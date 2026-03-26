@@ -2,12 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, X } from 'lucide-react';
 
 interface ToolItem {
   id: string;
@@ -18,6 +24,8 @@ interface ToolItem {
   icon: string;
   tags: string[];
   featured?: boolean;
+  features?: string[];
+  pricing?: string;
 }
 
 // AI视频工具数据
@@ -30,7 +38,9 @@ const aiTools: ToolItem[] = [
     category: '视频生成',
     icon: '🎬',
     tags: ['文生视频', '图生视频', '视频编辑'],
-    featured: true
+    featured: true,
+    features: ['Gen-3 Alpha 视频生成', 'Motion Brush 运动画笔', '视频背景移除', '绿幕抠像', '视频放大增强'],
+    pricing: '免费试用，付费版 $12/月起'
   },
   {
     id: '2',
@@ -40,7 +50,9 @@ const aiTools: ToolItem[] = [
     category: '视频生成',
     icon: '✨',
     tags: ['文生视频', '图生视频', '创意视频'],
-    featured: true
+    featured: true,
+    features: ['文本生成视频', '图片生成视频', '视频风格转换', '运动控制', 'Lip Sync 口型同步'],
+    pricing: '免费试用，付费版 $8/月起'
   },
   {
     id: '3',
@@ -50,7 +62,9 @@ const aiTools: ToolItem[] = [
     category: '视频生成',
     icon: '🌟',
     tags: ['文生视频', '长视频', '高质量'],
-    featured: true
+    featured: true,
+    features: ['最长60秒视频生成', '复杂场景理解', '多角色生成', '物理规律模拟', '高清画质输出'],
+    pricing: '需订阅 ChatGPT Plus ($20/月)'
   },
   {
     id: '4',
@@ -59,7 +73,9 @@ const aiTools: ToolItem[] = [
     url: 'https://stability.ai/',
     category: '视频生成',
     icon: '🎨',
-    tags: ['开源', '图生视频', '可部署']
+    tags: ['开源', '图生视频', '可部署'],
+    features: ['开源免费', '本地部署', '社区支持', '可定制训练', '多种模型版本'],
+    pricing: '开源免费'
   },
   {
     id: '5',
@@ -69,7 +85,9 @@ const aiTools: ToolItem[] = [
     category: '数字人',
     icon: '👤',
     tags: ['数字人', '口播视频', '多语言'],
-    featured: true
+    featured: true,
+    features: ['100+数字人模板', '300+语言支持', '语音克隆', '视频翻译', 'Instant Avatar 定制'],
+    pricing: '免费试用，付费版 $24/月起'
   },
   {
     id: '6',
@@ -78,7 +96,9 @@ const aiTools: ToolItem[] = [
     url: 'https://www.d-id.com/',
     category: '数字人',
     icon: '🎭',
-    tags: ['数字人', '照片转视频', 'AI头像']
+    tags: ['数字人', '照片转视频', 'AI头像'],
+    features: ['照片生成视频', 'AI头像生成', '实时数字人', 'API接口', '批量处理'],
+    pricing: '免费试用，付费版 $5.9/月起'
   },
   {
     id: '7',
@@ -87,7 +107,9 @@ const aiTools: ToolItem[] = [
     url: 'https://www.synthesia.io/',
     category: '数字人',
     icon: '🎪',
-    tags: ['企业级', '多语言', '模板丰富']
+    tags: ['企业级', '多语言', '模板丰富'],
+    features: ['150+数字人', '140+语言', '自定义数字人', 'PPT转视频', '团队协作'],
+    pricing: '企业定制，$22/月起'
   },
   {
     id: '8',
@@ -97,7 +119,9 @@ const aiTools: ToolItem[] = [
     category: '视频编辑',
     icon: '✂️',
     tags: ['智能剪辑', '智能字幕', '一键成片'],
-    featured: true
+    featured: true,
+    features: ['智能字幕生成', '一键成片', 'AI特效', '音频降噪', '多轨编辑'],
+    pricing: '免费使用，会员 25元/月'
   },
   {
     id: '9',
@@ -106,7 +130,9 @@ const aiTools: ToolItem[] = [
     url: 'https://www.descript.com/',
     category: '视频编辑',
     icon: '📝',
-    tags: ['文字编辑视频', 'AI配音', '自动转录']
+    tags: ['文字编辑视频', 'AI配音', '自动转录'],
+    features: ['文字编辑视频', 'AI语音克隆', '自动转录', '屏幕录制', '团队协作'],
+    pricing: '免费试用，付费版 $12/月起'
   },
   {
     id: '10',
@@ -115,7 +141,9 @@ const aiTools: ToolItem[] = [
     url: 'https://vrew.com/',
     category: '视频编辑',
     icon: '🎯',
-    tags: ['AI字幕', '智能剪辑', '语音识别']
+    tags: ['AI字幕', '智能剪辑', '语音识别'],
+    features: ['AI自动字幕', '语音识别剪辑', '多语言翻译', '模板库', '一键生成'],
+    pricing: '免费试用，付费版 9900韩元/月'
   },
   {
     id: '11',
@@ -124,7 +152,9 @@ const aiTools: ToolItem[] = [
     url: 'https://www.topazlabs.com/topaz-video-ai',
     category: '视频增强',
     icon: '💎',
-    tags: ['视频放大', '降噪', '帧插值']
+    tags: ['视频放大', '降噪', '帧插值'],
+    features: ['4K/8K视频放大', 'AI降噪', '帧插值', '视频稳定', '慢动作生成'],
+    pricing: '一次性购买 $299'
   },
   {
     id: '12',
@@ -133,7 +163,9 @@ const aiTools: ToolItem[] = [
     url: 'https://www.capcut.com/',
     category: '视频编辑',
     icon: '📱',
-    tags: ['移动端', 'AI特效', '模板丰富']
+    tags: ['移动端', 'AI特效', '模板丰富'],
+    features: ['移动端编辑', 'AI特效', '模板库', '自动字幕', '音乐同步'],
+    pricing: '免费使用，Pro版 $7.99/月'
   },
   {
     id: '13',
@@ -142,7 +174,9 @@ const aiTools: ToolItem[] = [
     url: 'https://pictory.ai/',
     category: '视频生成',
     icon: '📄',
-    tags: ['文章转视频', '视频剪辑', '内容创作']
+    tags: ['文章转视频', '视频剪辑', '内容创作'],
+    features: ['文章转视频', '长视频转短视频', '自动字幕', '品牌定制', '批量处理'],
+    pricing: '免费试用，付费版 $19/月起'
   },
   {
     id: '14',
@@ -151,7 +185,9 @@ const aiTools: ToolItem[] = [
     url: 'https://invideo.io/',
     category: '视频生成',
     icon: '🎥',
-    tags: ['在线制作', '模板库', '营销视频']
+    tags: ['在线制作', '模板库', '营销视频'],
+    features: ['5000+模板', 'AI脚本生成', '文字转视频', '品牌套件', '团队协作'],
+    pricing: '免费试用，付费版 $15/月起'
   },
   {
     id: '15',
@@ -160,7 +196,9 @@ const aiTools: ToolItem[] = [
     url: 'https://lumalabs.ai/',
     category: '3D视频',
     icon: '🌐',
-    tags: ['3D生成', 'NeRF', '视频转3D']
+    tags: ['3D生成', 'NeRF', '视频转3D'],
+    features: ['视频转3D', 'NeRF渲染', 'Dream Machine', '3D场景重建', 'AR导出'],
+    pricing: '免费试用，付费版按量计费'
   },
   {
     id: '16',
@@ -169,7 +207,9 @@ const aiTools: ToolItem[] = [
     url: 'https://kaiber.ai/',
     category: '创意视频',
     icon: '🎵',
-    tags: ['音乐可视化', '艺术创作', '风格转换']
+    tags: ['音乐可视化', '艺术创作', '风格转换'],
+    features: ['音乐可视化', '风格转换', '图片动画化', '故事板生成', '创意模板'],
+    pricing: '免费试用，付费版 $5/月起'
   },
   {
     id: '17',
@@ -178,7 +218,9 @@ const aiTools: ToolItem[] = [
     url: 'https://opus.pro/',
     category: '视频编辑',
     icon: '🎞️',
-    tags: ['自动剪辑', '短视频', '内容创作']
+    tags: ['自动剪辑', '短视频', '内容创作'],
+    features: ['自动提取精彩片段', 'AI字幕', '社交媒体适配', '批量处理', '分析报告'],
+    pricing: '免费试用，付费版 $9.99/月起'
   },
   {
     id: '18',
@@ -187,7 +229,9 @@ const aiTools: ToolItem[] = [
     url: 'https://fliki.ai/',
     category: '视频生成',
     icon: '🔊',
-    tags: ['文字转视频', 'AI配音', '营销视频']
+    tags: ['文字转视频', 'AI配音', '营销视频'],
+    features: ['文字转视频', '3000+AI语音', '75+语言', '自动字幕', '品牌定制'],
+    pricing: '免费试用，付费版 $21/月起'
   }
 ];
 
@@ -207,6 +251,7 @@ const hotTools = aiTools.filter(t => t.featured).slice(0, 4);
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
+  const [selectedTool, setSelectedTool] = useState<ToolItem | null>(null);
 
   const filteredTools = aiTools.filter(tool => {
     const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -293,7 +338,8 @@ export default function Home() {
               {filteredTools.map((tool) => (
                 <Card 
                   key={tool.id} 
-                  className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                  className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer"
+                  onClick={() => setSelectedTool(tool)}
                 >
                   <CardContent className="p-4">
                     <div className="flex gap-3">
@@ -330,17 +376,17 @@ export default function Home() {
                                 {tag}
                               </Badge>
                             ))}
+                            {tool.tags.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{tool.tags.length - 2}
+                              </Badge>
+                            )}
                           </div>
                           
-                          <Button 
-                            variant="default"
-                            size="sm"
-                            className="bg-blue-600 hover:bg-blue-700 gap-1 flex-shrink-0"
-                            onClick={() => window.open(tool.url, '_blank')}
-                          >
-                            访问
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
+                          <span className="text-xs text-blue-600 flex items-center gap-1 flex-shrink-0">
+                            查看详情
+                            <ChevronRight className="h-3 w-3" />
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -372,57 +418,57 @@ export default function Home() {
           <div className="hidden lg:block w-72 space-y-4">
             {/* 热门推荐 */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-sm font-semibold">热门推荐</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {hotTools.map((tool) => (
-                  <div 
-                    key={tool.id}
-                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                    onClick={() => window.open(tool.url, '_blank')}
-                  >
-                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded flex items-center justify-center text-sm flex-shrink-0">
-                      {tool.icon}
+              <CardContent className="pt-4 pb-3">
+                <h3 className="font-semibold text-sm mb-3">热门推荐</h3>
+                <div className="space-y-2">
+                  {hotTools.map((tool) => (
+                    <div 
+                      key={tool.id}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                      onClick={() => setSelectedTool(tool)}
+                    >
+                      <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded flex items-center justify-center text-sm flex-shrink-0">
+                        {tool.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{tool.name}</p>
+                        <p className="text-xs text-gray-500">{tool.category}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{tool.name}</p>
-                      <p className="text-xs text-gray-500">{tool.category}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </CardContent>
             </Card>
 
             {/* 最新更新 */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-2 pt-4">
-                <div className="flex items-center gap-2">
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center gap-2 mb-3">
                   <Clock className="h-4 w-4 text-gray-500" />
-                  <CardTitle className="text-sm font-semibold">最新动态</CardTitle>
+                  <h3 className="font-semibold text-sm">最新动态</h3>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
-                  <div>
-                    <p>新增 Sora 工具介绍</p>
-                    <p className="text-xs text-gray-500">2024-01-15</p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div>
+                      <p>新增 Sora 工具介绍</p>
+                      <p className="text-xs text-gray-500">2024-01-15</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
-                  <div>
-                    <p>更新 Runway 功能说明</p>
-                    <p className="text-xs text-gray-500">2024-01-10</p>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div>
+                      <p>更新 Runway 功能说明</p>
+                      <p className="text-xs text-gray-500">2024-01-10</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
-                  <div>
-                    <p>新增 3 个视频编辑工具</p>
-                    <p className="text-xs text-gray-500">2024-01-05</p>
+                  <div className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div>
+                      <p>新增 3 个视频编辑工具</p>
+                      <p className="text-xs text-gray-500">2024-01-05</p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -430,15 +476,15 @@ export default function Home() {
 
             {/* 联系我们 */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
-              <CardHeader className="pb-2 pt-4">
-                <CardTitle className="text-sm font-semibold">联系我们</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-gray-500" />
-                  <span>business@aivideotools.com</span>
+              <CardContent className="pt-4 pb-3">
+                <h3 className="font-semibold text-sm mb-2">联系我们</h3>
+                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <span>business@aivideotools.com</span>
+                  </div>
+                  <p className="text-xs text-gray-500">欢迎商务合作与工具推荐</p>
                 </div>
-                <p className="text-xs text-gray-500">欢迎商务合作与工具推荐</p>
               </CardContent>
             </Card>
           </div>
@@ -447,7 +493,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-blue-600 rounded">
@@ -468,6 +514,91 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Tool Detail Dialog */}
+      <Dialog open={!!selectedTool} onOpenChange={() => setSelectedTool(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          {selectedTool && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
+                    {selectedTool.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <DialogTitle className="text-xl">{selectedTool.name}</DialogTitle>
+                      {selectedTool.featured && (
+                        <Badge className="bg-blue-600">推荐</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="outline">{selectedTool.category}</Badge>
+                      {selectedTool.pricing && (
+                        <Badge variant="secondary">{selectedTool.pricing}</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <div className="space-y-4 mt-4">
+                {/* 描述 */}
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">简介</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {selectedTool.description}
+                  </p>
+                </div>
+
+                {/* 功能特点 */}
+                {selectedTool.features && selectedTool.features.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">主要功能</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {selectedTool.features.map((feature, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full flex-shrink-0"></div>
+                          {feature}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 标签 */}
+                <div>
+                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">标签</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTool.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 访问按钮 */}
+                <div className="pt-4 flex gap-3">
+                  <Button 
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2"
+                    onClick={() => window.open(selectedTool.url, '_blank')}
+                  >
+                    访问官网
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setSelectedTool(null)}
+                  >
+                    关闭
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
