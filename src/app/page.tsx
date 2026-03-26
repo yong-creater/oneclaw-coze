@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Video, Sparkles, Zap, Star, Search, Film, Wand2, Palette, Music, Info, TrendingUp, Clock, ChevronRight, Mail, MessageCircle, Globe } from 'lucide-react';
-import { BannerAd, InlineAd, SidebarAd, type AdConfig } from '@/components/ads/AdComponents';
+import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles } from 'lucide-react';
 
 interface ToolItem {
   id: string;
@@ -205,42 +204,6 @@ const categories = [
 // 热门工具
 const hotTools = aiTools.filter(t => t.featured).slice(0, 4);
 
-// 广告配置
-const bannerAd: AdConfig = {
-  id: 'ad-banner-1',
-  type: 'banner',
-  title: 'Runway Gen-3 Alpha震撼发布',
-  description: '最新AI视频生成模型，支持超写实视频创作，限时优惠！使用专属优惠码享8折',
-  linkUrl: 'https://runwayml.com/',
-  ctaText: '立即体验',
-  badge: '热门',
-  showClose: true,
-};
-
-const inlineAds: AdConfig[] = [
-  {
-    id: 'ad-inline-1',
-    type: 'inline',
-    title: 'Pika Labs - AI视频生成新标杆',
-    description: '注册即送100积分，支持文字/图片转视频，创作无限可能',
-    linkUrl: 'https://pika.art/',
-    ctaText: '免费试用',
-    badge: '限时优惠',
-  },
-];
-
-const sidebarAds: AdConfig[] = [
-  {
-    id: 'ad-sidebar-1',
-    type: 'sidebar',
-    title: '剪映专业版',
-    description: '免费视频编辑神器，内置AI功能，支持智能字幕、一键成片',
-    linkUrl: 'https://www.capcut.cn/',
-    ctaText: '免费下载',
-    badge: '推荐',
-  },
-];
-
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
@@ -255,30 +218,20 @@ export default function Home() {
     return matchesSearch && matchesCategory;
   });
 
-  // 在工具列表中间插入一个广告（第9个工具后）
-  const toolsWithAds = filteredTools.reduce((acc: (ToolItem | { type: 'ad'; config: AdConfig })[], tool, index) => {
-    acc.push(tool);
-    if (index === 8 && inlineAds[0]) {
-      acc.push({ type: 'ad', config: inlineAds[0] });
-    }
-    return acc;
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm dark:bg-gray-900/80 sticky top-0 z-50">
+      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                <Video className="h-6 w-6 text-white" />
+              <div className="p-2 bg-blue-600 rounded-lg">
+                <Video className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
                   AI视频工具集合
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">精选优质AI视频创作工具</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -288,8 +241,7 @@ export default function Home() {
                   <span className="hidden sm:inline">关于我们</span>
                 </Button>
               </Link>
-              <Badge variant="secondary" className="gap-1">
-                <Sparkles className="h-3 w-3" />
+              <Badge variant="secondary">
                 {aiTools.length} 个工具
               </Badge>
             </div>
@@ -298,55 +250,11 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Banner Ad */}
-        <div className="mb-8">
-          <BannerAd config={bannerAd} />
-        </div>
-
-        <div className="flex flex-col lg:flex-row gap-8">
+      <main className="container mx-auto px-4 py-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Content Area */}
           <div className="flex-1">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-3 gap-3 md:gap-4 mb-8">
-              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
-                <CardContent className="p-3 md:p-6">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <Video className="h-6 w-6 md:h-8 md:w-8 opacity-80" />
-                    <div>
-                      <p className="text-2xl md:text-3xl font-bold">{aiTools.length}</p>
-                      <p className="text-xs md:text-sm opacity-80">AI工具</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
-                <CardContent className="p-3 md:p-6">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <Zap className="h-6 w-6 md:h-8 md:w-8 opacity-80" />
-                    <div>
-                      <p className="text-2xl md:text-3xl font-bold">100%</p>
-                      <p className="text-xs md:text-sm opacity-80">免费使用</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-gradient-to-br from-pink-500 to-pink-600 text-white border-0">
-                <CardContent className="p-3 md:p-6">
-                  <div className="flex items-center gap-2 md:gap-3">
-                    <Star className="h-6 w-6 md:h-8 md:w-8 opacity-80" />
-                    <div>
-                      <p className="text-2xl md:text-3xl font-bold">精选</p>
-                      <p className="text-xs md:text-sm opacity-80">优质推荐</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Search and Filter */}
+            {/* Search */}
             <div className="mb-6">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -354,7 +262,7 @@ export default function Home() {
                   placeholder="搜索工具名称、描述或标签..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white dark:bg-gray-800"
+                  className="pl-10 h-11 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                 />
               </div>
 
@@ -362,94 +270,93 @@ export default function Home() {
               <div className="flex flex-wrap gap-2 mt-4">
                 {categories.map((category) => {
                   const Icon = category.icon;
+                  const isActive = selectedCategory === category.name;
                   return (
                     <Button
                       key={category.name}
-                      variant={selectedCategory === category.name ? "default" : "outline"}
+                      variant={isActive ? "default" : "outline"}
                       size="sm"
                       onClick={() => setSelectedCategory(category.name)}
-                      className="gap-1.5"
+                      className={isActive ? "bg-blue-600 hover:bg-blue-700" : ""}
                     >
-                      <Icon className="h-3.5 w-3.5" />
+                      <Icon className="h-3.5 w-3.5 mr-1.5" />
                       {category.name}
-                      <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
-                        {category.count}
-                      </Badge>
+                      <span className="ml-1.5 text-xs opacity-70">({category.count})</span>
                     </Button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Tools Grid with Ads */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-              {toolsWithAds.map((item, index) => {
-                if ('type' in item && item.type === 'ad') {
-                  return <InlineAd key={`ad-${index}`} config={item.config} />;
-                }
-                
-                const tool = item as ToolItem;
-                return (
-                  <Card 
-                    key={tool.id} 
-                    className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start gap-3">
-                        <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
-                          {tool.icon}
+            {/* Tools Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredTools.map((tool) => (
+                <Card 
+                  key={tool.id} 
+                  className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                >
+                  <CardContent className="p-4">
+                    <div className="flex gap-3">
+                      {/* 图标 */}
+                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
+                        {tool.icon}
+                      </div>
+                      
+                      {/* 内容 */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                            {tool.name}
+                          </h3>
+                          {tool.featured && (
+                            <Badge variant="default" className="bg-blue-600 text-xs flex-shrink-0">
+                              推荐
+                            </Badge>
+                          )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <CardTitle className="text-base group-hover:text-blue-600 transition-colors truncate">
-                              {tool.name}
-                            </CardTitle>
-                            {tool.featured && (
-                              <Badge variant="secondary" className="text-xs flex-shrink-0">
-                                <Star className="h-3 w-3 mr-1" />
-                                精选
+                        
+                        <Badge variant="outline" className="text-xs mb-2">
+                          {tool.category}
+                        </Badge>
+                        
+                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                          {tool.description}
+                        </p>
+                        
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex flex-wrap gap-1">
+                            {tool.tags.slice(0, 2).map((tag, tagIndex) => (
+                              <Badge key={tagIndex} variant="secondary" className="text-xs">
+                                {tag}
                               </Badge>
-                            )}
+                            ))}
                           </div>
-                          <Badge variant="outline" className="mt-1 text-xs">
-                            {tool.category}
-                          </Badge>
+                          
+                          <Button 
+                            variant="default"
+                            size="sm"
+                            className="bg-blue-600 hover:bg-blue-700 gap-1 flex-shrink-0"
+                            onClick={() => window.open(tool.url, '_blank')}
+                          >
+                            访问
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="mb-3 line-clamp-2 text-sm">
-                        {tool.description}
-                      </CardDescription>
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {tool.tags.slice(0, 3).map((tag, tagIndex) => (
-                          <Badge key={tagIndex} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button 
-                        className="w-full gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
-                        size="sm"
-                        onClick={() => window.open(tool.url, '_blank')}
-                      >
-                        立即访问
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
             {/* No Results */}
             {filteredTools.length === 0 && (
               <div className="text-center py-12">
-                <Video className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">没有找到匹配的工具</p>
+                <Video className="h-12 w-12 mx-auto text-gray-300 mb-3" />
+                <p className="text-gray-500">没有找到匹配的工具</p>
                 <Button 
                   variant="outline" 
-                  className="mt-4"
+                  className="mt-3"
                   onClick={() => {
                     setSearchQuery('');
                     setSelectedCategory('全部');
@@ -462,23 +369,20 @@ export default function Home() {
           </div>
 
           {/* Sidebar */}
-          <div className="hidden lg:block w-80 space-y-6">
+          <div className="hidden lg:block w-72 space-y-4">
             {/* 热门推荐 */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-blue-600" />
-                  <CardTitle className="text-base">热门推荐</CardTitle>
-                </div>
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-2 pt-4">
+                <CardTitle className="text-sm font-semibold">热门推荐</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {hotTools.map((tool, index) => (
+              <CardContent className="space-y-2">
+                {hotTools.map((tool) => (
                   <div 
                     key={tool.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                     onClick={() => window.open(tool.url, '_blank')}
                   >
-                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded flex items-center justify-center text-sm flex-shrink-0">
                       {tool.icon}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -491,69 +395,50 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* 侧边栏广告 */}
-            {sidebarAds.map((ad) => (
-              <SidebarAd key={ad.id} config={ad} />
-            ))}
-
             {/* 最新更新 */}
-            <Card>
-              <CardHeader className="pb-3">
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-2 pt-4">
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-green-600" />
-                  <CardTitle className="text-base">最新动态</CardTitle>
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <CardTitle className="text-sm font-semibold">最新动态</CardTitle>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-start gap-2 text-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
                   <div>
-                    <p className="font-medium">新增 Sora 工具介绍</p>
+                    <p>新增 Sora 工具介绍</p>
                     <p className="text-xs text-gray-500">2024-01-15</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 text-sm">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
                   <div>
-                    <p className="font-medium">更新 Runway 功能说明</p>
+                    <p>更新 Runway 功能说明</p>
                     <p className="text-xs text-gray-500">2024-01-10</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2 text-sm">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
                   <div>
-                    <p className="font-medium">新增 3 个视频编辑工具</p>
+                    <p>新增 3 个视频编辑工具</p>
                     <p className="text-xs text-gray-500">2024-01-05</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* 快速链接 */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-purple-600" />
-                  <CardTitle className="text-base">快速链接</CardTitle>
-                </div>
+            {/* 联系我们 */}
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardHeader className="pb-2 pt-4">
+                <CardTitle className="text-sm font-semibold">联系我们</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Link href="/about" className="flex items-center gap-2 text-sm hover:text-blue-600 transition-colors">
-                  <ChevronRight className="h-3 w-3" />
-                  关于我们
-                </Link>
-                <Link href="#" className="flex items-center gap-2 text-sm hover:text-blue-600 transition-colors">
-                  <ChevronRight className="h-3 w-3" />
-                  工具提交
-                </Link>
-                <Link href="#" className="flex items-center gap-2 text-sm hover:text-blue-600 transition-colors">
-                  <ChevronRight className="h-3 w-3" />
-                  合作洽谈
-                </Link>
-                <Link href="#" className="flex items-center gap-2 text-sm hover:text-blue-600 transition-colors">
-                  <ChevronRight className="h-3 w-3" />
-                  常见问题
-                </Link>
+              <CardContent className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span>business@aivideotools.com</span>
+                </div>
+                <p className="text-xs text-gray-500">欢迎商务合作与工具推荐</p>
               </CardContent>
             </Card>
           </div>
@@ -561,80 +446,24 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white/80 backdrop-blur-sm dark:bg-gray-900/80 mt-12">
-        <div className="container mx-auto px-4 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* 品牌 */}
-            <div className="md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
-                  <Video className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    AI视频工具集合
-                  </h3>
-                </div>
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-blue-600 rounded">
+                <Video className="h-4 w-4 text-white" />
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                精选优质AI视频创作工具，助力创意视频制作
-              </p>
+              <span className="font-medium text-gray-900 dark:text-white">AI视频工具集合</span>
             </div>
-
-            {/* 快速导航 */}
-            <div>
-              <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">快速导航</h4>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link href="/" className="hover:text-blue-600 transition-colors">首页</Link></li>
-                <li><Link href="/about" className="hover:text-blue-600 transition-colors">关于我们</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">工具分类</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">最新更新</Link></li>
-              </ul>
-            </div>
-
-            {/* 热门分类 */}
-            <div>
-              <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">热门分类</h4>
-              <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">视频生成</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">视频编辑</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">数字人</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 transition-colors">视频增强</Link></li>
-              </ul>
-            </div>
-
-            {/* 联系我们 */}
-            <div>
-              <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">联系我们</h4>
-              <ul className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <a href="mailto:contact@aivideotools.com" className="hover:text-blue-600 transition-colors">
-                    contact@aivideotools.com
-                  </a>
-                </li>
-                <li className="flex items-center gap-2">
-                  <MessageCircle className="h-4 w-4" />
-                  <span>商务合作</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  <span>广告投放</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <Separator className="my-6" />
-
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
-            <p>© 2024 AI视频工具集合. All rights reserved.</p>
+            <p>© 2024 AI视频工具集合. 精选优质AI视频创作工具</p>
             <div className="flex items-center gap-4">
-              <Link href="#" className="hover:text-blue-600 transition-colors">隐私政策</Link>
-              <span>|</span>
-              <Link href="#" className="hover:text-blue-600 transition-colors">服务条款</Link>
-              <span>|</span>
-              <Link href="#" className="hover:text-blue-600 transition-colors">网站地图</Link>
+              <Link href="/about" className="hover:text-blue-600 transition-colors">
+                关于我们
+              </Link>
+              <span className="text-gray-300">|</span>
+              <a href="mailto:business@aivideotools.com" className="hover:text-blue-600 transition-colors">
+                商务合作
+              </a>
             </div>
           </div>
         </div>
