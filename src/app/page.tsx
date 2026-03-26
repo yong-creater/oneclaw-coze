@@ -207,6 +207,7 @@ const bannerAd: AdConfig = {
   showClose: true,
 };
 
+// 只保留1个内联广告
 const inlineAds: AdConfig[] = [
   {
     id: 'ad-inline-1',
@@ -217,17 +218,9 @@ const inlineAds: AdConfig[] = [
     ctaText: '免费试用',
     badge: '限时优惠',
   },
-  {
-    id: 'ad-inline-2',
-    type: 'inline',
-    title: 'HeyGen数字人 - 营销视频必备',
-    description: 'AI数字人口播视频，支持多语言，新手注册送3个免费视频',
-    linkUrl: 'https://www.heygen.com/',
-    ctaText: '立即体验',
-    badge: '新品',
-  },
 ];
 
+// 只保留1个侧边栏广告
 const sidebarAds: AdConfig[] = [
   {
     id: 'ad-sidebar-1',
@@ -237,15 +230,6 @@ const sidebarAds: AdConfig[] = [
     linkUrl: 'https://www.capcut.cn/',
     ctaText: '免费下载',
     badge: '推荐',
-  },
-  {
-    id: 'ad-sidebar-2',
-    type: 'sidebar',
-    title: 'Topaz Video AI',
-    description: '专业视频增强工具，AI放大、降噪、帧插值，让视频更清晰',
-    linkUrl: 'https://www.topazlabs.com/topaz-video-ai',
-    ctaText: '了解更多',
-    badge: '专业',
   },
 ];
 
@@ -264,11 +248,12 @@ export default function Home() {
   });
 
   // 在工具列表中插入广告（每6个工具后插入一个广告）
+  // 在工具列表中间插入一个广告（第9个工具后）
   const toolsWithAds = filteredTools.reduce((acc: (ToolItem | { type: 'ad'; config: AdConfig })[], tool, index) => {
     acc.push(tool);
-    // 每6个工具后插入一个内联广告
-    if ((index + 1) % 6 === 0 && inlineAds[Math.floor(index / 6)]) {
-      acc.push({ type: 'ad', config: inlineAds[Math.floor(index / 6)] });
+    // 在第9个工具后插入广告（共18个工具，在中间位置）
+    if (index === 8 && inlineAds[0]) {
+      acc.push({ type: 'ad', config: inlineAds[0] });
     }
     return acc;
   }, []);
@@ -466,20 +451,6 @@ export default function Home() {
             {sidebarAds.map((ad) => (
               <SidebarAd key={ad.id} config={ad} />
             ))}
-            
-            {/* 广告位招商 */}
-            <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50">
-              <CardContent className="p-6 text-center">
-                <Sparkles className="h-8 w-8 mx-auto mb-3 text-gray-400" />
-                <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-2">广告位招商</h4>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  面向AI视频工具厂商，提供精准曝光
-                </p>
-                <Button variant="outline" className="w-full">
-                  联系我们
-                </Button>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
