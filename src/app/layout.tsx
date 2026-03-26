@@ -1,40 +1,146 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inspector } from 'react-dev-inspector';
+import Script from 'next/script';
 import './globals.css';
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#2563eb',
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL('https://aivideotools.com'),
   title: {
-    default: 'AI视频工具集合 | 精选优质AI视频创作工具',
+    default: 'AI视频工具集合 - 精选18+优质AI视频创作工具推荐',
     template: '%s | AI视频工具集合',
   },
   description:
-    '精选优质AI视频创作工具，包括视频生成、视频编辑、数字人、视频增强等多种类型的AI工具，助力创意视频制作。',
+    'AI视频工具集合精心整理18+款优质AI视频创作工具，涵盖AI视频生成(Runway、Pika、Sora)、视频编辑(剪映、Descript)、数字人(HeyGen、D-ID)等类别，助力创作者高效制作视频内容。',
   keywords: [
     'AI视频工具',
-    '视频生成',
-    '视频编辑',
-    '数字人',
-    'AI制作视频',
+    'AI视频生成',
+    'AI视频编辑',
+    'AI数字人',
+    '文生视频',
+    '图生视频',
     'Runway',
-    'Pika',
+    'Pika Labs',
     'Sora',
     'HeyGen',
     '剪映',
+    'CapCut',
+    'AI制作视频',
+    '视频剪辑工具',
+    'AI配音',
+    '智能字幕',
+    '视频增强',
+    '免费视频工具',
+    '视频创作者工具',
+    '2024 AI工具',
   ],
-  authors: [{ name: 'AI视频工具集合' }],
-  generator: 'Next.js',
-  openGraph: {
-    title: 'AI视频工具集合 | 精选优质AI视频创作工具',
-    description:
-      '精选优质AI视频创作工具，包括视频生成、视频编辑、数字人、视频增强等多种类型的AI工具。',
-    siteName: 'AI视频工具集合',
-    locale: 'zh_CN',
-    type: 'website',
-  },
+  authors: [{ name: 'AI视频工具集合', url: 'https://aivideotools.com' }],
+  creator: 'AI视频工具集合',
+  publisher: 'AI视频工具集合',
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
+  openGraph: {
+    title: 'AI视频工具集合 - 精选18+优质AI视频创作工具推荐',
+    description:
+      'AI视频工具集合精心整理18+款优质AI视频创作工具，涵盖AI视频生成、视频编辑、数字人等类别，助力创作者高效制作视频内容。',
+    url: 'https://aivideotools.com',
+    siteName: 'AI视频工具集合',
+    locale: 'zh_CN',
+    type: 'website',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'AI视频工具集合 - 精选优质AI视频创作工具',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI视频工具集合 - 精选18+优质AI视频创作工具推荐',
+    description:
+      '精选18+款优质AI视频创作工具，涵盖视频生成、编辑、数字人等类别。',
+    images: ['/og-image.png'],
+  },
+  alternates: {
+    canonical: 'https://aivideotools.com',
+  },
+  category: 'technology',
+  classification: 'AI Tools Directory',
+  other: {
+    'baidu-site-verification': 'your-baidu-verification-code',
+  },
+};
+
+// JSON-LD 结构化数据
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'AI视频工具集合',
+  description: '精选优质AI视频创作工具，助力创意视频制作',
+  url: 'https://aivideotools.com',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://aivideotools.com/?search={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+};
+
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'AI视频工具集合',
+  url: 'https://aivideotools.com',
+  logo: 'https://aivideotools.com/logo.png',
+  description: '精选优质AI视频创作工具',
+  sameAs: [],
+};
+
+const itemListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'AI视频工具推荐',
+  description: '精选AI视频创作工具列表',
+  numberOfItems: 18,
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Runway',
+      description: '专业的AI视频生成和编辑平台',
+      url: 'https://runwayml.com/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Pika Labs',
+      description: '强大的AI视频生成工具',
+      url: 'https://pika.art/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: 'Sora',
+      description: 'OpenAI推出的AI视频生成模型',
+      url: 'https://openai.com/sora',
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -45,8 +151,40 @@ export default function RootLayout({
   const isDev = process.env.COZE_PROJECT_ENV === 'DEV';
 
   return (
-    <html lang="en">
-      <body className={`antialiased`}>
+    <html lang="zh-CN">
+      <head>
+        {/* 百度统计 - 请替换为您自己的统计代码 */}
+        <Script
+          id="baidu-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              var _hmt = _hmt || [];
+              (function() {
+                var hm = document.createElement("script");
+                hm.src = "https://hm.baidu.com/hm.js?YOUR_BAIDU_ANALYTICS_ID";
+                var s = document.getElementsByTagName("script")[0]; 
+                s.parentNode.insertBefore(hm, s);
+              })();
+            `,
+          }}
+        />
+        
+        {/* 结构化数据 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      </head>
+      <body className="antialiased">
         {isDev && <Inspector />}
         {children}
       </body>

@@ -5,8 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Video, Users, Target, Award, Mail, MessageCircle, Heart, Sparkles } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: '关于我们',
-  description: '了解AI视频工具集合 - 我们致力于为创作者提供最优质的AI视频工具推荐',
+  title: '关于我们 - AI视频工具集合',
+  description: 'AI视频工具集合致力于为视频创作者提供最优质的AI工具推荐。我们精心筛选18+款AI视频生成、编辑工具，帮助创作者提高效率，释放创意。',
+  keywords: ['关于我们', 'AI视频工具', '视频创作', '工具推荐', '创作者服务'],
+  openGraph: {
+    title: '关于我们 - AI视频工具集合',
+    description: '致力于为视频创作者提供最优质的AI工具推荐',
+    type: 'article',
+  },
 };
 
 export default function AboutPage() {
