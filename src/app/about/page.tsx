@@ -7,11 +7,11 @@ import { Video, Users, Target, Award, Mail, MessageCircle, Heart, Sparkles, Arro
 
 export const metadata: Metadata = {
   title: '关于我们 - OneClaw',
-  description: 'OneClaw致力于为视频创作者提供最优质的AI工具推荐。我们精心筛选66+款AI视频生成、编辑工具，帮助创作者提高效率，释放创意。',
-  keywords: ['关于我们', 'AI视频工具', '视频创作', '工具推荐', '创作者服务', 'OneClaw'],
+  description: 'OneClaw 是一站式 AI 工具与资源导航平台，精心收录数百款优质 AI 工具，提供丰富的提示词模板和 AI 技能资源，助力用户高效使用各类 AI 产品。',
+  keywords: ['关于我们', 'AI工具导航', 'AI工具推荐', '提示词模板', 'AI技能', 'OneClaw'],
   openGraph: {
     title: '关于我们 - OneClaw',
-    description: '致力于为视频创作者提供最优质的AI工具推荐',
+    description: '一站式 AI 工具与资源导航平台',
     type: 'article',
   },
 };
@@ -49,11 +49,11 @@ export default function AboutPage() {
           
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
             <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
-            <span className="block text-2xl md:text-3xl mt-2 text-slate-600 dark:text-slate-400">AI视频工具箱</span>
+            <span className="block text-2xl md:text-3xl mt-2 text-slate-600 dark:text-slate-400">一站式 AI 工具与资源导航</span>
           </h1>
           
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            像小龙虾的钳子一样，精准抓取最优质的AI视频工具，助力创作者高效创作。
+            像小龙虾的钳子一样，精准抓取最优质的 AI 工具、提示词模板和技能资源，助力用户高效驾驭 AI 技术。
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">
@@ -67,7 +67,7 @@ export default function AboutPage() {
             </Badge>
             <Badge variant="secondary" className="text-sm px-4 py-2 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
               <Award className="h-4 w-4 mr-2" />
-              专业测评团队
+              专业内容团队
             </Badge>
           </div>
         </div>
@@ -82,13 +82,13 @@ export default function AboutPage() {
                 为什么叫"钳爪"？
               </h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                小龙虾的钳子是它最强大的武器，精准、有力、灵活。我们的使命就是像钳爪一样，帮您从海量工具中精准抓取最适合的那一款。
+                小龙虾的钳子是它最强大的武器，精准、有力、灵活。我们的使命就是像钳爪一样，帮您从海量 AI 资源中精准抓取最适合的那一款工具、模板或技能。
               </p>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                在AI技术快速发展的今天，视频创作正在经历一场革命。我们的使命是帮助每一位创作者找到最适合的AI工具，让视频创作变得更简单、更高效、更有创意。
+                在 AI 技术快速发展的今天，各类 AI 工具层出不穷。我们的使命是帮助每一位用户找到最适合的 AI 工具和资源，让 AI 技术变得更易用、更高效、更有价值。
               </p>
               <p className="text-gray-600 dark:text-gray-300">
-                我们相信，AI不应该取代创作者，而应该成为创作者最强大的助手。通过我们精心筛选的工具推荐，让您能够专注于创意本身，而不是被技术细节所困扰。
+                我们相信，AI 不应该只是少数人的专利，而应该成为每个人都能轻松驾驭的工具。通过我们精心筛选的工具推荐、提示词模板和技能教程，让您能够专注于创意本身，而不是被技术细节所困扰。
               </p>
             </div>
             
@@ -112,8 +112,8 @@ export default function AboutPage() {
               <Card className="text-center border-amber-100 dark:border-amber-900/30">
                 <CardContent className="pt-6">
                   <Award className="h-10 w-10 mx-auto mb-3 text-amber-500" />
-                  <h3 className="font-semibold mb-2">专业测评</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">深入功能评估</p>
+                  <h3 className="font-semibold mb-2">专业内容</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">深度测评评估</p>
                 </CardContent>
               </Card>
               
@@ -139,7 +139,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <Card className="text-center bg-gradient-to-br from-red-500 to-red-600 text-white border-0">
               <CardContent className="pt-6">
-                <p className="text-4xl font-bold mb-2">66+</p>
+                <p className="text-4xl font-bold mb-2">117+</p>
                 <p className="text-sm opacity-80">精选工具</p>
               </CardContent>
             </Card>
@@ -181,11 +181,11 @@ export default function AboutPage() {
                 <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mb-4">
                   <Video className="h-6 w-6 text-red-600 dark:text-red-400" />
                 </div>
-                <CardTitle>精选优质工具</CardTitle>
+                <CardTitle>精选优质资源</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  我们的人工编辑团队亲自测试每一款工具，确保推荐的都是真正好用、实用的AI视频工具，帮助您节省筛选时间。
+                  我们的内容团队亲自测试每一款工具和资源，确保推荐的都是真正好用、实用的 AI 工具、提示词模板和技能教程，帮助您节省筛选时间。
                 </CardDescription>
               </CardContent>
             </Card>
@@ -199,7 +199,7 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  AI技术发展日新月异，我们保持每周更新，第一时间为您带来最新、最强大的AI视频创作工具。
+                  AI 技术发展日新月异，我们保持每周更新，第一时间为您带来最新、最强大的 AI 工具和资源，让您始终站在技术前沿。
                 </CardDescription>
               </CardContent>
             </Card>
@@ -209,11 +209,11 @@ export default function AboutPage() {
                 <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                 </div>
-                <CardTitle>专业测评</CardTitle>
+                <CardTitle>专业指南</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  我们提供详细的功能对比、使用教程和最佳实践，帮助您快速上手并充分发挥每个工具的价值。
+                  我们提供详细的功能对比、使用教程和最佳实践，帮助您快速上手并充分发挥每个工具和资源的价值。
                 </CardDescription>
               </CardContent>
             </Card>

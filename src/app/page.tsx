@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp, Copy, Check, X, Heart, Target, BookOpen } from 'lucide-react';
+import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp, Copy, Check, X, Heart, Target, BookOpen, Rocket } from 'lucide-react';
 import { prompts, promptCategories, PromptItem } from '@/data/prompts';
 import { aiTools, ToolItem } from '@/data/tools';
 
@@ -604,83 +604,104 @@ const AboutDialog = memo(function AboutDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-white dark:bg-slate-800">
-        <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-3xl">
-              🦞
+      <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
+        {/* 滚动内容区域 */}
+        <div className="overflow-y-auto max-h-[85vh]">
+          {/* 头部区域 */}
+          <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-3xl">
+                🦞
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
+                  <span className="text-red-500">One</span><span className="text-orange-500">Claw</span> - 钳爪
+                </DialogTitle>
+                <p className="text-sm text-slate-500 dark:text-slate-400">一站式 AI 工具与资源导航平台</p>
+              </div>
             </div>
+          </div>
+          
+          {/* 内容区域 */}
+          <div className="px-6 py-5 space-y-5">
             <div>
-              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-                <span className="text-red-500">One</span><span className="text-orange-500">Claw</span> - 钳爪
-              </DialogTitle>
-              <p className="text-sm text-slate-500 dark:text-slate-400">AI视频工具箱</p>
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                <Target className="h-4 w-4 text-red-500" />
+                关于我们
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                OneClaw (钳爪) 是一个综合性的 AI 工具与资源导航平台，致力于为用户提供最全面、最实用的 AI 应用资源。我们精心收录了数百款优质 AI 工具，涵盖 AI 视频创作、AI 图像生成、AI 写作助手、AI 编程工具、AI 音频处理等多个热门领域，同时提供丰富的提示词模板和技能资源，帮助用户快速上手并高效使用各类 AI 产品。
+              </p>
             </div>
-          </div>
-        </DialogHeader>
-        
-        <div className="space-y-5 mt-4">
-          <div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <Target className="h-4 w-4 text-red-500" />
-              关于我们
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              OneClaw (钳爪) 是一个精选AI视频创作工具的平台，致力于帮助视频创作者快速找到最适合的AI工具，提升创作效率。我们精心挑选了117款优质AI视频工具，涵盖视频生成、数字人、视频编辑、AI配音等多个领域。
-            </p>
-          </div>
 
-          <div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-              <Heart className="h-4 w-4 text-red-500" />
-              我们的使命
-            </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              让每一位创作者都能轻松驾驭AI视频工具，释放创意潜能。无论你是专业视频制作人员还是刚入门的新手，都能在这里找到适合你的工具和资源。
-            </p>
-          </div>
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                <Heart className="h-4 w-4 text-red-500" />
+                我们的使命
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                让每一位用户都能轻松发现、了解并使用最适合的 AI 工具。无论你是专业创作者、开发者、设计师，还是刚接触 AI 的新手，都能在这里找到适合你的工具、提示词和技能资源，释放创意潜能，提升工作效率。
+              </p>
+            </div>
 
-          <div>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-red-500" />
-              平台特色
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { icon: '🎬', title: '精选工具', desc: '117款优质AI视频工具' },
-                { icon: '📝', title: '提示词库', desc: '专业提示词模板' },
-                { icon: '🔍', title: '智能分类', desc: '11个精细分类' },
-                { icon: '💡', title: '使用指南', desc: '详细功能介绍' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                  <span className="text-xl">{item.icon}</span>
-                  <div>
-                    <p className="font-medium text-sm text-slate-900 dark:text-white">{item.title}</p>
-                    <p className="text-xs text-slate-500">{item.desc}</p>
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-red-500" />
+                平台特色
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { icon: '🎬', title: '精选 AI 工具', desc: '视频、图像、写作、编程等多领域' },
+                  { icon: '📝', title: '提示词库', desc: '专业提示词模板，即用即走' },
+                  { icon: '🤖', title: 'AI 技能', desc: '实用 AI 技能与应用场景' },
+                  { icon: '🔍', title: '智能分类', desc: '多维度精细分类筛选' },
+                  { icon: '💡', title: '使用指南', desc: '详细功能介绍与使用教程' },
+                  { icon: '⭐', title: '推荐精选', desc: '热门工具与优质资源推荐' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                    <span className="text-xl">{item.icon}</span>
+                    <div>
+                      <p className="font-medium text-sm text-slate-900 dark:text-white">{item.title}</p>
+                      <p className="text-xs text-slate-500">{item.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                <Rocket className="h-4 w-4 text-red-500" />
+                内容覆盖
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {['AI 视频生成', 'AI 图像创作', 'AI 写作助手', 'AI 编程工具', 'AI 音频处理', 'AI 数字人', 'AI 翻译', 'AI 办公', '提示词工程', 'AI 技能教程'].map((tag, i) => (
+                  <Badge key={i} className="bg-gradient-to-r from-red-50 to-orange-50 text-red-700 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-300 border border-red-100 dark:border-red-800">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <Mail className="h-4 w-4 text-red-500" />
+                <span>联系邮箱：</span>
+                <a href="mailto:1017760688@qq.com" className="text-red-600 dark:text-red-400 hover:underline">
+                  1017760688@qq.com
+                </a>
+              </div>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                © 2024 OneClaw. 欢迎商务合作与工具推荐
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button onClick={onClose} className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
+                关闭
+              </Button>
             </div>
           </div>
-
-          <div className="pt-3 border-t border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-              <Mail className="h-4 w-4 text-red-500" />
-              <span>联系邮箱：</span>
-              <a href="mailto:1017760688@qq.com" className="text-red-600 dark:text-red-400 hover:underline">
-                1017760688@qq.com
-              </a>
-            </div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-              © 2024 OneClaw. 欢迎商务合作与工具推荐
-            </p>
-          </div>
-        </div>
-
-        <div className="flex justify-end mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
-          <Button onClick={onClose} className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
-            关闭
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
@@ -761,7 +782,7 @@ export default function Home() {
                 <h1 className="text-lg font-bold text-slate-900 dark:text-white">
                   <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
                 </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">精选优质AI视频创作工具</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">一站式 AI 工具与资源导航</p>
               </div>
             </Link>
             <div className="flex items-center gap-3">
