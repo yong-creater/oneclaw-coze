@@ -872,13 +872,6 @@ const categories = [
 // 热门工具
 const hotTools = aiTools.filter(t => t.featured).slice(0, 6);
 
-// 统计数据
-const stats = [
-  { label: 'AI工具', value: aiTools.length, icon: Video },
-  { label: '分类', value: categories.length - 1, icon: Film },
-  { label: '免费工具', value: aiTools.filter(t => t.pricing?.includes('免费')).length, icon: Star },
-];
-
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
@@ -928,29 +921,6 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <div 
-                key={index}
-                className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
-                    <Icon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</p>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
         {/* Search */}
         <div className="mb-4">
           <div className="relative">
@@ -990,12 +960,34 @@ export default function Home() {
           <div className="flex-1">
             {/* Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {filteredTools.map((tool) => (
-                <Card 
-                  key={tool.id} 
-                  className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
-                  onClick={() => setSelectedTool(tool)}
-                >
+              {filteredTools.map((tool, index) => (
+                <>
+                  {/* 在第6个工具后插入广告 */}
+                  {index === 6 && (
+                    <div key="ad-inline" className="md:col-span-2">
+                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-blue-100 dark:border-slate-600">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                              <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm text-slate-800 dark:text-white">AI视频创作课程推荐</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">从零开始掌握AI视频制作技巧</p>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" className="border-blue-200 dark:border-slate-500 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-slate-600">
+                            了解更多
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <Card 
+                    key={tool.id} 
+                    className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
+                    onClick={() => setSelectedTool(tool)}
+                  >
                   <CardContent className="p-4">
                     <div className="flex gap-3">
                       {/* 图标 */}
@@ -1054,6 +1046,7 @@ export default function Home() {
                     </div>
                   </CardContent>
                 </Card>
+                </>
               ))}
             </div>
 
@@ -1152,6 +1145,20 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* 广告位 */}
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-amber-100 dark:border-slate-600">
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
+                  <Zap className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <p className="font-medium text-sm text-slate-800 dark:text-white mb-1">高效视频工作流</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">一站式解决视频创作需求</p>
+                <Button size="sm" className="w-full bg-amber-500 hover:bg-amber-600 text-white">
+                  立即体验
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
