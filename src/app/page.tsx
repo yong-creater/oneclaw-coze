@@ -883,22 +883,23 @@ const ToolCard = memo(function ToolCard({
 }) {
   return (
     <Card 
-      className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
+      className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
       onClick={onClick}
     >
       <CardContent className="p-4">
-        <div className="flex gap-3">
-          <div className="w-11 h-11 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+        <div className="flex gap-4">
+          {/* 图标 - 更大更醒目 */}
+          <div className="w-14 h-14 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform">
             {tool.icon}
           </div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-semibold text-slate-900 dark:text-white truncate text-sm">
+            <div className="flex items-center gap-2 mb-1.5">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate">
                 {tool.name}
               </h3>
               {tool.featured && (
-                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600">
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600 px-2">
                   推荐
                 </Badge>
               )}
@@ -985,13 +986,14 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
     <Dialog open={!!tool} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800">
         <DialogHeader>
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
+          <div className="flex items-start gap-5">
+            {/* 弹窗图标 - 更大更醒目 */}
+            <div className="w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md">
               {tool.icon}
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <DialogTitle className="text-xl text-slate-900 dark:text-white">{tool.name}</DialogTitle>
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">{tool.name}</DialogTitle>
                 {tool.featured && (
                   <Badge className="bg-gradient-to-r from-red-500 to-orange-500">推荐</Badge>
                 )}
@@ -1077,14 +1079,14 @@ const HotToolItem = memo(function HotToolItem({
 }) {
   return (
     <div 
-      className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+      className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
       onClick={onClick}
     >
-      <div className="w-8 h-8 bg-slate-100 dark:bg-slate-600 rounded flex items-center justify-center text-sm flex-shrink-0">
+      <div className="w-10 h-10 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
         {tool.icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate text-slate-900 dark:text-white">{tool.name}</p>
+        <p className="font-semibold text-sm truncate text-slate-900 dark:text-white">{tool.name}</p>
         <p className="text-xs text-slate-500">{tool.category}</p>
       </div>
       <ChevronRight className="h-4 w-4 text-slate-400" />
