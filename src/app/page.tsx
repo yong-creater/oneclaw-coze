@@ -170,12 +170,12 @@ const SkillCard = memo(function SkillCard({
 }) {
   return (
     <Card 
-      className="hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800 transition-all bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
+      className="hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-800 transition-all bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
       onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
+          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-sm">
             {skill.icon.length <= 2 ? skill.icon : skill.name.charAt(0)}
           </div>
           <div className="flex-1 min-w-0">
@@ -184,7 +184,7 @@ const SkillCard = memo(function SkillCard({
                 {skill.name}
               </h3>
               {skill.featured && (
-                <Badge className="bg-blue-500 text-xs flex-shrink-0 px-2">
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 px-2">
                   ★ 精选
                 </Badge>
               )}
@@ -200,13 +200,13 @@ const SkillCard = memo(function SkillCard({
             
             <div className="flex items-center gap-4 text-xs text-slate-500">
               <div className="flex items-center gap-1">
-                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 <span>{formatNumber(skill.downloads)}</span>
               </div>
               <div className="flex items-center gap-1">
-                <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
                 <span>{formatNumber(skill.favorites)}</span>
@@ -253,14 +253,14 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
           {/* 头部区域 */}
           <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-5 pt-5 pb-4 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
+              <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-sm">
                 {skill.icon.length <= 2 ? skill.icon : skill.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">{skill.name}</DialogTitle>
                   {skill.featured && (
-                    <Badge className="bg-blue-500 text-xs px-2">★ 精选</Badge>
+                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs px-2">★ 精选</Badge>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
@@ -307,7 +307,7 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
             <div className="text-xs text-slate-500 dark:text-slate-400">
               该技能数据来源于
               {skill.sourceUrl ? (
-                <a href={skill.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline ml-1">
+                <a href={skill.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-orange-600 dark:text-orange-400 hover:underline ml-1">
                   {skill.source}
                 </a>
               ) : (
@@ -320,7 +320,7 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-center">
                 <div className="flex justify-center mb-1">
-                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                 </div>
@@ -329,7 +329,7 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
               </div>
               <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-center">
                 <div className="flex justify-center mb-1">
-                  <svg className="w-5 h-5 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
                 </div>
