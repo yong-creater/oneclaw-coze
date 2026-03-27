@@ -196,21 +196,31 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
           </div>
         </DialogHeader>
         
-        <div className="space-y-4 mt-4">
-          <div>
-            <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">简介</h4>
-            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              {tool.description}
-            </p>
-          </div>
+        <div className="space-y-5 mt-4">
+          {/* 详细介绍 */}
+          {tool.introduction && (
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Info className="h-4 w-4 text-red-500" />
+                详细介绍
+              </h4>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                {tool.introduction}
+              </p>
+            </div>
+          )}
 
+          {/* 主要功能 */}
           {tool.features && tool.features.length > 0 && (
             <div>
-              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">主要功能</h4>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-red-500" />
+                主要功能
+              </h4>
               <div className="grid grid-cols-2 gap-2">
                 {tool.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0"></div>
+                  <div key={index} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-700/50 px-3 py-2 rounded-lg">
+                    <div className="w-1.5 h-1.5 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex-shrink-0"></div>
                     {feature}
                   </div>
                 ))}
@@ -218,6 +228,44 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
             </div>
           )}
 
+          {/* 使用步骤 */}
+          {tool.usage && tool.usage.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <ChevronRight className="h-4 w-4 text-red-500" />
+                如何使用
+              </h4>
+              <div className="space-y-2">
+                {tool.usage.map((step, index) => (
+                  <div key={index} className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
+                      {index + 1}
+                    </div>
+                    <span className="pt-0.5">{step}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 适用人群 */}
+          {tool.audience && tool.audience.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Users className="h-4 w-4 text-red-500" />
+                适用人群
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {tool.audience.map((item, index) => (
+                  <Badge key={index} className="bg-gradient-to-r from-red-50 to-orange-50 text-red-700 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-300 border border-red-100 dark:border-red-800">
+                    {item}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 标签 */}
           <div>
             <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">标签</h4>
             <div className="flex flex-wrap gap-2">
@@ -229,9 +277,10 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
             </div>
           </div>
 
+          {/* 底部按钮 */}
           <div className="pt-4 flex gap-3">
             <Button 
-              className="flex-1 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 gap-2"
+              className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2"
               onClick={() => onVisit(tool.url)}
             >
               访问官网

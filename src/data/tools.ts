@@ -11,6 +11,9 @@ export interface ToolItem {
   features?: string[];
   pricing?: string;
   platform?: string;
+  introduction?: string; // 详细介绍
+  audience?: string[]; // 适用人群
+  usage?: string[]; // 使用步骤
 }
 
 export const aiTools: ToolItem[] = [
@@ -24,9 +27,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/fhHU1w8eDE',
     tags: ['视频生成', '图片生成', '数字人', '字节跳动'],
     featured: true,
-    features: ['文生视频', '图生视频', 'AI数字人', '对口型', '智能画布', '多语言支持'],
+    features: ['AI 图片创作', 'AI 视频创作', 'AI 图片编辑', '智能画布', '对口型', 'AI 数字人', '多语言支持', '无限画布', '智能多帧 2.0'],
     pricing: '免费试用，付费版 79元/月起',
-    platform: 'Web/APP'
+    platform: 'Web/APP',
+    introduction: '即梦 AI 是字节跳动推出的一站式 AI 创作平台，支持 AI 视频生成和 AI 图片生成。用户可通过自然语言或图片输入生成高质量的图像和视频。即梦 AI 提供 AI 绘画、智能画布、视频生成以及故事创作等多种功能，降低创作门槛，激发用户创意。已上线 Seedance 2.0 和 Seedream 5.0 等全新模型，支持音视频同步生成、更优质的人像和设计效果。',
+    audience: ['创意爱好者', '设计师', '内容创作者', '广告营销人员', '教育工作者'],
+    usage: ['访问产品官网注册登录', '选择创作功能（图片/视频）', '输入描述或上传图片', '调整参数后生成内容', '编辑优化并导出']
   },
   {
     id: '2',
@@ -36,9 +42,12 @@ export const aiTools: ToolItem[] = [
     category: '视频生成',
     logo: 'https://aka.doubaocdn.com/s/4Biq1w8eDE',
     tags: ['图生视频', '电商', '营销视频'],
-    features: ['图片生成视频', '多图连贯短片', '自定义动作', '高清画质'],
+    features: ['图片生成视频', '多图生成连贯短片', '自定义动作', '高清画质', '多场景适配'],
     pricing: '免费试用',
-    platform: 'Web'
+    platform: 'Web',
+    introduction: '绘蛙 AI 视频是绘蛙推出的 AI 电商营销视频内容创作平台，帮助用户快速生成高质量的电商营销视频。用户可以通过上传单张全身模特图片或最多 4 张图片，AI 技术生成动态视频。支持自定义模特动作，如"右手摸嘴角""向前模特步""原地旋转一圈"等，生成更具个性化的视频。',
+    audience: ['电商从业者', '服装品牌', '营销人员', '社交媒体运营'],
+    usage: ['访问官网注册登录', '上传全身模特图片', '选择动态模板或自定义动作', '生成视频并预览', '下载保存到本地']
   },
   {
     id: '3',
@@ -49,9 +58,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/f4W61w8eDE',
     tags: ['视频生成', '图片生成', '模型训练', '社区'],
     featured: true,
-    features: ['图片生成', '视频生成', '视频特效', 'LoRA训练', 'WebUI', 'ComfyUI'],
+    features: ['图片生成', '视频生成', '视频特效', '资产管理', '灵感发现', '快捷创作工具', 'WebUI/ComfyUI', 'LoRA 训练'],
     pricing: '免费试用，付费版 29元/月起',
-    platform: 'Web'
+    platform: 'Web',
+    introduction: 'LiblibAI 是一站式 AI 内容创作生成平台，提供图片生成、视频生成、视频特效和资产管理等功能。整合顶级 AI 模型，如混元 3.0、海螺 2.3、通义万相 2.5 等，将图像、视频、灵感、AI 应用、模型训练 5 大模块一站打通。拥有丰富的社区生态，创作者能获取灵感、分享作品，支持"做同款"功能快速复刻优秀创意。',
+    audience: ['内容创作者', '设计师', '游戏开发者', '电商运营', 'AI爱好者'],
+    usage: ['访问官网注册登录', '选择创作工具', '上传素材或输入描述', '设置生成参数', '生成并下载作品']
   },
   {
     id: '4',
@@ -62,9 +74,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/A4bg1w8eDE',
     tags: ['视频生成', '国产', '生数科技'],
     featured: true,
-    features: ['文生视频', '图生视频', '参考生视频', 'AI音效', '1080P高清', '快速生成'],
+    features: ['文本转视频', '图片转视频', '参考视频生成', '多主体一致性', '高质量视频输出', '智能超清', '多镜头生成', 'AI 模板', 'AI 音效'],
     pricing: '免费试用，付费按量计费',
-    platform: 'Web'
+    platform: 'Web',
+    introduction: 'Vidu 是生数科技推出的 AI 视频生成平台，集成 Vidu Q2、Vidu Q3 等先进模型，支持图生视频、文生视频和参考生视频功能。用户能通过上传图片、输入文字或参考视频生成具有细腻表情和生动演技的数字角色视频。Vidu Q3 使平台能一次性同步生成画面、对白、环境音效与 BGM，无需后期制作。',
+    audience: ['视频制作人员', '游戏开发者', '教育机构', '科研人员', '内容创作者'],
+    usage: ['访问官网注册登录', '选择文生视频或图生视频', '输入文本或上传图片', '调整生成参数', '生成并下载视频']
   },
   {
     id: '5',
@@ -74,9 +89,12 @@ export const aiTools: ToolItem[] = [
     category: '数字人',
     logo: 'https://aka.doubaocdn.com/s/40pg1w8eJL',
     tags: ['数字人', '3D', '视频创作'],
-    features: ['3D数字人生成', 'AI视频创作', '口播视频', '多场景模板'],
-    pricing: '免费试用',
-    platform: 'Web'
+    features: ['海量 3D 虚拟角色库', '一键生成 3D 内容', '自定义编辑功能', '后期包装工具', '镜头和素材编辑'],
+    pricing: '免费试用，付费版 49.8元/月起',
+    platform: 'Web',
+    introduction: '有言是由魔珐科技推出的一个一站式 AIGC 视频创作和 3D 数字人生成平台，通过提供海量超写实 3D 虚拟人角色，帮助用户无需真人出镜即可制作视频。基于魔珐自研的 AIGC 技术，支持用户输入文字快速生成 3D 内容，并提供自定义编辑、字幕、动效、背景音乐等后期包装功能。',
+    audience: ['教育工作者', '营销人员', '内容创作者', '企业宣传', '个人品牌建设'],
+    usage: ['访问官网注册登录', '选择视频版式', '选择模版和人物', '编辑视频脚本', '渲染并导出']
   },
   {
     id: '6',
@@ -87,9 +105,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/hPne1w8eJL',
     tags: ['数字人', '口播视频', '多语言', '视频翻译'],
     featured: true,
-    features: ['100+数字人模板', '300+语言支持', '语音克隆', '视频翻译', 'Instant Avatar', '背景替换'],
+    features: ['AI 视频头像', '头像 IV（照片生成视频）', 'AI 视频翻译器', 'AI 配音', '文本转视频', '图片转视频', '语音克隆', '多语言支持'],
     pricing: '免费试用，付费版 $24/月起',
-    platform: 'Web'
+    platform: 'Web',
+    introduction: 'HeyGen 是全球领先的 AI 数字人视频创作平台，致力于简化视频制作过程，让用户能迅速制作出具有专业水准的数字人视频。HeyGen 能将文本、图像或音频快速转化为高质量视频，基于视频创作 Agent，能实现从创意构思到成品视频的一站式制作，支持多语言语音克隆、AI 字幕生成等功能。',
+    audience: ['营销人员', '培训师', '内容创作者', '企业宣传', '教育工作者'],
+    usage: ['访问官网注册登录', '选择生成工具', '上传照片或选择预设头像', '输入文本并自定义数字人', '生成并下载视频']
   },
   {
     id: '7',
@@ -160,9 +181,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/tMSD1w8eJL',
     tags: ['视频生成', 'OpenAI', '高质量', '长视频'],
     featured: true,
-    features: ['最长60秒视频', '复杂场景理解', '多角色生成', '物理模拟', '高清画质'],
+    features: ['最长60秒视频', '复杂场景理解', '多角色生成', '物理模拟', '高清画质', '多镜头生成', '真实世界模拟'],
     pricing: '需订阅 ChatGPT Plus ($20/月)',
-    platform: 'Web'
+    platform: 'Web',
+    introduction: 'Sora 是 OpenAI 推出的革命性 AI 视频生成模型，可以生成长达 60 秒的高质量视频。Sora 能够根据文本提示生成逼真的视频，具备强大的物理规律模拟能力，能够理解复杂场景并生成多角色、多镜头的视频内容，是目前最先进的 AI 视频生成技术之一。',
+    audience: ['视频创作者', '电影制作人', '广告创意人员', '内容营销者', 'AI研究者'],
+    usage: ['订阅 ChatGPT Plus', '访问 Sora 页面', '输入详细的视频描述', '选择视频参数', '生成并下载视频']
   },
   {
     id: '13',
@@ -185,9 +209,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/1vT01w8eJL',
     tags: ['视频生成', '快手', '国产', '长视频'],
     featured: true,
-    features: ['最长2分钟视频', '高清画质', '运动笔刷', '首尾帧控制', '多风格支持'],
+    features: ['最长2分钟视频', '高清画质', '运动笔刷', '首尾帧控制', '多风格支持', '图生视频', '文生视频'],
     pricing: '免费试用，付费按量计费',
-    platform: 'Web/APP'
+    platform: 'Web/APP',
+    introduction: '可灵 AI 是快手推出的 AI 视频生成模型，国产顶尖水平。支持文生视频和图生视频，可生成最长 2 分钟的高清视频，运动笔刷控制精准。采用先进的 3D 时空联合注意力机制，能够模拟真实世界的物理规律，生成动作流畅、画质清晰的优质视频。',
+    audience: ['短视频创作者', '营销人员', '内容创作者', '电商运营', '广告从业者'],
+    usage: ['访问官网或下载APP', '注册登录账号', '选择文生视频或图生视频', '输入描述或上传图片', '调整参数并生成视频']
   },
   {
     id: '15',
@@ -402,9 +429,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/buOB1w8eJL',
     tags: ['视频生成', '视频编辑', '专业级', 'Gen-3'],
     featured: true,
-    features: ['Gen-3 Alpha', 'Motion Brush', '绿幕抠像', '视频放大', '多模态编辑'],
+    features: ['Gen-3 Alpha 超写实视频', 'Motion Brush 运动画笔', '绿幕抠除', '视频放大增强', '多模态编辑', '实时渲染'],
     pricing: '免费试用，付费版 $12/月起',
-    platform: 'Web'
+    platform: 'Web',
+    introduction: 'Runway 是 AI 视频生成领域的领军平台，Gen-3 Alpha 模型可生成超写实视频。支持文生视频、图生视频、视频编辑等多种功能，被好莱坞电影广泛采用。提供 Motion Brush 运动画笔、视频背景移除、绿幕抠像等专业功能，是专业视频创作者的首选工具。',
+    audience: ['电影制作人', '视频编辑师', '广告创意人员', '动画师', '专业创作者'],
+    usage: ['访问官网注册登录', '选择创作工具', '输入描述或上传素材', '调整生成参数', '生成并导出视频']
   },
   {
     id: '33',
@@ -415,9 +445,12 @@ export const aiTools: ToolItem[] = [
     logo: 'https://aka.doubaocdn.com/s/jTUg1w8eJL',
     tags: ['视频生成', '视频编辑', 'Pika Labs'],
     featured: true,
-    features: ['文生视频', '图生视频', 'Lip Sync', '特效模板', '运动控制'],
+    features: ['文本生成视频', '图片生成视频', 'Lip Sync 口型同步', '特效模板', '运动控制', '视频风格转换'],
     pricing: '免费试用，付费版 $8/月起',
-    platform: 'Web'
+    platform: 'Web',
+    introduction: 'Pika 是 Pika Labs 推出的新一代 AI 视频生成工具，Pika 2.0 模型效果惊艳。支持文字生成视频和图片生成视频，提供 Lip Sync 口型同步、特效模板等丰富功能。操作简单，生成速度快，特别适合创意视频和社交媒体内容创作。',
+    audience: ['短视频创作者', '社交媒体运营', '内容创作者', '营销人员', 'AI爱好者'],
+    usage: ['访问官网注册登录', '选择生成模式', '输入文本或上传图片', '选择风格和参数', '生成并下载视频']
   },
   {
     id: '34',
