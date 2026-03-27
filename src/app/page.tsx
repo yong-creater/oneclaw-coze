@@ -462,38 +462,6 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
   onVisit: (url: string) => void;
 }) {
   // AI 新闻状态
-  const [aiNews, setAiNews] = useState<Array<{
-    title: string;
-    url: string;
-    snippet: string;
-    source: string;
-    publishTime: string;
-  }>>([]);
-  const [loadingNews, setLoadingNews] = useState(false);
-
-  // 获取 AI 新闻
-  const fetchAINews = useCallback(async () => {
-    setLoadingNews(true);
-    try {
-      const response = await fetch('/api/ai-news');
-      const data = await response.json();
-      if (data.success && data.news) {
-        setAiNews(data.news);
-      }
-    } catch (error) {
-      console.error('Failed to fetch AI news:', error);
-    } finally {
-      setLoadingNews(false);
-    }
-  }, []);
-
-  // 当弹窗打开时获取新闻
-  useEffect(() => {
-    if (tool) {
-      fetchAINews();
-    }
-  }, [tool, fetchAINews]);
-
   if (!tool) return null;
 
   // 根据分类获取渐变色
@@ -643,60 +611,15 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
             </div>
           )}
 
-          {/* 当天热门 AI 新闻 */}
+          {/* 标签 */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                <Newspaper className="h-4 w-4 text-red-500" />
-                当天热门 AI 新闻
-              </h4>
-              <button 
-                onClick={fetchAINews}
-                className="text-xs text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors"
-                disabled={loadingNews}
-              >
-                <RefreshCw className={`h-3 w-3 ${loadingNews ? 'animate-spin' : ''}`} />
-                刷新
-              </button>
-            </div>
-            <div className="space-y-2">
-              {loadingNews ? (
-                <div className="flex items-center justify-center py-4">
-                  <RefreshCw className="h-5 w-5 animate-spin text-slate-400" />
-                </div>
-              ) : aiNews.length > 0 ? (
-                aiNews.map((news, index) => (
-                  <a
-                    key={index}
-                    href={news.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group"
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 bg-gradient-to-r from-red-500 to-orange-500 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-white text-xs font-bold">{index + 1}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-red-500 dark:group-hover:text-red-400 line-clamp-1 transition-colors">
-                          {news.title}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                          {news.snippet}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-slate-400">{news.source}</span>
-                        </div>
-                      </div>
-                      <ExternalLink className="h-4 w-4 text-slate-300 group-hover:text-red-400 transition-colors flex-shrink-0" />
-                    </div>
-                  </a>
-                ))
-              ) : (
-                <div className="text-center py-4 text-sm text-slate-500">
-                  暂无新闻数据
-                </div>
-              )}
+            <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">标签</h4>
+            <div className="flex flex-wrap gap-2">
+              {tool.tags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-700">
+                  {tag}
+                </Badge>
+              ))}
             </div>
           </div>
         </div>
@@ -1093,6 +1016,37 @@ export default function Home() {
   const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
   const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'skills'>('tools');
   const [showAbout, setShowAbout] = useState(false);
+  
+  // AI 新闻状态
+  const [aiNews, setAiNews] = useState<Array<{
+    title: string;
+    url: string;
+    snippet: string;
+    source: string;
+    publishTime: string;
+  }>>([]);
+  const [loadingNews, setLoadingNews] = useState(false);
+
+  // 获取 AI 新闻
+  const fetchAINews = useCallback(async () => {
+    setLoadingNews(true);
+    try {
+      const response = await fetch('/api/ai-news');
+      const data = await response.json();
+      if (data.success && data.news) {
+        setAiNews(data.news);
+      }
+    } catch (error) {
+      console.error('Failed to fetch AI news:', error);
+    } finally {
+      setLoadingNews(false);
+    }
+  }, []);
+
+  // 页面加载时获取新闻
+  useEffect(() => {
+    fetchAINews();
+  }, [fetchAINews]);
 
   // 缓存分类数据
   const categories = useMemo(() => getCategories(), []);
@@ -1293,35 +1247,54 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* 最新更新 */}
+            {/* 最新动态 - AI 新闻 */}
             <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
               <CardContent className="pt-4 pb-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <Clock className="h-4 w-4 text-emerald-500" />
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-white">最新动态</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <Newspaper className="h-4 w-4 text-red-500" />
+                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">AI 热门新闻</h3>
+                  </div>
+                  <button 
+                    onClick={fetchAINews}
+                    className="text-xs text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors"
+                    disabled={loadingNews}
+                  >
+                    <RefreshCw className={`h-3 w-3 ${loadingNews ? 'animate-spin' : ''}`} />
+                  </button>
                 </div>
-                <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                  <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                    <div>
-                      <p>新增 Kling 可灵、Vidu 等国产工具</p>
-                      <p className="text-xs text-slate-400">2024-03-20</p>
+                <div className="space-y-2">
+                  {loadingNews ? (
+                    <div className="flex items-center justify-center py-4">
+                      <RefreshCw className="h-4 w-4 animate-spin text-slate-400" />
                     </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                    <div>
-                      <p>新增 AI字幕、AI配音分类</p>
-                      <p className="text-xs text-slate-400">2024-03-15</p>
+                  ) : aiNews.length > 0 ? (
+                    aiNews.slice(0, 4).map((news, index) => (
+                      <a
+                        key={index}
+                        href={news.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block group"
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
+                            index === 0 ? 'bg-red-500' : index === 1 ? 'bg-orange-500' : index === 2 ? 'bg-amber-500' : 'bg-slate-400'
+                          }`}></div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-red-500 dark:group-hover:text-red-400 line-clamp-2 transition-colors">
+                              {news.title}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-0.5">{news.source}</p>
+                          </div>
+                        </div>
+                      </a>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-sm text-slate-500">
+                      暂无新闻
                     </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                    <div>
-                      <p>工具数量扩充至66个</p>
-                      <p className="text-xs text-slate-400">2024-03-10</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
