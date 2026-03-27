@@ -1629,8 +1629,9 @@ export default function Home() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="hidden lg:block w-72 space-y-4">
+          {/* Sidebar - Sticky定位 */}
+          <div className="hidden lg:block w-72 flex-shrink-0">
+            <div className="sticky top-4 space-y-4 max-h-[calc(100vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
             {/* 热门推荐 */}
             <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
               <CardContent className="pt-4 pb-3">
@@ -1706,6 +1707,7 @@ export default function Home() {
                 </Button>
               </div>
             </div>
+            </div>{/* sticky容器结束 */}
           </div>
         </div>
           </>
