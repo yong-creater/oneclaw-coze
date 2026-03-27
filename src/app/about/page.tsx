@@ -79,10 +79,10 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-                为什么叫"钳爪"？
+                关于 OneClaw
               </h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                小龙虾的钳子是它最强大的武器，精准、有力、灵活。我们的使命就是像钳爪一样，帮您从海量 AI 资源中精准抓取最适合的那一款工具、模板或技能。
+                OneClaw 致力于成为最全面的 AI 工具与资源导航平台。我们的使命是从海量 AI 资源中为您精准筛选最适合的工具、模板和技能。
               </p>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
                 在 AI 技术快速发展的今天，各类 AI 工具层出不穷。我们的使命是帮助每一位用户找到最适合的 AI 工具和资源，让 AI 技术变得更易用、更高效、更有价值。
@@ -96,8 +96,8 @@ export default function AboutPage() {
               <Card className="text-center border-red-100 dark:border-red-900/30">
                 <CardContent className="pt-6">
                   <Target className="h-10 w-10 mx-auto mb-3 text-red-500" />
-                  <h3 className="font-semibold mb-2">精准抓取</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">像钳爪一样精准</p>
+                  <h3 className="font-semibold mb-2">精准筛选</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">优质资源推荐</p>
                 </CardContent>
               </Card>
               
@@ -172,7 +172,7 @@ export default function AboutPage() {
       <section className="py-16 px-4 bg-white dark:bg-slate-800">
         <div className="container mx-auto max-w-6xl">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
-            为什么选择钳爪
+            为什么选择 OneClaw
           </h2>
           
           <div className="grid md:grid-cols-3 gap-8">

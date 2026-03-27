@@ -850,7 +850,7 @@ const AboutDialog = memo(function AboutDialog({
               </div>
               <div>
                 <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
-                  <span className="text-red-500">One</span><span className="text-orange-500">Claw</span> - 钳爪
+                  <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
                 </DialogTitle>
                 <p className="text-sm text-slate-500 dark:text-slate-400">一站式 AI 工具与资源导航平台</p>
               </div>
@@ -865,7 +865,7 @@ const AboutDialog = memo(function AboutDialog({
                 关于我们
               </h3>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                OneClaw (钳爪) 是一个综合性的 AI 工具与资源导航平台，致力于为用户提供最全面、最实用的 AI 应用资源。我们精心收录了数百款优质 AI 工具，涵盖 AI 视频创作、AI 图像生成、AI 写作助手、AI 编程工具、AI 音频处理等多个热门领域，同时提供丰富的提示词模板和技能资源，帮助用户快速上手并高效使用各类 AI 产品。
+                OneClaw 是一个综合性的 AI 工具与资源导航平台，致力于为用户提供最全面、最实用的 AI 应用资源。我们精心收录了数百款优质 AI 工具，涵盖 AI 视频创作、AI 图像生成、AI 写作助手、AI 编程工具、AI 音频处理等多个热门领域，同时提供丰富的提示词模板和技能资源，帮助用户快速上手并高效使用各类 AI 产品。
               </p>
             </div>
 
