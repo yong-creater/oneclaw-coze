@@ -525,58 +525,56 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
   
   return (
     <Dialog open={!!tool} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
-        {/* 滚动内容区域 */}
-        <div className="overflow-y-auto max-h-[90vh]">
-          {/* 头部区域 - 固定内边距 */}
-          <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
-            <div className="flex items-start gap-5">
-              {/* 弹窗图标 - 真实logo或首字母渐变 */}
-              <div className={`w-20 h-20 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden border border-slate-100 dark:border-slate-700`}>
-              {useRealLogo ? (
-                <img 
-                  src={tool.logo} 
-                  alt={tool.name}
-                  className="w-14 h-14 object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.className = `w-20 h-20 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`;
-                      parent.innerHTML = `<span className="text-white text-3xl font-bold">${getInitial(tool.name)}</span>`;
-                    }
-                  }}
-                />
-              ) : (
-                <span className="text-white text-3xl font-bold">{getInitial(tool.name)}</span>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden flex flex-col">
+        {/* 头部区域 - 固定 */}
+        <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-start gap-5">
+            {/* 弹窗图标 - 真实logo或首字母渐变 */}
+            <div className={`w-20 h-20 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden border border-slate-100 dark:border-slate-700`}>
+            {useRealLogo ? (
+              <img 
+                src={tool.logo} 
+                alt={tool.name}
+                className="w-14 h-14 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.className = `w-20 h-20 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`;
+                    parent.innerHTML = `<span className="text-white text-3xl font-bold">${getInitial(tool.name)}</span>`;
+                  }
+                }}
+              />
+            ) : (
+              <span className="text-white text-3xl font-bold">{getInitial(tool.name)}</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap mb-2">
+              <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">{tool.name}</DialogTitle>
+              {tool.featured && (
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500">推荐</Badge>
+              )}
+              {tool.pricing && tool.pricing.includes('免费') && (
+                <Badge className="bg-emerald-500">免费</Badge>
               )}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">{tool.name}</DialogTitle>
-                {tool.featured && (
-                  <Badge className="bg-gradient-to-r from-red-500 to-orange-500">推荐</Badge>
-                )}
-                {tool.pricing && tool.pricing.includes('免费') && (
-                  <Badge className="bg-emerald-500">免费</Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{tool.category}</Badge>
-                {tool.platform && (
-                  <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.platform}</Badge>
-                )}
-                {tool.pricing && (
-                  <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.pricing}</Badge>
-                )}
-              </div>
-            </div>
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{tool.category}</Badge>
+              {tool.platform && (
+                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.platform}</Badge>
+              )}
+              {tool.pricing && (
+                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.pricing}</Badge>
+              )}
             </div>
           </div>
+          </div>
+        </div>
         
-        {/* 内容区域 */}
-        <div className="px-6 py-5 space-y-5">
+        {/* 内容区域 - 可滚动 */}
+        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
           {/* 详细介绍 */}
           {tool.introduction && (
             <div>
@@ -701,25 +699,24 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
               )}
             </div>
           </div>
-
-          {/* 底部按钮 */}
-          <div className="pt-4 flex gap-3">
-            <Button 
-              className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2"
-              onClick={() => onVisit(tool.url)}
-            >
-              访问官网
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline"
-              className="border-slate-200 dark:border-slate-700"
-              onClick={onClose}
-            >
-              关闭
-            </Button>
-          </div>
         </div>
+
+        {/* 底部按钮 - 固定 */}
+        <div className="flex-shrink-0 px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex gap-3">
+          <Button 
+            className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2"
+            onClick={() => onVisit(tool.url)}
+          >
+            访问官网
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost"
+            className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300"
+            onClick={onClose}
+          >
+            关闭
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
