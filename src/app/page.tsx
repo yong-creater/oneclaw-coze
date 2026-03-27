@@ -898,7 +898,7 @@ const ToolCard = memo(function ToolCard({
                 {tool.name}
               </h3>
               {tool.featured && (
-                <Badge className="bg-blue-500 text-xs flex-shrink-0 hover:bg-blue-600">
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600">
                   推荐
                 </Badge>
               )}
@@ -949,18 +949,18 @@ const ToolCard = memo(function ToolCard({
 const InlineAd = memo(function InlineAd() {
   return (
     <div className="md:col-span-2">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-blue-100 dark:border-slate-600">
+      <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-red-100 dark:border-slate-600">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
             <div>
               <p className="font-medium text-sm text-slate-800 dark:text-white">AI视频创作课程推荐</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">从零开始掌握AI视频制作技巧</p>
             </div>
           </div>
-          <Button size="sm" variant="outline" className="border-blue-200 dark:border-slate-500 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-slate-600">
+          <Button size="sm" variant="outline" className="border-red-200 dark:border-slate-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-600">
             了解更多
           </Button>
         </div>
@@ -993,7 +993,7 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
               <div className="flex items-center gap-2 flex-wrap">
                 <DialogTitle className="text-xl text-slate-900 dark:text-white">{tool.name}</DialogTitle>
                 {tool.featured && (
-                  <Badge className="bg-blue-500">推荐</Badge>
+                  <Badge className="bg-gradient-to-r from-red-500 to-orange-500">推荐</Badge>
                 )}
                 {tool.pricing && tool.pricing.includes('免费') && (
                   <Badge className="bg-emerald-500">免费</Badge>
@@ -1026,7 +1026,7 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
               <div className="grid grid-cols-2 gap-2">
                 {tool.features.map((feature, index) => (
                   <div key={index} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full flex-shrink-0"></div>
                     {feature}
                   </div>
                 ))}
@@ -1137,17 +1137,17 @@ export default function Home() {
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md">
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <div className="p-2.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl shadow-md">
                 <Video className="h-5 w-5 text-white" />
               </div>
               <div>
                 <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-                  AI视频工具集合
+                  钳爪AI视频工具箱
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">精选优质AI视频创作工具</p>
               </div>
-            </div>
+            </Link>
             <div className="flex items-center gap-3">
               <Link href="/about">
                 <Button variant="ghost" size="sm" className="gap-2 text-slate-600 dark:text-slate-300">
@@ -1155,7 +1155,7 @@ export default function Home() {
                   <span className="hidden sm:inline">关于我们</span>
                 </Button>
               </Link>
-              <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+              <Badge variant="secondary" className="bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400">
                 {aiTools.length} 个工具
               </Badge>
             </div>
@@ -1189,7 +1189,7 @@ export default function Home() {
                 variant={isActive ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category.name)}
-                className={isActive ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-700"}
+                className={isActive ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white" : "border-slate-200 dark:border-slate-700"}
               >
                 <Icon className="h-3.5 w-3.5 mr-1.5" />
                 {category.name}
@@ -1235,7 +1235,7 @@ export default function Home() {
             <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
               <CardContent className="pt-4 pb-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp className="h-4 w-4 text-blue-500" />
+                  <TrendingUp className="h-4 w-4 text-red-500" />
                   <h3 className="font-semibold text-sm text-slate-900 dark:text-white">热门推荐</h3>
                 </div>
                 <div className="space-y-1">
@@ -1255,21 +1255,21 @@ export default function Home() {
                 </div>
                 <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                   <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p>新增 Kling 可灵、Vidu 等国产工具</p>
                       <p className="text-xs text-slate-400">2024-03-20</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p>新增 AI字幕、AI配音分类</p>
                       <p className="text-xs text-slate-400">2024-03-15</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p>工具数量扩充至66个</p>
                       <p className="text-xs text-slate-400">2024-03-10</p>
@@ -1280,15 +1280,15 @@ export default function Home() {
             </Card>
 
             {/* 联系我们 */}
-            <Card className="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 border-0 text-white">
+            <Card className="bg-gradient-to-br from-red-600 to-orange-500 dark:from-red-700 dark:to-orange-600 border-0 text-white">
               <CardContent className="pt-4 pb-3">
                 <h3 className="font-semibold text-sm mb-2">联系我们</h3>
-                <div className="text-sm text-slate-300 space-y-1">
+                <div className="text-sm text-white/90 space-y-1">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     <span className="text-xs">contact@oneclaw.shop</span>
                   </div>
-                  <p className="text-xs text-slate-400">欢迎商务合作与工具推荐</p>
+                  <p className="text-xs text-white/70">欢迎商务合作与工具推荐</p>
                 </div>
               </CardContent>
             </Card>
@@ -1315,12 +1315,12 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
+              <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
                 <Video className="h-4 w-4 text-white" />
               </div>
-              <span className="font-medium text-slate-900 dark:text-white">AI视频工具集合</span>
+              <span className="font-medium text-slate-900 dark:text-white">钳爪AI视频工具箱</span>
             </div>
-            <p>© 2024 AI视频工具集合. 精选{aiTools.length}款优质AI视频创作工具</p>
+            <p>© 2024 钳爪AI视频工具箱 (OneClaw). 精选{aiTools.length}款优质AI视频创作工具</p>
             <div className="flex items-center gap-4">
               <Link href="/about" className="hover:text-blue-600 transition-colors">
                 关于我们

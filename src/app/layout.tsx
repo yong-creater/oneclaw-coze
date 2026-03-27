@@ -7,17 +7,17 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#2563eb',
+  themeColor: '#ef4444',
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://oneclaw.shop'),
   title: {
-    default: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
-    template: '%s | AI视频工具集合',
+    default: '钳爪AI视频工具箱 - 精选66+优质AI视频创作工具推荐',
+    template: '%s | 钳爪AI视频工具箱',
   },
   description:
-    'AI视频工具集合精心整理66+款优质AI视频创作工具，涵盖AI视频生成(Runway、Pika、Sora)、视频编辑(剪映、Descript)、数字人(HeyGen、D-ID)等类别，助力创作者高效制作视频内容。',
+    '钳爪AI视频工具箱精心整理66+款优质AI视频创作工具，涵盖AI视频生成(Runway、Pika、Sora)、视频编辑(剪映、Descript)、数字人(HeyGen、D-ID)等类别，助力创作者高效制作视频内容。',
   keywords: [
     'AI视频工具',
     'AI视频生成',
@@ -40,9 +40,9 @@ export const metadata: Metadata = {
     '视频创作者工具',
     '2024 AI工具',
   ],
-  authors: [{ name: 'AI视频工具集合', url: 'https://oneclaw.shop' }],
-  creator: 'AI视频工具集合',
-  publisher: 'AI视频工具集合',
+  authors: [{ name: '钳爪AI视频工具箱', url: 'https://oneclaw.shop' }],
+  creator: '钳爪AI视频工具箱',
+  publisher: '钳爪AI视频工具箱',
   robots: {
     index: true,
     follow: true,
@@ -55,11 +55,11 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
+    title: '钳爪AI视频工具箱 - 精选66+优质AI视频创作工具推荐',
     description:
-      'AI视频工具集合精心整理66+款优质AI视频创作工具，涵盖AI视频生成、视频编辑、数字人、AI字幕、AI配音等类别，助力创作者高效制作视频内容。',
+      '钳爪AI视频工具箱精心整理66+款优质AI视频创作工具，涵盖AI视频生成、视频编辑、数字人、AI字幕、AI配音等类别，助力创作者高效制作视频内容。',
     url: 'https://oneclaw.shop',
-    siteName: 'AI视频工具集合',
+    siteName: '钳爪AI视频工具箱',
     locale: 'zh_CN',
     type: 'website',
     images: [
@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
+    title: '钳爪AI视频工具箱 - 精选66+优质AI视频创作工具推荐',
     description:
       '精选66+款优质AI视频创作工具，涵盖视频生成、编辑、数字人、字幕、配音等类别。',
     images: ['/og-image.png'],
@@ -92,7 +92,7 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'AI视频工具集合',
+  name: '钳爪AI视频工具箱',
   description: '精选优质AI视频创作工具，助力创意视频制作',
   url: 'https://oneclaw.shop',
   potentialAction: {
@@ -105,7 +105,7 @@ const jsonLd = {
 const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'AI视频工具集合',
+  name: '钳爪AI视频工具箱',
   url: 'https://oneclaw.shop',
   logo: 'https://oneclaw.shop/logo.png',
   description: '精选优质AI视频创作工具',
