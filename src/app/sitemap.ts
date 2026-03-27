@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://aivideotools.com';
+  const baseUrl = 'https://oneclaw.shop';
   
   // 工具分类
   const categories = [

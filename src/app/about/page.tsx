@@ -214,7 +214,7 @@ export default function AboutPage() {
                   </div>
                   <div>
                     <p className="font-semibold">邮箱联系</p>
-                    <p className="text-sm opacity-80">contact@aivideotools.com</p>
+                    <p className="text-sm opacity-80">contact@oneclaw.shop</p>
                   </div>
                 </div>
                 
@@ -224,7 +224,7 @@ export default function AboutPage() {
                   </div>
                   <div>
                     <p className="font-semibold">商务合作</p>
-                    <p className="text-sm opacity-80">business@aivideotools.com</p>
+                    <p className="text-sm opacity-80">business@oneclaw.shop</p>
                   </div>
                 </div>
               </div>

@@ -11,13 +11,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aivideotools.com'),
+  metadataBase: new URL('https://oneclaw.shop'),
   title: {
     default: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
     template: '%s | AI视频工具集合',
   },
   description:
-    'AI视频工具集合精心整理18+款优质AI视频创作工具，涵盖AI视频生成(Runway、Pika、Sora)、视频编辑(剪映、Descript)、数字人(HeyGen、D-ID)等类别，助力创作者高效制作视频内容。',
+    'AI视频工具集合精心整理66+款优质AI视频创作工具，涵盖AI视频生成(Runway、Pika、Sora)、视频编辑(剪映、Descript)、数字人(HeyGen、D-ID)等类别，助力创作者高效制作视频内容。',
   keywords: [
     'AI视频工具',
     'AI视频生成',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     '视频创作者工具',
     '2024 AI工具',
   ],
-  authors: [{ name: 'AI视频工具集合', url: 'https://aivideotools.com' }],
+  authors: [{ name: 'AI视频工具集合', url: 'https://oneclaw.shop' }],
   creator: 'AI视频工具集合',
   publisher: 'AI视频工具集合',
   robots: {
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     title: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
     description:
       'AI视频工具集合精心整理66+款优质AI视频创作工具，涵盖AI视频生成、视频编辑、数字人、AI字幕、AI配音等类别，助力创作者高效制作视频内容。',
-    url: 'https://aivideotools.com',
+    url: 'https://oneclaw.shop',
     siteName: 'AI视频工具集合',
     locale: 'zh_CN',
     type: 'website',
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   alternates: {
-    canonical: 'https://aivideotools.com',
+    canonical: 'https://oneclaw.shop',
   },
   category: 'technology',
   classification: 'AI Tools Directory',
@@ -94,10 +94,10 @@ const jsonLd = {
   '@type': 'WebSite',
   name: 'AI视频工具集合',
   description: '精选优质AI视频创作工具，助力创意视频制作',
-  url: 'https://aivideotools.com',
+  url: 'https://oneclaw.shop',
   potentialAction: {
     '@type': 'SearchAction',
-    target: 'https://aivideotools.com/?search={search_term_string}',
+    target: 'https://oneclaw.shop/?search={search_term_string}',
     'query-input': 'required name=search_term_string',
   },
 };
@@ -106,8 +106,8 @@ const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'AI视频工具集合',
-  url: 'https://aivideotools.com',
-  logo: 'https://aivideotools.com/logo.png',
+  url: 'https://oneclaw.shop',
+  logo: 'https://oneclaw.shop/logo.png',
   description: '精选优质AI视频创作工具',
   sameAs: [],
 };
