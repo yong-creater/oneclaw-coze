@@ -62,6 +62,9 @@ const ToolCard = memo(function ToolCard({
     return cleanName.charAt(0).toUpperCase();
   };
 
+  // 判断是否使用真实logo
+  const useRealLogo = tool.logo && tool.logo.startsWith('http');
+
   return (
     <Card 
       className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
@@ -69,9 +72,27 @@ const ToolCard = memo(function ToolCard({
     >
       <CardContent className="p-4">
         <div className="flex gap-4">
-          {/* 图标 - 首字母渐变 */}
-          <div className={`w-14 h-14 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform`}>
-            <span className="text-white text-xl font-bold">{getInitial(tool.name)}</span>
+          {/* 图标 - 真实logo或首字母渐变 */}
+          <div className={`w-14 h-14 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform overflow-hidden border border-slate-100 dark:border-slate-700`}>
+            {useRealLogo ? (
+              <img 
+                src={tool.logo} 
+                alt={tool.name}
+                className="w-10 h-10 object-contain"
+                onError={(e) => {
+                  // 加载失败时回退到首字母
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.className = `w-14 h-14 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform`;
+                    parent.innerHTML = `<span className="text-white text-xl font-bold">${getInitial(tool.name)}</span>`;
+                  }
+                }}
+              />
+            ) : (
+              <span className="text-white text-xl font-bold">{getInitial(tool.name)}</span>
+            )}
           </div>
           
           <div className="flex-1 min-w-0">
@@ -163,15 +184,38 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
     const cleanName = name.replace(/^(AI|智能|腾讯|快手|字节)/, '');
     return cleanName.charAt(0).toUpperCase();
   };
+
+  // 判断是否使用真实logo
+  const useRealLogo = tool.logo && tool.logo.startsWith('http');
   
   return (
     <Dialog open={!!tool} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800">
-        <DialogHeader>
-          <div className="flex items-start gap-5">
-            {/* 弹窗图标 - 首字母渐变 */}
-            <div className={`w-20 h-20 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`}>
-              <span className="text-white text-3xl font-bold">{getInitial(tool.name)}</span>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
+        {/* 滚动内容区域 */}
+        <div className="overflow-y-auto max-h-[90vh]">
+          {/* 头部区域 - 固定内边距 */}
+          <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+            <div className="flex items-start gap-5">
+              {/* 弹窗图标 - 真实logo或首字母渐变 */}
+              <div className={`w-20 h-20 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden border border-slate-100 dark:border-slate-700`}>
+              {useRealLogo ? (
+                <img 
+                  src={tool.logo} 
+                  alt={tool.name}
+                  className="w-14 h-14 object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.className = `w-20 h-20 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`;
+                      parent.innerHTML = `<span className="text-white text-3xl font-bold">${getInitial(tool.name)}</span>`;
+                    }
+                  }}
+                />
+              ) : (
+                <span className="text-white text-3xl font-bold">{getInitial(tool.name)}</span>
+              )}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap mb-2">
@@ -193,10 +237,11 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
                 )}
               </div>
             </div>
+            </div>
           </div>
-        </DialogHeader>
         
-        <div className="space-y-5 mt-4">
+        {/* 内容区域 */}
+        <div className="px-6 py-5 space-y-5">
           {/* 详细介绍 */}
           {tool.introduction && (
             <div>
@@ -295,6 +340,7 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
             </Button>
           </div>
         </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -331,13 +377,28 @@ const HotToolItem = memo(function HotToolItem({
     return cleanName.charAt(0).toUpperCase();
   };
 
+  // 判断是否使用真实logo
+  const useRealLogo = tool.logo && tool.logo.startsWith('http');
+
   return (
     <div 
       className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
       onClick={onClick}
     >
-      <div className={`w-10 h-10 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-lg flex items-center justify-center flex-shrink-0`}>
-        <span className="text-white text-sm font-bold">{getInitial(tool.name)}</span>
+      <div className={`w-10 h-10 ${useRealLogo ? 'bg-white border border-slate-100 dark:border-slate-700' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden`}>
+        {useRealLogo ? (
+          <img 
+            src={tool.logo} 
+            alt={tool.name}
+            className="w-7 h-7 object-contain"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <span className="text-white text-sm font-bold">{getInitial(tool.name)}</span>
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm truncate text-slate-900 dark:text-white">{tool.name}</p>
