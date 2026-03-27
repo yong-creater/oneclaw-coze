@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, Star, TrendingUp } from 'lucide-react';
+import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp } from 'lucide-react';
 
 interface ToolItem {
   id: string;
@@ -855,37 +855,281 @@ const aiTools: ToolItem[] = [
   },
 ];
 
-const categories = [
-  { name: '全部', icon: Video, count: aiTools.length, color: 'bg-blue-500' },
-  { name: '视频生成', icon: Wand2, count: aiTools.filter(t => t.category === '视频生成').length, color: 'bg-purple-500' },
-  { name: '数字人', icon: Users, count: aiTools.filter(t => t.category === '数字人').length, color: 'bg-pink-500' },
-  { name: '视频编辑', icon: Film, count: aiTools.filter(t => t.category === '视频编辑').length, color: 'bg-green-500' },
-  { name: 'AI字幕', icon: FileVideo, count: aiTools.filter(t => t.category === 'AI字幕').length, color: 'bg-orange-500' },
-  { name: 'AI配音', icon: Mic, count: aiTools.filter(t => t.category === 'AI配音').length, color: 'bg-red-500' },
-  { name: '视频增强', icon: Sparkles, count: aiTools.filter(t => t.category === '视频增强').length, color: 'bg-cyan-500' },
-  { name: '3D视频', icon: Palette, count: aiTools.filter(t => t.category === '3D视频').length, color: 'bg-indigo-500' },
-  { name: '创意视频', icon: Music, count: aiTools.filter(t => t.category === '创意视频').length, color: 'bg-amber-500' },
-  { name: '视频素材', icon: ImageIcon, count: aiTools.filter(t => t.category === '视频素材').length, color: 'bg-teal-500' },
-  { name: '屏幕录制', icon: Film, count: aiTools.filter(t => t.category === '屏幕录制').length, color: 'bg-slate-500' },
+// 使用 useMemo 缓存分类数据
+const getCategories = () => [
+  { name: '全部', icon: Video, count: aiTools.length },
+  { name: '视频生成', icon: Wand2, count: aiTools.filter(t => t.category === '视频生成').length },
+  { name: '数字人', icon: Users, count: aiTools.filter(t => t.category === '数字人').length },
+  { name: '视频编辑', icon: Film, count: aiTools.filter(t => t.category === '视频编辑').length },
+  { name: 'AI字幕', icon: FileVideo, count: aiTools.filter(t => t.category === 'AI字幕').length },
+  { name: 'AI配音', icon: Mic, count: aiTools.filter(t => t.category === 'AI配音').length },
+  { name: '视频增强', icon: Sparkles, count: aiTools.filter(t => t.category === '视频增强').length },
+  { name: '3D视频', icon: Palette, count: aiTools.filter(t => t.category === '3D视频').length },
+  { name: '创意视频', icon: Music, count: aiTools.filter(t => t.category === '创意视频').length },
+  { name: '视频素材', icon: ImageIcon, count: aiTools.filter(t => t.category === '视频素材').length },
+  { name: '屏幕录制', icon: Film, count: aiTools.filter(t => t.category === '屏幕录制').length },
 ];
 
 // 热门工具
 const hotTools = aiTools.filter(t => t.featured).slice(0, 6);
+
+// 工具卡片组件 - 使用 memo 优化
+const ToolCard = memo(function ToolCard({ 
+  tool, 
+  onClick 
+}: { 
+  tool: ToolItem; 
+  onClick: () => void;
+}) {
+  return (
+    <Card 
+      className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
+      onClick={onClick}
+    >
+      <CardContent className="p-4">
+        <div className="flex gap-3">
+          <div className="w-11 h-11 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+            {tool.icon}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-slate-900 dark:text-white truncate text-sm">
+                {tool.name}
+              </h3>
+              {tool.featured && (
+                <Badge className="bg-blue-500 text-xs flex-shrink-0 hover:bg-blue-600">
+                  推荐
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-1.5 mb-2">
+              <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">
+                {tool.category}
+              </Badge>
+              {tool.pricing && tool.pricing.includes('免费') && (
+                <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
+                  免费
+                </Badge>
+              )}
+            </div>
+            
+            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-2">
+              {tool.description}
+            </p>
+            
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap gap-1">
+                {tool.tags.slice(0, 2).map((tag, tagIndex) => (
+                  <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
+                    {tag}
+                  </Badge>
+                ))}
+                {tool.tags.length > 2 && (
+                  <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
+                    +{tool.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
+              
+              <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5 flex-shrink-0 font-medium">
+                详情
+                <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+// 内联广告组件
+const InlineAd = memo(function InlineAd() {
+  return (
+    <div className="md:col-span-2">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-blue-100 dark:border-slate-600">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="font-medium text-sm text-slate-800 dark:text-white">AI视频创作课程推荐</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">从零开始掌握AI视频制作技巧</p>
+            </div>
+          </div>
+          <Button size="sm" variant="outline" className="border-blue-200 dark:border-slate-500 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-slate-600">
+            了解更多
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// 工具详情弹窗组件
+const ToolDetailDialog = memo(function ToolDetailDialog({ 
+  tool, 
+  onClose,
+  onVisit 
+}: { 
+  tool: ToolItem | null; 
+  onClose: () => void;
+  onVisit: (url: string) => void;
+}) {
+  if (!tool) return null;
+  
+  return (
+    <Dialog open={!!tool} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800">
+        <DialogHeader>
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
+              {tool.icon}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <DialogTitle className="text-xl text-slate-900 dark:text-white">{tool.name}</DialogTitle>
+                {tool.featured && (
+                  <Badge className="bg-blue-500">推荐</Badge>
+                )}
+                {tool.pricing && tool.pricing.includes('免费') && (
+                  <Badge className="bg-emerald-500">免费</Badge>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{tool.category}</Badge>
+                {tool.platform && (
+                  <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.platform}</Badge>
+                )}
+                {tool.pricing && (
+                  <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.pricing}</Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogHeader>
+        
+        <div className="space-y-4 mt-4">
+          <div>
+            <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">简介</h4>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+              {tool.description}
+            </p>
+          </div>
+
+          {tool.features && tool.features.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">主要功能</h4>
+              <div className="grid grid-cols-2 gap-2">
+                {tool.features.map((feature, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">标签</h4>
+            <div className="flex flex-wrap gap-2">
+              {tool.tags.map((tag, index) => (
+                <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-700">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-4 flex gap-3">
+            <Button 
+              className="flex-1 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 gap-2"
+              onClick={() => onVisit(tool.url)}
+            >
+              访问官网
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline"
+              className="border-slate-200 dark:border-slate-700"
+              onClick={onClose}
+            >
+              关闭
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+});
+
+// 热门推荐项组件
+const HotToolItem = memo(function HotToolItem({ 
+  tool, 
+  onClick 
+}: { 
+  tool: ToolItem; 
+  onClick: () => void;
+}) {
+  return (
+    <div 
+      className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
+      onClick={onClick}
+    >
+      <div className="w-8 h-8 bg-slate-100 dark:bg-slate-600 rounded flex items-center justify-center text-sm flex-shrink-0">
+        {tool.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium text-sm truncate text-slate-900 dark:text-white">{tool.name}</p>
+        <p className="text-xs text-slate-500">{tool.category}</p>
+      </div>
+      <ChevronRight className="h-4 w-4 text-slate-400" />
+    </div>
+  );
+});
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [selectedTool, setSelectedTool] = useState<ToolItem | null>(null);
 
-  const filteredTools = aiTools.filter(tool => {
-    const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         tool.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesCategory = selectedCategory === '全部' || tool.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  // 缓存分类数据
+  const categories = useMemo(() => getCategories(), []);
+
+  // 缓存过滤后的工具列表
+  const filteredTools = useMemo(() => {
+    return aiTools.filter(tool => {
+      const matchesSearch = tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           tool.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           tool.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesCategory = selectedCategory === '全部' || tool.category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  // 缓存事件处理函数
+  const handleToolClick = useCallback((tool: ToolItem) => {
+    setSelectedTool(tool);
+  }, []);
+
+  const handleCloseDialog = useCallback(() => {
+    setSelectedTool(null);
+  }, []);
+
+  const handleVisit = useCallback((url: string) => {
+    window.open(url, '_blank');
+  }, []);
+
+  const handleClearFilters = useCallback(() => {
+    setSearchQuery('');
+    setSelectedCategory('全部');
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -961,92 +1205,11 @@ export default function Home() {
             {/* Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {filteredTools.map((tool, index) => (
-                <>
+                <div key={tool.id}>
                   {/* 在第6个工具后插入广告 */}
-                  {index === 6 && (
-                    <div key="ad-inline" className="md:col-span-2">
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-blue-100 dark:border-slate-600">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                              <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm text-slate-800 dark:text-white">AI视频创作课程推荐</p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">从零开始掌握AI视频制作技巧</p>
-                            </div>
-                          </div>
-                          <Button size="sm" variant="outline" className="border-blue-200 dark:border-slate-500 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-slate-600">
-                            了解更多
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <Card 
-                    key={tool.id} 
-                    className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
-                    onClick={() => setSelectedTool(tool)}
-                  >
-                  <CardContent className="p-4">
-                    <div className="flex gap-3">
-                      {/* 图标 */}
-                      <div className="w-11 h-11 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
-                        {tool.icon}
-                      </div>
-                      
-                      {/* 内容 */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-slate-900 dark:text-white truncate text-sm">
-                            {tool.name}
-                          </h3>
-                          {tool.featured && (
-                            <Badge className="bg-blue-500 text-xs flex-shrink-0 hover:bg-blue-600">
-                              推荐
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-center gap-1.5 mb-2">
-                          <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">
-                            {tool.category}
-                          </Badge>
-                          {tool.pricing && tool.pricing.includes('免费') && (
-                            <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
-                              免费
-                            </Badge>
-                          )}
-                        </div>
-                        
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-2">
-                          {tool.description}
-                        </p>
-                        
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex flex-wrap gap-1">
-                            {tool.tags.slice(0, 2).map((tag, tagIndex) => (
-                              <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
-                                {tag}
-                              </Badge>
-                            ))}
-                            {tool.tags.length > 2 && (
-                              <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
-                                +{tool.tags.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5 flex-shrink-0 font-medium">
-                            详情
-                            <ChevronRight className="h-3 w-3" />
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                </>
+                  {index === 6 && <InlineAd />}
+                  <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
+                </div>
               ))}
             </div>
 
@@ -1058,10 +1221,7 @@ export default function Home() {
                 <Button 
                   variant="outline" 
                   className="mt-3"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedCategory('全部');
-                  }}
+                  onClick={handleClearFilters}
                 >
                   清除筛选
                 </Button>
@@ -1080,20 +1240,7 @@ export default function Home() {
                 </div>
                 <div className="space-y-1">
                   {hotTools.map((tool) => (
-                    <div 
-                      key={tool.id}
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
-                      onClick={() => setSelectedTool(tool)}
-                    >
-                      <div className="w-8 h-8 bg-slate-100 dark:bg-slate-600 rounded flex items-center justify-center text-sm flex-shrink-0">
-                        {tool.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate text-slate-900 dark:text-white">{tool.name}</p>
-                        <p className="text-xs text-slate-500">{tool.category}</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400" />
-                    </div>
+                    <HotToolItem key={tool.id} tool={tool} onClick={() => handleToolClick(tool)} />
                   ))}
                 </div>
               </CardContent>
@@ -1188,96 +1335,11 @@ export default function Home() {
       </footer>
 
       {/* Tool Detail Dialog */}
-      <Dialog open={!!selectedTool} onOpenChange={() => setSelectedTool(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800">
-          {selectedTool && (
-            <>
-              <DialogHeader>
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
-                    {selectedTool.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <DialogTitle className="text-xl text-slate-900 dark:text-white">{selectedTool.name}</DialogTitle>
-                      {selectedTool.featured && (
-                        <Badge className="bg-blue-500">推荐</Badge>
-                      )}
-                      {selectedTool.pricing && selectedTool.pricing.includes('免费') && (
-                        <Badge className="bg-emerald-500">免费</Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{selectedTool.category}</Badge>
-                      {selectedTool.platform && (
-                        <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{selectedTool.platform}</Badge>
-                      )}
-                      {selectedTool.pricing && (
-                        <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{selectedTool.pricing}</Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </DialogHeader>
-              
-              <div className="space-y-4 mt-4">
-                {/* 描述 */}
-                <div>
-                  <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">简介</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {selectedTool.description}
-                  </p>
-                </div>
-
-                {/* 功能特点 */}
-                {selectedTool.features && selectedTool.features.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">主要功能</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedTool.features.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
-                          {feature}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 标签 */}
-                <div>
-                  <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">标签</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTool.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-700">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 访问按钮 */}
-                <div className="pt-4 flex gap-3">
-                  <Button 
-                    className="flex-1 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 gap-2"
-                    onClick={() => window.open(selectedTool.url, '_blank')}
-                  >
-                    访问官网
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    className="border-slate-200 dark:border-slate-700"
-                    onClick={() => setSelectedTool(null)}
-                  >
-                    关闭
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ToolDetailDialog 
+        tool={selectedTool} 
+        onClose={handleCloseDialog}
+        onVisit={handleVisit}
+      />
     </div>
   );
 }
