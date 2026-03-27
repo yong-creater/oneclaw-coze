@@ -135,3 +135,18 @@
 body {
   @apply font-sans;
 }
+
+/* 龙虾Logo摇摆动画 */
+@keyframes lobster-wiggle {
+  0%, 100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+/* hover时触发摇摆 */
+.group:hover .lobster-animate {
+  animation: lobster-wiggle 0.4s ease-in-out;
+}
