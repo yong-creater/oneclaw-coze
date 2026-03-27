@@ -1286,7 +1286,7 @@ export default function Home() {
                 <div className="text-sm text-white/90 space-y-1">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    <span className="text-xs">contact@oneclaw.shop</span>
+                    <span className="text-xs">1017760688@qq.com</span>
                   </div>
                   <p className="text-xs text-white/70">欢迎商务合作与工具推荐</p>
                 </div>
@@ -1326,7 +1326,7 @@ export default function Home() {
                 关于我们
               </Link>
               <span className="text-slate-300 dark:text-slate-600">|</span>
-              <a href="mailto:contact@oneclaw.shop" className="hover:text-blue-600 transition-colors">
+              <a href="mailto:1017760688@qq.com" className="hover:text-blue-600 transition-colors">
                 商务合作
               </a>
             </div>

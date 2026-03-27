@@ -240,7 +240,7 @@ export default function AboutPage() {
                   </div>
                   <div>
                     <p className="font-semibold">邮箱联系</p>
-                    <p className="text-sm opacity-80">contact@oneclaw.shop</p>
+                    <p className="text-sm opacity-80">1017760688@qq.com</p>
                   </div>
                 </div>
                 
@@ -250,7 +250,7 @@ export default function AboutPage() {
                   </div>
                   <div>
                     <p className="font-semibold">商务合作</p>
-                    <p className="text-sm opacity-80">business@oneclaw.shop</p>
+                    <p className="text-sm opacity-80">1017760688@qq.com</p>
                   </div>
                 </div>
               </div>
