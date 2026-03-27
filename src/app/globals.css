@@ -136,17 +136,156 @@ body {
   @apply font-sans;
 }
 
-/* 龙虾Logo摇摆动画 */
-@keyframes lobster-wiggle {
+/* 龙虾Logo动画 - 活灵活现版 */
+
+/* 基础呼吸动画 */
+@keyframes lobster-breathe {
   0%, 100% {
-    transform: rotate(-8deg);
+    transform: scale(1) translateY(0);
   }
   50% {
-    transform: rotate(8deg);
+    transform: scale(1.05) translateY(-2px);
   }
 }
 
-/* hover时触发摇摆 */
-.group:hover .lobster-animate {
-  animation: lobster-wiggle 0.4s ease-in-out;
+/* 摇摆动画 */
+@keyframes lobster-wiggle {
+  0%, 100% {
+    transform: rotate(-5deg);
+  }
+  25% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  75% {
+    transform: rotate(-3deg);
+  }
 }
+
+/* 钳子夹合动画 */
+@keyframes lobster-claw {
+  0%, 40%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  45%, 55% {
+    transform: rotate(-3deg) scale(1.1);
+  }
+  60%, 90% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+/* 跳舞动画 */
+@keyframes lobster-dance {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  10% {
+    transform: translateY(-3px) rotate(-8deg) scale(1.05);
+  }
+  20% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  30% {
+    transform: translateY(-2px) rotate(5deg) scale(1.02);
+  }
+  40% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-3deg) scale(1.08);
+  }
+  60% {
+    transform: translateY(-1px) rotate(2deg) scale(1.02);
+  }
+  70% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  80% {
+    transform: translateY(-2px) rotate(-5deg) scale(1.03);
+  }
+  90% {
+    transform: translateY(0) rotate(3deg) scale(1);
+  }
+}
+
+/* 主动画 - 组合多种效果 */
+@keyframes lobster-alive {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
+  }
+  10% {
+    transform: translateY(-2px) rotate(-6deg) scale(1.03);
+  }
+  20% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  30% {
+    transform: translateY(-1px) rotate(4deg) scale(1.02);
+  }
+  40% {
+    transform: translateY(0) rotate(-2deg) scale(1);
+  }
+  50% {
+    transform: translateY(-3px) rotate(0deg) scale(1.05);
+    filter: drop-shadow(0 4px 6px rgba(239,68,68,0.2));
+  }
+  60% {
+    transform: translateY(-1px) rotate(3deg) scale(1.02);
+  }
+  70% {
+    transform: translateY(0) rotate(-4deg) scale(1);
+  }
+  80% {
+    transform: translateY(-2px) rotate(2deg) scale(1.03);
+  }
+  90% {
+    transform: translateY(0) rotate(-2deg) scale(1);
+  }
+}
+
+/* 应用动画 */
+.lobster-animate {
+  display: inline-block;
+  animation: lobster-alive 4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* hover时的兴奋动画 */
+.group:hover .lobster-animate {
+  animation: lobster-dance 0.8s ease-in-out infinite;
+}
+
+/* 气泡动画 */
+@keyframes bubble-float {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  20% {
+    opacity: 0.8;
+    transform: translateY(-5px) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(1);
+  }
+}
+
+.bubble {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(100,200,255,0.4));
+  border-radius: 50%;
+  animation: bubble-float 2s ease-out infinite;
+}
+
+.bubble:nth-child(1) { left: 10%; animation-delay: 0s; }
+.bubble:nth-child(2) { left: 30%; animation-delay: 0.5s; }
+.bubble:nth-child(3) { left: 50%; animation-delay: 1s; }
+.bubble:nth-child(4) { left: 70%; animation-delay: 1.5s; }
+.bubble:nth-child(5) { left: 90%; animation-delay: 0.8s; }

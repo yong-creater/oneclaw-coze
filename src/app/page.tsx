@@ -1140,10 +1140,14 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity group">
-              <div className="relative">
-                <div className="w-11 h-11 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <span className="text-4xl lobster-animate">🦞</span>
+              <div className="relative w-12 h-12 flex items-center justify-center">
+                {/* 气泡效果 */}
+                <div className="absolute inset-0 overflow-visible pointer-events-none">
+                  <div className="bubble"></div>
+                  <div className="bubble"></div>
+                  <div className="bubble"></div>
                 </div>
+                <span className="text-4xl lobster-animate relative z-10">🦞</span>
                 <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse"></div>
               </div>
               <div>
