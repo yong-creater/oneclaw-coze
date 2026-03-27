@@ -1377,7 +1377,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [selectedTool, setSelectedTool] = useState<ToolItem | null>(null);
-  const [showPrompts, setShowPrompts] = useState(false);
+  const [selectedPrompt, setSelectedPrompt] = useState<PromptItem | null>(null);
+  const [activeTab, setActiveTab] = useState<'tools' | 'prompts'>('tools');
   const [showAbout, setShowAbout] = useState(false);
 
   // 缓存分类数据
@@ -1392,6 +1393,17 @@ export default function Home() {
       
       const matchesCategory = selectedCategory === '全部' || tool.category === selectedCategory;
       
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  // 缓存过滤后的提示词列表
+  const filteredPrompts = useMemo(() => {
+    return prompts.filter(p => {
+      const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesCategory = selectedCategory === '全部' || p.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [searchQuery, selectedCategory]);
@@ -1442,15 +1454,6 @@ export default function Home() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-2 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400"
-                onClick={() => setShowPrompts(true)}
-              >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">提示词库</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm" 
                 className="gap-2 text-slate-600 dark:text-slate-300"
                 onClick={() => setShowAbout(true)}
               >
@@ -1458,7 +1461,7 @@ export default function Home() {
                 <span className="hidden sm:inline">关于我们</span>
               </Button>
               <Badge variant="secondary" className="bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                {aiTools.length} 个工具
+                {activeTab === 'tools' ? `${aiTools.length} 个工具` : `${prompts.length} 个提示词`}
               </Badge>
             </div>
           </div>
@@ -1467,31 +1470,54 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        {/* Search */}
-        <div className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="搜索工具名称、描述或标签..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-            />
-          </div>
+        {/* Tab Switcher */}
+        <div className="flex gap-2 mb-4">
+          <Button
+            variant={activeTab === 'tools' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('tools')}
+            className={activeTab === 'tools' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2' : 'border-slate-200 dark:border-slate-700 gap-2'}
+          >
+            <Video className="h-4 w-4" />
+            工具库
+          </Button>
+          <Button
+            variant={activeTab === 'prompts' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('prompts')}
+            className={activeTab === 'prompts' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2' : 'border-slate-200 dark:border-slate-700 gap-2'}
+          >
+            <Sparkles className="h-4 w-4" />
+            提示词库
+          </Button>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {categories.map((category) => {
-            const Icon = category.icon;
-            const isActive = selectedCategory === category.name;
-            return (
-              <Button
-                key={category.name}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory(category.name)}
-                className={isActive ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white" : "border-slate-200 dark:border-slate-700"}
+        {/* Tools Tab Content */}
+        {activeTab === 'tools' && (
+          <>
+            {/* Search */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="搜索工具名称、描述或标签..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                />
+              </div>
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                const isActive = selectedCategory === category.name;
+                return (
+                  <Button
+                    key={category.name}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category.name)}
+                    className={isActive ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white" : "border-slate-200 dark:border-slate-700"}
               >
                 <Icon className="h-3.5 w-3.5 mr-1.5" />
                 {category.name}
@@ -1544,25 +1570,6 @@ export default function Home() {
                   {hotTools.map((tool) => (
                     <HotToolItem key={tool.id} tool={tool} onClick={() => handleToolClick(tool)} />
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 提示词库入口 */}
-            <Card 
-              className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-100 dark:border-red-900/30 hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => setShowPrompts(true)}
-            >
-              <CardContent className="pt-4 pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-xl flex items-center justify-center shadow-sm">
-                    <Sparkles className="h-6 w-6 text-red-600 dark:text-red-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">AI视频提示词库</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">20+专业提示词模板</p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-red-400" />
                 </div>
               </CardContent>
             </Card>
@@ -1629,6 +1636,72 @@ export default function Home() {
             </div>
           </div>
         </div>
+          </>
+        )}
+
+        {/* Prompts Tab Content */}
+        {activeTab === 'prompts' && (
+          <div className="space-y-6">
+            {/* 提示词库介绍 */}
+            <Card className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-800 border-red-100 dark:border-slate-700">
+              <CardContent className="pt-5 pb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-xl flex items-center justify-center">
+                    <Sparkles className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">AI视频提示词库</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">精选 {prompts.length} 个专业提示词模板，助你高效创作</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 分类筛选 */}
+            <div className="flex flex-wrap gap-2">
+              {promptCategories.map((cat) => (
+                <Button
+                  key={cat.name}
+                  variant={selectedCategory === cat.name ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className={selectedCategory === cat.name ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-1" : "border-slate-200 dark:border-slate-700 gap-1"}
+                >
+                  <span>{cat.icon}</span>
+                  {cat.name}
+                  <span className="text-xs opacity-60">({cat.count})</span>
+                </Button>
+              ))}
+            </div>
+
+            {/* 提示词列表 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filteredPrompts.map((prompt) => (
+                <Card key={prompt.id} className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => setSelectedPrompt(prompt)}
+                >
+                  <CardContent className="pt-4 pb-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+                        💬
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">{prompt.title}</h3>
+                          <Badge variant="secondary" className="text-xs bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 flex-shrink-0">
+                            {prompt.category}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{prompt.description}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Footer */}
@@ -1641,7 +1714,7 @@ export default function Home() {
             </div>
             <p>© 2024 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 精选{aiTools.length}款优质AI视频创作工具</p>
             <div className="flex items-center gap-4">
-              <button onClick={() => setShowPrompts(true)} className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
+              <button onClick={() => setActiveTab('prompts')} className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
                 提示词库
               </button>
               <span className="text-slate-300 dark:text-slate-600">|</span>
@@ -1664,11 +1737,60 @@ export default function Home() {
         onVisit={handleVisit}
       />
 
-      {/* Prompts Dialog */}
-      <PromptsDialog open={showPrompts} onClose={() => setShowPrompts(false)} />
-
       {/* About Dialog */}
       <AboutDialog open={showAbout} onClose={() => setShowAbout(false)} />
+
+      {/* Prompt Detail Dialog */}
+      <Dialog open={selectedPrompt !== null} onOpenChange={() => setSelectedPrompt(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          {selectedPrompt && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <span className="text-xl">💬</span>
+                  {selectedPrompt.title}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedPrompt.description}</p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white">提示词内容</h4>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedPrompt.content);
+                      }}
+                      className="h-7 text-xs gap-1"
+                    >
+                      <Copy className="h-3 w-3" />
+                      复制
+                    </Button>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                    <pre className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap font-mono">
+                      {selectedPrompt.content}
+                    </pre>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">标签</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedPrompt.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary" className="bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
