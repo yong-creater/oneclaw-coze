@@ -9,8 +9,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '视频编辑',
     '数字人',
     '视频增强',
+    'AI字幕',
+    'AI配音',
     '3D视频',
     '创意视频',
+    '视频素材',
+    '屏幕录制',
   ];
 
   return [
@@ -26,7 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
-    // 可以添加分类页面
+    // 分类页面
     ...categories.map((category) => ({
       url: `${baseUrl}/category/${encodeURIComponent(category)}`,
       lastModified: new Date(),

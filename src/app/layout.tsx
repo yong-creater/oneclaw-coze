@@ -13,7 +13,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://aivideotools.com'),
   title: {
-    default: 'AI视频工具集合 - 精选18+优质AI视频创作工具推荐',
+    default: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
     template: '%s | AI视频工具集合',
   },
   description:
@@ -55,9 +55,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'AI视频工具集合 - 精选18+优质AI视频创作工具推荐',
+    title: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
     description:
-      'AI视频工具集合精心整理18+款优质AI视频创作工具，涵盖AI视频生成、视频编辑、数字人等类别，助力创作者高效制作视频内容。',
+      'AI视频工具集合精心整理66+款优质AI视频创作工具，涵盖AI视频生成、视频编辑、数字人、AI字幕、AI配音等类别，助力创作者高效制作视频内容。',
     url: 'https://aivideotools.com',
     siteName: 'AI视频工具集合',
     locale: 'zh_CN',
@@ -73,9 +73,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AI视频工具集合 - 精选18+优质AI视频创作工具推荐',
+    title: 'AI视频工具集合 - 精选66+优质AI视频创作工具推荐',
     description:
-      '精选18+款优质AI视频创作工具，涵盖视频生成、编辑、数字人等类别。',
+      '精选66+款优质AI视频创作工具，涵盖视频生成、编辑、数字人、字幕、配音等类别。',
     images: ['/og-image.png'],
   },
   alternates: {
@@ -117,7 +117,7 @@ const itemListJsonLd = {
   '@type': 'ItemList',
   name: 'AI视频工具推荐',
   description: '精选AI视频创作工具列表',
-  numberOfItems: 18,
+  numberOfItems: 66,
   itemListElement: [
     {
       '@type': 'ListItem',
@@ -139,6 +139,20 @@ const itemListJsonLd = {
       name: 'Sora',
       description: 'OpenAI推出的AI视频生成模型',
       url: 'https://openai.com/sora',
+    },
+    {
+      '@type': 'ListItem',
+      position: 4,
+      name: 'Kling 可灵',
+      description: '快手推出的AI视频生成模型',
+      url: 'https://klingai.kuaishou.com/',
+    },
+    {
+      '@type': 'ListItem',
+      position: 5,
+      name: 'HeyGen',
+      description: 'AI数字人视频生成平台',
+      url: 'https://www.heygen.com/',
     },
   ],
 };
