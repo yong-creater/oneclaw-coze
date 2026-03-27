@@ -1789,19 +1789,19 @@ export default function Home() {
 
       {/* Prompt Detail Dialog */}
       <Dialog open={selectedPrompt !== null} onOpenChange={() => setSelectedPrompt(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
           {selectedPrompt && (
             <>
-              <DialogHeader>
+              <DialogHeader className="flex-shrink-0">
                 <DialogTitle className="flex items-center gap-2">
                   <span className="text-xl">💬</span>
                   {selectedPrompt.title}
                 </DialogTitle>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{selectedPrompt.description}</p>
               </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedPrompt.description}</p>
-                </div>
+              
+              <div className="flex-1 overflow-y-auto space-y-4 py-4">
+                {/* 提示词内容 */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="text-sm font-semibold text-slate-900 dark:text-white">提示词内容</h4>
@@ -1810,19 +1810,30 @@ export default function Home() {
                       size="sm"
                       onClick={() => {
                         navigator.clipboard.writeText(selectedPrompt.content);
+                        // 简单的成功提示
+                        const btn = document.activeElement as HTMLButtonElement;
+                        const originalText = btn.textContent;
+                        btn.textContent = '✓ 已复制';
+                        btn.disabled = true;
+                        setTimeout(() => {
+                          btn.textContent = originalText;
+                          btn.disabled = false;
+                        }, 1500);
                       }}
                       className="h-7 text-xs gap-1"
                     >
                       <Copy className="h-3 w-3" />
-                      复制
+                      复制提示词
                     </Button>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
-                    <pre className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap font-mono">
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700 max-h-[40vh] overflow-y-auto">
+                    <pre className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap font-mono leading-relaxed">
                       {selectedPrompt.content}
                     </pre>
                   </div>
                 </div>
+                
+                {/* 标签 */}
                 <div>
                   <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">标签</h4>
                   <div className="flex flex-wrap gap-2">
@@ -1833,6 +1844,26 @@ export default function Home() {
                     ))}
                   </div>
                 </div>
+              </div>
+              
+              {/* 底部按钮 */}
+              <div className="flex-shrink-0 flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedPrompt(null)}
+                  className="border-slate-200 dark:border-slate-700"
+                >
+                  关闭
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
+                  onClick={() => {
+                    navigator.clipboard.writeText(selectedPrompt.content);
+                    setSelectedPrompt(null);
+                  }}
+                >
+                  复制并关闭
+                </Button>
               </div>
             </>
           )}
