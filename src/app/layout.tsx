@@ -13,11 +13,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://oneclaw.shop'),
   title: {
-    default: 'OneClaw - 精选66+优质AI视频创作工具推荐',
+    default: 'OneClaw - 精选117款优质AI视频创作工具推荐',
     template: '%s | OneClaw',
   },
   description:
-    'OneClaw精心整理66+款优质AI视频创作工具，涵盖AI视频生成(Runway、Pika、Sora)、视频编辑(剪映、Descript)、数字人(HeyGen、D-ID)等类别，助力创作者高效制作视频内容。',
+    'OneClaw精心整理117款优质AI视频创作工具，涵盖AI视频生成(即梦AI、Runway、Pika、Sora、可灵AI)、视频编辑(剪映、Descript)、数字人(HeyGen、D-ID)等类别，助力创作者高效制作视频内容。',
   keywords: [
     'AI视频工具',
     'AI视频生成',
