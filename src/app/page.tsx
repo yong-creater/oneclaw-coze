@@ -1156,6 +1156,12 @@ export default function Home() {
               </div>
             </Link>
             <div className="flex items-center gap-3">
+              <Link href="/prompts">
+                <Button variant="ghost" size="sm" className="gap-2 text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400">
+                  <Sparkles className="h-4 w-4" />
+                  <span className="hidden sm:inline">提示词库</span>
+                </Button>
+              </Link>
               <Link href="/about">
                 <Button variant="ghost" size="sm" className="gap-2 text-slate-600 dark:text-slate-300">
                   <Info className="h-4 w-4" />
@@ -1253,6 +1259,24 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            {/* 提示词库入口 */}
+            <Link href="/prompts">
+              <Card className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-100 dark:border-red-900/30 hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="pt-4 pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-xl flex items-center justify-center shadow-sm">
+                      <Sparkles className="h-6 w-6 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-sm text-slate-900 dark:text-white">AI视频提示词库</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">20+专业提示词模板</p>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-red-400" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
             {/* 最新更新 */}
             <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
               <CardContent className="pt-4 pb-3">
@@ -1331,11 +1355,15 @@ export default function Home() {
             </div>
             <p>© 2024 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 精选{aiTools.length}款优质AI视频创作工具</p>
             <div className="flex items-center gap-4">
-              <Link href="/about" className="hover:text-blue-600 transition-colors">
+              <Link href="/prompts" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                提示词库
+              </Link>
+              <span className="text-slate-300 dark:text-slate-600">|</span>
+              <Link href="/about" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
                 关于我们
               </Link>
               <span className="text-slate-300 dark:text-slate-600">|</span>
-              <a href="mailto:1017760688@qq.com" className="hover:text-blue-600 transition-colors">
+              <a href="mailto:1017760688@qq.com" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
                 商务合作
               </a>
             </div>
