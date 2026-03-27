@@ -973,29 +973,6 @@ const ToolCard = memo(function ToolCard({
 });
 
 // 内联广告组件
-const InlineAd = memo(function InlineAd() {
-  return (
-    <div className="md:col-span-2">
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-red-100 dark:border-slate-600">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-red-600 dark:text-red-400" />
-            </div>
-            <div>
-              <p className="font-medium text-sm text-slate-800 dark:text-white">AI视频创作课程推荐</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">从零开始掌握AI视频制作技巧</p>
-            </div>
-          </div>
-          <Button size="sm" variant="outline" className="border-red-200 dark:border-slate-500 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-600">
-            了解更多
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-});
-
 // 工具详情弹窗组件
 const ToolDetailDialog = memo(function ToolDetailDialog({ 
   tool, 
@@ -1604,12 +1581,8 @@ export default function Home() {
           <div className="flex-1">
             {/* Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {filteredTools.map((tool, index) => (
-                <div key={tool.id}>
-                  {/* 在第6个工具后插入广告 */}
-                  {index === 6 && <InlineAd />}
-                  <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
-                </div>
+              {filteredTools.map((tool) => (
+                <ToolCard key={tool.id} tool={tool} onClick={() => handleToolClick(tool)} />
               ))}
             </div>
 
