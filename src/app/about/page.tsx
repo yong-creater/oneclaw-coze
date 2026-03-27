@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Video, Users, Target, Award, Mail, MessageCircle, Heart, Sparkles, ArrowLeft, Home } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: '关于我们 - ONEclaw',
-  description: 'ONEclaw致力于为视频创作者提供最优质的AI工具推荐。我们精心筛选66+款AI视频生成、编辑工具，帮助创作者提高效率，释放创意。',
-  keywords: ['关于我们', 'AI视频工具', '视频创作', '工具推荐', '创作者服务', 'ONEclaw'],
+  title: '关于我们 - OneClaw',
+  description: 'OneClaw致力于为视频创作者提供最优质的AI工具推荐。我们精心筛选66+款AI视频生成、编辑工具，帮助创作者提高效率，释放创意。',
+  keywords: ['关于我们', 'AI视频工具', '视频创作', '工具推荐', '创作者服务', 'OneClaw'],
   openGraph: {
-    title: '关于我们 - ONEclaw',
+    title: '关于我们 - OneClaw',
     description: '致力于为视频创作者提供最优质的AI工具推荐',
     type: 'article',
   },
@@ -34,7 +34,7 @@ export default function AboutPage() {
                 <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
                   <Home className="h-4 w-4 text-white" />
                 </div>
-                <span className="font-medium text-slate-900 dark:text-white text-sm"><span className="text-red-500">ONE</span><span className="text-orange-500">claw</span></span>
+                <span className="font-medium text-slate-900 dark:text-white text-sm"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
               </div>
             </Link>
           </div>
@@ -50,7 +50,7 @@ export default function AboutPage() {
           </div>
           
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="text-red-500">ONE</span><span className="text-orange-500">claw</span>
+            <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
             <span className="block text-2xl md:text-3xl mt-2 text-slate-600 dark:text-slate-400">AI视频工具箱</span>
           </h1>
           
@@ -279,9 +279,9 @@ export default function AboutPage() {
             <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
               <Video className="h-4 w-4 text-white" />
             </div>
-            <span className="font-medium text-gray-900 dark:text-white"><span className="text-red-500">ONE</span><span className="text-orange-500">claw</span></span>
+            <span className="font-medium text-gray-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
           </div>
-          <p>© 2024 ONEclaw. 用心服务每一位创作者</p>
+          <p>© 2024 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 用心服务每一位创作者</p>
         </div>
       </footer>
     </div>

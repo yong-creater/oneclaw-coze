@@ -1145,7 +1145,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-                  <span className="text-red-500">ONE</span><span className="text-orange-500">claw</span>
+                  <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">精选优质AI视频创作工具</p>
               </div>
@@ -1320,9 +1320,9 @@ export default function Home() {
               <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
                 <Video className="h-4 w-4 text-white" />
               </div>
-              <span className="font-medium text-slate-900 dark:text-white"><span className="text-red-500">ONE</span><span className="text-orange-500">claw</span></span>
+              <span className="font-medium text-slate-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
             </div>
-            <p>© 2024 ONEclaw. 精选{aiTools.length}款优质AI视频创作工具</p>
+            <p>© 2024 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 精选{aiTools.length}款优质AI视频创作工具</p>
             <div className="flex items-center gap-4">
               <Link href="/about" className="hover:text-blue-600 transition-colors">
                 关于我们
