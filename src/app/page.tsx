@@ -12,9 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp, Copy, Check, X, Heart, Target, BookOpen, Rocket } from 'lucide-react';
+import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp, Copy, Check, X, Heart, Target, BookOpen, Rocket, Lightbulb, Code, MessageSquare, BarChart, PenTool, Headphones, GraduationCap, Megaphone } from 'lucide-react';
 import { prompts, promptCategories, PromptItem } from '@/data/prompts';
 import { aiTools, ToolItem } from '@/data/tools';
+import { aiSkills, getSkillCategories, SkillItem } from '@/data/skills';
 
 // 使用导入的工具数据
 
@@ -145,6 +146,240 @@ const ToolCard = memo(function ToolCard({
         </div>
       </CardContent>
     </Card>
+  );
+});
+
+// 技能卡片组件
+const SkillCard = memo(function SkillCard({ 
+  skill, 
+  onClick 
+}: { 
+  skill: SkillItem; 
+  onClick: () => void;
+}) {
+  // 获取难度颜色
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case '入门': return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+      case '进阶': return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+      case '高级': return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400';
+      default: return 'bg-slate-50 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+    }
+  };
+
+  return (
+    <Card 
+      className="hover:shadow-lg hover:border-red-200 dark:hover:border-red-800 transition-all bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
+      onClick={onClick}
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+            {skill.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate">
+                {skill.name}
+              </h3>
+              {skill.featured && (
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600 px-2">
+                  热门
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-1.5 mb-2">
+              <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">
+                {skill.category}
+              </Badge>
+              <Badge className={`text-xs ${getDifficultyColor(skill.difficulty)} border-0`}>
+                {skill.difficulty}
+              </Badge>
+            </div>
+            
+            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-2">
+              {skill.description}
+            </p>
+            
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1 text-xs text-slate-400">
+                <Clock className="h-3 w-3" />
+                {skill.timeRequired}
+              </div>
+              
+              <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5 flex-shrink-0 font-medium">
+                查看详情
+                <ChevronRight className="h-3 w-3" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+});
+
+// 技能详情弹窗组件
+const SkillDetailDialog = memo(function SkillDetailDialog({ 
+  skill, 
+  onClose 
+}: { 
+  skill: SkillItem | null; 
+  onClose: () => void;
+}) {
+  if (!skill) return null;
+
+  // 获取难度颜色
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case '入门': return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+      case '进阶': return 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+      case '高级': return 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800';
+      default: return 'bg-slate-50 text-slate-700 dark:bg-slate-700 dark:text-slate-300';
+    }
+  };
+
+  return (
+    <Dialog open={!!skill} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
+        <div className="overflow-y-auto max-h-[90vh]">
+          {/* 头部区域 */}
+          <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0 shadow-md">
+                {skill.icon}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">{skill.name}</DialogTitle>
+                  {skill.featured && (
+                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500">热门</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{skill.category}</Badge>
+                  <Badge className={`${getDifficultyColor(skill.difficulty)} border`}>{skill.difficulty}</Badge>
+                  <div className="flex items-center gap-1 text-xs text-slate-500">
+                    <Clock className="h-3 w-3" />
+                    {skill.timeRequired}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* 内容区域 */}
+          <div className="px-6 py-5 space-y-5">
+            {/* 简介 */}
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Info className="h-4 w-4 text-red-500" />
+                技能简介
+              </h4>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                {skill.description}
+              </p>
+            </div>
+
+            {/* 应用场景 */}
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Target className="h-4 w-4 text-red-500" />
+                应用场景
+              </h4>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                {skill.scenario}
+              </p>
+            </div>
+
+            {/* 相关工具 */}
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-red-500" />
+                相关工具
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {skill.tools.map((tool, index) => (
+                  <Badge key={index} className="bg-gradient-to-r from-red-50 to-orange-50 text-red-700 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-300 border border-red-100 dark:border-red-800">
+                    {tool}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* 使用步骤 */}
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <ChevronRight className="h-4 w-4 text-red-500" />
+                使用步骤
+              </h4>
+              <div className="space-y-2">
+                {skill.steps.map((step, index) => (
+                  <div key={index} className="flex items-start gap-3 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-bold">
+                      {index + 1}
+                    </div>
+                    <span className="pt-0.5">{step}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 技巧提示 */}
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-red-500" />
+                技巧提示
+              </h4>
+              <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-3 space-y-1.5">
+                {skill.tips.map((tip, index) => (
+                  <div key={index} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="w-1.5 h-1.5 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex-shrink-0 mt-1.5"></div>
+                    <span>{tip}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 示例 */}
+            {skill.examples && skill.examples.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-red-500" />
+                  示例参考
+                </h4>
+                <div className="space-y-2">
+                  {skill.examples.map((example, index) => (
+                    <div key={index} className="bg-slate-50 dark:bg-slate-900 rounded-lg p-3 text-sm text-slate-600 dark:text-slate-400">
+                      {example}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 标签 */}
+            <div>
+              <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">标签</h4>
+              <div className="flex flex-wrap gap-2">
+                {skill.tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-700">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <Button onClick={onClose} className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
+                关闭
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 });
 
@@ -713,11 +948,13 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('全部');
   const [selectedTool, setSelectedTool] = useState<ToolItem | null>(null);
   const [selectedPrompt, setSelectedPrompt] = useState<PromptItem | null>(null);
-  const [activeTab, setActiveTab] = useState<'tools' | 'prompts'>('tools');
+  const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
+  const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'skills'>('tools');
   const [showAbout, setShowAbout] = useState(false);
 
   // 缓存分类数据
   const categories = useMemo(() => getCategories(), []);
+  const skillCategories = useMemo(() => getSkillCategories(), []);
 
   // 缓存过滤后的工具列表
   const filteredTools = useMemo(() => {
@@ -796,7 +1033,7 @@ export default function Home() {
                 <span className="hidden sm:inline">关于我们</span>
               </Button>
               <Badge variant="secondary" className="bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                {activeTab === 'tools' ? `${aiTools.length} 个工具` : `${prompts.length} 个提示词`}
+                {activeTab === 'tools' ? `${aiTools.length} 个工具` : activeTab === 'prompts' ? `${prompts.length} 个提示词` : `${aiSkills.length} 个技能`}
               </Badge>
             </div>
           </div>
@@ -822,6 +1059,14 @@ export default function Home() {
           >
             <Sparkles className="h-4 w-4" />
             提示词库
+          </Button>
+          <Button
+            variant={activeTab === 'skills' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('skills')}
+            className={activeTab === 'skills' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2' : 'border-slate-200 dark:border-slate-700 gap-2'}
+          >
+            <Lightbulb className="h-4 w-4" />
+            技能库
           </Button>
         </div>
 
@@ -1035,6 +1280,65 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Skills Tab Content */}
+        {activeTab === 'skills' && (
+          <>
+            {/* Search */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="搜索技能名称、描述或标签..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                />
+              </div>
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {skillCategories.map((category) => {
+                const isActive = selectedCategory === category.name;
+                return (
+                  <Button
+                    key={category.name}
+                    variant={isActive ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSelectedCategory(category.name)}
+                    className={isActive ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white' : 'border-slate-200 dark:border-slate-700'}
+                  >
+                    <span className="mr-1">{category.icon}</span>
+                    {category.name}
+                    <Badge variant="secondary" className="ml-1.5 bg-white/20 text-white border-0">
+                      {category.count}
+                    </Badge>
+                  </Button>
+                );
+              })}
+            </div>
+
+            {/* Skills Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {aiSkills
+                .filter(skill => {
+                  const matchesSearch = skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                       skill.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                       skill.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+                  const matchesCategory = selectedCategory === '全部' || skill.category === selectedCategory;
+                  return matchesSearch && matchesCategory;
+                })
+                .map((skill) => (
+                  <SkillCard 
+                    key={skill.id} 
+                    skill={skill} 
+                    onClick={() => setSelectedSkill(skill)}
+                  />
+                ))}
+            </div>
+          </>
+        )}
       </main>
 
       {/* Footer */}
@@ -1068,6 +1372,12 @@ export default function Home() {
         tool={selectedTool} 
         onClose={handleCloseDialog}
         onVisit={handleVisit}
+      />
+
+      {/* Skill Detail Dialog */}
+      <SkillDetailDialog 
+        skill={selectedSkill} 
+        onClose={() => setSelectedSkill(null)}
       />
 
       {/* About Dialog */}
