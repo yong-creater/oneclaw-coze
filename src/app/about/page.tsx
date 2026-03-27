@@ -31,8 +31,8 @@ export default function AboutPage() {
             </Link>
             <Link href="/">
               <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
-                  <Home className="h-4 w-4 text-white" />
+                <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg text-lg">
+                  🦞
                 </div>
                 <span className="font-medium text-slate-900 dark:text-white text-sm"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
               </div>
@@ -276,8 +276,8 @@ export default function AboutPage() {
       <footer className="border-t bg-white/80 backdrop-blur-sm dark:bg-slate-800/80 py-8">
         <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
-              <Video className="h-4 w-4 text-white" />
+            <div className="p-1 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg text-lg">
+              🦞
             </div>
             <span className="font-medium text-gray-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
           </div>

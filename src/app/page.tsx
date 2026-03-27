@@ -1140,8 +1140,8 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <div className="p-2.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl shadow-md">
-                <Video className="h-5 w-5 text-white" />
+              <div className="p-2 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl shadow-md text-2xl">
+                🦞
               </div>
               <div>
                 <h1 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -1317,8 +1317,8 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg">
-                <Video className="h-4 w-4 text-white" />
+              <div className="p-1 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg text-lg">
+                🦞
               </div>
               <span className="font-medium text-slate-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
             </div>
