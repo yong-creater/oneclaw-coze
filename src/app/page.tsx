@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Globe, Zap, Users } from 'lucide-react';
+import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, Star, TrendingUp } from 'lucide-react';
 
 interface ToolItem {
   id: string;
@@ -856,21 +856,28 @@ const aiTools: ToolItem[] = [
 ];
 
 const categories = [
-  { name: '全部', icon: Video, count: aiTools.length },
-  { name: '视频生成', icon: Wand2, count: aiTools.filter(t => t.category === '视频生成').length },
-  { name: '数字人', icon: Users, count: aiTools.filter(t => t.category === '数字人').length },
-  { name: '视频编辑', icon: Film, count: aiTools.filter(t => t.category === '视频编辑').length },
-  { name: 'AI字幕', icon: FileVideo, count: aiTools.filter(t => t.category === 'AI字幕').length },
-  { name: 'AI配音', icon: Mic, count: aiTools.filter(t => t.category === 'AI配音').length },
-  { name: '视频增强', icon: Sparkles, count: aiTools.filter(t => t.category === '视频增强').length },
-  { name: '3D视频', icon: Palette, count: aiTools.filter(t => t.category === '3D视频').length },
-  { name: '创意视频', icon: Music, count: aiTools.filter(t => t.category === '创意视频').length },
-  { name: '视频素材', icon: ImageIcon, count: aiTools.filter(t => t.category === '视频素材').length },
-  { name: '屏幕录制', icon: Film, count: aiTools.filter(t => t.category === '屏幕录制').length },
+  { name: '全部', icon: Video, count: aiTools.length, color: 'bg-blue-500' },
+  { name: '视频生成', icon: Wand2, count: aiTools.filter(t => t.category === '视频生成').length, color: 'bg-purple-500' },
+  { name: '数字人', icon: Users, count: aiTools.filter(t => t.category === '数字人').length, color: 'bg-pink-500' },
+  { name: '视频编辑', icon: Film, count: aiTools.filter(t => t.category === '视频编辑').length, color: 'bg-green-500' },
+  { name: 'AI字幕', icon: FileVideo, count: aiTools.filter(t => t.category === 'AI字幕').length, color: 'bg-orange-500' },
+  { name: 'AI配音', icon: Mic, count: aiTools.filter(t => t.category === 'AI配音').length, color: 'bg-red-500' },
+  { name: '视频增强', icon: Sparkles, count: aiTools.filter(t => t.category === '视频增强').length, color: 'bg-cyan-500' },
+  { name: '3D视频', icon: Palette, count: aiTools.filter(t => t.category === '3D视频').length, color: 'bg-indigo-500' },
+  { name: '创意视频', icon: Music, count: aiTools.filter(t => t.category === '创意视频').length, color: 'bg-amber-500' },
+  { name: '视频素材', icon: ImageIcon, count: aiTools.filter(t => t.category === '视频素材').length, color: 'bg-teal-500' },
+  { name: '屏幕录制', icon: Film, count: aiTools.filter(t => t.category === '屏幕录制').length, color: 'bg-slate-500' },
 ];
 
 // 热门工具
 const hotTools = aiTools.filter(t => t.featured).slice(0, 6);
+
+// 统计数据
+const stats = [
+  { label: 'AI工具', value: aiTools.length, icon: Video },
+  { label: '分类', value: categories.length - 1, icon: Film },
+  { label: '免费工具', value: aiTools.filter(t => t.pricing?.includes('免费')).length, icon: Star },
+];
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -888,29 +895,30 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-600 rounded-lg">
+              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md">
                 <Video className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h1 className="text-lg font-bold text-slate-900 dark:text-white">
                   AI视频工具集合
                 </h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">精选优质AI视频创作工具</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/about">
-                <Button variant="ghost" size="sm" className="gap-2">
+                <Button variant="ghost" size="sm" className="gap-2 text-slate-600 dark:text-slate-300">
                   <Info className="h-4 w-4" />
                   <span className="hidden sm:inline">关于我们</span>
                 </Button>
               </Link>
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
                 {aiTools.length} 个工具
               </Badge>
             </div>
@@ -920,102 +928,125 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <div 
+                key={index}
+                className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                    <Icon className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.value}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{stat.label}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Search */}
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Input
+              placeholder="搜索工具名称、描述或标签..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+            />
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            const isActive = selectedCategory === category.name;
+            return (
+              <Button
+                key={category.name}
+                variant={isActive ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category.name)}
+                className={isActive ? "bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900" : "border-slate-200 dark:border-slate-700"}
+              >
+                <Icon className="h-3.5 w-3.5 mr-1.5" />
+                {category.name}
+                <span className="ml-1.5 text-xs opacity-60">({category.count})</span>
+              </Button>
+            );
+          })}
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Content Area */}
           <div className="flex-1">
-            {/* Search */}
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="搜索工具名称、描述或标签..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                />
-              </div>
-
-              {/* Category Filter */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {categories.map((category) => {
-                  const Icon = category.icon;
-                  const isActive = selectedCategory === category.name;
-                  return (
-                    <Button
-                      key={category.name}
-                      variant={isActive ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedCategory(category.name)}
-                      className={isActive ? "bg-blue-600 hover:bg-blue-700" : ""}
-                    >
-                      <Icon className="h-3.5 w-3.5 mr-1.5" />
-                      {category.name}
-                      <span className="ml-1.5 text-xs opacity-70">({category.count})</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Tools Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {filteredTools.map((tool) => (
                 <Card 
                   key={tool.id} 
-                  className="hover:shadow-md transition-shadow bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 cursor-pointer"
+                  className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
                   onClick={() => setSelectedTool(tool)}
                 >
                   <CardContent className="p-4">
                     <div className="flex gap-3">
                       {/* 图标 */}
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center text-2xl flex-shrink-0">
+                      <div className="w-11 h-11 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
                         {tool.icon}
                       </div>
                       
                       {/* 内容 */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                          <h3 className="font-semibold text-slate-900 dark:text-white truncate text-sm">
                             {tool.name}
                           </h3>
                           {tool.featured && (
-                            <Badge variant="default" className="bg-blue-600 text-xs flex-shrink-0">
+                            <Badge className="bg-blue-500 text-xs flex-shrink-0 hover:bg-blue-600">
                               推荐
                             </Badge>
                           )}
                         </div>
                         
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="text-xs">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">
                             {tool.category}
                           </Badge>
                           {tool.pricing && tool.pricing.includes('免费') && (
-                            <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                            <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
                               免费
                             </Badge>
                           )}
                         </div>
                         
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-2">
                           {tool.description}
                         </p>
                         
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex flex-wrap gap-1">
                             {tool.tags.slice(0, 2).map((tag, tagIndex) => (
-                              <Badge key={tagIndex} variant="secondary" className="text-xs">
+                              <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
                                 {tag}
                               </Badge>
                             ))}
                             {tool.tags.length > 2 && (
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
                                 +{tool.tags.length - 2}
                               </Badge>
                             )}
                           </div>
                           
-                          <span className="text-xs text-blue-600 flex items-center gap-1 flex-shrink-0">
-                            查看详情
+                          <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5 flex-shrink-0 font-medium">
+                            详情
                             <ChevronRight className="h-3 w-3" />
                           </span>
                         </div>
@@ -1029,8 +1060,8 @@ export default function Home() {
             {/* No Results */}
             {filteredTools.length === 0 && (
               <div className="text-center py-12">
-                <Video className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">没有找到匹配的工具</p>
+                <Video className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+                <p className="text-slate-500">没有找到匹配的工具</p>
                 <Button 
                   variant="outline" 
                   className="mt-3"
@@ -1048,24 +1079,27 @@ export default function Home() {
           {/* Sidebar */}
           <div className="hidden lg:block w-72 space-y-4">
             {/* 热门推荐 */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
               <CardContent className="pt-4 pb-3">
-                <h3 className="font-semibold text-sm mb-3">热门推荐</h3>
-                <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className="h-4 w-4 text-blue-500" />
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-white">热门推荐</h3>
+                </div>
+                <div className="space-y-1">
                   {hotTools.map((tool) => (
                     <div 
                       key={tool.id}
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
                       onClick={() => setSelectedTool(tool)}
                     >
-                      <div className="w-8 h-8 bg-gray-100 dark:bg-gray-600 rounded flex items-center justify-center text-sm flex-shrink-0">
+                      <div className="w-8 h-8 bg-slate-100 dark:bg-slate-600 rounded flex items-center justify-center text-sm flex-shrink-0">
                         {tool.icon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{tool.name}</p>
-                        <p className="text-xs text-gray-500">{tool.category}</p>
+                        <p className="font-medium text-sm truncate text-slate-900 dark:text-white">{tool.name}</p>
+                        <p className="text-xs text-slate-500">{tool.category}</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                      <ChevronRight className="h-4 w-4 text-slate-400" />
                     </div>
                   ))}
                 </div>
@@ -1073,32 +1107,32 @@ export default function Home() {
             </Card>
 
             {/* 最新更新 */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
               <CardContent className="pt-4 pb-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <Clock className="h-4 w-4 text-gray-500" />
-                  <h3 className="font-semibold text-sm">最新动态</h3>
+                  <Clock className="h-4 w-4 text-emerald-500" />
+                  <h3 className="font-semibold text-sm text-slate-900 dark:text-white">最新动态</h3>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
                   <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p>新增 Kling 可灵、Vidu 等国产工具</p>
-                      <p className="text-xs text-gray-500">2024-03-20</p>
+                      <p className="text-xs text-slate-400">2024-03-20</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p>新增 AI字幕、AI配音分类</p>
-                      <p className="text-xs text-gray-500">2024-03-15</p>
+                      <p className="text-xs text-slate-400">2024-03-15</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p>工具数量扩充至66个</p>
-                      <p className="text-xs text-gray-500">2024-03-10</p>
+                      <p className="text-xs text-slate-400">2024-03-10</p>
                     </div>
                   </div>
                 </div>
@@ -1106,15 +1140,15 @@ export default function Home() {
             </Card>
 
             {/* 联系我们 */}
-            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Card className="bg-gradient-to-br from-slate-800 to-slate-900 dark:from-slate-700 dark:to-slate-800 border-0 text-white">
               <CardContent className="pt-4 pb-3">
                 <h3 className="font-semibold text-sm mb-2">联系我们</h3>
-                <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <div className="text-sm text-slate-300 space-y-1">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    <span>business@aivideotools.com</span>
+                    <Mail className="h-4 w-4" />
+                    <span className="text-xs">business@aivideotools.com</span>
                   </div>
-                  <p className="text-xs text-gray-500">欢迎商务合作与工具推荐</p>
+                  <p className="text-xs text-slate-400">欢迎商务合作与工具推荐</p>
                 </div>
               </CardContent>
             </Card>
@@ -1123,21 +1157,21 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-blue-600 rounded">
+              <div className="p-1.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg">
                 <Video className="h-4 w-4 text-white" />
               </div>
-              <span className="font-medium text-gray-900 dark:text-white">AI视频工具集合</span>
+              <span className="font-medium text-slate-900 dark:text-white">AI视频工具集合</span>
             </div>
             <p>© 2024 AI视频工具集合. 精选{aiTools.length}款优质AI视频创作工具</p>
             <div className="flex items-center gap-4">
               <Link href="/about" className="hover:text-blue-600 transition-colors">
                 关于我们
               </Link>
-              <span className="text-gray-300">|</span>
+              <span className="text-slate-300 dark:text-slate-600">|</span>
               <a href="mailto:business@aivideotools.com" className="hover:text-blue-600 transition-colors">
                 商务合作
               </a>
@@ -1148,31 +1182,31 @@ export default function Home() {
 
       {/* Tool Detail Dialog */}
       <Dialog open={!!selectedTool} onOpenChange={() => setSelectedTool(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800">
           {selectedTool && (
             <>
               <DialogHeader>
                 <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
+                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center text-3xl flex-shrink-0">
                     {selectedTool.icon}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <DialogTitle className="text-xl">{selectedTool.name}</DialogTitle>
+                      <DialogTitle className="text-xl text-slate-900 dark:text-white">{selectedTool.name}</DialogTitle>
                       {selectedTool.featured && (
-                        <Badge className="bg-blue-600">推荐</Badge>
+                        <Badge className="bg-blue-500">推荐</Badge>
                       )}
                       {selectedTool.pricing && selectedTool.pricing.includes('免费') && (
-                        <Badge className="bg-green-600">免费</Badge>
+                        <Badge className="bg-emerald-500">免费</Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <Badge variant="outline">{selectedTool.category}</Badge>
+                      <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{selectedTool.category}</Badge>
                       {selectedTool.platform && (
-                        <Badge variant="secondary">{selectedTool.platform}</Badge>
+                        <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{selectedTool.platform}</Badge>
                       )}
                       {selectedTool.pricing && (
-                        <Badge variant="secondary">{selectedTool.pricing}</Badge>
+                        <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{selectedTool.pricing}</Badge>
                       )}
                     </div>
                   </div>
@@ -1182,8 +1216,8 @@ export default function Home() {
               <div className="space-y-4 mt-4">
                 {/* 描述 */}
                 <div>
-                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">简介</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">简介</h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                     {selectedTool.description}
                   </p>
                 </div>
@@ -1191,11 +1225,11 @@ export default function Home() {
                 {/* 功能特点 */}
                 {selectedTool.features && selectedTool.features.length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">主要功能</h4>
+                    <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">主要功能</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {selectedTool.features.map((feature, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <div className="w-1.5 h-1.5 bg-blue-600 rounded-full flex-shrink-0"></div>
+                        <div key={index} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full flex-shrink-0"></div>
                           {feature}
                         </div>
                       ))}
@@ -1205,10 +1239,10 @@ export default function Home() {
 
                 {/* 标签 */}
                 <div>
-                  <h4 className="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-2">标签</h4>
+                  <h4 className="font-semibold text-sm text-slate-700 dark:text-slate-300 mb-2">标签</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedTool.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary">
+                      <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-700">
                         {tag}
                       </Badge>
                     ))}
@@ -1218,7 +1252,7 @@ export default function Home() {
                 {/* 访问按钮 */}
                 <div className="pt-4 flex gap-3">
                   <Button 
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 gap-2"
+                    className="flex-1 bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-white dark:text-slate-900 gap-2"
                     onClick={() => window.open(selectedTool.url, '_blank')}
                   >
                     访问官网
@@ -1226,6 +1260,7 @@ export default function Home() {
                   </Button>
                   <Button 
                     variant="outline"
+                    className="border-slate-200 dark:border-slate-700"
                     onClick={() => setSelectedTool(null)}
                   >
                     关闭
