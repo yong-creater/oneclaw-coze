@@ -1254,6 +1254,9 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <Newspaper className="h-4 w-4 text-red-500" />
                     <h3 className="font-semibold text-sm text-slate-900 dark:text-white">AI 热门新闻</h3>
+                    <span className="text-xs text-slate-400">
+                      {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}
+                    </span>
                   </div>
                   <button 
                     onClick={fetchAINews}
@@ -1285,7 +1288,17 @@ export default function Home() {
                             <p className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-red-500 dark:group-hover:text-red-400 line-clamp-2 transition-colors">
                               {news.title}
                             </p>
-                            <p className="text-xs text-slate-400 mt-0.5">{news.source}</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-xs text-slate-400">{news.source}</span>
+                              {news.publishTime && (
+                                <>
+                                  <span className="text-xs text-slate-300">·</span>
+                                  <span className="text-xs text-slate-400">
+                                    {new Date(news.publishTime).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                                  </span>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </a>
