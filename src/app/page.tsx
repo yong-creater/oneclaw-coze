@@ -1141,12 +1141,10 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity group">
               <div className="relative">
-                <div className="p-2.5 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl shadow-lg group-hover:scale-105 transition-transform">
-                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                    <span className="text-2xl lobster-animate">🦞</span>
-                  </div>
+                <div className="w-11 h-11 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-4xl lobster-animate">🦞</span>
                 </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-pulse"></div>
+                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse"></div>
               </div>
               <div>
                 <h1 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -1346,11 +1344,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <div className="p-1 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg shadow">
-                <div className="w-5 h-5 bg-white rounded flex items-center justify-center">
-                  <span className="text-sm">🦞</span>
-                </div>
-              </div>
+              <span className="text-2xl">🦞</span>
               <span className="font-medium text-slate-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
             </div>
             <p>© 2024 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 精选{aiTools.length}款优质AI视频创作工具</p>
