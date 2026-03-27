@@ -882,6 +882,31 @@ const ToolCard = memo(function ToolCard({
   tool: ToolItem; 
   onClick: () => void;
 }) {
+  // 根据分类获取渐变色
+  const getGradientColors = (category: string) => {
+    const gradients: Record<string, string> = {
+      '视频生成': 'from-violet-500 to-purple-600',
+      '数字人': 'from-pink-500 to-rose-600',
+      '视频编辑': 'from-blue-500 to-cyan-600',
+      'AI字幕': 'from-emerald-500 to-teal-600',
+      'AI配音': 'from-orange-500 to-amber-600',
+      '视频增强': 'from-indigo-500 to-blue-600',
+      '3D/VR': 'from-fuchsia-500 to-pink-600',
+      '创意工具': 'from-red-500 to-orange-500',
+      '素材资源': 'from-teal-500 to-green-600',
+      '录制工具': 'from-slate-500 to-gray-600',
+      '其他': 'from-gray-400 to-slate-500',
+    };
+    return gradients[category] || gradients['其他'];
+  };
+
+  // 获取工具名称首字母
+  const getInitial = (name: string) => {
+    // 移除常见前缀
+    const cleanName = name.replace(/^(AI|智能|腾讯|快手|字节)/, '');
+    return cleanName.charAt(0).toUpperCase();
+  };
+
   return (
     <Card 
       className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
@@ -889,18 +914,9 @@ const ToolCard = memo(function ToolCard({
     >
       <CardContent className="p-4">
         <div className="flex gap-4">
-          {/* 图标 - 使用真实 favicon */}
-          <div className="w-14 h-14 bg-white dark:bg-slate-700 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform overflow-hidden border border-slate-100 dark:border-slate-600">
-            <img 
-              src={`https://www.google.com/s2/favicons?domain=${tool.logo}&sz=64`}
-              alt={tool.name}
-              className="w-10 h-10 object-contain"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                target.parentElement!.innerHTML = `<span class="text-2xl">🎬</span>`;
-              }}
-            />
+          {/* 图标 - 首字母渐变 */}
+          <div className={`w-14 h-14 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform`}>
+            <span className="text-white text-xl font-bold">{getInitial(tool.name)}</span>
           </div>
           
           <div className="flex-1 min-w-0">
@@ -991,24 +1007,39 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
   onVisit: (url: string) => void;
 }) {
   if (!tool) return null;
+
+  // 根据分类获取渐变色
+  const getGradientColors = (category: string) => {
+    const gradients: Record<string, string> = {
+      '视频生成': 'from-violet-500 to-purple-600',
+      '数字人': 'from-pink-500 to-rose-600',
+      '视频编辑': 'from-blue-500 to-cyan-600',
+      'AI字幕': 'from-emerald-500 to-teal-600',
+      'AI配音': 'from-orange-500 to-amber-600',
+      '视频增强': 'from-indigo-500 to-blue-600',
+      '3D/VR': 'from-fuchsia-500 to-pink-600',
+      '创意工具': 'from-red-500 to-orange-500',
+      '素材资源': 'from-teal-500 to-green-600',
+      '录制工具': 'from-slate-500 to-gray-600',
+      '其他': 'from-gray-400 to-slate-500',
+    };
+    return gradients[category] || gradients['其他'];
+  };
+
+  // 获取工具名称首字母
+  const getInitial = (name: string) => {
+    const cleanName = name.replace(/^(AI|智能|腾讯|快手|字节)/, '');
+    return cleanName.charAt(0).toUpperCase();
+  };
   
   return (
     <Dialog open={!!tool} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800">
         <DialogHeader>
           <div className="flex items-start gap-5">
-            {/* 弹窗图标 - 使用真实 favicon */}
-            <div className="w-20 h-20 bg-white dark:bg-slate-700 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden border border-slate-100 dark:border-slate-600">
-              <img 
-                src={`https://www.google.com/s2/favicons?domain=${tool.logo}&sz=128`}
-                alt={tool.name}
-                className="w-14 h-14 object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.parentElement!.innerHTML = `<span class="text-4xl">🎬</span>`;
-                }}
-              />
+            {/* 弹窗图标 - 首字母渐变 */}
+            <div className={`w-20 h-20 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`}>
+              <span className="text-white text-3xl font-bold">{getInitial(tool.name)}</span>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap mb-2">
@@ -1096,22 +1127,36 @@ const HotToolItem = memo(function HotToolItem({
   tool: ToolItem; 
   onClick: () => void;
 }) {
+  // 根据分类获取渐变色
+  const getGradientColors = (category: string) => {
+    const gradients: Record<string, string> = {
+      '视频生成': 'from-violet-500 to-purple-600',
+      '数字人': 'from-pink-500 to-rose-600',
+      '视频编辑': 'from-blue-500 to-cyan-600',
+      'AI字幕': 'from-emerald-500 to-teal-600',
+      'AI配音': 'from-orange-500 to-amber-600',
+      '视频增强': 'from-indigo-500 to-blue-600',
+      '3D/VR': 'from-fuchsia-500 to-pink-600',
+      '创意工具': 'from-red-500 to-orange-500',
+      '素材资源': 'from-teal-500 to-green-600',
+      '录制工具': 'from-slate-500 to-gray-600',
+      '其他': 'from-gray-400 to-slate-500',
+    };
+    return gradients[category] || gradients['其他'];
+  };
+
+  const getInitial = (name: string) => {
+    const cleanName = name.replace(/^(AI|智能|腾讯|快手|字节)/, '');
+    return cleanName.charAt(0).toUpperCase();
+  };
+
   return (
     <div 
       className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
       onClick={onClick}
     >
-      <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-slate-100 dark:border-slate-600">
-        <img 
-          src={`https://www.google.com/s2/favicons?domain=${tool.logo}&sz=48`}
-          alt={tool.name}
-          className="w-7 h-7 object-contain"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            target.parentElement!.innerHTML = `<span class="text-lg">🎬</span>`;
-          }}
-        />
+      <div className={`w-10 h-10 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-lg flex items-center justify-center flex-shrink-0`}>
+        <span className="text-white text-sm font-bold">{getInitial(tool.name)}</span>
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-sm truncate text-slate-900 dark:text-white">{tool.name}</p>
