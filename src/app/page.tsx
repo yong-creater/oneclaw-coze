@@ -1396,18 +1396,64 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            {/* 广告位 */}
+            {/* 合成意向提交 */}
             <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-amber-100 dark:border-slate-600">
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+              <div className="text-center mb-3">
+                <div className="w-10 h-10 mx-auto mb-2 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-white" />
                 </div>
-                <p className="font-medium text-sm text-slate-800 dark:text-white mb-1">高效视频工作流</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">一站式解决视频创作需求</p>
-                <Button size="sm" className="w-full bg-amber-500 hover:bg-amber-600 text-white">
-                  立即体验
-                </Button>
+                <p className="font-medium text-sm text-slate-800 dark:text-white">AI 视频合成意向</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">描述您的需求，我们会尽快联系您</p>
               </div>
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.target as HTMLFormElement;
+                const intent = (form.elements.namedItem('intent') as HTMLTextAreaElement).value;
+                const email = (form.elements.namedItem('email') as HTMLInputElement)?.value;
+                
+                if (!intent.trim()) {
+                  alert('请输入您的合成意向');
+                  return;
+                }
+                
+                try {
+                  const response = await fetch('/api/submit-intent', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      intent,
+                      email,
+                      timestamp: new Date().toLocaleString('zh-CN'),
+                    }),
+                  });
+                  
+                  const data = await response.json();
+                  if (data.success) {
+                    alert('提交成功！我们会尽快与您联系。');
+                    form.reset();
+                  } else {
+                    alert(data.message || '提交失败，请稍后重试');
+                  }
+                } catch {
+                  alert('提交失败，请稍后重试');
+                }
+              }}>
+                <textarea
+                  name="intent"
+                  placeholder="描述您的视频合成需求，如：产品宣传视频、教育课程视频、短视频内容..."
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent mb-2"
+                  rows={3}
+                />
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="您的邮箱（选填）"
+                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 placeholder-slate-400 mb-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+                <Button type="submit" size="sm" className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
+                  立即提交
+                </Button>
+              </form>
             </div>
             </div>{/* sticky容器结束 */}
           </div>
