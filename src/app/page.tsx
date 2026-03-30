@@ -168,6 +168,29 @@ const SkillCard = memo(function SkillCard({
   skill: SkillItem; 
   onClick: () => void;
 }) {
+  // 根据分类获取渐变色
+  const getGradientColors = (category: string) => {
+    const gradients: Record<string, string> = {
+      '搜索工具': 'from-blue-500 to-cyan-600',
+      '文件处理': 'from-emerald-500 to-teal-600',
+      '数据分析': 'from-violet-500 to-purple-600',
+      '图像处理': 'from-pink-500 to-rose-600',
+      '代码开发': 'from-indigo-500 to-blue-600',
+      '写作助手': 'from-amber-500 to-yellow-600',
+      '效率工具': 'from-orange-500 to-amber-600',
+      '其他': 'from-slate-500 to-gray-600',
+    };
+    return gradients[category] || gradients['其他'];
+  };
+
+  // 获取技能名称首字母
+  const getInitial = (name: string) => {
+    return name.charAt(0).toUpperCase();
+  };
+
+  // 判断是否使用真实logo
+  const useRealLogo = skill.logo && skill.logo.startsWith('http');
+
   return (
     <Card 
       className="hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-800 transition-all bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
@@ -175,8 +198,20 @@ const SkillCard = memo(function SkillCard({
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-sm">
-            {skill.icon.length <= 2 ? skill.icon : skill.name.charAt(0)}
+          <div className={`w-12 h-12 ${useRealLogo ? 'bg-white border border-slate-100 dark:border-slate-700' : `bg-gradient-to-br ${getGradientColors(skill.category)}`} rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-sm overflow-hidden`}>
+            {useRealLogo ? (
+              <img 
+                src={skill.logo} 
+                alt={skill.name}
+                className="w-8 h-8 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+              />
+            ) : (
+              skill.icon.length <= 2 ? skill.icon : getInitial(skill.name)
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -244,6 +279,29 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
     }
   };
 
+  // 根据分类获取渐变色
+  const getGradientColors = (category: string) => {
+    const gradients: Record<string, string> = {
+      '搜索工具': 'from-blue-500 to-cyan-600',
+      '文件处理': 'from-emerald-500 to-teal-600',
+      '数据分析': 'from-violet-500 to-purple-600',
+      '图像处理': 'from-pink-500 to-rose-600',
+      '代码开发': 'from-indigo-500 to-blue-600',
+      '写作助手': 'from-amber-500 to-yellow-600',
+      '效率工具': 'from-orange-500 to-amber-600',
+      '其他': 'from-slate-500 to-gray-600',
+    };
+    return gradients[category] || gradients['其他'];
+  };
+
+  // 获取技能名称首字母
+  const getInitial = (name: string) => {
+    return name.charAt(0).toUpperCase();
+  };
+
+  // 判断是否使用真实logo
+  const useRealLogo = skill?.logo && skill.logo.startsWith('http');
+
   if (!skill) return null;
 
   return (
@@ -253,8 +311,20 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
           {/* 头部区域 */}
           <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-5 pt-5 pb-4 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-sm">
-                {skill.icon.length <= 2 ? skill.icon : skill.name.charAt(0)}
+              <div className={`w-14 h-14 ${useRealLogo ? 'bg-white border border-slate-100 dark:border-slate-700' : `bg-gradient-to-br ${getGradientColors(skill.category)}`} rounded-xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-sm overflow-hidden`}>
+                {useRealLogo ? (
+                  <img 
+                    src={skill.logo} 
+                    alt={skill.name}
+                    className="w-10 h-10 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  skill.icon.length <= 2 ? skill.icon : getInitial(skill.name)
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">

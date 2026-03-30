@@ -6,6 +6,7 @@ export interface SkillItem {
   identifier: string; // 技能标识符，如 find-skills
   description: string;
   icon: string; // emoji 或首字母
+  logo?: string; // 真实 logo URL（可选）
   version: string;
   author: string;
   source: string; // 来源
