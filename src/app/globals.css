@@ -201,65 +201,60 @@ html {
   animation: fadeInUp 0.3s ease-out forwards;
 }
 
-/* 龙虾动画 - 弯曲活捉版 */
+/* 龙虾动画 - 可爱活泼版 */
 
-/* 默认状态：轻微呼吸 */
-@keyframes lobster-idle {
+/* 整体轻微摇摆 */
+.lobster-main {
+  animation: lobster-breathe 3s ease-in-out infinite;
+}
+
+@keyframes lobster-breathe {
   0%, 100% {
     transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-1px) rotate(0.5deg);
-  }
-}
-
-.lobster-body {
-  animation: lobster-idle 4s ease-in-out infinite;
-  transform-origin: center center;
-}
-
-/* Hover状态：警觉 */
-.lobster-hovering {
-  animation: lobster-alert 0.5s ease-in-out infinite;
-}
-
-@keyframes lobster-alert {
-  0%, 100% {
-    transform: translateY(0) rotate(-1deg);
   }
   50% {
     transform: translateY(-2px) rotate(1deg);
   }
 }
 
-/* 被抓住状态：剧烈挣扎 */
-.lobster-caught {
-  animation: lobster-struggle 0.12s ease-in-out infinite;
+/* Hover 活跃 */
+.lobster-hovering .lobster-main {
+  animation: lobster-excited 0.4s ease-in-out infinite;
 }
 
-@keyframes lobster-struggle {
+@keyframes lobster-excited {
   0%, 100% {
-    transform: translateY(0) rotate(-4deg) scale(1.02);
-  }
-  25% {
-    transform: translateY(-2px) rotate(2deg) scale(0.98);
+    transform: translateY(0) rotate(-2deg);
   }
   50% {
-    transform: translateY(0) rotate(4deg) scale(1.03);
-  }
-  75% {
-    transform: translateY(-1px) rotate(-2deg) scale(1);
+    transform: translateY(-3px) rotate(2deg);
   }
 }
 
-.lobster-caught .lobster-body {
-  animation: none;
+/* 被抓住挣扎 */
+.lobster-caught .lobster-main {
+  animation: lobster-panic 0.1s ease-in-out infinite;
+}
+
+@keyframes lobster-panic {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg) scale(1.02);
+  }
+  25% {
+    transform: translateY(-4px) rotate(3deg) scale(0.98);
+  }
+  50% {
+    transform: translateY(0) rotate(5deg) scale(1.03);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-3deg) scale(1);
+  }
 }
 
 /* 眨眼 */
 @keyframes blink {
-  0%, 45%, 55%, 100% { ry: 0; }
-  50% { ry: 3; }
+  0%, 42%, 58%, 100% { ry: 0; }
+  50% { ry: 5.5; }
 }
 
 .eyelid {
@@ -267,122 +262,131 @@ html {
 }
 
 .lobster-caught .eyelid {
-  animation: blink 0.2s ease-in-out infinite;
+  animation: blink 0.15s ease-in-out infinite;
+}
+
+/* 眼球轻微移动 */
+@keyframes eye-move {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(0.5px); }
+}
+
+.eye-ball {
+  animation: eye-move 5s ease-in-out infinite;
 }
 
 /* 钳子开合 */
 @keyframes claw-snap {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-5deg); }
+  50% { transform: rotate(8deg); }
 }
 
-.claw-left {
-  animation: claw-snap 2.5s ease-in-out infinite;
-  transform-origin: 78px 26px;
+.claw-upper {
+  animation: claw-snap 2s ease-in-out infinite;
+  transform-origin: 75px 38px;
 }
 
-.claw-right {
-  animation: claw-snap 2.5s ease-in-out infinite 1.25s;
-  transform-origin: 78px 36px;
+.claw-lower {
+  animation: claw-snap 2s ease-in-out infinite 1s;
+  transform-origin: 75px 58px;
 }
 
-.lobster-hovering .claw-left,
-.lobster-hovering .claw-right {
-  animation-duration: 0.7s;
+.lobster-hovering .claw-upper,
+.lobster-hovering .claw-lower {
+  animation-duration: 0.5s;
 }
 
-.lobster-caught .claw-left,
-.lobster-caught .claw-right {
-  animation: claw-panic 0.15s ease-in-out infinite;
+.lobster-caught .claw-upper,
+.lobster-caught .claw-lower {
+  animation: claw-crazy 0.1s ease-in-out infinite;
 }
 
-@keyframes claw-panic {
+@keyframes claw-crazy {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-12deg); }
+  50% { transform: rotate(15deg); }
 }
 
-/* 触角 */
+/* 触角摆动 */
 @keyframes antenna-wave {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(4deg); }
+  50% { transform: rotate(5deg); }
 }
 
 .antenna-left {
-  animation: antenna-wave 3s ease-in-out infinite;
-  transform-origin: 88px 22px;
+  animation: antenna-wave 2.5s ease-in-out infinite;
+  transform-origin: 88px 42px;
 }
 
 .antenna-right {
-  animation: antenna-wave 3s ease-in-out infinite 1.5s;
-  transform-origin: 88px 34px;
+  animation: antenna-wave 2.5s ease-in-out infinite 1.25s;
+  transform-origin: 88px 54px;
 }
 
 .lobster-caught .antenna-left,
 .lobster-caught .antenna-right {
-  animation: antenna-panic 0.12s ease-in-out infinite;
+  animation: antenna-crazy 0.12s ease-in-out infinite;
 }
 
-@keyframes antenna-panic {
-  0%, 100% { transform: rotate(-8deg); }
-  50% { transform: rotate(8deg); }
+@keyframes antenna-crazy {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
 }
 
-/* 步足 */
+/* 步足摆动 */
 @keyframes leg-wiggle {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(3deg); }
 }
 
 .lobster-legs {
-  animation: leg-wiggle 2.5s ease-in-out infinite;
-  transform-origin: 65px 35px;
+  animation: leg-wiggle 2s ease-in-out infinite;
+  transform-origin: 60px 50px;
 }
 
 .lobster-caught .lobster-legs {
-  animation: leg-panic 0.15s ease-in-out infinite;
+  animation: leg-crazy 0.12s ease-in-out infinite;
 }
 
-@keyframes leg-panic {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(4deg); }
+@keyframes leg-crazy {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
 }
 
-/* 尾部 */
+/* 尾巴摆动 */
 @keyframes tail-wag {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(2deg); }
+  50% { transform: rotate(3deg); }
 }
 
 .lobster-tail {
   animation: tail-wag 3s ease-in-out infinite;
-  transform-origin: 20px 38px;
+  transform-origin: 20px 52px;
 }
 
 .lobster-caught .lobster-tail {
-  animation: tail-panic 0.15s ease-in-out infinite;
+  animation: tail-crazy 0.15s ease-in-out infinite;
 }
 
-@keyframes tail-panic {
-  0%, 100% { transform: rotate(-6deg); }
-  50% { transform: rotate(6deg); }
+@keyframes tail-crazy {
+  0%, 100% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
 }
 
-/* 头部 */
+/* 头部轻微晃动 */
 @keyframes head-bob {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-0.5px); }
+  50% { transform: translateY(-1px); }
 }
 
 .lobster-head {
   animation: head-bob 3s ease-in-out infinite;
-  transform-origin: 78px 28px;
 }
 
 .lobster-caught .lobster-head {
-  animation: head-panic 0.15s ease-in-out infinite;
+  animation: head-shake 0.1s ease-in-out infinite;
 }
 
-@keyframes head-panic {
+@keyframes head-shake {
   0%, 100% { transform: translateY(0) rotate(-3deg); }
   50% { transform: translateY(-2px) rotate(3deg); }
 }
