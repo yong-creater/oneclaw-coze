@@ -799,26 +799,139 @@ const PromptCard = memo(function PromptCard({
   prompt: PromptItem; 
   onClick: () => void;
 }) {
+  // 根据分类获取图标和渐变色
+  const getCategoryStyle = (category: string) => {
+    const styles: Record<string, { icon: string; gradient: string; bgGradient: string; borderHover: string }> = {
+      '视频生成': { 
+        icon: '🎬', 
+        gradient: 'from-violet-500 to-purple-600',
+        bgGradient: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20',
+        borderHover: 'hover:border-violet-300 dark:hover:border-violet-700'
+      },
+      '数字人': { 
+        icon: '👤', 
+        gradient: 'from-pink-500 to-rose-600',
+        bgGradient: 'from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20',
+        borderHover: 'hover:border-pink-300 dark:hover:border-pink-700'
+      },
+      '视频编辑': { 
+        icon: '✂️', 
+        gradient: 'from-blue-500 to-cyan-600',
+        bgGradient: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20',
+        borderHover: 'hover:border-blue-300 dark:hover:border-blue-700'
+      },
+      'AI配音': { 
+        icon: '🎙️', 
+        gradient: 'from-orange-500 to-amber-600',
+        bgGradient: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20',
+        borderHover: 'hover:border-orange-300 dark:hover:border-orange-700'
+      },
+      'AI字幕': { 
+        icon: '📝', 
+        gradient: 'from-emerald-500 to-teal-600',
+        bgGradient: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20',
+        borderHover: 'hover:border-emerald-300 dark:hover:border-emerald-700'
+      },
+      '视频增强': { 
+        icon: '✨', 
+        gradient: 'from-amber-500 to-yellow-600',
+        bgGradient: 'from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20',
+        borderHover: 'hover:border-amber-300 dark:hover:border-amber-700'
+      },
+      '创意视频': { 
+        icon: '🎨', 
+        gradient: 'from-fuchsia-500 to-pink-600',
+        bgGradient: 'from-fuchsia-50 to-pink-50 dark:from-fuchsia-900/20 dark:to-pink-900/20',
+        borderHover: 'hover:border-fuchsia-300 dark:hover:border-fuchsia-700'
+      },
+      '效率提升': { 
+        icon: '⚡', 
+        gradient: 'from-cyan-500 to-blue-600',
+        bgGradient: 'from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20',
+        borderHover: 'hover:border-cyan-300 dark:hover:border-cyan-700'
+      },
+      '个人成长': { 
+        icon: '🌱', 
+        gradient: 'from-green-500 to-emerald-600',
+        bgGradient: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
+        borderHover: 'hover:border-green-300 dark:hover:border-green-700'
+      },
+    };
+    return styles[category] || { 
+      icon: '📄', 
+      gradient: 'from-slate-500 to-gray-600',
+      bgGradient: 'from-slate-50 to-gray-50 dark:from-slate-900/20 dark:to-gray-900/20',
+      borderHover: 'hover:border-slate-300 dark:hover:border-slate-700'
+    };
+  };
+
+  const style = getCategoryStyle(prompt.category);
+  const categoryIcon = promptCategories.find(c => c.name === prompt.category)?.icon || style.icon;
+
   return (
     <Card 
-      className="hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-all bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
+      className={`group relative overflow-hidden bg-gradient-to-br ${style.bgGradient} border-slate-200/50 dark:border-slate-700/50 ${style.borderHover} hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer hover:-translate-y-1`}
       onClick={onClick}
     >
-      <CardContent className="p-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg flex items-center justify-center text-lg flex-shrink-0">
-            {promptCategories.find(c => c.name === prompt.category)?.icon || '📝'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">{prompt.title}</h3>
-              {prompt.featured && (
-                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-[10px] px-1.5">推荐</Badge>
-              )}
+      {/* 顶部装饰条 */}
+      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${style.gradient}`}></div>
+      
+      {/* 悬停光效 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/30 group-hover:to-white/10 transition-all duration-500 pointer-events-none"></div>
+      
+      <CardContent className="p-4 relative">
+        {/* 头部：分类图标 + 标签 */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            {/* 分类图标 */}
+            <div className={`w-10 h-10 bg-gradient-to-br ${style.gradient} rounded-xl flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+              {categoryIcon}
             </div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{prompt.description}</p>
+            {/* 提示词标签 */}
+            <div className="flex flex-col gap-0.5">
+              <span className={`text-[10px] font-semibold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent uppercase tracking-wider`}>
+                Prompt
+              </span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">{prompt.category}</span>
+            </div>
           </div>
-          <ChevronRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
+          
+          {/* 推荐标签 */}
+          {prompt.featured && (
+            <Badge className={`bg-gradient-to-r ${style.gradient} text-white text-[10px] px-2 py-0.5 shadow-sm`}>
+              <Star className="h-3 w-3 mr-0.5" />
+              精选
+            </Badge>
+          )}
+        </div>
+
+        {/* 标题 */}
+        <h3 className="font-bold text-base text-slate-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-1">
+          {prompt.title}
+        </h3>
+        
+        {/* 描述 */}
+        <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-relaxed">
+          {prompt.description}
+        </p>
+        
+        {/* 底部：标签 + 操作 */}
+        <div className="flex items-center justify-between">
+          <div className="flex flex-wrap gap-1">
+            {prompt.tags.slice(0, 3).map((tag, i) => (
+              <span 
+                key={i} 
+                className="text-[10px] px-1.5 py-0.5 bg-white/60 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 rounded border border-slate-200/50 dark:border-slate-700/50"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          
+          <div className="flex items-center gap-1 text-xs text-slate-400 group-hover:text-violet-500 transition-colors">
+            <Copy className="h-3 w-3" />
+            <span className="text-[10px]">点击查看</span>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -843,48 +956,141 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
     }
   };
 
+  // 根据分类获取图标和渐变色
+  const getCategoryStyle = (category: string) => {
+    const styles: Record<string, { icon: string; gradient: string }> = {
+      '视频生成': { icon: '🎬', gradient: 'from-violet-500 to-purple-600' },
+      '数字人': { icon: '👤', gradient: 'from-pink-500 to-rose-600' },
+      '视频编辑': { icon: '✂️', gradient: 'from-blue-500 to-cyan-600' },
+      'AI配音': { icon: '🎙️', gradient: 'from-orange-500 to-amber-600' },
+      'AI字幕': { icon: '📝', gradient: 'from-emerald-500 to-teal-600' },
+      '视频增强': { icon: '✨', gradient: 'from-amber-500 to-yellow-600' },
+      '创意视频': { icon: '🎨', gradient: 'from-fuchsia-500 to-pink-600' },
+      '效率提升': { icon: '⚡', gradient: 'from-cyan-500 to-blue-600' },
+      '个人成长': { icon: '🌱', gradient: 'from-green-500 to-emerald-600' },
+    };
+    return styles[category] || { icon: '📄', gradient: 'from-slate-500 to-gray-600' };
+  };
+
   if (!prompt) return null;
+
+  const style = getCategoryStyle(prompt.category);
+  const categoryIcon = promptCategories.find(c => c.name === prompt.category)?.icon || style.icon;
   
   return (
     <Dialog open={!!prompt} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-white dark:bg-slate-800">
-        <DialogHeader>
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-              {promptCategories.find(c => c.name === prompt.category)?.icon || '📝'}
+      <DialogContent className="max-w-3xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
+        {/* 顶部装饰条 */}
+        <div className={`h-1.5 bg-gradient-to-r ${style.gradient}`}></div>
+        
+        {/* 头部区域 */}
+        <div className="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-start gap-4">
+            {/* 分类图标 */}
+            <div className={`w-14 h-14 bg-gradient-to-br ${style.gradient} rounded-2xl flex items-center justify-center text-2xl shadow-lg flex-shrink-0`}>
+              {categoryIcon}
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">{prompt.title}</DialogTitle>
-                {prompt.featured && <Badge className="bg-gradient-to-r from-red-500 to-orange-500">推荐</Badge>}
+            
+            <div className="flex-1 min-w-0">
+              {/* 类型标签 */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`text-xs font-semibold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent uppercase tracking-wider`}>
+                  Prompt · {prompt.category}
+                </span>
+                {prompt.featured && (
+                  <Badge className={`bg-gradient-to-r ${style.gradient} text-white text-[10px] px-2`}>
+                    <Star className="h-3 w-3 mr-0.5" />
+                    精选
+                  </Badge>
+                )}
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{prompt.description}</p>
-              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">{prompt.category}</Badge>
+              
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white mb-1">
+                {prompt.title}
+              </DialogTitle>
+              
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                {prompt.description}
+              </p>
+              
+              {/* 标签 */}
+              <div className="flex flex-wrap gap-1.5 mt-3">
                 {prompt.tags.map((tag, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">{tag}</Badge>
+                  <Badge key={i} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
+                    {tag}
+                  </Badge>
                 ))}
               </div>
             </div>
           </div>
-        </DialogHeader>
+        </div>
         
-        <div className="mt-4 space-y-3">
-          <div className="relative">
-            <Button size="sm" variant="secondary" onClick={handleCopy} className="absolute right-2 top-2 z-10 gap-1.5">
-              {copied ? <><Check className="h-4 w-4 text-emerald-500"/>已复制</> : <><Copy className="h-4 w-4"/>复制</>}
+        {/* 内容区域 */}
+        <div className="px-6 py-5 max-h-[calc(90vh-220px)] overflow-y-auto">
+          {/* 提示词内容 */}
+          <div className="relative group">
+            {/* 复制按钮 */}
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              onClick={handleCopy} 
+              className={`absolute right-3 top-3 z-10 gap-1.5 transition-all duration-300 ${
+                copied 
+                  ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
+                  : 'bg-white/90 dark:bg-slate-700/90 hover:bg-white dark:hover:bg-slate-700'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  已复制
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  复制
+                </>
+              )}
             </Button>
-            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 pt-12 overflow-x-auto">
+            
+            {/* 提示词代码块 */}
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-xl p-5 pt-14 border border-slate-200/50 dark:border-slate-700/50">
               <pre className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">
                 {prompt.content}
               </pre>
             </div>
           </div>
-          <div className="flex gap-2 pt-2">
-            <Button onClick={handleCopy} className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-1.5">
-              {copied ? <><Check className="h-4 w-4"/>已复制</> : <><Copy className="h-4 w-4"/>复制提示词</>}
+        </div>
+        
+        {/* 底部操作栏 */}
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            💡 点击复制按钮，将提示词粘贴到 AI 工具中使用
+          </p>
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleCopy} 
+              className={`gap-1.5 transition-all duration-300 ${
+                copied 
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
+                  : `bg-gradient-to-r ${style.gradient} hover:opacity-90 text-white`
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  已复制到剪贴板
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4" />
+                  复制提示词
+                </>
+              )}
             </Button>
-            <Button variant="outline" onClick={onClose} className="border-slate-200 dark:border-slate-700">关闭</Button>
+            <Button variant="outline" onClick={onClose} className="border-slate-200 dark:border-slate-700">
+              关闭
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -1512,69 +1718,95 @@ export default function Home() {
 
         {/* Prompts Tab Content */}
         {activeTab === 'prompts' && (
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* 标题行与筛选 */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-white" />
+            <div className="flex flex-col gap-4">
+              {/* 标题区域 */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
+                      <BookOpen className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
+                      {prompts.length}
+                    </div>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">AI 视频提示词库</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">专业的提示词模板，一键复制即用</p>
+                  </div>
                 </div>
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">提示词库</h2>
-                <Badge variant="secondary" className="text-xs bg-gradient-to-r from-red-50 to-orange-50 text-red-700 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-400 border-0">
-                  {prompts.length} 个模板
-                </Badge>
               </div>
-              <div className="flex flex-wrap gap-1.5">
-                {promptCategories.map((cat) => (
-                  <Button
-                    key={cat.name}
-                    variant={selectedCategory === cat.name ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(cat.name)}
-                    className={selectedCategory === cat.name 
-                      ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white h-7 text-xs px-2.5 shadow-md shadow-red-500/20" 
-                      : "border-slate-200/60 dark:border-slate-700/60 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 text-xs px-2.5 transition-all duration-300"
-                    }
-                  >
-                    <span className="mr-0.5">{cat.icon}</span>
-                    {cat.name}
-                    <span className="ml-1 opacity-60 text-[10px]">({cat.count})</span>
-                  </Button>
-                ))}
+
+              {/* 分类筛选 */}
+              <div className="flex flex-wrap gap-2 p-3 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50">
+                {promptCategories.map((cat) => {
+                  const isActive = selectedCategory === cat.name;
+                  // 获取分类对应的渐变色
+                  const getGradient = (name: string) => {
+                    const gradients: Record<string, string> = {
+                      '全部': 'from-violet-500 to-purple-600',
+                      '视频生成': 'from-violet-500 to-purple-600',
+                      '数字人': 'from-pink-500 to-rose-600',
+                      '视频编辑': 'from-blue-500 to-cyan-600',
+                      'AI配音': 'from-orange-500 to-amber-600',
+                      'AI字幕': 'from-emerald-500 to-teal-600',
+                      '视频增强': 'from-amber-500 to-yellow-600',
+                      '创意视频': 'from-fuchsia-500 to-pink-600',
+                      '效率提升': 'from-cyan-500 to-blue-600',
+                      '个人成长': 'from-green-500 to-emerald-600',
+                    };
+                    return gradients[name] || 'from-slate-500 to-gray-600';
+                  };
+
+                  return (
+                    <Button
+                      key={cat.name}
+                      variant={isActive ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedCategory(cat.name)}
+                      className={isActive 
+                        ? `bg-gradient-to-r ${getGradient(cat.name)} hover:opacity-90 text-white h-8 text-xs px-3 shadow-md transition-all duration-300` 
+                        : "border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-700 h-8 text-xs px-3 transition-all duration-300"
+                      }
+                    >
+                      <span className="mr-1">{cat.icon}</span>
+                      {cat.name}
+                      <span className="ml-1.5 text-[10px] opacity-70">({cat.count})</span>
+                    </Button>
+                  );
+                })}
               </div>
             </div>
 
-            {/* 提示词列表 - 紧凑网格 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {/* 提示词列表 - 网格布局 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPrompts.map((prompt, index) => (
-                <Card 
+                <PromptCard 
                   key={prompt.id} 
-                  className="group relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-red-300/50 dark:hover:border-red-700/50 hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300 cursor-pointer hover:-translate-y-0.5"
-                  onClick={() => setSelectedPrompt(prompt)}
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  {/* 悬停光效 */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-orange-500/0 group-hover:from-red-500/5 group-hover:to-orange-500/5 transition-all duration-500"></div>
-                  
-                  <CardContent className="p-3 relative">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-lg flex items-center justify-center text-base flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                        💬
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 mb-0.5">
-                          <h3 className="font-medium text-sm text-slate-900 dark:text-white truncate group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">{prompt.title}</h3>
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{prompt.description}</p>
-                      </div>
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-gradient-to-r from-red-50 to-orange-50 text-red-600 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-400 flex-shrink-0 border-0">
-                        {prompt.category}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
+                  prompt={prompt} 
+                  onClick={() => setSelectedPrompt(prompt)} 
+                />
               ))}
             </div>
+
+            {/* 空状态 */}
+            {filteredPrompts.length === 0 && (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-2xl flex items-center justify-center">
+                  <BookOpen className="h-8 w-8 text-slate-400" />
+                </div>
+                <p className="text-slate-500 dark:text-slate-400">没有找到匹配的提示词</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-3"
+                  onClick={handleClearFilters}
+                >
+                  清除筛选
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
