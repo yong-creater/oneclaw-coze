@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp, Copy, Check, X, Heart, Target, BookOpen, Rocket, Lightbulb, Code, MessageSquare, BarChart, PenTool, Headphones, GraduationCap, Megaphone, Newspaper, RefreshCw, Star, Flame } from 'lucide-react';
-import { prompts, promptCategories, PromptItem } from '@/data/prompts';
+import { prompts, promptCategories, PromptItem, PromptCategory } from '@/data/prompts';
 import { aiTools, ToolItem } from '@/data/tools';
 import { aiSkills, getSkillCategories, SkillItem } from '@/data/skills';
 import AnimatedLobster from '@/components/AnimatedLobster';
@@ -513,6 +513,77 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
                 ))}
               </div>
             </div>
+            
+            {/* 案例展示 */}
+            {skill.example && (
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-yellow-500" />
+                  使用案例
+                </h4>
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800/50">
+                  {/* 使用场景 */}
+                  <div className="mb-3">
+                    <span className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">场景</span>
+                    <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">{skill.example.scenario}</p>
+                  </div>
+                  
+                  {/* 输入 */}
+                  <div className="mb-3">
+                    <span className="text-xs font-medium text-orange-600 dark:text-orange-400 uppercase tracking-wider">输入</span>
+                    <div className="mt-1 bg-white dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700">
+                      <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap font-mono">
+                        {skill.example.input}
+                      </pre>
+                    </div>
+                  </div>
+                  
+                  {/* 输出结果 */}
+                  <div>
+                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">输出结果</span>
+                    <div className="mt-1 bg-white dark:bg-slate-800 rounded-lg p-2.5 border border-slate-200 dark:border-slate-700">
+                      <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap font-mono leading-relaxed">
+                        {skill.example.output}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* 核心能力 */}
+            {skill.capabilities && skill.capabilities.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-orange-500" />
+                  核心能力
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {skill.capabilities.map((cap, index) => (
+                    <Badge key={index} className="bg-gradient-to-r from-orange-50 to-amber-50 text-orange-700 dark:from-orange-900/30 dark:to-amber-900/30 dark:text-orange-300 border border-orange-100 dark:border-orange-800 text-xs">
+                      {cap}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* 使用场景 */}
+            {skill.useCases && skill.useCases.length > 0 && (
+              <div>
+                <h4 className="font-semibold text-sm text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-blue-500" />
+                  适用场景
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {skill.useCases.map((uc, index) => (
+                    <Badge key={index} className="bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 dark:from-blue-900/30 dark:to-indigo-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-800 text-xs">
+                      {uc}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 更新时间 */}
             <div className="text-xs text-slate-400 dark:text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-700">
@@ -859,7 +930,7 @@ const PromptCard = memo(function PromptCard({
   };
 
   const style = getCategoryStyle(prompt.category);
-  const categoryIcon = promptCategories.find(c => c.name === prompt.category)?.icon || style.icon;
+  const categoryIcon = promptCategories.find((c: PromptCategory) => c.name === prompt.category)?.icon || style.icon;
 
   return (
     <Card 
@@ -962,7 +1033,7 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
   if (!prompt) return null;
 
   const style = getCategoryStyle(prompt.category);
-  const categoryIcon = promptCategories.find(c => c.name === prompt.category)?.icon || style.icon;
+  const categoryIcon = promptCategories.find((c: PromptCategory) => c.name === prompt.category)?.icon || style.icon;
   
   return (
     <Dialog open={!!prompt} onOpenChange={onClose}>
@@ -1013,7 +1084,25 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
         </div>
         
         {/* 内容区域 */}
-        <div className="px-6 py-5 max-h-[calc(90vh-220px)] overflow-y-auto">
+        <div className="px-6 py-5 max-h-[calc(90vh-220px)] overflow-y-auto space-y-5">
+          {/* 使用数据 */}
+          {(prompt.usage || prompt.rating) && (
+            <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+              {prompt.usage && (
+                <span className="flex items-center gap-1">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                  使用 {formatNumber(prompt.usage)} 次
+                </span>
+              )}
+              {prompt.rating && (
+                <span className="flex items-center gap-1">
+                  <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                  {prompt.rating.toFixed(1)} 分
+                </span>
+              )}
+            </div>
+          )}
+          
           {/* 提示词内容 */}
           <div className="relative group">
             {/* 复制按钮 */}
@@ -1047,6 +1136,51 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
               </pre>
             </div>
           </div>
+          
+          {/* 案例展示 */}
+          {prompt.example && (
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-yellow-500" />
+                案例展示
+              </h4>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800/50">
+                {/* 使用场景 */}
+                <div className="mb-3">
+                  <span className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">使用场景</span>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 mt-1">{prompt.example.input}</p>
+                </div>
+                
+                {/* 输出结果 */}
+                <div>
+                  <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">输出效果</span>
+                  <div className="mt-2 bg-white dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                    <pre className="text-xs text-slate-600 dark:text-slate-400 whitespace-pre-wrap font-mono leading-relaxed">
+                      {prompt.example.output}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* 使用技巧 */}
+          {prompt.tips && prompt.tips.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                <Zap className="h-4 w-4 text-orange-500" />
+                使用技巧
+              </h4>
+              <ul className="space-y-2">
+                {prompt.tips.map((tip, index) => (
+                  <li key={index} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <span className="text-orange-500 mt-0.5">•</span>
+                    {tip}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         
         {/* 底部操作栏 */}
