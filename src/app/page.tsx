@@ -335,9 +335,7 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
   return (
     <Dialog open={!!skill} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
-        {/* 顶部装饰条 */}
-        <div className={`h-1.5 bg-gradient-to-r ${getGradientColors(skill.category)}`}></div>
-        <div className="overflow-y-auto max-h-[calc(90vh-6px)]">
+        <div className="overflow-y-auto max-h-[90vh]">
           {/* 头部区域 */}
           <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-5 pt-5 pb-4 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-start gap-4">
@@ -661,8 +659,6 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
   return (
     <Dialog open={!!tool} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden flex flex-col">
-        {/* 顶部装饰条 */}
-        <div className={`h-1.5 bg-gradient-to-r ${getGradientColors(tool.category)} flex-shrink-0`}></div>
         {/* 头部区域 - 固定 */}
         <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-start gap-5">
@@ -1082,9 +1078,6 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
   return (
     <Dialog open={!!prompt} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
-        {/* 顶部装饰条 */}
-        <div className={`h-1.5 bg-gradient-to-r ${style.gradient}`}></div>
-        
         {/* 头部区域 */}
         <div className="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-start gap-4">
