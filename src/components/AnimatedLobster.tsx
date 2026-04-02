@@ -1,22 +1,73 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState, useCallback } from 'react';
 
 interface AnimatedLobsterProps {
   size?: number;
   className?: string;
 }
 
-// 动画龙虾组件 - 简洁优雅
+// 交互消息列表
+const INTERACTION_MESSAGES = [
+  { text: '欢迎来到 OneClaw！🦞', emoji: '🎉' },
+  { text: '发现 117 款优质 AI 工具！', emoji: '✨' },
+  { text: '点击工具卡片查看详情~', emoji: '👆' },
+  { text: '试试搜索功能吧！', emoji: '🔍' },
+  { text: '切换分类找找灵感！', emoji: '💡' },
+  { text: 'AI 视频工具一网打尽！', emoji: '🎬' },
+  { text: '感谢你的到来！', emoji: '❤️' },
+  { text: '今天也要加油哦！', emoji: '💪' },
+];
+
+// 动画龙虾组件 - 支持点击交互
 export const AnimatedLobster = memo(function AnimatedLobster({ 
   size = 48, 
   className = '' 
 }: AnimatedLobsterProps) {
+  const [showBubble, setShowBubble] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState(INTERACTION_MESSAGES[0]);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleClick = useCallback(() => {
+    if (isAnimating) return;
+    
+    // 随机选择一条消息
+    const randomIndex = Math.floor(Math.random() * INTERACTION_MESSAGES.length);
+    setCurrentMessage(INTERACTION_MESSAGES[randomIndex]);
+    
+    setIsAnimating(true);
+    setShowBubble(true);
+    
+    // 3秒后隐藏气泡
+    setTimeout(() => {
+      setShowBubble(false);
+      setTimeout(() => setIsAnimating(false), 300);
+    }, 3000);
+  }, [isAnimating]);
+
   return (
     <div 
-      className={`relative inline-block ${className}`}
+      className={`relative inline-block cursor-pointer ${className}`}
       style={{ width: size, height: size }}
+      onClick={handleClick}
+      title="点击我互动"
     >
+      {/* 消息气泡 */}
+      <div 
+        className={`absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap 
+          bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-lg border border-slate-200 
+          dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200
+          transition-all duration-300 z-50
+          ${showBubble ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
+      >
+        <span className="mr-1">{currentMessage.emoji}</span>
+        {currentMessage.text}
+        {/* 气泡尖角 */}
+        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 
+          bg-white dark:bg-slate-800 border-r border-b border-slate-200 dark:border-slate-700
+          rotate-45" />
+      </div>
+      
       {/* 龙虾主体 */}
       <svg 
         viewBox="0 0 120 80" 
@@ -93,7 +144,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
             <path 
               d="M100 40 Q108 38, 115 40 Q108 42, 100 40" 
               fill="url(#bodyMain)" 
-              stroke="#991b1b"
+              stroke="#991b1d"
               strokeWidth="0.5"
             />
             
