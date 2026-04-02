@@ -307,21 +307,6 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
     }
   };
 
-  // 根据分类获取渐变色
-  const getGradientColors = (category: string) => {
-    const gradients: Record<string, string> = {
-      '搜索工具': 'from-blue-500 to-cyan-600',
-      '文件处理': 'from-emerald-500 to-teal-600',
-      '数据分析': 'from-violet-500 to-purple-600',
-      '图像处理': 'from-pink-500 to-rose-600',
-      '代码开发': 'from-indigo-500 to-blue-600',
-      '写作助手': 'from-amber-500 to-yellow-600',
-      '效率工具': 'from-orange-500 to-amber-600',
-      '其他': 'from-slate-500 to-gray-600',
-    };
-    return gradients[category] || gradients['其他'];
-  };
-
   // 获取技能名称首字母
   const getInitial = (name: string) => {
     return name.charAt(0).toUpperCase();
@@ -337,9 +322,9 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
       <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
         <div className="overflow-y-auto max-h-[90vh]">
           {/* 头部区域 */}
-          <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-5 pt-5 pb-4 border-b border-slate-100 dark:border-slate-700">
+          <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-start gap-4">
-              <div className={`w-14 h-14 ${useRealLogo ? 'bg-white border border-slate-100 dark:border-slate-700' : `bg-gradient-to-br ${getGradientColors(skill.category)}`} rounded-xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 shadow-sm overflow-hidden`}>
+              <div className={`w-14 h-14 ${useRealLogo ? 'bg-slate-50 border border-slate-100 dark:border-slate-700' : 'bg-gradient-to-br from-red-500 to-orange-500'} rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-sm overflow-hidden`}>
                 {useRealLogo ? (
                   <img 
                     src={skill.logo} 
@@ -358,42 +343,29 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
                 <div className="flex items-center gap-2 mb-1">
                   <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">{skill.name}</DialogTitle>
                   {skill.featured && (
-                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs px-2">★ 精选</Badge>
+                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-[10px]">精选</Badge>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                   {skill.identifier}
                 </p>
+                <div className="flex items-center gap-1.5 mt-2">
+                  <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">{skill.category}</Badge>
+                  <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">{skill.version}</Badge>
+                </div>
               </div>
-              {/* 收藏和关闭按钮 */}
-              <div className="flex items-center gap-2">
-                <button className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                  <Heart className="h-4 w-4 text-slate-400" />
-                </button>
-                <button 
-                  onClick={onClose}
-                  className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-                >
-                  <X className="h-4 w-4 text-slate-400" />
-                </button>
-              </div>
+              {/* 关闭按钮 */}
+              <button 
+                onClick={onClose}
+                className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4 text-slate-400" />
+              </button>
             </div>
           </div>
           
           {/* 内容区域 */}
-          <div className="px-5 py-4 space-y-4">
-            {/* 版本和标签 */}
-            <div className="flex items-center gap-2">
-              <Badge className="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-0">
-                {skill.version}
-              </Badge>
-              {skill.featured && (
-                <Badge className="bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-0">
-                  ⚡ 加速下载可用
-                </Badge>
-              )}
-            </div>
-
+          <div className="px-6 py-4 space-y-4">
             {/* 描述 */}
             <div>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
@@ -405,7 +377,7 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
             <div className="text-xs text-slate-500 dark:text-slate-400">
               该技能数据来源于
               {skill.sourceUrl ? (
-                <a href={skill.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-orange-600 dark:text-orange-400 hover:underline ml-1">
+                <a href={skill.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-red-600 dark:text-red-400 hover:underline ml-1">
                   {skill.source}
                 </a>
               ) : (
@@ -615,7 +587,6 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
   );
 });
 
-// 内联广告组件
 // 工具详情弹窗组件
 const ToolDetailDialog = memo(function ToolDetailDialog({ 
   tool, 
@@ -628,24 +599,6 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
 }) {
   // AI 新闻状态
   if (!tool) return null;
-
-  // 根据分类获取渐变色
-  const getGradientColors = (category: string) => {
-    const gradients: Record<string, string> = {
-      '视频生成': 'from-violet-500 to-purple-600',
-      '数字人': 'from-pink-500 to-rose-600',
-      '视频编辑': 'from-blue-500 to-cyan-600',
-      'AI字幕': 'from-emerald-500 to-teal-600',
-      'AI配音': 'from-orange-500 to-amber-600',
-      '视频增强': 'from-indigo-500 to-blue-600',
-      '3D/VR': 'from-fuchsia-500 to-pink-600',
-      '创意工具': 'from-red-500 to-orange-500',
-      '素材资源': 'from-teal-500 to-green-600',
-      '录制工具': 'from-slate-500 to-gray-600',
-      '其他': 'from-gray-400 to-slate-500',
-    };
-    return gradients[category] || gradients['其他'];
-  };
 
   // 获取工具名称首字母
   const getInitial = (name: string) => {
@@ -661,45 +614,45 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden flex flex-col">
         {/* 头部区域 - 固定 */}
         <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
-          <div className="flex items-start gap-5">
+          <div className="flex items-start gap-4">
             {/* 弹窗图标 - 真实logo或首字母渐变 */}
-            <div className={`w-20 h-20 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden border border-slate-100 dark:border-slate-700`}>
+            <div className={`w-14 h-14 ${useRealLogo ? 'bg-slate-50' : 'bg-gradient-to-br from-red-500 to-orange-500'} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm overflow-hidden border border-slate-100 dark:border-slate-700`}>
             {useRealLogo ? (
               <img 
                 src={tool.logo} 
                 alt={tool.name}
-                className="w-14 h-14 object-contain"
+                className="w-10 h-10 object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   const parent = target.parentElement;
                   if (parent) {
-                    parent.className = `w-20 h-20 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md`;
-                    parent.innerHTML = `<span className="text-white text-3xl font-bold">${getInitial(tool.name)}</span>`;
+                    parent.className = 'w-14 h-14 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm';
+                    parent.innerHTML = `<span className="text-white text-xl font-bold">${getInitial(tool.name)}</span>`;
                   }
                 }}
               />
             ) : (
-              <span className="text-white text-3xl font-bold">{getInitial(tool.name)}</span>
+              <span className="text-white text-xl font-bold">{getInitial(tool.name)}</span>
             )}
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 flex-wrap mb-2">
-              <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">{tool.name}</DialogTitle>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">{tool.name}</DialogTitle>
               {tool.featured && (
-                <Badge className="bg-gradient-to-r from-red-500 to-orange-500">推荐</Badge>
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-[10px]">推荐</Badge>
               )}
               {tool.pricing && tool.pricing.includes('免费') && (
-                <Badge className="bg-emerald-500">免费</Badge>
+                <Badge className="bg-emerald-500 text-[10px]">免费</Badge>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{tool.category}</Badge>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">{tool.category}</Badge>
               {tool.platform && (
-                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.platform}</Badge>
+                <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">{tool.platform}</Badge>
               )}
               {tool.pricing && (
-                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-700">{tool.pricing}</Badge>
+                <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">{tool.pricing}</Badge>
               )}
             </div>
           </div>
@@ -1054,27 +1007,8 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
     }
   };
 
-  // 根据分类获取图标和渐变色
-  const getCategoryStyle = (category: string) => {
-    const styles: Record<string, { icon: string; gradient: string }> = {
-      '视频生成': { icon: '🎬', gradient: 'from-violet-500 to-purple-600' },
-      '数字人': { icon: '👤', gradient: 'from-pink-500 to-rose-600' },
-      '视频编辑': { icon: '✂️', gradient: 'from-blue-500 to-cyan-600' },
-      'AI配音': { icon: '🎙️', gradient: 'from-orange-500 to-amber-600' },
-      'AI字幕': { icon: '📝', gradient: 'from-emerald-500 to-teal-600' },
-      '视频增强': { icon: '✨', gradient: 'from-amber-500 to-yellow-600' },
-      '创意视频': { icon: '🎨', gradient: 'from-fuchsia-500 to-pink-600' },
-      '效率提升': { icon: '⚡', gradient: 'from-cyan-500 to-blue-600' },
-      '个人成长': { icon: '🌱', gradient: 'from-green-500 to-emerald-600' },
-    };
-    return styles[category] || { icon: '📄', gradient: 'from-slate-500 to-gray-600' };
-  };
-
   if (!prompt) return null;
 
-  const style = getCategoryStyle(prompt.category);
-  const categoryIcon = promptCategories.find((c: PromptCategory) => c.name === prompt.category)?.icon || style.icon;
-  
   return (
     <Dialog open={!!prompt} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
@@ -1082,36 +1016,31 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
         <div className="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-start gap-4">
             {/* 分类图标 */}
-            <div className={`w-14 h-14 bg-gradient-to-br ${style.gradient} rounded-2xl flex items-center justify-center text-2xl shadow-lg flex-shrink-0`}>
-              {categoryIcon}
+            <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-xl shadow-sm flex-shrink-0">
+              📝
             </div>
             
             <div className="flex-1 min-w-0">
-              {/* 类型标签 */}
-              <div className="flex items-center gap-2 mb-2">
-                <span className={`text-xs font-semibold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent uppercase tracking-wider`}>
-                  Prompt · {prompt.category}
-                </span>
+              <div className="flex items-center gap-2 mb-1">
+                <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
+                  {prompt.title}
+                </DialogTitle>
                 {prompt.featured && (
-                  <Badge className={`bg-gradient-to-r ${style.gradient} text-white text-[10px] px-2`}>
-                    <Star className="h-3 w-3 mr-0.5" />
+                  <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white text-[10px] px-2">
                     精选
                   </Badge>
                 )}
               </div>
-              
-              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white mb-1">
-                {prompt.title}
-              </DialogTitle>
               
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 {prompt.description}
               </p>
               
               {/* 标签 */}
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">{prompt.category}</Badge>
                 {prompt.tags.map((tag, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
+                  <Badge key={i} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700">
                     {tag}
                   </Badge>
                 ))}
@@ -1219,17 +1148,17 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
         </div>
         
         {/* 底部操作栏 */}
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-between">
           <p className="text-xs text-slate-500 dark:text-slate-400">
             💡 点击复制按钮，将提示词粘贴到 AI 工具中使用
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button 
               onClick={handleCopy}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 cursor-pointer ${
                 copied 
                   ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
-                  : `bg-gradient-to-r ${style.gradient} hover:opacity-90 text-white`
+                  : 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white'
               }`}
             >
               {copied ? (
@@ -1244,7 +1173,7 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
                 </>
               )}
             </button>
-            <button onClick={onClose} className="px-4 py-2 rounded-md text-sm font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+            <button onClick={onClose} className="px-4 py-2 rounded-md text-sm font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 cursor-pointer transition-colors">
               关闭
             </button>
           </div>
