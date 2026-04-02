@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp, Copy, Check, X, Heart, Target, BookOpen, Rocket, Lightbulb, Code, MessageSquare, BarChart, PenTool, Headphones, GraduationCap, Megaphone, Newspaper, RefreshCw } from 'lucide-react';
+import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, ChevronRight, Mail, Sparkles, Mic, Image as ImageIcon, FileVideo, Zap, Users, TrendingUp, Copy, Check, X, Heart, Target, BookOpen, Rocket, Lightbulb, Code, MessageSquare, BarChart, PenTool, Headphones, GraduationCap, Megaphone, Newspaper, RefreshCw, Star, Flame } from 'lucide-react';
 import { prompts, promptCategories, PromptItem } from '@/data/prompts';
 import { aiTools, ToolItem } from '@/data/tools';
 import { aiSkills, getSkillCategories, SkillItem } from '@/data/skills';
@@ -79,48 +79,54 @@ const ToolCard = memo(function ToolCard({
 
   return (
     <Card 
-      className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border-slate-200/60 dark:border-slate-700/60 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300/50 dark:hover:border-red-600/50 hover:-translate-y-1 card-glow"
       onClick={onClick}
     >
-      <CardContent className="p-4">
+      {/* 悬停光效背景 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-orange-500/0 to-amber-500/0 group-hover:from-red-500/5 group-hover:via-orange-500/5 group-hover:to-amber-500/5 transition-all duration-500"></div>
+      
+      <CardContent className="p-4 relative">
         <div className="flex gap-4">
           {/* 图标 - 真实logo或首字母渐变 */}
-          <div className={`w-14 h-14 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform overflow-hidden border border-slate-100 dark:border-slate-700`}>
+          <div className={`relative w-14 h-14 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden border border-slate-100/80 dark:border-slate-700/80`}>
+            {/* 图标光泽效果 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             {useRealLogo ? (
               <img 
                 src={tool.logo} 
                 alt={tool.name}
-                className="w-10 h-10 object-contain"
+                className="w-10 h-10 object-contain relative z-10"
                 onError={(e) => {
                   // 加载失败时回退到首字母
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   const parent = target.parentElement;
                   if (parent) {
-                    parent.className = `w-14 h-14 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform`;
-                    parent.innerHTML = `<span className="text-white text-xl font-bold">${getInitial(tool.name)}</span>`;
+                    parent.className = `w-14 h-14 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`;
+                    parent.innerHTML = `<span className="text-white text-xl font-bold relative z-10">${getInitial(tool.name)}</span>`;
                   }
                 }}
               />
             ) : (
-              <span className="text-white text-xl font-bold">{getInitial(tool.name)}</span>
+              <span className="text-white text-xl font-bold relative z-10">{getInitial(tool.name)}</span>
             )}
           </div>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1.5">
-              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                 {tool.name}
               </h3>
               {tool.featured && (
-                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600 px-2">
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600 px-2 shadow-sm">
+                  <Flame className="h-3 w-3 mr-0.5" />
                   推荐
                 </Badge>
               )}
             </div>
             
             <div className="flex items-center gap-1.5 mb-2">
-              <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">
+              <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-700/50">
                 {tool.category}
               </Badge>
               {tool.pricing && tool.pricing.includes('免费') && (
@@ -137,18 +143,18 @@ const ToolCard = memo(function ToolCard({
             <div className="flex items-center justify-between gap-2">
               <div className="flex flex-wrap gap-1">
                 {tool.tags.slice(0, 2).map((tag, tagIndex) => (
-                  <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
+                  <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-0">
                     {tag}
                   </Badge>
                 ))}
                 {tool.tags.length > 2 && (
-                  <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
+                  <Badge variant="secondary" className="text-xs bg-slate-100/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-0">
                     +{tool.tags.length - 2}
                   </Badge>
                 )}
               </div>
               
-              <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5 flex-shrink-0 font-medium">
+              <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5 flex-shrink-0 font-medium group-hover:translate-x-1 transition-transform">
                 详情
                 <ChevronRight className="h-3 w-3" />
               </span>
@@ -193,39 +199,45 @@ const SkillCard = memo(function SkillCard({
 
   return (
     <Card 
-      className="hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-800 transition-all bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border-slate-200/60 dark:border-slate-700/60 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-300/50 dark:hover:border-blue-600/50 hover:-translate-y-1"
       onClick={onClick}
     >
-      <CardContent className="p-4">
+      {/* 悬停光效背景 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-cyan-500/0 to-teal-500/0 group-hover:from-blue-500/5 group-hover:via-cyan-500/5 group-hover:to-teal-500/5 transition-all duration-500"></div>
+      
+      <CardContent className="p-4 relative">
         <div className="flex items-start gap-3">
-          <div className={`w-12 h-12 ${useRealLogo ? 'bg-white border border-slate-100 dark:border-slate-700' : `bg-gradient-to-br ${getGradientColors(skill.category)}`} rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-sm overflow-hidden`}>
+          <div className={`relative w-12 h-12 ${useRealLogo ? 'bg-white border border-slate-100/80 dark:border-slate-700/80' : `bg-gradient-to-br ${getGradientColors(skill.category)}`} rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden`}>
+            {/* 图标光泽效果 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             {useRealLogo ? (
               <img 
                 src={skill.logo} 
                 alt={skill.name}
-                className="w-8 h-8 object-contain"
+                className="w-8 h-8 object-contain relative z-10"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                 }}
               />
             ) : (
-              skill.icon.length <= 2 ? skill.icon : getInitial(skill.name)
+              <span className="relative z-10">{skill.icon.length <= 2 ? skill.icon : getInitial(skill.name)}</span>
             )}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 {skill.name}
               </h3>
               {skill.featured && (
-                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 px-2">
-                  ★ 精选
+                <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-xs flex-shrink-0 px-2 shadow-sm">
+                  <Star className="h-3 w-3 mr-0.5" />
+                  精选
                 </Badge>
               )}
             </div>
             
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mb-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mb-2 bg-slate-100/50 dark:bg-slate-700/50 px-2 py-0.5 rounded inline-block">
               {skill.identifier}
             </p>
             
@@ -234,19 +246,19 @@ const SkillCard = memo(function SkillCard({
             </p>
             
             <div className="flex items-center gap-4 text-xs text-slate-500">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 hover:text-orange-500 transition-colors">
                 <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 <span>{formatNumber(skill.downloads)}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 hover:text-amber-500 transition-colors">
                 <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
                 <span>{formatNumber(skill.favorites)}</span>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 hover:text-emerald-500 transition-colors">
                 <svg className="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
@@ -1167,10 +1179,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+      <header className="relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50 shadow-sm shadow-slate-200/50 dark:shadow-slate-900/50">
+        {/* 装饰性渐变背景 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-amber-500/5 pointer-events-none"></div>
+        
+        <div className="container mx-auto px-4 py-4 relative">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity group">
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-all duration-300 group">
               <div className="relative w-12 h-12 flex items-center justify-center">
                 {/* 气泡效果 */}
                 <div className="absolute inset-0 overflow-visible pointer-events-none">
@@ -1178,12 +1193,14 @@ export default function Home() {
                   <div className="bubble"></div>
                   <div className="bubble"></div>
                 </div>
+                {/* 光晕背景 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 <span className="text-4xl lobster-animate relative z-10">🦞</span>
-                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-400 rounded-full animate-pulse"></div>
+                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full animate-pulse shadow-lg shadow-amber-500/50"></div>
               </div>
               <div>
-                <h1 className="text-lg font-bold text-slate-900 dark:text-white">
-                  <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
+                <h1 className="text-lg font-bold">
+                  <span className="text-gradient">One</span><span className="text-orange-500">Claw</span>
                 </h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">一站式 AI 工具与资源导航</p>
               </div>
@@ -1192,13 +1209,14 @@ export default function Home() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="gap-2 text-slate-600 dark:text-slate-300"
+                className="gap-2 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all"
                 onClick={() => setShowAbout(true)}
               >
                 <Info className="h-4 w-4" />
                 <span className="hidden sm:inline">关于我们</span>
               </Button>
-              <Badge variant="secondary" className="bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+              <Badge variant="secondary" className="bg-gradient-to-r from-red-50 to-orange-50 text-red-700 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-400 border border-red-100 dark:border-red-800/50 shadow-sm">
+                <Sparkles className="h-3 w-3 mr-1" />
                 {activeTab === 'tools' ? `${aiTools.length} 个工具` : activeTab === 'prompts' ? `${prompts.length} 个提示词` : `${aiSkills.length} 个技能`}
               </Badge>
             </div>
@@ -1209,27 +1227,27 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         {/* Tab Switcher */}
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-6 p-1.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm inline-flex">
           <Button
-            variant={activeTab === 'tools' ? 'default' : 'outline'}
+            variant={activeTab === 'tools' ? 'default' : 'ghost'}
             onClick={() => setActiveTab('tools')}
-            className={activeTab === 'tools' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2' : 'border-slate-200 dark:border-slate-700 gap-2'}
+            className={activeTab === 'tools' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2 shadow-lg shadow-red-500/25' : 'gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}
           >
             <Video className="h-4 w-4" />
             工具库
           </Button>
           <Button
-            variant={activeTab === 'prompts' ? 'default' : 'outline'}
+            variant={activeTab === 'prompts' ? 'default' : 'ghost'}
             onClick={() => setActiveTab('prompts')}
-            className={activeTab === 'prompts' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2' : 'border-slate-200 dark:border-slate-700 gap-2'}
+            className={activeTab === 'prompts' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2 shadow-lg shadow-red-500/25' : 'gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}
           >
             <Sparkles className="h-4 w-4" />
             提示词库
           </Button>
           <Button
-            variant={activeTab === 'skills' ? 'default' : 'outline'}
+            variant={activeTab === 'skills' ? 'default' : 'ghost'}
             onClick={() => setActiveTab('skills')}
-            className={activeTab === 'skills' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2' : 'border-slate-200 dark:border-slate-700 gap-2'}
+            className={activeTab === 'skills' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2 shadow-lg shadow-red-500/25' : 'gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}
           >
             <Lightbulb className="h-4 w-4" />
             技能库
@@ -1241,14 +1259,16 @@ export default function Home() {
           <>
             {/* Search */}
             <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <div className="relative group">
+                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-red-500 transition-colors" />
                 <Input
                   placeholder="搜索工具名称、描述或标签..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-red-300 dark:focus:border-red-700 focus:ring-red-500/20 transition-all duration-300 hover:border-red-200 dark:hover:border-red-800"
                 />
+                {/* 搜索框光效 */}
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </div>
 
@@ -1263,12 +1283,15 @@ export default function Home() {
                     variant={isActive ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedCategory(category.name)}
-                    className={isActive ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white" : "border-slate-200 dark:border-slate-700"}
-              >
-                <Icon className="h-3.5 w-3.5 mr-1.5" />
-                {category.name}
-                <span className="ml-1.5 text-xs opacity-60">({category.count})</span>
-              </Button>
+                    className={isActive 
+                      ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-md shadow-red-500/20 transition-all duration-300 hover:scale-105" 
+                      : "border-slate-200/60 dark:border-slate-700/60 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
+                    }
+                  >
+                    <Icon className="h-3.5 w-3.5 mr-1.5" />
+                    {category.name}
+                    <span className="ml-1.5 text-xs opacity-60">({category.count})</span>
+                  </Button>
             );
           })}
         </div>
@@ -1303,43 +1326,61 @@ export default function Home() {
           <div className="hidden lg:block w-72 flex-shrink-0">
             <div className="sticky top-4 space-y-4 max-h-[calc(100vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
             {/* 热门推荐 */}
-            <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-              <CardContent className="pt-4 pb-3">
+            <Card className="relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/30 dark:shadow-slate-900/30">
+              {/* 装饰性渐变 */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-amber-500"></div>
+              <CardContent className="pt-5 pb-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp className="h-4 w-4 text-red-500" />
+                  <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-3.5 w-3.5 text-white" />
+                  </div>
                   <h3 className="font-semibold text-sm text-slate-900 dark:text-white">热门推荐</h3>
                 </div>
                 <div className="space-y-1">
-                  {hotTools.map((tool) => (
-                    <HotToolItem key={tool.id} tool={tool} onClick={() => handleToolClick(tool)} />
+                  {hotTools.map((tool, index) => (
+                    <div 
+                      key={tool.id}
+                      className="group flex items-center gap-3 p-2 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 dark:hover:from-red-900/20 dark:hover:to-orange-900/20 cursor-pointer transition-all duration-300"
+                      onClick={() => handleToolClick(tool)}
+                    >
+                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 flex items-center justify-center text-xs font-bold text-red-600 dark:text-red-400">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">{tool.name}</p>
+                        <p className="text-xs text-slate-500">{tool.category}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-red-500 group-hover:translate-x-1 transition-all" />
+                    </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
             {/* 最新动态 - AI 新闻 */}
-            <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-              <CardContent className="pt-4 pb-3">
+            <Card className="relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/30 dark:shadow-slate-900/30">
+              {/* 装饰性渐变 */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500"></div>
+              <CardContent className="pt-5 pb-3">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Newspaper className="h-4 w-4 text-red-500" />
+                    <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                      <Newspaper className="h-3.5 w-3.5 text-white" />
+                    </div>
                     <h3 className="font-semibold text-sm text-slate-900 dark:text-white">AI 热门新闻</h3>
-                    <span className="text-xs text-slate-400">
-                      {new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })}
-                    </span>
                   </div>
                   <button 
                     onClick={fetchAINews}
-                    className="text-xs text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors"
+                    className="text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
                     disabled={loadingNews}
                   >
-                    <RefreshCw className={`h-3 w-3 ${loadingNews ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`h-3.5 w-3.5 ${loadingNews ? 'animate-spin' : ''}`} />
                   </button>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {loadingNews ? (
                     <div className="flex items-center justify-center py-4">
-                      <RefreshCw className="h-4 w-4 animate-spin text-slate-400" />
+                      <div className="w-6 h-6 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
                     </div>
                   ) : aiNews.length > 0 ? (
                     aiNews.slice(0, 4).map((news, index) => (
@@ -1351,22 +1392,22 @@ export default function Home() {
                         className="block group"
                       >
                         <div className="flex items-start gap-2">
-                          <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
-                            index === 0 ? 'bg-red-500' : index === 1 ? 'bg-orange-500' : index === 2 ? 'bg-amber-500' : 'bg-slate-400'
+                          <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+                            index === 0 ? 'bg-gradient-to-br from-red-500 to-orange-500 shadow-sm shadow-red-500/50' : 
+                            index === 1 ? 'bg-gradient-to-br from-orange-500 to-amber-500' : 
+                            index === 2 ? 'bg-gradient-to-br from-amber-500 to-yellow-500' : 
+                            'bg-slate-400'
                           }`}></div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-red-500 dark:group-hover:text-red-400 line-clamp-2 transition-colors">
                               {news.title}
                             </p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-xs text-slate-400">{news.source}</span>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">{news.source}</span>
                               {news.publishTime && (
-                                <>
-                                  <span className="text-xs text-slate-300">·</span>
-                                  <span className="text-xs text-slate-400">
-                                    {new Date(news.publishTime).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
-                                  </span>
-                                </>
+                                <span className="text-xs text-slate-400">
+                                  {new Date(news.publishTime).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
+                                </span>
                               )}
                             </div>
                           </div>
@@ -1383,13 +1424,17 @@ export default function Home() {
             </Card>
 
             {/* 联系我们 */}
-            <Card className="bg-gradient-to-br from-red-600 to-orange-500 dark:from-red-700 dark:to-orange-600 border-0 text-white">
-              <CardContent className="pt-4 pb-3">
-                <h3 className="font-semibold text-sm mb-2">联系我们</h3>
+            <Card className="relative overflow-hidden bg-gradient-to-br from-red-600 to-orange-500 dark:from-red-700 dark:to-orange-600 border-0 text-white shadow-lg shadow-red-500/30">
+              <CardContent className="pt-4 pb-3 relative">
+                {/* 装饰性背景 */}
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
+                <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  联系我们
+                </h3>
                 <div className="text-sm text-white/90 space-y-1">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4" />
-                    <span className="text-xs">1017760688@qq.com</span>
+                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded">1017760688@qq.com</span>
                   </div>
                   <p className="text-xs text-white/70">欢迎商务合作与工具推荐</p>
                 </div>
@@ -1397,13 +1442,16 @@ export default function Home() {
             </Card>
 
             {/* 合成意向提交 */}
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-800 dark:to-slate-700 rounded-xl p-4 border border-amber-100 dark:border-slate-600">
-              <div className="text-center mb-3">
-                <div className="w-10 h-10 mx-auto mb-2 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-white" />
+            <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-700 rounded-xl p-4 border border-amber-100/50 dark:border-slate-600/50 shadow-lg shadow-amber-500/10">
+              {/* 装饰性背景 */}
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-full blur-3xl"></div>
+              
+              <div className="text-center mb-3 relative">
+                <div className="w-12 h-12 mx-auto mb-2 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/30">
+                  <Sparkles className="h-6 w-6 text-white" />
                 </div>
-                <p className="font-medium text-sm text-slate-800 dark:text-white">AI 视频合成意向</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">描述您的需求，我们会尽快联系您</p>
+                <p className="font-semibold text-sm text-slate-800 dark:text-white">AI 视频合成意向</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">描述您的需求，我们会尽快联系您</p>
               </div>
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -1441,16 +1489,17 @@ export default function Home() {
                 <textarea
                   name="intent"
                   placeholder="描述您的视频合成需求，如：产品宣传视频、教育课程视频、短视频内容..."
-                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent mb-2"
+                  className="w-full px-3 py-2.5 text-sm border border-slate-200/60 dark:border-slate-600/60 rounded-lg bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-300 mb-2 backdrop-blur-sm"
                   rows={3}
                 />
                 <input
                   name="email"
                   type="email"
                   placeholder="您的邮箱（选填）"
-                  className="w-full px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 placeholder-slate-400 mb-3 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-3 py-2.5 text-sm border border-slate-200/60 dark:border-slate-600/60 rounded-lg bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 placeholder-slate-400 mb-3 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-300 backdrop-blur-sm"
                 />
-                <Button type="submit" size="sm" className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white">
+                <Button type="submit" size="sm" className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:scale-[1.02]">
+                  <Sparkles className="h-4 w-4 mr-1.5" />
                   立即提交
                 </Button>
               </form>
@@ -1465,11 +1514,15 @@ export default function Home() {
         {activeTab === 'prompts' && (
           <div className="space-y-4">
             {/* 标题行与筛选 */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50">
               <div className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-red-500" />
+                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">提示词库</h2>
-                <Badge variant="secondary" className="text-xs">{prompts.length} 个模板</Badge>
+                <Badge variant="secondary" className="text-xs bg-gradient-to-r from-red-50 to-orange-50 text-red-700 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-400 border-0">
+                  {prompts.length} 个模板
+                </Badge>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {promptCategories.map((cat) => (
@@ -1478,7 +1531,10 @@ export default function Home() {
                     variant={selectedCategory === cat.name ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedCategory(cat.name)}
-                    className={selectedCategory === cat.name ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white h-7 text-xs px-2.5" : "border-slate-200 dark:border-slate-700 h-7 text-xs px-2.5"}
+                    className={selectedCategory === cat.name 
+                      ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white h-7 text-xs px-2.5 shadow-md shadow-red-500/20" 
+                      : "border-slate-200/60 dark:border-slate-700/60 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 h-7 text-xs px-2.5 transition-all duration-300"
+                    }
                   >
                     <span className="mr-0.5">{cat.icon}</span>
                     {cat.name}
@@ -1490,24 +1546,28 @@ export default function Home() {
 
             {/* 提示词列表 - 紧凑网格 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {filteredPrompts.map((prompt) => (
+              {filteredPrompts.map((prompt, index) => (
                 <Card 
                   key={prompt.id} 
-                  className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:shadow-sm transition-all cursor-pointer group"
+                  className="group relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 hover:border-red-300/50 dark:hover:border-red-700/50 hover:shadow-lg hover:shadow-red-500/10 transition-all duration-300 cursor-pointer hover:-translate-y-0.5"
                   onClick={() => setSelectedPrompt(prompt)}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <CardContent className="p-3">
+                  {/* 悬停光效 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-orange-500/0 group-hover:from-red-500/5 group-hover:to-orange-500/5 transition-all duration-500"></div>
+                  
+                  <CardContent className="p-3 relative">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-lg flex items-center justify-center text-base flex-shrink-0">
+                      <div className="w-9 h-9 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-lg flex items-center justify-center text-base flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                         💬
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
-                          <h3 className="font-medium text-sm text-slate-900 dark:text-white truncate group-hover:text-red-500 transition-colors">{prompt.title}</h3>
+                          <h3 className="font-medium text-sm text-slate-900 dark:text-white truncate group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">{prompt.title}</h3>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{prompt.description}</p>
                       </div>
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex-shrink-0">
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-gradient-to-r from-red-50 to-orange-50 text-red-600 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-400 flex-shrink-0 border-0">
                         {prompt.category}
                       </Badge>
                     </div>
@@ -1523,14 +1583,16 @@ export default function Home() {
           <>
             {/* Search */}
             <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <div className="relative group">
+                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
                 <Input
                   placeholder="搜索技能名称、描述或标签..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-blue-300 dark:focus:border-blue-700 focus:ring-blue-500/20 transition-all duration-300 hover:border-blue-200 dark:hover:border-blue-800"
                 />
+                {/* 搜索框光效 */}
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </div>
 
@@ -1544,11 +1606,14 @@ export default function Home() {
                     variant={isActive ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedCategory(category.name)}
-                    className={isActive ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white' : 'border-slate-200 dark:border-slate-700'}
+                    className={isActive 
+                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-md shadow-blue-500/20 transition-all duration-300 hover:scale-105' 
+                      : 'border-slate-200/60 dark:border-slate-700/60 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300'
+                    }
                   >
                     <span className="mr-1">{category.icon}</span>
                     {category.name}
-                    <Badge variant="secondary" className="ml-1.5 bg-white/20 text-white border-0">
+                    <Badge variant="secondary" className="ml-1.5 bg-white/20 text-white border-0 text-[10px]">
                       {category.count}
                     </Badge>
                   </Button>
@@ -1579,24 +1644,35 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
-        <div className="container mx-auto px-4 py-6">
+      <footer className="relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 mt-12">
+        {/* 装饰性渐变背景 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-red-500/5 via-orange-500/5 to-transparent pointer-events-none"></div>
+        
+        <div className="container mx-auto px-4 py-6 relative">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">🦞</span>
-              <span className="font-medium text-slate-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
+            <div className="flex items-center gap-2 group cursor-pointer">
+              <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🦞</span>
+              <span className="font-medium">
+                <span className="text-gradient font-bold">One</span>
+                <span className="text-orange-500 font-bold">Claw</span>
+              </span>
             </div>
-            <p>© 2024 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 精选{aiTools.length}款优质AI视频创作工具</p>
+            <p className="text-center">
+              © 2024 <span className="text-gradient font-semibold">One</span><span className="text-orange-500 font-semibold">Claw</span>. 精选 <span className="text-red-500 font-semibold">{aiTools.length}</span> 款优质AI视频创作工具
+            </p>
             <div className="flex items-center gap-4">
-              <button onClick={() => setActiveTab('prompts')} className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
+              <button onClick={() => setActiveTab('prompts')} className="hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
+                <Sparkles className="h-3.5 w-3.5" />
                 提示词库
               </button>
-              <span className="text-slate-300 dark:text-slate-600">|</span>
-              <button onClick={() => setShowAbout(true)} className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
+              <span className="text-slate-200 dark:border-slate-700">·</span>
+              <button onClick={() => setShowAbout(true)} className="hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
+                <Info className="h-3.5 w-3.5" />
                 关于我们
               </button>
-              <span className="text-slate-300 dark:text-slate-600">|</span>
-              <a href="mailto:1017760688@qq.com" className="hover:text-red-600 dark:hover:text-red-400 transition-colors">
+              <span className="text-slate-200 dark:border-slate-700">·</span>
+              <a href="mailto:1017760688@qq.com" className="hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
+                <Mail className="h-3.5 w-3.5" />
                 商务合作
               </a>
             </div>
