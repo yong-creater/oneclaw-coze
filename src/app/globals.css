@@ -201,32 +201,65 @@ html {
   animation: fadeInUp 0.3s ease-out forwards;
 }
 
-/* 龙虾动画 - 灵动版 */
+/* 龙虾动画 - 活捉版 */
 
-/* 整体轻微摇摆漂浮 */
-@keyframes lobster-sway {
+/* 默认状态：轻微摇摆漂浮 */
+@keyframes lobster-idle {
   0%, 100% {
-    transform: translateY(0) rotate(-1deg);
+    transform: translateY(0) rotate(-0.5deg);
   }
   25% {
-    transform: translateY(-1.5px) rotate(0.5deg);
+    transform: translateY(-1px) rotate(0.25deg);
   }
   50% {
-    transform: translateY(-2px) rotate(1deg);
+    transform: translateY(-1.5px) rotate(0.5deg);
   }
   75% {
-    transform: translateY(-1.5px) rotate(0.5deg);
+    transform: translateY(-1px) rotate(0.25deg);
   }
 }
 
 .lobster-body {
-  animation: lobster-sway 5s ease-in-out infinite;
+  animation: lobster-idle 6s ease-in-out infinite;
   transform-origin: center bottom;
 }
 
-/* 悬停时更活泼 */
-.lobster-container:hover .lobster-body {
-  animation-duration: 1.5s;
+/* Hover状态：变得活跃，想逃跑 */
+.lobster-hovering {
+  animation: lobster-escape 0.3s ease-in-out infinite;
+}
+
+@keyframes lobster-escape {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(1deg);
+  }
+}
+
+/* 被抓住状态：剧烈挣扎 */
+.lobster-caught {
+  animation: lobster-struggle 0.15s ease-in-out infinite;
+}
+
+@keyframes lobster-struggle {
+  0%, 100% {
+    transform: translateY(0) rotate(-5deg) scale(1.05);
+  }
+  25% {
+    transform: translateY(-3px) rotate(3deg) scale(0.98);
+  }
+  50% {
+    transform: translateY(0) rotate(5deg) scale(1.03);
+  }
+  75% {
+    transform: translateY(-2px) rotate(-3deg) scale(1);
+  }
+}
+
+.lobster-caught .lobster-body {
+  animation: none;
 }
 
 /* 眨眼动画 */
@@ -243,30 +276,50 @@ html {
   animation: blink 4s ease-in-out infinite;
 }
 
-/* 钳子开合 */
+/* 被抓住时快速眨眼 */
+.lobster-caught .eyelid {
+  animation: blink 0.3s ease-in-out infinite;
+}
+
+/* 钳子开合 - 默认慢 */
 @keyframes claw-snap {
   0%, 100% {
     transform: rotate(0deg) scale(1);
   }
   50% {
-    transform: rotate(-8deg) scale(1.02);
+    transform: rotate(-6deg) scale(1.02);
   }
 }
 
 .claw-left {
-  animation: claw-snap 2.5s ease-in-out infinite;
+  animation: claw-snap 3s ease-in-out infinite;
   transform-origin: 80px 30px;
 }
 
 .claw-right {
-  animation: claw-snap 2.5s ease-in-out infinite 1.25s;
+  animation: claw-snap 3s ease-in-out infinite 1.5s;
   transform-origin: 80px 50px;
 }
 
-/* 悬停时钳子快速开合 */
-.lobster-container:hover .claw-left,
-.lobster-container:hover .claw-right {
-  animation-duration: 0.6s;
+/* Hover时钳子快速开合 */
+.lobster-hovering .claw-left,
+.lobster-hovering .claw-right {
+  animation-duration: 0.8s;
+}
+
+/* 被抓住时钳子剧烈开合 */
+.lobster-caught .claw-left,
+.lobster-caught .claw-right {
+  animation: claw-panic 0.2s ease-in-out infinite;
+}
+
+@keyframes claw-panic {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(-15deg) scale(1.1);
+  }
 }
 
 /* 触角摆动 */
@@ -280,19 +333,34 @@ html {
 }
 
 .antenna-left {
-  animation: antenna-wave 3s ease-in-out infinite;
+  animation: antenna-wave 4s ease-in-out infinite;
   transform-origin: 98px 33px;
 }
 
 .antenna-right {
-  animation: antenna-wave 3s ease-in-out infinite 1.5s;
+  animation: antenna-wave 4s ease-in-out infinite 2s;
   transform-origin: 98px 47px;
 }
 
-/* 悬停时触角快速摆动 */
-.lobster-container:hover .antenna-left,
-.lobster-container:hover .antenna-right {
-  animation-duration: 0.8s;
+/* Hover时触角快速摆动 */
+.lobster-hovering .antenna-left,
+.lobster-hovering .antenna-right {
+  animation-duration: 1s;
+}
+
+/* 被抓住时触角剧烈摆动 */
+.lobster-caught .antenna-left,
+.lobster-caught .antenna-right {
+  animation: antenna-panic 0.15s ease-in-out infinite;
+}
+
+@keyframes antenna-panic {
+  0%, 100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
 }
 
 /* 步足轻微摆动 */
@@ -306,8 +374,22 @@ html {
 }
 
 .lobster-legs {
-  animation: leg-wiggle 2s ease-in-out infinite;
+  animation: leg-wiggle 3s ease-in-out infinite;
   transform-origin: 70px 40px;
+}
+
+/* 被抓住时步足剧烈摆动 */
+.lobster-caught .lobster-legs {
+  animation: leg-panic 0.2s ease-in-out infinite;
+}
+
+@keyframes leg-panic {
+  0%, 100% {
+    transform: rotate(-5deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
 }
 
 /* 尾部轻微摆动 */
@@ -316,13 +398,27 @@ html {
     transform: rotate(0deg);
   }
   50% {
-    transform: rotate(1deg);
+    transform: rotate(1.5deg);
   }
 }
 
 .lobster-tail {
-  animation: tail-wag 3s ease-in-out infinite;
+  animation: tail-wag 4s ease-in-out infinite;
   transform-origin: 28px 40px;
+}
+
+/* 被抓住时尾部剧烈摆动 */
+.lobster-caught .lobster-tail {
+  animation: tail-panic 0.2s ease-in-out infinite;
+}
+
+@keyframes tail-panic {
+  0%, 100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
 }
 
 /* ========== 龙虾 Loading 动画 ========== */

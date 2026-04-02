@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useCallback } from 'react';
+import { memo, useState, useCallback, useEffect } from 'react';
 
 interface AnimatedLobsterProps {
   size?: number;
@@ -9,47 +9,73 @@ interface AnimatedLobsterProps {
 
 // 交互消息列表
 const INTERACTION_MESSAGES = [
-  { text: '欢迎来到 OneClaw！', emoji: '🎉' },
-  { text: '发现 117 款优质 AI 工具！', emoji: '✨' },
-  { text: '点击工具卡片查看详情', emoji: '👆' },
-  { text: '试试搜索功能吧', emoji: '🔍' },
-  { text: '切换分类找找灵感', emoji: '💡' },
-  { text: 'AI 视频工具一网打尽', emoji: '🎬' },
-  { text: '感谢你的到来', emoji: '❤️' },
-  { text: '今天也要加油哦', emoji: '💪' },
+  { text: '别抓我！', emoji: '😱' },
+  { text: '放我下来！', emoji: '🦞' },
+  { text: '我是无辜的！', emoji: '😅' },
+  { text: '轻点轻点~', emoji: '🥺' },
+  { text: '你抓不到我！', emoji: '💨' },
+  { text: '快去看看工具吧！', emoji: '👇' },
+  { text: '哎呀被发现了！', emoji: '🙈' },
+  { text: '好痒好痒！', emoji: '🤣' },
 ];
 
-// 动画龙虾组件 - 灵动版
+// 动画龙虾组件 - 活捉版
 export const AnimatedLobster = memo(function AnimatedLobster({ 
   size = 48, 
   className = '' 
 }: AnimatedLobsterProps) {
   const [showBubble, setShowBubble] = useState(false);
   const [currentMessage, setCurrentMessage] = useState(INTERACTION_MESSAGES[0]);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isCaught, setIsCaught] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
   const handleClick = useCallback(() => {
-    if (isAnimating) return;
+    if (isCaught) return;
     
     // 随机选择一条消息
     const randomIndex = Math.floor(Math.random() * INTERACTION_MESSAGES.length);
     setCurrentMessage(INTERACTION_MESSAGES[randomIndex]);
     
-    setIsAnimating(true);
+    setIsCaught(true);
     setShowBubble(true);
     
-    // 2.5秒后隐藏气泡
+    // 2秒后恢复
     setTimeout(() => {
       setShowBubble(false);
-      setTimeout(() => setIsAnimating(false), 300);
-    }, 2500);
-  }, [isAnimating]);
+      setTimeout(() => setIsCaught(false), 300);
+    }, 2000);
+  }, [isCaught]);
+
+  // 随机移动效果
+  useEffect(() => {
+    if (!isHovering || isCaught) return;
+    
+    const container = document.querySelector('.lobster-container');
+    if (container) {
+      const randomMove = () => {
+        const x = (Math.random() - 0.5) * 4;
+        const y = (Math.random() - 0.5) * 4;
+        (container as HTMLElement).style.transform = `translate(${x}px, ${y}px)`;
+      };
+      
+      const interval = setInterval(randomMove, 500);
+      return () => clearInterval(interval);
+    }
+  }, [isHovering, isCaught]);
 
   return (
     <div 
-      className={`relative inline-block cursor-pointer lobster-container ${className}`}
+      className={`relative inline-block cursor-pointer lobster-container ${className} ${isCaught ? 'lobster-caught' : ''} ${isHovering ? 'lobster-hovering' : ''}`}
       style={{ width: size, height: size }}
       onClick={handleClick}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => {
+        setIsHovering(false);
+        const container = document.querySelector('.lobster-container');
+        if (container) {
+          (container as HTMLElement).style.transform = '';
+        }
+      }}
       title="点击我互动"
     >
       {/* 消息气泡 - 显示在下方 */}
@@ -77,34 +103,30 @@ export const AnimatedLobster = memo(function AnimatedLobster({
         }}
       >
         <defs>
-          {/* 身体主色渐变 */}
           <linearGradient id="bodyMain" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#ef4444" />
             <stop offset="40%" stopColor="#dc2626" />
             <stop offset="100%" stopColor="#991b1b" />
           </linearGradient>
           
-          {/* 身体高光 */}
           <linearGradient id="bodyHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#fca5a5" />
             <stop offset="100%" stopColor="#ef4444" />
           </linearGradient>
           
-          {/* 钳子渐变 */}
           <linearGradient id="clawGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#f97316" />
             <stop offset="50%" stopColor="#ea580c" />
             <stop offset="100%" stopColor="#c2410c" />
           </linearGradient>
           
-          {/* 腿部渐变 */}
           <linearGradient id="legGradient" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#dc2626" />
             <stop offset="100%" stopColor="#991b1b" />
           </linearGradient>
         </defs>
         
-        {/* 整体 - 轻微摇摆 */}
+        {/* 整体 */}
         <g className="lobster-body">
           {/* 尾部 */}
           <g className="lobster-tail">
@@ -156,12 +178,12 @@ export const AnimatedLobster = memo(function AnimatedLobster({
               <line x1="92" y1="45" x2="96" y2="52" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
               <circle cx="97" cy="53" r="3" fill="#1f2937" className="eye-pupil" />
               <circle cx="98" cy="54" r="1" fill="#fff" />
-              {/* 眼睑 - 用于眨眼动画 */}
+              {/* 眼睑 */}
               <ellipse cx="97" cy="27" rx="3.5" ry="0" fill="url(#bodyMain)" className="eyelid" />
               <ellipse cx="97" cy="53" rx="3.5" ry="0" fill="url(#bodyMain)" className="eyelid" />
             </g>
             
-            {/* 触角 - 轻微摆动 */}
+            {/* 触角 */}
             <g className="lobster-antennae">
               <path d="M98 33 Q105 25, 112 18 Q118 12, 122 8" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-left" />
               <path d="M98 47 Q105 55, 112 62 Q118 68, 122 72" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-right" />
@@ -170,7 +192,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
             </g>
           </g>
           
-          {/* 步足 - 轻微摆动 */}
+          {/* 步足 */}
           <g className="lobster-legs">
             <path d="M75 34 Q70 28, 62 24" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" />
             <path d="M75 46 Q70 52, 62 56" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" />
@@ -184,7 +206,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
             <path d="M62 50 Q56 58, 48 62" stroke="url(#legGradient)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           </g>
           
-          {/* 大钳子 - 开合动画 */}
+          {/* 大钳子 */}
           <g className="lobster-claws">
             {/* 左钳子 */}
             <g className="claw-left">
