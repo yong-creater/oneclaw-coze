@@ -201,51 +201,128 @@ html {
   animation: fadeInUp 0.3s ease-out forwards;
 }
 
-/* 龙虾动画 - 简洁微妙的呼吸感 */
+/* 龙虾动画 - 灵动版 */
 
-/* 整体轻微漂浮 */
-@keyframes lobster-float {
+/* 整体轻微摇摆漂浮 */
+@keyframes lobster-sway {
   0%, 100% {
-    transform: translateY(0);
+    transform: translateY(0) rotate(-1deg);
+  }
+  25% {
+    transform: translateY(-1.5px) rotate(0.5deg);
   }
   50% {
-    transform: translateY(-2px);
+    transform: translateY(-2px) rotate(1deg);
+  }
+  75% {
+    transform: translateY(-1.5px) rotate(0.5deg);
   }
 }
 
 .lobster-body {
-  animation: lobster-float 4s ease-in-out infinite;
+  animation: lobster-sway 5s ease-in-out infinite;
+  transform-origin: center bottom;
 }
 
-/* 钳子缓慢开合 */
-@keyframes claw-snap {
-  0%, 100% {
-    transform: rotate(0deg);
+/* 悬停时更活泼 */
+.lobster-container:hover .lobster-body {
+  animation-duration: 1.5s;
+}
+
+/* 眨眼动画 */
+@keyframes blink {
+  0%, 45%, 55%, 100% {
+    ry: 0;
   }
   50% {
-    transform: rotate(5deg);
+    ry: 3.5;
+  }
+}
+
+.eyelid {
+  animation: blink 4s ease-in-out infinite;
+}
+
+/* 钳子开合 */
+@keyframes claw-snap {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(-8deg) scale(1.02);
   }
 }
 
 .claw-left {
-  animation: claw-snap 3s ease-in-out infinite;
-  transform-origin: right center;
+  animation: claw-snap 2.5s ease-in-out infinite;
+  transform-origin: 80px 30px;
 }
 
 .claw-right {
-  animation: claw-snap 3s ease-in-out infinite 0.5s;
-  transform-origin: right center;
+  animation: claw-snap 2.5s ease-in-out infinite 1.25s;
+  transform-origin: 80px 50px;
 }
 
-/* 点击反馈 */
-.lobster-excited {
-  animation: none;
+/* 悬停时钳子快速开合 */
+.lobster-container:hover .claw-left,
+.lobster-container:hover .claw-right {
+  animation-duration: 0.6s;
 }
 
-.animate-particle,
-.animate-bubble-pop,
-.lobster-pulse {
-  animation: none;
+/* 触角摆动 */
+@keyframes antenna-wave {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+.antenna-left {
+  animation: antenna-wave 3s ease-in-out infinite;
+  transform-origin: 98px 33px;
+}
+
+.antenna-right {
+  animation: antenna-wave 3s ease-in-out infinite 1.5s;
+  transform-origin: 98px 47px;
+}
+
+/* 悬停时触角快速摆动 */
+.lobster-container:hover .antenna-left,
+.lobster-container:hover .antenna-right {
+  animation-duration: 0.8s;
+}
+
+/* 步足轻微摆动 */
+@keyframes leg-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+.lobster-legs {
+  animation: leg-wiggle 2s ease-in-out infinite;
+  transform-origin: 70px 40px;
+}
+
+/* 尾部轻微摆动 */
+@keyframes tail-wag {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+
+.lobster-tail {
+  animation: tail-wag 3s ease-in-out infinite;
+  transform-origin: 28px 40px;
 }
 
 /* ========== 龙虾 Loading 动画 ========== */

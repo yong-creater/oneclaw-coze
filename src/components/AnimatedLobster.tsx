@@ -9,17 +9,17 @@ interface AnimatedLobsterProps {
 
 // 交互消息列表
 const INTERACTION_MESSAGES = [
-  { text: '欢迎来到 OneClaw！🦞', emoji: '🎉' },
+  { text: '欢迎来到 OneClaw！', emoji: '🎉' },
   { text: '发现 117 款优质 AI 工具！', emoji: '✨' },
-  { text: '点击工具卡片查看详情~', emoji: '👆' },
-  { text: '试试搜索功能吧！', emoji: '🔍' },
-  { text: '切换分类找找灵感！', emoji: '💡' },
-  { text: 'AI 视频工具一网打尽！', emoji: '🎬' },
-  { text: '感谢你的到来！', emoji: '❤️' },
-  { text: '今天也要加油哦！', emoji: '💪' },
+  { text: '点击工具卡片查看详情', emoji: '👆' },
+  { text: '试试搜索功能吧', emoji: '🔍' },
+  { text: '切换分类找找灵感', emoji: '💡' },
+  { text: 'AI 视频工具一网打尽', emoji: '🎬' },
+  { text: '感谢你的到来', emoji: '❤️' },
+  { text: '今天也要加油哦', emoji: '💪' },
 ];
 
-// 动画龙虾组件 - 支持点击交互
+// 动画龙虾组件 - 灵动版
 export const AnimatedLobster = memo(function AnimatedLobster({ 
   size = 48, 
   className = '' 
@@ -38,27 +38,27 @@ export const AnimatedLobster = memo(function AnimatedLobster({
     setIsAnimating(true);
     setShowBubble(true);
     
-    // 3秒后隐藏气泡
+    // 2.5秒后隐藏气泡
     setTimeout(() => {
       setShowBubble(false);
       setTimeout(() => setIsAnimating(false), 300);
-    }, 3000);
+    }, 2500);
   }, [isAnimating]);
 
   return (
     <div 
-      className={`relative inline-block cursor-pointer ${className}`}
+      className={`relative inline-block cursor-pointer lobster-container ${className}`}
       style={{ width: size, height: size }}
       onClick={handleClick}
       title="点击我互动"
     >
       {/* 消息气泡 */}
       <div 
-        className={`absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap 
-          bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-lg border border-slate-200 
+        className={`absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap 
+          bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-md border border-slate-200 
           dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200
           transition-all duration-300 z-50
-          ${showBubble ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'}`}
+          ${showBubble ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-2 pointer-events-none'}`}
       >
         <span className="mr-1">{currentMessage.emoji}</span>
         {currentMessage.text}
@@ -71,7 +71,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       {/* 龙虾主体 */}
       <svg 
         viewBox="0 0 120 80" 
-        className="w-full h-full lobster-body"
+        className="w-full h-full"
         style={{ 
           filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
         }}
@@ -104,10 +104,10 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           </linearGradient>
         </defs>
         
-        {/* 整体 */}
+        {/* 整体 - 轻微摇摆 */}
         <g className="lobster-body">
           {/* 尾部 */}
-          <g>
+          <g className="lobster-tail">
             <path d="M8 40 Q2 35, 0 28 Q5 32, 10 36" fill="url(#bodyMain)" />
             <path d="M8 40 Q1 40, 0 40" fill="url(#bodyMain)" />
             <path d="M8 40 Q2 45, 0 52 Q5 48, 10 44" fill="url(#bodyMain)" />
@@ -148,27 +148,30 @@ export const AnimatedLobster = memo(function AnimatedLobster({
               strokeWidth="0.5"
             />
             
-            {/* 眼睛 */}
-            <g>
+            {/* 眼睛 - 会眨眼 */}
+            <g className="lobster-eyes">
               <line x1="92" y1="35" x2="96" y2="28" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="97" cy="27" r="3" fill="#1f2937" />
+              <circle cx="97" cy="27" r="3" fill="#1f2937" className="eye-pupil" />
               <circle cx="98" cy="26" r="1" fill="#fff" />
               <line x1="92" y1="45" x2="96" y2="52" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="97" cy="53" r="3" fill="#1f2937" />
+              <circle cx="97" cy="53" r="3" fill="#1f2937" className="eye-pupil" />
               <circle cx="98" cy="54" r="1" fill="#fff" />
+              {/* 眼睑 - 用于眨眼动画 */}
+              <ellipse cx="97" cy="27" rx="3.5" ry="0" fill="url(#bodyMain)" className="eyelid" />
+              <ellipse cx="97" cy="53" rx="3.5" ry="0" fill="url(#bodyMain)" className="eyelid" />
             </g>
             
-            {/* 触角 */}
-            <g>
-              <path d="M98 33 Q105 25, 112 18 Q118 12, 122 8" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-              <path d="M98 47 Q105 55, 112 62 Q118 68, 122 72" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" />
+            {/* 触角 - 轻微摆动 */}
+            <g className="lobster-antennae">
+              <path d="M98 33 Q105 25, 112 18 Q118 12, 122 8" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-left" />
+              <path d="M98 47 Q105 55, 112 62 Q118 68, 122 72" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-right" />
               <path d="M96 36 Q100 32, 104 30" stroke="#7f1d1d" strokeWidth="1" fill="none" strokeLinecap="round" />
               <path d="M96 44 Q100 48, 104 50" stroke="#7f1d1d" strokeWidth="1" fill="none" strokeLinecap="round" />
             </g>
           </g>
           
-          {/* 步足 */}
-          <g>
+          {/* 步足 - 轻微摆动 */}
+          <g className="lobster-legs">
             <path d="M75 34 Q70 28, 62 24" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" />
             <path d="M75 46 Q70 52, 62 56" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" />
             <path d="M72 33 Q66 26, 58 22" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" />
@@ -181,8 +184,8 @@ export const AnimatedLobster = memo(function AnimatedLobster({
             <path d="M62 50 Q56 58, 48 62" stroke="url(#legGradient)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           </g>
           
-          {/* 大钳子 */}
-          <g>
+          {/* 大钳子 - 开合动画 */}
+          <g className="lobster-claws">
             {/* 左钳子 */}
             <g className="claw-left">
               <path d="M80 30 Q72 22, 62 18 Q54 15, 48 12" stroke="url(#clawGradient)" strokeWidth="5" fill="none" strokeLinecap="round" />
