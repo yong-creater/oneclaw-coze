@@ -352,12 +352,12 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
               </div>
               {/* 收藏和关闭按钮 */}
               <div className="flex items-center gap-2">
-                <button className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                <button className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                   <Heart className="h-4 w-4 text-slate-400" />
                 </button>
                 <button 
                   onClick={onClose}
-                  className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                  className="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                 >
                   <X className="h-4 w-4 text-slate-400" />
                 </button>
@@ -438,20 +438,20 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
               <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-900 rounded-lg mb-3">
                 <button
                   onClick={() => setActiveTab('agent')}
-                  className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                     activeTab === 'agent' 
                       ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
-                      : 'text-slate-600 dark:text-slate-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   🤖 我是 Agent
                 </button>
                 <button
                   onClick={() => setActiveTab('human')}
-                  className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                     activeTab === 'human' 
                       ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' 
-                      : 'text-slate-600 dark:text-slate-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   👨 我是 Human
@@ -1571,7 +1571,7 @@ export default function Home() {
                   </div>
                   <button 
                     onClick={fetchAINews}
-                    className="text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+                    className="text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
                     disabled={loadingNews}
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${loadingNews ? 'animate-spin' : ''}`} />
@@ -1589,7 +1589,7 @@ export default function Home() {
                         href={news.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="block group"
+                        className="block group cursor-pointer"
                       >
                         <div className="flex items-start gap-2">
                           <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
@@ -1879,17 +1879,17 @@ export default function Home() {
               © 2024 <span className="text-gradient font-semibold">One</span><span className="text-orange-500 font-semibold">Claw</span>. 精选 <span className="text-red-500 font-semibold">{aiTools.length}</span> 款优质AI视频创作工具
             </p>
             <div className="flex items-center gap-4">
-              <button onClick={() => setActiveTab('prompts')} className="hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
+              <button onClick={() => setActiveTab('prompts')} className="cursor-pointer hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
                 <Sparkles className="h-3.5 w-3.5" />
                 提示词库
               </button>
               <span className="text-slate-200 dark:border-slate-700">·</span>
-              <button onClick={() => setShowAbout(true)} className="hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
+              <button onClick={() => setShowAbout(true)} className="cursor-pointer hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
                 <Info className="h-3.5 w-3.5" />
                 关于我们
               </button>
               <span className="text-slate-200 dark:border-slate-700">·</span>
-              <a href="mailto:1017760688@qq.com" className="hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
+              <a href="mailto:1017760688@qq.com" className="cursor-pointer hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
                 <Mail className="h-3.5 w-3.5" />
                 商务合作
               </a>
