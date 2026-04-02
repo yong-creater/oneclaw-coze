@@ -7,7 +7,7 @@ interface AnimatedLobsterProps {
   className?: string;
 }
 
-// 动画龙虾组件
+// 动画龙虾组件 - 更逼真的设计
 export const AnimatedLobster = memo(function AnimatedLobster({ 
   size = 48, 
   className = '' 
@@ -19,141 +19,189 @@ export const AnimatedLobster = memo(function AnimatedLobster({
     >
       {/* 气泡效果 */}
       <div className="absolute inset-0 overflow-visible pointer-events-none">
-        <div className="lobster-bubble" style={{ left: '20%', animationDelay: '0s' }} />
-        <div className="lobster-bubble" style={{ left: '50%', animationDelay: '0.5s' }} />
-        <div className="lobster-bubble" style={{ left: '80%', animationDelay: '1s' }} />
+        <div className="lobster-bubble" style={{ left: '10%', animationDelay: '0s' }} />
+        <div className="lobster-bubble" style={{ left: '30%', animationDelay: '0.8s' }} />
+        <div className="lobster-bubble" style={{ left: '60%', animationDelay: '1.6s' }} />
       </div>
       
       {/* 龙虾主体 */}
       <svg 
-        viewBox="0 0 100 100" 
-        className="w-full h-full lobster-swim"
-        style={{ filter: 'drop-shadow(0 4px 8px rgba(239, 68, 68, 0.3))' }}
+        viewBox="0 0 120 80" 
+        className="w-full h-full"
+        style={{ 
+          filter: 'drop-shadow(0 3px 6px rgba(220, 38, 38, 0.4))',
+          transformOrigin: 'center center'
+        }}
       >
         <defs>
-          {/* 身体渐变 */}
-          <linearGradient id="lobsterBody" x1="0%" y1="0%" x2="100%" y2="100%">
+          {/* 身体主色渐变 */}
+          <linearGradient id="bodyMain" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#ef4444" />
-            <stop offset="50%" stopColor="#dc2626" />
-            <stop offset="100%" stopColor="#b91c1c" />
+            <stop offset="40%" stopColor="#dc2626" />
+            <stop offset="100%" stopColor="#991b1b" />
+          </linearGradient>
+          
+          {/* 身体高光 */}
+          <linearGradient id="bodyHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#fca5a5" />
+            <stop offset="100%" stopColor="#ef4444" />
           </linearGradient>
           
           {/* 钳子渐变 */}
-          <linearGradient id="lobsterClaw" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="clawGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#ea580c" />
+            <stop offset="50%" stopColor="#ea580c" />
+            <stop offset="100%" stopColor="#c2410c" />
           </linearGradient>
           
-          {/* 高光渐变 */}
-          <linearGradient id="lobsterHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+          {/* 腿部渐变 */}
+          <linearGradient id="legGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#dc2626" />
+            <stop offset="100%" stopColor="#991b1b" />
           </linearGradient>
         </defs>
         
-        {/* 尾巴 - 摆动动画 */}
-        <g className="lobster-tail">
-          {/* 尾扇 */}
-          <path 
-            d="M15 50 Q5 45, 2 35 Q8 40, 15 45 Q8 45, 2 55 Q8 50, 15 55 Q5 55, 2 65 Q5 60, 15 55" 
-            fill="url(#lobsterBody)"
-            stroke="#991b1b"
-            strokeWidth="0.5"
-          />
-          {/* 尾节 */}
-          <ellipse cx="22" cy="50" rx="8" ry="6" fill="url(#lobsterBody)" />
-        </g>
-        
-        {/* 腹部 - 分节 */}
-        <g className="lobster-abdomen">
-          <ellipse cx="35" cy="50" rx="10" ry="8" fill="url(#lobsterBody)" />
-          <ellipse cx="48" cy="50" rx="10" ry="9" fill="url(#lobsterBody)" />
-          <ellipse cx="60" cy="50" rx="9" ry="8" fill="url(#lobsterBody)" />
-          {/* 腹部纹理 */}
-          <path d="M30 46 Q35 44, 40 46" stroke="#991b1b" strokeWidth="0.5" fill="none" opacity="0.5" />
-          <path d="M43 45 Q48 43, 53 45" stroke="#991b1b" strokeWidth="0.5" fill="none" opacity="0.5" />
-          <path d="M55 46 Q60 44, 65 46" stroke="#991b1b" strokeWidth="0.5" fill="none" opacity="0.5" />
-        </g>
-        
-        {/* 头胸部 */}
-        <g className="lobster-thorax">
-          <ellipse cx="75" cy="50" rx="12" ry="14" fill="url(#lobsterBody)" />
-          {/* 高光 */}
-          <ellipse cx="75" cy="45" rx="8" ry="6" fill="url(#lobsterHighlight)" />
-          {/* 眼睛 */}
-          <g className="lobster-eyes">
-            {/* 眼柄 */}
-            <line x1="78" y1="42" x2="85" y2="35" stroke="#991b1b" strokeWidth="2" strokeLinecap="round" />
-            <line x1="78" y1="42" x2="72" y2="35" stroke="#991b1b" strokeWidth="2" strokeLinecap="round" />
-            {/* 眼球 */}
-            <circle cx="86" cy="34" r="3" fill="#1f2937" />
-            <circle cx="71" cy="34" r="3" fill="#1f2937" />
-            <circle cx="87" cy="33" r="1" fill="white" />
-            <circle cx="72" cy="33" r="1" fill="white" />
+        {/* 整体游泳动画 */}
+        <g className="lobster-body">
+          {/* ========== 尾部 ========== */}
+          <g className="lobster-tail-section">
+            {/* 尾扇 - 五片 */}
+            <g className="lobster-tail-fin">
+              <path d="M8 40 Q2 35, 0 28 Q5 32, 10 36" fill="url(#bodyMain)" className="tail-fin-1" />
+              <path d="M8 40 Q1 40, 0 40" fill="url(#bodyMain)" className="tail-fin-2" />
+              <path d="M8 40 Q2 45, 0 52 Q5 48, 10 44" fill="url(#bodyMain)" className="tail-fin-3" />
+            </g>
+            {/* 尾节 */}
+            <ellipse cx="15" cy="40" rx="8" ry="7" fill="url(#bodyMain)" />
+            <ellipse cx="15" cy="38" rx="4" ry="2" fill="url(#bodyHighlight)" opacity="0.5" />
           </g>
-          {/* 触角 */}
-          <g className="lobster-antenna">
-            <path d="M82 38 Q90 30, 95 20" stroke="#991b1b" strokeWidth="1.5" fill="none" strokeLinecap="round" className="antenna-wave" />
-            <path d="M68 38 Q60 30, 55 20" stroke="#991b1b" strokeWidth="1.5" fill="none" strokeLinecap="round" className="antenna-wave-delayed" />
+          
+          {/* ========== 腹部（分6节）========== */}
+          <g className="lobster-abdomen">
+            {/* 腹节1 */}
+            <ellipse cx="28" cy="40" rx="9" ry="8" fill="url(#bodyMain)" />
+            <ellipse cx="28" cy="37" rx="4" ry="2" fill="url(#bodyHighlight)" opacity="0.4" />
+            <path d="M22 36 Q28 34, 34 36" stroke="#7f1d1d" strokeWidth="0.8" fill="none" opacity="0.6" />
+            
+            {/* 腹节2 */}
+            <ellipse cx="42" cy="40" rx="9" ry="9" fill="url(#bodyMain)" />
+            <ellipse cx="42" cy="37" rx="4" ry="2" fill="url(#bodyHighlight)" opacity="0.4" />
+            <path d="M36 36 Q42 34, 48 36" stroke="#7f1d1d" strokeWidth="0.8" fill="none" opacity="0.6" />
+            
+            {/* 腹节3 */}
+            <ellipse cx="55" cy="40" rx="8" ry="8" fill="url(#bodyMain)" />
+            <ellipse cx="55" cy="37" rx="3.5" ry="2" fill="url(#bodyHighlight)" opacity="0.4" />
+            <path d="M49 36 Q55 34, 61 36" stroke="#7f1d1d" strokeWidth="0.8" fill="none" opacity="0.6" />
+            
+            {/* 腹节4 */}
+            <ellipse cx="66" cy="40" rx="7" ry="7" fill="url(#bodyMain)" />
+            <ellipse cx="66" cy="37" rx="3" ry="1.5" fill="url(#bodyHighlight)" opacity="0.4" />
+            <path d="M61 36 Q66 34, 71 36" stroke="#7f1d1d" strokeWidth="0.8" fill="none" opacity="0.6" />
+            
+            {/* 腹节5 */}
+            <ellipse cx="75" cy="40" rx="6" ry="6" fill="url(#bodyMain)" />
+            <ellipse cx="75" cy="37" rx="2.5" ry="1.5" fill="url(#bodyHighlight)" opacity="0.4" />
+            
+            {/* 腹节6（连接头胸部）*/}
+            <ellipse cx="82" cy="40" rx="5" ry="5" fill="url(#bodyMain)" />
           </g>
-        </g>
-        
-        {/* 大钳子 - 左 */}
-        <g className="lobster-claw-left">
-          {/* 钳臂 */}
-          <path 
-            d="M70 60 Q65 70, 55 75 Q50 78, 45 85" 
-            stroke="url(#lobsterClaw)" 
-            strokeWidth="6" 
-            fill="none" 
-            strokeLinecap="round"
-          />
-          {/* 钳子 */}
-          <g transform="translate(45, 85) rotate(-30)">
+          
+          {/* ========== 头胸部 ========== */}
+          <g className="lobster-thorax">
+            {/* 头胸甲主体 */}
             <path 
-              d="M0 0 Q-8 -5, -15 0 Q-8 5, 0 0" 
-              fill="url(#lobsterClaw)"
-              className="claw-snap"
+              d="M85 28 Q95 30, 100 35 Q105 40, 100 45 Q95 50, 85 52 Q80 52, 78 48 Q76 40, 78 32 Q80 28, 85 28" 
+              fill="url(#bodyMain)" 
             />
+            {/* 头胸甲高光 */}
             <path 
-              d="M0 0 Q-8 8, -12 15 Q-5 10, 0 0" 
-              fill="url(#lobsterClaw)"
-              className="claw-snap-delayed"
+              d="M85 30 Q92 32, 96 36 Q98 38, 96 40 Q92 35, 85 33" 
+              fill="url(#bodyHighlight)" 
+              opacity="0.4" 
             />
+            {/* 额角（额剑）*/}
+            <path 
+              d="M100 40 Q108 38, 115 40 Q108 42, 100 40" 
+              fill="url(#bodyMain)" 
+              stroke="#991b1b"
+              strokeWidth="0.5"
+            />
+            
+            {/* 眼睛 */}
+            <g className="lobster-eyes">
+              {/* 左眼 */}
+              <line x1="92" y1="35" x2="96" y2="28" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="97" cy="27" r="3" fill="#1f2937" />
+              <circle cx="98" cy="26" r="1" fill="#fff" />
+              
+              {/* 右眼 */}
+              <line x1="92" y1="45" x2="96" y2="52" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="97" cy="53" r="3" fill="#1f2937" />
+              <circle cx="98" cy="54" r="1" fill="#fff" />
+            </g>
+            
+            {/* 触角 */}
+            <g className="lobster-antennae">
+              {/* 长触角 */}
+              <path d="M98 33 Q105 25, 112 18 Q118 12, 122 8" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-long-1" />
+              <path d="M98 47 Q105 55, 112 62 Q118 68, 122 72" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-long-2" />
+              {/* 短触角 */}
+              <path d="M96 36 Q100 32, 104 30" stroke="#7f1d1d" strokeWidth="1" fill="none" strokeLinecap="round" className="antenna-short-1" />
+              <path d="M96 44 Q100 48, 104 50" stroke="#7f1d1d" strokeWidth="1" fill="none" strokeLinecap="round" className="antenna-short-2" />
+            </g>
           </g>
-        </g>
-        
-        {/* 大钳子 - 右 */}
-        <g className="lobster-claw-right">
-          {/* 钳臂 */}
-          <path 
-            d="M70 40 Q65 30, 55 25 Q50 22, 45 15" 
-            stroke="url(#lobsterClaw)" 
-            strokeWidth="6" 
-            fill="none" 
-            strokeLinecap="round"
-          />
-          {/* 钳子 */}
-          <g transform="translate(45, 15) rotate(30)">
-            <path 
-              d="M0 0 Q-8 -5, -15 0 Q-8 5, 0 0" 
-              fill="url(#lobsterClaw)"
-              className="claw-snap"
-            />
-            <path 
-              d="M0 0 Q-8 8, -12 15 Q-5 10, 0 0" 
-              fill="url(#lobsterClaw)"
-              className="claw-snap-delayed"
-            />
+          
+          {/* ========== 步足（5对）========== */}
+          <g className="lobster-legs">
+            {/* 第1对步足 */}
+            <path d="M75 34 Q70 28, 62 24" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-pair-1" />
+            <path d="M75 46 Q70 52, 62 56" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-pair-1" />
+            
+            {/* 第2对步足 */}
+            <path d="M72 33 Q66 26, 58 22" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-pair-2" />
+            <path d="M72 47 Q66 54, 58 58" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-pair-2" />
+            
+            {/* 第3对步足 */}
+            <path d="M68 32 Q62 24, 54 20" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-pair-3" />
+            <path d="M68 48 Q62 56, 54 60" stroke="url(#legGradient)" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-pair-3" />
+            
+            {/* 第4对步足 */}
+            <path d="M65 31 Q58 22, 50 18" stroke="url(#legGradient)" strokeWidth="1.8" fill="none" strokeLinecap="round" className="leg-pair-4" />
+            <path d="M65 49 Q58 58, 50 62" stroke="url(#legGradient)" strokeWidth="1.8" fill="none" strokeLinecap="round" className="leg-pair-4" />
+            
+            {/* 第5对步足（较小）*/}
+            <path d="M62 30 Q56 22, 48 18" stroke="url(#legGradient)" strokeWidth="1.5" fill="none" strokeLinecap="round" className="leg-pair-5" />
+            <path d="M62 50 Q56 58, 48 62" stroke="url(#legGradient)" strokeWidth="1.5" fill="none" strokeLinecap="round" className="leg-pair-5" />
           </g>
-        </g>
-        
-        {/* 步足 */}
-        <g className="lobster-legs">
-          <path d="M60 55 Q55 62, 48 68" stroke="#991b1b" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-walk" />
-          <path d="M65 57 Q62 65, 58 72" stroke="#991b1b" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-walk-delayed" />
-          <path d="M60 45 Q55 38, 48 32" stroke="#991b1b" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-walk" />
-          <path d="M65 43 Q62 35, 58 28" stroke="#991b1b" strokeWidth="2" fill="none" strokeLinecap="round" className="leg-walk-delayed" />
+          
+          {/* ========== 大钳子 ========== */}
+          <g className="lobster-claws">
+            {/* 左钳子（上方）*/}
+            <g className="claw-left">
+              {/* 钳臂 */}
+              <path d="M80 30 Q72 22, 62 18 Q54 15, 48 12" stroke="url(#clawGradient)" strokeWidth="5" fill="none" strokeLinecap="round" />
+              {/* 钳子上半部分 */}
+              <path d="M48 12 Q42 8, 36 10 Q32 12, 35 16 Q40 14, 48 12" fill="url(#clawGradient)" className="claw-upper-left" />
+              {/* 钳子下半部分 */}
+              <path d="M48 12 Q44 16, 38 20 Q34 22, 36 18 Q42 16, 48 12" fill="url(#clawGradient)" className="claw-lower-left" />
+              {/* 钳子上的齿 */}
+              <circle cx="38" cy="14" r="1.5" fill="#c2410c" />
+              <circle cx="40" cy="17" r="1" fill="#c2410c" />
+            </g>
+            
+            {/* 右钳子（下方）*/}
+            <g className="claw-right">
+              {/* 钳臂 */}
+              <path d="M80 50 Q72 58, 62 62 Q54 65, 48 68" stroke="url(#clawGradient)" strokeWidth="5" fill="none" strokeLinecap="round" />
+              {/* 钳子上半部分 */}
+              <path d="M48 68 Q42 72, 36 70 Q32 68, 35 64 Q40 66, 48 68" fill="url(#clawGradient)" className="claw-upper-right" />
+              {/* 钳子下半部分 */}
+              <path d="M48 68 Q44 64, 38 60 Q34 58, 36 62 Q42 64, 48 68" fill="url(#clawGradient)" className="claw-lower-right" />
+              {/* 钳子上的齿 */}
+              <circle cx="38" cy="66" r="1.5" fill="#c2410c" />
+              <circle cx="40" cy="63" r="1" fill="#c2410c" />
+            </g>
+          </g>
         </g>
       </svg>
     </div>

@@ -288,132 +288,256 @@ html {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* 龙虾游泳动画 */
-@keyframes lobster-swim {
+/* 龙虾游泳动画 - 更自然逼真 */
+
+/* 整体身体游泳 */
+@keyframes lobster-swim-body {
   0%, 100% {
     transform: translateX(0) translateY(0) rotate(0deg);
   }
-  25% {
-    transform: translateX(3px) translateY(-2px) rotate(2deg);
+  15% {
+    transform: translateX(1px) translateY(-1px) rotate(1deg);
   }
-  50% {
-    transform: translateX(0) translateY(-4px) rotate(0deg);
+  30% {
+    transform: translateX(0) translateY(-2px) rotate(0deg);
+  }
+  45% {
+    transform: translateX(-1px) translateY(-1px) rotate(-1deg);
+  }
+  60% {
+    transform: translateX(0) translateY(0) rotate(0deg);
   }
   75% {
-    transform: translateX(-3px) translateY(-2px) rotate(-2deg);
+    transform: translateX(1px) translateY(-1px) rotate(0.5deg);
   }
 }
 
-.lobster-swim {
-  animation: lobster-swim 4s ease-in-out infinite;
+.lobster-body {
+  animation: lobster-swim-body 3s ease-in-out infinite;
   transform-origin: center center;
 }
 
-/* 龙虾尾巴摆动 */
-@keyframes tail-wag {
+/* 尾部摆动 */
+@keyframes tail-wave {
   0%, 100% {
     transform: rotate(0deg);
   }
   25% {
-    transform: rotate(8deg);
+    transform: rotate(12deg);
   }
   75% {
+    transform: rotate(-12deg);
+  }
+}
+
+.lobster-tail-section {
+  animation: tail-wave 1.2s ease-in-out infinite;
+  transform-origin: right center;
+}
+
+/* 尾扇独立摆动 */
+@keyframes fin-flutter {
+  0%, 100% {
+    transform: rotate(0deg) scaleY(1);
+  }
+  50% {
+    transform: rotate(5deg) scaleY(0.95);
+  }
+}
+
+.tail-fin-1 {
+  animation: fin-flutter 0.6s ease-in-out infinite;
+  transform-origin: right center;
+}
+
+.tail-fin-2 {
+  animation: fin-flutter 0.6s ease-in-out infinite 0.1s;
+  transform-origin: right center;
+}
+
+.tail-fin-3 {
+  animation: fin-flutter 0.6s ease-in-out infinite 0.2s;
+  transform-origin: right center;
+}
+
+/* 钳子开合 */
+@keyframes claw-snap-left {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-8deg);
+  }
+  60% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes claw-snap-right {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(8deg);
+  }
+  60% {
+    transform: rotate(-5deg);
+  }
+}
+
+.claw-left {
+  animation: claw-snap-left 2s ease-in-out infinite;
+  transform-origin: right center;
+}
+
+.claw-right {
+  animation: claw-snap-right 2s ease-in-out infinite 0.3s;
+  transform-origin: right center;
+}
+
+/* 钳子上下颚 */
+@keyframes claw-jaw {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+
+.claw-upper-left, .claw-lower-left {
+  animation: claw-jaw 2s ease-in-out infinite;
+  transform-origin: right center;
+}
+
+.claw-lower-left {
+  animation-delay: 0.1s;
+}
+
+.claw-upper-right, .claw-lower-right {
+  animation: claw-jaw 2s ease-in-out infinite 0.3s;
+  transform-origin: right center;
+}
+
+.claw-lower-right {
+  animation-delay: 0.4s;
+}
+
+/* 步足交替摆动 */
+@keyframes leg-paddle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+}
+
+@keyframes leg-paddle-reverse {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-12deg);
+  }
+}
+
+.leg-pair-1 {
+  animation: leg-paddle 0.5s ease-in-out infinite;
+  transform-origin: top right;
+}
+
+.leg-pair-2 {
+  animation: leg-paddle-reverse 0.5s ease-in-out infinite 0.1s;
+  transform-origin: top right;
+}
+
+.leg-pair-3 {
+  animation: leg-paddle 0.5s ease-in-out infinite 0.2s;
+  transform-origin: top right;
+}
+
+.leg-pair-4 {
+  animation: leg-paddle-reverse 0.5s ease-in-out infinite 0.3s;
+  transform-origin: top right;
+}
+
+.leg-pair-5 {
+  animation: leg-paddle 0.5s ease-in-out infinite 0.4s;
+  transform-origin: top right;
+}
+
+/* 触角摆动 */
+@keyframes antenna-sway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(8deg);
+  }
+  70% {
     transform: rotate(-8deg);
   }
 }
 
-.lobster-tail {
-  animation: tail-wag 1.5s ease-in-out infinite;
-  transform-origin: right center;
-}
-
-/* 龙虾钳子开合 */
-@keyframes claw-snap {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(10deg);
-  }
-}
-
-.claw-snap {
-  animation: claw-snap 2s ease-in-out infinite;
-  transform-origin: right center;
-}
-
-.claw-snap-delayed {
-  animation: claw-snap 2s ease-in-out infinite;
-  animation-delay: 0.1s;
-  transform-origin: right center;
-}
-
-/* 龙虾步足摆动 */
-@keyframes leg-walk {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(15deg);
-  }
-}
-
-.leg-walk {
-  animation: leg-walk 0.8s ease-in-out infinite;
-  transform-origin: top right;
-}
-
-.leg-walk-delayed {
-  animation: leg-walk 0.8s ease-in-out infinite;
-  animation-delay: 0.4s;
-  transform-origin: top right;
-}
-
-/* 龙虾触角摆动 */
-@keyframes antenna-wave {
-  0%, 100% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(10deg);
-  }
-}
-
-.antenna-wave {
-  animation: antenna-wave 1.5s ease-in-out infinite;
+.antenna-long-1 {
+  animation: antenna-sway 2s ease-in-out infinite;
   transform-origin: left bottom;
 }
 
-.antenna-wave-delayed {
-  animation: antenna-wave 1.5s ease-in-out infinite;
-  animation-delay: 0.3s;
-  transform-origin: right bottom;
+.antenna-long-2 {
+  animation: antenna-sway 2s ease-in-out infinite 0.5s;
+  transform-origin: left top;
+}
+
+.antenna-short-1 {
+  animation: antenna-sway 1.5s ease-in-out infinite;
+  transform-origin: left bottom;
+}
+
+.antenna-short-2 {
+  animation: antenna-sway 1.5s ease-in-out infinite 0.3s;
+  transform-origin: left top;
+}
+
+/* 眼睛轻微移动 */
+@keyframes eye-move {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(0.5px);
+  }
+}
+
+.lobster-eyes {
+  animation: eye-move 3s ease-in-out infinite;
 }
 
 /* 龙虾气泡效果 */
 @keyframes bubble-float {
   0% {
     opacity: 0;
-    transform: translateY(0) scale(0);
+    transform: translateY(0) translateX(0) scale(0);
   }
   20% {
     opacity: 0.8;
-    transform: translateY(-5px) scale(0.5);
+    transform: translateY(-5px) translateX(1px) scale(0.4);
   }
   100% {
     opacity: 0;
-    transform: translateY(-30px) scale(1);
+    transform: translateY(-25px) translateX(-2px) scale(0.8);
   }
 }
 
 .lobster-bubble {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(135,206,250,0.6));
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(135,206,250,0.6));
   border-radius: 50%;
-  animation: bubble-float 3s ease-out infinite;
-  bottom: 30%;
+  animation: bubble-float 2.5s ease-out infinite;
+  bottom: 40%;
   pointer-events: none;
 }
 
