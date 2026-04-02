@@ -52,20 +52,20 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       onClick={handleClick}
       title="点击我互动"
     >
-      {/* 消息气泡 */}
+      {/* 消息气泡 - 显示在下方 */}
       <div 
-        className={`absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap 
+        className={`absolute top-full mt-2 left-1/2 -translate-x-1/2 whitespace-nowrap 
           bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-md border border-slate-200 
           dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200
           transition-all duration-300 z-50
-          ${showBubble ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 translate-y-2 pointer-events-none'}`}
+          ${showBubble ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-75 -translate-y-2 pointer-events-none'}`}
       >
         <span className="mr-1">{currentMessage.emoji}</span>
         {currentMessage.text}
-        {/* 气泡尖角 */}
-        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 
-          bg-white dark:bg-slate-800 border-r border-b border-slate-200 dark:border-slate-700
-          rotate-45" />
+        {/* 气泡尖角 - 向上 */}
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 
+          bg-white dark:bg-slate-800 border-l border-t border-slate-200 dark:border-slate-700
+          -rotate-45" />
       </div>
       
       {/* 龙虾主体 */}
