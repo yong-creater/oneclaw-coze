@@ -9,7 +9,7 @@ interface LobsterLoadingProps {
   className?: string;
 }
 
-// 龙虾 SVG 基础组件
+// 可爱卡通龙虾 SVG 基础组件
 const LobsterSVG = memo(function LobsterSVG({ 
   size, 
   className = '' 
@@ -19,78 +19,96 @@ const LobsterSVG = memo(function LobsterSVG({
 }) {
   return (
     <svg 
-      viewBox="0 0 120 80" 
+      viewBox="0 0 64 64" 
       className={className}
-      style={{ width: size, height: size * 0.67 }}
+      style={{ width: size, height: size }}
     >
       <defs>
-        <linearGradient id="loadingBody" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#ef4444" />
-          <stop offset="50%" stopColor="#dc2626" />
-          <stop offset="100%" stopColor="#991b1b" />
+        {/* 身体渐变 - 橙红色 */}
+        <linearGradient id="loadingBodyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF6B4A" />
+          <stop offset="50%" stopColor="#E85A3C" />
+          <stop offset="100%" stopColor="#C94A2E" />
         </linearGradient>
-        <linearGradient id="loadingHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#fca5a5" />
-          <stop offset="100%" stopColor="#ef4444" />
+        
+        {/* 钳子渐变 - 橙色 */}
+        <linearGradient id="loadingClawGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF8C5A" />
+          <stop offset="100%" stopColor="#E86A3C" />
         </linearGradient>
-        <linearGradient id="loadingClaw" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#f97316" />
-          <stop offset="100%" stopColor="#c2410c" />
+        
+        {/* 高光渐变 */}
+        <linearGradient id="loadingHighlightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#FFB08A" />
+          <stop offset="100%" stopColor="#FF6B4A" />
         </linearGradient>
       </defs>
       
-      {/* 尾部 */}
-      <path d="M8 40 Q2 35, 0 28 Q5 32, 10 36" fill="url(#loadingBody)" />
-      <path d="M8 40 Q1 40, 0 40" fill="url(#loadingBody)" />
-      <path d="M8 40 Q2 45, 0 52 Q5 48, 10 44" fill="url(#loadingBody)" />
-      <ellipse cx="15" cy="40" rx="8" ry="7" fill="url(#loadingBody)" />
+      {/* 主体 - 圆润椭圆形 */}
+      <g className="lobster-body">
+        {/* 身体主体 */}
+        <ellipse cx="32" cy="34" rx="20" ry="18" fill="url(#loadingBodyGradient)" />
+        
+        {/* 身体高光 */}
+        <ellipse cx="28" cy="28" rx="10" ry="6" fill="url(#loadingHighlightGradient)" opacity="0.5" />
+        
+        {/* 腹部纹理 */}
+        <path d="M18 36 Q32 38 46 36" stroke="#C94A2E" strokeWidth="1" fill="none" opacity="0.3" />
+        <path d="M20 40 Q32 42 44 40" stroke="#C94A2E" strokeWidth="1" fill="none" opacity="0.3" />
+      </g>
       
-      {/* 腹部 */}
-      <ellipse cx="28" cy="40" rx="9" ry="8" fill="url(#loadingBody)" />
-      <ellipse cx="42" cy="40" rx="9" ry="9" fill="url(#loadingBody)" />
-      <ellipse cx="55" cy="40" rx="8" ry="8" fill="url(#loadingBody)" />
-      <ellipse cx="66" cy="40" rx="7" ry="7" fill="url(#loadingBody)" />
-      <ellipse cx="75" cy="40" rx="6" ry="6" fill="url(#loadingBody)" />
-      <ellipse cx="82" cy="40" rx="5" ry="5" fill="url(#loadingBody)" />
+      {/* 左钳子 */}
+      <g className="loading-claw-left">
+        <ellipse cx="10" cy="28" rx="8" ry="6" fill="url(#loadingClawGradient)" />
+        <ellipse cx="7" cy="26" rx="3" ry="2" fill="#FFB08A" opacity="0.4" />
+      </g>
       
-      {/* 头胸部 */}
-      <path 
-        d="M85 28 Q95 30, 100 35 Q105 40, 100 45 Q95 50, 85 52 Q80 52, 78 48 Q76 40, 78 32 Q80 28, 85 28" 
-        fill="url(#loadingBody)" 
-      />
-      <path 
-        d="M100 40 Q108 38, 115 40 Q108 42, 100 40" 
-        fill="url(#loadingBody)" 
-      />
+      {/* 右钳子 */}
+      <g className="loading-claw-right">
+        <ellipse cx="54" cy="28" rx="8" ry="6" fill="url(#loadingClawGradient)" />
+        <ellipse cx="57" cy="26" rx="3" ry="2" fill="#FFB08A" opacity="0.4" />
+      </g>
+      
+      {/* 小短腿 */}
+      <g className="loading-legs">
+        <rect x="20" y="50" width="5" height="8" rx="2" fill="url(#loadingClawGradient)" />
+        <rect x="28" y="52" width="5" height="8" rx="2" fill="url(#loadingClawGradient)" />
+        <rect x="36" y="52" width="5" height="8" rx="2" fill="url(#loadingClawGradient)" />
+        <rect x="44" y="50" width="5" height="8" rx="2" fill="url(#loadingClawGradient)" />
+      </g>
+      
+      {/* 触须 */}
+      <g className="loading-antennas">
+        {/* 左触须 */}
+        <path d="M24 16 Q20 8 16 4" stroke="#FF8C5A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <circle cx="16" cy="4" r="2" fill="#FF8C5A" />
+        
+        {/* 右触须 */}
+        <path d="M40 16 Q44 8 48 4" stroke="#FF8C5A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <circle cx="48" cy="4" r="2" fill="#FF8C5A" />
+      </g>
       
       {/* 眼睛 */}
-      <line x1="92" y1="35" x2="96" y2="28" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="97" cy="27" r="3" fill="#1f2937" />
-      <circle cx="98" cy="26" r="1" fill="#fff" />
-      <line x1="92" y1="45" x2="96" y2="52" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="97" cy="53" r="3" fill="#1f2937" />
-      <circle cx="98" cy="54" r="1" fill="#fff" />
-      
-      {/* 触角 */}
-      <path d="M98 33 Q105 25, 112 18 Q118 12, 122 8" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-      <path d="M98 47 Q105 55, 112 62 Q118 68, 122 72" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-      
-      {/* 步足 */}
-      <path d="M75 34 Q70 28, 62 24" stroke="#dc2626" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M75 46 Q70 52, 62 56" stroke="#dc2626" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M68 32 Q62 24, 54 20" stroke="#dc2626" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M68 48 Q62 56, 54 60" stroke="#dc2626" strokeWidth="2" fill="none" strokeLinecap="round" />
-      
-      {/* 钳子 */}
-      <g className="loading-claws">
-        <path d="M80 30 Q72 22, 62 18 Q54 15, 48 12" stroke="url(#loadingClaw)" strokeWidth="5" fill="none" strokeLinecap="round" />
-        <path d="M48 12 Q42 8, 36 10 Q32 12, 35 16 Q40 14, 48 12" fill="url(#loadingClaw)" />
-        <path d="M48 12 Q44 16, 38 20 Q34 22, 36 18" fill="url(#loadingClaw)" />
+      <g className="loading-eyes">
+        {/* 左眼 */}
+        <circle cx="24" cy="28" r="6" fill="#1a1a2e" />
+        <circle cx="22" cy="26" r="2" fill="#7dd3fc" />
+        <circle cx="26" cy="30" r="1.5" fill="white" opacity="0.6" />
         
-        <path d="M80 50 Q72 58, 62 62 Q54 65, 48 68" stroke="url(#loadingClaw)" strokeWidth="5" fill="none" strokeLinecap="round" />
-        <path d="M48 68 Q42 72, 36 70 Q32 68, 35 64 Q40 66, 48 68" fill="url(#loadingClaw)" />
-        <path d="M48 68 Q44 64, 38 60 Q34 58, 36 62" fill="url(#loadingClaw)" />
+        {/* 右眼 */}
+        <circle cx="40" cy="28" r="6" fill="#1a1a2e" />
+        <circle cx="38" cy="26" r="2" fill="#7dd3fc" />
+        <circle cx="42" cy="30" r="1.5" fill="white" opacity="0.6" />
       </g>
+      
+      {/* 腮红 */}
+      <g className="loading-blush">
+        <ellipse cx="16" cy="36" rx="4" ry="2" fill="#FFB5B5" opacity="0.5" />
+        <ellipse cx="48" cy="36" rx="4" ry="2" fill="#FFB5B5" opacity="0.5" />
+      </g>
+      
+      {/* 嘴巴 - 微笑 */}
+      <path d="M28 42 Q32 46 36 42" stroke="#C94A2E" strokeWidth="2" fill="none" strokeLinecap="round" />
     </svg>
   );
 });
