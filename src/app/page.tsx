@@ -82,7 +82,7 @@ const ToolCard = memo(function ToolCard({
 
   return (
     <Card 
-      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-red-400 dark:hover:border-red-500 hover:shadow-md"
       onClick={onClick}
     >
       <CardContent className="p-4 relative">
@@ -197,7 +197,7 @@ const SkillCard = memo(function SkillCard({
 
   return (
     <Card 
-      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-red-400 dark:hover:border-red-500 hover:shadow-md"
       onClick={onClick}
     >
       <CardContent className="p-4 relative">
@@ -863,7 +863,7 @@ const PromptCard = memo(function PromptCard({
 
   return (
     <Card 
-      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-red-400 dark:hover:border-red-500 hover:shadow-md"
       onClick={onClick}
     >
       <CardContent className="p-4 relative">
@@ -1427,7 +1427,7 @@ export default function Home() {
           <Button
             variant={activeTab === 'tools' ? 'default' : 'outline'}
             onClick={() => handleTabChange('tools')}
-            className={activeTab === 'tools' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
+            className={activeTab === 'tools' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2 hover:border-red-400 hover:text-red-600'}
           >
             <Video className="h-4 w-4" />
             工具库
@@ -1435,7 +1435,7 @@ export default function Home() {
           <Button
             variant={activeTab === 'prompts' ? 'default' : 'outline'}
             onClick={() => handleTabChange('prompts')}
-            className={activeTab === 'prompts' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
+            className={activeTab === 'prompts' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2 hover:border-red-400 hover:text-red-600'}
           >
             <Sparkles className="h-4 w-4" />
             提示词库
@@ -1443,7 +1443,7 @@ export default function Home() {
           <Button
             variant={activeTab === 'skills' ? 'default' : 'outline'}
             onClick={() => handleTabChange('skills')}
-            className={activeTab === 'skills' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
+            className={activeTab === 'skills' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2 hover:border-red-400 hover:text-red-600'}
           >
             <Lightbulb className="h-4 w-4" />
             技能库
@@ -1474,10 +1474,10 @@ export default function Home() {
                 return (
                   <Button
                     key={category.name}
-                    variant={isActive ? "default" : "ghost"}
+                    variant={isActive ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleCategoryChange(category.name)}
-                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
+                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : "hover:border-red-400 hover:text-red-600"}
                   >
                     <Icon className="h-3.5 w-3.5 mr-1.5" />
                     {category.name}
@@ -1545,10 +1545,10 @@ export default function Home() {
                 return (
                   <Button
                     key={cat.name}
-                    variant={isActive ? "default" : "ghost"}
+                    variant={isActive ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedCategory(cat.name)}
-                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
+                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : "hover:border-red-400 hover:text-red-600"}
                   >
                     <span className="mr-1">{cat.icon}</span>
                     {cat.name}
@@ -1608,10 +1608,10 @@ export default function Home() {
                 return (
                   <Button
                     key={category.name}
-                    variant={isActive ? 'default' : 'ghost'}
+                    variant={isActive ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setSelectedCategory(category.name)}
-                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
+                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : "hover:border-red-400 hover:text-red-600"}
                   >
                     <span className="mr-1">{category.icon}</span>
                     {category.name}
