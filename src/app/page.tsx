@@ -276,11 +276,34 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
   const [copied, setCopied] = useState<'agent' | 'human' | null>(null);
   const [activeTab, setActiveTab] = useState<'agent' | 'human'>('agent');
 
-  const handleCopy = async (type: 'agent' | 'human') => {
-    if (skill) {
-      await navigator.clipboard.writeText(skill.installGuide[type]);
+  const handleCopy = async (type: 'agent' | 'human', e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    if (!skill) return;
+    
+    try {
+      // 优先使用现代 Clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(skill.installGuide[type]);
+      } else {
+        // 降级方案：使用 execCommand
+        const textarea = document.createElement('textarea');
+        textarea.value = skill.installGuide[type];
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
       setCopied(type);
       setTimeout(() => setCopied(null), 2000);
+    } catch (error) {
+      console.error('复制失败:', error);
+      alert('复制失败，请手动复制');
     }
   };
 
@@ -312,7 +335,9 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
   return (
     <Dialog open={!!skill} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden">
-        <div className="overflow-y-auto max-h-[90vh]">
+        {/* 顶部装饰条 */}
+        <div className={`h-1.5 bg-gradient-to-r ${getGradientColors(skill.category)}`}></div>
+        <div className="overflow-y-auto max-h-[calc(90vh-6px)]">
           {/* 头部区域 */}
           <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-5 pt-5 pb-4 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-start gap-4">
@@ -460,18 +485,16 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
                     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pr-8">
                       {skill.installGuide.agent}
                     </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCopy('agent')}
-                      className="absolute right-2 top-2 h-7 px-2"
+                    <button
+                      onClick={(e) => handleCopy('agent', e)}
+                      className="absolute right-2 top-2 h-7 w-7 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     >
                       {copied === 'agent' ? (
                         <Check className="h-3 w-3 text-emerald-500" />
                       ) : (
-                        <Copy className="h-3 w-3" />
+                        <Copy className="h-3 w-3 text-slate-500" />
                       )}
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}
@@ -485,18 +508,16 @@ const SkillDetailDialog = memo(function SkillDetailDialog({
                     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed pr-8">
                       {skill.installGuide.human}
                     </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCopy('human')}
-                      className="absolute right-2 top-2 h-7 px-2"
+                    <button
+                      onClick={(e) => handleCopy('human', e)}
+                      className="absolute right-2 top-2 h-7 w-7 flex items-center justify-center rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     >
                       {copied === 'human' ? (
                         <Check className="h-3 w-3 text-emerald-500" />
                       ) : (
-                        <Copy className="h-3 w-3" />
+                        <Copy className="h-3 w-3 text-slate-500" />
                       )}
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}
@@ -640,6 +661,8 @@ const ToolDetailDialog = memo(function ToolDetailDialog({
   return (
     <Dialog open={!!tool} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 gap-0 bg-white dark:bg-slate-800 overflow-hidden flex flex-col">
+        {/* 顶部装饰条 */}
+        <div className={`h-1.5 bg-gradient-to-r ${getGradientColors(tool.category)} flex-shrink-0`}></div>
         {/* 头部区域 - 固定 */}
         <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
           <div className="flex items-start gap-5">
@@ -1006,11 +1029,32 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
-    if (prompt) {
-      await navigator.clipboard.writeText(prompt.content);
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!prompt) return;
+    
+    try {
+      // 优先使用现代 Clipboard API
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(prompt.content);
+      } else {
+        // 降级方案：使用 execCommand
+        const textarea = document.createElement('textarea');
+        textarea.value = prompt.content;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('复制失败:', error);
+      alert('复制失败，请手动复制');
     }
   };
 
@@ -1106,14 +1150,12 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
           {/* 提示词内容 */}
           <div className="relative group">
             {/* 复制按钮 */}
-            <Button 
-              size="sm" 
-              variant="secondary" 
-              onClick={handleCopy} 
-              className={`absolute right-3 top-3 z-10 gap-1.5 transition-all duration-300 ${
+            <button 
+              onClick={handleCopy}
+              className={`absolute right-3 top-3 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-300 cursor-pointer ${
                 copied 
                   ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
-                  : 'bg-white/90 dark:bg-slate-700/90 hover:bg-white dark:hover:bg-slate-700'
+                  : 'bg-white/95 dark:bg-slate-700/95 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 shadow-sm border border-slate-200 dark:border-slate-600'
               }`}
             >
               {copied ? (
@@ -1127,7 +1169,7 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
                   复制
                 </>
               )}
-            </Button>
+            </button>
             
             {/* 提示词代码块 */}
             <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 rounded-xl p-5 pt-14 border border-slate-200/50 dark:border-slate-700/50">
@@ -1189,9 +1231,9 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
             💡 点击复制按钮，将提示词粘贴到 AI 工具中使用
           </p>
           <div className="flex gap-2">
-            <Button 
-              onClick={handleCopy} 
-              className={`gap-1.5 transition-all duration-300 ${
+            <button 
+              onClick={handleCopy}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 cursor-pointer ${
                 copied 
                   ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
                   : `bg-gradient-to-r ${style.gradient} hover:opacity-90 text-white`
@@ -1208,10 +1250,10 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
                   复制提示词
                 </>
               )}
-            </Button>
-            <Button variant="outline" onClick={onClose} className="border-slate-200 dark:border-slate-700">
+            </button>
+            <button onClick={onClose} className="px-4 py-2 rounded-md text-sm font-medium border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
               关闭
-            </Button>
+            </button>
           </div>
         </div>
       </DialogContent>
