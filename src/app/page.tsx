@@ -80,18 +80,13 @@ const ToolCard = memo(function ToolCard({
 
   return (
     <Card 
-      className="group relative overflow-hidden bg-white dark:bg-slate-800 border-slate-200/60 dark:border-slate-700/60 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300/50 dark:hover:border-red-600/50 hover:-translate-y-1 card-glow"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg"
       onClick={onClick}
     >
-      {/* 悬停光效背景 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-orange-500/0 to-amber-500/0 group-hover:from-red-500/5 group-hover:via-orange-500/5 group-hover:to-amber-500/5 transition-all duration-500"></div>
-      
       <CardContent className="p-4 relative">
         <div className="flex gap-4">
           {/* 图标 - 真实logo或首字母渐变 */}
-          <div className={`relative w-14 h-14 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden border border-slate-100/80 dark:border-slate-700/80`}>
-            {/* 图标光泽效果 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className={`relative w-14 h-14 ${useRealLogo ? 'bg-white' : `bg-gradient-to-br ${getGradientColors(tool.category)}`} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow transition-all duration-200 overflow-hidden border border-slate-100 dark:border-slate-700`}>
             {useRealLogo ? (
               <img 
                 src={tool.logo} 
@@ -103,7 +98,7 @@ const ToolCard = memo(function ToolCard({
                   target.style.display = 'none';
                   const parent = target.parentElement;
                   if (parent) {
-                    parent.className = `w-14 h-14 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`;
+                    parent.className = `w-14 h-14 bg-gradient-to-br ${getGradientColors(tool.category)} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow transition-all duration-200`;
                     parent.innerHTML = `<span className="text-white text-xl font-bold relative z-10">${getInitial(tool.name)}</span>`;
                   }
                 }}
@@ -200,17 +195,12 @@ const SkillCard = memo(function SkillCard({
 
   return (
     <Card 
-      className="group relative overflow-hidden bg-white dark:bg-slate-800 border-slate-200/60 dark:border-slate-700/60 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-300/50 dark:hover:border-blue-600/50 hover:-translate-y-1"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
       onClick={onClick}
     >
-      {/* 悬停光效背景 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-cyan-500/0 to-teal-500/0 group-hover:from-blue-500/5 group-hover:via-cyan-500/5 group-hover:to-teal-500/5 transition-all duration-500"></div>
-      
       <CardContent className="p-4 relative">
         <div className="flex items-start gap-3">
-          <div className={`relative w-12 h-12 ${useRealLogo ? 'bg-white border border-slate-100/80 dark:border-slate-700/80' : `bg-gradient-to-br ${getGradientColors(skill.category)}`} rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden`}>
-            {/* 图标光泽效果 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className={`relative w-12 h-12 ${useRealLogo ? 'bg-white border border-slate-100 dark:border-slate-700' : `bg-gradient-to-br ${getGradientColors(skill.category)}`} rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-sm group-hover:shadow transition-all duration-200 overflow-hidden`}>
             {useRealLogo ? (
               <img 
                 src={skill.logo} 
@@ -231,14 +221,14 @@ const SkillCard = memo(function SkillCard({
                 {skill.name}
               </h3>
               {skill.featured && (
-                <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-xs flex-shrink-0 px-2 shadow-sm">
+                <Badge className="bg-blue-500 text-white text-xs flex-shrink-0 px-2">
                   <Star className="h-3 w-3 mr-0.5" />
                   精选
                 </Badge>
               )}
             </div>
             
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mb-2 bg-slate-100/50 dark:bg-slate-700/50 px-2 py-0.5 rounded inline-block">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mb-2 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded inline-block">
               {skill.identifier}
             </p>
             
@@ -871,18 +861,13 @@ const PromptCard = memo(function PromptCard({
 
   return (
     <Card 
-      className="group relative overflow-hidden bg-white dark:bg-slate-800 border-slate-200/60 dark:border-slate-700/60 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300/50 dark:hover:border-red-600/50 hover:-translate-y-1 card-glow"
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all duration-200 hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-lg"
       onClick={onClick}
     >
-      {/* 悬停光效背景 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-orange-500/0 to-amber-500/0 group-hover:from-red-500/5 group-hover:via-orange-500/5 group-hover:to-amber-500/5 transition-all duration-500"></div>
-      
       <CardContent className="p-4 relative">
         <div className="flex gap-4">
           {/* 图标 */}
-          <div className={`relative w-14 h-14 bg-gradient-to-br ${style.gradient} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden`}>
-            {/* 图标光泽效果 */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className={`relative w-14 h-14 bg-gradient-to-br ${style.gradient} rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm group-hover:shadow transition-all duration-200 overflow-hidden`}>
             <span className="text-xl relative z-10">{categoryIcon}</span>
           </div>
           
@@ -1383,20 +1368,11 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50 shadow-sm shadow-slate-200/50 dark:shadow-slate-900/50 overflow-visible">
-        {/* 装饰性渐变背景 */}
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-amber-500/5 pointer-events-none"></div>
-        
-        <div className="container mx-auto px-4 py-4 relative">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-all duration-300 group">
-              <div className="relative w-12 h-12 flex items-center justify-center">
-                {/* 光晕背景 */}
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                {/* 动画龙虾 */}
-                <AnimatedLobster size={48} className="relative z-10" />
-                <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full animate-pulse shadow-lg shadow-amber-500/50"></div>
-              </div>
+            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <AnimatedLobster size={48} className="relative z-10" />
               <div>
                 <h1 className="text-lg font-bold">
                   <span className="text-gradient">One</span><span className="text-orange-500">Claw</span>
@@ -1414,7 +1390,7 @@ export default function Home() {
                 <Info className="h-4 w-4" />
                 <span className="hidden sm:inline">关于我们</span>
               </Button>
-              <Badge variant="secondary" className="bg-gradient-to-r from-red-50 to-orange-50 text-red-700 dark:from-red-900/30 dark:to-orange-900/30 dark:text-red-400 border border-red-100 dark:border-red-800/50 shadow-sm">
+              <Badge variant="secondary" className="text-xs">
                 <Sparkles className="h-3 w-3 mr-1" />
                 {activeTab === 'tools' ? `${aiTools.length} 个工具` : activeTab === 'prompts' ? `${prompts.length} 个提示词` : `${aiSkills.length} 个技能`}
               </Badge>
@@ -1426,27 +1402,27 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
         {/* Tab Switcher */}
-        <div className="flex gap-2 mb-6 p-1.5 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm inline-flex">
+        <div className="flex gap-2 mb-6">
           <Button
-            variant={activeTab === 'tools' ? 'default' : 'ghost'}
+            variant={activeTab === 'tools' ? 'default' : 'outline'}
             onClick={() => setActiveTab('tools')}
-            className={activeTab === 'tools' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2 shadow-lg shadow-red-500/25' : 'gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}
+            className={activeTab === 'tools' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
           >
             <Video className="h-4 w-4" />
             工具库
           </Button>
           <Button
-            variant={activeTab === 'prompts' ? 'default' : 'ghost'}
+            variant={activeTab === 'prompts' ? 'default' : 'outline'}
             onClick={() => setActiveTab('prompts')}
-            className={activeTab === 'prompts' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2 shadow-lg shadow-red-500/25' : 'gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}
+            className={activeTab === 'prompts' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
           >
             <Sparkles className="h-4 w-4" />
             提示词库
           </Button>
           <Button
-            variant={activeTab === 'skills' ? 'default' : 'ghost'}
+            variant={activeTab === 'skills' ? 'default' : 'outline'}
             onClick={() => setActiveTab('skills')}
-            className={activeTab === 'skills' ? 'bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2 shadow-lg shadow-red-500/25' : 'gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'}
+            className={activeTab === 'skills' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
           >
             <Lightbulb className="h-4 w-4" />
             技能库
@@ -1458,16 +1434,14 @@ export default function Home() {
           <>
             {/* Search */}
             <div className="mb-4">
-              <div className="relative group">
-                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-red-500 transition-colors" />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
                   placeholder="搜索工具名称、描述或标签..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-red-300 dark:focus:border-red-700 focus:ring-red-500/20 transition-all duration-300 hover:border-red-200 dark:hover:border-red-800"
+                  className="pl-10 h-10"
                 />
-                {/* 搜索框光效 */}
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </div>
 
@@ -1482,18 +1456,15 @@ export default function Home() {
                     variant={isActive ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedCategory(category.name)}
-                    className={isActive 
-                      ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-md shadow-red-500/20 transition-all duration-300 hover:scale-105" 
-                      : "border-slate-200/60 dark:border-slate-700/60 hover:border-red-300 dark:hover:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300"
-                    }
+                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
                   >
                     <Icon className="h-3.5 w-3.5 mr-1.5" />
                     {category.name}
                     <span className="ml-1.5 text-xs opacity-60">({category.count})</span>
                   </Button>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Content Area */}
