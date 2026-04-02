@@ -5,9 +5,28 @@ export * from './prompts-types';
 // 导入各分类提示词（使用默认导出）
 import videoPromptsData from './prompts-video';
 import imagePromptsData from './prompts-image';
+import textPromptsData from './prompts-text';
+import codePromptsData from './prompts-code';
+import marketingPromptsData from './prompts-marketing';
+import dataPromptsData from './prompts-data';
+import translatePromptsData from './prompts-translate';
+import educationPromptsData from './prompts-education';
+import businessPromptsData from './prompts-business';
+import lifePromptsData from './prompts-life';
 
 // 合并所有提示词
-export const prompts = [...videoPromptsData, ...imagePromptsData];
+export const prompts = [
+  ...videoPromptsData, 
+  ...imagePromptsData,
+  ...textPromptsData,
+  ...codePromptsData,
+  ...marketingPromptsData,
+  ...dataPromptsData,
+  ...translatePromptsData,
+  ...educationPromptsData,
+  ...businessPromptsData,
+  ...lifePromptsData
+];
 
 // 动态生成分类
 export const promptCategories = (() => {
