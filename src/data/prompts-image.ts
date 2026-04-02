@@ -1372,6 +1372,593 @@ Android规范：
       type: 'text'
     }
   },
+  
+  // ========== 更多图像提示词 ==========
+  {
+    id: 'image-021',
+    title: 'Midjourney 人像摄影提示词',
+    description: '专业级人像摄影的Midjourney提示词模板',
+    category: '图像生成',
+    tags: ['Midjourney', '人像', '摄影', '肖像'],
+    featured: true,
+    usage: 32450,
+    rating: 4.9,
+    content: `# Midjourney 人像摄影提示词指南
+
+## 【人像摄影类型】
+
+### 商业人像
+- professional headshot - 专业头像
+- corporate portrait - 企业肖像
+- linkedin photo - 职业照
+- business casual - 商务休闲
+
+### 艺术人像
+- fine art portrait - 艺术肖像
+- editorial portrait - 杂志肖像
+- conceptual portrait - 概念肖像
+- dramatic portrait - 戏剧性肖像
+
+### 生活人像
+- lifestyle portrait - 生活方式肖像
+- candid portrait - 抓拍肖像
+- environmental portrait - 环境肖像
+- street portrait - 街头肖像
+
+## 【光线关键词】
+
+### 自然光
+- golden hour lighting - 黄金时刻光线
+- soft window light - 柔和窗光
+- overcast daylight - 阴天自然光
+- backlighting - 逆光
+
+### 人造光
+- studio lighting - 影棚灯光
+- beauty dish - 美人碟
+- softbox light - 柔光箱
+- rim light - 轮廓光
+
+### 特殊光效
+- Rembrandt lighting - 伦勃朗光
+- butterfly lighting - 蝴蝶光
+- split lighting - 分割光
+- loop lighting - 环形光`,
+    example: {
+      input: '职业女性商务肖像',
+      output: `【提示词】
+"Professional portrait of a confident Asian businesswoman in her early 30s, wearing a tailored navy blue blazer over a white silk blouse. She has natural makeup, subtle smile, and direct eye contact with the camera. Her hair is styled in an elegant low bun. Shot in a modern office environment with blurred glass walls in background. Soft natural lighting from a large window creates a subtle highlight on her face. Professional, approachable, and trustworthy expression. Shot on Canon EOS R5, 85mm lens at f/2.8, shallow depth of field, clean and bright color grading --ar 4:5 --v 6.0 --style raw"
+
+【参数建议】
+- 宽高比：4:5（适合社交媒体）
+- 风格：--style raw（更真实）
+- 版本：--v 6.0（最新版本）
+
+【构图要点】
+- 眼睛在画面上三分之一处
+- 面部朝向留有空间
+- 背景干净不抢焦点`,
+      type: 'text'
+    },
+    tips: [
+      '人像摄影中眼睛要有眼神光',
+      '使用--style raw获得更真实的效果',
+      '85mm焦段是人像最佳选择',
+      '光圈f/1.8-2.8获得完美虚化'
+    ]
+  },
+  
+  {
+    id: 'image-022',
+    title: 'Midjourney 风景摄影提示词',
+    description: '震撼风景摄影的Midjourney提示词模板',
+    category: '图像生成',
+    tags: ['Midjourney', '风景', '摄影', '自然'],
+    usage: 28760,
+    rating: 4.8,
+    content: `# Midjourney 风景摄影提示词指南
+
+## 【风景类型】
+
+### 山脉
+- majestic mountain peaks - 巍峨山峰
+- snow-capped mountains - 雪山
+- dramatic cliffs - 戏剧性悬崖
+- alpine meadow - 高山草甸
+
+### 海洋
+- pristine beach - 原始海滩
+- dramatic coastline - 壮丽海岸
+- crystal clear water - 清澈海水
+- sunset over ocean - 海上日落
+
+### 森林
+- ancient forest - 原始森林
+- misty woodland - 雾气森林
+- autumn foliage - 秋季红叶
+- sunbeams through trees - 阳光穿林
+
+### 沙漠
+- golden sand dunes - 金色沙丘
+- desert sunset - 沙漠日落
+- oasis - 绿洲
+- starry desert night - 沙漠星空
+
+## 【时间与光线】
+
+### 黄金时刻
+- golden hour - 黄金时刻
+- warm golden light - 温暖金光
+- long shadows - 长影
+- soft warm glow - 柔和暖光
+
+### 蓝调时刻
+- blue hour - 蓝调时刻
+- twilight sky - 暮色天空
+- cool blue tones - 冷蓝色调
+- city lights - 城市灯火`,
+    example: {
+      input: '冰岛北极光风景',
+      output: `【提示词】
+"Breathtaking landscape of Iceland under the Northern Lights (Aurora Borealis). A dramatic composition featuring the iconic Vestrahorn mountain in the background, its jagged peaks silhouetted against a sky filled with dancing green and purple aurora. In the foreground, a black sand beach with smooth rocks and a small reflective tide pool mirroring the celestial display. The aurora forms swirling curtains of emerald green and violet across the star-filled sky. A small traditional Icelandic turf house adds scale. Shot on Sony A7RIV, 14mm wide angle, long exposure of 15 seconds, ISO 3200. National Geographic quality, award-winning landscape photography --ar 16:9 --v 6.0"
+
+【参数建议】
+- 宽高比：16:9（风景最佳）
+- 长曝光模拟极光流动感
+- 广角镜头增加壮观感
+
+【构图技巧】
+- 前景：岩石/水面倒影
+- 中景：标志性建筑
+- 背景：极光天空`,
+      type: 'text'
+    },
+    tips: [
+      '风景摄影要有前景、中景、背景层次',
+      '广角镜头--ar 16:9增加壮观感',
+      '描述天气和光线增强氛围',
+      '添加摄影师名字风格参考'
+    ]
+  },
+  
+  {
+    id: 'image-023',
+    title: 'Stable Diffusion 写实人像',
+    description: 'Stable Diffusion超写实人像生成提示词',
+    category: '图像生成',
+    tags: ['Stable Diffusion', '人像', '写实', 'SD'],
+    usage: 25670,
+    rating: 4.8,
+    content: `# Stable Diffusion 写实人像提示词指南
+
+## 【SD模型推荐】
+
+### 写实模型
+- Realistic Vision - 综合写实
+- Deliberate - 细腻写实
+- Photon - 光影写实
+- CyberRealistic - 超写实
+
+### 人像模型
+- Beautiful Realistic Asians - 亚洲人脸
+- RPG - 角色扮演
+- ChilloutMix - 真实混合
+
+## 【必备正向提示词】
+
+### 画质增强
+- masterpiece, best quality
+- ultra high res
+- 8k uhd
+- photorealistic
+- raw photo
+
+### 细节增强
+- highly detailed
+- intricate details
+- sharp focus
+- professional photography
+
+### 皮肤质感
+- realistic skin texture
+- skin pores visible
+- natural skin
+- subsurface scattering
+
+## 【负向提示词】
+- (worst quality:1.4), (low quality:1.4)
+- (deformed:1.3), (bad anatomy:1.3)
+- (blurry:1.3), (watermark:1.3)
+- bad hands, missing fingers`,
+    example: {
+      input: '年轻女性肖像',
+      output: `【正向提示词】
+"(masterpiece, best quality, ultra high res:1.2), realistic photo of a beautiful young Asian woman, early 20s, natural makeup, soft smile, (looking at viewer:1.2), detailed eyes, detailed face, realistic skin texture with visible pores, soft natural lighting, professional portrait photography, 85mm lens, f/1.8, bokeh background, soft color grading, shot on Canon EOS R5"
+
+【负向提示词】
+"(worst quality, low quality:1.4), (deformed, distorted, disfigured:1.3), poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, (mutated hands and fingers:1.4), disconnected limbs, mutation, mutated, ugly, disgusting, blurry, amputation, watermark, text"
+
+【参数建议】
+- 采样器：DPM++ 2M Karras
+- 步数：20-30
+- CFG：7-9
+- 尺寸：512x768（后放大）`,
+      type: 'text'
+    },
+    tips: [
+      '正向提示词质量词汇放在最前面',
+      '权重用(xxx:1.2)格式调节',
+      '负向提示词必不可少',
+      '生成后可用Extra放大到4K'
+    ]
+  },
+  
+  {
+    id: 'image-024',
+    title: 'Logo设计提示词',
+    description: 'AI生成专业Logo设计的提示词模板',
+    category: '图像生成',
+    tags: ['Logo', '设计', '品牌', '标识'],
+    usage: 21340,
+    rating: 4.7,
+    content: `# Logo设计提示词指南
+
+## 【Logo风格类型】
+
+### 极简风格
+- minimalist logo - 极简Logo
+- clean geometric - 简洁几何
+- simple icon - 简单图标
+- modern mark - 现代标志
+
+### 复古风格
+- vintage logo - 复古Logo
+- retro badge - 复古徽章
+- classic emblem - 经典徽章
+- heritage design - 传统设计
+
+### 创意风格
+- creative logo - 创意Logo
+- abstract mark - 抽象标志
+- dynamic logo - 动态Logo
+- unique symbol - 独特符号
+
+### 科技风格
+- tech logo - 科技Logo
+- futuristic design - 未来设计
+- digital symbol - 数字符号
+- cyber aesthetic - 赛博美学
+
+## 【设计要素】
+
+### 形状
+- geometric shapes - 几何形状
+- organic forms - 有机形态
+- symmetrical - 对称
+- asymmetrical - 非对称
+
+### 颜色
+- monochrome - 单色
+- two-color - 双色
+- gradient - 渐变
+- vibrant colors - 鲜艳色彩`,
+    example: {
+      input: '科技公司Logo设计',
+      output: `【提示词】
+"Modern minimalist logo design for a technology company named 'NexaWave'. The logo should feature a sleek, abstract wave symbol that suggests innovation and forward momentum. Clean geometric lines, professional appearance. Primary color: deep blue (#1a365d) with a subtle cyan accent (#00b4d8). White background for clarity. The design should work well at both small and large scales, suitable for app icons, websites, and print materials. Vector-style, flat design, no gradients, no shadows, no text. Professional logo design, award-winning quality --ar 1:1 --v 6.0"
+
+【设计原则】
+- 简洁：3秒内能识别
+- 适配：各种尺寸都能用
+- 永恒：10年后也不过时
+- 独特：与竞品区分开
+
+【输出建议】
+- 生成多个版本对比
+- 测试黑白版本
+- 检查缩小后的可识别性`,
+      type: 'text'
+    },
+    tips: [
+      'Logo生成建议指定"white background"',
+      '添加"vector-style"、"flat design"获得简洁设计',
+      '指定品牌名让AI生成相关元素',
+      '生成后在矢量软件中描摹优化'
+    ]
+  },
+  
+  {
+    id: 'image-025',
+    title: '电商产品图提示词',
+    description: '电商主图和详情页产品图生成提示词',
+    category: '图像生成',
+    tags: ['电商', '产品', '商业', '主图'],
+    usage: 29870,
+    rating: 4.8,
+    content: `# 电商产品图提示词指南
+
+## 【产品图类型】
+
+### 主图（白底图）
+- pure white background - 纯白背景
+- product front view - 产品正面
+- clean and clear - 干净清晰
+- e-commerce main image - 电商主图
+
+### 场景图
+- lifestyle setting - 生活场景
+- product in use - 使用场景
+- contextual background - 情境背景
+- ambient lighting - 环境光
+
+### 细节图
+- close-up shot - 特写镜头
+- detail showcase - 细节展示
+- material texture - 材质纹理
+- functional highlight - 功能亮点
+
+### 对比图
+- before and after - 使用前后对比
+- size comparison - 尺寸对比
+- feature highlight - 特点突出
+
+## 【拍摄风格】
+
+### 高端奢华
+- premium aesthetic - 高端美感
+- luxury feel - 奢华感
+- elegant composition - 优雅构图
+- sophisticated lighting - 精致光线
+
+### 清新自然
+- clean and fresh - 清新干净
+- natural lighting - 自然光线
+- minimal setup - 极简布置
+- airy feel - 轻盈感`,
+    example: {
+      input: '护肤品电商主图',
+      output: `【主图提示词】
+"Professional e-commerce product photography of a luxury skincare serum bottle. Frosted glass bottle with rose gold pump dispenser, elegant minimalist design. Placed on a pure white background (#FFFFFF) with soft shadows. Front view clearly showing the product label. Studio lighting, bright and clean, no reflections on the bottle surface. High-end beauty brand aesthetic. Product is perfectly in focus, sharp details. 3000x3000 pixels, suitable for Amazon, Tmall, JD main image. Commercial photography quality --ar 1:1 --v 6.0"
+
+【场景图提示词】
+"Lifestyle product photography of the same skincare serum on a white marble bathroom counter. Soft morning light through a nearby window. Fresh flowers and a delicate ceramic dish in the background, blurred. Elegant, aspirational lifestyle setting. A woman's hand gently reaching for the bottle. Beauty magazine editorial style. Warm, inviting atmosphere --ar 4:5 --v 6.0"
+
+【电商图片规范】
+- 主图：800x800或1000x1000像素
+- 背景：纯白RGB(255,255,255)
+- 产品占比：70%-80%
+- 无水印、无Logo`,
+      type: 'text'
+    },
+    tips: [
+      '电商主图必须是纯白背景',
+      '产品要清晰对焦，占画面70%以上',
+      '光线均匀，无明显阴影',
+      '场景图要有代入感和购买欲'
+    ]
+  },
+  
+  {
+    id: 'image-026',
+    title: '建筑室内设计提示词',
+    description: '建筑摄影和室内设计效果图生成提示词',
+    category: '图像生成',
+    tags: ['建筑', '室内设计', '空间', '摄影'],
+    usage: 18920,
+    rating: 4.8,
+    content: `# 建筑室内设计提示词指南
+
+## 【拍摄角度】
+
+### 透视视角
+- wide angle shot - 广角镜头
+- interior perspective - 室内透视
+- architectural photography - 建筑摄影
+- vertical lines - 垂直线校正
+
+### 氛围角度
+- cozy corner - 温馨角落
+- workspace detail - 工作区细节
+- living area - 生活区
+- bedroom scene - 卧室场景
+
+## 【室内风格】
+
+### 现代简约
+- modern minimalist - 现代极简
+- Scandinavian design - 北欧风格
+- clean lines - 简洁线条
+- neutral palette - 中性色调
+
+### 工业风格
+- industrial loft - 工业风阁楼
+- exposed brick - 裸露砖墙
+- metal accents - 金属元素
+- raw materials - 原始材质
+
+### 豪华风格
+- luxury interior - 豪华内饰
+- high-end design - 高端设计
+- elegant furniture - 优雅家具
+- premium materials - 优质材料
+
+### 日式风格
+- Japanese minimalism - 日式极简
+- zen atmosphere - 禅意氛围
+- natural wood - 天然木材
+- tatami aesthetic - 榻榻米美学`,
+    example: {
+      input: '现代简约客厅设计',
+      output: `【提示词】
+"Stunning modern minimalist living room interior design. Spacious open floor plan with floor-to-ceiling windows overlooking a city skyline at golden hour. Clean white walls, light oak wood flooring, and a neutral color palette of beige, grey, and white. A comfortable L-shaped sectional sofa in light grey, paired with a low rectangular coffee table in natural wood. Minimalist pendant lighting, a large abstract painting on one wall, and a few carefully placed indoor plants. Soft natural light flooding the space, creating warm shadows. Architectural photography style, shot on Phase One, wide angle 24mm, professional interior photography --ar 16:9 --v 6.0"
+
+【设计要点】
+- 空间感：留白、通透
+- 光线：自然光为主
+- 色彩：3-5种颜色搭配
+- 材质：质感对比
+
+【摄影技巧】
+- 使用三脚架保持稳定
+- 多灯补光消除阴影
+- 垂直线校正避免变形`,
+      type: 'text'
+    },
+    tips: [
+      '室内摄影要用广角展示空间感',
+      '垂直线校正避免透视变形',
+      '光线要均匀，避免过暗角落',
+      '添加生活元素增加温馨感'
+    ]
+  },
+  
+  {
+    id: 'image-027',
+    title: '动漫角色设计提示词',
+    description: '动漫、游戏角色设计的AI生成提示词',
+    category: '图像生成',
+    tags: ['动漫', '角色设计', '游戏', '二次元'],
+    usage: 26780,
+    rating: 4.9,
+    content: `# 动漫角色设计提示词指南
+
+## 【动漫风格】
+
+### 日系动漫
+- anime style - 日系动漫风格
+- manga art - 漫画风格
+- Studio Ghibli style - 吉卜力风格
+- shonen/shoujo - 少年/少女风格
+
+### 韩系风格
+- manhwa style - 韩漫风格
+- webtoon art - 网漫风格
+- Korean illustration - 韩国插画
+
+### 欧美风格
+- western animation - 西方动画
+- Disney style - 迪士尼风格
+- comic book art - 漫画书风格
+
+## 【角色要素】
+
+### 外貌特征
+- hair style/color - 发型/发色
+- eye style - 眼睛风格
+- body type - 身材类型
+- distinctive features - 鲜明特征
+
+### 服装设计
+- casual outfit - 休闲服装
+- fantasy armor - 奇幻盔甲
+- school uniform - 校服
+- period costume - 时代服装
+
+### 表情姿态
+- dynamic pose - 动态姿势
+- confident expression - 自信表情
+- action stance - 战斗姿态
+- peaceful moment - 安静时刻`,
+    example: {
+      input: '奇幻游戏女主角设计',
+      output: `【提示词】
+"Full body character design of a fantasy RPG female protagonist. She is an elven warrior princess with long flowing silver-white hair, piercing violet eyes, and elegant pointed ears. Wearing ornate silver and gold armor with intricate engravings, a flowing deep blue cape, and leather boots. She holds a magnificent crystalline sword that glows with magical energy. Her expression is determined yet kind. Background is a mystical forest with ancient ruins. Art style combines anime aesthetics with realistic detail, similar to high-end JRPG character art. Dynamic composition, dramatic lighting, volumetric effects. Professional game concept art quality --ar 3:4 --niji 6"
+
+【角色设计表】
+- 正面全身图
+- 侧面视图
+- 背面设计
+- 表情包（开心/生气/悲伤）
+- 武器细节
+
+【设计要点】
+- 配色：银白+深蓝+金色
+- 特征：精灵耳+紫瞳
+- 元素：水晶剑+魔法光效`,
+      type: 'text'
+    },
+    tips: [
+      '动漫角色用--niji 6获得最佳效果',
+      '描述眼睛和发型是关键',
+      '添加背景增加角色故事感',
+      '设计系列图保持角色一致性'
+    ]
+  },
+  
+  {
+    id: 'image-028',
+    title: 'UI/UX界面设计提示词',
+    description: 'App和网页UI界面设计的AI生成提示词',
+    category: '图像生成',
+    tags: ['UI设计', 'UX', 'App', '网页'],
+    usage: 23450,
+    rating: 4.7,
+    content: `# UI/UX界面设计提示词指南
+
+## 【UI风格类型】
+
+### 现代简约
+- clean UI - 简洁UI
+- minimalist design - 极简设计
+- flat design - 扁平设计
+- white space - 大量留白
+
+### 玻璃拟态
+- glassmorphism - 玻璃拟态
+- frosted glass effect - 磨砂玻璃
+- blur background - 模糊背景
+- translucent layers - 半透明层
+
+### 新拟态
+- neumorphism - 新拟态
+- soft UI - 柔和UI
+- subtle shadows - 微妙阴影
+- embossed effect - 浮雕效果
+
+### 暗黑模式
+- dark mode UI - 暗黑模式
+- high contrast - 高对比度
+- neon accents - 霓虹点缀
+- OLED friendly - OLED友好
+
+## 【界面类型】
+
+### 移动端
+- mobile app screen - 手机App界面
+- iOS style - iOS风格
+- Material Design - Material设计
+- responsive layout - 响应式布局
+
+### 网页端
+- website design - 网站设计
+- landing page - 落地页
+- dashboard - 仪表盘
+- admin panel - 管理面板`,
+    example: {
+      input: '健身App主界面设计',
+      output: `【提示词】
+"Modern clean mobile fitness app UI design, main dashboard screen. Dark mode theme with vibrant gradient accent colors (purple to blue). Features include: large circular progress indicator showing daily steps (8,432/10,000), quick stat cards for calories burned, workout minutes, and heart rate. Bottom navigation bar with home, workout, nutrition, profile icons. Clean typography with San Francisco font. Glassmorphism effect on cards with subtle blur background. Smooth rounded corners, plenty of white space. Professional UI/UX design, Dribbble quality, high-fidelity mockup. iPhone 15 Pro frame, 4K resolution --ar 9:19 --v 6.0"
+
+【设计规范】
+- 颜色：深色背景 + 渐变点缀
+- 字体：SF Pro / Inter
+- 圆角：12-16px
+- 间距：8px网格系统
+
+【设计要点】
+- 信息层级清晰
+- 关键数据突出
+- 操作便捷直观
+- 视觉舒适不疲劳`,
+      type: 'text'
+    },
+    tips: [
+      'UI设计要指定设备尺寸比例',
+      '描述具体元素和布局更精准',
+      '参考知名设计风格如iOS/Material',
+      '添加"Dribbble quality"提升设计感'
+    ]
+  }
 ];
 
 export default imagePrompts;

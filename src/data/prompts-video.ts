@@ -1510,6 +1510,568 @@ BPM：110-120
   },
   
   // 更多提示词...
+  
+  // ========== 可灵 AI (Kling) ==========
+  {
+    id: 'video-021',
+    title: '可灵AI 电影质感提示词',
+    description: '专为可灵AI优化的电影级视频生成提示词模板',
+    category: '视频生成',
+    tags: ['可灵', 'Kling', '电影感', '国产AI'],
+    featured: true,
+    usage: 28950,
+    rating: 4.9,
+    content: `# 可灵AI 电影质感提示词生成器
+
+## 【角色定位】
+你是可灵AI的专业提示词工程师，精通：
+- 可灵AI模型的语言理解特点
+- 中英文混合提示词优化
+- 电影级画面质感控制
+- 动态效果与静态美感的平衡
+
+## 【可灵AI特点】
+- 中文理解能力强，支持中英文混合
+- 画面质感细腻，色彩表现优秀
+- 运动幅度控制精准
+- 支持5秒/10秒视频生成
+
+## 【提示词公式】
+\`\`\`
+[画面主体] + [动作描述] + [环境场景] + [光影氛围] + [镜头运动] + [风格参数]
+\`\`\`
+
+## 【质感增强关键词】
+
+### 电影感
+- cinematic lighting
+- film grain
+- anamorphic lens
+- depth of field
+- color grading
+
+### 高端感
+- premium quality
+- 8K resolution
+- photorealistic
+- studio lighting
+- professional color correction
+
+## 【输出要求】
+根据用户需求，生成：
+1. 精简版提示词（适合快速测试）
+2. 详细版提示词（适合最终输出）
+3. 参数建议`,
+    example: {
+      input: '一个女孩在咖啡馆看书',
+      output: `【精简版】
+"A young woman sitting by the window in a cozy cafe, reading a book, soft afternoon sunlight streaming through, steam rising from coffee cup, cinematic lighting, shallow depth of field, warm tones, slow camera push in, 4K"
+
+【详细版】
+"A beautiful young Asian woman in her early 20s, wearing a cream-colored knit sweater, sitting alone at a wooden table by a large window in a charming vintage cafe. She is deeply engrossed in reading a hardcover book, her fingers gently tracing the pages. Soft golden afternoon sunlight streams through the window, creating warm highlights on her hair and casting gentle shadows. A cup of latte sits beside the book, with delicate steam rising. The background shows blurred cafe interior with warm ambient lighting, wooden shelves, and potted plants. Camera slowly pushes in towards her face. Cinematic color grading with warm orange and teal tones, film grain texture, shot on ARRI Alexa, anamorphic lens flare, 4K resolution"
+
+【参数建议】
+- 模式：高质量模式
+- 时长：10秒
+- 比例：16:9
+- 运动幅度：中等`,
+      type: 'text'
+    },
+    tips: [
+      '可灵AI对中文理解很好，可以中英文混用',
+      '描述越具体，画面质感越好',
+      '添加"cinematic"、"film grain"可显著提升电影感',
+      '运动幅度"小"适合静态美感，"大"适合动态场景'
+    ]
+  },
+  
+  {
+    id: 'video-022',
+    title: '可灵AI 人物动作提示词',
+    description: '控制人物动作、表情、姿态的专业提示词模板',
+    category: '视频生成',
+    tags: ['可灵', 'Kling', '人物', '动作控制'],
+    usage: 22340,
+    rating: 4.8,
+    content: `# 可灵AI 人物动作提示词指南
+
+## 【动作控制要素】
+
+### 微动作（适合特写）
+- subtle smile forming
+- eyes blinking slowly
+- head tilting slightly
+- hair moving in breeze
+- fingers tapping gently
+
+### 中等动作（适合半身）
+- turning head to look
+- raising hand to wave
+- adjusting clothing
+- taking a sip
+- flipping hair
+
+### 大幅度动作（适合全身）
+- walking towards camera
+- running and jumping
+- dancing gracefully
+- spinning around
+- stretching arms
+
+## 【表情控制】
+
+### 正面情绪
+- genuine warm smile
+- joyful laughter
+- excited expression
+- peaceful contentment
+- loving gaze
+
+### 负面情绪
+- thoughtful frown
+- subtle sadness
+- surprised look
+- nervous glance
+- determined expression
+
+## 【姿态关键词】
+- elegant posture
+- relaxed stance
+- dynamic pose
+- casual sitting
+- confident stride`,
+    example: {
+      input: '商务人士在办公室自信地走向镜头',
+      output: `【提示词】
+"A professional Asian businessman in his 30s, wearing a well-fitted navy blue suit and tie, walking confidently towards the camera in a modern glass-walled office. His posture is upright and self-assured, slight smile on his face. Behind him, blurred colleagues working at desks, city skyline visible through floor-to-ceiling windows. Natural bright lighting from windows, professional corporate atmosphere. Camera tracks backwards as he walks forward, maintaining medium shot. 4K, professional color grading, clean modern aesthetic"
+
+【动作分解】
+1. 开场：从画面左侧走入
+2. 中段：稳定走向镜头，眼神坚定
+3. 结尾：微笑，停顿
+
+【注意事项】
+- 避免过于夸张的动作
+- 保持姿态自然流畅
+- 眼神与镜头有交流`,
+      type: 'text'
+    },
+    tips: [
+      '描述动作时使用现在分词形式（walking, smiling）',
+      '大动作需要更大的运动幅度设置',
+      '人物数量建议控制在1-3人',
+      '添加"natural"、"relaxed"避免僵硬感'
+    ]
+  },
+  
+  // ========== 即梦 AI ==========
+  {
+    id: 'video-023',
+    title: '即梦AI 短视频创作提示词',
+    description: '专为即梦AI优化的短视频创作提示词模板',
+    category: '视频生成',
+    tags: ['即梦', 'Jimeng', '短视频', '抖音风格'],
+    featured: true,
+    usage: 35680,
+    rating: 4.9,
+    content: `# 即梦AI 短视频创作提示词指南
+
+## 【角色定位】
+你是短视频内容创作专家，精通：
+- 抖音/TikTok热门风格
+- 快节奏视频剪辑感
+- 吸引眼球的前3秒法则
+- 即梦AI的中文优化能力
+
+## 【短视频黄金法则】
+1. 前3秒必须抓住眼球
+2. 画面要有变化和节奏感
+3. 色彩要鲜艳吸睛
+4. 结尾要有悬念或惊喜
+
+## 【热门风格模板】
+
+### 变装风格
+- "transformation from [A] to [B]"
+- "glow up transition"
+- "before and after reveal"
+
+### 情感风格
+- "nostalgic memories"
+- "heartwarming moment"
+- "emotional reunion"
+
+### 创意风格
+- "satisfying visual effect"
+- "satisfying process"
+- "oddly satisfying"
+
+### 生活风格
+- "aesthetic daily routine"
+- "cozy morning routine"
+- "perfect day in my life"`,
+    example: {
+      input: '复古风格变装视频',
+      output: `【提示词】
+"A young woman standing in a vintage-style room with floral wallpaper. She wears simple modern clothes (white t-shirt and jeans), looking at an old photo album. Soft nostalgic lighting. Suddenly, the scene transforms - she's now wearing elegant 1920s vintage fashion: a beaded flapper dress, pearl necklace, finger waves hairstyle. The room transforms to match - antique furniture, gramophone playing, warm amber lighting. She twirls gracefully, the vintage fabric flowing. Cinematic transition, dreamy atmosphere, nostalgic film grain, golden hour light, 4K quality"
+
+【分镜建议】
+0-2秒：现代场景，看相册，怀旧表情
+2-4秒：转场特效（光效/旋转）
+4-8秒：复古造型展示，优雅转身
+8-10秒：定格微笑，复古滤镜
+
+【配乐建议】
+选择复古爵士或古典风格BGM`,
+      type: 'text'
+    },
+    tips: [
+      '即梦AI对中文提示词支持优秀',
+      '变装类视频建议描述两种造型的对比',
+      '使用"transformation"、"suddenly"等词触发转场',
+      '短视频时长控制在5-10秒最佳'
+    ]
+  },
+  
+  {
+    id: 'video-024',
+    title: '即梦AI 美食视频提示词',
+    description: '让人垂涎欲滴的美食视频生成提示词',
+    category: '视频生成',
+    tags: ['即梦', 'Jimeng', '美食', '食物拍摄'],
+    usage: 18920,
+    rating: 4.8,
+    content: `# 即梦AI 美食视频提示词指南
+
+## 【美食拍摄要点】
+
+### 光线控制
+- warm natural lighting - 温暖自然光
+- soft window light - 柔和窗光
+- backlit glow - 逆光效果
+- overhead lighting - 顶光
+
+### 质感增强
+- glistening surface - 表面光泽
+- steam rising - 热气腾腾
+- oil glistening - 油光闪烁
+- fresh droplets - 新鲜水珠
+
+### 动态元素
+- steam billowing - 热气升腾
+- sauce drizzling - 酱汁淋下
+- cheese stretching - 芝士拉丝
+- bubbles popping - 气泡破裂
+
+### 色彩增强
+- vibrant colors - 鲜艳色彩
+- rich saturation - 高饱和度
+- appetizing tones - 诱人色调
+- warm color palette - 暖色调`,
+    example: {
+      input: '一碗热气腾腾的日式拉面',
+      output: `【提示词】
+"A steaming bowl of authentic Japanese ramen in a ceramic bowl, placed on a wooden table. Rich golden pork bone broth, perfectly cooked noodles visible beneath the surface. Toppings include: sliced chashu pork with beautiful marbling, a soft-boiled marinated egg with runny yolk, green onions, nori seaweed, and bamboo shoots. Steam rises gracefully from the hot broth, creating a warm aromatic atmosphere. Soft natural lighting from a nearby window, with a slight backlight creating a beautiful glow. Chopsticks gently lift some noodles, showing the texture. Background is a cozy ramen shop interior, blurred. Cinematic food photography style, shallow depth of field, warm color grading, 4K resolution"
+
+【拍摄角度建议】
+- 45度俯拍：展示全部食材
+- 侧面平视：展示汤面高度和热气
+- 特写镜头：展示面条质感
+
+【动态建议】
+- 静态画面 + 热气上升
+- 筷子夹面条动作
+- 汤匙舀起汤汁`,
+      type: 'text'
+    },
+    tips: [
+      '描述食物要具体：颜色、质地、温度',
+      '添加"steaming"、"glistening"增加食欲感',
+      '热食一定要描述热气，冷食描述水珠',
+      '使用"appetizing"、"delicious"增强美食感'
+    ]
+  },
+  
+  // ========== 通用视频技巧 ==========
+  {
+    id: 'video-025',
+    title: '产品展示视频提示词',
+    description: '专业产品展示视频的提示词模板，适用于电商和广告',
+    category: '视频生成',
+    tags: ['产品', '电商', '广告', '商业'],
+    usage: 24560,
+    rating: 4.7,
+    content: `# 产品展示视频提示词指南
+
+## 【产品视频类型】
+
+### 功能展示型
+重点展示产品使用过程和功能特点
+
+### 情感共鸣型
+通过场景和故事引发情感连接
+
+### 品牌形象型
+展示品牌调性和高端质感
+
+### 开箱体验型
+模拟真实开箱体验
+
+## 【产品拍摄技巧】
+
+### 光线
+- studio lighting - 影棚灯光
+- soft diffused light - 柔和漫射光
+- rim lighting - 轮廓光
+- gradient lighting - 渐变光
+
+### 背景
+- pure white background - 纯白背景
+- gradient background - 渐变背景
+- lifestyle setting - 生活场景
+- minimalist setup - 极简布置
+
+### 动态
+- 360 degree rotation - 360度旋转
+- slow motion reveal - 慢动作展示
+- detail zoom in - 细节特写
+- product in use - 使用场景`,
+    example: {
+      input: '高端护肤品产品视频',
+      output: `【提示词】
+"A luxurious skincare serum bottle on a clean white marble surface. The bottle is made of frosted glass with rose gold accents, elegant minimalist design. Soft diffused studio lighting creates gentle highlights on the glass surface. The bottle slowly rotates 360 degrees, showing the premium packaging from all angles. Golden liquid inside catches the light beautifully. A single drop of serum falls in slow motion onto a petal of rose, creating ripples. Background is soft gradient from white to pale pink. Elegant, sophisticated, premium beauty aesthetic. 4K, shallow depth of field, commercial quality"
+
+【分镜建议】
+0-2秒：产品整体展示，正面静态
+2-5秒：缓慢360度旋转
+5-7秒：细节特写（瓶盖/瓶身）
+7-9秒：产品使用（滴管/液体）
+9-10秒：品牌logo定格
+
+【调性建议】
+- 整体色调：优雅、高级、纯净
+- 配乐：轻奢风格轻音乐
+- 节奏：舒缓、高级感`,
+      type: 'text'
+    },
+    tips: [
+      '产品视频要突出"质感"关键词',
+      '360度旋转是最经典的产品展示方式',
+      '玻璃/金属材质要描述反光效果',
+      '使用场景展示能增加代入感'
+    ]
+  },
+  
+  {
+    id: 'video-026',
+    title: '旅行风景视频提示词',
+    description: '壮丽风景和旅行主题视频的提示词模板',
+    category: '视频生成',
+    tags: ['旅行', '风景', '航拍', '自然'],
+    usage: 21230,
+    rating: 4.8,
+    content: `# 旅行风景视频提示词指南
+
+## 【风景类型与关键词】
+
+### 自然风光
+- majestic mountains - 巍峨山脉
+- pristine beach - 原始海滩
+- lush forest - 茂密森林
+- cascading waterfall - 飞流瀑布
+- endless desert - 无垠沙漠
+
+### 城市景观
+- skyline at dusk - 黄昏天际线
+- bustling streets - 繁忙街道
+- historic architecture - 历史建筑
+- neon nightscape - 霓虹夜景
+
+### 特色场景
+- golden hour sunset - 黄金时刻日落
+- blue hour city - 蓝调时刻城市
+- starry night sky - 星空夜景
+- foggy morning - 雾气清晨
+
+## 【航拍视角】
+
+### 高空俯瞰
+- aerial drone shot - 航拍镜头
+- bird's eye view - 鸟瞰视角
+- sweeping panorama - 全景扫视
+- majestic reveal - 壮丽展现
+
+### 低空掠过
+- low altitude pass - 低空掠过
+- following shot - 跟踪镜头
+- reveal shot - 揭示镜头`,
+    example: {
+      input: '瑞士阿尔卑斯山脉日出',
+      output: `【提示词】
+"Breathtaking aerial drone shot of Swiss Alps at sunrise. Snow-capped mountain peaks stretching to infinity, bathed in warm golden and pink light of dawn. Layers of mountain ranges create dramatic depth, with morning mist filling the valleys between peaks. A few fluffy clouds catch the first rays of sunlight, glowing orange and gold. Camera slowly rises and pans across the majestic landscape, revealing more peaks emerging from the darkness. In the distance, a small alpine lake reflects the colorful sky. The scene conveys pure serenity and awe-inspiring natural beauty. Cinematic color grading, dramatic contrast, shot on RED camera, 8K resolution, anamorphic lens"
+
+【镜头运动建议】
+方式一：从低到高升起，揭示全景
+方式二：横移扫视，展示山脉延绵
+方式三：前进推进，穿越山峰
+
+【时间点建议】
+- 日出前10分钟：蓝紫色调
+- 日出时刻：金色光芒
+- 日出后10分钟：温暖橙光`,
+      type: 'text'
+    },
+    tips: [
+      '风景视频要有"reveal"揭示感',
+      '描述光线和时间对风景至关重要',
+      '添加海拔、距离等描述增加宏大感',
+      '云雾能增加层次和神秘感'
+    ]
+  },
+  
+  {
+    id: 'video-027',
+    title: '宠物萌宠视频提示词',
+    description: '可爱宠物和动物视频的提示词模板',
+    category: '视频生成',
+    tags: ['宠物', '萌宠', '动物', '可爱'],
+    usage: 19870,
+    rating: 4.9,
+    content: `# 宠物萌宠视频提示词指南
+
+## 【萌宠拍摄要点】
+
+### 可爱元素
+- fluffy fur - 毛茸茸
+- big round eyes - 圆圆大眼
+- tiny paws - 小爪子
+- wagging tail - 摇尾巴
+- perked ears - 竖起的耳朵
+
+### 动作描述
+- playfully jumping - 活泼跳跃
+- curiously sniffing - 好奇嗅闻
+- lazily stretching - 慵懒伸懒腰
+- happily running - 开心奔跑
+- sleeping peacefully - 安详睡觉
+
+### 情感表达
+- excited expression - 兴奋表情
+- confused look - 困惑表情
+- happy panting - 开心喘气
+- loving gaze - 深情注视
+
+## 【宠物类型关键词】
+
+### 狗狗
+- golden retriever - 金毛
+- french bulldog - 法斗
+- husky - 哈士奇
+- corgi - 柯基
+
+### 猫咪
+- persian cat - 波斯猫
+- british shorthair - 英短
+- maine coon - 缅因猫
+- tabby cat - 虎斑猫`,
+    example: {
+      input: '可爱柯基在草地上奔跑',
+      output: `【提示词】
+"An adorable corgi puppy running joyfully across a sunny meadow with colorful wildflowers. The corgi has fluffy orange and white fur, big bright eyes full of excitement, and its signature short legs moving rapidly. Its ears are perked up and tongue is happily hanging out as it runs towards the camera. The afternoon sunlight creates a warm golden glow, highlighting the fur texture. Butterflies flutter around as the corgi playfully chases them. Camera follows alongside in a tracking shot, keeping the puppy in focus while the beautiful meadow background blurs. Cheerful, heartwarming atmosphere. 4K, cinematic, shallow depth of field, slow motion moments"
+
+【拍摄建议】
+- 低角度拍摄（与宠物视线平行）
+- 使用慢动作捕捉可爱瞬间
+- 保持环境安全无危险物品
+- 准备零食吸引注意力
+
+【表情捕捉要点】
+- 奔跑时的快乐表情
+- 停下时的好奇眼神
+- 发现镜头时的可爱歪头`,
+      type: 'text'
+    },
+    tips: [
+      '宠物视频要突出"adorable"、"cute"等词',
+      '描述毛发质感增加真实感',
+      '添加动态元素（追蝴蝶、玩球等）',
+      '低角度拍摄让宠物更有亲和力'
+    ]
+  },
+  
+  {
+    id: 'video-028',
+    title: '运动健身视频提示词',
+    description: '健身动作和运动场景视频的提示词模板',
+    category: '视频生成',
+    tags: ['健身', '运动', '锻炼', '健康'],
+    usage: 15680,
+    rating: 4.7,
+    content: `# 运动健身视频提示词指南
+
+## 【运动场景设置】
+
+### 健身房
+- modern gym - 现代健身房
+- well-lit fitness center - 明亮健身中心
+- professional equipment - 专业器材
+- motivating atmosphere - 激励氛围
+
+### 户外运动
+- city park workout - 公园锻炼
+- beach running - 沙滩跑步
+- mountain hiking - 山地徒步
+- urban street workout - 街头健身
+
+### 专业场地
+- basketball court - 篮球场
+- tennis court - 网球场
+- swimming pool - 游泳池
+- yoga studio - 瑜伽室
+
+## 【动作关键词】
+
+### 力量训练
+- lifting weights - 举重
+- bench press - 卧推
+- deadlift - 硬拉
+- squats - 深蹲
+
+### 有氧运动
+- running - 跑步
+- cycling - 骑行
+- jumping rope - 跳绳
+- swimming - 游泳
+
+### 柔韧训练
+- yoga pose - 瑜伽姿势
+- stretching - 拉伸
+- pilates - 普拉提`,
+    example: {
+      input: '专业健身教练示范深蹲动作',
+      output: `【提示词】
+"A fit athletic fitness trainer performing perfect squat form in a modern, well-lit gym. The trainer wears professional athletic wear, showing proper technique: feet shoulder-width apart, back straight, core engaged, descending until thighs are parallel to ground, then driving up through heels. Mirror in background shows form from multiple angles. The gym has sleek modern equipment, motivational posters on walls, and large windows letting in natural light. Camera captures from side angle to show proper form, then cuts to front view. Professional fitness video style, clean editing, clear demonstration. 4K, studio lighting, shallow depth of field"
+
+【拍摄要点】
+- 侧面角度展示动作轨迹
+- 镜子增加多角度展示
+- 光线要明亮但不刺眼
+- 背景干净整洁
+
+【动作分解】
+1. 准备姿势：站直，核心收紧
+2. 下蹲阶段：臀部后坐，膝盖对齐脚尖
+3. 底部停留：大腿平行地面
+4. 起身阶段：臀部发力站起`,
+      type: 'text'
+    },
+    tips: [
+      '健身视频要强调"proper form"正确姿势',
+      '光线要充足展示肌肉线条',
+      '镜面反射能增加专业感',
+      '运动服要紧身展示身材'
+    ]
+  }
 ];
 
 // 默认导出
