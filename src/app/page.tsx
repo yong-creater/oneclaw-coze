@@ -1407,6 +1407,15 @@ export default function Home() {
                 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
               </span>
             </Link>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowAbout(true)}
+              className="text-slate-600 dark:text-slate-300"
+            >
+              <Info className="h-4 w-4 mr-1.5" />
+              关于我们
+            </Button>
           </div>
         </div>
       </header>
