@@ -1463,60 +1463,53 @@ export default function Home() {
 
         {/* Prompts Tab Content */}
         {activeTab === 'prompts' && (
-          <div className="space-y-6">
-            {/* 提示词库介绍 */}
-            <Card className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-800 border-red-100 dark:border-slate-700">
-              <CardContent className="pt-5 pb-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-xl flex items-center justify-center">
-                    <Sparkles className="h-5 w-5 text-red-600 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">AI视频提示词库</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">精选 {prompts.length} 个专业提示词模板，助你高效创作</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 分类筛选 */}
-            <div className="flex flex-wrap gap-2">
-              {promptCategories.map((cat) => (
-                <Button
-                  key={cat.name}
-                  variant={selectedCategory === cat.name ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(cat.name)}
-                  className={selectedCategory === cat.name ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-1" : "border-slate-200 dark:border-slate-700 gap-1"}
-                >
-                  <span>{cat.icon}</span>
-                  {cat.name}
-                  <span className="text-xs opacity-60">({cat.count})</span>
-                </Button>
-              ))}
+          <div className="space-y-4">
+            {/* 标题行与筛选 */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-red-500" />
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">提示词库</h2>
+                <Badge variant="secondary" className="text-xs">{prompts.length} 个模板</Badge>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {promptCategories.map((cat) => (
+                  <Button
+                    key={cat.name}
+                    variant={selectedCategory === cat.name ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(cat.name)}
+                    className={selectedCategory === cat.name ? "bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white h-7 text-xs px-2.5" : "border-slate-200 dark:border-slate-700 h-7 text-xs px-2.5"}
+                  >
+                    <span className="mr-0.5">{cat.icon}</span>
+                    {cat.name}
+                    <span className="ml-1 opacity-60 text-[10px]">({cat.count})</span>
+                  </Button>
+                ))}
+              </div>
             </div>
 
-            {/* 提示词列表 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 提示词列表 - 紧凑网格 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
               {filteredPrompts.map((prompt) => (
-                <Card key={prompt.id} className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow cursor-pointer"
+                <Card 
+                  key={prompt.id} 
+                  className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-700 hover:shadow-sm transition-all cursor-pointer group"
                   onClick={() => setSelectedPrompt(prompt)}
                 >
-                  <CardContent className="pt-4 pb-3">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+                  <CardContent className="p-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/40 dark:to-orange-900/40 rounded-lg flex items-center justify-center text-base flex-shrink-0">
                         💬
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-sm text-slate-900 dark:text-white truncate">{prompt.title}</h3>
-                          <Badge variant="secondary" className="text-xs bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 flex-shrink-0">
-                            {prompt.category}
-                          </Badge>
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <h3 className="font-medium text-sm text-slate-900 dark:text-white truncate group-hover:text-red-500 transition-colors">{prompt.title}</h3>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{prompt.description}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{prompt.description}</p>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 flex-shrink-0">
+                        {prompt.category}
+                      </Badge>
                     </div>
                   </CardContent>
                 </Card>
