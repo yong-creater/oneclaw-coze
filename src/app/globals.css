@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
-/* ========== 龙虾动画 ========== */
+/* ========== 可爱卡通龙虾动画 ========== */
 
-/* 整体游动感 */
 .lobster-wrap {
   transition: transform 0.3s ease;
 }
@@ -11,49 +10,32 @@
   transform-origin: center center;
 }
 
-/* 默认状态：轻微游动 */
-.lobster-wrap:not(.lobster-caught):not(.lobster-hovering) .lobster-whole {
-  animation: lobster-swim 4s ease-in-out infinite;
+/* 默认状态：轻微浮动 */
+.lobster-wrap:not(.lobster-caught):not(.lobster-hovering) .lobster-body {
+  animation: body-float 3s ease-in-out infinite;
 }
 
-@keyframes lobster-swim {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  25% {
-    transform: translateY(-1.5px) rotate(0.3deg);
-  }
-  75% {
-    transform: translateY(1px) rotate(-0.2deg);
-  }
+@keyframes body-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 }
 
 /* Hover状态：更活跃 */
-.lobster-wrap.lobster-hovering .lobster-whole {
-  animation: lobster-active 1.5s ease-in-out infinite;
+.lobster-wrap.lobster-hovering .lobster-body {
+  animation: body-bounce 1s ease-in-out infinite;
 }
 
-@keyframes lobster-active {
-  0%, 100% {
-    transform: translateY(0) rotate(0deg) scale(1);
-  }
-  25% {
-    transform: translateY(-2px) rotate(0.5deg) scale(1.02);
-  }
-  50% {
-    transform: translateY(1px) rotate(-0.5deg) scale(1);
-  }
-  75% {
-    transform: translateY(-1px) rotate(0.3deg) scale(1.01);
-  }
+@keyframes body-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-3px) scale(1.02); }
 }
 
 /* 点击挣扎 */
 .lobster-wrap.lobster-caught {
-  animation: lobster-struggle 0.15s ease-in-out infinite;
+  animation: struggle 0.15s ease-in-out infinite;
 }
 
-@keyframes lobster-struggle {
+@keyframes struggle {
   0% { transform: rotate(-8deg) translateY(-2px); }
   25% { transform: rotate(5deg) translateY(2px); }
   50% { transform: rotate(-5deg) translateY(-1px); }
@@ -61,111 +43,138 @@
   100% { transform: rotate(-8deg) translateY(-2px); }
 }
 
-/* 大钳子开合 */
+/* 钳子开合 */
 .claw-left {
   transform-origin: 18px 28px;
-  animation: claw-left-move 3s ease-in-out infinite;
+  animation: claw-left-wave 2s ease-in-out infinite;
 }
 
 .claw-right {
-  transform-origin: 18px 47px;
-  animation: claw-right-move 3s ease-in-out infinite;
+  transform-origin: 46px 28px;
+  animation: claw-right-wave 2s ease-in-out infinite;
 }
 
-@keyframes claw-left-move {
+@keyframes claw-left-wave {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-4deg); }
+  50% { transform: rotate(-5deg); }
 }
 
-@keyframes claw-right-move {
+@keyframes claw-right-wave {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(4deg); }
+  50% { transform: rotate(5deg); }
 }
 
 /* Hover时钳子动作更大 */
 .lobster-wrap.lobster-hovering .claw-left,
 .lobster-wrap.lobster-hovering .claw-right {
-  animation-duration: 1.2s;
+  animation-duration: 0.8s;
 }
 
-/* 尾巴摆动 */
-.lobster-tail {
-  transform-origin: 80px 37.5px;
-  animation: tail-wave 3s ease-in-out infinite;
+/* 触须摆动 */
+.antenna-left {
+  transform-origin: 24px 16px;
+  animation: antenna-left-wave 2.5s ease-in-out infinite;
 }
 
-@keyframes tail-wave {
+.antenna-right {
+  transform-origin: 40px 16px;
+  animation: antenna-right-wave 2.5s ease-in-out infinite;
+}
+
+@keyframes antenna-left-wave {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(3deg); }
+  50% { transform: rotate(-8deg); }
 }
 
-/* Hover时尾巴摆动更快 */
-.lobster-wrap.lobster-hovering .lobster-tail {
-  animation-duration: 1.5s;
-}
-
-/* 步足轻微摆动 */
-.lobster-legs path:nth-child(odd) {
-  animation: leg-move 3s ease-in-out infinite;
-}
-
-.lobster-legs path:nth-child(even) {
-  animation: leg-move 3s ease-in-out infinite reverse;
-}
-
-@keyframes leg-move {
-  0%, 100% { transform: scaleX(1); }
-  50% { transform: scaleX(0.95); }
-}
-
-/* 短触角摆动 */
-.lobster-antenna .antenna-short-top {
-  transform-origin: 36px 26px;
-  animation: antenna-short-wave 2.5s ease-in-out infinite;
-}
-
-.lobster-antenna .antenna-short-bottom {
-  transform-origin: 36px 49px;
-  animation: antenna-short-wave 2.5s ease-in-out infinite reverse;
-}
-
-@keyframes antenna-short-wave {
+@keyframes antenna-right-wave {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(3deg); }
+  50% { transform: rotate(8deg); }
 }
 
 /* Hover时触角摆动更快 */
-.lobster-wrap.lobster-hovering .lobster-antenna .antenna-short-top,
-.lobster-wrap.lobster-hovering .lobster-antenna .antenna-short-bottom {
+.lobster-wrap.lobster-hovering .antenna-left,
+.lobster-wrap.lobster-hovering .antenna-right {
   animation-duration: 1s;
 }
 
-/* 眨眼 */
-.lobster-eyes .eyelid {
+/* 腿摆动 */
+.legs rect:nth-child(1) { animation: leg-move 1.5s ease-in-out infinite 0s; }
+.legs rect:nth-child(2) { animation: leg-move 1.5s ease-in-out infinite 0.1s; }
+.legs rect:nth-child(3) { animation: leg-move 1.5s ease-in-out infinite 0.2s; }
+.legs rect:nth-child(4) { animation: leg-move 1.5s ease-in-out infinite 0.3s; }
+
+@keyframes leg-move {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(2px); }
+}
+
+/* 眼睛眨眼 */
+.eyes .eye-left,
+.eyes .eye-right {
   animation: blink 4s ease-in-out infinite;
   transform-origin: center;
 }
 
 @keyframes blink {
-  0%, 45%, 55%, 100% {
-    transform: scaleY(0);
-    opacity: 0;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
+  0%, 45%, 55%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.1); }
 }
 
 /* 眼球微移 */
-.lobster-eyes .eye-pupil {
-  animation: eye-move 6s ease-in-out infinite;
+.lobster-wrap:not(.lobster-caught) .eyes .eye-left {
+  animation: eye-move-left 6s ease-in-out infinite;
 }
 
-@keyframes eye-move {
+.lobster-wrap:not(.lobster-caught) .eyes .eye-right {
+  animation: eye-move-right 6s ease-in-out infinite;
+}
+
+@keyframes eye-move-left {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-0.5px); }
+  75% { transform: translateX(0.5px); }
+}
+
+@keyframes eye-move-right {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(0.5px); }
   75% { transform: translateX(-0.5px); }
+}
+
+/* 腮红闪烁 */
+.blush {
+  animation: blush-pulse 3s ease-in-out infinite;
+}
+
+@keyframes blush-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.7; }
+}
+
+/* Hover时腮红更明显 */
+.lobster-wrap.lobster-hovering .blush {
+  animation-duration: 1s;
+}
+
+/* 嘴巴微笑变化 */
+.mouth {
+  animation: smile 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes smile {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.2); }
+}
+
+/* Hover时嘴巴更开心 */
+.lobster-wrap.lobster-hovering .mouth {
+  animation: happy-smile 0.8s ease-in-out infinite;
+}
+
+@keyframes happy-smile {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.3) translateY(-1px); }
 }
 
 /* ========== 全局样式 ========== */
