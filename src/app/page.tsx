@@ -1398,33 +1398,15 @@ export default function Home() {
       {isPageLoading && <FullPageLoading text="龙虾正在为你准备..." />}
       
       {/* Header */}
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+      <header className="bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <AnimatedLobster size={48} className="relative z-10" />
-              <div>
-                <h1 className="text-lg font-bold">
-                  <span className="text-gradient">One</span><span className="text-orange-500">Claw</span>
-                </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">一站式 AI 工具与资源导航</p>
-              </div>
+            <Link href="/" className="flex items-center gap-2.5">
+              <AnimatedLobster size={36} className="relative z-10" />
+              <span className="text-lg font-bold">
+                <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
+              </span>
             </Link>
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all"
-                onClick={() => setShowAbout(true)}
-              >
-                <Info className="h-4 w-4" />
-                <span className="hidden sm:inline">关于我们</span>
-              </Button>
-              <Badge variant="secondary" className="text-xs">
-                <Sparkles className="h-3 w-3 mr-1" />
-                {activeTab === 'tools' ? `${aiTools.length} 个工具` : activeTab === 'prompts' ? `${prompts.length} 个提示词` : `${aiSkills.length} 个技能`}
-              </Badge>
-            </div>
           </div>
         </div>
       </header>
@@ -1483,14 +1465,13 @@ export default function Home() {
                 return (
                   <Button
                     key={category.name}
-                    variant={isActive ? "default" : "outline"}
+                    variant={isActive ? "default" : "ghost"}
                     size="sm"
                     onClick={() => handleCategoryChange(category.name)}
                     className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
                   >
                     <Icon className="h-3.5 w-3.5 mr-1.5" />
                     {category.name}
-                    <span className="ml-1.5 text-xs opacity-60">({category.count})</span>
                   </Button>
                 );
               })}
@@ -1505,7 +1486,7 @@ export default function Home() {
             ) : (
               <>
                 {/* Tools Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredTools.map((tool) => (
                     <ToolCard key={tool.id} tool={tool} onClick={() => handleToolClick(tool)} />
                   ))}
@@ -1528,191 +1509,6 @@ export default function Home() {
               </>
             )}
           </div>
-
-          {/* Sidebar - Sticky定位 */}
-          <div className="hidden lg:block w-72 flex-shrink-0">
-            <div className="sticky top-4 space-y-4 max-h-[calc(100vh-2rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600">
-            {/* 热门推荐 */}
-            <Card className="relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/30 dark:shadow-slate-900/30">
-              {/* 装饰性渐变 */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-orange-500 to-amber-500"></div>
-              <CardContent className="pt-5 pb-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
-                    <TrendingUp className="h-3.5 w-3.5 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-slate-900 dark:text-white">热门推荐</h3>
-                </div>
-                <div className="space-y-1">
-                  {hotTools.map((tool, index) => (
-                    <div 
-                      key={tool.id}
-                      className="group flex items-center gap-3 p-2 rounded-lg hover:bg-gradient-to-r hover:from-red-50 hover:to-orange-50 dark:hover:from-red-900/20 dark:hover:to-orange-900/20 cursor-pointer transition-all duration-300"
-                      onClick={() => handleToolClick(tool)}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 flex items-center justify-center text-xs font-bold text-red-600 dark:text-red-400">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">{tool.name}</p>
-                        <p className="text-xs text-slate-500">{tool.category}</p>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-slate-400 group-hover:text-red-500 group-hover:translate-x-1 transition-all" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 最新动态 - AI 新闻 */}
-            <Card className="relative overflow-hidden bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/30 dark:shadow-slate-900/30">
-              {/* 装饰性渐变 */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500"></div>
-              <CardContent className="pt-5 pb-3">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                      <Newspaper className="h-3.5 w-3.5 text-white" />
-                    </div>
-                    <h3 className="font-semibold text-sm text-slate-900 dark:text-white">AI 热门新闻</h3>
-                  </div>
-                  <button 
-                    onClick={fetchAINews}
-                    className="text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
-                    disabled={loadingNews}
-                  >
-                    <RefreshCw className={`h-3.5 w-3.5 ${loadingNews ? 'animate-spin' : ''}`} />
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {loadingNews ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="w-6 h-6 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin"></div>
-                    </div>
-                  ) : aiNews.length > 0 ? (
-                    aiNews.slice(0, 4).map((news, index) => (
-                      <a
-                        key={index}
-                        href={news.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block group cursor-pointer"
-                      >
-                        <div className="flex items-start gap-2">
-                          <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
-                            index === 0 ? 'bg-gradient-to-br from-red-500 to-orange-500 shadow-sm shadow-red-500/50' : 
-                            index === 1 ? 'bg-gradient-to-br from-orange-500 to-amber-500' : 
-                            index === 2 ? 'bg-gradient-to-br from-amber-500 to-yellow-500' : 
-                            'bg-slate-400'
-                          }`}></div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-red-500 dark:group-hover:text-red-400 line-clamp-2 transition-colors">
-                              {news.title}
-                            </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">{news.source}</span>
-                              {news.publishTime && (
-                                <span className="text-xs text-slate-400">
-                                  {new Date(news.publishTime).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric' })}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-                    ))
-                  ) : (
-                    <div className="text-center py-4 text-sm text-slate-500">
-                      暂无新闻
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 联系我们 */}
-            <Card className="relative overflow-hidden bg-gradient-to-br from-red-600 to-orange-500 dark:from-red-700 dark:to-orange-600 border-0 text-white shadow-lg shadow-red-500/30">
-              <CardContent className="pt-4 pb-3 relative">
-                {/* 装饰性背景 */}
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
-                <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  联系我们
-                </h3>
-                <div className="text-sm text-white/90 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded">1017760688@qq.com</span>
-                  </div>
-                  <p className="text-xs text-white/70">欢迎商务合作与工具推荐</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* 合成意向提交 */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 dark:from-slate-800 dark:via-slate-800 dark:to-slate-700 rounded-xl p-4 border border-amber-100/50 dark:border-slate-600/50 shadow-lg shadow-amber-500/10">
-              {/* 装饰性背景 */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-full blur-3xl"></div>
-              
-              <div className="text-center mb-3 relative">
-                <div className="w-12 h-12 mx-auto mb-2 bg-gradient-to-br from-red-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg shadow-red-500/30">
-                  <Sparkles className="h-6 w-6 text-white" />
-                </div>
-                <p className="font-semibold text-sm text-slate-800 dark:text-white">AI 视频合成意向</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">描述您的需求，我们会尽快联系您</p>
-              </div>
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                const form = e.target as HTMLFormElement;
-                const intent = (form.elements.namedItem('intent') as HTMLTextAreaElement).value;
-                const email = (form.elements.namedItem('email') as HTMLInputElement)?.value;
-                
-                if (!intent.trim()) {
-                  alert('请输入您的合成意向');
-                  return;
-                }
-                
-                try {
-                  const response = await fetch('/api/submit-intent', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      intent,
-                      email,
-                      timestamp: new Date().toLocaleString('zh-CN'),
-                    }),
-                  });
-                  
-                  const data = await response.json();
-                  if (data.success) {
-                    alert('提交成功！我们会尽快与您联系。');
-                    form.reset();
-                  } else {
-                    alert(data.message || '提交失败，请稍后重试');
-                  }
-                } catch {
-                  alert('提交失败，请稍后重试');
-                }
-              }}>
-                <textarea
-                  name="intent"
-                  placeholder="描述您的视频合成需求，如：产品宣传视频、教育课程视频、短视频内容..."
-                  className="w-full px-3 py-2.5 text-sm border border-slate-200/60 dark:border-slate-600/60 rounded-lg bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 placeholder-slate-400 resize-none focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-300 mb-2 backdrop-blur-sm"
-                  rows={3}
-                />
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="您的邮箱（选填）"
-                  className="w-full px-3 py-2.5 text-sm border border-slate-200/60 dark:border-slate-600/60 rounded-lg bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 placeholder-slate-400 mb-3 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-300 backdrop-blur-sm"
-                />
-                <Button type="submit" size="sm" className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all duration-300 hover:scale-[1.02]">
-                  <Sparkles className="h-4 w-4 mr-1.5" />
-                  立即提交
-                </Button>
-              </form>
-            </div>
-            </div>{/* sticky容器结束 */}
-          </div>
         </div>
           </>
         )}
@@ -1722,16 +1518,14 @@ export default function Home() {
           <>
             {/* Search */}
             <div className="mb-4">
-              <div className="relative group">
-                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-red-500 transition-colors" />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="搜索提示词名称、描述或标签..."
+                  placeholder="搜索提示词..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-red-300 dark:focus:border-red-700 focus:ring-red-500/20 transition-all duration-300 hover:border-red-200 dark:hover:border-red-800"
+                  className="pl-10 h-10"
                 />
-                {/* 搜索框光效 */}
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </div>
 
@@ -1739,44 +1533,23 @@ export default function Home() {
             <div className="flex flex-wrap gap-2 mb-6">
               {promptCategories.map((cat) => {
                 const isActive = selectedCategory === cat.name;
-                // 获取分类对应的渐变色
-                const getGradient = (name: string) => {
-                  const gradients: Record<string, string> = {
-                    '全部': 'from-red-500 to-orange-500',
-                    '视频生成': 'from-violet-500 to-purple-600',
-                    '数字人': 'from-pink-500 to-rose-600',
-                    '视频编辑': 'from-blue-500 to-cyan-600',
-                    'AI配音': 'from-orange-500 to-amber-600',
-                    'AI字幕': 'from-emerald-500 to-teal-600',
-                    '视频增强': 'from-amber-500 to-yellow-600',
-                    '创意视频': 'from-fuchsia-500 to-pink-600',
-                    '效率提升': 'from-cyan-500 to-blue-600',
-                    '个人成长': 'from-green-500 to-emerald-600',
-                  };
-                  return gradients[name] || 'from-slate-500 to-gray-600';
-                };
-
                 return (
                   <Button
                     key={cat.name}
-                    variant={isActive ? "default" : "outline"}
+                    variant={isActive ? "default" : "ghost"}
                     size="sm"
                     onClick={() => setSelectedCategory(cat.name)}
-                    className={isActive 
-                      ? `bg-gradient-to-r ${getGradient(cat.name)} hover:opacity-90 text-white shadow-md shadow-violet-500/20 transition-all duration-300 hover:scale-105` 
-                      : "border-slate-200/60 dark:border-slate-700/60 hover:border-violet-300 dark:hover:border-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all duration-300"
-                    }
+                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
                   >
                     <span className="mr-1">{cat.icon}</span>
                     {cat.name}
-                    <span className="ml-1.5 text-xs opacity-60">({cat.count})</span>
                   </Button>
                 );
               })}
             </div>
 
             {/* 提示词列表 - 网格布局 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPrompts.map((prompt) => (
                 <PromptCard 
                   key={prompt.id} 
@@ -1808,16 +1581,14 @@ export default function Home() {
           <>
             {/* Search */}
             <div className="mb-4">
-              <div className="relative group">
-                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="搜索技能名称、描述或标签..."
+                  placeholder="搜索技能..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-blue-300 dark:focus:border-blue-700 focus:ring-blue-500/20 transition-all duration-300 hover:border-blue-200 dark:hover:border-blue-800"
+                  className="pl-10 h-10"
                 />
-                {/* 搜索框光效 */}
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </div>
 
@@ -1828,26 +1599,20 @@ export default function Home() {
                 return (
                   <Button
                     key={category.name}
-                    variant={isActive ? 'default' : 'outline'}
+                    variant={isActive ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setSelectedCategory(category.name)}
-                    className={isActive 
-                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-md shadow-blue-500/20 transition-all duration-300 hover:scale-105' 
-                      : 'border-slate-200/60 dark:border-slate-700/60 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-300'
-                    }
+                    className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
                   >
                     <span className="mr-1">{category.icon}</span>
                     {category.name}
-                    <Badge variant="secondary" className="ml-1.5 bg-white/20 text-white border-0 text-[10px]">
-                      {category.count}
-                    </Badge>
                   </Button>
                 );
               })}
             </div>
 
             {/* Skills Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {aiSkills
                 .filter(skill => {
                   const matchesSearch = skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
