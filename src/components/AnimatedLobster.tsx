@@ -1,21 +1,83 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState, useCallback } from 'react';
 
 interface AnimatedLobsterProps {
   size?: number;
   className?: string;
 }
 
-// 动画龙虾组件 - 更逼真的设计
+// 动画龙虾组件 - 更逼真的设计 + 有趣交互
 export const AnimatedLobster = memo(function AnimatedLobster({ 
   size = 48, 
   className = '' 
 }: AnimatedLobsterProps) {
+  const [isExcited, setIsExcited] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
+  const [showMessage, setShowMessage] = useState('');
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; emoji: string }>>([]);
+
+  // 有趣的消息
+  const funMessages = [
+    '🦞 咔嚓！',
+    '🫧 噗噜噗噜~',
+    '✨ 我是一只快乐的龙虾！',
+    '🦞 钳钳爱你~',
+    '💨 游走了又游回来~',
+    '🔥 我很辣的！',
+    '🦞 咱们去吃火锅吧！',
+    '👑 我可是海鲜之王',
+    '💪 我的钳子超有力！',
+    '🌊 海底世界真美丽~',
+  ];
+
+  // 粒子emoji
+  const particleEmojis = ['🫧', '✨', '🦞', '💝', '🌊', '⭐', '💫', '🦀'];
+
+  // 点击处理
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    // 增加点击次数
+    const newCount = clickCount + 1;
+    setClickCount(newCount);
+    
+    // 触发兴奋状态
+    setIsExcited(true);
+    setTimeout(() => setIsExcited(false), 600);
+    
+    // 显示随机消息
+    const randomMessage = funMessages[Math.floor(Math.random() * funMessages.length)];
+    setShowMessage(randomMessage);
+    setTimeout(() => setShowMessage(''), 1500);
+    
+    // 生成粒子效果
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    const newParticles = Array.from({ length: 6 }, (_, i) => ({
+      id: Date.now() + i,
+      x: rect.width / 2,
+      y: rect.height / 2,
+      emoji: particleEmojis[Math.floor(Math.random() * particleEmojis.length)],
+    }));
+    setParticles(prev => [...prev, ...newParticles]);
+    
+    // 清理粒子
+    setTimeout(() => {
+      setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
+    }, 800);
+
+    // 连续点击彩蛋
+    if (newCount >= 10) {
+      setShowMessage('🎉 你已经点了' + newCount + '次！太爱我了！');
+      setTimeout(() => setShowMessage(''), 2000);
+    }
+  }, [clickCount]);
+
   return (
     <div 
-      className={`relative inline-block ${className}`}
+      className={`relative inline-block cursor-pointer select-none ${className}`}
       style={{ width: size, height: size }}
+      onClick={handleClick}
     >
       {/* 气泡效果 */}
       <div className="absolute inset-0 overflow-visible pointer-events-none">
@@ -24,12 +86,41 @@ export const AnimatedLobster = memo(function AnimatedLobster({
         <div className="lobster-bubble" style={{ left: '60%', animationDelay: '1.6s' }} />
       </div>
       
+      {/* 点击粒子效果 */}
+      {particles.map(particle => (
+        <div
+          key={particle.id}
+          className="absolute pointer-events-none animate-particle"
+          style={{
+            left: particle.x,
+            top: particle.y,
+            fontSize: size * 0.3,
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
+          {particle.emoji}
+        </div>
+      ))}
+      
+      {/* 消息气泡 */}
+      {showMessage && (
+        <div 
+          className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 text-sm font-medium animate-bubble-pop z-50"
+          style={{ fontSize: size * 0.28 }}
+        >
+          {showMessage}
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white dark:bg-slate-800 rotate-45 border-r border-b border-slate-200 dark:border-slate-700" />
+        </div>
+      )}
+      
       {/* 龙虾主体 */}
       <svg 
         viewBox="0 0 120 80" 
-        className="w-full h-full"
+        className={`w-full h-full transition-transform duration-300 ${isExcited ? 'lobster-excited' : ''}`}
         style={{ 
-          filter: 'drop-shadow(0 3px 6px rgba(220, 38, 38, 0.4))',
+          filter: isExcited 
+            ? 'drop-shadow(0 0 12px rgba(239, 68, 68, 0.6)) drop-shadow(0 4px 8px rgba(220, 38, 38, 0.4))' 
+            : 'drop-shadow(0 3px 6px rgba(220, 38, 38, 0.4))',
           transformOrigin: 'center center'
         }}
       >
@@ -177,7 +268,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           {/* ========== 大钳子 ========== */}
           <g className="lobster-claws">
             {/* 左钳子（上方）*/}
-            <g className="claw-left">
+            <g className={`claw-left ${isExcited ? 'claw-excited' : ''}`}>
               {/* 钳臂 */}
               <path d="M80 30 Q72 22, 62 18 Q54 15, 48 12" stroke="url(#clawGradient)" strokeWidth="5" fill="none" strokeLinecap="round" />
               {/* 钳子上半部分 */}
@@ -190,7 +281,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
             </g>
             
             {/* 右钳子（下方）*/}
-            <g className="claw-right">
+            <g className={`claw-right ${isExcited ? 'claw-excited' : ''}`}>
               {/* 钳臂 */}
               <path d="M80 50 Q72 58, 62 62 Q54 65, 48 68" stroke="url(#clawGradient)" strokeWidth="5" fill="none" strokeLinecap="round" />
               {/* 钳子上半部分 */}
@@ -204,6 +295,13 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           </g>
         </g>
       </svg>
+      
+      {/* 点击计数器（连续点击显示）*/}
+      {clickCount >= 5 && clickCount < 10 && (
+        <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-amber-600 font-bold animate-pulse">
+          x{clickCount}
+        </div>
+      )}
     </div>
   );
 });
