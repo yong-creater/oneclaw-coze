@@ -871,67 +871,66 @@ const PromptCard = memo(function PromptCard({
 
   return (
     <Card 
-      className={`group relative overflow-hidden bg-gradient-to-br ${style.bgGradient} border-slate-200/50 dark:border-slate-700/50 ${style.borderHover} hover:shadow-xl hover:shadow-violet-500/10 transition-all duration-300 cursor-pointer hover:-translate-y-1`}
+      className="group relative overflow-hidden bg-white dark:bg-slate-800 border-slate-200/60 dark:border-slate-700/60 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-red-500/10 hover:border-red-300/50 dark:hover:border-red-600/50 hover:-translate-y-1 card-glow"
       onClick={onClick}
     >
-      {/* 顶部装饰条 */}
-      <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${style.gradient}`}></div>
-      
-      {/* 悬停光效 */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/0 group-hover:from-white/30 group-hover:to-white/10 transition-all duration-500 pointer-events-none"></div>
+      {/* 悬停光效背景 */}
+      <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-orange-500/0 to-amber-500/0 group-hover:from-red-500/5 group-hover:via-orange-500/5 group-hover:to-amber-500/5 transition-all duration-500"></div>
       
       <CardContent className="p-4 relative">
-        {/* 头部：分类图标 + 标签 */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            {/* 分类图标 */}
-            <div className={`w-10 h-10 bg-gradient-to-br ${style.gradient} rounded-xl flex items-center justify-center text-lg shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-              {categoryIcon}
+        <div className="flex gap-4">
+          {/* 图标 */}
+          <div className={`relative w-14 h-14 bg-gradient-to-br ${style.gradient} rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300 overflow-hidden`}>
+            {/* 图标光泽效果 */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <span className="text-xl relative z-10">{categoryIcon}</span>
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
+                {prompt.title}
+              </h3>
+              {prompt.featured && (
+                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600 px-2 shadow-sm">
+                  <Flame className="h-3 w-3 mr-0.5" />
+                  推荐
+                </Badge>
+              )}
             </div>
-            {/* 提示词标签 */}
-            <div className="flex flex-col gap-0.5">
-              <span className={`text-[10px] font-semibold bg-gradient-to-r ${style.gradient} bg-clip-text text-transparent uppercase tracking-wider`}>
+            
+            <div className="flex items-center gap-1.5 mb-2">
+              <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-700/50">
+                {prompt.category}
+              </Badge>
+              <Badge variant="secondary" className="text-xs bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 border-0">
                 Prompt
-              </span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{prompt.category}</span>
+              </Badge>
             </div>
-          </div>
-          
-          {/* 推荐标签 */}
-          {prompt.featured && (
-            <Badge className={`bg-gradient-to-r ${style.gradient} text-white text-[10px] px-2 py-0.5 shadow-sm`}>
-              <Star className="h-3 w-3 mr-0.5" />
-              精选
-            </Badge>
-          )}
-        </div>
-
-        {/* 标题 */}
-        <h3 className="font-bold text-base text-slate-900 dark:text-white mb-2 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors line-clamp-1">
-          {prompt.title}
-        </h3>
-        
-        {/* 描述 */}
-        <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 line-clamp-2 leading-relaxed">
-          {prompt.description}
-        </p>
-        
-        {/* 底部：标签 + 操作 */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-wrap gap-1">
-            {prompt.tags.slice(0, 3).map((tag, i) => (
-              <span 
-                key={i} 
-                className="text-[10px] px-1.5 py-0.5 bg-white/60 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 rounded border border-slate-200/50 dark:border-slate-700/50"
-              >
-                {tag}
+            
+            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-2">
+              {prompt.description}
+            </p>
+            
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex flex-wrap gap-1">
+                {prompt.tags.slice(0, 2).map((tag, tagIndex) => (
+                  <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-0">
+                    {tag}
+                  </Badge>
+                ))}
+                {prompt.tags.length > 2 && (
+                  <Badge variant="secondary" className="text-xs bg-slate-100/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border-0">
+                    +{prompt.tags.length - 2}
+                  </Badge>
+                )}
+              </div>
+              
+              <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-0.5 flex-shrink-0 font-medium group-hover:translate-x-1 transition-transform">
+                查看
+                <ChevronRight className="h-3 w-3" />
               </span>
-            ))}
-          </div>
-          
-          <div className="flex items-center gap-1 text-xs text-slate-400 group-hover:text-violet-500 transition-colors">
-            <Copy className="h-3 w-3" />
-            <span className="text-[10px]">点击查看</span>
+            </div>
           </div>
         </div>
       </CardContent>
@@ -1716,15 +1715,15 @@ export default function Home() {
             {/* Search */}
             <div className="mb-4">
               <div className="relative group">
-                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-violet-500 transition-colors" />
+                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-red-500 transition-colors" />
                 <Input
                   placeholder="搜索提示词名称、描述或标签..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-violet-300 dark:focus:border-violet-700 focus:ring-violet-500/20 transition-all duration-300 hover:border-violet-200 dark:hover:border-violet-800"
+                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-red-300 dark:focus:border-red-700 focus:ring-red-500/20 transition-all duration-300 hover:border-red-200 dark:hover:border-red-800"
                 />
                 {/* 搜索框光效 */}
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-violet-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-red-500/10 to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
             </div>
 
@@ -1735,7 +1734,7 @@ export default function Home() {
                 // 获取分类对应的渐变色
                 const getGradient = (name: string) => {
                   const gradients: Record<string, string> = {
-                    '全部': 'from-violet-500 to-purple-600',
+                    '全部': 'from-red-500 to-orange-500',
                     '视频生成': 'from-violet-500 to-purple-600',
                     '数字人': 'from-pink-500 to-rose-600',
                     '视频编辑': 'from-blue-500 to-cyan-600',
@@ -1769,7 +1768,7 @@ export default function Home() {
             </div>
 
             {/* 提示词列表 - 网格布局 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {filteredPrompts.map((prompt) => (
                 <PromptCard 
                   key={prompt.id} 
@@ -1840,7 +1839,7 @@ export default function Home() {
             </div>
 
             {/* Skills Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {aiSkills
                 .filter(skill => {
                   const matchesSearch = skill.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
