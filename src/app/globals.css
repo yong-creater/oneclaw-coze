@@ -61,69 +61,47 @@
   100% { transform: rotate(-8deg) translateY(-2px); }
 }
 
-/* 触角摆动 */
-.lobster-antenna .antenna-top {
-  transform-origin: 98px 33px;
-  animation: antenna-wave 3s ease-in-out infinite;
+/* 大钳子开合 */
+.claw-left {
+  transform-origin: 18px 28px;
+  animation: claw-left-move 3s ease-in-out infinite;
 }
 
-.lobster-antenna .antenna-bottom {
-  transform-origin: 98px 47px;
-  animation: antenna-wave 3s ease-in-out infinite reverse 0.5s;
+.claw-right {
+  transform-origin: 18px 47px;
+  animation: claw-right-move 3s ease-in-out infinite;
 }
 
-@keyframes antenna-wave {
+@keyframes claw-left-move {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(3deg); }
+  50% { transform: rotate(-4deg); }
 }
 
-/* Hover时触角摆动更快 */
-.lobster-wrap.lobster-hovering .lobster-antenna .antenna-top,
-.lobster-wrap.lobster-hovering .lobster-antenna .antenna-bottom {
-  animation-duration: 1.5s;
+@keyframes claw-right-move {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+
+/* Hover时钳子动作更大 */
+.lobster-wrap.lobster-hovering .claw-left,
+.lobster-wrap.lobster-hovering .claw-right {
+  animation-duration: 1.2s;
 }
 
 /* 尾巴摆动 */
 .lobster-tail {
-  transform-origin: 10px 40px;
+  transform-origin: 80px 37.5px;
   animation: tail-wave 3s ease-in-out infinite;
 }
 
 @keyframes tail-wave {
   0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(2deg); }
+  50% { transform: rotate(3deg); }
 }
 
 /* Hover时尾巴摆动更快 */
 .lobster-wrap.lobster-hovering .lobster-tail {
   animation-duration: 1.5s;
-}
-
-/* 钳子轻微开合 */
-.lobster-claws .claw-top {
-  transform-origin: 80px 30px;
-  animation: claw-top-move 4s ease-in-out infinite;
-}
-
-.lobster-claws .claw-bottom {
-  transform-origin: 80px 50px;
-  animation: claw-bottom-move 4s ease-in-out infinite reverse;
-}
-
-@keyframes claw-top-move {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-3deg); }
-}
-
-@keyframes claw-bottom-move {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-3deg); }
-}
-
-/* Hover时钳子动作更大 */
-.lobster-wrap.lobster-hovering .lobster-claws .claw-top,
-.lobster-wrap.lobster-hovering .lobster-claws .claw-bottom {
-  animation-duration: 1s;
 }
 
 /* 步足轻微摆动 */
@@ -138,6 +116,28 @@
 @keyframes leg-move {
   0%, 100% { transform: scaleX(1); }
   50% { transform: scaleX(0.95); }
+}
+
+/* 短触角摆动 */
+.lobster-antenna .antenna-short-top {
+  transform-origin: 36px 26px;
+  animation: antenna-short-wave 2.5s ease-in-out infinite;
+}
+
+.lobster-antenna .antenna-short-bottom {
+  transform-origin: 36px 49px;
+  animation: antenna-short-wave 2.5s ease-in-out infinite reverse;
+}
+
+@keyframes antenna-short-wave {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(3deg); }
+}
+
+/* Hover时触角摆动更快 */
+.lobster-wrap.lobster-hovering .lobster-antenna .antenna-short-top,
+.lobster-wrap.lobster-hovering .lobster-antenna .antenna-short-bottom {
+  animation-duration: 1s;
 }
 
 /* 眨眼 */

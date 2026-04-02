@@ -42,7 +42,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
   return (
     <div 
       className={`relative inline-block cursor-pointer lobster-wrap ${className} ${isCaught ? 'lobster-caught' : ''} ${isHovering ? 'lobster-hovering' : ''}`}
-      style={{ width: size, height: size * 0.7 }}
+      style={{ width: size, height: size * 0.75 }}
       onClick={handleClick}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
@@ -62,8 +62,8 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           bg-white dark:bg-slate-800 border-l border-t border-slate-200 dark:border-slate-700 -rotate-45" />
       </div>
       
-      {/* 龙虾 SVG */}
-      <svg viewBox="0 0 120 80" className="w-full h-full lobster-main">
+      {/* 龙虾 SVG - 更像真实龙虾的形象 */}
+      <svg viewBox="0 0 100 75" className="w-full h-full lobster-main">
         <defs>
           <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#ef4444" />
@@ -78,87 +78,85 @@ export const AnimatedLobster = memo(function AnimatedLobster({
             <stop offset="0%" stopColor="#fca5a5" />
             <stop offset="100%" stopColor="#ef4444" />
           </linearGradient>
+          <linearGradient id="tailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#dc2626" />
+            <stop offset="100%" stopColor="#991b1b" />
+          </linearGradient>
         </defs>
         
         <g className="lobster-whole">
-          {/* 尾部 */}
-          <g className="lobster-tail">
-            <path d="M8 40 Q2 35, 0 28 Q5 32, 10 36" fill="url(#bodyGrad)" />
-            <path d="M8 40 Q1 40, 0 40" fill="url(#bodyGrad)" />
-            <path d="M8 40 Q2 45, 0 52 Q5 48, 10 44" fill="url(#bodyGrad)" />
-            <ellipse cx="15" cy="40" rx="8" ry="7" fill="url(#bodyGrad)" />
-            <ellipse cx="15" cy="38" rx="4" ry="2" fill="url(#shine)" opacity="0.5" />
+          {/* 大钳子 - 左边 */}
+          <g className="claw-left">
+            <path d="M18 28 Q12 18, 8 12 Q6 8, 8 6 Q12 4, 16 8 Q14 12, 12 16 Q14 14, 18 18 Q20 22, 18 28" 
+              fill="url(#clawGrad)" stroke="#c2410c" strokeWidth="0.5" />
+            <path d="M10 10 Q8 8, 10 6 Q13 5, 15 8" fill="url(#clawGrad)" />
+            <path d="M14 16 Q16 14, 18 18" stroke="#fdba74" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.6" />
           </g>
           
-          {/* 腹部 */}
-          <g className="lobster-abdomen">
-            <ellipse cx="28" cy="40" rx="9" ry="8" fill="url(#bodyGrad)" />
-            <ellipse cx="28" cy="37" rx="4" ry="2" fill="url(#shine)" opacity="0.4" />
-            <ellipse cx="42" cy="40" rx="9" ry="9" fill="url(#bodyGrad)" />
-            <ellipse cx="42" cy="37" rx="4" ry="2" fill="url(#shine)" opacity="0.4" />
-            <ellipse cx="55" cy="40" rx="8" ry="8" fill="url(#bodyGrad)" />
-            <ellipse cx="55" cy="37" rx="3.5" ry="2" fill="url(#shine)" opacity="0.4" />
-            <ellipse cx="66" cy="40" rx="7" ry="7" fill="url(#bodyGrad)" />
-            <ellipse cx="66" cy="37" rx="3" ry="1.5" fill="url(#shine)" opacity="0.4" />
-            <ellipse cx="75" cy="40" rx="6" ry="6" fill="url(#bodyGrad)" />
-            <ellipse cx="82" cy="40" rx="5" ry="5" fill="url(#bodyGrad)" />
-          </g>
-          
-          {/* 头胸部 */}
-          <g className="lobster-head">
-            <path d="M85 28 Q95 30, 100 35 Q105 40, 100 45 Q95 50, 85 52 Q80 52, 78 48 Q76 40, 78 32 Q80 28, 85 28" fill="url(#bodyGrad)" />
-            <path d="M85 30 Q92 32, 96 36 Q98 38, 96 40 Q92 35, 85 33" fill="url(#shine)" opacity="0.3" />
-            <path d="M100 40 Q108 38, 115 40 Q108 42, 100 40" fill="url(#bodyGrad)" stroke="#991b1b" strokeWidth="0.5" />
-            
-            {/* 眼睛 */}
-            <g className="lobster-eyes">
-              <line x1="92" y1="35" x2="96" y2="28" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="97" cy="27" r="3" fill="#1f2937" className="eye-pupil" />
-              <circle cx="98" cy="26" r="1" fill="#fff" />
-              <ellipse cx="97" cy="27" rx="3.5" ry="0" fill="url(#bodyGrad)" className="eyelid" />
-              
-              <line x1="92" y1="45" x2="96" y2="52" stroke="#7f1d1d" strokeWidth="1.5" strokeLinecap="round" />
-              <circle cx="97" cy="53" r="3" fill="#1f2937" className="eye-pupil" />
-              <circle cx="98" cy="54" r="1" fill="#fff" />
-              <ellipse cx="97" cy="53" rx="3.5" ry="0" fill="url(#bodyGrad)" className="eyelid" />
-            </g>
-            
-            {/* 触角 */}
-            <g className="lobster-antenna">
-              <path d="M98 33 Q105 25, 112 18 Q118 12, 122 8" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-top" />
-              <path d="M98 47 Q105 55, 112 62 Q118 68, 122 72" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-bottom" />
-              <path d="M96 36 Q100 32, 104 30" stroke="#7f1d1d" strokeWidth="1" fill="none" strokeLinecap="round" />
-              <path d="M96 44 Q100 48, 104 50" stroke="#7f1d1d" strokeWidth="1" fill="none" strokeLinecap="round" />
-            </g>
+          {/* 大钳子 - 右边 */}
+          <g className="claw-right">
+            <path d="M18 47 Q12 57, 8 63 Q6 67, 8 69 Q12 71, 16 67 Q14 63, 12 59 Q14 61, 18 57 Q20 53, 18 47" 
+              fill="url(#clawGrad)" stroke="#c2410c" strokeWidth="0.5" />
+            <path d="M10 65 Q8 67, 10 69 Q13 70, 15 67" fill="url(#clawGrad)" />
+            <path d="M14 59 Q16 61, 18 57" stroke="#fdba74" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.6" />
           </g>
           
           {/* 步足 */}
           <g className="lobster-legs">
-            <path d="M75 34 Q70 28, 62 24" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M75 46 Q70 52, 62 56" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M72 33 Q66 26, 58 22" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M72 47 Q66 54, 58 58" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M68 32 Q62 24, 54 20" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M68 48 Q62 56, 54 60" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
-            <path d="M65 31 Q58 22, 50 18" stroke="#b91c1c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-            <path d="M65 49 Q58 58, 50 62" stroke="#b91c1c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-            <path d="M62 30 Q56 22, 48 18" stroke="#b91c1c" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            <path d="M62 50 Q56 58, 48 62" stroke="#b91c1c" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <path d="M25 32 Q22 28, 18 26 Q14 24, 10 23" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M25 43 Q22 47, 18 49 Q14 51, 10 52" stroke="#b91c1c" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path d="M30 30 Q26 24, 22 20 Q18 16, 14 14" stroke="#b91c1c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+            <path d="M30 45 Q26 51, 22 55 Q18 59, 14 61" stroke="#b91c1c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+            <path d="M36 29 Q32 22, 28 17 Q24 12, 20 9" stroke="#b91c1c" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <path d="M36 46 Q32 53, 28 58 Q24 63, 20 66" stroke="#b91c1c" strokeWidth="1.5" fill="none" strokeLinecap="round" />
           </g>
           
-          {/* 大钳子 */}
-          <g className="lobster-claws">
-            <g className="claw-top">
-              <path d="M80 30 Q72 22, 62 18 Q54 15, 48 12" stroke="url(#clawGrad)" strokeWidth="5" fill="none" strokeLinecap="round" />
-              <path d="M48 12 Q42 8, 36 10 Q32 12, 35 16 Q40 14, 48 12" fill="url(#clawGrad)" />
-              <path d="M48 12 Q44 16, 38 20 Q34 22, 36 18 Q42 16, 48 12" fill="url(#clawGrad)" />
-            </g>
+          {/* 身体 - 粗壮的分节 */}
+          <g className="lobster-body">
+            {/* 头胸部 */}
+            <ellipse cx="40" cy="37.5" rx="12" ry="15" fill="url(#bodyGrad)" />
+            <ellipse cx="40" cy="33" rx="6" ry="4" fill="url(#shine)" opacity="0.3" />
             
-            <g className="claw-bottom">
-              <path d="M80 50 Q72 58, 62 62 Q54 65, 48 68" stroke="url(#clawGrad)" strokeWidth="5" fill="none" strokeLinecap="round" />
-              <path d="M48 68 Q42 72, 36 70 Q32 68, 35 64 Q40 66, 48 68" fill="url(#clawGrad)" />
-              <path d="M48 68 Q44 64, 38 60 Q34 58, 36 62 Q42 64, 48 68" fill="url(#clawGrad)" />
-            </g>
+            {/* 腹部分节 */}
+            <ellipse cx="52" cy="37.5" rx="9" ry="12" fill="url(#bodyGrad)" />
+            <ellipse cx="52" cy="34" rx="4.5" ry="3" fill="url(#shine)" opacity="0.25" />
+            
+            <ellipse cx="62" cy="37.5" rx="7.5" ry="10" fill="url(#bodyGrad)" />
+            <ellipse cx="62" cy="34" rx="3.5" ry="2.5" fill="url(#shine)" opacity="0.25" />
+            
+            <ellipse cx="70" cy="37.5" rx="6" ry="8" fill="url(#bodyGrad)" />
+            
+            <ellipse cx="76" cy="37.5" rx="4.5" ry="6" fill="url(#bodyGrad)" />
+          </g>
+          
+          {/* 尾部扇形 */}
+          <g className="lobster-tail">
+            <path d="M80 37.5 Q90 30, 95 25 Q92 37.5, 95 50 Q90 45, 80 37.5" fill="url(#tailGrad)" />
+            <path d="M82 37.5 Q88 33, 92 30" stroke="#991b1b" strokeWidth="0.8" fill="none" />
+            <path d="M82 37.5 Q88 42, 92 45" stroke="#991b1b" strokeWidth="0.8" fill="none" />
+            <path d="M82 37.5 Q88 37.5, 93 37.5" stroke="#991b1b" strokeWidth="0.8" fill="none" />
+          </g>
+          
+          {/* 眼睛 - 短触须 */}
+          <g className="lobster-eyes">
+            {/* 眼柄 */}
+            <line x1="42" y1="26" x2="44" y2="20" stroke="#7f1d1d" strokeWidth="1.8" strokeLinecap="round" />
+            <line x1="42" y1="49" x2="44" y2="55" stroke="#7f1d1d" strokeWidth="1.8" strokeLinecap="round" />
+            
+            {/* 眼球 */}
+            <circle cx="44" cy="19" r="3.5" fill="#1f2937" className="eye-pupil" />
+            <circle cx="45.5" cy="17.5" r="1.2" fill="#fff" />
+            <ellipse cx="44" cy="19" rx="4" ry="0" fill="url(#bodyGrad)" className="eyelid" />
+            
+            <circle cx="44" cy="56" r="3.5" fill="#1f2937" className="eye-pupil" />
+            <circle cx="45.5" cy="57.5" r="1.2" fill="#fff" />
+            <ellipse cx="44" cy="56" rx="4" ry="0" fill="url(#bodyGrad)" className="eyelid" />
+          </g>
+          
+          {/* 短触角 */}
+          <g className="lobster-antenna">
+            <path d="M36 26 Q38 22, 40 20 Q42 18, 44 17" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-short-top" />
+            <path d="M36 49 Q38 53, 40 55 Q42 57, 44 58" stroke="#991b1b" strokeWidth="1.2" fill="none" strokeLinecap="round" className="antenna-short-bottom" />
           </g>
         </g>
       </svg>
