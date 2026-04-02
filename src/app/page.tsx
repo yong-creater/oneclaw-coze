@@ -16,6 +16,7 @@ import { ExternalLink, Video, Search, Film, Wand2, Palette, Music, Info, Clock, 
 import { prompts, promptCategories, PromptItem } from '@/data/prompts';
 import { aiTools, ToolItem } from '@/data/tools';
 import { aiSkills, getSkillCategories, SkillItem } from '@/data/skills';
+import AnimatedLobster from '@/components/AnimatedLobster';
 
 // 格式化数字显示
 function formatNumber(num: number): string {
@@ -1198,9 +1199,7 @@ const AboutDialog = memo(function AboutDialog({
           {/* 头部区域 */}
           <div className="sticky top-0 bg-white dark:bg-slate-800 z-10 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-3xl">
-                🦞
-              </div>
+              <AnimatedLobster size={48} />
               <div>
                 <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
                   <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
@@ -1393,15 +1392,10 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-all duration-300 group">
               <div className="relative w-12 h-12 flex items-center justify-center">
-                {/* 气泡效果 */}
-                <div className="absolute inset-0 overflow-visible pointer-events-none">
-                  <div className="bubble"></div>
-                  <div className="bubble"></div>
-                  <div className="bubble"></div>
-                </div>
                 {/* 光晕背景 */}
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-orange-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <span className="text-4xl lobster-animate relative z-10">🦞</span>
+                {/* 动画龙虾 */}
+                <AnimatedLobster size={48} className="relative z-10" />
                 <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full animate-pulse shadow-lg shadow-amber-500/50"></div>
               </div>
               <div>
@@ -1883,7 +1877,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-6 relative">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-400">
             <div className="flex items-center gap-2 group cursor-pointer">
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🦞</span>
+              <AnimatedLobster size={32} />
               <span className="font-medium">
                 <span className="text-gradient font-bold">One</span>
                 <span className="text-orange-500 font-bold">Claw</span>
