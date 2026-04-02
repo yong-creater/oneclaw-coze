@@ -1869,38 +1869,13 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-t border-slate-200/50 dark:border-slate-700/50 mt-12">
-        {/* 装饰性渐变背景 */}
-        <div className="absolute inset-0 bg-gradient-to-t from-red-500/5 via-orange-500/5 to-transparent pointer-events-none"></div>
-        
-        <div className="container mx-auto px-4 py-6 relative">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-600 dark:text-slate-400">
-            <div className="flex items-center gap-2 group cursor-pointer">
-              <AnimatedLobster size={32} />
-              <span className="font-medium">
-                <span className="text-gradient font-bold">One</span>
-                <span className="text-orange-500 font-bold">Claw</span>
-              </span>
-            </div>
-            <p className="text-center">
-              © 2024 <span className="text-gradient font-semibold">One</span><span className="text-orange-500 font-semibold">Claw</span>. 精选 <span className="text-red-500 font-semibold">{aiTools.length}</span> 款优质AI视频创作工具
-            </p>
-            <div className="flex items-center gap-4">
-              <button onClick={() => setActiveTab('prompts')} className="cursor-pointer hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
-                <Sparkles className="h-3.5 w-3.5" />
-                提示词库
-              </button>
-              <span className="text-slate-200 dark:border-slate-700">·</span>
-              <button onClick={() => setShowAbout(true)} className="cursor-pointer hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
-                <Info className="h-3.5 w-3.5" />
-                关于我们
-              </button>
-              <span className="text-slate-200 dark:border-slate-700">·</span>
-              <a href="mailto:1017760688@qq.com" className="cursor-pointer hover:text-red-500 dark:hover:text-red-400 transition-all duration-300 hover:scale-105 flex items-center gap-1">
-                <Mail className="h-3.5 w-3.5" />
-                商务合作
-              </a>
-            </div>
+      <footer className="border-t border-slate-100 dark:border-slate-800 mt-12">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <AnimatedLobster size={24} />
+            <span>
+              © 2024 <span className="font-semibold text-red-500">One</span><span className="font-semibold text-orange-500">Claw</span>
+            </span>
           </div>
         </div>
       </footer>
