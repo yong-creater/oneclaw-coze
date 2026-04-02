@@ -1712,71 +1712,65 @@ export default function Home() {
 
         {/* Prompts Tab Content */}
         {activeTab === 'prompts' && (
-          <div className="space-y-5">
-            {/* 标题行与筛选 */}
-            <div className="flex flex-col gap-4">
-              {/* 标题区域 */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/30">
-                      <BookOpen className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
-                      {prompts.length}
-                    </div>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">AI 视频提示词库</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">专业的提示词模板，一键复制即用</p>
-                  </div>
-                </div>
+          <>
+            {/* Search */}
+            <div className="mb-4">
+              <div className="relative group">
+                <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 group-hover:text-violet-500 transition-colors" />
+                <Input
+                  placeholder="搜索提示词名称、描述或标签..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 h-11 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 focus:border-violet-300 dark:focus:border-violet-700 focus:ring-violet-500/20 transition-all duration-300 hover:border-violet-200 dark:hover:border-violet-800"
+                />
+                {/* 搜索框光效 */}
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-violet-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
               </div>
+            </div>
 
-              {/* 分类筛选 */}
-              <div className="flex flex-wrap gap-2 p-3 bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50">
-                {promptCategories.map((cat) => {
-                  const isActive = selectedCategory === cat.name;
-                  // 获取分类对应的渐变色
-                  const getGradient = (name: string) => {
-                    const gradients: Record<string, string> = {
-                      '全部': 'from-violet-500 to-purple-600',
-                      '视频生成': 'from-violet-500 to-purple-600',
-                      '数字人': 'from-pink-500 to-rose-600',
-                      '视频编辑': 'from-blue-500 to-cyan-600',
-                      'AI配音': 'from-orange-500 to-amber-600',
-                      'AI字幕': 'from-emerald-500 to-teal-600',
-                      '视频增强': 'from-amber-500 to-yellow-600',
-                      '创意视频': 'from-fuchsia-500 to-pink-600',
-                      '效率提升': 'from-cyan-500 to-blue-600',
-                      '个人成长': 'from-green-500 to-emerald-600',
-                    };
-                    return gradients[name] || 'from-slate-500 to-gray-600';
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2 mb-6">
+              {promptCategories.map((cat) => {
+                const isActive = selectedCategory === cat.name;
+                // 获取分类对应的渐变色
+                const getGradient = (name: string) => {
+                  const gradients: Record<string, string> = {
+                    '全部': 'from-violet-500 to-purple-600',
+                    '视频生成': 'from-violet-500 to-purple-600',
+                    '数字人': 'from-pink-500 to-rose-600',
+                    '视频编辑': 'from-blue-500 to-cyan-600',
+                    'AI配音': 'from-orange-500 to-amber-600',
+                    'AI字幕': 'from-emerald-500 to-teal-600',
+                    '视频增强': 'from-amber-500 to-yellow-600',
+                    '创意视频': 'from-fuchsia-500 to-pink-600',
+                    '效率提升': 'from-cyan-500 to-blue-600',
+                    '个人成长': 'from-green-500 to-emerald-600',
                   };
+                  return gradients[name] || 'from-slate-500 to-gray-600';
+                };
 
-                  return (
-                    <Button
-                      key={cat.name}
-                      variant={isActive ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedCategory(cat.name)}
-                      className={isActive 
-                        ? `bg-gradient-to-r ${getGradient(cat.name)} hover:opacity-90 text-white h-8 text-xs px-3 shadow-md transition-all duration-300` 
-                        : "border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-700 h-8 text-xs px-3 transition-all duration-300"
-                      }
-                    >
-                      <span className="mr-1">{cat.icon}</span>
-                      {cat.name}
-                      <span className="ml-1.5 text-[10px] opacity-70">({cat.count})</span>
-                    </Button>
-                  );
-                })}
-              </div>
+                return (
+                  <Button
+                    key={cat.name}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedCategory(cat.name)}
+                    className={isActive 
+                      ? `bg-gradient-to-r ${getGradient(cat.name)} hover:opacity-90 text-white shadow-md shadow-violet-500/20 transition-all duration-300 hover:scale-105` 
+                      : "border-slate-200/60 dark:border-slate-700/60 hover:border-violet-300 dark:hover:border-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-all duration-300"
+                    }
+                  >
+                    <span className="mr-1">{cat.icon}</span>
+                    {cat.name}
+                    <span className="ml-1.5 text-xs opacity-60">({cat.count})</span>
+                  </Button>
+                );
+              })}
             </div>
 
             {/* 提示词列表 - 网格布局 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPrompts.map((prompt, index) => (
+              {filteredPrompts.map((prompt) => (
                 <PromptCard 
                   key={prompt.id} 
                   prompt={prompt} 
@@ -1788,10 +1782,8 @@ export default function Home() {
             {/* 空状态 */}
             {filteredPrompts.length === 0 && (
               <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-2xl flex items-center justify-center">
-                  <BookOpen className="h-8 w-8 text-slate-400" />
-                </div>
-                <p className="text-slate-500 dark:text-slate-400">没有找到匹配的提示词</p>
+                <BookOpen className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+                <p className="text-slate-500">没有找到匹配的提示词</p>
                 <Button 
                   variant="outline" 
                   className="mt-3"
@@ -1801,7 +1793,7 @@ export default function Home() {
                 </Button>
               </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Skills Tab Content */}
