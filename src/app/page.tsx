@@ -1644,12 +1644,26 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-slate-100 dark:border-slate-800 mt-12">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <AnimatedLobster size={24} />
-            <span>
-              © 2024 <span className="font-semibold text-red-500">One</span><span className="font-semibold text-orange-500">Claw</span>
-            </span>
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+              <AnimatedLobster size={24} />
+              <span>
+                © 2024 <span className="font-semibold text-red-500">One</span><span className="font-semibold text-orange-500">Claw</span>
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-xs text-slate-400 dark:text-slate-500">
+              <span>oneclaw.shop</span>
+              <span className="hidden sm:inline">·</span>
+              <a 
+                href="https://beian.miit.gov.cn/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              >
+                京ICP备XXXXXXXX号
+              </a>
+            </div>
           </div>
         </div>
       </footer>
