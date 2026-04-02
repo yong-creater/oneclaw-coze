@@ -17,6 +17,8 @@ import { prompts, promptCategories, PromptItem } from '@/data/prompts';
 import { aiTools, ToolItem } from '@/data/tools';
 import { aiSkills, getSkillCategories, SkillItem } from '@/data/skills';
 import AnimatedLobster from '@/components/AnimatedLobster';
+import { LobsterLoading, FullPageLoading } from '@/components/LobsterLoading';
+import { SkeletonGrid } from '@/components/LobsterSkeleton';
 
 // 格式化数字显示
 function formatNumber(num: number): string {
@@ -1287,6 +1289,8 @@ export default function Home() {
   const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
   const [activeTab, setActiveTab] = useState<'tools' | 'prompts' | 'skills'>('tools');
   const [showAbout, setShowAbout] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
   
   // AI 新闻状态
   const [aiNews, setAiNews] = useState<Array<{
@@ -1314,10 +1318,33 @@ export default function Home() {
     }
   }, []);
 
+  // 页面初始加载动画
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   // 页面加载时获取新闻
   useEffect(() => {
     fetchAINews();
   }, [fetchAINews]);
+
+  // 分类切换时的加载效果
+  const handleCategoryChange = useCallback((category: string) => {
+    setIsCategoryLoading(true);
+    setSelectedCategory(category);
+    setTimeout(() => setIsCategoryLoading(false), 300);
+  }, []);
+
+  // Tab 切换时的加载效果
+  const handleTabChange = useCallback((tab: 'tools' | 'prompts' | 'skills') => {
+    setIsCategoryLoading(true);
+    setActiveTab(tab);
+    setSelectedCategory('全部');
+    setTimeout(() => setIsCategoryLoading(false), 300);
+  }, []);
 
   // 缓存分类数据
   const categories = useMemo(() => getCategories(), []);
@@ -1367,6 +1394,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* 页面加载动画 */}
+      {isPageLoading && <FullPageLoading text="龙虾正在为你准备..." />}
+      
       {/* Header */}
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
@@ -1405,7 +1435,7 @@ export default function Home() {
         <div className="flex gap-2 mb-6">
           <Button
             variant={activeTab === 'tools' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('tools')}
+            onClick={() => handleTabChange('tools')}
             className={activeTab === 'tools' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
           >
             <Video className="h-4 w-4" />
@@ -1413,7 +1443,7 @@ export default function Home() {
           </Button>
           <Button
             variant={activeTab === 'prompts' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('prompts')}
+            onClick={() => handleTabChange('prompts')}
             className={activeTab === 'prompts' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
           >
             <Sparkles className="h-4 w-4" />
@@ -1421,7 +1451,7 @@ export default function Home() {
           </Button>
           <Button
             variant={activeTab === 'skills' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('skills')}
+            onClick={() => handleTabChange('skills')}
             className={activeTab === 'skills' ? 'bg-red-500 hover:bg-red-600 text-white gap-2' : 'gap-2'}
           >
             <Lightbulb className="h-4 w-4" />
@@ -1455,7 +1485,7 @@ export default function Home() {
                     key={category.name}
                     variant={isActive ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedCategory(category.name)}
+                    onClick={() => handleCategoryChange(category.name)}
                     className={isActive ? "bg-red-500 hover:bg-red-600 text-white" : ""}
                   >
                     <Icon className="h-3.5 w-3.5 mr-1.5" />
@@ -1468,27 +1498,34 @@ export default function Home() {
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Main Content Area */}
-          <div className="flex-1">
-            {/* Tools Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {filteredTools.map((tool) => (
-                <ToolCard key={tool.id} tool={tool} onClick={() => handleToolClick(tool)} />
-              ))}
-            </div>
+          <div className="flex-1 relative">
+            {/* 分类切换加载 - 显示骨架屏 */}
+            {isCategoryLoading ? (
+              <SkeletonGrid count={6} type="tool" />
+            ) : (
+              <>
+                {/* Tools Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {filteredTools.map((tool) => (
+                    <ToolCard key={tool.id} tool={tool} onClick={() => handleToolClick(tool)} />
+                  ))}
+                </div>
 
-            {/* No Results */}
-            {filteredTools.length === 0 && (
-              <div className="text-center py-12">
-                <Video className="h-12 w-12 mx-auto text-slate-300 mb-3" />
-                <p className="text-slate-500">没有找到匹配的工具</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-3"
-                  onClick={handleClearFilters}
-                >
-                  清除筛选
-                </Button>
-              </div>
+                {/* No Results */}
+                {filteredTools.length === 0 && (
+                  <div className="text-center py-12">
+                    <Video className="h-12 w-12 mx-auto text-slate-300 mb-3" />
+                    <p className="text-slate-500">没有找到匹配的工具</p>
+                    <Button 
+                      variant="outline" 
+                      className="mt-3"
+                      onClick={handleClearFilters}
+                    >
+                      清除筛选
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

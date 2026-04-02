@@ -248,3 +248,107 @@ html {
   animation: none;
 }
 
+/* ========== 龙虾 Loading 动画 ========== */
+
+/* 波浪摇摆 */
+@keyframes wave {
+  0%, 100% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(10deg);
+  }
+}
+
+.animate-wave {
+  animation: wave 1s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+/* 跳舞 */
+@keyframes dance {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(5deg);
+  }
+}
+
+.animate-dance {
+  animation: dance 1.5s ease-in-out infinite;
+}
+
+/* 钳子开合 */
+@keyframes clamp {
+  0%, 100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.8);
+  }
+}
+
+.animate-clamp {
+  animation: clamp 0.8s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* 页面加载动画 */
+@keyframes page-loading {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) rotate(-15deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-20px) rotate(15deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.animate-page-loading {
+  animation: page-loading 2s ease-in-out infinite;
+}
+
+/* 骨架屏动画 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, 
+    #f1f5f9 25%, 
+    #e2e8f0 50%, 
+    #f1f5f9 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, 
+    #1e293b 25%, 
+    #334155 50%, 
+    #1e293b 75%
+  );
+  background-size: 200% 100%;
+}
+
