@@ -54,6 +54,11 @@
     'Times New Roman', Times, serif;
 }
 
+/* 防止页面因滚动条出现/消失而晃动 */
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
