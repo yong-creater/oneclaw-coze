@@ -1222,20 +1222,21 @@ const PromptDetailDialog = memo(function PromptDetailDialog({
 // 提示词库弹窗组件
 const PromptsDialog = memo(function PromptsDialog({ 
   open, 
-  onClose 
+  onClose,
+  onSelectPrompt
 }: { 
   open: boolean; 
   onClose: () => void;
+  onSelectPrompt: (prompt: PromptItem) => void;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('全部');
-  const [selectedPrompt, setSelectedPrompt] = useState<PromptItem | null>(null);
 
   const filteredPrompts = useMemo(() => {
-    return prompts.filter(p => {
+    return prompts.filter((p: PromptItem) => {
       const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+                           p.tags.some((t: string) => t.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesCategory = selectedCategory === '全部' || p.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
@@ -1269,7 +1270,7 @@ const PromptsDialog = memo(function PromptsDialog({
               />
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {promptCategories.slice(0, 6).map((cat) => (
+              {promptCategories.slice(0, 6).map((cat: PromptCategory) => (
                 <Button
                   key={cat.name}
                   variant={selectedCategory === cat.name ? "default" : "outline"}
@@ -1286,8 +1287,8 @@ const PromptsDialog = memo(function PromptsDialog({
           {/* 提示词列表 */}
           <div className="flex-1 overflow-y-auto pr-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {filteredPrompts.map((prompt) => (
-                <PromptCard key={prompt.id} prompt={prompt} onClick={() => setSelectedPrompt(prompt)} />
+              {filteredPrompts.map((prompt: PromptItem) => (
+                <PromptCard key={prompt.id} prompt={prompt} onClick={() => onSelectPrompt(prompt)} />
               ))}
             </div>
             {filteredPrompts.length === 0 && (
@@ -1295,9 +1296,6 @@ const PromptsDialog = memo(function PromptsDialog({
             )}
           </div>
         </div>
-
-        {/* 提示词详情弹窗 */}
-        <PromptDetailDialog prompt={selectedPrompt} onClose={() => setSelectedPrompt(null)} />
       </DialogContent>
     </Dialog>
   );
@@ -1815,91 +1813,14 @@ export default function Home() {
         onClose={() => setSelectedSkill(null)}
       />
 
+      {/* Prompt Detail Dialog */}
+      <PromptDetailDialog 
+        prompt={selectedPrompt} 
+        onClose={() => setSelectedPrompt(null)}
+      />
+
       {/* About Dialog */}
       <AboutDialog open={showAbout} onClose={() => setShowAbout(false)} />
-
-      {/* Prompt Detail Dialog */}
-      <Dialog open={selectedPrompt !== null} onOpenChange={() => setSelectedPrompt(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
-          {selectedPrompt && (
-            <>
-              <DialogHeader className="flex-shrink-0">
-                <DialogTitle className="flex items-center gap-2">
-                  <span className="text-xl">💬</span>
-                  {selectedPrompt.title}
-                </DialogTitle>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{selectedPrompt.description}</p>
-              </DialogHeader>
-              
-              <div className="flex-1 overflow-y-auto space-y-4 py-4">
-                {/* 提示词内容 */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-semibold text-slate-900 dark:text-white">提示词内容</h4>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(selectedPrompt.content);
-                        // 简单的成功提示
-                        const btn = document.activeElement as HTMLButtonElement;
-                        const originalText = btn.textContent;
-                        btn.textContent = '✓ 已复制';
-                        btn.disabled = true;
-                        setTimeout(() => {
-                          btn.textContent = originalText;
-                          btn.disabled = false;
-                        }, 1500);
-                      }}
-                      className="h-7 text-xs gap-1"
-                    >
-                      <Copy className="h-3 w-3" />
-                      复制提示词
-                    </Button>
-                  </div>
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700 max-h-[40vh] overflow-y-auto">
-                    <pre className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap font-mono leading-relaxed">
-                      {selectedPrompt.content}
-                    </pre>
-                  </div>
-                </div>
-                
-                {/* 标签 */}
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-900 dark:text-white mb-2">标签</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedPrompt.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              {/* 底部按钮 */}
-              <div className="flex-shrink-0 flex justify-end gap-2 pt-3 border-t border-slate-200 dark:border-slate-700">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedPrompt(null)}
-                  className="border-slate-200 dark:border-slate-700"
-                >
-                  关闭
-                </Button>
-                <Button
-                  className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white"
-                  onClick={() => {
-                    navigator.clipboard.writeText(selectedPrompt.content);
-                    setSelectedPrompt(null);
-                  }}
-                >
-                  复制并关闭
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
