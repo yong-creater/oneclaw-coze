@@ -297,9 +297,15 @@ export const prompts: PromptItem[] = [
 - oddly satisfying
 - ASMR aesthetic`,
     example: {
-      input: '复古风格变装视频',
-      output: `【提示词】
-"A young woman standing in a vintage-style room with floral wallpaper. She wears simple modern clothes, looking at an old photo album. Suddenly, the scene transforms - she's now wearing elegant 1920s vintage fashion: a beaded flapper dress, pearl necklace, finger waves hairstyle. The room transforms to match - antique furniture, gramophone playing, warm amber lighting. Cinematic transition, dreamy atmosphere, nostalgic film grain"`,
+      input: '写一个15秒的抖音短视频脚本，主题是咖啡店推荐',
+      output: `### 15秒抖音咖啡店推荐脚本
+
+|镜号|时长|景别|画面内容|台词|音效|拍摄地点|
+|----|----|----|--------|----|----|--------|
+|1|0-3s|特写|手快速撕开奶泡拉花针的包装，针尖轻触奶泡，瞬间拉出完美爱心|（惊讶语气）"天呐！这家店的拉花居然……"|撕包装的脆响、轻敲奶泡的闷响|咖啡吧台内|
+|2|3-8s|中景|镜头拉远，露出咖啡师微笑递出咖啡的手，背景是暖黄色的复古吊灯和满墙的咖啡豆罐|"……能把爱心拉到我心坎里！"|轻柔的钢琴BGM起|咖啡店前厅|
+|3|8-12s|近景|博主捧起咖啡杯，喝一大口后眯眼满足点头，杯身上印着咖啡店的LOGO|"焦糖拿铁甜而不腻，绝了！"|吸溜咖啡的声音|博主座位区|
+|4|12-15s|全景|博主举着咖啡指向镜头，画面左下角弹出门店定位+"今日买一送一"字样|"地址放左下角，快冲！"|BGM突然鼓点加重|咖啡店门口|`,
       type: 'text'
     }
   },

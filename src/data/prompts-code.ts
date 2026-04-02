@@ -28,74 +28,45 @@ export const prompts: PromptItem[] = [
 4. 考虑边界情况
 5. 注重性能优化`,
     example: {
-      input: '用Python实现一个简单的RESTful API',
-      output: `【代码示例】
+      input: '为以下函数添加详细的中文注释：function debounce(fn, delay) { let timer = null; return function(...args) { clearTimeout(timer); timer = setTimeout(() => fn.apply(this, args), delay); }; }',
+      output: `### 添加详细中文注释后的防抖函数
 
-\`\`\`python
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Optional
-import uvicorn
+\`\`\`javascript
+/**
+ * 防抖函数：高频触发的函数，在指定延迟时间内没有再次触发时，才会执行一次目标函数
+ * 核心原理：每次触发时清除上一次的定时器，重新计时，确保只有最后一次触发会生效
+ * 
+ * @param {Function} fn - 要进行防抖处理的目标函数
+ * @param {number} delay - 防抖延迟时间，单位：毫秒(ms)
+ * @returns {Function} - 经过防抖处理后的包装函数
+ * 
+ * @example
+ * // 示例1：处理输入框搜索联想
+ * const search = (keyword) => console.log('搜索关键词：' + keyword);
+ * const debouncedSearch = debounce(search, 500);
+ * input.addEventListener('input', (e) => debouncedSearch(e.target.value));
+ */
+function debounce(fn, delay) {
+    // 闭包保存定时器ID，用于后续清除操作
+    let timer = null;
 
-app = FastAPI(title="用户管理API")
-
-# 数据模型
-class User(BaseModel):
-    id: Optional[int] = None
-    name: str
-    email: str
-    age: Optional[int] = None
-
-# 模拟数据库
-users_db = {}
-user_id_counter = 1
-
-@app.get("/users", summary="获取所有用户")
-async def get_users():
-    """获取所有用户列表"""
-    return {"users": list(users_db.values())}
-
-@app.get("/users/{user_id}", summary="获取单个用户")
-async def get_user(user_id: int):
-    """根据ID获取用户详情"""
-    if user_id not in users_db:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    return users_db[user_id]
-
-@app.post("/users", summary="创建用户", status_code=201)
-async def create_user(user: User):
-    """创建新用户"""
-    global user_id_counter
-    user.id = user_id_counter
-    users_db[user_id_counter] = user
-    user_id_counter += 1
-    return {"message": "用户创建成功", "user": user}
-
-@app.put("/users/{user_id}", summary="更新用户")
-async def update_user(user_id: int, user: User):
-    """更新用户信息"""
-    if user_id not in users_db:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    user.id = user_id
-    users_db[user_id] = user
-    return {"message": "用户更新成功", "user": user}
-
-@app.delete("/users/{user_id}", summary="删除用户")
-async def delete_user(user_id: int):
-    """删除用户"""
-    if user_id not in users_db:
-        raise HTTPException(status_code=404, detail="用户不存在")
-    del users_db[user_id]
-    return {"message": "用户删除成功"}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    // 返回包装后的防抖函数，使用剩余参数接收原函数的所有入参
+    return function(...args) {
+        // 每次触发时清除上一次未执行的定时器
+        clearTimeout(timer);
+        // 重新设置新的定时器，延迟执行目标函数
+        timer = setTimeout(() => {
+            // 使用apply绑定原函数的this上下文，并传递所有参数
+            fn.apply(this, args);
+        }, delay);
+    };
+}
 \`\`\`
 
-【使用说明】
-1. 安装依赖：pip install fastapi uvicorn
-2. 运行服务：python main.py
-3. 访问文档：http://localhost:8000/docs`,
+### 注释补充说明
+1. **核心逻辑注释**：在闭包变量timer和关键逻辑处添加了单行注释，解释每一步的作用
+2. **上下文绑定说明**：通过fn.apply(this, args)确保原函数的this指向与触发时的上下文一致
+3. **应用场景示例**：提供了输入框搜索、窗口resize两个实际场景`,
       type: 'text'
     }
   },

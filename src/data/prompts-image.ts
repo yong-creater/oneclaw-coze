@@ -43,15 +43,27 @@ export const prompts: PromptItem[] = [
 - Ring light
 - Natural window light`,
     example: {
-      input: '优雅的女性肖像，电影感',
-      output: `【提示词】
-"Elegant woman portrait, approx 30 years old, natural beauty with soft makeup, intelligent eyes looking at camera, wearing minimalist silk blouse in cream color, soft natural window light from left side creating gentle Rembrandt lighting, blurred European cafe background with vintage aesthetic, shot on Hasselblad H6D-100c with 85mm lens at f/1.4, shallow depth of field, subtle film grain, muted color palette with warm skin tones, editorial magazine quality --ar 2:3 --style raw --s 250 --v 6.0"
+      input: '生成一个科技感十足的AI机器人形象，要赛博朋克风格',
+      output: `### Midjourney 精准提示词（带权重/参数控制）
 
-【参数解释】
-- Hasselblad: 哈苏相机，专业中画幅质感
-- f/1.4: 极浅景深，奶油般虚化
-- Rembrandt lighting: 伦勃朗光，经典人像光效
-- muted color palette: 低饱和高级色调`,
+\`\`\`
+主体描述：(cyberpunk AI robot, sleek black carbon-fiber exoskeleton, glowing neon blue neural pathways, holographic display chest plate, retractable plasma energy claws, floating magnetic shoulder drones, asymmetric mechanical limbs:1.2)
+
+风格修饰：cyberpunk aesthetic, neo-Tokyo street background, rain-slicked metallic surfaces, high contrast chiaroscuro lighting, hyper-detailed concept art, inspired by Syd Mead and Blade Runner 2049, cinematic lens flare, gritty futuristic texture
+
+质量参数：8k resolution, ultra-photorealistic, intricate details, sharp focus, cinematic quality, ray tracing reflections
+
+技术参数：--ar 16:9 --style raw --stylize 750 --v 6.0 --q 2
+\`\`\`
+
+### 提示词拆解说明
+1. **主体强化**：通过(关键词:1.2)给核心视觉元素增加权重，突出机器人的赛博核心特征
+2. **风格锚定**：明确绑定赛博朋克标志性元素，同时加入《银翼杀手2049》的电影质感
+3. **技术参数优化**：
+   - --style raw：保留机械硬科幻的冷峻质感
+   - --stylize 750：平衡风格化与写实度
+   - --ar 16:9：适配电影级宽屏构图
+   - --q 2：提升渲染精度`,
       type: 'text'
     },
     tips: [
