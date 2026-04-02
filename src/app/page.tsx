@@ -1384,7 +1384,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50 shadow-sm shadow-slate-200/50 dark:shadow-slate-900/50">
+      <header className="relative bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-50 shadow-sm shadow-slate-200/50 dark:shadow-slate-900/50 overflow-visible">
         {/* 装饰性渐变背景 */}
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-amber-500/5 pointer-events-none"></div>
         

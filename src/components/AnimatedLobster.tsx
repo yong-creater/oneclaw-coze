@@ -105,7 +105,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       {/* 消息气泡 */}
       {showMessage && (
         <div 
-          className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 text-sm font-medium animate-bubble-pop z-50"
+          className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white dark:bg-slate-800 px-3 py-1.5 rounded-full shadow-lg border border-slate-200 dark:border-slate-700 text-sm font-medium animate-bubble-pop pointer-events-none"
           style={{ fontSize: size * 0.28 }}
         >
           {showMessage}
