@@ -30,7 +30,7 @@ export const LobsterLoading = memo(function LobsterLoading({
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
       <div className={animationClass}>
         <Image
-          src="/lobster-logo.png?v=2"
+          src="/lobster-logo.png?v=3"
           alt="OneClaw 龙虾"
           width={size}
           height={size}
