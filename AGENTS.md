@@ -225,6 +225,14 @@ pnpm dev
 # 构建
 pnpm build
 
+# 生产环境数据初始化
+curl -X POST https://oneclaw.shop/api/admin/init-production
+
+# 导入工具数据
+curl -X POST https://oneclaw.shop/api/admin/tools/import \
+  -H "Content-Type: application/json" \
+  -d '{"tools": [...]}'
+
 # 数据库迁移
 coze-coding-ai db generate-models  # 同步模型
 coze-coding-ai db upgrade          # 同步到数据库
