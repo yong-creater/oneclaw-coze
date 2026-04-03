@@ -633,25 +633,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 搜索框 */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="搜索工具名称、出品方..."
-            className="pl-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
         {/* 榜单入口 */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           <Link href="/rankings?type=hot" className="group">
