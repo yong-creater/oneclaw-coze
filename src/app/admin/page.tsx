@@ -1,68 +1,137 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Wrench, FolderTree, Tags, Eye, MousePointer, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Wrench, FolderTree, Tags, Eye, MousePointer, TrendingUp, 
+  Star, Users, FileText, AlertTriangle, Plus, Download,
+  ExternalLink, Settings, Database, RefreshCw
+} from 'lucide-react';
 
 interface Stats {
   tools_count: number;
+  featured_count: number;
+  active_count: number;
   categories: number;
   tags: number;
-  featured_count: number;
+  total_views: number;
+  total_clicks: number;
+  ratings_count: number;
+  reviews_pending: number;
 }
 
 interface RecentTool {
   id: number;
   name: string;
+  logo: string;
   producer: string;
   free_type: string;
   is_featured: boolean;
+  is_active: boolean;
+  click_count: number;
   created_at: string;
 }
 
+interface TopTool {
+  id: number;
+  name: string;
+  logo: string;
+  click_count: number;
+}
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<Stats>({
+    tools_count: 0,
+    featured_count: 0,
+    active_count: 0,
+    categories: 0,
+    tags: 0,
+    total_views: 0,
+    total_clicks: 0,
+    ratings_count: 0,
+    reviews_pending: 0
+  });
   const [recentTools, setRecentTools] = useState<RecentTool[]>([]);
+  const [topTools, setTopTools] = useState<TopTool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkingHealth, setCheckingHealth] = useState(false);
+  const [healthIssues, setHealthIssues] = useState<any[]>([]);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const [statsRes, toolsRes] = await Promise.all([
-          fetch('/api/admin/init-data'),
-          fetch('/api/admin/tools?limit=5&order=created_at.desc'),
-        ]);
-        
-        const statsData = await statsRes.json();
-        const toolsData = await toolsRes.json();
-        
-        if (statsData.success) {
-          setStats({
-            tools_count: statsData.data.tools_count,
-            categories: statsData.data.categories.length,
-            tags: statsData.data.tags.length,
-            featured_count: 0,
-          });
-        }
-        
-        if (toolsData.success) {
-          setRecentTools(toolsData.data || []);
-        }
-      } catch (error) {
-        console.error('获取数据失败:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
-    fetchData();
+    fetchDashboardData();
   }, []);
 
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const [statsRes, toolsRes, topRes] = await Promise.all([
+        fetch('/api/admin/stats'),
+        fetch('/api/admin/tools?limit=5&order=created_at.desc'),
+        fetch('/api/tools?limit=5&order=click_count.desc'),
+      ]);
+      
+      const statsData = await statsRes.json();
+      const toolsData = await toolsRes.json();
+      const topData = await topRes.json();
+      
+      if (statsData.success) {
+        setStats(statsData.data);
+      }
+      
+      if (toolsData.success) {
+        setRecentTools(toolsData.data || []);
+      }
+
+      if (topData.success) {
+        setTopTools(topData.data || []);
+      }
+    } catch (error) {
+      console.error('获取数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkHealth = async () => {
+    setCheckingHealth(true);
+    try {
+      const res = await fetch('/api/admin/health-check');
+      const data = await res.json();
+      if (data.success) {
+        setHealthIssues(data.data.issues || []);
+        if (data.data.issues?.length > 0) {
+          alert(`发现 ${data.data.issues.length} 个工具链接异常`);
+        } else {
+          alert('所有工具链接正常');
+        }
+      }
+    } catch (error) {
+      console.error('健康检查失败:', error);
+    } finally {
+      setCheckingHealth(false);
+    }
+  };
+
   const statCards = [
-    { name: '工具总数', value: stats?.tools_count || 0, icon: Wrench, color: 'bg-blue-500' },
-    { name: '分类数量', value: stats?.categories || 0, icon: FolderTree, color: 'bg-green-500' },
-    { name: '标签数量', value: stats?.tags || 0, icon: Tags, color: 'bg-purple-500' },
-    { name: '首页推荐', value: stats?.featured_count || 0, icon: TrendingUp, color: 'bg-orange-500' },
+    { name: '工具总数', value: stats.tools_count, icon: Wrench, color: 'bg-blue-500', href: '/admin/tools' },
+    { name: '分类数量', value: stats.categories, icon: FolderTree, color: 'bg-green-500', href: '/admin/categories' },
+    { name: '标签数量', value: stats.tags, icon: Tags, color: 'bg-purple-500', href: '/admin/tags' },
+    { name: '首页推荐', value: stats.featured_count, icon: TrendingUp, color: 'bg-orange-500' },
+    { name: '总浏览量', value: stats.total_views.toLocaleString(), icon: Eye, color: 'bg-cyan-500' },
+    { name: '总点击量', value: stats.total_clicks.toLocaleString(), icon: MousePointer, color: 'bg-pink-500' },
+    { name: '用户评分', value: stats.ratings_count, icon: Star, color: 'bg-yellow-500' },
+    { name: '待审评论', value: stats.reviews_pending, icon: AlertTriangle, color: 'bg-red-500', href: '/admin/reviews' },
   ];
+
+  const FREE_TYPE_COLORS: Record<string, string> = {
+    '完全免费': 'bg-green-100 text-green-700',
+    '免费额度': 'bg-blue-100 text-blue-700',
+    '限时免费': 'bg-orange-100 text-orange-700',
+    '付费工具': 'bg-slate-100 text-slate-700',
+  };
 
   if (loading) {
     return (
@@ -74,110 +143,213 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* 页面标题 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">管理后台</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">OneClaw AI视频工具导航站管理</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={checkHealth} disabled={checkingHealth}>
+            {checkingHealth ? (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Database className="w-4 h-4 mr-2" />
+            )}
+            链接检测
+          </Button>
+          <Link href="/" target="_blank">
+            <Button variant="outline" size="sm">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              查看站点
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       {/* 统计卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statCards.map((stat) => (
-          <div 
-            key={stat.name}
-            className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{stat.name}</p>
-                <p className="text-3xl font-bold text-slate-800 dark:text-slate-100 mt-1">
-                  {stat.value}
-                </p>
-              </div>
-              <div className={`p-3 rounded-lg ${stat.color}`}>
-                <stat.icon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
+          <Link key={stat.name} href={stat.href || '#'}>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{stat.name}</p>
+                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                      {stat.value}
+                    </p>
+                  </div>
+                  <div className={`p-2.5 rounded-lg ${stat.color}`}>
+                    <stat.icon className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
       {/* 快捷操作 */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">快捷操作</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a 
-            href="/admin/tools/new"
-            className="flex flex-col items-center justify-center p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors"
-          >
-            <Wrench className="w-8 h-8 mb-2" />
-            <span className="text-sm font-medium">添加工具</span>
-          </a>
-          <a 
-            href="/admin/tools/import"
-            className="flex flex-col items-center justify-center p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-          >
-            <TrendingUp className="w-8 h-8 mb-2" />
-            <span className="text-sm font-medium">批量导入</span>
-          </a>
-          <a 
-            href="/admin/categories"
-            className="flex flex-col items-center justify-center p-4 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-          >
-            <FolderTree className="w-8 h-8 mb-2" />
-            <span className="text-sm font-medium">管理分类</span>
-          </a>
-          <a 
-            href="/admin/tags"
-            className="flex flex-col items-center justify-center p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
-          >
-            <Tags className="w-8 h-8 mb-2" />
-            <span className="text-sm font-medium">管理标签</span>
-          </a>
-        </div>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">快捷操作</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/tools/new">
+              <Button size="sm" className="bg-gradient-to-r from-orange-500 to-red-500">
+                <Plus className="w-4 h-4 mr-2" />
+                添加工具
+              </Button>
+            </Link>
+            <Link href="/admin/tools/import">
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                批量导入
+              </Button>
+            </Link>
+            <Link href="/admin/categories">
+              <Button variant="outline" size="sm">
+                <FolderTree className="w-4 h-4 mr-2" />
+                分类管理
+              </Button>
+            </Link>
+            <Link href="/admin/tags">
+              <Button variant="outline" size="sm">
+                <Tags className="w-4 h-4 mr-2" />
+                标签管理
+              </Button>
+            </Link>
+            <Link href="/admin/reviews">
+              <Button variant="outline" size="sm">
+                <FileText className="w-4 h-4 mr-2" />
+                评论审核
+                {stats.reviews_pending > 0 && (
+                  <Badge className="ml-2 bg-red-500 text-white text-xs">{stats.reviews_pending}</Badge>
+                )}
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 最近添加 */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">最近添加</CardTitle>
+              <Link href="/admin/tools" className="text-sm text-orange-500 hover:text-orange-600">
+                查看全部
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {recentTools.map(tool => (
+                <div key={tool.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <img 
+                    src={tool.logo} 
+                    alt={tool.name} 
+                    className="w-10 h-10 rounded-lg object-contain bg-slate-100"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</p>
+                      {tool.is_featured && (
+                        <TrendingUp className="w-3 h-3 text-orange-500" />
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">{tool.producer}</p>
+                  </div>
+                  <Badge className={FREE_TYPE_COLORS[tool.free_type] || ''}>
+                    {tool.free_type}
+                  </Badge>
+                </div>
+              ))}
+              {recentTools.length === 0 && (
+                <p className="text-center text-sm text-slate-500 py-4">暂无数据</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 热门工具 */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">热门工具 TOP 5</CardTitle>
+              <Link href="/rankings" className="text-sm text-orange-500 hover:text-orange-600">
+                查看榜单
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topTools.map((tool, index) => (
+                <div key={tool.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    index === 0 ? 'bg-yellow-500 text-white' :
+                    index === 1 ? 'bg-slate-400 text-white' :
+                    index === 2 ? 'bg-orange-400 text-white' :
+                    'bg-slate-200 text-slate-600'
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <img 
+                    src={tool.logo} 
+                    alt={tool.name} 
+                    className="w-10 h-10 rounded-lg object-contain bg-slate-100"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-slate-500">
+                    <MousePointer className="w-3 h-3" />
+                    {tool.click_count}
+                  </div>
+                </div>
+              ))}
+              {topTools.length === 0 && (
+                <p className="text-center text-sm text-slate-500 py-4">暂无数据</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* 最近添加的工具 */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">最近添加</h2>
-        {recentTools.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-700">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">工具名称</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">出品方</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">免费类型</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">推荐</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTools.map((tool) => (
-                  <tr key={tool.id} className="border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30">
-                    <td className="py-3 px-4 text-sm text-slate-800 dark:text-slate-200">{tool.name}</td>
-                    <td className="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">{tool.producer}</td>
-                    <td className="py-3 px-4">
-                      <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                        tool.free_type === '完全免费' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                        tool.free_type === '免费额度' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                        tool.free_type === '限时免费' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                        'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
-                      }`}>
-                        {tool.free_type}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      {tool.is_featured ? (
-                        <span className="inline-flex px-2 py-1 text-xs rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
-                          推荐
-                        </span>
-                      ) : '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-            暂无工具数据，请先导入工具
-          </div>
-        )}
-      </div>
+      {/* 健康检查结果 */}
+      {healthIssues.length > 0 && (
+        <Card className="border-red-200 dark:border-red-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              链接异常 ({healthIssues.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {healthIssues.slice(0, 5).map((issue, index) => (
+                <div key={index} className="p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm">
+                  <p className="font-medium text-red-700 dark:text-red-300">{issue.tool_name}</p>
+                  {issue.issues.map((i: any, idx: number) => (
+                    <p key={idx} className="text-xs text-red-600 dark:text-red-400">
+                      {i.type}: {i.error || `状态码 ${i.status}`}
+                    </p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

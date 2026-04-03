@@ -625,6 +625,51 @@ export default function HomePage() {
           )}
         </div>
 
+        {/* 推荐工具区域 */}
+        {!hasFilters && activeCategory === 'all' && tools.filter(t => t.is_featured).length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-orange-500" />
+                编辑精选
+              </h2>
+              <Link href="/rankings?type=hot" className="text-sm text-orange-500 hover:text-orange-600 flex items-center gap-1">
+                查看更多 <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {tools.filter(t => t.is_featured).slice(0, 4).map(tool => (
+                <Card
+                  key={tool.id}
+                  className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-2 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-all cursor-pointer relative overflow-hidden"
+                  onClick={() => openDetail(tool)}
+                >
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-orange-500/20 to-transparent rounded-bl-full" />
+                  <CardContent className="p-4">
+                    <div className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden mb-2 shadow-sm">
+                        <img
+                          src={tool.logo}
+                          alt={tool.name}
+                          className="w-12 h-12 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect fill="%23f97316" width="48" height="48"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="20" font-weight="bold">${tool.name[0]}</text></svg>`;
+                          }}
+                        />
+                      </div>
+                      <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-1">{tool.name}</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{tool.highlight}</p>
+                      <span className={`mt-2 text-xs px-2 py-0.5 rounded-full ${FREE_TYPE_COLORS[tool.free_type]}`}>
+                        {tool.free_type}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* 工具列表 */}
         {loading ? (
           <SkeletonGrid count={8} />
@@ -716,6 +761,60 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      {/* 页脚 */}
+      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">功能导航</h3>
+              <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                <li><Link href="/rankings" className="hover:text-orange-500">榜单中心</Link></li>
+                <li><Link href="/resources" className="hover:text-orange-500">资源中心</Link></li>
+                <li><Link href="/compare" className="hover:text-orange-500">工具对比</Link></li>
+                <li><Link href="/workspace" className="hover:text-orange-500">我的工作台</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">工具分类</h3>
+              <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                <li><Link href="/?category=video-generation" className="hover:text-orange-500">视频生成</Link></li>
+                <li><Link href="/?category=digital-human" className="hover:text-orange-500">数字人</Link></li>
+                <li><Link href="/?category=video-editing" className="hover:text-orange-500">视频编辑</Link></li>
+                <li><Link href="/?category=ai-dubbing" className="hover:text-orange-500">AI配音</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">关于我们</h3>
+              <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                <li><span className="hover:text-orange-500 cursor-pointer">关于OneClaw</span></li>
+                <li><span className="hover:text-orange-500 cursor-pointer">收录标准</span></li>
+                <li><span className="hover:text-orange-500 cursor-pointer">商务合作</span></li>
+                <li><span className="hover:text-orange-500 cursor-pointer">联系我们</span></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">联系方式</h3>
+              <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
+                <li>邮箱: 1017760688@qq.com</li>
+                <li>域名: oneclaw.shop</li>
+              </ul>
+            </div>
+          </div>
+          <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <AnimatedLobster size={24} />
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                © 2024 OneClaw. All rights reserved.
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+              <span className="hover:text-orange-500 cursor-pointer">用户协议</span>
+              <span className="hover:text-orange-500 cursor-pointer">隐私政策</span>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       {/* 工具详情弹窗 */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>

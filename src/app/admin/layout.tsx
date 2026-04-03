@@ -8,7 +8,8 @@ import {
   Wrench, 
   FolderTree, 
   Tags, 
-  Settings,
+  MessageSquare,
+  Star,
   Menu,
   X,
   ExternalLink
@@ -19,7 +20,7 @@ const navigation = [
   { name: '工具管理', href: '/admin/tools', icon: Wrench },
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
   { name: '标签管理', href: '/admin/tags', icon: Tags },
-  { name: '系统设置', href: '/admin/settings', icon: Settings },
+  { name: '评论审核', href: '/admin/reviews', icon: MessageSquare },
 ];
 
 export default function AdminLayout({
