@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
+// 工具数据类型定义
+interface ToolData {
+  name: string;
+  logo: string;
+  producer: string;
+  highlight: string;
+  category: string;
+  free_type: string;
+  free_quota_desc: string;
+  official_url: string;
+  promotion_url?: string;
+  is_official?: boolean;
+  is_featured: boolean;
+  feature_tags: string[];
+  advantages: string[];
+  limitations: string[];
+  commercial_license: string;
+}
+
 // 完整初始化数据
 const INIT_DATA = {
   categories: [
@@ -29,7 +48,7 @@ const INIT_DATA = {
 };
 
 // 完整工具数据
-const TOOLS = [
+const TOOLS: ToolData[] = [
   // ========== 视频生成 ==========
   { name: 'Sora', logo: 'https://openai.com/favicon.ico', producer: 'OpenAI', highlight: 'OpenAI革命性AI视频', category: '视频生成', free_type: '付费工具', free_quota_desc: '$20/月起', official_url: 'https://openai.com/sora', is_featured: true, feature_tags: ['文生视频', '4K分辨率', '长视频生成'], advantages: ['最长60秒视频', '复杂场景理解', '多角色一致性'], limitations: ['需要订阅'], commercial_license: '需授权商用' },
   { name: 'Runway Gen-3', logo: 'https://runwayml.com/favicon.ico', producer: 'Runway', highlight: '专业级AI视频生成', category: '视频生成', free_type: '免费额度', free_quota_desc: '$12/月起', official_url: 'https://runwayml.com', is_featured: true, feature_tags: ['文生视频', '图生视频', '视频编辑'], advantages: ['电影级画质', '运动笔刷控制', '多风格模板'], limitations: ['免费额度有限'], commercial_license: '需授权商用' },
