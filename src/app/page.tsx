@@ -175,14 +175,32 @@ export default function HomePage() {
   const [isMember, setIsMember] = useState(false);
   const maxCompare = isMember ? 3 : 2;
 
-  // 初始化用户ID
+  // 初始化用户ID和会员状态
   useEffect(() => {
-    setUserId(getUserId());
+    const id = getUserId();
+    setUserId(id);
     // 加载对比工具
     setCompareTools(getCompareTools());
     // 监听对比变化
     const handleCompareChange = () => setCompareTools(getCompareTools());
     window.addEventListener('compareToolsChanged', handleCompareChange);
+    
+    // 检查会员状态
+    const checkMemberStatus = async () => {
+      if (id) {
+        try {
+          const res = await fetch(`/api/members?user_id=${id}`);
+          const data = await res.json();
+          if (data.success && data.data?.is_active) {
+            setIsMember(true);
+          }
+        } catch (error) {
+          console.error('检查会员状态失败:', error);
+        }
+      }
+    };
+    checkMemberStatus();
+    
     return () => window.removeEventListener('compareToolsChanged', handleCompareChange);
   }, []);
 
