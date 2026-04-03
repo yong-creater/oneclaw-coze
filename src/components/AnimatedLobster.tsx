@@ -68,12 +68,13 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       
       {/* 敲键盘的酷龙虾图片 */}
       <Image
-        src="/lobster-logo.png"
+        src="/lobster-logo.png?v=2"
         alt="OneClaw 龙虾"
         width={size}
         height={size}
         className={`w-full h-full object-contain transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
         priority
+        unoptimized
       />
     </div>
   );
