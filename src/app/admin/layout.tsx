@@ -13,7 +13,9 @@ import {
   Menu,
   X,
   ExternalLink,
-  Megaphone
+  Megaphone,
+  Users,
+  CreditCard
 } from 'lucide-react';
 
 const navigation = [
@@ -22,6 +24,8 @@ const navigation = [
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
   { name: '标签管理', href: '/admin/tags', icon: Tags },
   { name: '评论审核', href: '/admin/reviews', icon: MessageSquare },
+  { name: '会员管理', href: '/admin/members', icon: Users },
+  { name: '订单管理', href: '/admin/orders', icon: CreditCard },
   { name: '广告管理', href: '/admin/ads', icon: Megaphone },
 ];
 
