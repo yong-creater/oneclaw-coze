@@ -206,38 +206,20 @@ html {
   animation: fadeInUp 0.3s ease-out forwards;
 }
 
-/* 龙虾敲键盘动画 - 模拟打字的节奏感 */
-@keyframes typing {
+/* 龙虾敲键盘动画 - 键盘光效闪烁 */
+@keyframes keyboard-tap {
   0%, 100% {
-    transform: translateY(0) rotate(0deg);
+    opacity: 0.2;
+    transform: scale(1);
   }
-  15% {
-    transform: translateY(-2px) rotate(-1deg);
-  }
-  30% {
-    transform: translateY(0) rotate(0deg);
-  }
-  45% {
-    transform: translateY(-1.5px) rotate(0.5deg);
-  }
-  60% {
-    transform: translateY(0) rotate(0deg);
-  }
-  75% {
-    transform: translateY(-2px) rotate(-0.5deg);
-  }
-  90% {
-    transform: translateY(0) rotate(0deg);
+  50% {
+    opacity: 0.6;
+    transform: scale(0.95);
   }
 }
 
-.animate-typing {
-  animation: typing 1.5s ease-in-out infinite;
-  transform-origin: bottom center;
-}
-
-.animate-typing:hover {
-  animation: typing 0.8s ease-in-out infinite;
+.animate-keyboard-tap {
+  animation: keyboard-tap 0.3s ease-in-out infinite;
 }
 
 /* 页面加载动画 */
