@@ -7,18 +7,18 @@ interface AnimatedLobsterProps {
   className?: string;
 }
 
-// 程序员风格的有趣语录
+// 龙虾助手风格的互动语录
 const INTERACTION_MESSAGES = [
-  { text: '我在专心写代码，怎么啦？', emoji: '⌨️' },
-  { text: '别吵，这个bug快修完了', emoji: '🐛' },
-  { text: '等我提交这个PR', emoji: '📝' },
-  { text: '需求又变了？', emoji: '🙄' },
-  { text: '代码能跑就行', emoji: '😏' },
-  { text: '这不是bug，是feature', emoji: '✨' },
-  { text: '在我电脑上是好的啊', emoji: '🤷' },
-  { text: '今天一定不加班', emoji: '🫠' },
-  { text: '编译中，勿扰...', emoji: '⏳' },
-  { text: '你试试重启一下', emoji: '🔄' },
+  { text: '正在帮你找好工具~', emoji: '🔍' },
+  { text: '发现了一个宝藏工具！', emoji: '✨' },
+  { text: '有什么能帮到你的？', emoji: '🦞' },
+  { text: '我正在努力工作中~', emoji: '💪' },
+  { text: '这个工具不错哦！', emoji: '👍' },
+  { text: '让我帮你搜搜看~', emoji: '🔎' },
+  { text: '工具库有117款神器呢', emoji: '🚀' },
+  { text: '继续逛逛吧~', emoji: '👋' },
+  { text: '我是你的AI工具助手', emoji: '🤖' },
+  { text: '点击卡片看详情哦', emoji: '👆' },
 ];
 
 export const AnimatedLobster = memo(function AnimatedLobster({ 
