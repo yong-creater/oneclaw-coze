@@ -22,6 +22,8 @@ import {
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
 import CompareBar, { getCompareTools, saveCompareTools, type CompareTool } from '@/components/CompareBar';
+import SponsorBadge, { isSponsorActive } from '@/components/SponsorBadge';
+import AdBanner from '@/components/AdBanner';
 import Link from 'next/link';
 
 // 类型定义
@@ -54,6 +56,8 @@ interface Tool {
   commercial_license: string;
   max_duration: string;
   free_quota_desc: string | null;
+  sponsor_type: string | null;
+  sponsor_expires_at: string | null;
   categories: { name: string; slug: string };
 }
 
@@ -764,6 +768,9 @@ export default function HomePage() {
         )}
 
         {/* 工具列表 */}
+        {/* 首页横幅广告 */}
+        <AdBanner position="home_banner" className="mb-6" />
+        
         {loading ? (
           <SkeletonGrid count={8} />
         ) : tools.length > 0 ? (
@@ -799,7 +806,10 @@ export default function HomePage() {
                               <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
                                 {tool.name}
                               </h3>
-                              {tool.is_featured && (
+                              {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
+                                <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
+                              )}
+                              {tool.is_featured && !tool.sponsor_type && (
                                 <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
                               )}
                             </div>
