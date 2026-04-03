@@ -99,6 +99,8 @@
 | `user_ratings` | 用户评分 | id, user_id, tool_id, effect_score, usability_score |
 | `admin_users` | 管理员用户 | id, username, password_hash, email, role, is_active |
 | `admin_sessions` | 管理员会话 | id, user_id, token, expires_at |
+| `users` | 用户表 | id, user_id, openid, nickname, avatar_url, phone |
+| `user_sessions` | 用户会话 | id, user_id, token, expires_at |
 
 ### 工具字段说明
 

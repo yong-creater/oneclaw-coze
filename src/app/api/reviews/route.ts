@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAuth } from '@/lib/user-middleware';
 
 // 获取评论列表
 export async function GET(request: NextRequest) {
@@ -10,35 +11,35 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    if (toolId) {
-      // 获取工具的评论列表（只返回已审核通过的）
-      const offset = (page - 1) * limit;
-      
-      const { data: reviews, error, count } = await client
-        .from('user_reviews')
-        .select('*, user_ratings(effect_score, usability_score, quota_score, stability_score, overall_score)', { count: 'exact' })
-        .eq('tool_id', toolId)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
-
-      if (error) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-      }
-
-      return NextResponse.json({
-        success: true,
-        data: reviews || [],
-        pagination: {
-          page,
-          limit,
-          total: count || 0,
-          total_pages: Math.ceil((count || 0) / limit)
-        }
-      });
+    if (!toolId) {
+      return NextResponse.json({ success: false, error: '缺少tool_id参数' }, { status: 400 });
     }
 
-    return NextResponse.json({ success: false, error: '缺少tool_id参数' }, { status: 400 });
+    // 获取工具的评论列表（只返回已审核通过的）
+    const offset = (page - 1) * limit;
+    
+    const { data: reviews, error, count } = await client
+      .from('user_reviews')
+      .select('*, user_ratings(effect_score, usability_score, quota_score, stability_score, overall_score)', { count: 'exact' })
+      .eq('tool_id', toolId)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: reviews || [],
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit)
+      }
+    });
   } catch (error) {
     console.error('获取评论失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
@@ -48,11 +49,18 @@ export async function GET(request: NextRequest) {
 // 创建评论
 export async function POST(request: NextRequest) {
   try {
+    // 验证登录
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+    const { userId } = authResult;
+
     const client = getSupabaseClient();
     const body = await request.json();
-    const { user_id, tool_id, content } = body;
+    const { tool_id, content } = body;
 
-    if (!user_id || !tool_id || !content) {
+    if (!tool_id || !content) {
       return NextResponse.json({ success: false, error: '缺少必要参数' }, { status: 400 });
     }
 
@@ -65,7 +73,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await client
       .from('user_reviews')
       .insert({
-        user_id,
+        user_id: userId,
         tool_id,
         content,
         status: 'pending'

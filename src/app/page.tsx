@@ -24,6 +24,7 @@ import { SkeletonGrid } from '@/components/LobsterSkeleton';
 import CompareBar, { getCompareTools, saveCompareTools, type CompareTool } from '@/components/CompareBar';
 import SponsorBadge, { isSponsorActive } from '@/components/SponsorBadge';
 import AdBanner from '@/components/AdBanner';
+import UserButton from '@/components/UserButton';
 import Link from 'next/link';
 
 // 类型定义
@@ -587,12 +588,7 @@ export default function HomePage() {
                   <span className="hidden sm:inline">资源</span>
                 </Button>
               </Link>
-              <Link href="/workspace">
-                <Button variant="outline" size="sm" className="gap-1">
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">工作台</span>
-                </Button>
-              </Link>
+              <UserButton />
             </div>
           </div>
         </div>
