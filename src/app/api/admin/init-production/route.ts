@@ -204,6 +204,7 @@ export async function POST(request: NextRequest) {
       tools: 0,
       prompts: 0,
       tutorials: 0,
+      errors: [] as string[],
     };
 
     console.log('🚀 开始初始化生产环境数据...');
@@ -214,7 +215,12 @@ export async function POST(request: NextRequest) {
       const { error } = await client
         .from('categories')
         .upsert(cat, { onConflict: 'slug' });
-      if (!error) results.categories++;
+      if (error) {
+        console.log(`  ❌ 分类 ${cat.name}: ${error.message}`);
+        results.errors.push(`分类 ${cat.name}: ${error.message}`);
+      } else {
+        results.categories++;
+      }
     }
 
     // 2. 初始化标签
@@ -224,26 +230,40 @@ export async function POST(request: NextRequest) {
         const { error } = await client
           .from('tags')
           .upsert({ name, type }, { onConflict: 'name' });
-        if (!error) results.tags++;
+        if (error) {
+          console.log(`  ❌ 标签 ${name}: ${error.message}`);
+        } else {
+          results.tags++;
+        }
       }
     }
 
     // 3. 获取分类ID映射
-    const { data: categories } = await client
+    const { data: categories, error: catError } = await client
       .from('categories')
       .select('id, name');
-    const categoryMap = new Map(categories?.map(c => [c.name, c.id]) || []);
+    
+    if (catError || !categories) {
+      results.errors.push(`获取分类失败: ${catError?.message}`);
+      return NextResponse.json({ success: false, results, error: '获取分类失败' }, { status: 500 });
+    }
+    
+    const categoryMap = new Map(categories.map(c => [c.name, c.id]));
+    console.log('📋 分类映射:', Object.fromEntries(categoryMap));
 
     // 4. 初始化工具
     console.log('🔧 初始化工具...');
+    let toolErrors = 0;
     for (const tool of TOOLS) {
       const categoryId = categoryMap.get(tool.category);
       if (!categoryId) {
-        console.log(`  ⚠️ 跳过 ${tool.name}: 找不到分类 ${tool.category}`);
+        const errMsg = `跳过 ${tool.name}: 找不到分类 ${tool.category}`;
+        console.log(`  ⚠️ ${errMsg}`);
+        results.errors.push(errMsg);
         continue;
       }
 
-      const { error } = await client.from('tools').upsert({
+      const { error } = await client.from('tools').insert({
         name: tool.name,
         logo: tool.logo,
         producer: tool.producer,
@@ -265,19 +285,25 @@ export async function POST(request: NextRequest) {
         launch_date: new Date().toISOString(),
         view_count: Math.floor(Math.random() * 1000),
         click_count: Math.floor(Math.random() * 500),
-      }, { onConflict: 'name' });
+      });
 
-      if (!error) {
-        results.tools++;
+      if (error) {
+        // 如果是重复键错误，忽略
+        if (!error.message.includes('duplicate')) {
+          toolErrors++;
+          if (toolErrors <= 5) {
+            results.errors.push(`${tool.name}: ${error.message}`);
+          }
+        }
       } else {
-        console.log(`  ⚠️ ${tool.name}: ${error.message}`);
+        results.tools++;
       }
     }
 
     // 5. 初始化Prompt模板
     console.log('📝 初始化Prompt模板...');
     for (const prompt of PROMPTS) {
-      const { error } = await client.from('prompts').upsert({
+      const { error } = await client.from('prompts').insert({
         title: prompt.title,
         content: prompt.content,
         category: prompt.category,
@@ -286,15 +312,21 @@ export async function POST(request: NextRequest) {
         uses: Math.floor(Math.random() * 1000) + 100,
         likes: Math.floor(Math.random() * 200) + 20,
         status: 'published',
-      }, { onConflict: 'title' });
+      });
 
-      if (!error) results.prompts++;
+      if (error) {
+        if (!error.message.includes('duplicate')) {
+          results.errors.push(`Prompt ${prompt.title}: ${error.message}`);
+        }
+      } else {
+        results.prompts++;
+      }
     }
 
     // 6. 初始化教程
     console.log('📚 初始化教程...');
     for (const tutorial of TUTORIALS) {
-      const { error } = await client.from('tutorials').upsert({
+      const { error } = await client.from('tutorials').insert({
         title: tutorial.title,
         content: tutorial.content,
         category: tutorial.category,
@@ -304,9 +336,15 @@ export async function POST(request: NextRequest) {
         likes: Math.floor(Math.random() * 300) + 30,
         is_featured: tutorial.is_featured || false,
         status: 'published',
-      }, { onConflict: 'title' });
+      });
 
-      if (!error) results.tutorials++;
+      if (error) {
+        if (!error.message.includes('duplicate')) {
+          results.errors.push(`教程 ${tutorial.title}: ${error.message}`);
+        }
+      } else {
+        results.tutorials++;
+      }
     }
 
     console.log('✨ 初始化完成！', results);
