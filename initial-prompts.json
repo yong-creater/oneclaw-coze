@@ -1,0 +1,291 @@
+{
+  "prompts": [
+    {
+      "title": "电影级风景镜头",
+      "content": "A breathtaking cinematic aerial shot of [SUBJECT], golden hour lighting, dramatic clouds, 8K resolution, photorealistic, smooth camera movement, professional cinematography, epic scale, volumetric fog",
+      "category": "场景描述",
+      "tags": ["风景", "电影感", "航拍"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "产品展示视频",
+      "content": "Product showcase video of [PRODUCT], clean white background, soft studio lighting, 360 degree rotation, professional commercial style, high-end product photography, smooth motion, subtle reflections",
+      "category": "场景描述",
+      "tags": ["产品", "商业", "展示"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "科幻城市夜景",
+      "content": "Futuristic cyberpunk cityscape at night, neon lights reflecting on wet streets, flying vehicles, holographic advertisements, Blade Runner aesthetic, cinematic wide shot, 8K quality, atmospheric fog",
+      "category": "场景描述",
+      "tags": ["科幻", "城市", "赛博朋克"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "自然纪录片风格",
+      "content": "Nature documentary style footage of [ANIMAL/SCENE], close-up slow motion, shallow depth of field, golden hour, National Geographic quality, detailed textures, natural habitat, cinematic composition",
+      "category": "场景描述",
+      "tags": ["自然", "纪录片", "动物"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "美食视频拍摄",
+      "content": "Delicious [FOOD] food videography, steam rising, close-up macro shot, warm lighting, professional food styling, appetizing presentation, shallow depth of field, slow motion pour, restaurant quality",
+      "category": "场景描述",
+      "tags": ["美食", "商业", "近景"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "运动慢动作",
+      "content": "Dynamic sports action in slow motion, [SPORT/ACTION], sweat droplets frozen in air, intense expression, dramatic lighting, high frame rate capture, professional sports photography style, cinematic impact",
+      "category": "场景描述",
+      "tags": ["运动", "慢动作", "动感"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "古风仙侠场景",
+      "content": "Ancient Chinese fantasy landscape, misty mountains, traditional pavilions, flying cranes, ethereal atmosphere, wuxia style, soft pastel colors, cinematic wide shot, dreamlike quality, 4K resolution",
+      "category": "场景描述",
+      "tags": ["古风", "仙侠", "中国风"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "科技产品发布",
+      "content": "Tech product reveal video, sleek [DEVICE] emerging from darkness, particle effects, futuristic interface animations, Apple-style presentation, premium feel, dramatic lighting, clean minimal design",
+      "category": "场景描述",
+      "tags": ["科技", "产品", "发布"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "城市延时摄影",
+      "content": "Urban timelapse from day to night, city skyline transformation, moving clouds, traffic lights trails, busy streets, architectural details, smooth transitions, professional timelapse photography",
+      "category": "场景描述",
+      "tags": ["城市", "延时", "风景"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "水下世界",
+      "content": "Underwater ocean scene, coral reef with tropical fish, sunlight rays penetrating water, bubbles rising, crystal clear water, marine life, peaceful atmosphere, documentary quality, vibrant colors",
+      "category": "场景描述",
+      "tags": ["水下", "海洋", "自然"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "二次元少女",
+      "content": "Anime style girl with [HAIR_COLOR] hair, [EYE_COLOR] eyes, wearing [OUTFIT], cherry blossoms background, soft lighting, Studio Ghibli inspired, detailed illustration, kawaii aesthetic, pastel colors",
+      "category": "角色扮演",
+      "tags": ["二次元", "少女", "动漫"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "写实人物肖像",
+      "content": "Photorealistic portrait of a [AGE] year old [GENDER] with [FEATURES], natural lighting, shallow depth of field, professional headshot, detailed skin texture, expressive eyes, cinematic color grading",
+      "category": "角色扮演",
+      "tags": ["肖像", "写实", "人物"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "历史人物还原",
+      "content": "Historical figure [NAME/ERA] portrait, period accurate clothing and setting, museum quality, detailed textures, dramatic Renaissance lighting, classical painting style, dignified pose",
+      "category": "角色扮演",
+      "tags": ["历史", "人物", "写实"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "奇幻角色设计",
+      "content": "Fantasy character design, [RACE/TYPE] warrior with [WEAPONS], intricate armor details, magical aura, dramatic pose, concept art style, detailed background, epic lighting, ArtStation quality",
+      "category": "角色扮演",
+      "tags": ["奇幻", "游戏", "设计"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "职业形象照",
+      "content": "Professional [JOB_TITLE] in modern office environment, confident expression, business attire, soft natural lighting from window, corporate headshot style, clean background, approachable yet professional",
+      "category": "角色扮演",
+      "tags": ["职业", "商务", "肖像"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "动漫角色战斗",
+      "content": "Anime character dynamic battle pose, action scene, energy effects, dramatic speed lines, intense expression, manga style, dynamic composition, vibrant colors, epic moment capture",
+      "category": "角色扮演",
+      "tags": ["动漫", "战斗", "动感"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "复古电影风格",
+      "content": "Vintage film look, [SUBJECT] in 1970s style, film grain, warm color palette, soft focus edges, retro aesthetic, Kodak Portra 400 colors, nostalgic atmosphere, classic cinema composition",
+      "category": "风格迁移",
+      "tags": ["复古", "电影", "胶片"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "赛博朋克风格",
+      "content": "Cyberpunk transformation, [SUBJECT] with neon accents, glitch effects, holographic elements, purple and cyan color scheme, futuristic overlay, tech aesthetics, digital distortion, high contrast",
+      "category": "风格迁移",
+      "tags": ["赛博朋克", "科技", "未来"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "水墨画风格",
+      "content": "Traditional Chinese ink wash painting style, [SUBJECT], elegant brush strokes, minimal composition, zen aesthetic, black and white with subtle color accents, artistic, cultural heritage feel",
+      "category": "风格迁移",
+      "tags": ["水墨", "中国风", "艺术"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "油画艺术风格",
+      "content": "Oil painting style, [SUBJECT] in impressionist manner, visible brushstrokes, rich textures, classical art composition, museum masterpiece quality, warm tones, artistic interpretation",
+      "category": "风格迁移",
+      "tags": ["油画", "艺术", "印象派"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "像素艺术风格",
+      "content": "Pixel art style, [SUBJECT] in 16-bit retro game aesthetic, vibrant limited color palette, nostalgic 90s gaming feel, clean pixel work, sprite animation style, charming simplicity",
+      "category": "风格迁移",
+      "tags": ["像素", "复古", "游戏"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "动漫渲染风格",
+      "content": "Anime 3D render style, [SUBJECT], cel-shaded, vibrant colors, clean outlines, anime aesthetic, smooth gradients, Ghibli-inspired, expressive, professional animation quality",
+      "category": "风格迁移",
+      "tags": ["动漫", "渲染", "3D"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "赛璐璐风格",
+      "content": "Cel-shaded animation style, [SUBJECT], bold outlines, flat colors, anime aesthetic, clean geometric shapes, vibrant and saturated, Japanese animation tradition, dynamic pose",
+      "category": "风格迁移",
+      "tags": ["赛璐璐", "动漫", "动画"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "低多边形风格",
+      "content": "Low poly 3D art, [SUBJECT] constructed from geometric polygons, minimalist design, soft gradient lighting, modern graphic style, clean aesthetics, abstract interpretation, pastel colors",
+      "category": "风格迁移",
+      "tags": ["低多边形", "3D", "几何"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "爆炸特效",
+      "content": "Cinematic explosion effect, debris and particles, fire and smoke, slow motion capture, realistic physics, dramatic lighting, Hollywood VFX quality, volumetric smoke, detailed destruction",
+      "category": "特效制作",
+      "tags": ["爆炸", "特效", "电影"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "魔法粒子效果",
+      "content": "Magical particle effects, glowing sparkles, ethereal energy swirl, fantasy magic casting, mystical aura, rainbow colored particles, slow motion flow, dreamlike atmosphere, high quality VFX",
+      "category": "特效制作",
+      "tags": ["魔法", "粒子", "奇幻"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "火焰特效",
+      "content": "Realistic fire effects, roaring flames, heat distortion, dynamic movement, realistic smoke, orange and blue color palette, cinematic quality, volumetric fire, natural combustion physics",
+      "category": "特效制作",
+      "tags": ["火焰", "特效", "写实"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "水下气泡效果",
+      "content": "Underwater bubble effects, rising air bubbles, light refraction, crystal clear water, realistic physics, ocean depth atmosphere, volumetric lighting, peaceful underwater scene",
+      "category": "特效制作",
+      "tags": ["水下", "气泡", "自然"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "闪电风暴效果",
+      "content": "Dramatic lightning storm, electric bolts across sky, dark clouds, bright flashes, cinematic weather, powerful energy, realistic lightning physics, ominous atmosphere, high contrast",
+      "category": "特效制作",
+      "tags": ["闪电", "风暴", "天气"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "烟雾迷雾效果",
+      "content": "Atmospheric fog and mist, volumetric smoke, mysterious ambiance, diffused lighting, depth and layers, cinematic atmosphere, horror movie feel, slow swirling motion, realistic particle simulation",
+      "category": "特效制作",
+      "tags": ["烟雾", "迷雾", "氛围"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "产品旋转展示",
+      "content": "360 degree product rotation, [PRODUCT] on turntable, smooth continuous motion, studio lighting, clean background, professional commercial style, detailed texture showcase, premium presentation",
+      "category": "场景描述",
+      "tags": ["产品", "展示", "商业"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "建筑空间展示",
+      "content": "Architectural interior flythrough, modern [ROOM TYPE], natural lighting, interior design showcase, smooth camera movement, real estate style, wide angle lens, detailed materials, luxury feel",
+      "category": "场景描述",
+      "tags": ["建筑", "室内", "空间"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "节日庆典场景",
+      "content": "Festive celebration scene, [HOLIDAY/EVENT] atmosphere, decorations, warm lighting, joyful mood, crowd celebration, cultural elements, vibrant colors, cinematic wide shot, celebratory ambiance",
+      "category": "场景描述",
+      "tags": ["节日", "庆典", "氛围"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "微观世界",
+      "content": "Macro microscopic world, tiny [SUBJECT] enlarged, extreme close-up, detailed textures, shallow depth of field, scientific documentary style, hidden world reveal, crystal sharp focus",
+      "category": "场景描述",
+      "tags": ["微观", "近景", "科学"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "太空宇宙场景",
+      "content": "Space cosmic scene, planets and nebulae, stars backdrop, cinematic quality, NASA inspired, vast universe, dramatic lighting, sci-fi aesthetic, epic scale, astronomical accuracy",
+      "category": "场景描述",
+      "tags": ["太空", "宇宙", "科幻"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "四季变换",
+      "content": "Seasonal transition timelapse, same location through four seasons, spring blossoms, summer green, autumn colors, winter snow, smooth morphing transitions, nature documentary style, peaceful atmosphere",
+      "category": "场景描述",
+      "tags": ["四季", "自然", "延时"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "数字人主播开场",
+      "content": "Professional AI anchor greeting: Hello everyone, welcome to today's program. I'm your AI host, bringing you the latest [TOPIC] content. Let's dive in and explore together!",
+      "category": "场景描述",
+      "tags": ["数字人", "主播", "开场"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "电商带货口播",
+      "content": "E-commerce product pitch: 大家好！今天给大家推荐这款[产品名]，它有[特点1]、[特点2]、[特点3]三大亮点。现在下单还有优惠，赶紧点击链接购买吧！",
+      "category": "场景描述",
+      "tags": ["电商", "带货", "口播"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "知识科普解说",
+      "content": "Educational content script: 今天我们来了解[TOPIC]。首先，让我们看看它的基本原理...[详细解释]...通过这个例子，相信大家对[TOPIC]有了更深入的理解。欢迎点赞关注！",
+      "category": "场景描述",
+      "tags": ["知识", "科普", "教育"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "品牌故事叙述",
+      "content": "Brand storytelling: 从一个简单的想法开始，[品牌名]一直致力于[使命]。经过[时间]的发展，我们已经[成就]。未来，我们将继续[愿景]。感谢一路有您。",
+      "category": "场景描述",
+      "tags": ["品牌", "故事", "企业"],
+      "author": "OneClaw官方"
+    },
+    {
+      "title": "Vlog生活记录",
+      "content": "Vlog daily life: 今天是美好的一天！早上[活动]，中午[活动]，下午[活动]。生活就是要这样充满仪式感，希望你们也过得开心！记得点赞关注哦～",
+      "category": "场景描述",
+      "tags": ["Vlog", "生活", "记录"],
+      "author": "OneClaw官方"
+    }
+  ]
+}
