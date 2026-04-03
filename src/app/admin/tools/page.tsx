@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Plus, Edit, Trash2, Star, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Star, ExternalLink, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 
 interface Tool {
   id: number;
@@ -212,15 +212,25 @@ export default function ToolsAdminPage() {
           </select>
         </div>
         
-        {/* 添加按钮 */}
-        <Link
-          href="/admin/tools/new"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white 
-            text-sm font-medium hover:bg-orange-600 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          添加工具
-        </Link>
+        {/* 操作按钮 */}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/tools/import"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+              text-slate-600 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            批量导入
+          </Link>
+          <Link
+            href="/admin/tools/new"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white 
+              text-sm font-medium hover:bg-orange-600 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            添加工具
+          </Link>
+        </div>
       </div>
 
       {/* 工具列表 */}
@@ -305,7 +315,7 @@ export default function ToolsAdminPage() {
                           <ExternalLink className="w-4 h-4" />
                         </a>
                         <Link
-                          href={`/admin/tools/${tool.id}`}
+                          href={`/admin/tools/${tool.id}/edit`}
                           className="p-1.5 rounded text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30"
                           title="编辑"
                         >

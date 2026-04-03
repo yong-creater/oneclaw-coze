@@ -10,17 +10,15 @@ export async function GET(request: NextRequest) {
     const scene = searchParams.get('scene'); // 口播视频、电商带货等
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    let query = client
-      .from('tools')
-      .select('id, name, logo, producer, highlight, free_type, feature_tags, official_url, promotion_url, view_count, click_count, launch_date, categories(name, slug)')
-      .eq('is_active', true);
-
     let tools: any[] = [];
 
     switch (type) {
       case 'hot':
         // 热门榜单：按点击量排序
-        const { data: hotTools } = await query
+        const { data: hotTools } = await client
+          .from('tools')
+          .select('id, name, logo, producer, highlight, free_type, feature_tags, official_url, promotion_url, view_count, click_count, launch_date, categories(name, slug)')
+          .eq('is_active', true)
           .order('click_count', { ascending: false })
           .limit(limit);
         tools = hotTools || [];
@@ -28,7 +26,10 @@ export async function GET(request: NextRequest) {
 
       case 'free':
         // 免费神器榜单：只显示完全免费的工具，按评分排序
-        const { data: freeTools } = await query
+        const { data: freeTools } = await client
+          .from('tools')
+          .select('id, name, logo, producer, highlight, free_type, feature_tags, official_url, promotion_url, view_count, click_count, launch_date, categories(name, slug)')
+          .eq('is_active', true)
           .in('free_type', ['完全免费', '免费额度'])
           .order('click_count', { ascending: false })
           .limit(limit);
@@ -40,7 +41,10 @@ export async function GET(request: NextRequest) {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
-        const { data: newTools } = await query
+        const { data: newTools } = await client
+          .from('tools')
+          .select('id, name, logo, producer, highlight, free_type, feature_tags, official_url, promotion_url, view_count, click_count, launch_date, categories(name, slug)')
+          .eq('is_active', true)
           .gte('launch_date', thirtyDaysAgo.toISOString())
           .order('launch_date', { ascending: false })
           .limit(limit);

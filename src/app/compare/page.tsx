@@ -343,7 +343,7 @@ export default function ComparePage() {
               选择2-4个工具进行对比
             </h3>
             <p className="text-sm text-slate-500">
-              搜索并添加工具，然后点击"开始对比"按钮
+              搜索并添加工具，然后点击「开始对比」按钮
             </p>
           </div>
         )}

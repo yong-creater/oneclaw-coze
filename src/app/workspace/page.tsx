@@ -79,26 +79,6 @@ export default function WorkspacePage() {
   const [ratings, setRatings] = useState<RatingItem[]>([]);
   const [ratingsPagination, setRatingsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
 
-  // 初始化
-  useEffect(() => {
-    const id = getUserId();
-    setUserId(id);
-    if (id) {
-      fetchAllData(id);
-    }
-  }, []);
-
-  // 获取所有数据
-  const fetchAllData = async (uid: string) => {
-    setLoading(true);
-    await Promise.all([
-      fetchFavorites(uid, 1),
-      fetchHistory(uid, 1),
-      fetchRatings(uid, 1)
-    ]);
-    setLoading(false);
-  };
-
   // 获取收藏
   const fetchFavorites = async (uid: string, page: number) => {
     try {
@@ -140,6 +120,27 @@ export default function WorkspacePage() {
       console.error('获取评分失败:', error);
     }
   };
+
+  // 获取所有数据
+  const fetchAllData = async (uid: string) => {
+    setLoading(true);
+    await Promise.all([
+      fetchFavorites(uid, 1),
+      fetchHistory(uid, 1),
+      fetchRatings(uid, 1)
+    ]);
+    setLoading(false);
+  };
+
+  // 初始化
+  useEffect(() => {
+    const id = getUserId();
+    setUserId(id);
+    if (id) {
+      fetchAllData(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 取消收藏
   const removeFavorite = async (toolId: number) => {
