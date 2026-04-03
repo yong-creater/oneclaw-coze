@@ -72,7 +72,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
         alt="OneClaw 龙虾"
         width={size}
         height={size}
-        className={`w-full h-full object-contain transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
+        className={`w-full h-full object-contain transition-all duration-200 animate-typing ${isCaught ? 'animate-bounce' : ''}`}
         priority
         unoptimized
       />

@@ -20,10 +20,10 @@ export const LobsterLoading = memo(function LobsterLoading({
   const animationClass = {
     spin: 'animate-spin',
     bounce: 'animate-bounce',
-    wave: 'animate-pulse',
-    dance: 'animate-bounce',
-    pulse: 'animate-pulse',
-    clamp: 'animate-pulse',
+    wave: 'animate-typing',
+    dance: 'animate-typing',
+    pulse: 'animate-typing',
+    clamp: 'animate-typing',
   }[variant];
 
   return (
