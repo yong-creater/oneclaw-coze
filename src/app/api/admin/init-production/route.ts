@@ -204,10 +204,42 @@ export async function POST(request: NextRequest) {
       tools: 0,
       prompts: 0,
       tutorials: 0,
+      admin_created: false,
       errors: [] as string[],
     };
 
     console.log('🚀 开始初始化生产环境数据...');
+
+    // 0. 检查并创建管理员账号
+    const { data: existingAdmin, error: adminCheckError } = await client
+      .from('admin_users')
+      .select('id')
+      .maybeSingle();
+
+    if (!existingAdmin) {
+      console.log('👤 创建默认管理员账号...');
+      const bcrypt = await import('bcryptjs');
+      const passwordHash = await bcrypt.hash('admin123', 10);
+      
+      const { error: createAdminError } = await client
+        .from('admin_users')
+        .insert({
+          username: 'admin',
+          password_hash: passwordHash,
+          email: 'admin@oneclaw.shop',
+          role: 'super_admin',
+          is_active: true,
+        });
+      
+      if (createAdminError) {
+        results.errors.push(`创建管理员失败: ${createAdminError.message}`);
+      } else {
+        results.admin_created = true;
+        console.log('  ✅ 管理员账号已创建: admin / admin123');
+      }
+    } else {
+      console.log('👤 管理员账号已存在，跳过创建');
+    }
 
     // 1. 初始化分类
     console.log('📁 初始化分类...');
@@ -388,6 +420,11 @@ export async function GET() {
       .from('tutorials')
       .select('*', { count: 'exact', head: true });
 
+    const { data: adminUser } = await client
+      .from('admin_users')
+      .select('id, username')
+      .maybeSingle();
+
     const needsInit = (categoryCount || 0) < 14 || (toolCount || 0) < 50;
 
     return NextResponse.json({
@@ -398,6 +435,7 @@ export async function GET() {
         tools: toolCount || 0,
         prompts: promptCount || 0,
         tutorials: tutorialCount || 0,
+        admin_exists: !!adminUser,
       },
       needsInit,
       message: needsInit

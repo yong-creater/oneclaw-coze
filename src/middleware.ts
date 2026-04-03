@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify, SignJWT } from 'jose';
+import { jwtVerify } from 'jose';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'oneclaw-admin-secret-key-2024';
 
@@ -13,13 +13,17 @@ const PROTECTED_PATHS = [
   '/api/admin/orders',
   '/api/admin/ads',
   '/api/admin/init-data',
-  '/api/admin/init-production',
   '/api/admin/health-check',
 ];
 
 // 只读路径（GET请求不需要认证）
 const READ_ONLY_PATHS = [
   '/api/admin/stats',
+];
+
+// 首次初始化路径（无管理员时允许访问）
+const FIRST_TIME_INIT_PATHS = [
+  '/api/admin/init-production',
 ];
 
 // 验证JWT Token（Edge Runtime兼容，使用jose）
@@ -43,6 +47,14 @@ function getTokenFromHeader(authHeader: string | null): string | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // 检查是否是首次初始化路径
+  const isFirstTimeInit = FIRST_TIME_INIT_PATHS.some(path => pathname.startsWith(path));
+  
+  if (isFirstTimeInit) {
+    // 对于首次初始化路径，允许通过（在route中检查是否有管理员）
+    return NextResponse.next();
+  }
   
   // 检查是否是受保护的路径
   const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path));
