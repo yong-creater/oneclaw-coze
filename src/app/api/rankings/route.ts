@@ -88,31 +88,45 @@ export async function GET(request: NextRequest) {
         tools = [];
     }
 
-    // 为每个工具添加评分统计
-    const toolsWithRatings = await Promise.all(
-      tools.map(async (tool) => {
-        const { data: ratings } = await client
-          .from('user_ratings')
-          .select('effect_score, usability_score, quota_score, stability_score')
-          .eq('tool_id', tool.id);
+    // 批量获取所有工具的评分统计（优化：单次查询）
+    const toolIds = tools.map(t => t.id);
+    let ratingsMap: Record<number, { count: number; avg: number }> = {};
+    
+    if (toolIds.length > 0) {
+      const { data: allRatings } = await client
+        .from('user_ratings')
+        .select('tool_id, effect_score, usability_score, quota_score, stability_score')
+        .in('tool_id', toolIds);
 
-        let avgRating = 0;
-        if (ratings && ratings.length > 0) {
-          const total = ratings.reduce((sum, r) => {
-            const avg = (r.effect_score + r.usability_score + r.quota_score + r.stability_score) / 4;
-            return sum + avg;
-          }, 0);
-          avgRating = Math.round((total / ratings.length) * 10) / 10;
-        }
+      if (allRatings) {
+        // 按工具ID分组计算平均分
+        const grouped = allRatings.reduce((acc, r) => {
+          if (!acc[r.tool_id]) {
+            acc[r.tool_id] = { total: 0, count: 0 };
+          }
+          const avg = (r.effect_score + r.usability_score + r.quota_score + r.stability_score) / 4;
+          acc[r.tool_id].total += avg;
+          acc[r.tool_id].count += 1;
+          return acc;
+        }, {} as Record<number, { total: number; count: number }>);
 
-        return {
-          ...tool,
-          rating_count: ratings?.length || 0,
-          avg_rating: avgRating
-        };
-      })
-    );
+        ratingsMap = Object.fromEntries(
+          Object.entries(grouped).map(([id, data]) => [
+            Number(id),
+            { count: data.count, avg: Math.round((data.total / data.count) * 10) / 10 }
+          ])
+        );
+      }
+    }
 
+    // 合并评分数据
+    const toolsWithRatings = tools.map(tool => ({
+      ...tool,
+      rating_count: ratingsMap[tool.id]?.count || 0,
+      avg_rating: ratingsMap[tool.id]?.avg || 0
+    }));
+
+    // 榜单数据可以缓存较长时间
     return NextResponse.json({
       success: true,
       data: toolsWithRatings,
@@ -121,6 +135,8 @@ export async function GET(request: NextRequest) {
         scene,
         limit
       }
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' }
     });
   } catch (error) {
     console.error('获取榜单失败:', error);

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 获取分类列表
+// 获取分类列表（分类数据变化少，可以长时间缓存）
 export async function GET() {
   try {
     const client = getSupabaseClient();
@@ -16,6 +16,8 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600' }
     });
   } catch (error) {
     console.error('获取分类失败:', error);

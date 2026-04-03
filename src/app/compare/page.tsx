@@ -165,6 +165,7 @@ function CompareContent() {
   const [loading, setLoading] = useState(true);
 
   const toolIds = searchParams.get('ids')?.split(',').map(Number) || [];
+  const toolIdsKey = toolIds.join(',');
 
   useEffect(() => {
     if (toolIds.length === 0) {
@@ -175,45 +176,57 @@ function CompareContent() {
     const fetchData = async () => {
       setLoading(true);
       
-      // 获取工具详情
-      const toolsData: ToolDetail[] = [];
-      const ratingsData: Record<number, RatingStats> = {};
-      const reviewsData: Record<number, Review[]> = {};
-
-      for (const id of toolIds) {
-        try {
-          const res = await fetch(`/api/tools/${id}`);
-          const data = await res.json();
-          if (data.success) {
-            toolsData.push(data.data);
-
-            // 获取评分
-            const ratingRes = await fetch(`/api/ratings?tool_id=${id}`);
-            const ratingData = await ratingRes.json();
-            if (ratingData.success) {
-              ratingsData[id] = ratingData.data;
-            }
-
-            // 获取评论
-            const reviewsRes = await fetch(`/api/reviews?tool_id=${id}&limit=3`);
-            const reviewsResData = await reviewsRes.json();
-            if (reviewsResData.success) {
-              reviewsData[id] = reviewsResData.data;
-            }
+      try {
+        // 并行获取所有工具详情
+        const toolPromises = toolIds.map(id => 
+          fetch(`/api/tools/${id}`).then(res => res.json())
+        );
+        
+        const toolResults = await Promise.all(toolPromises);
+        
+        // 过滤有效的工具
+        const toolsData = toolResults
+          .filter(r => r.success)
+          .map(r => r.data);
+        
+        // 并行获取所有评分和评论
+        const [ratingResults, reviewsResults] = await Promise.all([
+          Promise.all(toolIds.map(id => 
+            fetch(`/api/ratings?tool_id=${id}`).then(res => res.json())
+          )),
+          Promise.all(toolIds.map(id => 
+            fetch(`/api/reviews?tool_id=${id}&limit=3`).then(res => res.json())
+          ))
+        ]);
+        
+        // 组装评分数据
+        const ratingsData: Record<number, RatingStats> = {};
+        toolIds.forEach((id, index) => {
+          if (ratingResults[index]?.success) {
+            ratingsData[id] = ratingResults[index].data;
           }
-        } catch (error) {
-          console.error('获取工具失败:', error);
-        }
-      }
+        });
+        
+        // 组装评论数据
+        const reviewsData: Record<number, Review[]> = {};
+        toolIds.forEach((id, index) => {
+          if (reviewsResults[index]?.success) {
+            reviewsData[id] = reviewsResults[index].data;
+          }
+        });
 
-      setTools(toolsData);
-      setRatings(ratingsData);
-      setReviews(reviewsData);
-      setLoading(false);
+        setTools(toolsData);
+        setRatings(ratingsData);
+        setReviews(reviewsData);
+      } catch (error) {
+        console.error('获取工具失败:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchData();
-  }, [toolIds.join(','), router]);
+  }, [toolIdsKey, router]);
 
   if (loading) {
     return (

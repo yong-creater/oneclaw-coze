@@ -18,24 +18,15 @@ export async function GET(request: NextRequest) {
     const feature_tags = searchParams.get('features')?.split(',').filter(Boolean) || [];
     const search = searchParams.get('search');
     
-    // 构建基础查询 - 只查询上架的工具
+    // 构建基础查询 - 使用JOIN直接关联分类，避免额外查询
     let query = client
       .from('tools')
-      .select('*, categories(name, slug)', { count: 'exact' })
+      .select('*, categories!inner(id, name, slug)', { count: 'exact' })
       .eq('is_active', true);
     
-    // 分类筛选
+    // 分类筛选 - 直接用关联表的slug筛选
     if (category_slug && category_slug !== 'all') {
-      // 先获取分类ID
-      const { data: category } = await client
-        .from('categories')
-        .select('id')
-        .eq('slug', category_slug)
-        .maybeSingle();
-      
-      if (category) {
-        query = query.eq('category_id', category.id);
-      }
+      query = query.eq('categories.slug', category_slug);
     }
     
     // 免费类型筛选
@@ -63,6 +54,11 @@ export async function GET(request: NextRequest) {
     
     if (error) throw new Error(error.message);
     
+    // 添加缓存头，静态数据缓存更长时间
+    const cacheControl = search || free_types.length || feature_tags.length
+      ? 'public, max-age=30, stale-while-revalidate=60' // 有筛选参数，短缓存
+      : 'public, max-age=60, stale-while-revalidate=300'; // 无筛选，长缓存
+    
     return NextResponse.json({
       success: true,
       data,
@@ -72,6 +68,8 @@ export async function GET(request: NextRequest) {
         total: count || 0,
         total_pages: Math.ceil((count || 0) / limit),
       }
+    }, {
+      headers: { 'Cache-Control': cacheControl }
     });
   } catch (error) {
     console.error('获取工具列表失败:', error);
