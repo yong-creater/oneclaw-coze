@@ -1,22 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Wrench, 
   FolderTree, 
   Tags, 
   MessageSquare,
-  Star,
   Menu,
   X,
   ExternalLink,
   Megaphone,
   Users,
-  CreditCard
+  CreditCard,
+  LogOut,
+  Loader2
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const navigation = [
   { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
@@ -35,7 +37,62 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [user, setUser] = useState<{ username: string } | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  // 检查登录状态
+  useEffect(() => {
+    // 登录页面不需要检查
+    if (pathname === '/admin/login') {
+      setChecking(false);
+      return;
+    }
+
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/admin/auth');
+        const data = await res.json();
+        
+        if (data.success && data.user) {
+          setUser(data.user);
+        } else {
+          router.push('/admin/login');
+        }
+      } catch (error) {
+        router.push('/admin/login');
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [pathname, router]);
+
+  // 登出
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' });
+      router.push('/admin/login');
+    } catch (error) {
+      console.error('登出失败:', error);
+    }
+  };
+
+  // 登录页面不显示布局
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  // 检查中显示加载
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -123,8 +180,17 @@ export default function AdminLayout({
             <h1 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
               {navigation.find(n => n.href === pathname || (n.href !== '/admin' && pathname.startsWith(n.href)))?.name || '管理后台'}
             </h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500">管理员</span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-500">{user?.username || '管理员'}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-slate-600 hover:text-red-600 dark:text-slate-300"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                退出
+              </Button>
             </div>
           </div>
         </header>

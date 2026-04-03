@@ -35,6 +35,7 @@
 - **UI 组件**: shadcn/ui (基于 Radix UI)
 - **Styling**: Tailwind CSS 4
 - **Icons**: Lucide React
+- **认证**: jose (JWT), bcryptjs (密码加密)
 
 ## 目录结构
 
@@ -96,6 +97,8 @@
 | `tags` | 标签 | id, name, type |
 | `user_favorites` | 用户收藏 | id, user_id, tool_id |
 | `user_ratings` | 用户评分 | id, user_id, tool_id, effect_score, usability_score |
+| `admin_users` | 管理员用户 | id, username, password_hash, email, role, is_active |
+| `admin_sessions` | 管理员会话 | id, user_id, token, expires_at |
 
 ### 工具字段说明
 
