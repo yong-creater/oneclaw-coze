@@ -7,7 +7,6 @@ interface AnimatedLobsterProps {
   className?: string;
 }
 
-// 龙虾助手风格的互动语录
 const INTERACTION_MESSAGES = [
   { text: '正在帮你找好工具~', emoji: '🔍' },
   { text: '发现了一个宝藏工具！', emoji: '✨' },
@@ -65,170 +64,85 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           bg-white dark:bg-slate-800 border-l border-t border-slate-200 dark:border-slate-700 -rotate-45" />
       </div>
       
-      {/* SVG龙虾 - 和原图一模一样 */}
-      <svg viewBox="0 0 200 200" className={`w-full h-full ${isCaught ? 'animate-bounce' : ''}`}>
+      {/* SVG龙虾 */}
+      <svg viewBox="0 0 120 120" className={`w-full h-full ${isCaught ? 'animate-bounce' : ''}`}>
         <defs>
-          {/* 身体渐变 - 鲜亮的红色 */}
-          <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FF6B4A" />
-            <stop offset="50%" stopColor="#E85A3C" />
-            <stop offset="100%" stopColor="#C94A2E" />
+          <linearGradient id="bodyColor" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FF6347" />
+            <stop offset="100%" stopColor="#DC3545" />
           </linearGradient>
-          {/* 钳子渐变 - 略浅的橙色 */}
-          <linearGradient id="clawGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FF8C5A" />
-            <stop offset="100%" stopColor="#E86A3C" />
-          </linearGradient>
-          {/* 键盘渐变 */}
-          <linearGradient id="keyboardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#374151" />
-            <stop offset="100%" stopColor="#1f2937" />
-          </linearGradient>
-          {/* 高光渐变 */}
-          <linearGradient id="highlightGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#FFB08A" />
-            <stop offset="100%" stopColor="#FF8C5A" />
+          <linearGradient id="clawColor" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FF7F50" />
+            <stop offset="100%" stopColor="#E85A3C" />
           </linearGradient>
         </defs>
         
-        {/* 身体 - 静止不动 */}
-        <g className="lobster-body">
-          {/* 尾部 */}
-          <ellipse cx="100" cy="155" rx="25" ry="18" fill="url(#bodyGrad)" />
-          <ellipse cx="100" cy="168" rx="15" ry="10" fill="url(#clawGrad)" />
-          <ellipse cx="100" cy="178" rx="8" ry="6" fill="url(#clawGrad)" />
+        {/* 笔记本电脑 */}
+        <rect x="25" y="70" width="70" height="40" rx="3" fill="#2d2d2d" />
+        <rect x="30" y="75" width="60" height="28" rx="2" fill="#1a1a1a" />
+        {/* 屏幕内容 */}
+        <rect x="35" y="80" width="30" height="2" rx="1" fill="#4ade80" opacity="0.7" />
+        <rect x="35" y="85" width="45" height="2" rx="1" fill="#60a5fa" opacity="0.7" />
+        <rect x="35" y="90" width="25" height="2" rx="1" fill="#f472b6" opacity="0.7" />
+        <rect x="35" y="95" width="40" height="2" rx="1" fill="#fbbf24" opacity="0.7" />
+        {/* 键盘 */}
+        <rect x="20" y="105" width="80" height="10" rx="2" fill="#2d2d2d" />
+        
+        {/* 龙虾身体 */}
+        <g className="body">
+          {/* 尾巴 */}
+          <ellipse cx="60" cy="62" rx="18" ry="12" fill="url(#bodyColor)" />
           
-          {/* 身体主体 - 分节 */}
-          <ellipse cx="100" cy="130" rx="35" ry="22" fill="url(#bodyGrad)" />
-          <ellipse cx="100" cy="110" rx="38" ry="25" fill="url(#bodyGrad)" />
-          <ellipse cx="100" cy="90" rx="35" ry="22" fill="url(#bodyGrad)" />
-          
-          {/* 身体高光 */}
-          <ellipse cx="90" cy="85" rx="15" ry="8" fill="#FFB08A" opacity="0.4" />
-          <ellipse cx="88" cy="105" rx="12" ry="6" fill="#FFB08A" opacity="0.3" />
-          
-          {/* 身体纹理线 */}
-          <path d="M65 90 Q100 95 135 90" stroke="#C94A2E" strokeWidth="1.5" fill="none" opacity="0.4" />
-          <path d="M62 110 Q100 115 138 110" stroke="#C94A2E" strokeWidth="1.5" fill="none" opacity="0.4" />
-          <path d="M65 130 Q100 135 135 130" stroke="#C94A2E" strokeWidth="1.5" fill="none" opacity="0.4" />
+          {/* 身体 */}
+          <ellipse cx="60" cy="48" rx="25" ry="18" fill="url(#bodyColor)" />
+          <ellipse cx="60" cy="35" rx="22" ry="15" fill="url(#bodyColor)" />
           
           {/* 头部 */}
-          <ellipse cx="100" cy="68" rx="32" ry="24" fill="url(#bodyGrad)" />
-          <ellipse cx="92" cy="60" rx="12" ry="7" fill="#FFB08A" opacity="0.35" />
+          <ellipse cx="60" cy="22" rx="20" ry="14" fill="url(#bodyColor)" />
+          
+          {/* 高光 */}
+          <ellipse cx="52" cy="18" rx="8" ry="5" fill="#FFB08A" opacity="0.35" />
           
           {/* 触须 */}
-          <path d="M75 50 Q60 35 55 20" stroke="#8B4513" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <circle cx="55" cy="20" r="3" fill="#8B4513" />
-          <path d="M125 50 Q140 35 145 20" stroke="#8B4513" strokeWidth="3" fill="none" strokeLinecap="round" />
-          <circle cx="145" cy="20" r="3" fill="#8B4513" />
+          <path d="M45 10 Q38 5 35 2" stroke="#8B4513" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <circle cx="35" cy="2" r="2" fill="#8B4513" />
+          <path d="M75 10 Q82 5 85 2" stroke="#8B4513" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <circle cx="85" cy="2" r="2" fill="#8B4513" />
           
-          {/* 眼睛 - 没有墨镜，清晰的黑色大眼睛 */}
-          <g className="eyes">
-            {/* 左眼 */}
-            <circle cx="82" cy="62" r="10" fill="#1a1a2e" />
-            <circle cx="79" cy="59" r="3" fill="#7dd3fc" />
-            <circle cx="85" cy="65" r="2" fill="white" opacity="0.6" />
-            
-            {/* 右眼 */}
-            <circle cx="118" cy="62" r="10" fill="#1a1a2e" />
-            <circle cx="115" cy="59" r="3" fill="#7dd3fc" />
-            <circle cx="121" cy="65" r="2" fill="white" opacity="0.6" />
-          </g>
+          {/* 眼睛 */}
+          <circle cx="50" cy="20" r="6" fill="#1a1a1a" />
+          <circle cx="48" cy="18" r="2" fill="#7dd3fc" />
+          <circle cx="70" cy="20" r="6" fill="#1a1a1a" />
+          <circle cx="68" cy="18" r="2" fill="#7dd3fc" />
           
           {/* 腮红 */}
-          <ellipse cx="68" cy="75" rx="8" ry="4" fill="#FFB5B5" opacity="0.5" />
-          <ellipse cx="132" cy="75" rx="8" ry="4" fill="#FFB5B5" opacity="0.5" />
-          
-          {/* 微笑嘴巴 */}
-          <path d="M90 82 Q100 90 110 82" stroke="#C94A2E" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+          <ellipse cx="42" cy="28" rx="5" ry="3" fill="#FFB5B5" opacity="0.5" />
+          <ellipse cx="78" cy="28" rx="5" ry="3" fill="#FFB5B5" opacity="0.5" />
         </g>
         
-        {/* 小腿 */}
-        <g className="legs">
-          <rect x="70" y="140" width="6" height="15" rx="3" fill="url(#clawGrad)" />
-          <rect x="82" y="142" width="6" height="16" rx="3" fill="url(#clawGrad)" />
-          <rect x="112" y="142" width="6" height="16" rx="3" fill="url(#clawGrad)" />
-          <rect x="124" y="140" width="6" height="15" rx="3" fill="url(#clawGrad)" />
-        </g>
-        
-        {/* 笔记本电脑 */}
-        <g className="laptop">
-          {/* 屏幕 */}
-          <rect x="55" y="115" width="90" height="55" rx="4" fill="#1f2937" stroke="#374151" strokeWidth="2" />
-          <rect x="60" y="120" width="80" height="40" rx="2" fill="#111827" />
-          
-          {/* 屏幕内容 - 简单的代码行 */}
-          <rect x="65" y="128" width="40" height="3" rx="1" fill="#4ade80" opacity="0.6" />
-          <rect x="65" y="135" width="55" height="3" rx="1" fill="#60a5fa" opacity="0.6" />
-          <rect x="65" y="142" width="35" height="3" rx="1" fill="#f472b6" opacity="0.6" />
-          <rect x="65" y="149" width="50" height="3" rx="1" fill="#fbbf24" opacity="0.6" />
-          
-          {/* 键盘底座 */}
-          <rect x="50" y="170" width="100" height="12" rx="2" fill="#1f2937" stroke="#374151" strokeWidth="1" />
-          
-          {/* 键盘按键 */}
-          <g className="keys" opacity="0.5">
-            <rect x="55" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="65" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="75" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="85" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="95" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="105" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="115" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="125" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-            <rect x="135" y="173" width="8" height="5" rx="0.5" fill="#6b7280" />
-          </g>
-        </g>
-        
-        {/* 左钳子 - 敲键盘动画 */}
-        <g className="claw-left" style={{ transformOrigin: '50px 100px' }}>
-          {/* 钳子手臂 */}
-          <ellipse cx="40" cy="95" rx="18" ry="12" fill="url(#clawGrad)" />
-          <ellipse cx="35" cy="92" rx="6" ry="4" fill="#FFB08A" opacity="0.4" />
-          {/* 钳子头部 */}
-          <ellipse cx="35" cy="120" rx="14" ry="10" fill="url(#clawGrad)" className="claw-tip-left">
-            <animate 
-              attributeName="cy" 
-              values="120;115;120;115;120" 
-              dur="0.5s" 
-              repeatCount="indefinite"
-              calcMode="spline"
-              keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-            />
+        {/* 左钳子 - 敲键盘 */}
+        <g style={{ transformOrigin: '25px 40px' }}>
+          <ellipse cx="15" cy="38" rx="12" ry="8" fill="url(#clawColor)" />
+          <ellipse cx="10" cy="55" rx="10" ry="7" fill="url(#clawColor)">
+            <animate attributeName="cy" values="55;52;55;52;55" dur="0.4s" repeatCount="indefinite" />
           </ellipse>
-          <ellipse cx="32" cy="118" rx="5" ry="3" fill="#FFB08A" opacity="0.4" />
         </g>
         
-        {/* 右钳子 - 敲键盘动画（错开节奏） */}
-        <g className="claw-right" style={{ transformOrigin: '150px 100px' }}>
-          {/* 钳子手臂 */}
-          <ellipse cx="160" cy="95" rx="18" ry="12" fill="url(#clawGrad)" />
-          <ellipse cx="165" cy="92" rx="6" ry="4" fill="#FFB08A" opacity="0.4" />
-          {/* 钳子头部 */}
-          <ellipse cx="165" cy="120" rx="14" ry="10" fill="url(#clawGrad)" className="claw-tip-right">
-            <animate 
-              attributeName="cy" 
-              values="120;120;115;120;115" 
-              dur="0.5s" 
-              repeatCount="indefinite"
-              calcMode="spline"
-              keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-            />
+        {/* 右钳子 - 敲键盘 */}
+        <g style={{ transformOrigin: '95px 40px' }}>
+          <ellipse cx="105" cy="38" rx="12" ry="8" fill="url(#clawColor)" />
+          <ellipse cx="110" cy="55" rx="10" ry="7" fill="url(#clawColor)">
+            <animate attributeName="cy" values="55;55;52;55;52" dur="0.4s" repeatCount="indefinite" />
           </ellipse>
-          <ellipse cx="168" cy="118" rx="5" ry="3" fill="#FFB08A" opacity="0.4" />
         </g>
         
         {/* 敲击光效 */}
-        <g className="tap-effects">
-          <circle cx="70" cy="175" r="4" fill="#FF6B4A" opacity="0.6">
-            <animate attributeName="opacity" values="0.6;0.9;0.6" dur="0.25s" repeatCount="indefinite" begin="0s" />
-            <animate attributeName="r" values="4;6;4" dur="0.25s" repeatCount="indefinite" begin="0s" />
-          </circle>
-          <circle cx="130" cy="175" r="4" fill="#FF6B4A" opacity="0.6">
-            <animate attributeName="opacity" values="0.6;0.9;0.6" dur="0.25s" repeatCount="indefinite" begin="0.25s" />
-            <animate attributeName="r" values="4;6;4" dur="0.25s" repeatCount="indefinite" begin="0.25s" />
-          </circle>
-        </g>
+        <circle cx="20" cy="108" r="3" fill="#FF6347" opacity="0.7">
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="0.2s" repeatCount="indefinite" />
+        </circle>
+        <circle cx="100" cy="108" r="3" fill="#FF6347" opacity="0.7">
+          <animate attributeName="opacity" values="0.7;1;0.7" dur="0.2s" repeatCount="indefinite" begin="0.2s" />
+        </circle>
       </svg>
     </div>
   );
