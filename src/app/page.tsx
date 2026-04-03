@@ -17,10 +17,11 @@ import {
   ExternalLink, Video, Search, Film, Wand2, Palette, Music, 
   Mic, Users, ChevronRight, Sparkles, Star, X, Check,
   ChevronLeft, ChevronRight as ChevronRightIcon, Heart, MessageSquare,
-  ThumbsUp, History, User, Flame, Gift, Trophy, ArrowLeftRight
+  ThumbsUp, History, User, Flame, Gift, Trophy, ArrowLeftRight, Crown
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
+import CompareBar, { getCompareTools, saveCompareTools, type CompareTool } from '@/components/CompareBar';
 import Link from 'next/link';
 
 // 类型定义
@@ -169,10 +170,84 @@ export default function HomePage() {
   const [newReview, setNewReview] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // 对比状态
+  const [compareTools, setCompareTools] = useState<CompareTool[]>([]);
+  const [isMember, setIsMember] = useState(false);
+  const maxCompare = isMember ? 3 : 2;
+
   // 初始化用户ID
   useEffect(() => {
     setUserId(getUserId());
+    // 加载对比工具
+    setCompareTools(getCompareTools());
+    // 监听对比变化
+    const handleCompareChange = () => setCompareTools(getCompareTools());
+    window.addEventListener('compareToolsChanged', handleCompareChange);
+    return () => window.removeEventListener('compareToolsChanged', handleCompareChange);
   }, []);
+
+  // 切换对比
+  const toggleCompare = (tool: Tool, e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const isSelected = compareTools.some(t => t.id === tool.id);
+    
+    if (isSelected) {
+      // 移除
+      const newTools = compareTools.filter(t => t.id !== tool.id);
+      saveCompareTools(newTools);
+      setCompareTools(newTools);
+    } else {
+      // 添加
+      if (compareTools.length >= maxCompare) {
+        return; // 已达上限
+      }
+      if (compareTools.length > 0 && compareTools[0].category_id !== tool.category_id) {
+        return; // 不同分类
+      }
+      
+      const newTool: CompareTool = {
+        id: tool.id,
+        name: tool.name,
+        logo: tool.logo,
+        category_id: tool.category_id,
+        category_name: tool.categories?.name || '',
+      };
+      
+      const newTools = [...compareTools, newTool];
+      saveCompareTools(newTools);
+      setCompareTools(newTools);
+    }
+  };
+
+  // 检查是否可对比
+  const canCompare = (tool: Tool): { canAdd: boolean; reason: string } => {
+    const isSelected = compareTools.some(t => t.id === tool.id);
+    if (isSelected) return { canAdd: true, reason: '' };
+    
+    if (compareTools.length >= maxCompare) {
+      return { canAdd: false, reason: '已达上限' };
+    }
+    if (compareTools.length > 0 && compareTools[0].category_id !== tool.category_id) {
+      return { canAdd: false, reason: '需同分类' };
+    }
+    
+    return { canAdd: true, reason: '' };
+  };
+
+  // 从对比列表移除
+  const removeFromCompare = (toolId: number) => {
+    const newTools = compareTools.filter(t => t.id !== toolId);
+    saveCompareTools(newTools);
+    setCompareTools(newTools);
+  };
+
+  // 清空对比列表
+  const clearCompare = () => {
+    saveCompareTools([]);
+    setCompareTools([]);
+  };
 
   // 获取分类
   const fetchCategories = async () => {
@@ -676,53 +751,77 @@ export default function HomePage() {
         ) : tools.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {tools.map(tool => (
-                <Card
-                  key={tool.id}
-                  className="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-lg transition-all cursor-pointer"
-                  onClick={() => openDetail(tool)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      {/* Logo */}
-                      <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        <img
-                          src={tool.logo}
-                          alt={tool.name}
-                          className="w-10 h-10 object-contain"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
-                          }}
-                        />
-                      </div>
+              {tools.map(tool => {
+                const isCompareSelected = compareTools.some(t => t.id === tool.id);
+                const { canAdd, reason } = canCompare(tool);
+                
+                return (
+                  <Card
+                    key={tool.id}
+                    className="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-lg transition-all cursor-pointer"
+                    onClick={() => openDetail(tool)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        {/* Logo */}
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <img
+                            src={tool.logo}
+                            alt={tool.name}
+                            className="w-10 h-10 object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
+                            }}
+                          />
+                        </div>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
-                            {tool.name}
-                          </h3>
-                          {tool.is_featured && (
-                            <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">
-                          {tool.highlight}
-                        </p>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${FREE_TYPE_COLORS[tool.free_type]}`}>
-                            {tool.free_type}
-                          </span>
-                          {tool.feature_tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                              {tag}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
+                                {tool.name}
+                              </h3>
+                              {tool.is_featured && (
+                                <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
+                              )}
+                            </div>
+                            {/* 对比按钮 */}
+                            <Button
+                              variant={isCompareSelected ? 'default' : 'outline'}
+                              size="sm"
+                              className={`h-7 text-xs gap-1 flex-shrink-0 ${
+                                isCompareSelected 
+                                  ? 'bg-orange-500 hover:bg-orange-600 text-white' 
+                                  : !canAdd && !isCompareSelected
+                                    ? 'opacity-50 cursor-not-allowed'
+                                    : ''
+                              }`}
+                              disabled={!canAdd && !isCompareSelected}
+                              onClick={(e) => toggleCompare(tool, e)}
+                            >
+                              <ArrowLeftRight className="w-3 h-3" />
+                              {isCompareSelected ? '已选' : reason || '对比'}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">
+                            {tool.highlight}
+                          </p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${FREE_TYPE_COLORS[tool.free_type]}`}>
+                              {tool.free_type}
                             </span>
-                          ))}
+                            {tool.feature_tags.slice(0, 2).map(tag => (
+                              <span key={tag} className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
 
             {/* 分页 */}
@@ -815,6 +914,9 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* 对比栏 */}
+      <CompareBar />
 
       {/* 工具详情弹窗 */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
