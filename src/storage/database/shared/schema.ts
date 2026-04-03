@@ -62,6 +62,10 @@ export const tools = pgTable("tools", {
   is_featured: boolean("is_featured").notNull().default(false), // 首页推荐
   is_active: boolean("is_active").notNull().default(true), // 是否上架
   
+  // 付费收录（P2功能）
+  sponsor_type: varchar("sponsor_type", { length: 20 }), // basic, premium, diamond
+  sponsor_expires_at: timestamp("sponsor_expires_at", { withTimezone: true }), // 推广到期时间
+  
   // 核心优势与局限性
   advantages: jsonb("advantages").$type<string[]>().notNull().default([]), // 核心优势（最多3条）
   limitations: jsonb("limitations").$type<string[]>().notNull().default([]), // 局限性（最多2条）
@@ -162,4 +166,80 @@ export const userReviews = pgTable("user_reviews", {
   index("user_reviews_user_id_idx").on(table.user_id),
   index("user_reviews_tool_id_idx").on(table.tool_id),
   index("user_reviews_status_idx").on(table.status),
+]);
+
+// 教程表（P1功能）
+export const tutorials = pgTable("tutorials", {
+  id: serial().primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  content: text("content").notNull(),
+  tool_id: integer("tool_id").references(() => tools.id, { onDelete: "set null" }),
+  category: varchar("category", { length: 50 }).notNull(), // 入门教程、进阶技巧、案例分享
+  difficulty: varchar("difficulty", { length: 20 }).notNull(), // 初级、中级、高级
+  cover_image: varchar("cover_image", { length: 500 }),
+  author: varchar("author", { length: 100 }),
+  views: integer("views").notNull().default(0),
+  likes: integer("likes").notNull().default(0),
+  is_featured: boolean("is_featured").notNull().default(false),
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, published
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("tutorials_tool_id_idx").on(table.tool_id),
+  index("tutorials_category_idx").on(table.category),
+  index("tutorials_status_idx").on(table.status),
+]);
+
+// Prompt模板表（P1功能）
+export const prompts = pgTable("prompts", {
+  id: serial().primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  content: text("content").notNull(),
+  tool_id: integer("tool_id").references(() => tools.id, { onDelete: "set null" }),
+  category: varchar("category", { length: 50 }).notNull(), // 角色扮演、场景描述、风格迁移
+  tags: jsonb("tags").$type<string[]>().notNull().default([]),
+  author: varchar("author", { length: 100 }),
+  uses: integer("uses").notNull().default(0), // 使用次数
+  likes: integer("likes").notNull().default(0),
+  is_featured: boolean("is_featured").notNull().default(false),
+  status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, published
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("prompts_tool_id_idx").on(table.tool_id),
+  index("prompts_category_idx").on(table.category),
+  index("prompts_status_idx").on(table.status),
+]);
+
+// 会员表（P2功能）
+export const members = pgTable("members", {
+  id: serial().primaryKey(),
+  user_id: varchar("user_id", { length: 100 }).notNull().unique(),
+  level: varchar("level", { length: 20 }).notNull().default("free"), // free, pro, enterprise
+  expires_at: timestamp("expires_at", { withTimezone: true }),
+  points: integer("points").notNull().default(0), // 积分
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("members_user_id_idx").on(table.user_id),
+  index("members_level_idx").on(table.level),
+]);
+
+// 广告位表（P2功能）
+export const advertisements = pgTable("advertisements", {
+  id: serial().primaryKey(),
+  title: varchar("title", { length: 200 }).notNull(),
+  image_url: varchar("image_url", { length: 500 }).notNull(),
+  link_url: varchar("link_url", { length: 500 }).notNull(),
+  position: varchar("position", { length: 50 }).notNull(), // home_banner, sidebar, tool_detail
+  priority: integer("priority").notNull().default(0), // 权重
+  clicks: integer("clicks").notNull().default(0),
+  impressions: integer("impressions").notNull().default(0),
+  starts_at: timestamp("starts_at", { withTimezone: true }).notNull(),
+  ends_at: timestamp("ends_at", { withTimezone: true }).notNull(),
+  is_active: boolean("is_active").notNull().default(true),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("advertisements_position_idx").on(table.position),
+  index("advertisements_is_active_idx").on(table.is_active),
 ]);
