@@ -28,17 +28,21 @@
 │   │   ├── page.tsx        # 前台首页
 │   │   ├── layout.tsx      # 根布局
 │   │   ├── globals.css     # 全局样式
+│   │   ├── tools/[id]/     # 工具详情页(SEO优化)
 │   │   ├── admin/          # 后台管理系统
 │   │   │   ├── layout.tsx  # 后台布局
 │   │   │   ├── page.tsx    # 仪表盘
-│   │   │   └── tools/      # 工具管理
+│   │   │   ├── tools/      # 工具管理
+│   │   │   ├── categories/ # 分类管理
+│   │   │   ├── tags/       # 标签管理
+│   │   │   └── reviews/    # 评论审核
 │   │   ├── workspace/      # 用户工作台(P1)
 │   │   ├── rankings/       # 榜单中心(P1)
 │   │   ├── resources/      # 资源中心(P1)
 │   │   ├── compare/        # 工具对比(P2)
 │   │   ├── dashboard/      # 数据看板(P3)
 │   │   └── api/            # API路由
-│   │       ├── tools/      # 前台工具API
+│   │       ├── tools/      # 前台工具API (含[id]详情)
 │   │       ├── categories/ # 分类API
 │   │       ├── tags/       # 标签API
 │   │       ├── ratings/    # 评分API
@@ -51,6 +55,7 @@
 │   │       ├── compare/    # 对比API
 │   │       ├── members/    # 会员API
 │   │       ├── ads/        # 广告API
+│   │       ├── dashboard/  # 数据看板API
 │   │       └── admin/      # 后台管理API
 │   ├── components/ui/      # Shadcn UI 组件库
 │   ├── data/               # 静态数据（旧）

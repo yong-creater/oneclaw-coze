@@ -1068,6 +1068,11 @@ export default function HomePage() {
                     <ExternalLink className="w-4 h-4 mr-2" />
                     官网直达
                   </Button>
+                  <Link href={`/tools/${selectedTool.id}`} target="_blank">
+                    <Button variant="outline">
+                      查看详情页
+                    </Button>
+                  </Link>
                   <Button variant="outline" onClick={() => setDetailOpen(false)}>
                     关闭
                   </Button>

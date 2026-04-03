@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-  Video, TrendingUp, Users, Star, Eye,
+  Video, TrendingUp, Users, Star, Eye, MessageSquare, Heart,
   BarChart3, PieChart, Activity
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
@@ -16,39 +16,54 @@ interface Stats {
   total_views: number;
   total_clicks: number;
   total_ratings: number;
+  total_reviews: number;
+  total_favorites: number;
   categories: { name: string; count: number }[];
-  top_tools: { name: string; clicks: number }[];
+  top_tools: { name: string; click_count: number }[];
+  free_type_distribution: { name: string; count: number }[];
   recent_activity: { date: string; count: number }[];
 }
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
-    total_tools: 117,
-    total_views: 125680,
-    total_clicks: 45320,
-    total_ratings: 3250,
-    categories: [
-      { name: '视频生成', count: 42 },
-      { name: '数字人', count: 25 },
-      { name: '视频编辑', count: 20 },
-      { name: 'AI配音', count: 18 },
-      { name: '动漫创作', count: 12 },
-    ],
-    top_tools: [
-      { name: '可灵AI', clicks: 8520 },
-      { name: 'Runway', clicks: 7340 },
-      { name: 'Pika', clicks: 6280 },
-      { name: 'HeyGen', clicks: 5420 },
-      { name: 'Sora', clicks: 4890 },
-    ],
+    total_tools: 0,
+    total_views: 0,
+    total_clicks: 0,
+    total_ratings: 0,
+    total_reviews: 0,
+    total_favorites: 0,
+    categories: [],
+    top_tools: [],
+    free_type_distribution: [],
     recent_activity: []
   });
 
   useEffect(() => {
-    // 模拟加载
-    setTimeout(() => setLoading(false), 500);
+    fetchDashboardData();
   }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const res = await fetch('/api/dashboard');
+      const data = await res.json();
+      if (data.success) {
+        setStats(data.data);
+      }
+    } catch (error) {
+      console.error('获取数据失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -185,8 +200,8 @@ export default function DashboardPage() {
               </h3>
               <div className="space-y-3">
                 {stats.top_tools.map((tool, index) => {
-                  const maxClicks = stats.top_tools[0].clicks;
-                  const percentage = (tool.clicks / maxClicks * 100).toFixed(0);
+                  const maxClicks = stats.top_tools[0]?.click_count || 1;
+                  const percentage = ((tool.click_count || 0) / maxClicks * 100).toFixed(0);
                   return (
                     <div key={tool.name} className="flex items-center gap-3">
                       <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-sm font-medium text-slate-600 dark:text-slate-300">
@@ -195,7 +210,7 @@ export default function DashboardPage() {
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium text-slate-800 dark:text-slate-100">{tool.name}</span>
-                          <span className="text-xs text-slate-500">{tool.clicks.toLocaleString()}</span>
+                          <span className="text-xs text-slate-500">{(tool.click_count || 0).toLocaleString()}</span>
                         </div>
                         <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                           <div 

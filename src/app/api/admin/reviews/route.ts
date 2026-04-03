@@ -9,9 +9,10 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'pending';
     const limit = parseInt(searchParams.get('limit') || '50');
 
+    // 获取评论列表
     const { data: reviews, error } = await client
       .from('user_reviews')
-      .select('*, tools(id, name, logo), user_ratings(effect_score, usability_score, quota_score, stability_score, overall_score)')
+      .select('*, tools(id, name, logo)')
       .eq('status', status)
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -20,7 +21,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, data: reviews || [] });
+    // 为每个评论获取对应的评分
+    const reviewsWithRatings = await Promise.all(
+      (reviews || []).map(async (review) => {
+        const { data: rating } = await client
+          .from('user_ratings')
+          .select('effect_score, usability_score, quota_score, stability_score, overall_score')
+          .eq('user_id', review.user_id)
+          .eq('tool_id', review.tool_id)
+          .maybeSingle();
+
+        return {
+          ...review,
+          user_ratings: rating
+        };
+      })
+    );
+
+    return NextResponse.json({ success: true, data: reviewsWithRatings });
   } catch (error) {
     console.error('获取评论失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });

@@ -8,27 +8,37 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const position = searchParams.get('position');
 
-    const now = new Date().toISOString();
+    // 检查表是否存在
+    try {
+      const now = new Date().toISOString();
 
-    let query = client
-      .from('advertisements')
-      .select('*')
-      .eq('is_active', true)
-      .lte('starts_at', now)
-      .gte('ends_at', now)
-      .order('priority', { ascending: false });
+      let query = client
+        .from('advertisements')
+        .select('*')
+        .eq('is_active', true)
+        .lte('starts_at', now)
+        .gte('ends_at', now)
+        .order('priority', { ascending: false });
 
-    if (position) {
-      query = query.eq('position', position);
+      if (position) {
+        query = query.eq('position', position);
+      }
+
+      const { data: ads, error } = await query.limit(10);
+
+      if (error) {
+        // 如果表不存在，返回空数据
+        if (error.message.includes('Could not find')) {
+          return NextResponse.json({ success: true, data: [] });
+        }
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, data: ads || [] });
+    } catch (tableError) {
+      // 表不存在时返回空数据
+      return NextResponse.json({ success: true, data: [] });
     }
-
-    const { data: ads, error } = await query.limit(10);
-
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, data: ads || [] });
   } catch (error) {
     console.error('获取广告失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });

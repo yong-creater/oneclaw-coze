@@ -11,36 +11,54 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
 
-    let query = client
-      .from('tutorials')
-      .select('*, tools(id, name, logo)', { count: 'exact' })
-      .eq('status', 'published')
-      .order('created_at', { ascending: false });
+    // 检查表是否存在
+    try {
+      let query = client
+        .from('tutorials')
+        .select('*, tools(id, name, logo)', { count: 'exact' })
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
 
-    if (toolId) {
-      query = query.eq('tool_id', toolId);
-    }
-    if (category) {
-      query = query.eq('category', category);
-    }
-
-    const offset = (page - 1) * limit;
-    const { data: tutorials, error, count } = await query.range(offset, offset + limit - 1);
-
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: tutorials || [],
-      pagination: {
-        page,
-        limit,
-        total: count || 0,
-        total_pages: Math.ceil((count || 0) / limit)
+      if (toolId) {
+        query = query.eq('tool_id', toolId);
       }
-    });
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      const offset = (page - 1) * limit;
+      const { data: tutorials, error, count } = await query.range(offset, offset + limit - 1);
+
+      if (error) {
+        // 如果表不存在，返回空数据
+        if (error.message.includes('Could not find')) {
+          return NextResponse.json({
+            success: true,
+            data: [],
+            pagination: { page, limit, total: 0, total_pages: 0 }
+          });
+        }
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: tutorials || [],
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          total_pages: Math.ceil((count || 0) / limit)
+        }
+      });
+    } catch (tableError) {
+      // 表不存在时返回空数据
+      return NextResponse.json({
+        success: true,
+        data: [],
+        pagination: { page, limit, total: 0, total_pages: 0 }
+      });
+    }
   } catch (error) {
     console.error('获取教程失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });

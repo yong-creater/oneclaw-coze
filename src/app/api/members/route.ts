@@ -12,32 +12,53 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: '缺少user_id参数' }, { status: 400 });
     }
 
-    const { data: member, error } = await client
-      .from('members')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
-    // 如果没有会员记录，创建免费会员
-    if (!member) {
-      const { data: newMember, error: createError } = await client
+    // 检查表是否存在
+    try {
+      const { data: member, error } = await client
         .from('members')
-        .insert({ user_id: userId, level: 'free' })
-        .select()
-        .single();
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (createError) {
-        return NextResponse.json({ success: false, error: createError.message }, { status: 500 });
+      if (error) {
+        // 如果表不存在，返回默认免费会员
+        if (error.message.includes('Could not find')) {
+          return NextResponse.json({
+            success: true,
+            data: {
+              user_id: userId,
+              level: 'free',
+              expires_at: null
+            }
+          });
+        }
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
       }
 
-      return NextResponse.json({ success: true, data: newMember });
-    }
+      // 如果没有会员记录，返回默认免费会员
+      if (!member) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            user_id: userId,
+            level: 'free',
+            expires_at: null
+          }
+        });
+      }
 
-    return NextResponse.json({ success: true, data: member });
+      return NextResponse.json({ success: true, data: member });
+    } catch (tableError) {
+      // 表不存在时返回默认免费会员
+      return NextResponse.json({
+        success: true,
+        data: {
+          user_id: userId,
+          level: 'free',
+          expires_at: null
+        }
+      });
+    }
   } catch (error) {
     console.error('获取会员信息失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
