@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useCallback } from 'react';
+import Image from 'next/image';
 
 interface AnimatedLobsterProps {
   size?: number;
@@ -65,140 +66,45 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           bg-white dark:bg-slate-800 border-l border-t border-slate-200 dark:border-slate-700 -rotate-45" />
       </div>
       
-      {/* SVG龙虾 - 身体静止，钳子敲键盘 */}
-      <svg viewBox="0 0 100 100" className={`w-full h-full ${isCaught ? 'animate-bounce' : ''}`}>
-        <defs>
-          {/* 身体渐变 */}
-          <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FF6B4A" />
-            <stop offset="50%" stopColor="#E85A3C" />
-            <stop offset="100%" stopColor="#C94A2E" />
-          </linearGradient>
-          {/* 钳子渐变 */}
-          <linearGradient id="clawGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FF8C5A" />
-            <stop offset="100%" stopColor="#E86A3C" />
-          </linearGradient>
-          {/* 键盘渐变 */}
-          <linearGradient id="keyboardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#374151" />
-            <stop offset="100%" stopColor="#1f2937" />
-          </linearGradient>
-        </defs>
+      {/* 原始Logo图片 */}
+      <Image
+        src="/lobster-logo.png?v=3"
+        alt="OneClaw 龙虾"
+        width={size}
+        height={size}
+        className={`w-full h-full object-contain transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
+        priority
+        unoptimized
+      />
+      
+      {/* 键盘敲击动画光效 - 覆盖在图片上 */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* 左钳子敲击光效 */}
+        <div 
+          className="absolute animate-tap-left"
+          style={{
+            left: '15%',
+            bottom: '15%',
+            width: '12%',
+            height: '8%',
+          }}
+        >
+          <div className="w-full h-full rounded-full bg-orange-400/40 blur-[2px]" />
+        </div>
         
-        {/* 身体 - 静止不动 */}
-        <g className="lobster-body">
-          {/* 主体 */}
-          <ellipse cx="50" cy="40" rx="22" ry="20" fill="url(#bodyGrad)" />
-          {/* 身体高光 */}
-          <ellipse cx="44" cy="34" rx="10" ry="6" fill="#FFB08A" opacity="0.4" />
-          {/* 腹部纹理 */}
-          <path d="M32 44 Q50 46 68 44" stroke="#C94A2E" strokeWidth="1" fill="none" opacity="0.3" />
-          <path d="M35 50 Q50 52 65 50" stroke="#C94A2E" strokeWidth="1" fill="none" opacity="0.3" />
-          
-          {/* 尾巴 */}
-          <ellipse cx="50" cy="62" rx="12" ry="8" fill="url(#bodyGrad)" />
-          <ellipse cx="50" cy="68" rx="8" ry="5" fill="url(#clawGrad)" />
-          
-          {/* 触须 */}
-          <path d="M38 22 Q32 12 28 6" stroke="#FF8C5A" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <circle cx="28" cy="6" r="2" fill="#FF8C5A" />
-          <path d="M62 22 Q68 12 72 6" stroke="#FF8C5A" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <circle cx="72" cy="6" r="2" fill="#FF8C5A" />
-          
-          {/* 小眼睛 */}
-          <circle cx="42" cy="36" r="5" fill="#1a1a2e" />
-          <circle cx="40" cy="34" r="1.5" fill="#7dd3fc" />
-          <circle cx="58" cy="36" r="5" fill="#1a1a2e" />
-          <circle cx="56" cy="34" r="1.5" fill="#7dd3fc" />
-          
-          {/* 墨镜 */}
-          <rect x="36" y="32" width="12" height="8" rx="2" fill="#1a1a2e" />
-          <rect x="52" y="32" width="12" height="8" rx="2" fill="#1a1a2e" />
-          <rect x="47" y="35" width="6" height="2" fill="#374151" />
-          
-          {/* 腮红 */}
-          <ellipse cx="34" cy="44" rx="4" ry="2" fill="#FFB5B5" opacity="0.5" />
-          <ellipse cx="66" cy="44" rx="4" ry="2" fill="#FFB5B5" opacity="0.5" />
-        </g>
-        
-        {/* 小腿 */}
-        <g className="legs">
-          <rect x="38" y="58" width="4" height="8" rx="2" fill="url(#clawGrad)" />
-          <rect x="46" y="60" width="4" height="8" rx="2" fill="url(#clawGrad)" />
-          <rect x="54" y="60" width="4" height="8" rx="2" fill="url(#clawGrad)" />
-          <rect x="60" y="58" width="4" height="8" rx="2" fill="url(#clawGrad)" />
-        </g>
-        
-        {/* 键盘 */}
-        <g className="keyboard">
-          <rect x="20" y="78" width="60" height="16" rx="2" fill="url(#keyboardGrad)" />
-          {/* 按键行 */}
-          <g className="keys" opacity="0.6">
-            <rect x="24" y="81" width="6" height="4" rx="0.5" fill="#6b7280" className="key-1" />
-            <rect x="32" y="81" width="6" height="4" rx="0.5" fill="#6b7280" className="key-2" />
-            <rect x="40" y="81" width="6" height="4" rx="0.5" fill="#6b7280" className="key-3" />
-            <rect x="48" y="81" width="6" height="4" rx="0.5" fill="#6b7280" className="key-1" />
-            <rect x="56" y="81" width="6" height="4" rx="0.5" fill="#6b7280" className="key-2" />
-            <rect x="64" y="81" width="6" height="4" rx="0.5" fill="#6b7280" className="key-3" />
-            <rect x="72" y="81" width="4" height="4" rx="0.5" fill="#6b7280" className="key-1" />
-          </g>
-          <g className="keys" opacity="0.6">
-            <rect x="26" y="87" width="5" height="4" rx="0.5" fill="#6b7280" className="key-2" />
-            <rect x="33" y="87" width="5" height="4" rx="0.5" fill="#6b7280" className="key-3" />
-            <rect x="40" y="87" width="5" height="4" rx="0.5" fill="#6b7280" className="key-1" />
-            <rect x="47" y="87" width="12" height="4" rx="0.5" fill="#6b7280" className="key-2" />
-            <rect x="61" y="87" width="5" height="4" rx="0.5" fill="#6b7280" className="key-3" />
-            <rect x="68" y="87" width="5" height="4" rx="0.5" fill="#6b7280" className="key-1" />
-          </g>
-        </g>
-        
-        {/* 左钳子 - 敲键盘动画 */}
-        <g className="claw-left" style={{ transformOrigin: '38px 50px' }}>
-          <ellipse cx="22" cy="74" rx="8" ry="5" fill="url(#clawGrad)" className="claw-tip">
-            <animate 
-              attributeName="cy" 
-              values="74;72;74;72;74" 
-              dur="0.6s" 
-              repeatCount="indefinite"
-              calcMode="spline"
-              keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-            />
-          </ellipse>
-          <ellipse cx="19" cy="72" rx="3" ry="2" fill="#FFB08A" opacity="0.4" />
-        </g>
-        
-        {/* 右钳子 - 敲键盘动画（错开节奏） */}
-        <g className="claw-right" style={{ transformOrigin: '62px 50px' }}>
-          <ellipse cx="78" cy="74" rx="8" ry="5" fill="url(#clawGrad)" className="claw-tip">
-            <animate 
-              attributeName="cy" 
-              values="74;74;72;74;72" 
-              dur="0.6s" 
-              repeatCount="indefinite"
-              calcMode="spline"
-              keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"
-            />
-          </ellipse>
-          <ellipse cx="81" cy="72" rx="3" ry="2" fill="#FFB08A" opacity="0.4" />
-        </g>
-        
-        {/* 敲击光效 */}
-        <g className="tap-effects">
-          <circle cx="28" cy="83" r="2" fill="#FF6B4A" opacity="0.5">
-            <animate attributeName="opacity" values="0.5;0.8;0.5" dur="0.3s" repeatCount="indefinite" begin="0s" />
-            <animate attributeName="r" values="2;3;2" dur="0.3s" repeatCount="indefinite" begin="0s" />
-          </circle>
-          <circle cx="50" cy="83" r="2" fill="#FF6B4A" opacity="0.5">
-            <animate attributeName="opacity" values="0.5;0.8;0.5" dur="0.3s" repeatCount="indefinite" begin="0.15s" />
-            <animate attributeName="r" values="2;3;2" dur="0.3s" repeatCount="indefinite" begin="0.15s" />
-          </circle>
-          <circle cx="72" cy="83" r="2" fill="#FF6B4A" opacity="0.5">
-            <animate attributeName="opacity" values="0.5;0.8;0.5" dur="0.3s" repeatCount="indefinite" begin="0.3s" />
-            <animate attributeName="r" values="2;3;2" dur="0.3s" repeatCount="indefinite" begin="0.3s" />
-          </circle>
-        </g>
-      </svg>
+        {/* 右钳子敲击光效 */}
+        <div 
+          className="absolute animate-tap-right"
+          style={{
+            right: '15%',
+            bottom: '15%',
+            width: '12%',
+            height: '8%',
+          }}
+        >
+          <div className="w-full h-full rounded-full bg-orange-400/40 blur-[2px]" />
+        </div>
+      </div>
     </div>
   );
 });
