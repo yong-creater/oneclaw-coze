@@ -1,12 +1,30 @@
-# OneClaw (钳爪) - AI视频工具导航站
+# OneClaw (钳爪) - 全品类AI工具导航站
 
 ## 项目概述
 
-**OneClaw** - AI视频工具导航站，精选117款优质AI视频创作工具，涵盖视频生成、数字人、视频编辑、AI配音、动漫创作等类别。
+**OneClaw** - 全品类AI工具导航站，精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程、AI音频、AI办公、AI营销、AI学习、AI聊天、AI搜索等全品类。
 
 - **域名**: oneclaw.shop
 - **联系邮箱**: 1017760688@qq.com
 - **品牌元素**: 龙虾 🦞，红橙渐变配色
+
+### 分类体系
+
+| 分类 | 工具数 | 代表工具 |
+|------|--------|----------|
+| 视频生成 | 119 | Sora, Runway, 可灵AI, 即梦AI |
+| 数字人 | 31 | HeyGen, Synthesia, D-ID |
+| 视频编辑 | 29 | 剪映, CapCut, Runway ML |
+| AI绘画 | 9 | Midjourney, DALL·E 3, Stable Diffusion |
+| AI聊天 | 8 | ChatGPT, Claude, Kimi, 豆包 |
+| AI配音 | 8 | ElevenLabs, 讯飞配音 |
+| AI写作 | 7 | Notion AI, Jasper, 秘塔写作猫 |
+| AI编程 | 5 | GitHub Copilot, Cursor, 通义灵码 |
+| AI音频 | 4 | Suno, Udio, Mubert |
+| AI办公 | 4 | Gamma, 飞书妙记, Beautiful.ai |
+| AI搜索 | 3 | Perplexity, 秘塔AI搜索 |
+| AI营销 | 3 | Jasper Marketing, Copy.ai |
+| AI学习 | 3 | Duolingo, Speak |
 
 ### 技术栈
 

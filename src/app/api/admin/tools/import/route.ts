@@ -8,9 +8,19 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
   '视频编辑': 'video-editing',
   'AI配音': 'ai-dubbing',
   'AI字幕': 'ai-dubbing', // 兼容旧分类
-  'AI音乐': 'anime-creation', // 兼容旧分类
+  'AI音乐': 'ai-audio', // 改为AI音频
   '动画制作': 'anime-creation',
   '动漫创作': 'anime-creation',
+  // 新增全品类分类
+  'AI绘画': 'ai-image',
+  'AI写作': 'ai-writing',
+  'AI编程': 'ai-coding',
+  'AI音频': 'ai-audio',
+  'AI办公': 'ai-office',
+  'AI营销': 'ai-marketing',
+  'AI学习': 'ai-learning',
+  'AI聊天': 'ai-chat',
+  'AI搜索': 'ai-search',
 };
 
 // 批量导入工具
