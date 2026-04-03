@@ -13,11 +13,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   ExternalLink, Video, Search, Film, Wand2, Palette, Music, 
   Mic, Users, ChevronRight, Sparkles, Star, X, Check,
   ChevronLeft, ChevronRight as ChevronRightIcon, Heart, MessageSquare,
-  ThumbsUp, History, User, Flame, Gift, Trophy, ArrowLeftRight, Crown
+  ThumbsUp, History, User, Flame, Gift, Trophy, ArrowLeftRight, Crown,
+  ChevronDown, Filter
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -599,36 +607,58 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* 分类导航 */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-          <button
-            onClick={() => setActiveCategory('all')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-              activeCategory === 'all'
-                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-700'
-            }`}
-          >
-            <Video className="w-4 h-4" />
-            全部
-          </button>
-          {categories.map(cat => {
-            const Icon = CATEGORY_ICONS[cat.slug] || Video;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.slug)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeCategory === cat.slug
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                {cat.name}
-              </button>
-            );
-          })}
+        {/* 筛选区域 */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          {/* 分类选择 */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-slate-500" />
+            <Select value={activeCategory} onValueChange={setActiveCategory}>
+              <SelectTrigger className="w-[160px] bg-white dark:bg-slate-800">
+                <SelectValue placeholder="选择分类" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-4 h-4" />
+                    <span>全部工具</span>
+                  </div>
+                </SelectItem>
+                {categories.map(cat => {
+                  const Icon = CATEGORY_ICONS[cat.slug] || Video;
+                  return (
+                    <SelectItem key={cat.id} value={cat.slug}>
+                      <div className="flex items-center gap-2">
+                        <Icon className="w-4 h-4" />
+                        <span>{cat.name}</span>
+                      </div>
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 搜索框 */}
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="搜索工具名称、出品方..."
+              className="pl-10 bg-white dark:bg-slate-800"
+            />
+          </div>
+
+          {/* 当前分类标签 */}
+          {activeCategory !== 'all' && (
+            <Badge 
+              className="bg-gradient-to-r from-orange-500 to-red-500 text-white cursor-pointer hover:opacity-80"
+              onClick={() => setActiveCategory('all')}
+            >
+              {categories.find(c => c.slug === activeCategory)?.name || activeCategory}
+              <X className="w-3 h-3 ml-1" />
+            </Badge>
+          )}
         </div>
 
         {/* 榜单入口 */}
