@@ -1,215 +1,103 @@
 'use client';
 
-import { useState, useMemo, memo } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { 
-  Search, ChevronRight, ArrowLeft, Copy, Check, Sparkles, BookOpen
+  Search, ChevronRight, ArrowLeft, Copy, FileText, ChevronLeft
 } from 'lucide-react';
-import { prompts, promptCategories, PromptItem } from '@/data/prompts';
+import { AnimatedLobster } from '@/components/AnimatedLobster';
 
-// 提示词卡片组件
-const PromptCard = memo(function PromptCard({ 
-  prompt, 
-  onClick 
-}: { 
-  prompt: PromptItem; 
-  onClick: () => void;
-}) {
-  return (
-    <Card 
-      className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group"
-      onClick={onClick}
-    >
-      <CardContent className="p-5">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-            {promptCategories.find(c => c.name === prompt.category)?.icon || '📝'}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <h3 className="font-bold text-base text-slate-900 dark:text-white truncate">
-                {prompt.title}
-              </h3>
-              {prompt.featured && (
-                <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-xs flex-shrink-0 hover:from-red-600 hover:to-orange-600 px-2">
-                  推荐
-                </Badge>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-1.5 mb-2">
-              <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">
-                {prompt.category}
-              </Badge>
-            </div>
-            
-            <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
-              {prompt.description}
-            </p>
-            
-            <div className="flex items-center justify-between gap-2 mt-3">
-              <div className="flex flex-wrap gap-1">
-                {prompt.tags.slice(0, 3).map((tag, tagIndex) => (
-                  <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-              
-              <span className="text-xs text-red-600 dark:text-red-400 flex items-center gap-0.5 flex-shrink-0 font-medium">
-                查看详情
-                <ChevronRight className="h-3 w-3" />
-              </span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-});
+interface Prompt {
+  id: number;
+  title: string;
+  content: string;
+  tool_id: number | null;
+  category: string;
+  tags: string[];
+  author: string | null;
+  status: string;
+  uses: number;
+  created_at: string;
+  tools?: { id: number; name: string; logo: string } | null;
+}
 
-// 提示词详情弹窗组件
-const PromptDetailDialog = memo(function PromptDetailDialog({ 
-  prompt, 
-  onClose 
-}: { 
-  prompt: PromptItem | null; 
-  onClose: () => void;
-}) {
-  const [copied, setCopied] = useState(false);
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+}
 
-  const handleCopy = async () => {
-    if (prompt) {
-      await navigator.clipboard.writeText(prompt.content);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+const CATEGORY_ICONS: Record<string, string> = {
+  '视频生成': '🎬',
+  '数字人': '👤',
+  '视频编辑': '✂️',
+  'AI绘画': '🎨',
+  'AI聊天': '💬',
+  'AI配音': '🎙️',
+  'AI写作': '✍️',
+  'AI编程': '💻',
+  'AI音频': '🎵',
+  'AI办公': '📊',
+  'AI搜索': '🔍',
+  'AI营销': '📢',
+  'AI学习': '📚',
+  '其他': '📝',
+};
+
+export default function PromptsPage() {
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1, limit: 12, total: 0, total_pages: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const fetchData = async (page = 1) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('page', page.toString());
+      params.set('limit', pagination.limit.toString());
+      if (selectedCategory) params.set('category', selectedCategory);
+      
+      const res = await fetch(`/api/prompts?${params}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setPrompts(data.data);
+        setPagination(prev => ({ ...prev, page, total: data.pagination.total, total_pages: data.pagination.total_pages }));
+        
+        // 提取所有分类
+        const cats = new Set<string>();
+        data.data.forEach((p: Prompt) => cats.add(p.category));
+        setCategories(Array.from(cats));
+      }
+    } catch (error) {
+      console.error('获取数据失败:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!prompt) return null;
-  
-  return (
-    <Dialog open={!!prompt} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-800">
-        <DialogHeader>
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 shadow-md">
-              {promptCategories.find(c => c.name === prompt.category)?.icon || '📝'}
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2 flex-wrap mb-2">
-                <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">{prompt.title}</DialogTitle>
-                {prompt.featured && (
-                  <Badge className="bg-gradient-to-r from-red-500 to-orange-500">推荐</Badge>
-                )}
-              </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{prompt.description}</p>
-              <div className="flex items-center gap-2 mt-2 flex-wrap">
-                <Badge variant="outline" className="border-slate-200 dark:border-slate-600">{prompt.category}</Badge>
-                {prompt.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-700">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          </div>
-        </DialogHeader>
-        
-        <div className="space-y-4 mt-4">
-          <div className="relative">
-            <div className="absolute right-2 top-2 z-10">
-              <Button 
-                size="sm" 
-                variant="secondary"
-                onClick={handleCopy}
-                className="gap-1.5"
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 text-emerald-500" />
-                    已复制
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4" />
-                    复制提示词
-                  </>
-                )}
-              </Button>
-            </div>
-            <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 pt-12 overflow-x-auto">
-              <pre className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed">
-                {prompt.content}
-              </pre>
-            </div>
-          </div>
+  useEffect(() => {
+    fetchData(1);
+  }, [selectedCategory]);
 
-          <div className="pt-4 flex gap-3">
-            <Button 
-              className="flex-1 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white gap-2"
-              onClick={handleCopy}
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4" />
-                  已复制到剪贴板
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4" />
-                  复制提示词
-                </>
-              )}
-            </Button>
-            <Button 
-              variant="outline"
-              className="border-slate-200 dark:border-slate-700"
-              onClick={onClose}
-            >
-              关闭
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-});
-
-export default function PromptsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('全部');
-  const [selectedPrompt, setSelectedPrompt] = useState<PromptItem | null>(null);
-
-  // 过滤后的提示词
-  const filteredPrompts = useMemo(() => {
-    return prompts.filter(prompt => {
-      const matchesSearch = 
-        prompt.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prompt.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        prompt.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      const matchesCategory = selectedCategory === '全部' || prompt.category === selectedCategory;
-      
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, selectedCategory]);
-
-  // 推荐提示词
-  const featuredPrompts = useMemo(() => {
-    return prompts.filter(p => p.featured).slice(0, 4);
-  }, []);
+  // 搜索过滤
+  const filteredPrompts = searchQuery
+    ? prompts.filter(p => 
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.tags?.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : prompts;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -226,14 +114,11 @@ export default function PromptsPage() {
                 <span className="text-sm font-medium">返回首页</span>
               </Link>
               <div className="h-6 w-px bg-slate-200 dark:bg-slate-700"></div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🦞</span>
+              <Link href="/" className="flex items-center gap-2">
+                <AnimatedLobster size={24} />
                 <span className="font-bold text-lg text-slate-900 dark:text-white">OneClaw</span>
-              </div>
+              </Link>
             </div>
-            <Link href="/" className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
-              AI视频工具箱
-            </Link>
           </div>
         </div>
       </header>
@@ -242,15 +127,15 @@ export default function PromptsPage() {
       <section className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 py-12 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
-            <BookOpen className="h-4 w-4" />
+            <FileText className="h-4 w-4" />
             专业提示词库
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
-            AI视频创作提示词库
+            AI创作提示词库
           </h1>
           <p className="text-lg text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
-            精选 {prompts.length} 个专业提示词模板，涵盖视频生成、数字人、配音剪辑等场景，
-            助你高效创作优质AI视频内容
+            精选 {pagination.total} 个专业提示词模板，涵盖视频生成、数字人、AI绘画等场景，
+            助你高效创作优质AI内容
           </p>
           
           {/* Search Bar */}
@@ -270,128 +155,146 @@ export default function PromptsPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Category Tabs */}
         <div className="flex flex-wrap gap-2 mb-6 justify-center">
-          {promptCategories.map((category) => (
+          <button
+            onClick={() => setSelectedCategory('')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              !selectedCategory
+                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md'
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+            }`}
+          >
+            全部
+          </button>
+          {categories.map((category) => (
             <button
-              key={category.name}
-              onClick={() => setSelectedCategory(category.name)}
+              key={category}
+              onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                selectedCategory === category.name
+                selectedCategory === category
                   ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-md'
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
               }`}
             >
-              {category.icon} {category.name}
-              <span className="ml-1.5 text-xs opacity-80">({category.count})</span>
+              {CATEGORY_ICONS[category] || '📝'} {category}
             </button>
           ))}
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Main List */}
-          <div className="flex-1">
-            {/* Results Count */}
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                找到 <span className="font-semibold text-slate-900 dark:text-white">{filteredPrompts.length}</span> 个提示词
-              </p>
-            </div>
+        {/* Results Count */}
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            找到 <span className="font-semibold text-slate-900 dark:text-white">{filteredPrompts.length}</span> 个提示词
+          </p>
+        </div>
 
+        {/* Loading */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+          </div>
+        ) : filteredPrompts.length > 0 ? (
+          <>
             {/* Prompt Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPrompts.map((prompt) => (
-                <PromptCard 
-                  key={prompt.id} 
-                  prompt={prompt} 
-                  onClick={() => setSelectedPrompt(prompt)}
-                />
+                <Link key={prompt.id} href={`/prompts/${prompt.id}`}>
+                  <Card className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group h-full">
+                    <CardContent className="p-5">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                          {CATEGORY_ICONS[prompt.category] || '📝'}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-base text-slate-900 dark:text-white truncate mb-1.5">
+                            {prompt.title}
+                          </h3>
+                          
+                          <div className="flex items-center gap-1.5 mb-2">
+                            <Badge variant="outline" className="text-xs border-slate-200 dark:border-slate-600">
+                              {prompt.category}
+                            </Badge>
+                          </div>
+                          
+                          <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+                            {prompt.content.slice(0, 80)}...
+                          </p>
+                          
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex flex-wrap gap-1">
+                              {prompt.tags?.slice(0, 2).map((tag, tagIndex) => (
+                                <Badge key={tagIndex} variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-0">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {prompt.tags?.length > 2 && (
+                                <span className="text-xs text-slate-500">+{prompt.tags.length - 2}</span>
+                              )}
+                            </div>
+                            
+                            <span className="text-xs text-red-600 dark:text-red-400 flex items-center gap-0.5 flex-shrink-0 font-medium">
+                              查看
+                              <ChevronRight className="h-3 w-3" />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
 
-            {filteredPrompts.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-4xl mb-4">🔍</div>
-                <p className="text-slate-500 dark:text-slate-400">
-                  没有找到匹配的提示词，试试其他关键词？
-                </p>
+            {/* Pagination */}
+            {pagination.total_pages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page === 1}
+                  onClick={() => fetchData(pagination.page - 1)}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="text-sm text-slate-500">
+                  {pagination.page} / {pagination.total_pages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.page === pagination.total_pages}
+                  onClick={() => fetchData(pagination.page + 1)}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
               </div>
             )}
+          </>
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-4xl mb-4">🔍</div>
+            <p className="text-slate-500 dark:text-slate-400">
+              没有找到匹配的提示词，试试其他关键词？
+            </p>
           </div>
-
-          {/* Sidebar */}
-          <aside className="w-full lg:w-80 flex-shrink-0">
-            {/* Featured Prompts */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-5 mb-4">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-5 w-5 text-red-500" />
-                <h3 className="font-bold text-slate-900 dark:text-white">推荐提示词</h3>
-              </div>
-              <div className="space-y-3">
-                {featuredPrompts.map((prompt) => (
-                  <div 
-                    key={prompt.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors"
-                    onClick={() => setSelectedPrompt(prompt)}
-                  >
-                    <div className="w-8 h-8 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg flex items-center justify-center text-sm">
-                      {promptCategories.find(c => c.name === prompt.category)?.icon || '📝'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate text-slate-900 dark:text-white">{prompt.title}</p>
-                      <p className="text-xs text-slate-500">{prompt.category}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-slate-400" />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Tips Card */}
-            <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-slate-800 dark:to-slate-700 rounded-xl border border-red-100 dark:border-slate-600 p-5">
-              <h3 className="font-bold text-slate-900 dark:text-white mb-3">💡 使用技巧</h3>
-              <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500">•</span>
-                  点击提示词卡片查看完整内容
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500">•</span>
-                  使用复制按钮快速获取提示词
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500">•</span>
-                  根据具体需求调整提示词参数
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500">•</span>
-                  多次迭代优化获得最佳效果
-                </li>
-              </ul>
-            </div>
-          </aside>
-        </div>
+        )}
       </main>
 
       {/* Footer */}
       <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <span className="text-2xl">🦞</span>
+            <AnimatedLobster size={24} />
             <span className="font-bold text-lg text-slate-900 dark:text-white">OneClaw</span>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-            AI视频创作提示词库 · 助力创作者高效产出
+            AI创作提示词库 · 激发无限创意
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            © 2024 OneClaw · <a href="mailto:1017760688@qq.com" className="hover:text-red-500">1017760688@qq.com</a>
+            © 2024 OneClaw · <a href="mailto:1017760688@qq.com" className="hover:text-orange-500">1017760688@qq.com</a>
           </p>
         </div>
       </footer>
-
-      {/* Detail Dialog */}
-      <PromptDetailDialog 
-        prompt={selectedPrompt} 
-        onClose={() => setSelectedPrompt(null)} 
-      />
     </div>
   );
 }

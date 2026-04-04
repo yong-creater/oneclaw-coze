@@ -171,49 +171,51 @@ export default function TutorialsPage() {
           <>
             <div className="space-y-4">
               {tutorials.map(tutorial => (
-                <Card key={tutorial.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex gap-4">
-                      {tutorial.cover_image ? (
-                        <div className="w-32 h-20 rounded-lg bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden">
-                          <img src={tutorial.cover_image} alt="" className="w-full h-full object-cover" />
-                        </div>
-                      ) : (
-                        <div className="w-32 h-20 rounded-lg bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 flex-shrink-0 flex items-center justify-center">
-                          <BookOpen className="w-8 h-8 text-orange-500" />
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <h3 className="font-medium text-slate-800 dark:text-slate-100">
-                            {tutorial.title}
-                          </h3>
-                          <Badge variant="outline" className="text-xs">
-                            {tutorial.category}
-                          </Badge>
-                          <span className={`text-xs px-2 py-0.5 rounded ${DIFFICULTY_COLORS[tutorial.difficulty] || 'bg-slate-100 text-slate-600'}`}>
-                            {tutorial.difficulty}
-                          </span>
-                        </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-2">
-                          {tutorial.content.replace(/<[^>]*>/g, '').slice(0, 150)}...
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-slate-500">
-                          {tutorial.author && <span>作者: {tutorial.author}</span>}
-                          <span className="flex items-center gap-1">
-                            <Eye className="w-3 h-3" />
-                            {tutorial.views}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <ThumbsUp className="w-3 h-3" />
-                            {tutorial.likes}
-                          </span>
-                          <span>{new Date(tutorial.created_at).toLocaleDateString()}</span>
+                <Link key={tutorial.id} href={`/tutorials/${tutorial.id}`}>
+                  <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer">
+                    <CardContent className="p-4">
+                      <div className="flex gap-4">
+                        {tutorial.cover_image ? (
+                          <div className="w-32 h-20 rounded-lg bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden">
+                            <img src={tutorial.cover_image} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-32 h-20 rounded-lg bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 flex-shrink-0 flex items-center justify-center">
+                            <BookOpen className="w-8 h-8 text-orange-500" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="font-medium text-slate-800 dark:text-slate-100">
+                              {tutorial.title}
+                            </h3>
+                            <Badge variant="outline" className="text-xs">
+                              {tutorial.category}
+                            </Badge>
+                            <span className={`text-xs px-2 py-0.5 rounded ${DIFFICULTY_COLORS[tutorial.difficulty] || 'bg-slate-100 text-slate-600'}`}>
+                              {tutorial.difficulty}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-2">
+                            {tutorial.content.replace(/<[^>]*>/g, '').slice(0, 150)}...
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-slate-500">
+                            {tutorial.author && <span>作者: {tutorial.author}</span>}
+                            <span className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              {tutorial.views}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <ThumbsUp className="w-3 h-3" />
+                              {tutorial.likes}
+                            </span>
+                            <span>{new Date(tutorial.created_at).toLocaleDateString()}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
 
