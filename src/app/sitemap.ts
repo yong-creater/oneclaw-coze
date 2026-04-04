@@ -1,47 +1,79 @@
 import { MetadataRoute } from 'next';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://oneclaw.shop';
   
-  // 工具分类
-  const categories = [
-    '视频生成',
-    '视频编辑',
-    '数字人',
-    '视频增强',
-    'AI字幕',
-    'AI配音',
-    '3D视频',
-    '创意视频',
-    '视频素材',
-    '屏幕录制',
+  // 工具分类slug
+  const categorySlugs = [
+    'video-generation',
+    'digital-human',
+    'video-editing',
+    'ai-dubbing',
+    'ai-painting',
+    'ai-chat',
+    'ai-writing',
+    'ai-coding',
+    'ai-audio',
+    'ai-office',
+    'ai-marketing',
+    'ai-learning',
+    'ai-search',
+    'ai-translation',
   ];
 
-  return [
+  // 静态页面
+  const staticPages = [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'daily' as const,
       priority: 1,
     },
     {
-      url: `${baseUrl}/about`,
+      url: `${baseUrl}/rankings`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/resources`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/prompts`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
     },
-    // 分类页面
-    ...categories.map((category) => ({
-      url: `${baseUrl}/category/${encodeURIComponent(category)}`,
+    {
+      url: `${baseUrl}/compare`,
       lastModified: new Date(),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
-    })),
+    },
+    {
+      url: `${baseUrl}/workspace`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/membership`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    },
   ];
+
+  // 分类页面
+  const categoryPages = categorySlugs.map((slug) => ({
+    url: `${baseUrl}/category/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily' as const,
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...categoryPages];
 }

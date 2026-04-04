@@ -14,39 +14,47 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://oneclaw.shop'),
   title: {
-    default: 'OneClaw - 一站式 AI 工具与资源导航平台',
-    template: '%s | OneClaw',
+    default: 'OneClaw - 全品类AI工具导航 | 精选238款优质AI工具',
+    template: '%s | OneClaw AI工具导航',
   },
   description:
-    'OneClaw 是一站式 AI 工具与资源导航平台，精心收录数百款优质 AI 工具，涵盖 AI 视频生成、AI 图像创作、AI 写作助手、AI 编程工具、AI 音频处理等多个领域，同时提供丰富的提示词模板和 AI 技能资源，助力用户高效使用各类 AI 产品。',
+    'OneClaw(钳爪)是全品类AI工具导航站，精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程、AI音频、AI办公等14大分类。提供工具对比、评分评价、教程资源，助您快速找到最适合的AI工具。',
   keywords: [
     'AI工具导航',
     'AI工具推荐',
+    'AI工具大全',
     'AI视频生成',
     'AI图像创作',
     'AI写作助手',
     'AI编程工具',
+    'AI数字人',
+    'AI配音',
+    'AI音频',
     '提示词模板',
-    'AI技能',
-    'Runway',
-    'Pika',
     'Sora',
+    'Runway',
+    '可灵AI',
+    '即梦AI',
     'Midjourney',
     'ChatGPT',
     'Claude',
-    'AI数字人',
-    'AI配音',
-    'AI字幕',
     '免费AI工具',
-    '2024 AI工具',
-    'AI工具大全',
+    '2025 AI工具',
+    'AI工具排行榜',
   ],
   authors: [{ name: 'OneClaw', url: 'https://oneclaw.shop' }],
   creator: 'OneClaw',
   publisher: 'OneClaw',
+  applicationName: 'OneClaw',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
@@ -56,9 +64,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'OneClaw - 一站式 AI 工具与资源导航平台',
+    title: 'OneClaw - 全品类AI工具导航 | 精选238款优质AI工具',
     description:
-      'OneClaw 精心收录数百款优质 AI 工具，涵盖 AI 视频、AI 图像、AI 写作、AI 编程等多个领域，同时提供丰富的提示词模板和 AI 技能资源。',
+      '精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类。提供工具对比、评分评价、教程资源。',
     url: 'https://oneclaw.shop',
     siteName: 'OneClaw',
     locale: 'zh_CN',
@@ -68,24 +76,25 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'OneClaw - 一站式 AI 工具与资源导航平台',
+        alt: 'OneClaw - 全品类AI工具导航',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'OneClaw - 一站式 AI 工具与资源导航平台',
+    title: 'OneClaw - 全品类AI工具导航',
     description:
-      '精选数百款优质 AI 工具，涵盖视频、图像、写作、编程等多个领域，提供提示词模板和 AI 技能资源。',
+      '精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类。',
     images: ['/og-image.png'],
   },
   alternates: {
     canonical: 'https://oneclaw.shop',
   },
   category: 'technology',
-  classification: 'AI Tools & Resources Directory',
+  classification: 'AI Tools Directory',
   other: {
-    'baidu-site-verification': 'your-baidu-verification-code',
+    'applicable-device': 'pc,mobile',
+    'mobile-agent': 'pc,mobile',
   },
 };
 
@@ -94,11 +103,16 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: 'OneClaw',
-  description: '一站式 AI 工具与资源导航平台，精选优质 AI 工具、提示词模板和 AI 技能资源',
+  alternateName: '钳爪AI工具导航',
+  description: '全品类AI工具导航站，精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类',
   url: 'https://oneclaw.shop',
+  inLanguage: 'zh-CN',
   potentialAction: {
     '@type': 'SearchAction',
-    target: 'https://oneclaw.shop/?search={search_term_string}',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://oneclaw.shop/?search={search_term_string}',
+    },
     'query-input': 'required name=search_term_string',
   },
 };
@@ -107,53 +121,59 @@ const organizationJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'OneClaw',
+  alternateName: '钳爪',
   url: 'https://oneclaw.shop',
-  logo: 'https://oneclaw.shop/logo.png',
-  description: '一站式 AI 工具与资源导航平台',
+  logo: 'https://oneclaw.shop/lobster-logo.png',
+  description: '全品类AI工具导航平台',
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer service',
+    email: '1017760688@qq.com',
+  },
   sameAs: [],
 };
 
 const itemListJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
-  name: 'AI工具推荐',
-  description: '精选 AI 工具、提示词和技能资源',
-  numberOfItems: 117,
+  name: 'AI工具推荐 - OneClaw精选',
+  description: '精选热门AI工具，涵盖视频生成、数字人、AI绘画、AI写作等',
+  numberOfItems: 238,
   itemListElement: [
     {
       '@type': 'ListItem',
       position: 1,
-      name: '即梦 AI',
-      description: '一站式 AI 视频、图片、数字人创作工具',
-      url: 'https://jimeng.jianying.com/',
+      name: 'Sora - OpenAI视频生成',
+      description: 'OpenAI推出的革命性AI视频生成工具',
+      url: 'https://oneclaw.shop/tools/1',
     },
     {
       '@type': 'ListItem',
       position: 2,
-      name: 'Runway',
-      description: '专业的AI视频生成和编辑平台',
-      url: 'https://runwayml.com/',
+      name: '可灵AI',
+      description: '快手推出的AI视频生成工具，支持最长2分钟视频',
+      url: 'https://oneclaw.shop/tools/2',
     },
     {
       '@type': 'ListItem',
       position: 3,
-      name: 'Pika',
-      description: '强大的AI视频生成工具',
-      url: 'https://pika.art/',
+      name: '即梦AI',
+      description: '字节跳动一站式AI视频、图片、数字人创作工具',
+      url: 'https://oneclaw.shop/tools/3',
     },
     {
       '@type': 'ListItem',
       position: 4,
-      name: 'Sora',
-      description: 'OpenAI推出的AI视频生成模型',
-      url: 'https://openai.com/sora',
+      name: 'Runway',
+      description: '专业级AI视频生成和编辑平台',
+      url: 'https://oneclaw.shop/tools/4',
     },
     {
       '@type': 'ListItem',
       position: 5,
       name: 'HeyGen',
-      description: 'AI数字人视频生成平台',
-      url: 'https://www.heygen.com/',
+      description: '专业AI数字人视频生成平台',
+      url: 'https://oneclaw.shop/tools/5',
     },
   ],
 };
@@ -168,6 +188,28 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
+        {/* 百度站长验证 - 请替换为您自己的验证码 */}
+        <meta name="baidu-site-verification" content="oneclaw-baidu-verify" />
+        
+        {/* 百度自动推送 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                var bp = document.createElement('script');
+                var curProtocol = window.location.protocol.split(':')[0];
+                if (curProtocol === 'https') {
+                  bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+                } else {
+                  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+                }
+                var s = document.getElementsByTagName("script")[0];
+                s.parentNode.insertBefore(bp, s);
+              })();
+            `,
+          }}
+        />
+        
         {/* 百度统计 - 请替换为您自己的统计代码 */}
         <Script
           id="baidu-analytics"

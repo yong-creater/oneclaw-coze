@@ -8,18 +8,33 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/_next/', '/static/'],
+        disallow: ['/api/', '/_next/', '/static/', '/admin/'],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
+        crawlDelay: 1,
       },
       {
         userAgent: 'Baiduspider',
         allow: '/',
+        crawlDelay: 1,
+      },
+      {
+        userAgent: 'Baiduspider-image',
+        allow: '/',
       },
       {
         userAgent: 'Bingbot',
+        allow: '/',
+        crawlDelay: 1,
+      },
+      {
+        userAgent: 'Sogou',
+        allow: '/',
+      },
+      {
+        userAgent: '360Spider',
         allow: '/',
       },
     ],

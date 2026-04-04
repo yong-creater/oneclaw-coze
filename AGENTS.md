@@ -218,6 +218,35 @@ interface Tool {
    - 通过/拒绝操作
    - 评论详情查看
 
+## SEO优化
+
+### Favicon配置
+- 使用Next.js的icon约定，动态生成favicon
+- `/icon` - 32x32 PNG格式favicon
+- `/apple-icon` - 180x180 PNG格式Apple Touch Icon
+- 使用龙虾emoji(🦞)配合红橙渐变背景
+
+### 元数据配置
+- 完整的title、description、keywords
+- Open Graph标签（Facebook、微信分享）
+- Twitter Card标签
+- 百度站长验证meta标签
+- 结构化数据（JSON-LD）：WebSite、Organization、ItemList
+
+### 百度SEO优化
+1. **百度站长验证**：在`layout.tsx`中添加验证meta标签
+2. **百度自动推送**：自动向百度提交新页面
+3. **百度统计**：需替换`YOUR_BAIDU_ANALYTICS_ID`
+4. **robots.txt**：配置Baiduspider、Baiduspider-image爬虫规则
+5. **sitemap.xml**：包含所有主要页面，每日更新
+
+### 百度收录步骤
+1. 访问 [百度搜索资源平台](https://ziyuan.baidu.com/)
+2. 添加网站并选择验证方式（推荐HTML标签验证）
+3. 将验证码替换到`layout.tsx`中的`baidu-site-verification` meta标签
+4. 提交sitemap：`https://oneclaw.shop/sitemap.xml`
+5. 等待百度爬虫收录（通常需要1-2周）
+
 ## 包管理规范
 
 **仅允许使用 pnpm** 作为包管理器，**严禁使用 npm 或 yarn**。
