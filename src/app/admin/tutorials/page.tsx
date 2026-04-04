@@ -46,9 +46,7 @@ interface Pagination {
 }
 
 const CATEGORIES = [
-  '视频生成', '数字人', '视频编辑', 'AI绘画', 'AI聊天', 
-  'AI配音', 'AI写作', 'AI编程', 'AI音频', 'AI办公', 
-  'AI搜索', 'AI营销', 'AI学习', '其他'
+  '入门教程', '进阶技巧', '案例分享', 'API对接', '最佳实践', '常见问题', '其他'
 ];
 
 const DIFFICULTY_COLORS: Record<string, string> = {

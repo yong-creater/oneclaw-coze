@@ -34,7 +34,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 // 教程分类
 const TUTORIAL_CATEGORIES = [
-  '全部', '入门教程', '进阶技巧', '案例分享', 'API对接'
+  '全部', '入门教程', '进阶技巧', '案例分享', 'API对接', '最佳实践', '常见问题'
 ];
 
 export default function TutorialsPage() {

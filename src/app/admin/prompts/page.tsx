@@ -44,9 +44,8 @@ interface Pagination {
 }
 
 const CATEGORIES = [
-  '视频生成', '数字人', '视频编辑', 'AI绘画', 'AI聊天', 
-  'AI配音', 'AI写作', 'AI编程', 'AI音频', 'AI办公', 
-  'AI搜索', 'AI营销', 'AI学习', '其他'
+  '视频生成', 'AI绘画', '文案写作', '代码编程', '数字人', 
+  '音频生成', '图像处理', '数据分析', '营销文案', '学习助手', '其他'
 ];
 
 const STATUS_COLORS: Record<string, string> = {
