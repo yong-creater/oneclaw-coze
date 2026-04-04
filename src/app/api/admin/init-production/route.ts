@@ -309,6 +309,7 @@ export async function POST(request: NextRequest) {
       prompts: 0,
       tutorials: 0,
       admin_created: false,
+      admin_password: '', // 仅在创建时返回一次
       errors: [] as string[],
     };
 
@@ -321,9 +322,13 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (!existingAdmin) {
-      console.log('👤 创建默认管理员账号...');
+      console.log('👤 创建管理员账号...');
       const bcrypt = await import('bcryptjs');
-      const passwordHash = await bcrypt.hash('admin123', 10);
+      const crypto = await import('crypto');
+      
+      // 优先使用环境变量中的密码，否则生成随机高强度密码
+      const adminPassword = process.env.ADMIN_PASSWORD || crypto.randomBytes(16).toString('base64').slice(0, 20);
+      const passwordHash = await bcrypt.hash(adminPassword, 10);
       
       const { error: createAdminError } = await client
         .from('admin_users')
@@ -339,7 +344,8 @@ export async function POST(request: NextRequest) {
         results.errors.push(`创建管理员失败: ${createAdminError.message}`);
       } else {
         results.admin_created = true;
-        console.log('  ✅ 管理员账号已创建: admin / admin123');
+        results.admin_password = adminPassword; // 仅在创建时返回一次
+        console.log('  ✅ 管理员账号已创建');
       }
     } else {
       console.log('👤 管理员账号已存在，跳过创建');
