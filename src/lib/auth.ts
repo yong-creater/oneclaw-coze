@@ -118,6 +118,7 @@ export async function authenticateAdmin(username: string, password: string): Pro
 export async function validateSession(token: string): Promise<AdminUser | null> {
   const decoded = await verifyToken(token);
   if (!decoded) {
+    console.log('[Auth] Token verification failed');
     return null;
   }
   
@@ -131,11 +132,13 @@ export async function validateSession(token: string): Promise<AdminUser | null> 
     .single();
   
   if (error || !session) {
+    console.log('[Auth] Session not found in DB:', error?.message);
     return null;
   }
   
   // 检查是否过期
   if (new Date(session.expires_at) < new Date()) {
+    console.log('[Auth] Session expired');
     // 删除过期会话
     await client.from('admin_sessions').delete().eq('token', token);
     return null;
@@ -149,8 +152,11 @@ export async function validateSession(token: string): Promise<AdminUser | null> 
     .single();
   
   if (userError || !user || !user.is_active) {
+    console.log('[Auth] User not found or inactive:', userError?.message);
     return null;
   }
+  
+  console.log('[Auth] Session validated for user:', user.username);
   
   return {
     id: user.id,
