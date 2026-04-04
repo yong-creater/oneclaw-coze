@@ -14,7 +14,8 @@ export function useUserId(): string {
       id = 'user_' + Math.random().toString(36).substr(2, 9) + Date.now();
       localStorage.setItem('oneclaw_user_id', id);
     }
-    setUserId(id);
+    // 使用 setTimeout 避免同步 setState 警告
+    setTimeout(() => setUserId(id), 0);
   }, []);
 
   return userId;
@@ -179,7 +180,8 @@ export function useOnline() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    setIsOnline(navigator.onLine);
+    // 使用 setTimeout 避免同步 setState 警告
+    setTimeout(() => setIsOnline(navigator.onLine), 0);
     
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);

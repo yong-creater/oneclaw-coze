@@ -333,8 +333,8 @@ function CompareContent() {
                 {/* 免费权益 */}
                 <CompareRow
                   label="免费类型"
-                  values={tools.map(t => (
-                    <Badge className={
+                  values={tools.map((t, idx) => (
+                    <Badge key={idx} className={
                       t.free_type === '完全免费' ? 'bg-green-100 text-green-700' :
                       t.free_type === '免费额度' ? 'bg-blue-100 text-blue-700' :
                       'bg-slate-100 text-slate-700'
@@ -351,8 +351,8 @@ function CompareContent() {
                 {/* 核心功能 */}
                 <CompareRow
                   label="核心功能"
-                  values={tools.map(t => (
-                    <div className="flex flex-wrap gap-1">
+                  values={tools.map((t, idx) => (
+                    <div key={idx} className="flex flex-wrap gap-1">
                       {t.feature_tags.slice(0, 4).map(tag => (
                         <span key={tag} className="text-xs px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded">
                           {tag}
@@ -400,8 +400,8 @@ function CompareContent() {
                 {/* 核心优势 */}
                 <CompareRow
                   label="核心优势"
-                  values={tools.map(t => (
-                    <ul className="space-y-1">
+                  values={tools.map((t, idx) => (
+                    <ul key={idx} className="space-y-1">
                       {t.advantages.map((a, i) => (
                         <li key={i} className="flex items-start gap-1 text-sm text-green-600 dark:text-green-400">
                           <Check className="w-3 h-3 mt-0.5 flex-shrink-0" />
@@ -416,8 +416,8 @@ function CompareContent() {
                 {/* 局限性 */}
                 <CompareRow
                   label="局限性"
-                  values={tools.map(t => (
-                    <ul className="space-y-1">
+                  values={tools.map((t, idx) => (
+                    <ul key={idx} className="space-y-1">
                       {t.limitations.length > 0 ? t.limitations.map((l, i) => (
                         <li key={i} className="flex items-start gap-1 text-sm text-red-600 dark:text-red-400">
                           <X className="w-3 h-3 mt-0.5 flex-shrink-0" />
@@ -431,8 +431,9 @@ function CompareContent() {
                 {/* 直达入口 */}
                 <CompareRow
                   label="直达入口"
-                  values={tools.map(t => (
+                  values={tools.map((t, idx) => (
                     <Button
+                      key={idx}
                       size="sm"
                       className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
                       onClick={() => window.open(t.promotion_url || t.official_url, '_blank')}

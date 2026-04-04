@@ -14,7 +14,9 @@ function loadEnv(): void {
   }
 
   try {
+    // 尝试动态加载 dotenv
     try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       require('dotenv').config();
       if (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY) {
         envLoaded = true;
