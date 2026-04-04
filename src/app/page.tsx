@@ -1050,8 +1050,11 @@ export default function HomePage() {
               <AnimatedLobster size={24} />
               <span className="text-sm text-slate-500 dark:text-slate-400">© 2024 OneClaw. All rights reserved.</span>
             </div>
-            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
               <a href="mailto:1017760688@qq.com" className="hover:text-orange-500">联系邮箱</a>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">
+                渝ICP备2026004291号-2
+              </a>
             </div>
           </div>
         </div>
