@@ -139,29 +139,29 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <Card className="text-center bg-gradient-to-br from-red-500 to-red-600 text-white border-0">
               <CardContent className="pt-6">
-                <p className="text-4xl font-bold mb-2">117+</p>
+                <p className="text-4xl font-bold mb-2">520+</p>
                 <p className="text-sm opacity-80">精选工具</p>
               </CardContent>
             </Card>
             
             <Card className="text-center bg-gradient-to-br from-orange-500 to-orange-600 text-white border-0">
               <CardContent className="pt-6">
-                <p className="text-4xl font-bold mb-2">10万+</p>
-                <p className="text-sm opacity-80">月活用户</p>
+                <p className="text-4xl font-bold mb-2">14</p>
+                <p className="text-sm opacity-80">分类覆盖</p>
               </CardContent>
             </Card>
             
             <Card className="text-center bg-gradient-to-br from-amber-500 to-amber-600 text-white border-0">
               <CardContent className="pt-6">
-                <p className="text-4xl font-bold mb-2">50万+</p>
-                <p className="text-sm opacity-80">工具点击</p>
+                <p className="text-4xl font-bold mb-2">131+</p>
+                <p className="text-sm opacity-80">提示词模板</p>
               </CardContent>
             </Card>
             
             <Card className="text-center bg-gradient-to-br from-rose-500 to-rose-600 text-white border-0">
               <CardContent className="pt-6">
-                <p className="text-4xl font-bold mb-2">99%</p>
-                <p className="text-sm opacity-80">用户满意度</p>
+                <p className="text-4xl font-bold mb-2">40+</p>
+                <p className="text-sm opacity-80">专业教程</p>
               </CardContent>
             </Card>
           </div>

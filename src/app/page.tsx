@@ -1032,10 +1032,9 @@ export default function HomePage() {
             <div>
               <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">关于我们</h3>
               <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
-                <li><span className="hover:text-orange-500 cursor-pointer">关于OneClaw</span></li>
-                <li><span className="hover:text-orange-500 cursor-pointer">收录标准</span></li>
-                <li><span className="hover:text-orange-500 cursor-pointer">商务合作</span></li>
-                <li><span className="hover:text-orange-500 cursor-pointer">联系我们</span></li>
+                <li><Link href="/about" className="hover:text-orange-500">关于OneClaw</Link></li>
+                <li><a href="mailto:1017760688@qq.com" className="hover:text-orange-500">商务合作</a></li>
+                <li><a href="mailto:1017760688@qq.com" className="hover:text-orange-500">联系我们</a></li>
               </ul>
             </div>
             <div>
@@ -1052,8 +1051,7 @@ export default function HomePage() {
               <span className="text-sm text-slate-500 dark:text-slate-400">© 2024 OneClaw. All rights reserved.</span>
             </div>
             <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-              <span className="hover:text-orange-500 cursor-pointer">用户协议</span>
-              <span className="hover:text-orange-500 cursor-pointer">隐私政策</span>
+              <a href="mailto:1017760688@qq.com" className="hover:text-orange-500">联系邮箱</a>
             </div>
           </div>
         </div>
