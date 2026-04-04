@@ -67,7 +67,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       
       {/* 敲键盘的酷龙虾 */}
       <Image
-        src="/lobster-logo.png?v=8"
+        src="/lobster-logo.png?v=9"
         alt="OneClaw 龙虾"
         width={size}
         height={size}
