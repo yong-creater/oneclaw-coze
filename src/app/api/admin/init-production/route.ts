@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { validateSession } from '@/lib/auth';
 
 // 工具数据类型定义
 interface ToolData {
@@ -302,6 +303,34 @@ const TUTORIALS = [
 export async function POST(request: NextRequest) {
   try {
     const client = getSupabaseClient();
+    
+    // 检查是否已有管理员账号
+    const { data: existingAdmin } = await client
+      .from('admin_users')
+      .select('id')
+      .maybeSingle();
+    
+    // 如果已有管理员，需要认证
+    if (existingAdmin) {
+      const token = request.cookies.get('admin_token')?.value;
+      if (!token) {
+        return NextResponse.json({ 
+          success: false, 
+          error: '未授权访问，请先登录',
+          code: 'UNAUTHORIZED'
+        }, { status: 401 });
+      }
+
+      const admin = await validateSession(token);
+      if (!admin) {
+        return NextResponse.json({ 
+          success: false, 
+          error: '登录已过期，请重新登录',
+          code: 'SESSION_EXPIRED'
+        }, { status: 401 });
+      }
+    }
+    
     const results = {
       categories: 0,
       tags: 0,
@@ -315,12 +344,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🚀 开始初始化生产环境数据...');
 
-    // 0. 检查并创建管理员账号
-    const { data: existingAdmin, error: adminCheckError } = await client
-      .from('admin_users')
-      .select('id')
-      .maybeSingle();
-
+    // 0. 检查并创建管理员账号（如果不存在）
     if (!existingAdmin) {
       console.log('👤 创建管理员账号...');
       const bcrypt = await import('bcryptjs');

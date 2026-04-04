@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 仅用于初始化场景：当只有一个admin账号时允许重置密码
+// 仅用于开发环境初始化场景：重置管理员密码
+// 生产环境应该禁用此API
 export async function POST(request: NextRequest) {
   try {
+    // 检查是否为开发环境
+    if (process.env.COZE_PROJECT_ENV === 'PROD') {
+      return NextResponse.json({ 
+        success: false, 
+        error: '生产环境禁止使用此接口' 
+      }, { status: 403 });
+    }
+
     const body = await request.json();
     const { username, new_password } = body;
 

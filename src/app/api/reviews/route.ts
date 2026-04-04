@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     
     const { data: reviews, error, count } = await client
       .from('user_reviews')
-      .select('*, user_ratings(effect_score, usability_score, quota_score, stability_score, overall_score)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('tool_id', toolId)
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
@@ -30,9 +30,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
 
+    // 如果有评论，获取对应的评分数据
+    let reviewsWithRatings = reviews || [];
+    if (reviews && reviews.length > 0) {
+      const userIds = reviews.map(r => r.user_id);
+      const { data: ratings } = await client
+        .from('user_ratings')
+        .select('user_id, effect_score, usability_score, quota_score, stability_score, overall_score')
+        .eq('tool_id', toolId)
+        .in('user_id', userIds);
+
+      // 合并评分数据
+      const ratingsMap = new Map((ratings || []).map(r => [r.user_id, r]));
+      reviewsWithRatings = reviews.map(review => ({
+        ...review,
+        user_rating: ratingsMap.get(review.user_id) || null
+      }));
+    }
+
     return NextResponse.json({
       success: true,
-      data: reviews || [],
+      data: reviewsWithRatings,
       pagination: {
         page,
         limit,

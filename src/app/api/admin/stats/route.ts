@@ -1,9 +1,29 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { validateSession } from '@/lib/auth';
 
 // 获取后台统计数据
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // 验证管理员身份
+    const token = request.cookies.get('admin_token')?.value;
+    if (!token) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '未授权访问，请先登录',
+        code: 'UNAUTHORIZED'
+      }, { status: 401 });
+    }
+
+    const admin = await validateSession(token);
+    if (!admin) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '登录已过期，请重新登录',
+        code: 'SESSION_EXPIRED'
+      }, { status: 401 });
+    }
+
     const client = getSupabaseClient();
 
     // 并行获取所有统计数据
