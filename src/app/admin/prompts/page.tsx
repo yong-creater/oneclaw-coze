@@ -62,8 +62,8 @@ export default function PromptsAdminPage() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
     search: '',
-    category: '',
-    status: '',
+    category: 'all',
+    status: 'all',
   });
   
   // 编辑弹窗
@@ -85,8 +85,8 @@ export default function PromptsAdminPage() {
       params.set('page', pagination.page.toString());
       params.set('limit', pagination.limit.toString());
       if (filters.search) params.set('search', filters.search);
-      if (filters.category) params.set('category', filters.category);
-      if (filters.status) params.set('status', filters.status);
+      if (filters.category && filters.category !== 'all') params.set('category', filters.category);
+      if (filters.status && filters.status !== 'all') params.set('status', filters.status);
       
       const res = await fetch(`/api/admin/prompts?${params}`);
       const data = await res.json();
@@ -222,7 +222,7 @@ export default function PromptsAdminPage() {
                 <SelectValue placeholder="分类" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">全部分类</SelectItem>
+                <SelectItem value="all">全部分类</SelectItem>
                 {CATEGORIES.map(cat => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
@@ -233,12 +233,12 @@ export default function PromptsAdminPage() {
                 <SelectValue placeholder="状态" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">全部状态</SelectItem>
+                <SelectItem value="all">全部状态</SelectItem>
                 <SelectItem value="published">已发布</SelectItem>
                 <SelectItem value="draft">草稿</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => setFilters({ search: '', category: '', status: '' })}>
+            <Button variant="outline" onClick={() => setFilters({ search: '', category: 'all', status: 'all' })}>
               重置
             </Button>
           </div>
