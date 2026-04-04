@@ -55,11 +55,11 @@
 │   │   │   ├── categories/ # 分类管理
 │   │   │   ├── tags/       # 标签管理
 │   │   │   └── reviews/    # 评论审核
-│   │   ├── workspace/      # 用户工作台(P1)
-│   │   ├── rankings/       # 榜单中心(P1)
-│   │   ├── resources/      # 资源中心(P1)
-│   │   ├── compare/        # 工具对比(P2)
-│   │   ├── dashboard/      # 数据看板(P3)
+│   │   ├── workspace/      # 用户工作台
+│   │   ├── rankings/       # 榜单中心
+│   │   ├── prompts/        # 提示词库(一级入口)
+│   │   ├── tutorials/      # 教程库(一级入口)
+│   │   ├── membership/     # 会员中心
 │   │   └── api/            # API路由
 │   │       ├── tools/      # 前台工具API (含[id]详情)
 │   │       ├── categories/ # 分类API
@@ -71,10 +71,8 @@
 │   │       ├── rankings/   # 榜单API
 │   │       ├── tutorials/  # 教程API
 │   │       ├── prompts/    # Prompt模板API
-│   │       ├── compare/    # 对比API
 │   │       ├── members/    # 会员API
 │   │       ├── ads/        # 广告API
-│   │       ├── dashboard/  # 数据看板API
 │   │       └── admin/      # 后台管理API
 │   ├── components/ui/      # Shadcn UI 组件库
 │   ├── data/               # 静态数据（旧）
@@ -144,7 +142,6 @@ interface Tool {
 | `/api/rankings` | GET | 榜单数据(热门、免费、新品) |
 | `/api/tutorials` | GET/POST | 教程库 |
 | `/api/prompts` | GET/POST | Prompt模板库 |
-| `/api/compare` | GET | 工具对比数据 |
 | `/api/members` | GET/POST | 会员信息管理 |
 | `/api/ads` | GET/POST | 广告位管理 |
 
@@ -160,20 +157,17 @@ interface Tool {
 
 ## 前台功能模块
 
-### P1 核心功能
+### 核心功能
 1. **用户评分与短评** - 四维评分(效果、易用性、额度、稳定性) + 文字评论
 2. **用户收藏与工作台** (`/workspace`) - 收藏管理、浏览历史、评分记录
 3. **榜单中心** (`/rankings`) - 热门榜单、免费神器、新品上线、场景化榜单
-4. **资源中心** (`/resources`) - Prompt模板库、教程库
+4. **提示词库** (`/prompts`) - AI视频创作提示词模板库
+5. **教程库** (`/tutorials`) - AI工具使用教程
 
-### P2 增值功能
-1. **工具对比** (`/compare`) - 2-4个工具横向对比
-2. **会员体系** - free/pro/enterprise三级会员
-3. **付费收录** - sponsor_type字段支持basic/premium/diamond
-4. **广告系统** - 多位置广告位管理
-
-### P3 高级功能
-1. **数据看板** (`/dashboard`) - 行业数据统计、工具分析
+### 增值功能
+1. **会员体系** - 月度/年度/终身三级会员
+2. **付费收录** - sponsor_type字段支持basic/premium/diamond
+3. **广告系统** - 多位置广告位管理
 
 ## 后台管理系统
 

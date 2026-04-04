@@ -17,11 +17,10 @@ import {
   ExternalLink, Video, Search, Film, Wand2, Palette, Music, 
   Mic, Users, ChevronRight, Sparkles, Star, X, Check,
   ChevronLeft, ChevronRight as ChevronRightIcon, Heart, MessageSquare,
-  ThumbsUp, History, User, Flame, Gift, Trophy, ArrowLeftRight, Crown
+  ThumbsUp, History, User, Flame, Gift, Trophy, BookOpen, Lightbulb
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
-import CompareBar, { getCompareTools, saveCompareTools, type CompareTool } from '@/components/CompareBar';
 import SponsorBadge, { isSponsorActive } from '@/components/SponsorBadge';
 import AdBanner from '@/components/AdBanner';
 import UserButton from '@/components/UserButton';
@@ -175,102 +174,11 @@ export default function HomePage() {
   const [newReview, setNewReview] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // 对比状态
-  const [compareTools, setCompareTools] = useState<CompareTool[]>([]);
-  const [isMember, setIsMember] = useState(false);
-  const maxCompare = isMember ? 3 : 2;
-
-  // 初始化用户ID和会员状态
+  // 初始化用户ID
   useEffect(() => {
     const id = getUserId();
     setUserId(id);
-    // 加载对比工具
-    setCompareTools(getCompareTools());
-    // 监听对比变化
-    const handleCompareChange = () => setCompareTools(getCompareTools());
-    window.addEventListener('compareToolsChanged', handleCompareChange);
-    
-    // 检查会员状态
-    const checkMemberStatus = async () => {
-      if (id) {
-        try {
-          const res = await fetch(`/api/members?user_id=${id}`);
-          const data = await res.json();
-          if (data.success && data.data?.is_active) {
-            setIsMember(true);
-          }
-        } catch (error) {
-          console.error('检查会员状态失败:', error);
-        }
-      }
-    };
-    checkMemberStatus();
-    
-    return () => window.removeEventListener('compareToolsChanged', handleCompareChange);
   }, []);
-
-  // 切换对比
-  const toggleCompare = (tool: Tool, e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    const isSelected = compareTools.some(t => t.id === tool.id);
-    
-    if (isSelected) {
-      // 移除
-      const newTools = compareTools.filter(t => t.id !== tool.id);
-      saveCompareTools(newTools);
-      setCompareTools(newTools);
-    } else {
-      // 添加
-      if (compareTools.length >= maxCompare) {
-        return; // 已达上限
-      }
-      if (compareTools.length > 0 && compareTools[0].category_id !== tool.category_id) {
-        return; // 不同分类
-      }
-      
-      const newTool: CompareTool = {
-        id: tool.id,
-        name: tool.name,
-        logo: tool.logo,
-        category_id: tool.category_id,
-        category_name: tool.categories?.name || '',
-      };
-      
-      const newTools = [...compareTools, newTool];
-      saveCompareTools(newTools);
-      setCompareTools(newTools);
-    }
-  };
-
-  // 检查是否可对比
-  const canCompare = (tool: Tool): { canAdd: boolean; reason: string } => {
-    const isSelected = compareTools.some(t => t.id === tool.id);
-    if (isSelected) return { canAdd: true, reason: '' };
-    
-    if (compareTools.length >= maxCompare) {
-      return { canAdd: false, reason: '已达上限' };
-    }
-    if (compareTools.length > 0 && compareTools[0].category_id !== tool.category_id) {
-      return { canAdd: false, reason: '需同分类' };
-    }
-    
-    return { canAdd: true, reason: '' };
-  };
-
-  // 从对比列表移除
-  const removeFromCompare = (toolId: number) => {
-    const newTools = compareTools.filter(t => t.id !== toolId);
-    saveCompareTools(newTools);
-    setCompareTools(newTools);
-  };
-
-  // 清空对比列表
-  const clearCompare = () => {
-    saveCompareTools([]);
-    setCompareTools([]);
-  };
 
   // 获取分类
   const fetchCategories = async () => {
@@ -576,16 +484,16 @@ export default function HomePage() {
                 <Video className="w-4 h-4" />
                 <span>共 {pagination.total} 款工具</span>
               </div>
-              <Link href="/compare">
-                <Button variant="ghost" size="sm" className="gap-1 hidden lg:flex">
-                  <ArrowLeftRight className="w-4 h-4" />
-                  对比
+              <Link href="/prompts">
+                <Button variant="ghost" size="sm" className="gap-1">
+                  <Lightbulb className="w-4 h-4" />
+                  <span className="hidden sm:inline">提示词库</span>
                 </Button>
               </Link>
-              <Link href="/resources">
+              <Link href="/tutorials">
                 <Button variant="ghost" size="sm" className="gap-1">
-                  <Sparkles className="w-4 h-4" />
-                  <span className="hidden sm:inline">资源</span>
+                  <BookOpen className="w-4 h-4" />
+                  <span className="hidden sm:inline">教程库</span>
                 </Button>
               </Link>
               <UserButton />
@@ -775,9 +683,6 @@ export default function HomePage() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {tools.map(tool => {
-                const isCompareSelected = compareTools.some(t => t.id === tool.id);
-                const { canAdd, reason } = canCompare(tool);
-                
                 return (
                   <Card
                     key={tool.id}
@@ -799,35 +704,16 @@ export default function HomePage() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2 mb-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
-                                {tool.name}
-                              </h3>
-                              {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
-                                <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
-                              )}
-                              {tool.is_featured && !tool.sponsor_type && (
-                                <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
-                              )}
-                            </div>
-                            {/* 对比按钮 */}
-                            <Button
-                              variant={isCompareSelected ? 'default' : 'outline'}
-                              size="sm"
-                              className={`h-7 text-xs gap-1 flex-shrink-0 ${
-                                isCompareSelected 
-                                  ? 'bg-orange-500 hover:bg-orange-600 text-white' 
-                                  : !canAdd && !isCompareSelected
-                                    ? 'opacity-50 cursor-not-allowed'
-                                    : ''
-                              }`}
-                              disabled={!canAdd && !isCompareSelected}
-                              onClick={(e) => toggleCompare(tool, e)}
-                            >
-                              <ArrowLeftRight className="w-3 h-3" />
-                              {isCompareSelected ? '已选' : reason || '对比'}
-                            </Button>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
+                              {tool.name}
+                            </h3>
+                            {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
+                              <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
+                            )}
+                            {tool.is_featured && !tool.sponsor_type && (
+                              <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
+                            )}
                           </div>
                           <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">
                             {tool.highlight}
@@ -895,8 +781,8 @@ export default function HomePage() {
               <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">功能导航</h3>
               <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
                 <li><Link href="/rankings" className="hover:text-orange-500">榜单中心</Link></li>
-                <li><Link href="/resources" className="hover:text-orange-500">资源中心</Link></li>
-                <li><Link href="/compare" className="hover:text-orange-500">工具对比</Link></li>
+                <li><Link href="/prompts" className="hover:text-orange-500">提示词库</Link></li>
+                <li><Link href="/tutorials" className="hover:text-orange-500">教程库</Link></li>
                 <li><Link href="/workspace" className="hover:text-orange-500">我的工作台</Link></li>
               </ul>
             </div>
@@ -940,9 +826,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
-      {/* 对比栏 */}
-      <CompareBar />
 
       {/* 工具详情弹窗 */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
