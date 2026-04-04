@@ -489,6 +489,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 7. 初始化微信配置（如果不存在）
+    console.log('📱 初始化微信配置...');
+    const { data: existingWechatConfig } = await client
+      .from('wechat_config')
+      .select('id')
+      .maybeSingle();
+
+    if (!existingWechatConfig) {
+      const { error: wechatError } = await client
+        .from('wechat_config')
+        .insert({
+          app_id: '',
+          app_secret: '',
+          qr_code_url: '',
+          token: '',
+          encoding_aes_key: '',
+        });
+
+      if (wechatError) {
+        results.errors.push(`微信配置初始化失败: ${wechatError.message}`);
+      } else {
+        console.log('  ✅ 微信配置已初始化（请在后台完善配置）');
+      }
+    } else {
+      console.log('  📱 微信配置已存在，跳过初始化');
+    }
+
     console.log('✨ 初始化完成！', results);
 
     return NextResponse.json({

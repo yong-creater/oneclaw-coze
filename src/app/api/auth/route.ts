@@ -5,10 +5,11 @@ import {
   deleteUserSession, 
   mockWechatLogin,
   getWechatQRCode,
-  createOrGetUser
+  createOrGetUser,
+  checkLoginRequest
 } from '@/lib/user-auth';
 
-// 获取登录二维码
+// 获取登录二维码 / 检查登录状态
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -23,6 +24,43 @@ export async function GET(request: NextRequest) {
           qrUrl,
           sceneId
         }
+      });
+    }
+    
+    // 检查扫码登录状态
+    if (action === 'check') {
+      const sceneId = searchParams.get('sceneId');
+      if (!sceneId) {
+        return NextResponse.json({
+          success: false,
+          error: '缺少sceneId参数'
+        }, { status: 400 });
+      }
+      
+      const result = await checkLoginRequest(sceneId);
+      
+      if (result.status === 'confirmed' && result.user && result.token) {
+        // 登录成功，设置cookie
+        const response = NextResponse.json({
+          success: true,
+          status: 'confirmed',
+          data: { user: result.user, token: result.token }
+        });
+        
+        response.cookies.set('user_token', result.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/'
+        });
+        
+        return response;
+      }
+      
+      return NextResponse.json({
+        success: true,
+        status: result.status
       });
     }
     

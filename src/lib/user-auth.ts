@@ -160,22 +160,109 @@ export async function deleteUserSession(token: string): Promise<void> {
   await client.from('user_sessions').delete().eq('token', token);
 }
 
+// 创建登录请求（用于扫码登录状态跟踪）
+export async function createLoginRequest(sceneId: string): Promise<void> {
+  const client = getSupabaseClient();
+  
+  // 设置5分钟过期
+  const expiresAt = new Date();
+  expiresAt.setMinutes(expiresAt.getMinutes() + 5);
+  
+  await client.from('login_requests').insert({
+    scene_id: sceneId,
+    status: 'pending', // pending, scanned, confirmed, expired
+    expires_at: expiresAt.toISOString()
+  });
+}
+
+// 检查登录请求状态
+export async function checkLoginRequest(sceneId: string): Promise<{
+  status: 'pending' | 'scanned' | 'confirmed' | 'expired';
+  user?: User;
+  token?: string;
+}> {
+  const client = getSupabaseClient();
+  
+  const { data: loginRequest, error } = await client
+    .from('login_requests')
+    .select('*')
+    .eq('scene_id', sceneId)
+    .maybeSingle();
+  
+  if (error || !loginRequest) {
+    return { status: 'expired' };
+  }
+  
+  // 检查是否过期
+  if (new Date(loginRequest.expires_at) < new Date()) {
+    await client.from('login_requests').delete().eq('scene_id', sceneId);
+    return { status: 'expired' };
+  }
+  
+  // 如果已确认，获取用户信息
+  if (loginRequest.status === 'confirmed' && loginRequest.user_id) {
+    const user = await getUserById(loginRequest.user_id);
+    const token = loginRequest.token;
+    
+    // 清理登录请求
+    await client.from('login_requests').delete().eq('scene_id', sceneId);
+    
+    return { status: 'confirmed', user: user || undefined, token };
+  }
+  
+  return { status: loginRequest.status };
+}
+
+// 更新登录请求状态（微信回调时调用）
+export async function updateLoginRequest(
+  sceneId: string, 
+  status: 'scanned' | 'confirmed',
+  userId?: string,
+  token?: string
+): Promise<void> {
+  const client = getSupabaseClient();
+  
+  await client
+    .from('login_requests')
+    .update({
+      status,
+      user_id: userId,
+      token,
+      updated_at: new Date().toISOString()
+    })
+    .eq('scene_id', sceneId);
+}
+
 // 获取微信二维码URL
 export async function getWechatQRCode(): Promise<{ qrUrl: string; sceneId: string }> {
   const client = getSupabaseClient();
   
   const { data: config } = await client
     .from('wechat_config')
-    .select('qr_code_url')
+    .select('qr_code_url, app_id, app_secret')
     .single();
   
   // 生成唯一的场景ID（用于标识这次登录请求）
   const sceneId = `login_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
   
-  return {
-    qrUrl: config?.qr_code_url || '',
-    sceneId
-  };
+  // 创建登录请求记录
+  await createLoginRequest(sceneId);
+  
+  // 如果有配置，生成带参数的二维码URL
+  // 实际生产环境需要调用微信API生成带参数二维码
+  // 这里返回配置的二维码URL或默认占位图
+  
+  const qrUrl = config?.qr_code_url || generatePlaceholderQR(sceneId);
+  
+  return { qrUrl, sceneId };
+}
+
+// 生成占位二维码（开发环境）
+function generatePlaceholderQR(sceneId: string): string {
+  // 使用在线二维码生成服务生成一个带场景ID的二维码
+  // 实际生产环境应该调用微信API
+  const content = `oneclaw://login?scene=${sceneId}`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(content)}`;
 }
 
 // 模拟微信登录（开发环境使用）

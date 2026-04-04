@@ -207,6 +207,53 @@ interface Tool {
    - 一级分类CRUD
    - 二级分类展示
    - 排序设置
+   
+4. **标签管理** (`/admin/tags`)
+   - 标签分类展示
+   - 标签CRUD
+   - 按类型筛选
+
+5. **评论审核** (`/admin/reviews`)
+   - 待审核评论列表
+   - 通过/拒绝操作
+   - 评论详情查看
+
+6. **微信配置** (`/admin/wechat`)
+   - 公众号AppID/AppSecret配置
+   - 登录二维码URL配置
+   - 消息服务器配置
+
+## 用户登录系统
+
+### 微信扫码登录
+
+C端用户通过微信扫码登录，登录后可进行评分、收藏、评论等互动操作。
+
+**登录流程：**
+1. 用户点击登录按钮，打开登录弹窗
+2. 前端请求 `/api/auth?action=qrcode` 获取二维码
+3. 前端轮询 `/api/auth?action=check&sceneId=xxx` 检查扫码状态
+4. 用户扫码后状态变为 `scanned`，确认后变为 `confirmed`
+5. 登录成功，设置 `user_token` Cookie（有效期30天）
+
+**开发环境：**
+- 支持模拟登录按钮，方便开发调试
+- 模拟登录会创建测试用户并返回token
+
+**生产环境配置：**
+1. 在微信公众平台获取 AppID 和 AppSecret
+2. 配置服务器URL：`https://oneclaw.shop/api/wechat/callback`
+3. 生成带参数的二维码，将URL配置到后台
+4. 实现微信消息回调处理（需单独开发）
+
+### 用户数据表
+
+| 表名 | 说明 |
+|------|------|
+| `users` | 用户信息表 |
+| `user_sessions` | 用户会话表 |
+| `login_requests` | 登录请求表（扫码状态跟踪） |
+| `wechat_config` | 微信公众号配置表 |
 
 4. **标签管理** (`/admin/tags`)
    - 标签分类展示

@@ -16,7 +16,8 @@ import {
   Users,
   CreditCard,
   LogOut,
-  Loader2
+  Loader2,
+  Smartphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -29,6 +30,7 @@ const navigation = [
   { name: '会员管理', href: '/admin/members', icon: Users },
   { name: '订单管理', href: '/admin/orders', icon: CreditCard },
   { name: '广告管理', href: '/admin/ads', icon: Megaphone },
+  { name: '微信配置', href: '/admin/wechat', icon: Smartphone },
 ];
 
 export default function AdminLayout({
