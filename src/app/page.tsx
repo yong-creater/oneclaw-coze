@@ -1025,7 +1025,7 @@ export default function HomePage() {
             </div>
             
             <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
-              <span>© 2024 OneClaw</span>
+              <span>© 2025 OneClaw</span>
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
                 渝ICP备2026004291号-2
               </a>

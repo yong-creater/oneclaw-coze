@@ -189,7 +189,7 @@ export default async function TutorialDetailPage({
         <footer className="bg-white border-t border-slate-200 py-6 mt-12">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <p className="text-sm text-slate-500">
-              © 2024 OneClaw · AI工具导航平台
+              © 2025 OneClaw · AI工具导航平台
             </p>
           </div>
         </footer>

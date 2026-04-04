@@ -277,7 +277,7 @@ export default function AboutPage() {
             <span className="text-2xl">🦞</span>
             <span className="font-medium text-gray-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
           </div>
-          <p>© 2024 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 用心服务每一位创作者</p>
+          <p>© 2025 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 用心服务每一位创作者</p>
           <p className="mt-2 text-sm">
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">
               渝ICP备2026004291号-2

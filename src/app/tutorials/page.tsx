@@ -266,7 +266,7 @@ export default function TutorialsPage() {
             AI工具使用教程 · 助力创作者高效产出
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-500">
-            © 2024 OneClaw · <a href="mailto:1017760688@qq.com" className="hover:text-orange-500">1017760688@qq.com</a>
+            © 2025 OneClaw · <a href="mailto:1017760688@qq.com" className="hover:text-orange-500">1017760688@qq.com</a>
             <span className="mx-2">·</span>
             <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">
               渝ICP备2026004291号-2
