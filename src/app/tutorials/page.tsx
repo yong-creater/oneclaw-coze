@@ -28,7 +28,9 @@ interface Tutorial {
 // 难度颜色
 const DIFFICULTY_COLORS: Record<string, string> = {
   '初级': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  '入门': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   '中级': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+  '进阶': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   '高级': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
 };
 

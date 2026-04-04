@@ -50,7 +50,9 @@ const CATEGORIES = [
 ];
 
 const DIFFICULTY_COLORS: Record<string, string> = {
+  '初级': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   '入门': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  '中级': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   '进阶': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   '高级': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
 };
@@ -433,8 +435,8 @@ export default function TutorialsAdminPage() {
                     <SelectValue placeholder="选择难度" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="入门">入门</SelectItem>
-                    <SelectItem value="进阶">进阶</SelectItem>
+                    <SelectItem value="初级">初级</SelectItem>
+                    <SelectItem value="中级">中级</SelectItem>
                     <SelectItem value="高级">高级</SelectItem>
                   </SelectContent>
                 </Select>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye, ThumbsUp, BookOpen, User, Calendar, Share2 } from 'lucide-react';
 import { AnimatedLobster } from '@/components/AnimatedLobster';
-import { marked } from 'marked';
 
 interface Tutorial {
   id: number;
@@ -28,23 +27,52 @@ interface Tutorial {
 
 const DIFFICULTY_COLORS: Record<string, string> = {
   '入门': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  '初级': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   '进阶': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  '中级': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   '高级': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
 };
 
-// 配置 marked 选项
-marked.setOptions({
-  breaks: true,
-  gfm: true,
-});
-
-// 将 Markdown 转换为 HTML
+// 简单的 Markdown 转 HTML 函数
 const renderMarkdown = (content: string): string => {
-  try {
-    return marked.parse(content) as string;
-  } catch {
-    return content;
-  }
+  if (!content) return '';
+  
+  let html = content;
+  
+  // 标题
+  html = html.replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-6 mb-3 text-slate-900 dark:text-white">$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-8 mb-4 text-slate-900 dark:text-white border-b pb-2">$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-8 mb-4 text-slate-900 dark:text-white">$1</h1>');
+  
+  // 粗体
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+  
+  // 链接
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-orange-500 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+  
+  // 行内代码
+  html = html.replace(/`([^`]+)`/g, '<code class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-sm font-mono">$1</code>');
+  
+  // 列表项
+  html = html.replace(/^- (.+)$/gm, '<li class="ml-4 mb-1">$1</li>');
+  html = html.replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 mb-1 list-decimal">$2</li>');
+  
+  // 段落（非空行且不是其他元素）
+  html = html.split('\n\n').map(block => {
+    if (block.trim() && !block.startsWith('<')) {
+      // 检查是否是列表组
+      if (block.match(/^- /m) || block.match(/^\d+\. /m)) {
+        return `<ul class="my-3 space-y-1">${block}</ul>`;
+      }
+      return `<p class="mb-4 leading-relaxed text-slate-700 dark:text-slate-300">${block}</p>`;
+    }
+    return block;
+  }).join('\n');
+  
+  // 换行
+  html = html.replace(/\n/g, '<br/>');
+  
+  return html;
 };
 
 export default function TutorialDetailPage() {
