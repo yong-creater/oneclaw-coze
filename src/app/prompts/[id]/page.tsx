@@ -93,7 +93,7 @@ export default async function PromptDetailPage({
           {/* 标签 */}
           {prompt.tags && prompt.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-6">
-              {prompt.tags.map((tag, index) => (
+              {prompt.tags.map((tag: string, index: number) => (
                 <span key={index} className="text-sm px-3 py-1 rounded-full bg-slate-100 text-slate-600">
                   {tag}
                 </span>
