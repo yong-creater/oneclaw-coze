@@ -128,11 +128,9 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-slate-200">
-            <p className="text-xs text-slate-500 text-center">
-              首次使用请联系管理员获取账号
-            </p>
-          </div>
+          <p className="text-xs text-slate-500 text-center mt-6">
+            首次使用请联系管理员获取账号
+          </p>
         </CardContent>
       </Card>
     </div>
