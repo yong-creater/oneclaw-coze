@@ -192,12 +192,14 @@ export default function RootLayout({
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <head>
+      <head suppressHydrationWarning>
         {/* 百度站长验证 - 请替换为您自己的验证码 */}
         <meta name="baidu-site-verification" content="oneclaw-baidu-verify" />
         
         {/* 百度自动推送 */}
-        <script
+        <Script
+          id="baidu-push"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function(){
@@ -233,16 +235,22 @@ export default function RootLayout({
         />
         
         {/* 结构化数据 */}
-        <script
+        <Script
+          id="jsonld-website"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <script
+        <Script
+          id="jsonld-organization"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
-        <script
+        <Script
+          id="jsonld-itemlist"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
       </head>
