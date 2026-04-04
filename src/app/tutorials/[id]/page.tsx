@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Eye, ThumbsUp, BookOpen, User, Calendar, Share2 } from 'lucide-react';
 import { AnimatedLobster } from '@/components/AnimatedLobster';
+import { marked } from 'marked';
 
 interface Tutorial {
   id: number;
@@ -29,6 +30,21 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   '入门': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   '进阶': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
   '高级': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+};
+
+// 配置 marked 选项
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+});
+
+// 将 Markdown 转换为 HTML
+const renderMarkdown = (content: string): string => {
+  try {
+    return marked.parse(content) as string;
+  } catch {
+    return content;
+  }
 };
 
 export default function TutorialDetailPage() {
@@ -205,7 +221,7 @@ export default function TutorialDetailPage() {
                 prose-headings:text-slate-900 dark:prose-headings:text-white
                 prose-a:text-orange-500 prose-a:no-underline hover:prose-a:underline
                 prose-img:rounded-lg prose-pre:bg-slate-100 dark:prose-pre:bg-slate-900"
-              dangerouslySetInnerHTML={{ __html: tutorial.content }}
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(tutorial.content) }}
             />
           </CardContent>
         </Card>
