@@ -84,8 +84,11 @@ export default function TutorialDetailPage() {
 
   useEffect(() => {
     const fetchTutorial = async () => {
+      const id = params?.id;
+      if (!id) return;
+      
       try {
-        const res = await fetch(`/api/tutorials/${params.id}`);
+        const res = await fetch(`/api/tutorials/${id}`);
         const data = await res.json();
         
         if (data.success) {
@@ -102,7 +105,7 @@ export default function TutorialDetailPage() {
     };
 
     fetchTutorial();
-  }, [params.id, router]);
+  }, [params, router]);
 
   const handleLike = async () => {
     if (!tutorial || liked) return;

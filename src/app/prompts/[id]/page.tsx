@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Copy, Check, FileText, User, Calendar, Share2 } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Sparkles, User, Calendar, Eye } from 'lucide-react';
 import { AnimatedLobster } from '@/components/AnimatedLobster';
 
 interface Prompt {
@@ -23,6 +23,20 @@ interface Prompt {
   tools?: { id: number; name: string; logo: string } | null;
 }
 
+const CATEGORY_ICONS: Record<string, string> = {
+  '视频生成': '🎬',
+  'AI绘画': '🎨',
+  '文案写作': '✍️',
+  '代码编程': '💻',
+  '数字人': '👤',
+  '音频生成': '🎵',
+  '图像处理': '🖼️',
+  '数据分析': '📊',
+  '营销文案': '📢',
+  '学习助手': '📚',
+  '其他': '📝',
+};
+
 export default function PromptDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -32,8 +46,11 @@ export default function PromptDetailPage() {
 
   useEffect(() => {
     const fetchPrompt = async () => {
+      const id = params?.id;
+      if (!id) return;
+      
       try {
-        const res = await fetch(`/api/prompts/${params.id}`);
+        const res = await fetch(`/api/prompts/${id}`);
         const data = await res.json();
         
         if (data.success) {
@@ -42,7 +59,7 @@ export default function PromptDetailPage() {
           router.push('/prompts');
         }
       } catch (error) {
-        console.error('获取Prompt失败:', error);
+        console.error('获取提示词失败:', error);
         router.push('/prompts');
       } finally {
         setLoading(false);
@@ -50,7 +67,7 @@ export default function PromptDetailPage() {
     };
 
     fetchPrompt();
-  }, [params.id, router]);
+  }, [params, router]);
 
   const handleCopy = async () => {
     if (!prompt) return;
@@ -58,36 +75,9 @@ export default function PromptDetailPage() {
     try {
       await navigator.clipboard.writeText(prompt.content);
       setCopied(true);
-      
-      // 增加使用次数
-      await fetch('/api/prompts', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: prompt.id })
-      });
-      
-      setPrompt(prev => prev ? { ...prev, uses: prev.uses + 1 } : null);
-      
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('复制失败:', error);
-    }
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: prompt?.title,
-          text: prompt?.content.slice(0, 100) + '...',
-          url: window.location.href
-        });
-      } catch (error) {
-        console.log('分享取消');
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      alert('链接已复制');
     }
   };
 
@@ -124,13 +114,11 @@ export default function PromptDetailPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* 标题区 */}
         <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl flex items-center justify-center text-xl">
+              {CATEGORY_ICONS[prompt.category] || '📝'}
+            </div>
             <Badge variant="outline">{prompt.category}</Badge>
-            {prompt.tags?.slice(0, 5).map((tag, i) => (
-              <Badge key={i} variant="secondary" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
           </div>
           
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4">
@@ -149,11 +137,22 @@ export default function PromptDetailPage() {
               {new Date(prompt.created_at).toLocaleDateString()}
             </span>
             <span className="flex items-center gap-1">
-              <Copy className="w-4 h-4" />
-              {prompt.uses} 次使用
+              <Eye className="w-4 h-4" />
+              {prompt.uses || 0} 次使用
             </span>
           </div>
         </div>
+
+        {/* 标签 */}
+        {prompt.tags && prompt.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {prompt.tags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         {/* 关联工具 */}
         {prompt.tools && (
@@ -167,7 +166,7 @@ export default function PromptDetailPage() {
                     className="w-10 h-10 rounded-lg object-cover"
                   />
                   <div>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">适用工具</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">关联工具</p>
                     <p className="font-medium text-slate-900 dark:text-white">{prompt.tools.name}</p>
                   </div>
                 </div>
@@ -183,70 +182,52 @@ export default function PromptDetailPage() {
         <Card className="bg-white dark:bg-slate-800 mb-6">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-slate-900 dark:text-white">Prompt内容</h2>
+              <h2 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-orange-500" />
+                提示词内容
+              </h2>
               <Button
+                variant="outline"
+                size="sm"
                 onClick={handleCopy}
-                className={copied ? "bg-green-500 hover:bg-green-600" : "bg-orange-500 hover:bg-orange-600"}
+                className="flex items-center gap-2"
               >
                 {copied ? (
                   <>
-                    <Check className="w-4 h-4 mr-2" />
+                    <Check className="w-4 h-4 text-green-500" />
                     已复制
                   </>
                 ) : (
                   <>
-                    <Copy className="w-4 h-4 mr-2" />
-                    复制使用
+                    <Copy className="w-4 h-4" />
+                    复制
                   </>
                 )}
               </Button>
             </div>
             
             <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <pre className="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-200 font-mono leading-relaxed overflow-x-auto">
+              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 font-mono leading-relaxed">
                 {prompt.content}
               </pre>
             </div>
           </CardContent>
         </Card>
 
-        {/* 使用提示 */}
-        <Card className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800/30 mb-6">
-          <CardContent className="p-4">
-            <h3 className="font-medium text-slate-900 dark:text-white mb-2">使用提示</h3>
-            <ul className="text-sm text-slate-600 dark:text-slate-300 space-y-1">
-              <li>• 点击"复制使用"按钮复制Prompt内容</li>
+        {/* 使用说明 */}
+        <Card className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800">
+          <CardContent className="p-6">
+            <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-3">
+              💡 使用技巧
+            </h3>
+            <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+              <li>• 点击「复制」按钮将提示词复制到剪贴板</li>
               <li>• 在对应的AI工具中粘贴使用</li>
-              <li>• 根据实际需求调整参数和细节</li>
-              <li>• 多次尝试可以获得更好的效果</li>
+              <li>• 可以根据具体需求修改提示词细节</li>
+              <li>• 好的提示词越具体，生成效果越好</li>
             </ul>
           </CardContent>
         </Card>
-
-        {/* 操作按钮 */}
-        <div className="flex items-center justify-center gap-4">
-          <Button
-            onClick={handleCopy}
-            size="lg"
-            className={copied ? "bg-green-500 hover:bg-green-600" : "bg-orange-500 hover:bg-orange-600"}
-          >
-            {copied ? (
-              <>
-                <Check className="w-4 h-4 mr-2" />
-                已复制到剪贴板
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4 mr-2" />
-                复制Prompt
-              </>
-            )}
-          </Button>
-          <Button variant="outline" size="lg" onClick={handleShare}>
-            <Share2 className="w-4 h-4 mr-2" />
-            分享
-          </Button>
-        </div>
       </main>
 
       {/* Footer */}
@@ -257,7 +238,7 @@ export default function PromptDetailPage() {
             <span className="font-bold text-lg text-slate-900 dark:text-white">OneClaw</span>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-            AI创作提示词库 · 激发无限创意
+            AI提示词库 · 助力创作者高效产出
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-500">
             © 2024 OneClaw · <a href="mailto:1017760688@qq.com" className="hover:text-orange-500">1017760688@qq.com</a>
