@@ -46,8 +46,8 @@ export default function AdminLayout({
 
   // 检查登录状态
   useEffect(() => {
-    // 登录页面不需要检查
-    if (pathname === '/admin/login') {
+    // 登录页面和修改密码页面不需要检查
+    if (pathname === '/admin/login' || pathname === '/admin/change-password') {
       setChecking(false);
       return;
     }
@@ -59,6 +59,12 @@ export default function AdminLayout({
         
         if (data.success && data.authenticated && data.data) {
           setUser(data.data);
+          
+          // 检查是否需要修改密码
+          if (data.data.must_change_password) {
+            router.push('/admin/change-password');
+            return;
+          }
         } else {
           router.push('/admin/login');
         }
@@ -82,8 +88,8 @@ export default function AdminLayout({
     }
   };
 
-  // 登录页面不显示布局
-  if (pathname === '/admin/login') {
+  // 登录页面和修改密码页面不显示布局
+  if (pathname === '/admin/login' || pathname === '/admin/change-password') {
     return <>{children}</>;
   }
 

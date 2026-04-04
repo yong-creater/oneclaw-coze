@@ -11,6 +11,7 @@ export interface AdminUser {
   email: string | null;
   role: string;
   is_active: boolean;
+  must_change_password?: boolean;
 }
 
 // 验证密码
@@ -71,7 +72,7 @@ export async function authenticateAdmin(username: string, password: string): Pro
   
   const { data: user, error } = await client
     .from('admin_users')
-    .select('id, username, password_hash, email, role, is_active')
+    .select('id, username, password_hash, email, role, is_active, must_change_password')
     .eq('username', username)
     .single();
   
@@ -100,6 +101,7 @@ export async function authenticateAdmin(username: string, password: string): Pro
     email: user.email,
     role: user.role,
     is_active: user.is_active,
+    must_change_password: user.must_change_password || false,
   };
   
   const token = await generateToken(adminUser);
@@ -147,7 +149,7 @@ export async function validateSession(token: string): Promise<AdminUser | null> 
   // 获取用户信息
   const { data: user, error: userError } = await client
     .from('admin_users')
-    .select('id, username, email, role, is_active')
+    .select('id, username, email, role, is_active, must_change_password')
     .eq('id', decoded.id)
     .single();
   
@@ -164,6 +166,7 @@ export async function validateSession(token: string): Promise<AdminUser | null> 
     email: user.email,
     role: user.role,
     is_active: user.is_active,
+    must_change_password: user.must_change_password || false,
   };
 }
 
