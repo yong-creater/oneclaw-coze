@@ -32,7 +32,8 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        router.push('/admin');
+        // 登录成功，刷新页面跳转
+        window.location.href = '/admin';
       } else {
         setError(data.error || '登录失败');
       }
@@ -79,9 +80,10 @@ export default function AdminLoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="请输入用户名"
-                  className="pl-10 bg-slate-900/50 border-slate-600 focus:border-orange-500"
+                  className="pl-10 bg-slate-100 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-orange-500 focus:ring-orange-500"
                   disabled={loading}
                   required
+                  autoComplete="username"
                 />
               </div>
             </div>
@@ -95,9 +97,10 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="请输入密码"
-                  className="pl-10 pr-10 bg-slate-900/50 border-slate-600 focus:border-orange-500"
+                  className="pl-10 pr-10 bg-slate-100 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-orange-500 focus:ring-orange-500"
                   disabled={loading}
                   required
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"

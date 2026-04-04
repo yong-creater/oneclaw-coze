@@ -32,12 +32,16 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // 设置cookie - 开发和生产环境都需要正确设置
+    const isProduction = process.env.NODE_ENV === 'production';
+    
     response.cookies.set('admin_token', result.token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
       sameSite: 'lax',
       maxAge: 24 * 60 * 60, // 24小时
       path: '/',
+      domain: isProduction ? undefined : 'localhost',
     });
 
     return response;

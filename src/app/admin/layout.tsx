@@ -55,8 +55,8 @@ export default function AdminLayout({
         const res = await fetch('/api/admin/auth');
         const data = await res.json();
         
-        if (data.success && data.user) {
-          setUser(data.user);
+        if (data.success && data.authenticated && data.data) {
+          setUser(data.data);
         } else {
           router.push('/admin/login');
         }
