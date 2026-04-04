@@ -62,7 +62,7 @@ export default function AdminLayout({
         } else {
           router.push('/admin/login');
         }
-      } catch (error) {
+      } catch {
         router.push('/admin/login');
       } finally {
         setChecking(false);

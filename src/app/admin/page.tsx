@@ -42,6 +42,20 @@ interface TopTool {
   click_count: number;
 }
 
+interface HealthIssueItem {
+  type: string;
+  url: string;
+  healthy: boolean;
+  status?: number;
+  error?: string;
+}
+
+interface HealthIssue {
+  tool_id: number;
+  tool_name: string;
+  issues: HealthIssueItem[];
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     tools_count: 0,
@@ -58,7 +72,7 @@ export default function AdminDashboard() {
   const [topTools, setTopTools] = useState<TopTool[]>([]);
   const [loading, setLoading] = useState(true);
   const [checkingHealth, setCheckingHealth] = useState(false);
-  const [healthIssues, setHealthIssues] = useState<any[]>([]);
+  const [healthIssues, setHealthIssues] = useState<HealthIssue[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -340,7 +354,7 @@ export default function AdminDashboard() {
               {healthIssues.slice(0, 5).map((issue, index) => (
                 <div key={index} className="p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm">
                   <p className="font-medium text-red-700 dark:text-red-300">{issue.tool_name}</p>
-                  {issue.issues.map((i: any, idx: number) => (
+                  {issue.issues.map((i, idx) => (
                     <p key={idx} className="text-xs text-red-600 dark:text-red-400">
                       {i.type}: {i.error || `状态码 ${i.status}`}
                     </p>

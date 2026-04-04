@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,6 @@ import { Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +35,7 @@ export default function AdminLoginPage() {
       } else {
         setError(data.error || '登录失败');
       }
-    } catch (err) {
+    } catch {
       setError('网络错误，请重试');
     } finally {
       setLoading(false);
