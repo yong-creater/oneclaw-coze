@@ -191,7 +191,7 @@ export default function RootLayout({
   const isDev = process.env.COZE_PROJECT_ENV === 'DEV';
 
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <head>
         {/* 百度站长验证 - 请替换为您自己的验证码 */}
         <meta name="baidu-site-verification" content="oneclaw-baidu-verify" />
@@ -246,7 +246,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
       </head>
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         {isDev && <Inspector />}
         <Providers>{children}</Providers>
       </body>
