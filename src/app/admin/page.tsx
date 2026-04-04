@@ -67,10 +67,11 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
+      // 并行获取统计数据、最近工具、热门工具
       const [statsRes, toolsRes, topRes] = await Promise.all([
         fetch('/api/admin/stats'),
-        fetch('/api/admin/tools?limit=5&order=created_at.desc'),
-        fetch('/api/tools?limit=5&order=click_count.desc'),
+        fetch('/api/admin/tools?limit=5'),
+        fetch('/api/tools?limit=5'),
       ]);
       
       const statsData = await statsRes.json();
