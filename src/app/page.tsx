@@ -1010,29 +1010,26 @@ export default function HomePage() {
       {/* 页脚 */}
       <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-2 gap-8 mb-8">
-            <div>
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">关于我们</h3>
-              <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
-                <li><Link href="/about" className="hover:text-orange-500">关于OneClaw</Link></li>
-                <li><a href="mailto:1017760688@qq.com" className="hover:text-orange-500">联系我们</a></li>
-              </ul>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <AnimatedLobster size={28} />
+              <div className="flex flex-col">
+                <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">全品类AI工具导航</span>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-slate-800 dark:text-slate-100 mb-4">联系方式</h3>
-              <ul className="space-y-2 text-sm text-slate-500 dark:text-slate-400">
-                <li>邮箱: 1017760688@qq.com</li>
-              </ul>
+            
+            <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <a href="mailto:1017760688@qq.com" className="hover:text-orange-500 transition-colors">邮箱: 1017760688@qq.com</a>
             </div>
-          </div>
-          <div className="pt-8 border-t border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <AnimatedLobster size={24} />
-              <span className="text-sm text-slate-500 dark:text-slate-400">© 2024 OneClaw. All rights reserved.</span>
+            
+            <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+              <span>© 2024 OneClaw</span>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
             </div>
-            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-500 dark:text-slate-400 hover:text-orange-500">
-              渝ICP备2026004291号-2
-            </a>
           </div>
         </div>
       </footer>
