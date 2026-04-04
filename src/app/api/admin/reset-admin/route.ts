@@ -35,12 +35,12 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(new_password);
 
     if (existingAdmin) {
-      // 更新密码
+      // 更新密码，并标记需要修改密码
       const { error } = await client
         .from('admin_users')
         .update({ 
           password_hash: passwordHash,
-          must_change_password: false,
+          must_change_password: true,  // 重置密码后强制要求修改
         })
         .eq('username', 'admin');
 
@@ -53,11 +53,11 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: '管理员密码已重置',
+        message: '管理员密码已重置，首次登录后需修改密码',
         username: 'admin',
       });
     } else {
-      // 创建管理员
+      // 创建管理员，并标记需要修改密码
       const { error } = await client
         .from('admin_users')
         .insert({
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
           email: 'admin@oneclaw.shop',
           role: 'super_admin',
           is_active: true,
-          must_change_password: false,
+          must_change_password: true,  // 首次登录后需修改密码
         });
 
       if (error) {
