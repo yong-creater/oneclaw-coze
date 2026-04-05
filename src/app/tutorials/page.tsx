@@ -256,22 +256,20 @@ export default function TutorialsPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <AnimatedLobster size={24} />
-            <span className="font-bold text-lg text-slate-900 dark:text-white">OneClaw</span>
+      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <AnimatedLobster size={20} />
+              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
-            AI工具使用教程 · 助力创作者高效产出
-          </p>
-          <p className="text-xs text-slate-400 dark:text-slate-500">
-            © 2025 OneClaw · AI工具导航平台
-            <span className="mx-2">·</span>
-            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">
-              渝ICP备2026004291号-2
-            </a>
-          </p>
         </div>
       </footer>
     </div>

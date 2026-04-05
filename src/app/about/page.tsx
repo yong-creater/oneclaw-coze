@@ -271,18 +271,20 @@ export default function AboutPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-white/80 backdrop-blur-sm dark:bg-slate-800/80 py-8">
-        <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="text-2xl">🦞</span>
-            <span className="font-medium text-gray-900 dark:text-white"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
+      <footer className="border-t bg-white/80 backdrop-blur-sm dark:bg-slate-800/80 py-6">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🦞</span>
+              <span className="font-bold text-gray-900 dark:text-white">OneClaw</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+              <span>关于OneClaw</span>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
           </div>
-          <p>© 2025 <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>. 用心服务每一位创作者</p>
-          <p className="mt-2 text-sm">
-            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500">
-              渝ICP备2026004291号-2
-            </a>
-          </p>
         </div>
       </footer>
     </div>
