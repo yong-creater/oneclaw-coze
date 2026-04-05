@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { ArrowLeft, Eye, ThumbsUp, User, Calendar, BookOpen } from 'lucide-react';
 
@@ -119,13 +118,13 @@ export default async function TutorialDetailPage({
                 <span>返回教程列表</span>
               </Link>
               <Link href="/" className="flex items-center gap-2">
-              <Image 
-                src="/lobster-logo.png" 
-                alt="OneClaw" 
-                width={32} 
-                height={32}
-                className="object-contain"
-              />
+                <img 
+                  src="/lobster-logo.png" 
+                  alt="OneClaw" 
+                  width={32} 
+                  height={32}
+                  className="object-contain"
+                />
                 <span className="font-bold text-lg text-slate-900">OneClaw</span>
               </Link>
             </div>
@@ -197,13 +196,13 @@ export default async function TutorialDetailPage({
           <div className="max-w-4xl mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-              <Image 
-                src="/lobster-logo.png" 
-                alt="OneClaw" 
-                width={28} 
-                height={28}
-                className="object-contain"
-              />
+                <img 
+                  src="/lobster-logo.png" 
+                  alt="OneClaw" 
+                  width={28} 
+                  height={28}
+                  className="object-contain"
+                />
                 <span className="font-bold text-slate-900">OneClaw</span>
               </div>
               <div className="flex items-center gap-6 text-sm text-slate-500">

@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,13 +31,13 @@ export default function AboutPage() {
             </Link>
             <Link href="/">
               <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <Image 
-                src="/lobster-logo.png" 
-                alt="OneClaw" 
-                width={32} 
-                height={32}
-                className="object-contain"
-              />
+                <img 
+                  src="/lobster-logo.png" 
+                  alt="OneClaw" 
+                  width={32} 
+                  height={32}
+                  className="object-contain"
+                />
                 <span className="font-medium text-slate-900 dark:text-white text-sm"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
               </div>
             </Link>
@@ -282,7 +281,7 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Image 
+              <img 
                 src="/lobster-logo.png" 
                 alt="OneClaw" 
                 width={28} 
