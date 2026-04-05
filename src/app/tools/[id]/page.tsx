@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -710,7 +711,13 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-xl">🦞</span>
+              <Image 
+                src="/lobster-logo.png" 
+                alt="OneClaw" 
+                width={28} 
+                height={28}
+                className="object-contain"
+              />
               <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
