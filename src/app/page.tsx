@@ -1021,7 +1021,6 @@ export default function HomePage() {
             
             <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
-              <a href="mailto:1017760688@qq.com" className="hover:text-orange-500 transition-colors">邮箱: 1017760688@qq.com</a>
             </div>
             
             <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
