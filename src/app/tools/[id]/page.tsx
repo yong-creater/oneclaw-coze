@@ -456,10 +456,10 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {/* Tab导航 */}
-      <div className="bg-white border-b border-slate-200 sticky top-[49px] z-40">
+      <div className="bg-white sticky top-[49px] z-40 shadow-sm">
         <div className="max-w-5xl mx-auto px-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full justify-start h-auto bg-transparent p-0 gap-0">
+            <TabsList className="w-full justify-start h-auto bg-transparent p-0 gap-0 border-b border-slate-200 rounded-none">
               {[
                 { value: 'detail', label: '工具详情' },
                 { value: 'features', label: '功能详解' },
@@ -480,7 +480,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto px-4 pt-[100px] pb-8">
         {/* Tab1: 工具详情 */}
         {activeTab === 'detail' && (
           <div className="space-y-8">
