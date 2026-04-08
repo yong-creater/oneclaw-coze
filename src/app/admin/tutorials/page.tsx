@@ -116,6 +116,19 @@ export default function TutorialsAdminPage() {
     }
   };
 
+  const handleSearchChange = (v: string) => {
+    setFilters(prev => ({ ...prev, search: v }));
+  };
+
+  const handleSearch = () => {
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
+  const handleReset = () => {
+    setFilters({ search: '', category: 'all', status: 'all' });
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -137,14 +150,18 @@ export default function TutorialsAdminPage() {
         <CardContent className="p-4">
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px]">
-              <Input
-                placeholder="搜索标题、作者..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="dark:bg-slate-700"
-              />
+              <div className="flex gap-2">
+                <Input
+                  placeholder="搜索标题、作者..."
+                  value={filters.search}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  className="dark:bg-slate-700"
+                />
+                <Button variant="outline" onClick={handleSearch}>搜索</Button>
+              </div>
             </div>
-            <Select value={filters.category} onValueChange={(v) => setFilters(prev => ({ ...prev, category: v }))}>
+            <Select value={filters.category} onValueChange={(v) => { setFilters(prev => ({ ...prev, category: v })); setPagination(prev => ({ ...prev, page: 1 })); }}>
               <SelectTrigger className="w-[150px] dark:bg-slate-700">
                 <SelectValue placeholder="分类" />
               </SelectTrigger>
@@ -155,7 +172,7 @@ export default function TutorialsAdminPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filters.status} onValueChange={(v) => setFilters(prev => ({ ...prev, status: v }))}>
+            <Select value={filters.status} onValueChange={(v) => { setFilters(prev => ({ ...prev, status: v })); setPagination(prev => ({ ...prev, page: 1 })); }}>
               <SelectTrigger className="w-[120px] dark:bg-slate-700">
                 <SelectValue placeholder="状态" />
               </SelectTrigger>
@@ -165,7 +182,7 @@ export default function TutorialsAdminPage() {
                 <SelectItem value="draft">草稿</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => setFilters({ search: '', category: 'all', status: 'all' })}>
+            <Button variant="outline" onClick={handleReset}>
               重置
             </Button>
           </div>
