@@ -556,38 +556,47 @@ export default function HomePage() {
 
         {/* ==================== 提示词库 ==================== */}
         {mainTab === 'prompts' && (
-          <>
-            {/* 搜索 */}
-            <div className="mb-6">
-              <div className="relative max-w-xl mx-auto">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <Input
-                  type="text"
-                  placeholder="搜索提示词..."
-                  value={promptSearch}
-                  onChange={(e) => setPromptSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && fetchPrompts(1)}
-                  className="pl-12 pr-4 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                />
+          <div className="flex gap-6">
+            {/* 左侧分类导航 */}
+            <aside className="w-56 flex-shrink-0">
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 sticky top-24">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                  <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
+                </div>
+                <nav className="p-2">
+                  {PROMPT_CATEGORIES.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => { setPromptCategory(cat); setPromptsPagination(prev => ({ ...prev, page: 1 })); }}
+                      className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                        promptCategory === cat
+                          ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      <span className="truncate">{cat}</span>
+                    </button>
+                  ))}
+                </nav>
               </div>
-            </div>
+            </aside>
 
-            {/* 分类筛选 */}
-            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-              {PROMPT_CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => { setPromptCategory(cat); setPromptsPagination(prev => ({ ...prev, page: 1 })); }}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                    promptCategory === cat
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 border border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+            {/* 右侧内容 */}
+            <div className="flex-1 min-w-0">
+              {/* 搜索 */}
+              <div className="mb-4">
+                <div className="relative max-w-xl">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="搜索提示词..."
+                    value={promptSearch}
+                    onChange={(e) => setPromptSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchPrompts(1)}
+                    className="pl-12 pr-4 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  />
+                </div>
+              </div>
 
             {/* Prompt列表 */}
             {promptsLoading ? (
@@ -644,43 +653,53 @@ export default function HomePage() {
                 <p className="text-sm text-slate-500">提示词模板正在整理中，敬请期待</p>
               </div>
             )}
-          </>
+            </div>
+          </div>
         )}
 
         {/* ==================== 教程库 ==================== */}
         {mainTab === 'tutorials' && (
-          <>
-            {/* 搜索 */}
-            <div className="mb-6">
-              <div className="relative max-w-xl mx-auto">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <Input
-                  type="text"
-                  placeholder="搜索教程..."
-                  value={tutorialSearch}
-                  onChange={(e) => setTutorialSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && fetchTutorials(1)}
-                  className="pl-12 pr-4 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                />
+          <div className="flex gap-6">
+            {/* 左侧分类导航 */}
+            <aside className="w-56 flex-shrink-0">
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 sticky top-24">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                  <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
+                </div>
+                <nav className="p-2">
+                  {TUTORIAL_CATEGORIES.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => { setTutorialCategory(cat); setTutorialsPagination(prev => ({ ...prev, page: 1 })); }}
+                      className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                        tutorialCategory === cat
+                          ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      <span className="truncate">{cat}</span>
+                    </button>
+                  ))}
+                </nav>
               </div>
-            </div>
+            </aside>
 
-            {/* 分类筛选 */}
-            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-              {TUTORIAL_CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => { setTutorialCategory(cat); setTutorialsPagination(prev => ({ ...prev, page: 1 })); }}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                    tutorialCategory === cat
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 border border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+            {/* 右侧内容 */}
+            <div className="flex-1 min-w-0">
+              {/* 搜索 */}
+              <div className="mb-4">
+                <div className="relative max-w-xl">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="搜索教程..."
+                    value={tutorialSearch}
+                    onChange={(e) => setTutorialSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchTutorials(1)}
+                    className="pl-12 pr-4 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  />
+                </div>
+              </div>
 
             {/* 教程列表 */}
             {tutorialsLoading ? (
@@ -747,7 +766,8 @@ export default function HomePage() {
                 <p className="text-sm text-slate-500">教程内容正在编写中，敬请期待</p>
               </div>
             )}
-          </>
+            </div>
+          </div>
         )}
       </main>
 
