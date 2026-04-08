@@ -338,7 +338,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="min-h-screen bg-slate-50">
       {/* 顶部导航 - 简洁白色导航栏 */}
-      <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
         <div className="max-w-5xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-orange-500 transition-colors">
@@ -366,7 +366,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       </header>
 
       {/* 工具信息头部 */}
-      <div className="bg-white border-b border-slate-200">
+      <div className="bg-white">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="flex flex-col lg:flex-row items-start gap-6">
             {/* Logo */}
@@ -459,7 +459,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       <div className="bg-white sticky top-[49px] z-40 shadow-sm">
         <div className="max-w-5xl mx-auto px-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full justify-start h-auto bg-transparent p-0 gap-0 border-b border-slate-200 rounded-none">
+            <TabsList className="w-full justify-start h-auto bg-transparent p-0 gap-0 rounded-none">
               {[
                 { value: 'detail', label: '工具详情' },
                 { value: 'features', label: '功能详解' },
