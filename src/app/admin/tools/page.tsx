@@ -99,6 +99,11 @@ export default function ToolsAdminPage() {
     fetchData();
   }, [fetchData]);
 
+  const handleFilterChange = (key: 'search' | 'category_id' | 'free_type' | 'is_featured', value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setPagination(prev => ({ ...prev, page: 1 }));
+  };
+
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`确定要删除工具「${name}」吗？`)) return;
     
@@ -160,22 +165,29 @@ export default function ToolsAdminPage() {
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div className="flex flex-wrap gap-2 items-center">
           {/* 搜索框 */}
-          <div className="relative">
+          <div className="relative flex items-center">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="搜索工具名称、出品方..."
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              onKeyDown={(e) => e.key === 'Enter' && handleFilterChange('search', filters.search)}
               className="pl-10 pr-4 py-2 w-64 rounded-lg border border-slate-200 dark:border-slate-700 
                 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
+            <button
+              onClick={() => handleFilterChange('search', filters.search)}
+              className="ml-2 px-3 py-2 rounded-lg bg-orange-500 text-white text-sm hover:bg-orange-600"
+            >
+              搜索
+            </button>
           </div>
           
           {/* 分类筛选 */}
           <select
             value={filters.category_id}
-            onChange={(e) => { setFilters(prev => ({ ...prev, category_id: e.target.value })); setPagination(prev => ({ ...prev, page: 1 })); }}
+            onChange={(e) => handleFilterChange('category_id', e.target.value)}
             className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
               bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
@@ -188,7 +200,7 @@ export default function ToolsAdminPage() {
           {/* 免费类型筛选 */}
           <select
             value={filters.free_type}
-            onChange={(e) => { setFilters(prev => ({ ...prev, free_type: e.target.value })); setPagination(prev => ({ ...prev, page: 1 })); }}
+            onChange={(e) => handleFilterChange('free_type', e.target.value)}
             className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
               bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
@@ -202,7 +214,7 @@ export default function ToolsAdminPage() {
           {/* 推荐筛选 */}
           <select
             value={filters.is_featured}
-            onChange={(e) => { setFilters(prev => ({ ...prev, is_featured: e.target.value })); setPagination(prev => ({ ...prev, page: 1 })); }}
+            onChange={(e) => handleFilterChange('is_featured', e.target.value)}
             className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
               bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
