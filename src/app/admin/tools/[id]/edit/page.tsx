@@ -3,9 +3,9 @@
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Trash2, Star, Eye, MousePointer } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Eye, MousePointer, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Category {
   id: number;
@@ -19,12 +19,31 @@ interface Tag {
   type: string;
 }
 
+interface ToolScene {
+  scene_no: string;
+  user_group: string;
+  scene_desc: string;
+}
+
+interface ToolFunction {
+  func_name: string;
+  func_desc: string;
+}
+
+interface ToolFAQ {
+  question: string;
+  answer: string;
+}
+
 interface Tool {
   id: number;
   name: string;
   logo: string;
   producer: string;
   highlight: string;
+  short_desc: string;
+  full_desc: string;
+  use_guide: string;
   category_id: number;
   sub_category_ids: number[];
   free_type: string;
@@ -42,18 +61,16 @@ interface Tool {
   launch_date: string;
   view_count: number;
   click_count: number;
+  scenes: ToolScene[];
+  functions: ToolFunction[];
+  faqs: ToolFAQ[];
+  customer_email: string;
+  feedback_link: string;
 }
 
 const FREE_TYPES = ['完全免费', '免费额度', '限时免费', '付费工具'];
 const LICENSE_TYPES = ['可免费商用', '需授权商用', '不可商用'];
 const DURATION_OPTIONS = ['30秒', '60秒', '2分钟', '5分钟', '10分钟', '无限制'];
-
-const FREE_TYPE_COLORS: Record<string, string> = {
-  '完全免费': 'bg-green-100 text-green-700',
-  '免费额度': 'bg-blue-100 text-blue-700',
-  '限时免费': 'bg-orange-100 text-orange-700',
-  '付费工具': 'bg-slate-100 text-slate-700',
-};
 
 export default function EditToolPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -68,6 +85,9 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
     logo: '',
     producer: '',
     highlight: '',
+    short_desc: '',
+    full_desc: '',
+    use_guide: '',
     category_id: '',
     sub_category_ids: [] as number[],
     free_type: '免费额度',
@@ -83,6 +103,11 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
     limitations: ['', ''],
     commercial_license: '可免费商用',
     launch_date: new Date().toISOString().split('T')[0],
+    scenes: [{ scene_no: '#1', user_group: '', scene_desc: '' }] as ToolScene[],
+    functions: [{ func_name: '', func_desc: '' }] as ToolFunction[],
+    faqs: [{ question: '', answer: '' }] as ToolFAQ[],
+    customer_email: '',
+    feedback_link: '',
   });
 
   // 获取工具数据
@@ -99,6 +124,9 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
             logo: toolData.logo || '',
             producer: toolData.producer || '',
             highlight: toolData.highlight || '',
+            short_desc: toolData.short_desc || '',
+            full_desc: toolData.full_desc || '',
+            use_guide: toolData.use_guide || '',
             category_id: toolData.category_id?.toString() || '',
             sub_category_ids: toolData.sub_category_ids || [],
             free_type: toolData.free_type || '免费额度',
@@ -118,6 +146,11 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
               : ['', ''],
             commercial_license: toolData.commercial_license || '可免费商用',
             launch_date: toolData.launch_date?.split('T')[0] || new Date().toISOString().split('T')[0],
+            scenes: toolData.scenes?.length > 0 ? toolData.scenes : [{ scene_no: '#1', user_group: '', scene_desc: '' }],
+            functions: toolData.functions?.length > 0 ? toolData.functions : [{ func_name: '', func_desc: '' }],
+            faqs: toolData.faqs?.length > 0 ? toolData.faqs : [{ question: '', answer: '' }],
+            customer_email: toolData.customer_email || '',
+            feedback_link: toolData.feedback_link || '',
           });
         } else {
           alert('工具不存在');
@@ -162,6 +195,9 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
         category_id: parseInt(formData.category_id),
         advantages: formData.advantages.filter(a => a.trim()),
         limitations: formData.limitations.filter(l => l.trim()),
+        scenes: formData.scenes.filter(s => s.user_group.trim() && s.scene_desc.trim()),
+        functions: formData.functions.filter(f => f.func_name.trim() && f.func_desc.trim()),
+        faqs: formData.faqs.filter(f => f.question.trim() && f.answer.trim()),
         launch_date: new Date(formData.launch_date).toISOString(),
       };
 
@@ -216,6 +252,75 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
     }));
   };
 
+  // 场景管理
+  const addScene = () => {
+    setFormData(prev => ({
+      ...prev,
+      scenes: [...prev.scenes, { scene_no: `#${prev.scenes.length + 1}`, user_group: '', scene_desc: '' }]
+    }));
+  };
+
+  const updateScene = (index: number, field: keyof ToolScene, value: string) => {
+    setFormData(prev => {
+      const newScenes = [...prev.scenes];
+      newScenes[index] = { ...newScenes[index], [field]: value };
+      return { ...prev, scenes: newScenes };
+    });
+  };
+
+  const removeScene = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      scenes: prev.scenes.filter((_, i) => i !== index).map((s, i) => ({ ...s, scene_no: `#${i + 1}` }))
+    }));
+  };
+
+  // 功能管理
+  const addFunction = () => {
+    setFormData(prev => ({
+      ...prev,
+      functions: [...prev.functions, { func_name: '', func_desc: '' }]
+    }));
+  };
+
+  const updateFunction = (index: number, field: keyof ToolFunction, value: string) => {
+    setFormData(prev => {
+      const newFunctions = [...prev.functions];
+      newFunctions[index] = { ...newFunctions[index], [field]: value };
+      return { ...prev, functions: newFunctions };
+    });
+  };
+
+  const removeFunction = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      functions: prev.functions.filter((_, i) => i !== index)
+    }));
+  };
+
+  // FAQ管理
+  const addFAQ = () => {
+    setFormData(prev => ({
+      ...prev,
+      faqs: [...prev.faqs, { question: '', answer: '' }]
+    }));
+  };
+
+  const updateFAQ = (index: number, field: 'question' | 'answer', value: string) => {
+    setFormData(prev => {
+      const newFAQs = [...prev.faqs];
+      newFAQs[index] = { ...newFAQs[index], [field]: value };
+      return { ...prev, faqs: newFAQs };
+    });
+  };
+
+  const removeFAQ = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      faqs: prev.faqs.filter((_, i) => i !== index)
+    }));
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -225,7 +330,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* 返回按钮 */}
       <div className="flex items-center justify-between mb-6">
         <Link
@@ -338,6 +443,56 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
 
+        {/* 描述信息 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">描述信息</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                简短描述（首页展示）
+              </label>
+              <input
+                type="text"
+                value={formData.short_desc}
+                onChange={(e) => setFormData(prev => ({ ...prev, short_desc: e.target.value }))}
+                placeholder="一句话介绍工具用途"
+                maxLength={100}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                完整描述（详情页展示）
+              </label>
+              <Textarea
+                value={formData.full_desc}
+                onChange={(e) => setFormData(prev => ({ ...prev, full_desc: e.target.value }))}
+                placeholder="详细介绍工具的功能、特点和使用场景..."
+                rows={4}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                使用指南
+              </label>
+              <Textarea
+                value={formData.use_guide}
+                onChange={(e) => setFormData(prev => ({ ...prev, use_guide: e.target.value }))}
+                placeholder="分步骤说明工具的使用方法..."
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* 分类与价格 */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">分类与价格</h2>
@@ -442,6 +597,34 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                   bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                联系邮箱
+              </label>
+              <input
+                type="email"
+                value={formData.customer_email}
+                onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
+                placeholder="用户反馈联系邮箱"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                反馈链接
+              </label>
+              <input
+                type="url"
+                value={formData.feedback_link}
+                onChange={(e) => setFormData(prev => ({ ...prev, feedback_link: e.target.value }))}
+                placeholder="用户反馈表单链接"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
           </div>
         </div>
 
@@ -509,6 +692,139 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
                   bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
+            ))}
+          </div>
+        </div>
+
+        {/* 适用场景 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">适用场景</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addScene}>
+              <Plus className="w-4 h-4 mr-1" />
+              添加场景
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            {formData.scenes.map((scene, index) => (
+              <div key={index} className="flex gap-3 items-start p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={scene.user_group}
+                    onChange={(e) => updateScene(index, 'user_group', e.target.value)}
+                    placeholder="适用人群（如：学生/科研人群）"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <input
+                    type="text"
+                    value={scene.scene_desc}
+                    onChange={(e) => updateScene(index, 'scene_desc', e.target.value)}
+                    placeholder="场景描述"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeScene(index)}
+                  className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 核心功能 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">核心功能</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addFunction}>
+              <Plus className="w-4 h-4 mr-1" />
+              添加功能
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            {formData.functions.map((func, index) => (
+              <div key={index} className="flex gap-3 items-start p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={func.func_name}
+                    onChange={(e) => updateFunction(index, 'func_name', e.target.value)}
+                    placeholder="功能名称（如：智能搜索）"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <input
+                    type="text"
+                    value={func.func_desc}
+                    onChange={(e) => updateFunction(index, 'func_desc', e.target.value)}
+                    placeholder="功能描述"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeFunction(index)}
+                  className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 常见问题 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">常见问题</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addFAQ}>
+              <Plus className="w-4 h-4 mr-1" />
+              添加FAQ
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            {formData.faqs.map((faq, index) => (
+              <div key={index} className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg space-y-3">
+                <div className="flex gap-3 items-start">
+                  <span className="text-sm font-medium text-slate-500 mt-2">Q{index + 1}</span>
+                  <input
+                    type="text"
+                    value={faq.question}
+                    onChange={(e) => updateFAQ(index, 'question', e.target.value)}
+                    placeholder="问题"
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeFAQ(index)}
+                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="text-sm font-medium text-slate-500 mt-2">A</span>
+                  <Textarea
+                    value={faq.answer}
+                    onChange={(e) => updateFAQ(index, 'answer', e.target.value)}
+                    placeholder="回答"
+                    rows={2}
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </div>

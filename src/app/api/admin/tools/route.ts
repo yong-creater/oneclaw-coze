@@ -97,6 +97,9 @@ export async function POST(request: NextRequest) {
         logo: body.logo,
         producer: body.producer,
         highlight: body.highlight,
+        short_desc: body.short_desc,
+        full_desc: body.full_desc,
+        use_guide: body.use_guide,
         category_id: body.category_id,
         sub_category_ids: body.sub_category_ids || [],
         free_type: body.free_type,
@@ -112,6 +115,11 @@ export async function POST(request: NextRequest) {
         limitations: body.limitations || [],
         commercial_license: body.commercial_license,
         launch_date: body.launch_date || new Date().toISOString(),
+        scenes: body.scenes || [],
+        functions: body.functions || [],
+        faqs: body.faqs || [],
+        customer_email: body.customer_email,
+        feedback_link: body.feedback_link,
       })
       .select()
       .single();
@@ -147,10 +155,12 @@ export async function PUT(request: NextRequest) {
     
     // 只更新提供的字段
     const updatableFields = [
-      'name', 'logo', 'producer', 'highlight', 'category_id', 'sub_category_ids',
+      'name', 'logo', 'producer', 'highlight', 'short_desc', 'full_desc', 'use_guide',
+      'category_id', 'sub_category_ids',
       'free_type', 'free_quota_desc', 'feature_tags', 'max_duration',
       'official_url', 'promotion_url', 'is_official', 'is_featured', 'is_active',
-      'advantages', 'limitations', 'commercial_license', 'launch_date'
+      'advantages', 'limitations', 'commercial_license', 'launch_date',
+      'scenes', 'functions', 'faqs', 'customer_email', 'feedback_link'
     ];
     
     for (const field of updatableFields) {

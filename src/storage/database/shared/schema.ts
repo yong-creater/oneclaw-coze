@@ -39,6 +39,11 @@ export const tools = pgTable("tools", {
   producer: varchar("producer", { length: 100 }).notNull(), // 出品方
   highlight: varchar("highlight", { length: 50 }).notNull(), // 一句话核心亮点
   
+  // 描述信息
+  short_desc: text("short_desc"), // 简短描述（首页展示）
+  full_desc: text("full_desc"), // 完整描述（详情页）
+  use_guide: text("use_guide"), // 使用指南
+  
   // 分类
   category_id: integer("category_id").notNull().references(() => categories.id),
   sub_category_ids: jsonb("sub_category_ids").$type<number[]>().default([]), // 二级分类ID数组
@@ -56,6 +61,8 @@ export const tools = pgTable("tools", {
   // 链接
   official_url: varchar("official_url", { length: 500 }).notNull(), // 官网直达链接
   promotion_url: varchar("promotion_url", { length: 500 }), // 专属推广链接
+  customer_email: varchar("customer_email", { length: 200 }), // 联系邮箱
+  feedback_link: varchar("feedback_link", { length: 500 }), // 反馈链接
   
   // 认证与推荐
   is_official: boolean("is_official").notNull().default(false), // 官方认证
@@ -69,6 +76,25 @@ export const tools = pgTable("tools", {
   // 核心优势与局限性
   advantages: jsonb("advantages").$type<string[]>().notNull().default([]), // 核心优势（最多3条）
   limitations: jsonb("limitations").$type<string[]>().notNull().default([]), // 局限性（最多2条）
+  
+  // 适用场景
+  scenes: jsonb("scenes").$type<{
+    scene_no: string;
+    user_group: string;
+    scene_desc: string;
+  }[]>().default([]),
+  
+  // 核心功能
+  functions: jsonb("functions").$type<{
+    func_name: string;
+    func_desc: string;
+  }[]>().default([]),
+  
+  // 常见问题
+  faqs: jsonb("faqs").$type<{
+    question: string;
+    answer: string;
+  }[]>().default([]),
   
   // 商用授权
   commercial_license: varchar("commercial_license", { length: 20 }).notNull(), // 可免费商用、需授权商用、不可商用

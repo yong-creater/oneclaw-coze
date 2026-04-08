@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Plus, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Category {
   id: number;
@@ -17,8 +19,25 @@ interface Tag {
   type: string;
 }
 
+interface ToolScene {
+  scene_no: string;
+  user_group: string;
+  scene_desc: string;
+}
+
+interface ToolFunction {
+  func_name: string;
+  func_desc: string;
+}
+
+interface ToolFAQ {
+  question: string;
+  answer: string;
+}
+
 const FREE_TYPES = ['完全免费', '免费额度', '限时免费', '付费工具'];
 const LICENSE_TYPES = ['可免费商用', '需授权商用', '不可商用'];
+const DURATION_OPTIONS = ['30秒', '60秒', '2分钟', '5分钟', '10分钟', '无限制'];
 
 export default function NewToolPage() {
   const router = useRouter();
@@ -30,6 +49,9 @@ export default function NewToolPage() {
     logo: '',
     producer: '',
     highlight: '',
+    short_desc: '',
+    full_desc: '',
+    use_guide: '',
     category_id: '',
     sub_category_ids: [] as number[],
     free_type: '免费额度',
@@ -45,6 +67,11 @@ export default function NewToolPage() {
     limitations: ['', ''],
     commercial_license: '可免费商用',
     launch_date: new Date().toISOString().split('T')[0],
+    scenes: [{ scene_no: '#1', user_group: '', scene_desc: '' }] as ToolScene[],
+    functions: [{ func_name: '', func_desc: '' }] as ToolFunction[],
+    faqs: [{ question: '', answer: '' }] as ToolFAQ[],
+    customer_email: '',
+    feedback_link: '',
   });
 
   useEffect(() => {
@@ -73,6 +100,9 @@ export default function NewToolPage() {
         category_id: parseInt(formData.category_id),
         advantages: formData.advantages.filter(a => a.trim()),
         limitations: formData.limitations.filter(l => l.trim()),
+        scenes: formData.scenes.filter(s => s.user_group.trim() && s.scene_desc.trim()),
+        functions: formData.functions.filter(f => f.func_name.trim() && f.func_desc.trim()),
+        faqs: formData.faqs.filter(f => f.question.trim() && f.answer.trim()),
         launch_date: new Date(formData.launch_date).toISOString(),
       };
 
@@ -105,8 +135,77 @@ export default function NewToolPage() {
     }));
   };
 
+  // 场景管理
+  const addScene = () => {
+    setFormData(prev => ({
+      ...prev,
+      scenes: [...prev.scenes, { scene_no: `#${prev.scenes.length + 1}`, user_group: '', scene_desc: '' }]
+    }));
+  };
+
+  const updateScene = (index: number, field: keyof ToolScene, value: string) => {
+    setFormData(prev => {
+      const newScenes = [...prev.scenes];
+      newScenes[index] = { ...newScenes[index], [field]: value };
+      return { ...prev, scenes: newScenes };
+    });
+  };
+
+  const removeScene = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      scenes: prev.scenes.filter((_, i) => i !== index).map((s, i) => ({ ...s, scene_no: `#${i + 1}` }))
+    }));
+  };
+
+  // 功能管理
+  const addFunction = () => {
+    setFormData(prev => ({
+      ...prev,
+      functions: [...prev.functions, { func_name: '', func_desc: '' }]
+    }));
+  };
+
+  const updateFunction = (index: number, field: keyof ToolFunction, value: string) => {
+    setFormData(prev => {
+      const newFunctions = [...prev.functions];
+      newFunctions[index] = { ...newFunctions[index], [field]: value };
+      return { ...prev, functions: newFunctions };
+    });
+  };
+
+  const removeFunction = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      functions: prev.functions.filter((_, i) => i !== index)
+    }));
+  };
+
+  // FAQ管理
+  const addFAQ = () => {
+    setFormData(prev => ({
+      ...prev,
+      faqs: [...prev.faqs, { question: '', answer: '' }]
+    }));
+  };
+
+  const updateFAQ = (index: number, field: 'question' | 'answer', value: string) => {
+    setFormData(prev => {
+      const newFAQs = [...prev.faqs];
+      newFAQs[index] = { ...newFAQs[index], [field]: value };
+      return { ...prev, faqs: newFAQs };
+    });
+  };
+
+  const removeFAQ = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      faqs: prev.faqs.filter((_, i) => i !== index)
+    }));
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* 返回按钮 */}
       <Link
         href="/admin/tools"
@@ -182,6 +281,56 @@ export default function NewToolPage() {
           </div>
         </div>
 
+        {/* 描述信息 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">描述信息</h2>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                简短描述（首页展示）
+              </label>
+              <input
+                type="text"
+                value={formData.short_desc}
+                onChange={(e) => setFormData(prev => ({ ...prev, short_desc: e.target.value }))}
+                placeholder="一句话介绍工具用途"
+                maxLength={100}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                完整描述（详情页展示）
+              </label>
+              <Textarea
+                value={formData.full_desc}
+                onChange={(e) => setFormData(prev => ({ ...prev, full_desc: e.target.value }))}
+                placeholder="详细介绍工具的功能、特点和使用场景..."
+                rows={4}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                使用指南
+              </label>
+              <Textarea
+                value={formData.use_guide}
+                onChange={(e) => setFormData(prev => ({ ...prev, use_guide: e.target.value }))}
+                placeholder="分步骤说明工具的使用方法..."
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* 分类与价格 */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">分类与价格</h2>
@@ -204,7 +353,7 @@ export default function NewToolPage() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 免费类型 <span className="text-red-500">*</span>
@@ -221,54 +370,98 @@ export default function NewToolPage() {
                 ))}
               </select>
             </div>
-            
-            {formData.free_type === '免费额度' && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  免费额度说明 <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.free_quota_desc}
-                  onChange={(e) => setFormData(prev => ({ ...prev, free_quota_desc: e.target.value }))}
-                  placeholder="如：每日免费生成5条1080P视频"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                    bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  required
-                />
-              </div>
-            )}
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                生成时长上限 <span className="text-red-500">*</span>
+                免费额度说明
               </label>
               <input
                 type="text"
+                value={formData.free_quota_desc}
+                onChange={(e) => setFormData(prev => ({ ...prev, free_quota_desc: e.target.value }))}
+                placeholder="如：免费试用，付费版 $19/月起"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                生成时长上限
+              </label>
+              <select
                 value={formData.max_duration}
                 onChange={(e) => setFormData(prev => ({ ...prev, max_duration: e.target.value }))}
-                placeholder="如：60秒、10分钟"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                {DURATION_OPTIONS.map(dur => (
+                  <option key={dur} value={dur}>{dur}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 链接设置 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">链接设置</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                官网链接 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="url"
+                value={formData.official_url}
+                onChange={(e) => setFormData(prev => ({ ...prev, official_url: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
                   bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                商用授权说明 <span className="text-red-500">*</span>
+                推广链接（联盟链接，优先跳转）
               </label>
-              <select
-                value={formData.commercial_license}
-                onChange={(e) => setFormData(prev => ({ ...prev, commercial_license: e.target.value }))}
+              <input
+                type="url"
+                value={formData.promotion_url}
+                onChange={(e) => setFormData(prev => ({ ...prev, promotion_url: e.target.value }))}
+                placeholder="联盟推广链接（可选）"
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
                   bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                required
-              >
-                {LICENSE_TYPES.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                联系邮箱
+              </label>
+              <input
+                type="email"
+                value={formData.customer_email}
+                onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
+                placeholder="用户反馈联系邮箱"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                反馈链接
+              </label>
+              <input
+                type="url"
+                value={formData.feedback_link}
+                onChange={(e) => setFormData(prev => ({ ...prev, feedback_link: e.target.value }))}
+                placeholder="用户反馈表单链接"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
             </div>
           </div>
         </div>
@@ -283,10 +476,10 @@ export default function NewToolPage() {
                 key={tag.id}
                 type="button"
                 onClick={() => handleFeatureTagToggle(tag.name)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                   formData.feature_tags.includes(tag.name)
                     ? 'bg-orange-500 text-white'
-                    : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-orange-100 dark:hover:bg-orange-900/30'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-orange-100'
                 }`}
               >
                 {tag.name}
@@ -295,97 +488,221 @@ export default function NewToolPage() {
           </div>
         </div>
 
-        {/* 链接 */}
+        {/* 核心优势 */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">链接设置</h2>
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">核心优势（最多3条）</h2>
+          
+          <div className="space-y-3">
+            {[0, 1, 2].map(i => (
+              <input
+                key={i}
+                type="text"
+                value={formData.advantages[i] || ''}
+                onChange={(e) => {
+                  const newAdv = [...formData.advantages];
+                  newAdv[i] = e.target.value;
+                  setFormData(prev => ({ ...prev, advantages: newAdv }));
+                }}
+                placeholder={`优势${i + 1}`}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 局限性 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">局限性（最多2条）</h2>
+          
+          <div className="space-y-3">
+            {[0, 1].map(i => (
+              <input
+                key={i}
+                type="text"
+                value={formData.limitations[i] || ''}
+                onChange={(e) => {
+                  const newLim = [...formData.limitations];
+                  newLim[i] = e.target.value;
+                  setFormData(prev => ({ ...prev, limitations: newLim }));
+                }}
+                placeholder={`局限性${i + 1}`}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 适用场景 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">适用场景</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addScene}>
+              <Plus className="w-4 h-4 mr-1" />
+              添加场景
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            {formData.scenes.map((scene, index) => (
+              <div key={index} className="flex gap-3 items-start p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={scene.user_group}
+                    onChange={(e) => updateScene(index, 'user_group', e.target.value)}
+                    placeholder="适用人群（如：学生/科研人群）"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <input
+                    type="text"
+                    value={scene.scene_desc}
+                    onChange={(e) => updateScene(index, 'scene_desc', e.target.value)}
+                    placeholder="场景描述"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeScene(index)}
+                  className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 核心功能 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">核心功能</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addFunction}>
+              <Plus className="w-4 h-4 mr-1" />
+              添加功能
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            {formData.functions.map((func, index) => (
+              <div key={index} className="flex gap-3 items-start p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    value={func.func_name}
+                    onChange={(e) => updateFunction(index, 'func_name', e.target.value)}
+                    placeholder="功能名称（如：智能搜索）"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <input
+                    type="text"
+                    value={func.func_desc}
+                    onChange={(e) => updateFunction(index, 'func_desc', e.target.value)}
+                    placeholder="功能描述"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeFunction(index)}
+                  className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 常见问题 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">常见问题</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addFAQ}>
+              <Plus className="w-4 h-4 mr-1" />
+              添加FAQ
+            </Button>
+          </div>
+          
+          <div className="space-y-4">
+            {formData.faqs.map((faq, index) => (
+              <div key={index} className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg space-y-3">
+                <div className="flex gap-3 items-start">
+                  <span className="text-sm font-medium text-slate-500 mt-2">Q{index + 1}</span>
+                  <input
+                    type="text"
+                    value={faq.question}
+                    onChange={(e) => updateFAQ(index, 'question', e.target.value)}
+                    placeholder="问题"
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeFAQ(index)}
+                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="flex gap-3 items-start">
+                  <span className="text-sm font-medium text-slate-500 mt-2">A</span>
+                  <Textarea
+                    value={faq.answer}
+                    onChange={(e) => updateFAQ(index, 'answer', e.target.value)}
+                    placeholder="回答"
+                    rows={2}
+                    className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 其他设置 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">其他设置</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                官网直达链接 <span className="text-red-500">*</span>
+                商用授权
               </label>
-              <input
-                type="url"
-                value={formData.official_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, official_url: e.target.value }))}
+              <select
+                value={formData.commercial_license}
+                onChange={(e) => setFormData(prev => ({ ...prev, commercial_license: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
                   bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                required
-              />
+              >
+                {LICENSE_TYPES.map(lic => (
+                  <option key={lic} value={lic}>{lic}</option>
+                ))}
+              </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                专属推广链接
+                上线日期
               </label>
               <input
-                type="url"
-                value={formData.promotion_url}
-                onChange={(e) => setFormData(prev => ({ ...prev, promotion_url: e.target.value }))}
-                placeholder="联盟推广链接，优先于官网链接"
+                type="date"
+                value={formData.launch_date}
+                onChange={(e) => setFormData(prev => ({ ...prev, launch_date: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
                   bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
-        </div>
 
-        {/* 优劣势 */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">核心优势与局限性</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                核心优势（最多3条）
-              </label>
-              {[0, 1, 2].map(i => (
-                <input
-                  key={i}
-                  type="text"
-                  value={formData.advantages[i] || ''}
-                  onChange={(e) => {
-                    const newAdvantages = [...formData.advantages];
-                    newAdvantages[i] = e.target.value;
-                    setFormData(prev => ({ ...prev, advantages: newAdvantages }));
-                  }}
-                  placeholder={`优势${i + 1}（最多20字）`}
-                  maxLength={20}
-                  className="w-full px-3 py-2 mb-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                    bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              ))}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                局限性（最多2条）
-              </label>
-              {[0, 1].map(i => (
-                <input
-                  key={i}
-                  type="text"
-                  value={formData.limitations[i] || ''}
-                  onChange={(e) => {
-                    const newLimitations = [...formData.limitations];
-                    newLimitations[i] = e.target.value;
-                    setFormData(prev => ({ ...prev, limitations: newLimitations }));
-                  }}
-                  placeholder={`局限${i + 1}（最多20字）`}
-                  maxLength={20}
-                  className="w-full px-3 py-2 mb-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                    bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* 状态设置 */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">状态设置</h2>
-          
-          <div className="flex flex-wrap gap-6">
+          <div className="flex flex-wrap gap-4 mt-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -395,7 +712,7 @@ export default function NewToolPage() {
               />
               <span className="text-sm text-slate-700 dark:text-slate-300">官方认证</span>
             </label>
-            
+
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -405,7 +722,7 @@ export default function NewToolPage() {
               />
               <span className="text-sm text-slate-700 dark:text-slate-300">首页推荐</span>
             </label>
-            
+
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -413,42 +730,24 @@ export default function NewToolPage() {
                 onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
                 className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
               />
-              <span className="text-sm text-slate-700 dark:text-slate-300">上架</span>
+              <span className="text-sm text-slate-700 dark:text-slate-300">上架显示</span>
             </label>
-          </div>
-          
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-              上线时间
-            </label>
-            <input
-              type="date"
-              value={formData.launch_date}
-              onChange={(e) => setFormData(prev => ({ ...prev, launch_date: e.target.value }))}
-              className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            />
           </div>
         </div>
 
         {/* 提交按钮 */}
-        <div className="flex justify-end gap-4">
-          <Link
-            href="/admin/tools"
-            className="px-6 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-              text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-          >
-            取消
+        <div className="flex items-center justify-end gap-4">
+          <Link href="/admin/tools">
+            <Button variant="outline" type="button">取消</Button>
           </Link>
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-lg bg-orange-500 text-white 
-              font-medium hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-4 h-4 mr-2" />
             {loading ? '保存中...' : '保存'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>
