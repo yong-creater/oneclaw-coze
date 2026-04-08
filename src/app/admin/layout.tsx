@@ -123,7 +123,7 @@ export default function AdminLayout({
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200 dark:border-slate-700">
+        <div className="flex items-center justify-between h-16 px-4">
           <Link href="/admin" className="flex items-center gap-2">
             <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
               OneClaw
@@ -181,7 +181,7 @@ export default function AdminLayout({
       {/* 主内容区 */}
       <div className="lg:pl-64">
         {/* 顶部栏 */}
-        <header className="sticky top-0 z-30 h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+        <header className="sticky top-0 z-30 h-16 bg-white dark:bg-slate-800 shadow-sm">
           <div className="flex items-center justify-between h-full px-4">
             <button 
               onClick={() => setSidebarOpen(true)}
