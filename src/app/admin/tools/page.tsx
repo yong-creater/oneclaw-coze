@@ -175,7 +175,7 @@ export default function ToolsAdminPage() {
           {/* 分类筛选 */}
           <select
             value={filters.category_id}
-            onChange={(e) => setFilters(prev => ({ ...prev, category_id: e.target.value }))}
+            onChange={(e) => { setFilters(prev => ({ ...prev, category_id: e.target.value })); setPagination(prev => ({ ...prev, page: 1 })); }}
             className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
               bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
@@ -188,7 +188,7 @@ export default function ToolsAdminPage() {
           {/* 免费类型筛选 */}
           <select
             value={filters.free_type}
-            onChange={(e) => setFilters(prev => ({ ...prev, free_type: e.target.value }))}
+            onChange={(e) => { setFilters(prev => ({ ...prev, free_type: e.target.value })); setPagination(prev => ({ ...prev, page: 1 })); }}
             className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
               bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
@@ -202,7 +202,7 @@ export default function ToolsAdminPage() {
           {/* 推荐筛选 */}
           <select
             value={filters.is_featured}
-            onChange={(e) => setFilters(prev => ({ ...prev, is_featured: e.target.value }))}
+            onChange={(e) => { setFilters(prev => ({ ...prev, is_featured: e.target.value })); setPagination(prev => ({ ...prev, page: 1 })); }}
             className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
               bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
           >
