@@ -74,6 +74,7 @@ interface ToolFAQ {
 }
 
 interface Rating {
+  count?: number;
   effect_score: number;
   usability_score: number;
   quota_score: number;
@@ -331,7 +332,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   // 计算评分
-  const hasRatings = ratings && ratings.count > 0;
+  const hasRatings = ratings && (ratings.count ?? 0) > 0;
   const overallScore = hasRatings ? ratings.overall_score : (tool.rating_stats?.total_score?.toString() || null);
   const featureTags = tool.feature_tags || [];
 
@@ -863,7 +864,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                       <div className={`w-10 h-10 rounded-lg ${item.color} flex items-center justify-center mx-auto mb-2`}>
                         <item.icon className="w-5 h-5" />
                       </div>
-                      <p className="text-xl font-bold text-slate-800">{value}</p>
+                      <p className="text-xl font-bold text-slate-800">{item.value}</p>
                       <p className="text-xs text-slate-500">{item.label}</p>
                     </CardContent>
                   </Card>
