@@ -1,18 +1,12 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Search, Plus, Edit, Trash2, Eye, ThumbsUp, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, Plus, Trash2, Eye, ThumbsUp, ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -20,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 
 interface Tutorial {
   id: number;
@@ -63,6 +57,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function TutorialsAdminPage() {
+  const router = useRouter();
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1, limit: 20, total: 0, total_pages: 0
@@ -72,19 +67,6 @@ export default function TutorialsAdminPage() {
     search: '',
     category: 'all',
     status: 'all',
-  });
-  
-  // 编辑弹窗
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editingTutorial, setEditingTutorial] = useState<Tutorial | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    category: '',
-    difficulty: '入门',
-    cover_image: '',
-    author: '',
-    status: 'published'
   });
 
   const fetchData = useCallback(async () => {
@@ -123,73 +105,14 @@ export default function TutorialsAdminPage() {
       const data = await res.json();
       
       if (data.success) {
+        toast.success('删除成功');
         fetchData();
       } else {
-        alert('删除失败: ' + data.error);
+        toast.error('删除失败: ' + data.error);
       }
     } catch (error) {
       console.error('删除失败:', error);
-      alert('删除失败');
-    }
-  };
-
-  const openEditDialog = (tutorial?: Tutorial) => {
-    if (tutorial) {
-      setEditingTutorial(tutorial);
-      setFormData({
-        title: tutorial.title,
-        content: tutorial.content,
-        category: tutorial.category,
-        difficulty: tutorial.difficulty,
-        cover_image: tutorial.cover_image || '',
-        author: tutorial.author || '',
-        status: tutorial.status
-      });
-    } else {
-      setEditingTutorial(null);
-      setFormData({
-        title: '',
-        content: '',
-        category: '',
-        difficulty: '入门',
-        cover_image: '',
-        author: '',
-        status: 'published'
-      });
-    }
-    setShowEditDialog(true);
-  };
-
-  const handleSave = async () => {
-    if (!formData.title || !formData.content || !formData.category) {
-      alert('请填写必填项');
-      return;
-    }
-
-    try {
-      const url = '/api/admin/tutorials';
-      const method = editingTutorial ? 'PUT' : 'POST';
-      const body = editingTutorial 
-        ? { ...formData, id: editingTutorial.id }
-        : formData;
-
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      
-      const data = await res.json();
-      
-      if (data.success) {
-        setShowEditDialog(false);
-        fetchData();
-      } else {
-        alert('保存失败: ' + data.error);
-      }
-    } catch (error) {
-      console.error('保存失败:', error);
-      alert('保存失败');
+      toast.error('删除失败');
     }
   };
 
@@ -203,7 +126,7 @@ export default function TutorialsAdminPage() {
             共 {pagination.total} 个教程
           </p>
         </div>
-        <Button onClick={() => openEditDialog()} className="bg-orange-500 hover:bg-orange-600">
+        <Button onClick={() => router.push('/admin/tutorials/new')} className="bg-orange-500 hover:bg-orange-600">
           <Plus className="w-4 h-4 mr-2" />
           添加教程
         </Button>
@@ -328,9 +251,9 @@ export default function TutorialsAdminPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => openEditDialog(tutorial)}
+                            onClick={() => router.push(`/admin/tutorials/${tutorial.id}/edit`)}
                           >
-                            <Edit className="w-4 h-4" />
+                            <Eye className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
@@ -375,122 +298,6 @@ export default function TutorialsAdminPage() {
           </Button>
         </div>
       )}
-
-      {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingTutorial ? '编辑教程' : '添加教程'}</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                标题 <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="教程标题"
-                className="dark:bg-slate-700"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                内容 <span className="text-red-500">*</span>
-              </label>
-              <Textarea
-                value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="支持HTML格式..."
-                rows={10}
-                className="dark:bg-slate-700"
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                  分类 <span className="text-red-500">*</span>
-                </label>
-                <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
-                  <SelectTrigger className="dark:bg-slate-700">
-                    <SelectValue placeholder="选择分类" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORIES.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                  难度 <span className="text-red-500">*</span>
-                </label>
-                <Select value={formData.difficulty} onValueChange={(v) => setFormData(prev => ({ ...prev, difficulty: v }))}>
-                  <SelectTrigger className="dark:bg-slate-700">
-                    <SelectValue placeholder="选择难度" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="初级">初级</SelectItem>
-                    <SelectItem value="中级">中级</SelectItem>
-                    <SelectItem value="高级">高级</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                  封面图
-                </label>
-                <Input
-                  value={formData.cover_image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
-                  placeholder="封面图URL"
-                  className="dark:bg-slate-700"
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                  作者
-                </label>
-                <Input
-                  value={formData.author}
-                  onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                  placeholder="作者名称"
-                  className="dark:bg-slate-700"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                状态
-              </label>
-              <Select value={formData.status} onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}>
-                <SelectTrigger className="dark:bg-slate-700 w-[150px]">
-                  <SelectValue placeholder="选择状态" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="published">已发布</SelectItem>
-                  <SelectItem value="draft">草稿</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>取消</Button>
-            <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600">保存</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
