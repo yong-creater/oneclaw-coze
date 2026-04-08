@@ -5,17 +5,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { 
   ExternalLink, Video, Search, Film, Wand2, Palette, Music, 
   Mic, Users, ChevronRight, Sparkles, Star, X, Check,
-  ChevronLeft, ChevronRight as ChevronRightIcon, Heart, MessageSquare,
+  ChevronLeft, ChevronRight as ChevronRightIcon, MessageSquare,
   ThumbsUp, Flame, Gift, BookOpen, Lightbulb, Copy, Eye
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
@@ -58,23 +51,6 @@ interface Tool {
   sponsor_type: string | null;
   sponsor_expires_at: string | null;
   categories: { name: string; slug: string };
-}
-
-interface Rating {
-  effect_score: number;
-  usability_score: number;
-  quota_score: number;
-  stability_score: number;
-  overall_score: string;
-}
-
-interface Review {
-  id: number;
-  user_id: string;
-  content: string;
-  likes: number;
-  created_at: string;
-  user_ratings?: Rating;
 }
 
 interface Prompt {
@@ -142,29 +118,6 @@ const getUserId = (): string => {
   return userId;
 };
 
-// ==================== 星级评分组件 ====================
-function StarRating({ value, onChange, readonly = false }: { 
-  value: number; 
-  onChange?: (v: number) => void; 
-  readonly?: boolean;
-}) {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map(star => (
-        <button
-          key={star}
-          type="button"
-          disabled={readonly}
-          onClick={() => onChange?.(star)}
-          className={`${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'} transition-transform`}
-        >
-          <Star className={`w-5 h-5 ${star <= value ? 'text-orange-500 fill-orange-500' : 'text-slate-300 dark:text-slate-600'}`} />
-        </button>
-      ))}
-    </div>
-  );
-}
-
 // ==================== 主组件 ====================
 export default function HomePage() {
   // 主Tab状态
@@ -183,34 +136,8 @@ export default function HomePage() {
   const [selectedFreeTypes, setSelectedFreeTypes] = useState<string[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   
-  // 详情弹窗
-  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
-  
   // 用户相关
   const [userId, setUserId] = useState('');
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [ratingStats, setRatingStats] = useState({
-    count: 0,
-    avg_overall: 0,
-    avg_effect: 0,
-    avg_usability: 0,
-    avg_quota: 0,
-    avg_stability: 0,
-    user_rating: null as { effect_score: number; usability_score: number; quota_score: number; stability_score: number } | null
-  });
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [reviewsPagination, setReviewsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
-  
-  // 评分状态
-  const [newRating, setNewRating] = useState({
-    effect_score: 0,
-    usability_score: 0,
-    quota_score: 0,
-    stability_score: 0
-  });
-  const [newReview, setNewReview] = useState('');
-  const [submitting, setSubmitting] = useState(false);
 
   // ==================== 提示词库状态 ====================
   const [prompts, setPrompts] = useState<Prompt[]>([]);
@@ -292,37 +219,6 @@ export default function HomePage() {
       setToolsLoading(false);
     }
   }, [toolsPagination.page, activeCategory, searchQuery, selectedFreeTypes, selectedFeatures]);
-
-  const fetchToolRatingsAndReviews = async (toolId: number) => {
-    try {
-      const ratingRes = await fetch(`/api/ratings?tool_id=${toolId}&user_id=${userId}`);
-      const ratingData = await ratingRes.json();
-      if (ratingData.success) {
-        setRatingStats(ratingData.data);
-        if (ratingData.data.user_rating) {
-          setNewRating({
-            effect_score: ratingData.data.user_rating.effect_score,
-            usability_score: ratingData.data.user_rating.usability_score,
-            quota_score: ratingData.data.user_rating.quota_score,
-            stability_score: ratingData.data.user_rating.stability_score
-          });
-        }
-      }
-
-      const reviewsRes = await fetch(`/api/reviews?tool_id=${toolId}&page=1&limit=5`);
-      const reviewsData = await reviewsRes.json();
-      if (reviewsData.success) {
-        setReviews(reviewsData.data);
-        setReviewsPagination(reviewsData.pagination);
-      }
-
-      const favRes = await fetch(`/api/favorites?tool_id=${toolId}&check_user_id=${userId}`);
-      const favData = await favRes.json();
-      if (favData.success) setIsFavorited(favData.data.is_favorited);
-    } catch (error) {
-      console.error('获取工具数据失败:', error);
-    }
-  };
 
   useEffect(() => {
     if (mainTab === 'tools') {
@@ -428,94 +324,6 @@ export default function HomePage() {
     setSelectedFeatures([]);
     setSearchQuery('');
     setActiveCategory('all');
-  };
-
-  // ==================== 工具操作 ====================
-  const openDetail = async (tool: Tool) => {
-    setSelectedTool(tool);
-    setDetailOpen(true);
-    
-    if (userId) {
-      await fetch('/api/history', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, tool_id: tool.id })
-      });
-    }
-    
-    await fetchToolRatingsAndReviews(tool.id);
-  };
-
-  const toggleFavorite = async () => {
-    if (!userId || !selectedTool) return;
-    
-    try {
-      if (isFavorited) {
-        await fetch(`/api/favorites?user_id=${userId}&tool_id=${selectedTool.id}`, { method: 'DELETE' });
-        setIsFavorited(false);
-      } else {
-        await fetch('/api/favorites', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, tool_id: selectedTool.id })
-        });
-        setIsFavorited(true);
-      }
-    } catch (error) {
-      console.error('收藏操作失败:', error);
-    }
-  };
-
-  const submitRating = async () => {
-    if (!userId || !selectedTool) return;
-    if (Object.values(newRating).some(v => v === 0)) {
-      alert('请完成所有评分项');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/ratings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, tool_id: selectedTool.id, ...newRating })
-      });
-      const data = await res.json();
-      if (data.success) {
-        await fetchToolRatingsAndReviews(selectedTool.id);
-        alert('评分成功！');
-      }
-    } catch (error) {
-      console.error('提交评分失败:', error);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const submitReview = async () => {
-    if (!userId || !selectedTool) return;
-    if (newReview.length < 10 || newReview.length > 500) {
-      alert('评论长度需在10-500字之间');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const res = await fetch('/api/reviews', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, tool_id: selectedTool.id, content: newReview })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setNewReview('');
-        alert(data.message);
-      }
-    } catch (error) {
-      console.error('提交评论失败:', error);
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const hasFilters = selectedFreeTypes.length > 0 || selectedFeatures.length > 0 || searchQuery;
@@ -728,11 +536,26 @@ export default function HomePage() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {tools.map(tool => (
-                    <Card
+                    <a
                       key={tool.id}
-                      className="group bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-lg transition-all cursor-pointer"
-                      onClick={() => openDetail(tool)}
+                      href={`/tools/${tool.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block"
+                      onClick={() => {
+                        // 异步记录浏览历史
+                        if (userId) {
+                          fetch('/api/history', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ user_id: userId, tool_id: tool.id })
+                          }).catch(console.error);
+                        }
+                      }}
                     >
+                      <Card
+                        className="h-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-lg transition-all"
+                      >
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -771,6 +594,7 @@ export default function HomePage() {
                         </div>
                       </CardContent>
                     </Card>
+                    </a>
                   ))}
                 </div>
 
@@ -1024,180 +848,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-
-      {/* 工具详情弹窗 */}
-      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          {selectedTool && (
-            <>
-              <DialogHeader>
-                <div className="flex items-start gap-4">
-                  <img
-                    src={selectedTool.logo}
-                    alt={selectedTool.name}
-                    className="w-14 h-14 rounded-xl object-contain bg-slate-100 dark:bg-slate-700"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56"><rect fill="%23f97316" width="56" height="56"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="24" font-weight="bold">${selectedTool.name[0]}</text></svg>`;
-                    }}
-                  />
-                  <div className="flex-1">
-                    <DialogTitle className="text-xl flex items-center gap-2">
-                      {selectedTool.name}
-                      <button onClick={toggleFavorite} className="ml-2">
-                        <Heart className={`w-5 h-5 ${isFavorited ? 'text-red-500 fill-red-500' : 'text-slate-300'}`} />
-                      </button>
-                    </DialogTitle>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{selectedTool.producer}</p>
-                  </div>
-                </div>
-              </DialogHeader>
-
-              <div className="space-y-4 mt-4">
-                <p className="text-slate-600 dark:text-slate-300">{selectedTool.highlight}</p>
-
-                <div className="flex flex-wrap gap-2">
-                  <span className={`px-3 py-1 rounded-full text-sm ${FREE_TYPE_COLORS[selectedTool.free_type]}`}>
-                    {selectedTool.free_type}
-                  </span>
-                  {selectedTool.feature_tags.map(tag => (
-                    <span key={tag} className="px-3 py-1 rounded-full text-sm bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {selectedTool.advantages.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-slate-800 dark:text-slate-100 mb-2">核心优势</h4>
-                    <ul className="space-y-1">
-                      {selectedTool.advantages.map((a, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
-                          <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          {a}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {selectedTool.limitations.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-slate-800 dark:text-slate-100 mb-2">局限性</h4>
-                    <ul className="space-y-1">
-                      {selectedTool.limitations.map((l, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
-                          <X className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          {l}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
-                    onClick={() => window.open(selectedTool.promotion_url || selectedTool.official_url, '_blank')}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    访问官网
-                  </Button>
-                </div>
-
-                {/* 评分统计 */}
-                <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-medium text-slate-800 dark:text-slate-100">用户评分</h4>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-5 h-5 text-orange-500 fill-orange-500" />
-                      <span className="font-bold text-lg">{ratingStats.avg_overall.toFixed(1)}</span>
-                      <span className="text-sm text-slate-500">({ratingStats.count}人评分)</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                      <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{ratingStats.avg_effect.toFixed(1)}</div>
-                      <div className="text-xs text-slate-500">效果</div>
-                    </div>
-                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                      <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{ratingStats.avg_usability.toFixed(1)}</div>
-                      <div className="text-xs text-slate-500">易用性</div>
-                    </div>
-                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                      <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{ratingStats.avg_quota.toFixed(1)}</div>
-                      <div className="text-xs text-slate-500">免费额度</div>
-                    </div>
-                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                      <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{ratingStats.avg_stability.toFixed(1)}</div>
-                      <div className="text-xs text-slate-500">稳定性</div>
-                    </div>
-                  </div>
-
-                  {/* 我的评分 */}
-                  <div className="space-y-3 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                    <h5 className="font-medium text-slate-800 dark:text-slate-100">我的评分</h5>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">效果</span>
-                        <StarRating value={newRating.effect_score} onChange={(v) => setNewRating(prev => ({ ...prev, effect_score: v }))} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">易用性</span>
-                        <StarRating value={newRating.usability_score} onChange={(v) => setNewRating(prev => ({ ...prev, usability_score: v }))} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">免费额度</span>
-                        <StarRating value={newRating.quota_score} onChange={(v) => setNewRating(prev => ({ ...prev, quota_score: v }))} />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">稳定性</span>
-                        <StarRating value={newRating.stability_score} onChange={(v) => setNewRating(prev => ({ ...prev, stability_score: v }))} />
-                      </div>
-                    </div>
-                    <Button onClick={submitRating} disabled={submitting} className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white">
-                      {submitting ? '提交中...' : '提交评分'}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* 评论区 */}
-                <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-                  <h4 className="font-medium text-slate-800 dark:text-slate-100 mb-4">用户评论</h4>
-                  
-                  {reviews.length > 0 ? (
-                    <div className="space-y-3 mb-4">
-                      {reviews.map(review => (
-                        <div key={review.id} className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
-                          <p className="text-sm text-slate-600 dark:text-slate-300">{review.content}</p>
-                          <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
-                            <span>{new Date(review.created_at).toLocaleDateString()}</span>
-                            <span className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" />{review.likes}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-slate-500 text-center py-4">暂无评论</p>
-                  )}
-
-                  <div className="space-y-3">
-                    <Textarea
-                      placeholder="写下你的使用体验（10-500字）..."
-                      value={newReview}
-                      onChange={(e) => setNewReview(e.target.value)}
-                      className="min-h-[80px]"
-                    />
-                    <Button onClick={submitReview} disabled={submitting} variant="outline" className="w-full">
-                      {submitting ? '提交中...' : '发表评论'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
