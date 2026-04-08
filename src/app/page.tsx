@@ -6,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  ExternalLink, Video, Search, Film, Wand2, Palette, Music, 
+  Video, Search, Film, Wand2, Palette, 
   Mic, Users, ChevronRight, Sparkles, Star, X, Check,
-  ChevronLeft, ChevronRight as ChevronRightIcon, MessageSquare,
+  ChevronLeft, 
   ThumbsUp, Flame, Gift, BookOpen, Lightbulb, Copy, Eye
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
@@ -23,12 +23,6 @@ interface Category {
   id: number;
   name: string;
   slug: string;
-}
-
-interface Tag {
-  id: number;
-  name: string;
-  type: string;
 }
 
 interface Tool {
@@ -125,7 +119,6 @@ export default function HomePage() {
 
   // ==================== 工具导航状态 ====================
   const [categories, setCategories] = useState<Category[]>([]);
-  const [featureTags, setFeatureTags] = useState<Tag[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [toolsLoading, setToolsLoading] = useState(true);
   const [toolsPagination, setToolsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
@@ -133,8 +126,6 @@ export default function HomePage() {
   // 筛选状态
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedFreeTypes, setSelectedFreeTypes] = useState<string[]>([]);
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   
   // 用户相关
   const [userId, setUserId] = useState('');
@@ -166,7 +157,6 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchCategories();
-    fetchTags();
   }, []);
 
   // ==================== 工具相关方法 ====================
@@ -180,16 +170,6 @@ export default function HomePage() {
     }
   };
 
-  const fetchTags = async () => {
-    try {
-      const res = await fetch('/api/tags?type=feature');
-      const data = await res.json();
-      if (data.success) setFeatureTags(data.data);
-    } catch (error) {
-      console.error('获取标签失败:', error);
-    }
-  };
-
   const fetchTools = useCallback(async () => {
     setToolsLoading(true);
     try {
@@ -199,8 +179,6 @@ export default function HomePage() {
       
       if (activeCategory !== 'all') params.set('category', activeCategory);
       if (searchQuery) params.set('search', searchQuery);
-      if (selectedFreeTypes.length > 0) params.set('free_types', selectedFreeTypes.join(','));
-      if (selectedFeatures.length > 0) params.set('features', selectedFeatures.join(','));
 
       const res = await fetch(`/api/tools?${params}`);
       const data = await res.json();
@@ -218,14 +196,14 @@ export default function HomePage() {
     } finally {
       setToolsLoading(false);
     }
-  }, [toolsPagination.page, activeCategory, searchQuery, selectedFreeTypes, selectedFeatures]);
+  }, [toolsPagination.page, activeCategory, searchQuery]);
 
   useEffect(() => {
     if (mainTab === 'tools') {
       setToolsPagination(prev => ({ ...prev, page: 1 }));
       fetchTools();
     }
-  }, [activeCategory, selectedFreeTypes, selectedFeatures]);
+  }, [activeCategory]);
 
   useEffect(() => {
     if (mainTab === 'tools') {
@@ -306,27 +284,11 @@ export default function HomePage() {
     if (mainTab === 'tutorials') fetchTutorials(1);
   }, [mainTab, tutorialCategory]);
 
-  // ==================== 筛选操作 ====================
-  const toggleFilter = (type: 'freeType' | 'feature', value: string) => {
-    if (type === 'freeType') {
-      setSelectedFreeTypes(prev => 
-        prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-      );
-    } else {
-      setSelectedFeatures(prev => 
-        prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-      );
-    }
-  };
-
+  // ==================== 清除筛选 ====================
   const clearFilters = () => {
-    setSelectedFreeTypes([]);
-    setSelectedFeatures([]);
     setSearchQuery('');
     setActiveCategory('all');
   };
-
-  const hasFilters = selectedFreeTypes.length > 0 || selectedFeatures.length > 0 || searchQuery;
 
   // ==================== 渲染 ====================
   return (
@@ -376,59 +338,66 @@ export default function HomePage() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
-          <>
-            {/* 搜索框 */}
-            <div className="mb-4">
-              <div className="relative max-w-xl mx-auto">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <Input
-                  type="text"
-                  placeholder="搜索AI工具..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <X className="w-4 h-4 text-slate-400" />
+          <div className="flex gap-6">
+            {/* 左侧分类导航 */}
+            <aside className="w-56 flex-shrink-0">
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 sticky top-24">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                  <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
+                </div>
+                <nav className="p-2">
+                  <button
+                    onClick={() => setActiveCategory('all')}
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                      activeCategory === 'all'
+                        ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>全部工具</span>
                   </button>
-                )}
+                  {categories.map(cat => {
+                    const Icon = CATEGORY_ICONS[cat.slug] || Video;
+                    const isActive = activeCategory === cat.slug;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.slug)}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                          isActive
+                            ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span className="truncate">{cat.name}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
               </div>
-            </div>
+            </aside>
 
-            {/* 分类导航 */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                <button
-                  onClick={() => setActiveCategory('all')}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    activeCategory === 'all'
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 border border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  全部
-                </button>
-                {categories.map(cat => {
-                  const Icon = CATEGORY_ICONS[cat.slug] || Video;
-                  const isActive = activeCategory === cat.slug;
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => setActiveCategory(cat.slug)}
-                      className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                        isActive
-                          ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 border border-slate-200 dark:border-slate-700'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {cat.name}
+            {/* 右侧内容 */}
+            <div className="flex-1 min-w-0">
+              {/* 搜索框 */}
+              <div className="mb-4">
+                <div className="relative max-w-xl">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="搜索AI工具..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 pr-4 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  />
+                  {searchQuery && (
+                    <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <X className="w-4 h-4 text-slate-400" />
                     </button>
-                  );
-                })}
+                  )}
+                </div>
               </div>
-            </div>
 
             {/* 榜单入口 */}
             <div className="grid grid-cols-3 gap-3 mb-6">
@@ -467,57 +436,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            {/* 筛选区 */}
-            <div className="mb-6 space-y-3">
-              {/* 免费类型 */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400">免费类型</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {['完全免费', '免费额度', '限时免费', '付费工具'].map(type => (
-                    <button
-                      key={type}
-                      onClick={() => toggleFilter('freeType', type)}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                        selectedFreeTypes.includes(type)
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 border border-slate-200 dark:border-slate-700'
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-              </div>
 
-              {/* 核心功能 */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-slate-600 dark:text-slate-400">核心功能</span>
-                  {hasFilters && (
-                    <button onClick={clearFilters} className="text-xs text-orange-500 hover:text-orange-600">
-                      清除筛选
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {featureTags.slice(0, 12).map(tag => (
-                    <button
-                      key={tag.id}
-                      onClick={() => toggleFilter('feature', tag.name)}
-                      className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                        selectedFeatures.includes(tag.name)
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-orange-50 border border-slate-200 dark:border-slate-700'
-                      }`}
-                    >
-                      {tag.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
 
             {/* 广告位 */}
             <AdBanner position="home_banner" className="mb-6" />
@@ -631,7 +550,8 @@ export default function HomePage() {
                 <Button variant="outline" onClick={clearFilters}>清除筛选</Button>
               </div>
             )}
-          </>
+            </div>
+          </div>
         )}
 
         {/* ==================== 提示词库 ==================== */}
