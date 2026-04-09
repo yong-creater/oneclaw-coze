@@ -8,6 +8,8 @@ const PROTECTED_PATHS = [
   '/api/admin/tools',
   '/api/admin/categories',
   '/api/admin/tags',
+  '/api/admin/tutorials',
+  '/api/admin/prompts',
   '/api/admin/reviews',
   '/api/admin/members',
   '/api/admin/orders',
