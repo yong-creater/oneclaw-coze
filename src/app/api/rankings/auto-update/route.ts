@@ -185,32 +185,69 @@ export async function POST(request: NextRequest) {
     
     console.log(`[RankingUpdate] 获取到 ${tools.length} 个工具数据`);
     
+    // 先获取 tools 表中的所有工具，用于匹配 ID
+    const { data: allTools } = await client
+      .from('tools')
+      .select('id, name, logo, official_url');
+    
     // 格式化数据
-    const formattedTools = tools.map((tool, index) => ({
-      rank: tool.rank || index + 1,
-      rank_change: 0, // 自动更新时设为0，需与上月对比
-      tool_id: null, // 自动匹配
-      tool_name: tool.name,
-      tool_url: tool.url,
-      tool_logo: tool.logo || `https://www.google.com/s2/favicons?domain=${new URL(tool.url).hostname}&sz=128`,
-      tool_logo_backup: null,
-      tool_description: tool.description || null,
-      monthly_visits: tool.monthly_visits || '0',
-      monthly_visits_num: parseVisitsToNumber(tool.monthly_visits),
-      growth: null, // 需对比上月
-      growth_num: 0,
-      growth_rate: null,
-      growth_rate_num: 0,
-      global_rank: tool.rank || index + 1,
-      global_rank_change: 0,
-      country_rank: null,
-      country_rank_change: 0,
-      category: tool.category || 'AI Tools',
-      tags: [],
-      source_flag: 'auto',
-      data_status: 'valid',
-      stats_month: targetMonth,
-    }));
+    const formattedTools = tools.map((tool, index) => {
+      // 尝试匹配 tools 表中的 ID
+      let matchedToolId: number | null = null;
+      let matchedLogo: string | null = null;
+      
+      if (allTools) {
+        // 精确匹配名称
+        const exactMatch = allTools.find(t => 
+          t.name.toLowerCase() === tool.name.toLowerCase()
+        );
+        if (exactMatch) {
+          matchedToolId = exactMatch.id;
+          matchedLogo = exactMatch.logo;
+        } else {
+          // 模糊匹配
+          const fuzzyMatch = allTools.find(t => 
+            t.name.toLowerCase().includes(tool.name.toLowerCase()) ||
+            tool.name.toLowerCase().includes(t.name.toLowerCase())
+          );
+          if (fuzzyMatch) {
+            matchedToolId = fuzzyMatch.id;
+            matchedLogo = fuzzyMatch.logo;
+          }
+        }
+      }
+      
+      // 生成 favicon URL（需要 encode）
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(tool.url)}&sz=128`;
+      
+      return {
+        rank: tool.rank || index + 1,
+        rank_change: 0, // 自动更新时设为0，需与上月对比
+        tool_id: matchedToolId,
+        tool_name: tool.name,
+        tool_url: tool.url,
+        tool_logo: matchedLogo || faviconUrl,
+        tool_logo_backup: null,
+        tool_description: tool.description || null,
+        monthly_visits: tool.monthly_visits || '0',
+        monthly_visits_num: parseVisitsToNumber(tool.monthly_visits),
+        growth: null, // 需对比上月
+        growth_num: 0,
+        growth_rate: null,
+        growth_rate_num: 0,
+        global_rank: tool.rank || index + 1,
+        global_rank_change: 0,
+        country_rank: null,
+        country_rank_change: 0,
+        category: tool.category || 'AI Tools',
+        tags: [],
+        source_flag: 'auto',
+        data_status: 'valid',
+        stats_month: targetMonth,
+      };
+    });
+    
+    console.log(`[RankingUpdate] 匹配到 ${formattedTools.filter(t => t.tool_id).length} 个工具 ID`);
     
     // 计算排名变化（与上月对比）
     const lastMonth = getLastMonth(targetMonth);

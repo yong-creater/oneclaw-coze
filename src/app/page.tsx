@@ -429,22 +429,27 @@ export default function HomePage() {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <img
-                              src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${item.tool_url}&sz=64`}
+                              src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
                               alt={item.tool_name}
                               className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/lobster-logo.png';
+                                (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
                               }}
                             />
                             <div>
-                              <a
-                                href={item.tool_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors"
-                              >
-                                {item.tool_name}
-                              </a>
+                              {item.tool_id ? (
+                                <Link
+                                  href={`/tools/${item.tool_id}`}
+                                  target="_blank"
+                                  className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors"
+                                >
+                                  {item.tool_name}
+                                </Link>
+                              ) : (
+                                <span className="font-medium text-slate-800 dark:text-white">
+                                  {item.tool_name}
+                                </span>
+                              )}
                               {item.tool_description && (
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
                                   {item.tool_description}
@@ -475,14 +480,24 @@ export default function HomePage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <a
-                            href={item.tool_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-orange-500 hover:text-orange-600 font-medium"
-                          >
-                            访问 →
-                          </a>
+                          {item.tool_id ? (
+                            <Link
+                              href={`/tools/${item.tool_id}`}
+                              target="_blank"
+                              className="text-sm text-orange-500 hover:text-orange-600 font-medium"
+                            >
+                              查看详情 →
+                            </Link>
+                          ) : (
+                            <a
+                              href={item.tool_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-orange-500 hover:text-orange-600 font-medium"
+                            >
+                              访问官网 →
+                            </a>
+                          )}
                         </td>
                       </tr>
                     ))}
