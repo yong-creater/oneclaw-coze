@@ -111,6 +111,8 @@ export async function GET(request: NextRequest) {
         available_months: availableMonths,
         available_categories: availableCategories,
       },
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' }
     });
   } catch (error: any) {
     console.error('获取榜单失败:', error);

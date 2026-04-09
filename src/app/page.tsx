@@ -128,7 +128,29 @@ const getUserId = (): string => {
   return userId;
 };
 
-// ==================== 主组件 ====================
+// 缓存管理器
+	const CACHE_DURATION = 5 * 60 * 1000;
+	const cache = {
+	  get: (key: string) => {
+	    if (typeof window === 'undefined') return null;
+	    const item = localStorage.getItem(`oneclaw_cache_${key}`);
+	    if (!item) return null;
+	    try {
+	      const { data, timestamp } = JSON.parse(item);
+	      if (Date.now() - timestamp > CACHE_DURATION) {
+	        localStorage.removeItem(`oneclaw_cache_${key}`);
+	        return null;
+	      }
+	      return data;
+	    } catch { return null; }
+	  },
+	  set: (key: string, data: unknown) => {
+	    if (typeof window === 'undefined') return;
+	    localStorage.setItem(`oneclaw_cache_${key}`, JSON.stringify({ data, timestamp: Date.now() }));
+	  }
+	};
+
+	// ==================== 主组件 ====================
 export default function HomePage() {
   // 主Tab状态
   const [mainTab, setMainTab] = useState<MainTab>('rankings');
@@ -177,25 +199,35 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetchCategories();
-    fetchRankings();
+    // 并行加载所有数据
+    Promise.all([
+      fetchCategories(),
+      fetchRankings()
+    ]);
   }, []);
 
   // ==================== 榜单相关方法 ====================
   const fetchRankings = async () => {
+    // 检查缓存
+    const cached = cache.get('rankings');
+    if (cached) {
+      setRankings(cached.data || []);
+      setRankingsMonth(cached.month || '');
+      setRankingsLoading(false);
+      return;
+    }
+    
     setRankingsLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.set('limit', '50');
-      
-      const res = await fetch(`/api/rankings/monthly?${params}`);
+      const res = await fetch(`/api/rankings/monthly?limit=50`);
       const data = await res.json();
       
       if (data.success) {
-        setRankings(data.data || []);
-        if (data.meta?.current_month) {
-          setRankingsMonth(data.meta.current_month);
-        }
+        const rankingsData = data.data || [];
+        const month = data.meta?.current_month || '';
+        cache.set('rankings', { data: rankingsData, month });
+        setRankings(rankingsData);
+        setRankingsMonth(month);
       }
     } catch (error) {
       console.error('获取榜单失败:', error);
@@ -206,22 +238,39 @@ export default function HomePage() {
 
   // ==================== 工具相关方法 ====================
   const fetchCategories = async () => {
+    const cached = cache.get('categories');
+    if (cached) {
+      setCategories(cached);
+      return;
+    }
+    
     try {
       const res = await fetch('/api/categories');
       const data = await res.json();
-      if (data.success) setCategories(data.data);
+      if (data.success) {
+        cache.set('categories', data.data);
+        setCategories(data.data);
+      }
     } catch (error) {
       console.error('获取分类失败:', error);
     }
   };
 
   const fetchTools = useCallback(async () => {
+    const cacheKey = `tools_${activeCategory}_${toolsPagination.page}`;
+    const cached = cache.get(cacheKey);
+    if (cached && !searchQuery) {
+      setTools(cached.data || []);
+      setToolsPagination(prev => ({ ...prev, total: cached.total, total_pages: cached.total_pages }));
+      setToolsLoading(false);
+      return;
+    }
+    
     setToolsLoading(true);
     try {
       const params = new URLSearchParams();
       params.set('page', toolsPagination.page.toString());
       params.set('limit', '20');
-      
       if (activeCategory !== 'all') params.set('category', activeCategory);
       if (searchQuery) params.set('search', searchQuery);
 
@@ -229,12 +278,16 @@ export default function HomePage() {
       const data = await res.json();
       
       if (data.success) {
-        setTools(data.data);
+        const toolsData = data.data;
+        setTools(toolsData);
         setToolsPagination(prev => ({
           ...prev,
           total: data.pagination.total,
           total_pages: data.pagination.total_pages
         }));
+        if (!searchQuery) {
+          cache.set(cacheKey, { data: toolsData, total: data.pagination.total, total_pages: data.pagination.total_pages });
+        }
       }
     } catch (error) {
       console.error('获取工具失败:', error);
@@ -266,6 +319,15 @@ export default function HomePage() {
 
   // ==================== 提示词相关方法 ====================
   const fetchPrompts = async (page: number) => {
+    const cacheKey = `prompts_${promptCategory}_${page}`;
+    const cached = cache.get(cacheKey);
+    if (cached && !promptSearch) {
+      setPrompts(cached.data || []);
+      setPromptsPagination(cached.pagination);
+      setPromptsLoading(false);
+      return;
+    }
+    
     setPromptsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -279,6 +341,9 @@ export default function HomePage() {
       if (data.success) {
         setPrompts(data.data);
         setPromptsPagination(data.pagination);
+        if (!promptSearch) {
+          cache.set(cacheKey, { data: data.data, pagination: data.pagination });
+        }
       }
     } catch (error) {
       console.error('获取Prompt失败:', error);
@@ -304,6 +369,15 @@ export default function HomePage() {
 
   // ==================== 教程相关方法 ====================
   const fetchTutorials = async (page: number) => {
+    const cacheKey = `tutorials_${tutorialCategory}_${page}`;
+    const cached = cache.get(cacheKey);
+    if (cached && !tutorialSearch) {
+      setTutorials(cached.data || []);
+      setTutorialsPagination(cached.pagination);
+      setTutorialsLoading(false);
+      return;
+    }
+    
     setTutorialsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -317,6 +391,9 @@ export default function HomePage() {
       if (data.success) {
         setTutorials(data.data);
         setTutorialsPagination(data.pagination);
+        if (!tutorialSearch) {
+          cache.set(cacheKey, { data: data.data, pagination: data.pagination });
+        }
       }
     } catch (error) {
       console.error('获取教程失败:', error);
