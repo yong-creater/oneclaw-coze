@@ -207,10 +207,6 @@ export default function TutorialsPage() {
                               <Eye className="w-3 h-3" />
                               {tutorial.views}
                             </span>
-                            <span className="flex items-center gap-1">
-                              <ThumbsUp className="w-3 h-3" />
-                              {tutorial.likes}
-                            </span>
                             <span>{new Date(tutorial.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
