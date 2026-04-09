@@ -106,19 +106,12 @@ export default async function TutorialDetailPage({
       .then(() => {});
     
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="min-h-screen bg-slate-50">
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-          <div className="max-w-4xl mx-auto px-4 py-3">
-            <Link href="/" className="flex items-center gap-2">
-              <img 
-                src="/lobster-logo.png" 
-                alt="OneClaw" 
-                width={32} 
-                height={32}
-                className="object-contain"
-              />
-              <span className="font-bold text-lg text-slate-900">OneClaw</span>
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+          <div className="max-w-4xl mx-auto px-4 py-4">
+            <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-orange-500">
+              <span>← 返回首页</span>
             </Link>
           </div>
         </header>
