@@ -366,67 +366,94 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </header>
 
-      {/* 工具信息头部 */}
-      <div className="bg-white">
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="flex flex-col lg:flex-row items-start gap-6">
-            {/* Logo */}
-            <div className="w-20 h-20 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-              {tool.logo ? (
-                <img
-                  src={tool.logo}
-                  alt={tool.name}
-                  className="w-16 h-16 object-contain"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                    (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-                  }}
-                />
-              ) : null}
-              <span className={`text-2xl font-bold text-slate-400 ${tool.logo ? 'hidden' : ''}`}>
-                {tool.name[0]}
-              </span>
+      {/* 工具信息头部 - 高级质感设计 */}
+      <div className="relative">
+        {/* 背景装饰 */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-orange-50" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-orange-100/50 to-transparent rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-100/30 to-transparent rounded-full blur-3xl" />
+        
+        <div className="relative max-w-5xl mx-auto px-4 py-10">
+          <div className="flex flex-col lg:flex-row items-start gap-8">
+            {/* Logo - 精致圆形设计 */}
+            <div className="relative">
+              <div className="w-24 h-24 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center justify-center overflow-hidden ring-4 ring-orange-100">
+                {tool.logo ? (
+                  <img
+                    src={tool.logo}
+                    alt={tool.name}
+                    className="w-20 h-20 object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <span className={`text-3xl font-bold text-slate-300 ${tool.logo ? 'hidden' : ''}`}>
+                  {tool.name[0]}
+                </span>
+              </div>
+              {/* 精选徽章 */}
+              {tool.is_featured && (
+                <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-semibold rounded-full shadow-lg">
+                  精选
+                </div>
+              )}
             </div>
             
             {/* 工具信息 */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                <h1 className="text-2xl font-bold text-slate-800">{tool.name}</h1>
+              {/* 标题行 */}
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                  {tool.name}
+                </h1>
                 {tool.is_official && (
-                  <Badge variant="outline" className="text-blue-600 border-blue-300 bg-blue-50">官方认证</Badge>
-                )}
-                {tool.is_featured && (
-                  <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">精选</Badge>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium border border-blue-200">
+                    <Award className="w-3 h-3" />
+                    官方认证
+                  </span>
                 )}
               </div>
               
-              <p className="text-slate-500 text-sm mb-3">{tool.producer}</p>
+              {/* 出品方 */}
+              <p className="text-slate-500 mb-4 flex items-center gap-2">
+                <span className="w-8 h-px bg-slate-200" />
+                {tool.producer}
+              </p>
               
-              {/* 评分和标签 */}
-              <div className="flex flex-wrap items-center gap-3 mb-3">
+              {/* 一句话亮点 */}
+              <p className="text-lg text-slate-700 mb-4 font-medium">{tool.highlight}</p>
+              
+              {/* 评分和价格标签 */}
+              <div className="flex flex-wrap items-center gap-4 mb-5">
                 {overallScore ? (
-                  <div className="flex items-center gap-1.5">
-                    <StarRating value={Math.round(Number(overallScore))} readonly />
-                    <span className="text-lg font-semibold text-slate-800">{overallScore}</span>
-                    <span className="text-sm text-slate-400">({reviewsPagination.total}条评价)</span>
+                  <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg shadow-sm border border-slate-100">
+                    <StarRating value={Math.round(Number(overallScore))} readonly size="sm" />
+                    <span className="font-semibold text-slate-800">{overallScore}</span>
+                    <span className="text-xs text-slate-400">({reviewsPagination.total}条)</span>
                   </div>
                 ) : (
-                  <span className="text-sm text-slate-400">暂无评分</span>
+                  <span className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-sm">暂无评分</span>
                 )}
-                <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${FREE_TYPE_COLORS[tool.free_type] || 'bg-slate-100 text-slate-700'}`}>
+                <span className={`px-3 py-1.5 rounded-lg font-medium text-sm shadow-sm ${
+                  tool.free_type === '完全免费' 
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
+                    : tool.free_type === '免费额度'
+                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
+                    : 'bg-slate-100 text-slate-600'
+                }`}>
                   {tool.free_type}
                 </span>
               </div>
               
-              <p className="text-slate-600 text-sm mb-4">{tool.highlight}</p>
-              
-              {/* 标签 */}
+              {/* 功能标签 */}
               <div className="flex flex-wrap gap-2">
-                {featureTags.slice(0, 6).map((tag, i) => (
+                {featureTags.slice(0, 5).map((tag, i) => (
                   <Link 
                     key={i} 
                     href={`/?search=${encodeURIComponent(tag)}`}
-                    className="px-3 py-1 rounded-full text-xs bg-slate-100 text-slate-600 hover:bg-orange-100 hover:text-orange-600 transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs bg-white text-slate-600 border border-slate-200 hover:border-orange-300 hover:text-orange-600 transition-all shadow-sm hover:shadow"
                   >
                     {tag}
                   </Link>
@@ -434,11 +461,11 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             </div>
             
-            {/* CTA按钮 */}
-            <div className="flex flex-col gap-2 w-full lg:w-auto lg:flex-row">
+            {/* CTA按钮组 - 垂直排列 */}
+            <div className="flex flex-col gap-3 w-full lg:w-auto">
               <Button
                 onClick={handleVisit}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6"
+                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-8 py-3 shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 立即使用
@@ -446,38 +473,43 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               <Button
                 variant="outline"
                 onClick={() => window.open(tool.official_url, '_blank')}
-                className="border-slate-300 text-slate-700 hover:bg-slate-50"
+                className="border-2 border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium px-6 py-2.5"
               >
                 <Globe className="w-4 h-4 mr-2" />
-                官网
+                访问官网
               </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Tab导航 */}
-      <div className="bg-white sticky top-[49px] z-40 shadow-sm">
+      {/* Tab导航 - 简洁现代风格 */}
+      <div className="bg-white border-b border-slate-200 sticky top-[49px] z-40">
         <div className="max-w-5xl mx-auto px-4">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="w-full justify-start h-auto bg-transparent p-0 gap-0 rounded-none">
-              {[
-                { value: 'detail', label: '工具详情' },
-                { value: 'features', label: '功能详解' },
-                { value: 'pricing', label: '价格权益' },
-                { value: 'reviews', label: '用户评价' },
-                { value: 'insights', label: '数据洞察' },
-              ].map((tab) => (
-                <TabsTrigger 
-                  key={tab.value}
-                  value={tab.value} 
-                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 data-[state=active]:font-semibold rounded-none px-4 py-3 text-slate-500 hover:text-slate-700 text-sm"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+          <div className="flex items-center gap-1">
+            {[
+              { value: 'detail', label: '详情', icon: FileText },
+              { value: 'features', label: '功能', icon: Wand2 },
+              { value: 'pricing', label: '价格', icon: BarChart3 },
+              { value: 'reviews', label: '评价', icon: MessageSquare },
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`relative px-5 py-3.5 text-sm font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === tab.value
+                    ? 'text-orange-500'
+                    : 'text-slate-500 hover:text-slate-700'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+                {activeTab === tab.value && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-500 rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
