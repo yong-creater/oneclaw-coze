@@ -360,6 +360,14 @@ export default function HomePage() {
     if (mainTab === 'prompts') fetchPrompts(1);
   }, [mainTab, promptCategory]);
 
+  // 提示词搜索
+  useEffect(() => {
+    if (mainTab === 'prompts') {
+      const timer = setTimeout(() => fetchPrompts(1), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [promptSearch]);
+
   const copyPrompt = async (prompt: Prompt) => {
     await navigator.clipboard.writeText(prompt.content);
     setCopiedPromptId(prompt.id);
@@ -409,6 +417,14 @@ export default function HomePage() {
   useEffect(() => {
     if (mainTab === 'tutorials') fetchTutorials(1);
   }, [mainTab, tutorialCategory]);
+
+  // 教程搜索
+  useEffect(() => {
+    if (mainTab === 'tutorials') {
+      const timer = setTimeout(() => fetchTutorials(1), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [tutorialSearch]);
 
   // ==================== 清除筛选 ====================
   const clearFilters = () => {
