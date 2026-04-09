@@ -20,7 +20,9 @@ import {
   Smartphone,
   BookOpen,
   FileText,
-  TrendingUp
+  TrendingUp,
+  Clock,
+  Settings
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -29,7 +31,16 @@ const navigation = [
   { name: '工具管理', href: '/admin/tools', icon: Wrench },
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
   { name: '标签管理', href: '/admin/tags', icon: Tags },
-  { name: '榜单管理', href: '/admin/rankings', icon: TrendingUp },
+  { 
+    name: '榜单管理', 
+    href: '/admin/rankings', 
+    icon: TrendingUp,
+    children: [
+      { name: '榜单列表', href: '/admin/rankings' },
+      { name: '数据导入', href: '/admin/rankings/import' },
+      { name: '定时任务', href: '/admin/rankings/scheduler' },
+    ]
+  },
   { name: '教程管理', href: '/admin/tutorials', icon: BookOpen },
   { name: 'Prompt管理', href: '/admin/prompts', icon: FileText },
   { name: '评论审核', href: '/admin/reviews', icon: MessageSquare },
@@ -143,24 +154,51 @@ export default function AdminLayout({
         {/* 导航菜单 */}
         <nav className="p-4 space-y-1">
           {navigation.map((item) => {
+            const hasChildren = item.children && item.children.length > 0;
             const isActive = pathname === item.href || 
               (item.href !== '/admin' && pathname.startsWith(item.href));
+            const isChildActive = hasChildren && item.children?.some(child => pathname === child.href);
+
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`
-                  flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                  transition-colors duration-200
-                  ${isActive 
-                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' 
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
-                  }
-                `}
-              >
-                <item.icon className="w-5 h-5" />
-                {item.name}
-              </Link>
+              <div key={item.name}>
+                <Link
+                  href={item.href}
+                  className={`
+                    flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                    transition-colors duration-200
+                    ${(isActive || isChildActive) 
+                      ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' 
+                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                    }
+                  `}
+                >
+                  <item.icon className="w-5 h-5" />
+                  {item.name}
+                </Link>
+                
+                {/* 子菜单 */}
+                {hasChildren && (
+                  <div className={`ml-4 mt-1 space-y-1 ${isChildActive ? 'block' : 'hidden'}`}>
+                    {item.children?.map(child => (
+                      <Link
+                        key={child.href}
+                        href={child.href}
+                        className={`
+                          flex items-center gap-2 px-3 py-1.5 rounded text-sm
+                          transition-colors duration-200
+                          ${pathname === child.href
+                            ? 'text-orange-600 dark:text-orange-400 font-medium'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                          }
+                        `}
+                      >
+                        <span className="w-1 h-1 rounded-full bg-current" />
+                        {child.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
