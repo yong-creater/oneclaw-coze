@@ -233,7 +233,7 @@ export async function POST(request: NextRequest) {
         monthly_visits_num: parseVisitsToNumber(tool.monthly_visits),
         growth: null, // 需对比上月
         growth_num: 0,
-        growth_rate: null,
+        growth_rate: '',
         growth_rate_num: 0,
         global_rank: tool.rank || index + 1,
         global_rank_change: 0,

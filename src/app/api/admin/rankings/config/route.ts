@@ -3,10 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// 延迟初始化 Supabase 客户端
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 // 获取定时任务配置
 export async function GET() {
@@ -24,19 +27,18 @@ export async function GET() {
       return NextResponse.json({ success: false, error: '认证失败' }, { status: 401 });
     }
 
-    // 从 ranking_configs 表获取配置
+    const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from('ranking_configs')
       .select('*')
       .eq('config_key', 'scheduler')
       .single();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = No rows found
+    if (error && error.code !== 'PGRST116') {
       console.error('获取配置失败:', error);
       return NextResponse.json({ success: false, error: '获取配置失败' }, { status: 500 });
     }
 
-    // 返回配置（使用默认值）
     const defaultConfig = {
       auto_update_enabled: false,
       update_schedule: 'daily',
@@ -81,13 +83,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const {
-      auto_update_enabled,
-      update_schedule,
-      update_time,
-    } = body;
+    const { auto_update_enabled, update_schedule, update_time } = body;
 
-    // 验证数据
     if (!['daily', 'weekly', 'monthly'].includes(update_schedule)) {
       return NextResponse.json({ 
         success: false, 
@@ -95,7 +92,6 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // 验证时间格式
     if (!/^\d{2}:\d{2}$/.test(update_time)) {
       return NextResponse.json({ 
         success: false, 
@@ -103,18 +99,12 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const configValue = {
-      auto_update_enabled: Boolean(auto_update_enabled),
-      update_schedule,
-      update_time,
-    };
-
-    // 保存到数据库（使用 upsert）
+    const supabase = getSupabaseAdmin();
     const { error } = await supabase
       .from('ranking_configs')
       .upsert({
         config_key: 'scheduler',
-        config_value: configValue,
+        config_value: { auto_update_enabled: Boolean(auto_update_enabled), update_schedule, update_time },
         description: '榜单定时更新配置',
         updated_at: new Date().toISOString(),
       }, {
@@ -126,10 +116,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '保存配置失败' }, { status: 500 });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: '配置保存成功',
-    });
+    return NextResponse.json({ success: true, message: '配置保存成功' });
   } catch (error) {
     console.error('保存配置失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });

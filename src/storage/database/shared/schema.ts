@@ -1,5 +1,4 @@
 import { pgTable, serial, varchar, text, boolean, timestamp, integer, index, jsonb } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
 
 // 系统健康检查表（必须保留）
 export const healthCheck = pgTable("health_check", {
@@ -292,9 +291,9 @@ export const monthlyRankings = pgTable("monthly_rankings", {
   
   // 流量数据
   monthlyVisits: varchar("monthly_visits", { length: 50 }).notNull(),
-  monthlyVisitsNum: bigint("monthly_visits_num"),
+  monthlyVisitsNum: integer("monthly_visits_num"),
   growth: varchar("growth", { length: 50 }),
-  growthNum: bigint("growth_num"),
+  growthNum: integer("growth_num"),
   growthRate: varchar("growth_rate", { length: 20 }),
   growthRateNum: varchar("growth_rate_num", { length: 20 }), // 使用 varchar 存储 DECIMAL
   

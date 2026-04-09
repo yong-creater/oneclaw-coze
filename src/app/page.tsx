@@ -9,7 +9,7 @@ import {
   Video, Search, Film, Wand2, Palette, 
   Mic, Users, ChevronRight, Star, X, Check,
   ChevronLeft, 
-  ThumbsUp, Flame, BookOpen, Lightbulb, Copy, Eye,
+  ThumbsUp, BookOpen, Lightbulb, Copy, Eye,
   TrendingUp
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
@@ -75,6 +75,7 @@ interface Tutorial {
 interface RankingItem {
   id: number;
   rank: number;
+  tool_id: number | null;
   tool_name: string;
   tool_url: string;
   tool_logo: string;
@@ -410,12 +411,21 @@ export default function HomePage() {
                       <th className="px-6 py-4 font-medium w-32">月访问量</th>
                       <th className="px-6 py-4 font-medium w-24">增长率</th>
                       <th className="px-6 py-4 font-medium w-24">分类</th>
-                      <th className="px-6 py-4 font-medium w-24">操作</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                     {rankings.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                      <tr 
+                        key={item.id} 
+                        className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                        onClick={() => {
+                          if (item.tool_id) {
+                            window.open(`/tools/${item.tool_id}`, '_blank');
+                          } else {
+                            window.open(item.tool_url, '_blank');
+                          }
+                        }}
+                      >
                         <td className="px-6 py-4">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
                             item.rank === 1 ? 'bg-yellow-400 text-white' :
@@ -437,19 +447,9 @@ export default function HomePage() {
                               }}
                             />
                             <div>
-                              {item.tool_id ? (
-                                <Link
-                                  href={`/tools/${item.tool_id}`}
-                                  target="_blank"
-                                  className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors"
-                                >
-                                  {item.tool_name}
-                                </Link>
-                              ) : (
-                                <span className="font-medium text-slate-800 dark:text-white">
-                                  {item.tool_name}
-                                </span>
-                              )}
+                              <span className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors">
+                                {item.tool_name}
+                              </span>
                               {item.tool_description && (
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
                                   {item.tool_description}
@@ -478,26 +478,6 @@ export default function HomePage() {
                           <span className="text-sm text-slate-500">
                             {item.category || '-'}
                           </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {item.tool_id ? (
-                            <Link
-                              href={`/tools/${item.tool_id}`}
-                              target="_blank"
-                              className="text-sm text-orange-500 hover:text-orange-600 font-medium"
-                            >
-                              查看详情 →
-                            </Link>
-                          ) : (
-                            <a
-                              href={item.tool_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm text-orange-500 hover:text-orange-600 font-medium"
-                            >
-                              访问官网 →
-                            </a>
-                          )}
                         </td>
                       </tr>
                     ))}
