@@ -9,7 +9,8 @@ import {
   Video, Search, Film, Wand2, Palette, 
   Mic, Users, ChevronRight, Sparkles, Star, X, Check,
   ChevronLeft, 
-  ThumbsUp, Flame, Gift, BookOpen, Lightbulb, Copy, Eye
+  ThumbsUp, Flame, Gift, BookOpen, Lightbulb, Copy, Eye,
+  TrendingUp
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -71,6 +72,19 @@ interface Tutorial {
   created_at: string;
 }
 
+interface RankingItem {
+  id: number;
+  rank: number;
+  tool_name: string;
+  tool_url: string;
+  tool_logo: string;
+  monthly_visits: string;
+  growth: string;
+  growth_rate: string;
+  category: string;
+  tool_description: string;
+}
+
 // ==================== 常量 ====================
 const FREE_TYPE_COLORS: Record<string, string> = {
   '完全免费': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -94,6 +108,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 };
 
 const MAIN_TABS = [
+  { key: 'rankings', label: '热门榜单', icon: TrendingUp },
   { key: 'tools', label: '工具导航', icon: Video },
   { key: 'prompts', label: '提示词库', icon: Lightbulb },
   { key: 'tutorials', label: '教程库', icon: BookOpen },
@@ -115,7 +130,12 @@ const getUserId = (): string => {
 // ==================== 主组件 ====================
 export default function HomePage() {
   // 主Tab状态
-  const [mainTab, setMainTab] = useState<MainTab>('tools');
+  const [mainTab, setMainTab] = useState<MainTab>('rankings');
+
+  // ==================== 榜单状态 ====================
+  const [rankings, setRankings] = useState<RankingItem[]>([]);
+  const [rankingsLoading, setRankingsLoading] = useState(true);
+  const [rankingsMonth, setRankingsMonth] = useState('');
 
   // ==================== 工具导航状态 ====================
   const [categories, setCategories] = useState<Category[]>([]);
@@ -157,7 +177,31 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchCategories();
+    fetchRankings();
   }, []);
+
+  // ==================== 榜单相关方法 ====================
+  const fetchRankings = async () => {
+    setRankingsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('limit', '50');
+      
+      const res = await fetch(`/api/rankings/monthly?${params}`);
+      const data = await res.json();
+      
+      if (data.success) {
+        setRankings(data.data || []);
+        if (data.meta?.current_month) {
+          setRankingsMonth(data.meta.current_month);
+        }
+      }
+    } catch (error) {
+      console.error('获取榜单失败:', error);
+    } finally {
+      setRankingsLoading(false);
+    }
+  };
 
   // ==================== 工具相关方法 ====================
   const fetchCategories = async () => {
@@ -336,6 +380,137 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* ==================== 热门榜单 ==================== */}
+        {mainTab === 'rankings' && (
+          <div>
+            {/* 页面标题 */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
+                {rankingsMonth ? `${rankingsMonth.replace('-', '年')}月 AI工具榜单` : 'AI工具热门榜单'}
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                精选最受欢迎的AI工具，实时追踪热度变化
+              </p>
+            </div>
+
+            {/* 榜单内容 */}
+            {rankingsLoading ? (
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-8">
+                <div className="flex items-center justify-center h-48">
+                  <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
+                </div>
+              </div>
+            ) : rankings.length > 0 ? (
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-slate-50 dark:bg-slate-700/50">
+                    <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
+                      <th className="px-6 py-4 font-medium w-20">排名</th>
+                      <th className="px-6 py-4 font-medium">工具</th>
+                      <th className="px-6 py-4 font-medium w-32">月访问量</th>
+                      <th className="px-6 py-4 font-medium w-24">增长率</th>
+                      <th className="px-6 py-4 font-medium w-24">分类</th>
+                      <th className="px-6 py-4 font-medium w-24">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                    {rankings.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                            item.rank === 1 ? 'bg-yellow-400 text-white' :
+                            item.rank === 2 ? 'bg-slate-300 text-white' :
+                            item.rank === 3 ? 'bg-orange-300 text-white' :
+                            'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                          }`}>
+                            {item.rank}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${item.tool_url}&sz=64`}
+                              alt={item.tool_name}
+                              className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/lobster-logo.png';
+                              }}
+                            />
+                            <div>
+                              <a
+                                href={item.tool_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors"
+                              >
+                                {item.tool_name}
+                              </a>
+                              {item.tool_description && (
+                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                                  {item.tool_description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                            {item.monthly_visits || '-'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {item.growth_rate ? (
+                            <span className={`text-sm font-medium ${
+                              item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'
+                            }`}>
+                              {item.growth_rate}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm text-slate-500">
+                            {item.category || '-'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <a
+                            href={item.tool_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-orange-500 hover:text-orange-600 font-medium"
+                          >
+                            访问 →
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center">
+                <TrendingUp className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                <p className="text-slate-500 dark:text-slate-400 mb-4">暂无榜单数据</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500">
+                  请联系管理员导入榜单数据
+                </p>
+              </div>
+            )}
+
+            {/* 更多榜单链接 */}
+            <div className="mt-6 text-center">
+              <Link href="/rankings">
+                <Button variant="outline" className="gap-2">
+                  查看完整榜单
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
           <div className="flex gap-6">
