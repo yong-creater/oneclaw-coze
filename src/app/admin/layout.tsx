@@ -19,7 +19,8 @@ import {
   Loader2,
   Smartphone,
   BookOpen,
-  FileText
+  FileText,
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -28,6 +29,7 @@ const navigation = [
   { name: '工具管理', href: '/admin/tools', icon: Wrench },
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
   { name: '标签管理', href: '/admin/tags', icon: Tags },
+  { name: '榜单管理', href: '/admin/rankings', icon: TrendingUp },
   { name: '教程管理', href: '/admin/tutorials', icon: BookOpen },
   { name: 'Prompt管理', href: '/admin/prompts', icon: FileText },
   { name: '评论审核', href: '/admin/reviews', icon: MessageSquare },

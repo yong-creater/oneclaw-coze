@@ -269,3 +269,88 @@ export const advertisements = pgTable("advertisements", {
   index("advertisements_position_idx").on(table.position),
   index("advertisements_is_active_idx").on(table.is_active),
 ]);
+
+// ============================================
+// 月度榜单相关表（Toolify榜单功能）
+// ============================================
+
+// 月度榜单表
+export const monthlyRankings = pgTable("monthly_rankings", {
+  id: serial().primaryKey(),
+  
+  // 排名信息
+  rank: integer("rank").notNull(),
+  rankChange: integer("rank_change").default(0),
+  
+  // 工具基本信息
+  toolId: integer("tool_id").references(() => tools.id, { onDelete: "set null" }),
+  toolName: varchar("tool_name", { length: 200 }).notNull(),
+  toolUrl: varchar("tool_url", { length: 500 }).notNull(),
+  toolLogo: varchar("tool_logo", { length: 500 }),
+  toolLogoBackup: varchar("tool_logo_backup", { length: 500 }),
+  toolDescription: varchar("tool_description", { length: 500 }),
+  
+  // 流量数据
+  monthlyVisits: varchar("monthly_visits", { length: 50 }).notNull(),
+  monthlyVisitsNum: bigint("monthly_visits_num"),
+  growth: varchar("growth", { length: 50 }),
+  growthNum: bigint("growth_num"),
+  growthRate: varchar("growth_rate", { length: 20 }),
+  growthRateNum: varchar("growth_rate_num", { length: 20 }), // 使用 varchar 存储 DECIMAL
+  
+  // 排名信息
+  globalRank: integer("global_rank"),
+  globalRankChange: integer("global_rank_change").default(0),
+  countryRank: integer("country_rank"),
+  countryRankChange: integer("country_rank_change").default(0),
+  
+  // 分类标签
+  category: varchar("category", { length: 100 }),
+  tags: jsonb("tags").$type<string[]>().default([]),
+  
+  // 数据来源
+  sourceFlag: varchar("source_flag", { length: 50 }).default("manual"),
+  dataStatus: varchar("data_status", { length: 20 }).default("valid"),
+  
+  // 时间信息
+  statsMonth: varchar("stats_month", { length: 7 }).notNull(), // YYYY-MM
+  updateTime: timestamp("update_time", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("monthly_rankings_stats_month_idx").on(table.statsMonth),
+  index("monthly_rankings_rank_idx").on(table.rank),
+  index("monthly_rankings_category_idx").on(table.category),
+]);
+
+// 月度榜单历史归档表
+export const monthlyRankingsArchive = pgTable("monthly_rankings_archive", {
+  id: serial().primaryKey(),
+  backupMonth: varchar("backup_month", { length: 7 }).notNull(),
+  data: jsonb("data").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("monthly_rankings_archive_backup_month_idx").on(table.backupMonth),
+]);
+
+// 榜单配置表
+export const rankingConfigs = pgTable("ranking_configs", {
+  id: serial().primaryKey(),
+  configKey: varchar("config_key", { length: 100 }).notNull().unique(),
+  configValue: jsonb("config_value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// 榜单更新日志表
+export const rankingUpdateLogs = pgTable("ranking_update_logs", {
+  id: serial().primaryKey(),
+  updateMonth: varchar("update_month", { length: 7 }).notNull(),
+  updateType: varchar("update_type", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).notNull(),
+  totalCount: integer("total_count").default(0),
+  errorCount: integer("error_count").default(0),
+  errorDetails: jsonb("error_details"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("ranking_update_logs_month_idx").on(table.updateMonth),
+  index("ranking_update_logs_status_idx").on(table.status),
+]);
