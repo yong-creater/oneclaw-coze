@@ -759,7 +759,7 @@ export default function HomePage() {
                             <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{prompt.uses}</span>
                             <span className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" />{prompt.likes}</span>
                           </div>
-                          <Button size="sm" variant="outline" onClick={() => copyPrompt(prompt)}>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); copyPrompt(prompt); }}>
                             {copiedPromptId === prompt.id ? <><Check className="w-3 h-3 mr-1" />已复制</> : <><Copy className="w-3 h-3 mr-1" />复制</>}
                           </Button>
                         </div>
