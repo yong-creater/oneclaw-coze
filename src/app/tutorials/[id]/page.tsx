@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { ArrowLeft, Eye, User, Calendar } from 'lucide-react';
+import { Eye, User, Calendar } from 'lucide-react';
 import TutorialLikeButton from '@/components/TutorialLikeButton';
 
 interface Tutorial {
@@ -110,25 +110,16 @@ export default async function TutorialDetailPage({
         {/* Header */}
         <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50 shadow-sm">
           <div className="max-w-4xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <Link 
-                href="/tutorials" 
-                className="flex items-center gap-2 text-slate-600 hover:text-orange-500 transition-colors font-medium"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span>返回教程列表</span>
-              </Link>
-              <Link href="/" className="flex items-center gap-2">
-                <img 
-                  src="/lobster-logo.png" 
-                  alt="OneClaw" 
-                  width={32} 
-                  height={32}
-                  className="object-contain"
-                />
-                <span className="font-bold text-lg text-slate-900">OneClaw</span>
-              </Link>
-            </div>
+            <Link href="/" className="flex items-center gap-2">
+              <img 
+                src="/lobster-logo.png" 
+                alt="OneClaw" 
+                width={32} 
+                height={32}
+                className="object-contain"
+              />
+              <span className="font-bold text-lg text-slate-900">OneClaw</span>
+            </Link>
           </div>
         </header>
 
