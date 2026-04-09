@@ -50,7 +50,7 @@ export default function TutorialsPage() {
 
   useEffect(() => {
     fetchTutorials(1);
-  }, [category]);
+  }, [category, searchQuery]);
 
   const fetchTutorials = async (page: number) => {
     setLoading(true);

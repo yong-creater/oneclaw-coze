@@ -66,6 +66,7 @@ export default function PromptsPage() {
       params.set('page', page.toString());
       params.set('limit', pagination.limit.toString());
       if (selectedCategory) params.set('category', selectedCategory);
+      if (searchQuery) params.set('search', searchQuery);
       
       const res = await fetch(`/api/prompts?${params}`);
       const data = await res.json();
@@ -88,7 +89,7 @@ export default function PromptsPage() {
 
   useEffect(() => {
     fetchData(1);
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
 
   // 搜索过滤
   const filteredPrompts = searchQuery
