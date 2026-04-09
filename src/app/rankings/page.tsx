@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  Flame, Gift, Sparkles, TrendingUp, TrendingDown, Minus,
+  Flame, TrendingUp, TrendingDown, Minus,
   ExternalLink, Search, ChevronLeft, ChevronRight, Filter,
   Download, Info, ArrowUpDown, ArrowUp, ArrowDown, Globe
 } from 'lucide-react';
@@ -54,8 +54,6 @@ interface RankingsResponse {
 // 榜单类型配置
 const RANKING_TYPES = [
   { id: 'hot', name: '热门榜单', icon: Flame, color: 'text-red-500 bg-red-50 dark:bg-red-900/20' },
-  { id: 'growth', name: '增长最快', icon: TrendingUp, color: 'text-green-500 bg-green-50 dark:bg-green-900/20' },
-  { id: 'new', name: '新品上榜', icon: Sparkles, color: 'text-purple-500 bg-purple-50 dark:bg-purple-900/20' },
 ];
 
 // 格式化月份显示
