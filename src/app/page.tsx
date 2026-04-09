@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
   Video, Search, Film, Wand2, Palette, 
-  Mic, Users, ChevronRight, Sparkles, Star, X, Check,
+  Mic, Users, ChevronRight, Star, X, Check,
   ChevronLeft, 
-  ThumbsUp, Flame, Gift, BookOpen, Lightbulb, Copy, Eye,
+  ThumbsUp, Flame, BookOpen, Lightbulb, Copy, Eye,
   TrendingUp
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
@@ -573,45 +573,6 @@ export default function HomePage() {
                   )}
                 </div>
               </div>
-
-            {/* 榜单入口 */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <Link href="/rankings?type=hot" className="group">
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-xl border border-red-200 dark:border-red-800/50 hover:border-orange-400 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
-                    <Flame className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-slate-800 dark:text-slate-100 text-sm">热门榜单</h3>
-                    <p className="text-xs text-slate-500">TOP 10</p>
-                  </div>
-                </div>
-              </Link>
-              <Link href="/rankings?type=free" className="group">
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800/50 hover:border-green-400 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
-                    <Gift className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-slate-800 dark:text-slate-100 text-sm">免费神器</h3>
-                    <p className="text-xs text-slate-500">省钱必备</p>
-                  </div>
-                </div>
-              </Link>
-              <Link href="/rankings?type=new" className="group">
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl border border-purple-200 dark:border-purple-800/50 hover:border-purple-400 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-slate-800 dark:text-slate-100 text-sm">新品上线</h3>
-                    <p className="text-xs text-slate-500">抢先体验</p>
-                  </div>
-                </div>
-              </Link>
-            </div>
-
-
 
             {/* 广告位 */}
             <AdBanner position="home_banner" className="mb-6" />
