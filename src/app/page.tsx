@@ -738,7 +738,11 @@ export default function HomePage() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {prompts.map(prompt => (
-                    <Card key={prompt.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
+                    <Card 
+                      key={prompt.id} 
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
+                      onClick={() => window.open(`/prompts/${prompt.id}`, '_blank')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-medium text-slate-800 dark:text-slate-100 line-clamp-1">{prompt.title}</h3>
@@ -841,7 +845,11 @@ export default function HomePage() {
               <>
                 <div className="space-y-4">
                   {tutorials.map(tutorial => (
-                    <Card key={tutorial.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer">
+                    <Card 
+                      key={tutorial.id} 
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
+                      onClick={() => window.open(`/tutorials/${tutorial.id}`, '_blank')}
+                    >
                       <CardContent className="p-4">
                         <div className="flex gap-4">
                           {tutorial.cover_image ? (
