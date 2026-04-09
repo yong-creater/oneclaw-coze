@@ -297,6 +297,10 @@ export default function HomePage() {
   }, [toolsPagination.page, activeCategory, searchQuery]);
 
   useEffect(() => {
+    if (mainTab === 'tools') fetchTools();
+  }, [mainTab]);
+
+  useEffect(() => {
     if (mainTab === 'tools') {
       setToolsPagination(prev => ({ ...prev, page: 1 }));
       fetchTools();
