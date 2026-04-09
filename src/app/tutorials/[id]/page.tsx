@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { ArrowLeft, Eye, ThumbsUp, User, Calendar, BookOpen } from 'lucide-react';
+import { ArrowLeft, Eye, User, Calendar } from 'lucide-react';
+import TutorialLikeButton from '@/components/TutorialLikeButton';
 
 interface Tutorial {
   id: number;
@@ -165,10 +166,7 @@ export default async function TutorialDetailPage({
                 <Eye className="w-4 h-4" />
                 <span>{tutorial.views} 浏览</span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <ThumbsUp className="w-4 h-4" />
-                <span>{tutorial.likes} 点赞</span>
-              </span>
+              <TutorialLikeButton tutorialId={tutorial.id} initialLikes={tutorial.likes} />
             </div>
           </div>
 
