@@ -346,22 +346,6 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               <ChevronLeft className="w-5 h-5" />
               <span className="font-medium">返回首页</span>
             </Link>
-            <div className="flex items-center gap-1">
-              <button 
-                onClick={handleShare}
-                className="p-2 text-slate-500 hover:text-orange-500 hover:bg-slate-100 rounded-lg transition-colors"
-                title="分享"
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button 
-                onClick={toggleFavorite}
-                className={`p-2 rounded-lg transition-colors ${isFavorited ? 'text-red-500 bg-red-50' : 'text-slate-500 hover:text-orange-500 hover:bg-slate-100'}`}
-                title="收藏"
-              >
-                <Heart className={`w-5 h-5 ${isFavorited ? 'fill-current' : ''}`} />
-              </button>
-            </div>
           </div>
         </div>
       </header>
@@ -463,21 +447,26 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
             
             {/* CTA按钮组 - 垂直排列 */}
             <div className="flex flex-col gap-3 w-full lg:w-auto">
-              <Button
-                onClick={handleVisit}
-                className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-8 py-3 shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                立即使用
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => window.open(tool.official_url, '_blank')}
-                className="border-2 border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300 font-medium px-6 py-2.5"
-              >
-                <Globe className="w-4 h-4 mr-2" />
-                访问官网
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={handleVisit}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-6 py-3 shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]"
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  立即使用
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={toggleFavorite}
+                  className={`px-4 py-3 border-2 transition-all ${
+                    isFavorited 
+                      ? 'border-red-200 bg-red-50 text-red-500 hover:bg-red-100' 
+                      : 'border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                  }`}
+                >
+                  <ThumbsUp className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
