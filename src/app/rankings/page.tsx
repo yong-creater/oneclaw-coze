@@ -390,7 +390,8 @@ export default function RankingsPage() {
                     onClick={() => {
                       // 记录来源页面
                       if (typeof window !== 'undefined') {
-                        sessionStorage.setItem('backFrom', window.location.pathname);
+                        const backState = { path: window.location.href };
+                        sessionStorage.setItem('backFrom', JSON.stringify(backState));
                       }
                       if (item.tool_id) {
                         router.push(`/tools/${item.tool_id}`);

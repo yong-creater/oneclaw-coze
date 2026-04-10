@@ -60,27 +60,26 @@ export default function BackButton({ defaultText = '返回', defaultHref, classN
       if (backState && backState.path) {
         sessionStorage.removeItem('backFrom');
         
-        // 构建返回 URL，附加分页参数
+        // 构建返回 URL
         let url = backState.path;
         
-        // 如果有分页参数，添加到 URL
-        const params = new URLSearchParams();
-        if (backState.page && backState.page > 1) {
-          params.set('page', backState.page.toString());
+        // 解析已有的查询参数
+        const urlObj = new URL(url, 'http://localhost');
+        const existingParams = urlObj.searchParams;
+        
+        // 只有当 path 中没有这些参数时，才从 state 中添加
+        // 这样可以避免重复添加参数
+        if (backState.page && backState.page > 1 && !existingParams.has('page')) {
+          urlObj.searchParams.set('page', backState.page.toString());
         }
-        if (backState.category && backState.category !== 'all') {
-          params.set('category', backState.category);
+        if (backState.category && backState.category !== 'all' && !existingParams.has('category')) {
+          urlObj.searchParams.set('category', backState.category);
         }
-        if (backState.search) {
-          params.set('search', backState.search);
+        if (backState.search && !existingParams.has('search')) {
+          urlObj.searchParams.set('search', backState.search);
         }
         
-        const queryString = params.toString();
-        if (queryString) {
-          url = url.includes('?') ? `${url}&${queryString}` : `${url}?${queryString}`;
-        }
-        
-        router.push(url);
+        router.push(urlObj.pathname + urlObj.search);
         return;
       }
       
