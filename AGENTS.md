@@ -99,6 +99,22 @@
 | `admin_sessions` | 管理员会话 | id, user_id, token, expires_at |
 | `users` | 用户表 | id, user_id, openid, nickname, avatar_url, phone |
 | `user_sessions` | 用户会话 | id, user_id, token, expires_at |
+| `skill_categories` | 技能分类表 | id, name, slug, icon, color, sort_order |
+| `skills` | 技能表 | id, name, slug, description, logo, category_id, official_url, tags |
+
+### 技能库
+
+技能库是从 [SkillHub](https://skillhub.cn/skills) 爬取的真实 AI 技能数据，涵盖 Agent、代码开发、效率工具等多个领域。
+
+| 分类 | 说明 |
+|------|------|
+| AI | Agent、自我优化、知识图谱等 |
+| 智能开发 | 代码审查、API、浏览器自动化等 |
+| 工具效率 | 搜索、总结、文件处理等 |
+| 数据分析 | SQL、数据可视化等 |
+| 内容创作 | 写作、SEO等 |
+| 安全合规 | 安全检测、隐私保护等 |
+| 通讯协作 | 团队协作、客服等 |
 
 ### 工具字段说明
 
