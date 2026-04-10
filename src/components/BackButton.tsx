@@ -9,31 +9,28 @@ interface BackButtonProps {
   className?: string;
 }
 
-interface BackState {
-  page?: number;
-  category?: string;
-  search?: string;
-  path: string;
-}
-
 export default function BackButton({ defaultText = '返回', defaultHref, className = '' }: BackButtonProps) {
   const router = useRouter();
-  const [savedBackState, setSavedBackState] = useState<BackState | null>(null);
+  const [savedPath, setSavedPath] = useState<string | null>(null);
 
-  // 组件加载时读取返回状态
+  // 组件加载时读取返回路径
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const backFrom = sessionStorage.getItem('backFrom');
       if (backFrom) {
         try {
+          // 尝试解析 JSON
           const state = JSON.parse(backFrom);
           if (state && state.path) {
-            setSavedBackState(state);
-          } else {
-            setSavedBackState({ path: backFrom });
+            setSavedPath(state.path);
+          } else if (typeof backFrom === 'string' && backFrom.startsWith('/')) {
+            setSavedPath(backFrom);
           }
         } catch {
-          setSavedBackState({ path: backFrom });
+          // 如果解析失败，直接使用字符串
+          if (backFrom.startsWith('/')) {
+            setSavedPath(backFrom);
+          }
         }
       }
     }
@@ -41,50 +38,32 @@ export default function BackButton({ defaultText = '返回', defaultHref, classN
 
   const handleGoBack = () => {
     if (typeof window !== 'undefined') {
-      // 始终优先使用 sessionStorage 中保存的返回状态
-      let backState = savedBackState;
+      // 优先使用已保存的路径
+      let path = savedPath;
       
-      // 如果状态为空，尝试直接读取 sessionStorage
-      if (!backState) {
+      // 如果没有保存的路径，尝试直接从 sessionStorage 读取
+      if (!path) {
         const backFrom = sessionStorage.getItem('backFrom');
         if (backFrom) {
           try {
             const state = JSON.parse(backFrom);
-            backState = state && state.path ? state : { path: backFrom };
+            path = state && state.path ? state.path : backFrom;
           } catch {
-            backState = { path: backFrom };
+            path = backFrom;
           }
         }
       }
       
-      if (backState && backState.path) {
-        sessionStorage.removeItem('backFrom');
-        
-        // 构建返回 URL
-        let url = backState.path;
-        
-        // 解析已有的查询参数
-        const urlObj = new URL(url, 'http://localhost');
-        const existingParams = urlObj.searchParams;
-        
-        // 只有当 path 中没有这些参数时，才从 state 中添加
-        // 这样可以避免重复添加参数
-        if (backState.page && backState.page > 1 && !existingParams.has('page')) {
-          urlObj.searchParams.set('page', backState.page.toString());
-        }
-        if (backState.category && backState.category !== 'all' && !existingParams.has('category')) {
-          urlObj.searchParams.set('category', backState.category);
-        }
-        if (backState.search && !existingParams.has('search')) {
-          urlObj.searchParams.set('search', backState.search);
-        }
-        
-        router.push(urlObj.pathname + urlObj.search);
-        return;
-      }
+      // 清除 sessionStorage
+      sessionStorage.removeItem('backFrom');
       
-      // 如果没有保存的状态，返回首页
-      router.push(defaultHref || '/');
+      // 如果有有效的路径，跳转到该路径
+      if (path && path.startsWith('/')) {
+        router.push(path);
+      } else {
+        // 否则返回首页
+        router.push(defaultHref || '/');
+      }
     } else {
       router.push(defaultHref || '/');
     }

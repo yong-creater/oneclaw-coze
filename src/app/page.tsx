@@ -692,7 +692,7 @@ export default function HomePage() {
                         onClick={() => {
                           // 记录来源页面
                           if (typeof window !== 'undefined') {
-                            const backState = { path: window.location.href };
+                            const backState = { path: window.location.pathname + window.location.search || '/' };
                             sessionStorage.setItem('backFrom', JSON.stringify(backState));
                           }
                           if (item.tool_id) {
@@ -856,7 +856,7 @@ export default function HomePage() {
                       onClick={() => {
                         // 记录来源页面到 sessionStorage
                         if (typeof window !== 'undefined') {
-                          const backState = { path: window.location.href };
+                          const backState = { path: window.location.pathname + window.location.search || '/' };
                           sessionStorage.setItem('backFrom', JSON.stringify(backState));
                         }
                         // 异步记录浏览历史
