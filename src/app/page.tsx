@@ -743,11 +743,9 @@ export default function HomePage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <Image
+                            <img
                               src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
                               alt={item.tool_name}
-                              width={40}
-                              height={40}
                               className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
                               loading="lazy"
                               onError={(e) => {
@@ -911,11 +909,9 @@ export default function HomePage() {
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-                            <Image
+                            <img
                               src={tool.logo}
                               alt={tool.name}
-                              width={40}
-                              height={40}
                               className="w-10 h-10 object-contain"
                               loading="lazy"
                               onError={(e) => {
@@ -1182,7 +1178,7 @@ export default function HomePage() {
                         <div className="flex gap-4">
                           {tutorial.cover_image ? (
                             <div className="w-32 h-20 rounded-lg bg-slate-100 dark:bg-slate-700 flex-shrink-0 overflow-hidden">
-                              <Image src={tutorial.cover_image} alt="" fill className="object-cover" loading="lazy" />
+                              <img src={tutorial.cover_image} alt="" className="w-full h-full object-cover" loading="lazy" />
                             </div>
                           ) : (
                             <div className="w-32 h-20 rounded-lg bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 flex-shrink-0 flex items-center justify-center">
