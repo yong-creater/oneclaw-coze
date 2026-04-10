@@ -761,7 +761,7 @@ export default function HomePage() {
                   </tbody>
                 </table>
               </div>
-            )}
+            ) : (
               <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center">
                 <TrendingUp className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
                 <p className="text-slate-500 dark:text-slate-400 mb-4">暂无榜单数据</p>
