@@ -1375,38 +1375,65 @@ export default function HomePage() {
       </main>
 
       {/* 页脚 */}
-      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {/* 公众号推广 */}
-          <div className="flex flex-col items-center mb-8 pb-8 border-b border-slate-100 dark:border-slate-700">
-            <div className="flex items-center gap-4 mb-4">
-              <Image 
-                src="/wechat-qrcode.jpg" 
-                alt="微信公众号" 
-                width={112}
-                height={112}
-                className="w-28 h-28 rounded-lg shadow-md"
-              />
-              <div>
-                <h3 className="font-bold text-slate-900 dark:text-white mb-1">欢迎关注公众号</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+      <footer className="bg-gradient-to-t from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          {/* 公众号推广 - 居中卡片设计 */}
+          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-900/20 dark:via-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 mb-8 border border-orange-100 dark:border-orange-800/30">
+            <div className="flex flex-col md:flex-row items-center gap-8">
+              {/* 二维码区域 */}
+              <div className="relative">
+                <div className="absolute -inset-2 bg-gradient-to-r from-orange-400 to-amber-400 rounded-2xl blur-lg opacity-30"></div>
+                <div className="relative bg-white dark:bg-slate-800 rounded-xl p-3 shadow-xl">
+                  <Image 
+                    src="/wechat-qrcode.jpg" 
+                    alt="微信公众号" 
+                    width={120}
+                    height={120}
+                    className="w-28 h-28 rounded-lg"
+                  />
+                </div>
+                {/* 装饰龙虾 */}
+                <div className="absolute -top-4 -right-4">
+                  <AnimatedLobster size={32} />
+                </div>
+              </div>
+              
+              {/* 文字区域 */}
+              <div className="text-center md:text-left flex-1">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+                  欢迎关注公众号
+                </h3>
+                <p className="text-slate-600 dark:text-slate-300 mb-1">
                   获取最新AI工具资讯、技巧与资源
                 </p>
-                <p className="text-xs text-slate-400">
+                <div className="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-4 py-2 rounded-full text-sm">
+                  <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
                   回复「AI」送你一份AI工具使用指南
-                </p>
+                </div>
+              </div>
+              
+              {/* 右侧品牌 */}
+              <div className="hidden md:flex flex-col items-center gap-3">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg">
+                  <AnimatedLobster size={40} />
+                </div>
+                <span className="font-bold text-lg text-slate-700 dark:text-slate-200">OneClaw</span>
               </div>
             </div>
           </div>
           
           {/* 底部导航 */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <AnimatedLobster size={24} />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                <AnimatedLobster size={20} />
+              </div>
               <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+              <span className="text-xs text-slate-400 ml-2">AI工具导航</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <span className="text-slate-300 dark:text-slate-600">|</span>
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
                 渝ICP备2026004291号-2
               </a>
