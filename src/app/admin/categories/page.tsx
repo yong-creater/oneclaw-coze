@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, ChevronRight, FolderTree } from 'lucide-react';
+import { Plus, Edit, Trash2, FolderTree } from 'lucide-react';
 
 interface Category {
   id: number;
@@ -21,17 +21,8 @@ interface Category {
   tools_count?: number;
 }
 
-interface SubCategory {
-  id: number;
-  name: string;
-  slug: string;
-  parent_id: number;
-  sort_order: number;
-}
-
 export default function CategoriesAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -44,16 +35,14 @@ export default function CategoriesAdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [catRes, subRes] = await Promise.all([
-        fetch('/api/categories'),
-        fetch('/api/sub-categories')
-      ]);
+      const res = await fetch('/api/categories');
+      const data = await res.json();
       
-      const catData = await catRes.json();
-      const subData = await subRes.json();
-      
-      if (catData.success) setCategories(catData.data);
-      if (subData.success) setSubCategories(subData.data);
+      if (data.success) {
+        // 按 sort_order 排序
+        const sorted = [...data.data].sort((a: Category, b: Category) => a.sort_order - b.sort_order);
+        setCategories(sorted);
+      }
     } catch (error) {
       console.error('获取数据失败:', error);
     } finally {
@@ -98,6 +87,7 @@ export default function CategoriesAdminPage() {
     try {
       const res = await fetch(`/api/admin/categories?id=${id}`, { method: 'DELETE' });
       const data = await res.json();
+
       if (data.success) {
         fetchData();
       } else {
@@ -123,17 +113,13 @@ export default function CategoriesAdminPage() {
     setEditDialogOpen(true);
   };
 
-  const getSubCount = (parentId: number) => {
-    return subCategories.filter(s => s.parent_id === parentId).length;
-  };
-
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">分类管理</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">管理工具分类和子分类</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">管理工具一级分类</p>
         </div>
         <Button onClick={() => openEditDialog()} className="bg-gradient-to-r from-orange-500 to-red-500">
           <Plus className="w-4 h-4 mr-2" />
@@ -156,6 +142,11 @@ export default function CategoriesAdminPage() {
                     <FolderTree className="w-5 h-5 text-orange-500" />
                     {category.name}
                     <span className="text-xs font-normal text-slate-500">/{category.slug}</span>
+                    {category.tools_count !== undefined && (
+                      <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full ml-2">
+                        {category.tools_count} 个工具
+                      </span>
+                    )}
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="sm" onClick={() => openEditDialog(category)}>
@@ -168,28 +159,7 @@ export default function CategoriesAdminPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                {/* 子分类 */}
-                <div className="space-y-2">
-                  {subCategories
-                    .filter(s => s.parent_id === category.id)
-                    .map(sub => (
-                      <div key={sub.id} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <ChevronRight className="w-4 h-4 text-slate-400" />
-                          <span className="text-sm">{sub.name}</span>
-                          <span className="text-xs text-slate-400">/{sub.slug}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                            <Edit className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  {getSubCount(category.id) === 0 && (
-                    <p className="text-sm text-slate-400 pl-4">暂无子分类</p>
-                  )}
-                </div>
+                <p className="text-sm text-slate-500">排序：{category.sort_order}</p>
               </CardContent>
             </Card>
           ))
@@ -228,7 +198,7 @@ export default function CategoriesAdminPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">排序</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">排序（数字越小越靠前）</label>
               <Input
                 type="number"
                 value={formData.sort_order}
