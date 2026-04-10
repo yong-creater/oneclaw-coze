@@ -208,6 +208,7 @@ export default function HomePage() {
   const [rankings, setRankings] = useState<RankingItem[]>([]);
   const [rankingsLoading, setRankingsLoading] = useState(true);
   const [rankingsMonth, setRankingsMonth] = useState('');
+  const [rankingsRegion, setRankingsRegion] = useState<'global' | 'china'>('global');
 
   // ==================== 工具导航状态 ====================
   const [categories, setCategories] = useState<Category[]>([]);
@@ -285,10 +286,19 @@ export default function HomePage() {
     ]);
   }, []);
 
+  // 榜单地区切换
+  useEffect(() => {
+    if (mainTab === 'rankings') {
+      cache.clear(`rankings_${rankingsRegion}`);
+      fetchRankings();
+    }
+  }, [rankingsRegion]);
+
   // ==================== 榜单相关方法 ====================
   const fetchRankings = async () => {
-    // 检查缓存
-    const cached = cache.get('rankings');
+    // 检查缓存（包含地区）
+    const cacheKey = `rankings_${rankingsRegion}`;
+    const cached = cache.get(cacheKey);
     if (cached) {
       setRankings(cached.data || []);
       setRankingsMonth(cached.month || '');
@@ -298,13 +308,14 @@ export default function HomePage() {
     
     setRankingsLoading(true);
     try {
-      const res = await fetch(`/api/rankings/monthly?limit=50`);
+      const regionParam = rankingsRegion === 'china' ? '&region=china' : '';
+      const res = await fetch(`/api/rankings/monthly?limit=30${regionParam}`);
       const data = await res.json();
       
       if (data.success) {
         const rankingsData = data.data || [];
         const month = data.meta?.current_month || '';
-        cache.set('rankings', { data: rankingsData, month });
+        cache.set(cacheKey, { data: rankingsData, month });
         setRankings(rankingsData);
         setRankingsMonth(month);
       }
@@ -589,7 +600,10 @@ export default function HomePage() {
                     key={tab.key}
                     onClick={() => {
                       // 切换 Tab 时清除该模块缓存，强制获取最新数据
-                      if (tab.key === 'rankings') cache.clear('rankings');
+                      if (tab.key === 'rankings') {
+                        cache.clear('rankings_global');
+                        cache.clear('rankings_china');
+                      }
                       if (tab.key === 'tools') cache.clear(`tools_all_1`);
                       if (tab.key === 'prompts') cache.clear('prompts_全部_1');
                       if (tab.key === 'skills') cache.clear(`skills_all_1`);
@@ -621,12 +635,38 @@ export default function HomePage() {
         {/* ==================== 热门榜单 ==================== */}
         {mainTab === 'rankings' && (
           <div>
-            {/* 页面标题 */}
+            {/* 页面标题和Tab切换 */}
             <div className="mb-6">
-              <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
-                {rankingsMonth ? `${rankingsMonth.replace('-', '年')}月 AI工具榜单` : 'AI工具热门榜单'}
-              </h1>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <div className="flex items-center justify-between mb-4">
+                <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
+                  {rankingsMonth ? `${rankingsMonth.replace('-', '年')}月 AI工具榜单` : 'AI工具热门榜单'}
+                </h1>
+                
+                {/* Tab切换 */}
+                <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                  <button
+                    onClick={() => setRankingsRegion('global')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      rankingsRegion === 'global'
+                        ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    全球Top50
+                  </button>
+                  <button
+                    onClick={() => setRankingsRegion('china')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      rankingsRegion === 'china'
+                        ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    国内Top50
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400">
                 精选最受欢迎的AI工具，实时追踪热度变化
               </p>
             </div>
@@ -730,16 +770,6 @@ export default function HomePage() {
                 </p>
               </div>
             )}
-
-            {/* 更多榜单链接 */}
-            <div className="mt-6 text-center">
-              <Link href="/rankings">
-                <Button variant="outline" className="gap-2">
-                  查看完整榜单
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
           </div>
         )}
 
