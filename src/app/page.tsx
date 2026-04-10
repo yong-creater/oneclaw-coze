@@ -734,24 +734,6 @@ export default function HomePage() {
                 </div>
                 <nav className="p-2 space-y-0.5">
                   {categories.map(cat => {
-                    // 根据分类名称分配 emoji 图标
-                    const categoryIcons: Record<string, string> = {
-                      '视频生成': '🎬',
-                      '数字人': '👤',
-                      '视频编辑': '✂️',
-                      'AI配音': '🎙️',
-                      '动漫创作': '🎨',
-                      'AI绘画': '🖼️',
-                      'AI写作': '✍️',
-                      'AI编程': '💻',
-                      'AI音频': '🎵',
-                      'AI办公': '📊',
-                      'AI营销': '📢',
-                      'AI学习': '📚',
-                      'AI聊天': '💬',
-                      'AI搜索': '🔍',
-                    };
-                    const icon = categoryIcons[cat.name] || '📦';
                     const isActive = activeCategory === cat.slug;
                     return (
                       <button
@@ -763,7 +745,6 @@ export default function HomePage() {
                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                       >
-                        <span className="mr-2">{icon}</span>
                         <span className="truncate flex-1 text-left">{cat.name}</span>
                       </button>
                     );
@@ -920,18 +901,6 @@ export default function HomePage() {
                 </div>
                 <nav className="p-2 space-y-0.5">
                   {PROMPT_CATEGORIES.map(cat => {
-                    // 提示词分类图标
-                    const promptIcons: Record<string, string> = {
-                      '视频创作': '🎬',
-                      '文案写作': '✍️',
-                      '营销推广': '📢',
-                      '教育学习': '📚',
-                      '代码生成': '💻',
-                      '数据分析': '📊',
-                      '图像生成': '🖼️',
-                      '语音合成': '🎵',
-                    };
-                    const icon = promptIcons[cat] || '📝';
                     const isActive = promptCategory === cat;
                     return (
                       <button
@@ -943,7 +912,6 @@ export default function HomePage() {
                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                       >
-                        <span className="mr-2">{icon}</span>
                         <span className="truncate flex-1 text-left">{cat}</span>
                       </button>
                     );
@@ -1043,18 +1011,6 @@ export default function HomePage() {
                 </div>
                 <nav className="p-2 space-y-0.5">
                   {TUTORIAL_CATEGORIES.map(cat => {
-                    // 教程分类图标
-                    const tutorialIcons: Record<string, string> = {
-                      '视频生成': '🎬',
-                      '数字人': '👤',
-                      'AI配音': '🎙️',
-                      'AI绘画': '🖼️',
-                      'AI写作': '✍️',
-                      'AI编程': '💻',
-                      '数据分析': '📊',
-                      '效率工具': '⚡',
-                    };
-                    const icon = tutorialIcons[cat] || '📖';
                     const isActive = tutorialCategory === cat;
                     return (
                       <button
@@ -1066,7 +1022,6 @@ export default function HomePage() {
                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                       >
-                        <span className="mr-2">{icon}</span>
                         <span className="truncate flex-1 text-left">{cat}</span>
                       </button>
                     );
@@ -1176,18 +1131,6 @@ export default function HomePage() {
                 </div>
                 <nav className="p-2 space-y-0.5">
                   {skillCategories.map(cat => {
-                    // 根据分类名称分配 emoji 图标
-                    const skillCategoryIcons: Record<string, string> = {
-                      'AI': '🤖',
-                      '智能开发': '💻',
-                      '工具效率': '⚡',
-                      '提升': '📈',
-                      '数据分析': '📊',
-                      '内容创作': '✍️',
-                      '安全合规': '🔒',
-                      '通讯协作': '💬',
-                    };
-                    const icon = skillCategoryIcons[cat.name] || '📦';
                     const isActive = skillCategory === cat.id;
                     return (
                       <button
@@ -1199,7 +1142,6 @@ export default function HomePage() {
                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                       >
-                        <span className="mr-2">{icon}</span>
                         <span className="truncate flex-1 text-left">{cat.name}</span>
                       </button>
                     );
