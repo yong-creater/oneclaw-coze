@@ -427,19 +427,6 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                   {tool.free_type}
                 </span>
               </div>
-              
-              {/* 功能标签 */}
-              <div className="flex flex-wrap gap-2">
-                {featureTags.slice(0, 5).map((tag, i) => (
-                  <Link 
-                    key={i} 
-                    href={`/?search=${encodeURIComponent(tag)}`}
-                    className="px-3 py-1.5 rounded-lg text-xs bg-white text-slate-600 border border-slate-200 hover:border-orange-300 hover:text-orange-600 transition-all shadow-sm hover:shadow"
-                  >
-                    {tag}
-                  </Link>
-                ))}
-              </div>
             </div>
             
             {/* CTA按钮组 - 垂直排列 */}
@@ -890,18 +877,20 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               </div>
 
               {/* 热门标签 */}
-              <Card className="bg-white">
-                <CardContent className="p-5">
-                  <h3 className="font-semibold text-slate-800 mb-3">相关标签</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {featureTags.slice(0, 10).map((tag, i) => (
-                      <span key={i} className="px-3 py-1.5 rounded-full text-sm bg-slate-100 text-slate-600">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              {featureTags.length > 0 && (
+                <Card className="bg-white">
+                  <CardContent className="p-5">
+                    <h3 className="font-semibold text-slate-800 mb-3">相关标签</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {featureTags.slice(0, 10).map((tag, i) => (
+                        <span key={i} className="px-3 py-1.5 rounded-full text-sm bg-slate-100 text-slate-600">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </section>
           </div>
         )}
