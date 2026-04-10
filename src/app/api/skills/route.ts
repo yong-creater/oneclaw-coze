@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       .from('skills')
       .select(`
         *,
-        skill_categories:id (
+        skill_categories (
           id,
           name,
           slug,

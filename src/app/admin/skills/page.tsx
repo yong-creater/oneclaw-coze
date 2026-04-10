@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, Edit2, Trash2, Search, 
   ChevronLeft, ChevronRight, Star, StarOff,
-  Sparkles, FolderOpen
+  Sparkles, FolderOpen, Database
 } from 'lucide-react';
 
 interface SkillCategory {
@@ -59,6 +59,8 @@ interface Pagination {
 export default function AdminSkillsPage() {
   const [token, setToken] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('categories');
+  const [initStatus, setInitStatus] = useState<{ categories: number; skills: number; initialized?: boolean } | null>(null);
+  const [initLoading, setInitLoading] = useState(false);
   
   // 分类状态
   const [categories, setCategories] = useState<SkillCategory[]>([]);
@@ -102,6 +104,55 @@ export default function AdminSkillsPage() {
     const stored = localStorage.getItem('admin_token');
     if (stored) setToken(stored);
   }, []);
+
+  // 检查初始化状态
+  useEffect(() => {
+    if (token) {
+      checkInitStatus();
+    }
+  }, [token]);
+
+  const checkInitStatus = async () => {
+    try {
+      const res = await fetch('/api/admin/skills/init', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setInitStatus(data.data);
+      }
+    } catch (error) {
+      console.error('检查初始化状态失败:', error);
+    }
+  };
+
+  const handleInitData = async () => {
+    setInitLoading(true);
+    try {
+      const res = await fetch('/api/admin/skills/init', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ force: false })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        alert(`初始化成功！创建了 ${data.data.categories_created} 个分类和 ${data.data.skills_created} 个技能`);
+        checkInitStatus();
+        fetchCategories();
+      } else {
+        alert(data.error || '初始化失败');
+      }
+    } catch (error) {
+      console.error('初始化失败:', error);
+      alert('初始化失败');
+    } finally {
+      setInitLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (token) {
@@ -313,11 +364,30 @@ export default function AdminSkillsPage() {
         <TabsContent value="categories" className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>技能分类</CardTitle>
-              <Button onClick={() => setCategoryDialog({ open: true, mode: 'create' })}>
-                <Plus className="w-4 h-4 mr-2" />
-                添加分类
-              </Button>
+              <div>
+                <CardTitle>技能分类</CardTitle>
+                {initStatus && (
+                  <p className="text-sm text-slate-500 mt-1">
+                    当前 {initStatus.categories} 个分类，{initStatus.skills} 个技能
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {(!initStatus?.initialized || initStatus?.skills === 0) && (
+                  <Button 
+                    variant="outline" 
+                    onClick={handleInitData}
+                    disabled={initLoading}
+                  >
+                    <Database className="w-4 h-4 mr-2" />
+                    {initLoading ? '初始化中...' : '初始化示例数据'}
+                  </Button>
+                )}
+                <Button onClick={() => setCategoryDialog({ open: true, mode: 'create' })}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  添加分类
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {categoriesLoading ? (
