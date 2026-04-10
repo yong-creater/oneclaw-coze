@@ -18,21 +18,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async redirects() {
-    return [
-      {
-        source: '/(.*)',
-        has: [
-          {
-            type: 'host',
-            value: 'oneclaw.shop',
-          },
-        ],
-        destination: 'https://www.oneclaw.shop/:path*',
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
