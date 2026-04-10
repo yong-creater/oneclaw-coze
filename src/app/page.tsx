@@ -201,6 +201,15 @@ export default function HomePage() {
   // 页面加载时，从 sessionStorage 读取返回的 tab
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // 优先读取 homeTab（从详情页返回时设置）
+      const homeTab = sessionStorage.getItem('homeTab');
+      if (homeTab) {
+        setMainTab(homeTab as MainTab);
+        sessionStorage.removeItem('homeTab');
+        return;
+      }
+      
+      // 其次读取 backFrom
       const backFrom = sessionStorage.getItem('backFrom');
       if (backFrom) {
         try {
@@ -209,7 +218,7 @@ export default function HomePage() {
             setMainTab(state.tab);
           }
         } catch {}
-        // 读取完后清除，避免影响其他操作
+        // 读取完后清除
         sessionStorage.removeItem('backFrom');
       }
     }

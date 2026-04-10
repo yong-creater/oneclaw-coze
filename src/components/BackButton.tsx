@@ -16,49 +16,64 @@ export default function BackButton({ defaultText = '返回', defaultHref = '/', 
       const backFrom = sessionStorage.getItem('backFrom');
       
       if (backFrom) {
-        // 尝试解析 JSON 获取完整状态
-        let path = backFrom;
-        let page: number | undefined;
-        let category: string | undefined;
-        let search: string | undefined;
+        let returnUrl = backFrom;
+        let isHomePage = false;
         let tab: string | undefined;
         
+        // 尝试解析 JSON
         try {
           const state = JSON.parse(backFrom);
-          if (state) {
-            path = state.path || backFrom;
-            page = state.page;
-            category = state.category;
-            search = state.search;
+          if (state && state.path) {
+            returnUrl = state.path;
+            isHomePage = state.path === '/';
             tab = state.tab;
+            
+            // 如果是其他页面，追加分页和筛选参数
+            if (!isHomePage) {
+              const searchParams = new URLSearchParams();
+              const urlObj = new URL(state.path, 'http://localhost');
+              
+              // 只添加不在原 URL 中的参数
+              if (state.page && state.page > 1 && !urlObj.searchParams.has('page')) {
+                searchParams.set('page', String(state.page));
+              }
+              if (state.category && state.category !== 'all' && !urlObj.searchParams.has('category')) {
+                searchParams.set('category', state.category);
+              }
+              if (state.search && !urlObj.searchParams.has('search')) {
+                searchParams.set('search', state.search);
+              }
+              
+              const query = searchParams.toString();
+              if (query) {
+                returnUrl = returnUrl + (returnUrl.includes('?') ? '&' : '?') + query;
+              }
+            }
           }
         } catch {
-          // 保持原值
+          // 解析失败，使用原始值
         }
         
-        // 确保 path 是有效的
-        if (path && typeof path === 'string' && path.startsWith('/')) {
-          // 构建返回 URL，附加分页和筛选参数
-          const params = new URLSearchParams();
-          if (page && page > 1) params.set('page', page.toString());
-          if (category && category !== 'all') params.set('category', category);
-          if (search) params.set('search', search);
-          
-          const queryString = params.toString();
-          const returnUrl = queryString ? `${path}?${queryString}` : path;
-          
-          // 如果目标是首页，保留 sessionStorage 让首页读取 tab
-          if (path !== '/') {
-            sessionStorage.removeItem('backFrom');
-          }
-          
+        // 清除 sessionStorage（返回首页时保留，让首页读取 tab）
+        if (!isHomePage) {
+          sessionStorage.removeItem('backFrom');
+        }
+        
+        // 如果是首页，且有 tab 信息，需要把 tab 保存回去
+        // 因为首页加载时会读取 sessionStorage 并清除
+        if (isHomePage && tab) {
+          sessionStorage.setItem('homeTab', tab);
+        }
+        
+        // 确保返回有效路径
+        if (returnUrl && returnUrl.startsWith('/')) {
           router.push(returnUrl);
           return;
         }
       }
     }
     
-    // 如果没有保存的路径，返回首页
+    // 默认返回首页
     router.push(defaultHref);
   };
 
