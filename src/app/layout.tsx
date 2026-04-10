@@ -14,9 +14,9 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL('https://oneclaw.shop'),
   icons: {
-    icon: '/oneclaw-logo.jpg',
-    shortcut: '/oneclaw-logo.jpg',
-    apple: '/oneclaw-logo.jpg',
+    icon: '/oneclaw-logo.png',
+    shortcut: '/oneclaw-logo.png',
+    apple: '/oneclaw-logo.png',
   },
   title: {
     default: 'OneClaw - 全品类AI工具导航 | 精选238款优质AI工具',
@@ -128,7 +128,7 @@ const organizationJsonLd = {
   name: 'OneClaw',
   alternateName: '钳爪',
   url: 'https://oneclaw.shop',
-  logo: 'https://oneclaw.shop/oneclaw-logo.jpg',
+  logo: 'https://oneclaw.shop/oneclaw-logo.png',
   description: '全品类AI工具导航平台',
   contactPoint: {
     '@type': 'ContactPoint',

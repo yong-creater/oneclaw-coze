@@ -528,7 +528,7 @@ export default function WorkspacePage() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Image 
-                src="/oneclaw-logo.jpg" 
+                src="/oneclaw-logo.png" 
                 alt="OneClaw" 
                 width={28} 
                 height={28}
