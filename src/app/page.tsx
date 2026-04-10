@@ -1277,21 +1277,6 @@ export default function HomePage() {
                         </div>
                         
                         {/* 右侧：来源 */}
-                        <div className="flex items-center gap-4 flex-shrink-0">
-                          {/* 分类标签 */}
-                          {skill.skill_categories && (
-                            <span 
-                              className="hidden lg:inline-flex text-xs px-2 py-1 rounded-full"
-                              style={{ backgroundColor: skill.skill_categories.color + '20', color: skill.skill_categories.color }}
-                            >
-                              {skill.skill_categories.name}
-                            </span>
-                          )}
-                          
-                          {/* 来源 */}
-                          <div className="text-xs text-slate-400">
-                            源自 ClawHub
-                          </div>
                         </div>
                       </Link>
                     );
