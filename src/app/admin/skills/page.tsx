@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, Edit2, Trash2, Search, 
   ChevronLeft, ChevronRight, Star, StarOff,
-  Sparkles, FolderOpen, Database
+  Sparkles, FolderOpen, Database, Download
 } from 'lucide-react';
 
 interface SkillCategory {
@@ -114,41 +114,57 @@ export default function AdminSkillsPage() {
 
   const checkInitStatus = async () => {
     try {
-      const res = await fetch('/api/admin/skills/init', {
+      // 从分类 API 获取状态
+      const res = await fetch('/api/admin/skills/categories', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
-        setInitStatus(data.data);
+        // 同时获取技能数量
+        const skillsRes = await fetch('/api/skills?limit=1', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const skillsData = await skillsRes.json();
+        setInitStatus({
+          categories: data.data?.length || 0,
+          skills: skillsData.pagination?.total || 0,
+          initialized: (data.data?.length || 0) > 0
+        });
       }
     } catch (error) {
       console.error('检查初始化状态失败:', error);
     }
   };
 
-  const handleInitData = async () => {
+  const handleImportFromSkillHub = async () => {
+    if (!confirm('将从 SkillHub 导入精选技能数据（会覆盖现有数据），是否继续？')) {
+      return;
+    }
     setInitLoading(true);
     try {
-      const res = await fetch('/api/admin/skills/init', {
+      const res = await fetch('/api/admin/skills/import', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ force: false })
+        body: JSON.stringify({ force: true })
       });
       const data = await res.json();
       
       if (data.success) {
-        alert(`初始化成功！创建了 ${data.data.categories_created} 个分类和 ${data.data.skills_created} 个技能`);
+        alert(data.message);
         checkInitStatus();
         fetchCategories();
+        if (activeTab === 'skills') {
+          fetchSkills(1);
+        }
       } else {
-        alert(data.error || '初始化失败');
+        alert(data.error || '导入失败');
       }
     } catch (error) {
-      console.error('初始化失败:', error);
-      alert('初始化失败');
+      console.error('导入失败:', error);
+      alert('导入失败');
     } finally {
       setInitLoading(false);
     }
@@ -373,16 +389,14 @@ export default function AdminSkillsPage() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                {(!initStatus?.initialized || initStatus?.skills === 0) && (
-                  <Button 
-                    variant="outline" 
-                    onClick={handleInitData}
-                    disabled={initLoading}
-                  >
-                    <Database className="w-4 h-4 mr-2" />
-                    {initLoading ? '初始化中...' : '初始化示例数据'}
-                  </Button>
-                )}
+                <Button 
+                  variant="outline" 
+                  onClick={handleImportFromSkillHub}
+                  disabled={initLoading}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  {initLoading ? '导入中...' : '导入 SkillHub 数据'}
+                </Button>
                 <Button onClick={() => setCategoryDialog({ open: true, mode: 'create' })}>
                   <Plus className="w-4 h-4 mr-2" />
                   添加分类
