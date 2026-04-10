@@ -126,24 +126,6 @@ const FREE_TYPE_COLORS: Record<string, string> = {
   '付费工具': 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
 };
 
-const CATEGORY_ICONS: Record<string, typeof Wand2> = {
-  'video-generation': Wand2,
-  'digital-human': Wand2,
-  'video-editing': Wand2,
-  'ai-dubbing': Wand2,
-  'anime-creation': Wand2,
-  'ai-image': Wand2,
-  'ai-writing': Wand2,
-  'ai-coding': Wand2,
-  'ai-audio': Wand2,
-  'ai-office': Wand2,
-  'ai-marketing': Wand2,
-  'ai-learning': Wand2,
-  'ai-chat': Wand2,
-  'ai-search': Wand2,
-  'default': Wand2,
-};
-
 const DIFFICULTY_COLORS: Record<string, string> = {
   '初级': 'bg-green-100 text-green-700',
   '中级': 'bg-yellow-100 text-yellow-700',
@@ -762,19 +744,17 @@ export default function HomePage() {
                     <span>全部工具</span>
                   </button>
                   {categories.map(cat => {
-                    const Icon = CATEGORY_ICONS[cat.slug] || Wand2;
                     const isActive = activeCategory === cat.slug;
                     return (
                       <button
                         key={cat.id}
                         onClick={() => setActiveCategory(cat.slug)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+                        className={`w-full px-3 py-2 rounded-lg text-sm transition-colors ${
                           isActive
                             ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
                             : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                         }`}
                       >
-                        <Icon className="w-4 h-4" />
                         <span className="truncate">{cat.name}</span>
                       </button>
                     );
@@ -1168,13 +1148,12 @@ export default function HomePage() {
                     <button
                       key={cat.id}
                       onClick={() => { setSkillCategory(cat.id); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
-                      className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                      className={`w-full px-3 py-2 rounded-lg text-sm transition-colors ${
                         skillCategory === cat.id
                           ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
                           : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                       }`}
                     >
-                      {cat.icon && <span className="mr-2">{cat.icon}</span>}
                       <span className="truncate">{cat.name}</span>
                     </button>
                   ))}
