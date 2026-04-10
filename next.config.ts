@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   allowedDevOrigins: ['*.dev.coze.site'],
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
@@ -14,6 +15,16 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'code.coze.cn',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'skillhub.cn',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.coze.cn',
         pathname: '/**',
       },
     ],

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -357,9 +358,11 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
             <div className="relative">
               <div className="w-24 h-24 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center justify-center overflow-hidden ring-4 ring-orange-100">
                 {tool.logo ? (
-                  <img
+                  <Image
                     src={tool.logo}
                     alt={tool.name}
+                    width={80}
+                    height={80}
                     className="w-20 h-20 object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
