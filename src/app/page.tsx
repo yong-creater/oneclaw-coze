@@ -126,12 +126,21 @@ const FREE_TYPE_COLORS: Record<string, string> = {
   '付费工具': 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
 };
 
-const CATEGORY_ICONS: Record<string, typeof Video> = {
-  'video-generation': Wand2,
-  'digital-human': Users,
-  'video-editing': Film,
-  'ai-dubbing': Mic,
-  'anime-creation': Palette,
+const CATEGORY_ICONS: Record<string, typeof Sparkles> = {
+  'video-generation': Sparkles,
+  'digital-human': Sparkles,
+  'video-editing': Sparkles,
+  'ai-dubbing': Sparkles,
+  'anime-creation': Sparkles,
+  'ai-writing': Sparkles,
+  'ai-coding': Sparkles,
+  'ai-audio': Sparkles,
+  'ai-office': Sparkles,
+  'ai-marketing': Sparkles,
+  'ai-learning': Sparkles,
+  'ai-chat': Sparkles,
+  'ai-search': Sparkles,
+  'default': Sparkles,
 };
 
 const DIFFICULTY_COLORS: Record<string, string> = {
