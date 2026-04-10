@@ -1244,10 +1244,15 @@ export default function HomePage() {
                     const letter = skill.name.charAt(0).toUpperCase();
                     
                     return (
-                      <Link 
-                        href={`/skills/${skill.slug}`}
+                      <div
                         key={skill.id}
                         className="flex items-center gap-4 py-4 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-pointer group"
+                        onClick={() => {
+                          if (typeof window !== 'undefined') {
+                            sessionStorage.setItem('backFrom', window.location.pathname);
+                          }
+                          router.push(`/skills/${skill.slug}`);
+                        }}
                       >
                         {/* 左侧：字母标识 + 标题 + 描述 */}
                         <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -1266,7 +1271,7 @@ export default function HomePage() {
                             </p>
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>

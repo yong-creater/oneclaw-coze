@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Eye, User, Calendar } from 'lucide-react';
 import TutorialLikeButton from '@/components/TutorialLikeButton';
+import BackButton from '@/components/BackButton';
 
 interface Tutorial {
   id: number;
@@ -78,128 +79,129 @@ function renderMarkdown(content: string): string {
   return html;
 }
 
-export default async function TutorialDetailPage({ 
-  params 
-}: { 
-  params: Promise<{ id: string }> 
-}) {
-  const { id } = await params;
+// 获取教程详情
+async function getTutorial(id: string) {
+  const supabase = getSupabaseClient();
   
-  try {
-    const client = getSupabaseClient();
-    const { data: tutorial, error } = await client
-      .from('tutorials')
-      .select('*')
-      .eq('id', parseInt(id))
-      .eq('status', 'published')
-      .single();
+  const { data, error } = await supabase
+    .from('tutorials')
+    .select('*')
+    .eq('id', parseInt(id))
+    .eq('status', 'published')
+    .single();
     
-    if (error || !tutorial) {
-      notFound();
-    }
-    
-    // 增加浏览量（异步执行，不阻塞渲染）
-    client
-      .from('tutorials')
-      .update({ views: (tutorial.views || 0) + 1 })
-      .eq('id', tutorial.id)
-      .then(() => {});
-    
-    return (
-      <div className="min-h-screen bg-slate-50">
-        {/* Header */}
-        <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-          <div className="max-w-4xl mx-auto px-4 py-4">
-            <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-orange-500">
-              <span>← 返回首页</span>
-            </Link>
-          </div>
-        </header>
+  if (error || !data) {
+    return null;
+  }
+  
+  return data;
+}
 
-        <main className="max-w-4xl mx-auto px-4 py-8">
-          {/* 教程头部信息 */}
-          <div className="mb-8">
-            {/* 分类和难度标签 */}
-            <div className="flex items-center gap-3 mb-4">
-              <span className="px-3 py-1 bg-orange-100 text-orange-700 border border-orange-200 rounded-full text-sm font-medium">
-                {tutorial.category}
-              </span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium border ${DIFFICULTY_COLORS[tutorial.difficulty] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
-                {tutorial.difficulty}
-              </span>
-            </div>
-            
-            {/* 标题 */}
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
-              {tutorial.title}
-            </h1>
-            
-            {/* 元信息 */}
-            <div className="flex items-center gap-6 text-sm text-slate-500 flex-wrap">
-              {tutorial.author && (
-                <span className="flex items-center gap-1.5">
-                  <User className="w-4 h-4" />
-                  <span>{tutorial.author}</span>
-                </span>
-              )}
-              <span className="flex items-center gap-1.5">
-                <Calendar className="w-4 h-4" />
-                <span>{new Date(tutorial.created_at).toLocaleDateString('zh-CN')}</span>
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Eye className="w-4 h-4" />
-                <span>{tutorial.views} 浏览</span>
-              </span>
-              <TutorialLikeButton tutorialId={tutorial.id} initialLikes={tutorial.likes} />
-            </div>
-          </div>
-
-          {/* 教程内容 */}
-          <article className="bg-white rounded-2xl shadow-lg p-8 border border-slate-200">
-            <div 
-              className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-a:text-orange-500"
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(tutorial.content) }}
-            />
-          </article>
-          
-          {/* 底部操作区 */}
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <Link 
-              href="/tutorials"
-              className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
-            >
-              查看更多教程
-            </Link>
-          </div>
-        </main>
-
-        {/* Footer */}
-        <footer className="bg-white border-t border-slate-200 py-6 mt-12">
-          <div className="max-w-4xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <img 
-                  src="/oneclaw-logo.png" 
-                  alt="OneClaw" 
-                  width={28} 
-                  height={28}
-                  className="object-contain"
-                />
-                <span className="font-bold text-slate-900">OneClaw</span>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-slate-500">
-                <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
-                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
-                  渝ICP备2026004291号-2
-                </a>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </div>
-    );
-  } catch (error) {
-    console.error('获取教程失败:', error);
+export default async function TutorialDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const tutorial = await getTutorial(id);
+  
+  if (!tutorial) {
     notFound();
   }
+  
+  // 增加浏览量
+  const supabase = getSupabaseClient();
+  supabase
+    .from('tutorials')
+    .update({ views: (tutorial.views || 0) + 1 })
+    .eq('id', tutorial.id)
+    .then(() => {});
+  
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <BackButton />
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* 教程头部信息 */}
+        <div className="mb-8">
+          {/* 分类和难度标签 */}
+          <div className="flex items-center gap-3 mb-4">
+            <span className="px-3 py-1 bg-orange-100 text-orange-700 border border-orange-200 rounded-full text-sm font-medium">
+              {tutorial.category}
+            </span>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium border ${DIFFICULTY_COLORS[tutorial.difficulty] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+              {tutorial.difficulty}
+            </span>
+          </div>
+          
+          {/* 标题 */}
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4 leading-tight">
+            {tutorial.title}
+          </h1>
+          
+          {/* 元信息 */}
+          <div className="flex items-center gap-6 text-sm text-slate-500 flex-wrap">
+            {tutorial.author && (
+              <span className="flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span>{tutorial.author}</span>
+              </span>
+            )}
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4" />
+              <span>{new Date(tutorial.created_at).toLocaleDateString('zh-CN')}</span>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Eye className="w-4 h-4" />
+              <span>{tutorial.views} 浏览</span>
+            </span>
+            <TutorialLikeButton tutorialId={tutorial.id} initialLikes={tutorial.likes} />
+          </div>
+        </div>
+
+        {/* 教程内容 */}
+        <article className="bg-white rounded-2xl shadow-lg p-8 border border-slate-200">
+          <div 
+            className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-a:text-orange-500"
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(tutorial.content) }}
+          />
+        </article>
+        
+        {/* 底部操作区 */}
+        <div className="mt-8 flex items-center justify-center gap-4">
+          <Link 
+            href="/tutorials"
+            className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition-colors"
+          >
+            查看更多教程
+          </Link>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-slate-200 py-6 mt-12">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <img 
+                src="/oneclaw-logo.png" 
+                alt="OneClaw" 
+                width={28} 
+                height={28}
+                className="object-contain"
+              />
+              <span className="font-bold text-slate-900">OneClaw</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-500">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 }

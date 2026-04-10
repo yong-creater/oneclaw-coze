@@ -4,6 +4,8 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, BookOpen, List, Clock, CheckCircle, Download, Heart, ExternalLink, FileText, Code, Zap, Star, Shield } from 'lucide-react';
+import BackButton from '@/components/BackButton';
+import LobsterLoading from '@/components/LobsterLoading';
 
 // 获取技能详情
 async function getSkill(slug: string) {
@@ -133,13 +135,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
       <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center gap-4">
-            <Link 
-              href="/" 
-              className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>返回技能库</span>
-            </Link>
+            <BackButton defaultText="返回技能库" />
             <div className="flex-1" />
             <div className="text-sm text-slate-400">
               技能库 / {skill.skill_categories?.name || '全部'}
