@@ -162,26 +162,50 @@ const getUserId = (): string => {
 };
 
 // 缓存管理器
-	const CACHE_DURATION = 5 * 60 * 1000;
-	const cache = {
-	  get: (key: string) => {
-	    if (typeof window === 'undefined') return null;
-	    const item = localStorage.getItem(`oneclaw_cache_${key}`);
-	    if (!item) return null;
-	    try {
-	      const { data, timestamp } = JSON.parse(item);
-	      if (Date.now() - timestamp > CACHE_DURATION) {
-	        localStorage.removeItem(`oneclaw_cache_${key}`);
-	        return null;
-	      }
-	      return data;
-	    } catch { return null; }
-	  },
-	  set: (key: string, data: unknown) => {
-	    if (typeof window === 'undefined') return;
-	    localStorage.setItem(`oneclaw_cache_${key}`, JSON.stringify({ data, timestamp: Date.now() }));
-	  }
-	};
+const CACHE_DURATION = 5 * 60 * 1000;
+const cache = {
+  get: (key: string) => {
+    if (typeof window === 'undefined') return null;
+    const item = localStorage.getItem(`oneclaw_cache_${key}`);
+    if (!item) return null;
+    try {
+      const { data, timestamp } = JSON.parse(item);
+      if (Date.now() - timestamp > CACHE_DURATION) {
+        localStorage.removeItem(`oneclaw_cache_${key}`);
+        return null;
+      }
+      return data;
+    } catch { return null; }
+  },
+  set: (key: string, data: unknown) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(`oneclaw_cache_${key}`, JSON.stringify({ data, timestamp: Date.now() }));
+  },
+  clear: (key?: string) => {
+    if (typeof window === 'undefined') return;
+    if (key) {
+      localStorage.removeItem(`oneclaw_cache_${key}`);
+    } else {
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('oneclaw_cache_'));
+      keys.forEach(k => localStorage.removeItem(k));
+    }
+  },
+  cleanup: () => {
+    if (typeof window === 'undefined') return;
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('oneclaw_cache_'));
+    keys.forEach(key => {
+      try {
+        const item = localStorage.getItem(key);
+        if (item) {
+          const { timestamp } = JSON.parse(item);
+          if (Date.now() - timestamp > CACHE_DURATION) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch {}
+    });
+  }
+};
 
 	// ==================== 主组件 ====================
 export default function HomePage() {
@@ -237,6 +261,8 @@ export default function HomePage() {
   useEffect(() => {
     const id = getUserId();
     setUserId(id);
+    // 清理过期缓存
+    cache.cleanup();
   }, []);
 
   useEffect(() => {
@@ -549,7 +575,15 @@ export default function HomePage() {
                 return (
                   <button
                     key={tab.key}
-                    onClick={() => setMainTab(tab.key)}
+                    onClick={() => {
+                      // 切换 Tab 时清除该模块缓存，强制获取最新数据
+                      if (tab.key === 'tutorials') cache.clear('tutorials_all_1');
+                      if (tab.key === 'prompts') cache.clear('prompts_全部_1');
+                      if (tab.key === 'tools') cache.clear(`tools_all_1`);
+                      if (tab.key === 'skills') cache.clear(`skills_all_1`);
+                      if (tab.key === 'rankings') cache.clear('rankings');
+                      setMainTab(tab.key);
+                    }}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
