@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, use, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -124,6 +125,7 @@ function StarRating({ value, onChange, readonly = false, size = 'md' }: {
 // 主页面组件
 export default function ToolDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const [tool, setTool] = useState<Tool | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -210,6 +212,20 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       if (data.success) setIsFavorited(data.is_favorited);
     } catch (err) {
       console.error('检查收藏失败:', err);
+    }
+  };
+
+  const handleGoBack = () => {
+    if (typeof window !== 'undefined') {
+      const backFrom = sessionStorage.getItem('backFrom');
+      if (backFrom) {
+        sessionStorage.removeItem('backFrom');
+        router.push(backFrom);
+      } else {
+        router.push('/');
+      }
+    } else {
+      router.push('/');
     }
   };
 
@@ -335,9 +351,9 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       {/* 顶部导航 */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-orange-500">
-            <span>← 返回首页</span>
-          </Link>
+          <button onClick={handleGoBack} className="flex items-center gap-2 text-slate-600 hover:text-orange-500">
+            <span>← 返回</span>
+          </button>
         </div>
       </header>
 

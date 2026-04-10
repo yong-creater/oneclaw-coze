@@ -690,6 +690,10 @@ export default function HomePage() {
                         key={item.id} 
                         className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
                         onClick={() => {
+                          // 记录来源页面
+                          if (typeof window !== 'undefined') {
+                            sessionStorage.setItem('backFrom', window.location.pathname);
+                          }
                           if (item.tool_id) {
                             router.push(`/tools/${item.tool_id}`);
                           } else {
@@ -845,13 +849,14 @@ export default function HomePage() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {tools.map(tool => (
-                    <a
+                    <div
                       key={tool.id}
-                      href={`/tools/${tool.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block"
+                      className="block cursor-pointer"
                       onClick={() => {
+                        // 记录来源页面到 sessionStorage
+                        if (typeof window !== 'undefined') {
+                          sessionStorage.setItem('backFrom', window.location.pathname);
+                        }
                         // 异步记录浏览历史
                         if (userId) {
                           fetch('/api/history', {
@@ -860,6 +865,7 @@ export default function HomePage() {
                             body: JSON.stringify({ user_id: userId, tool_id: tool.id })
                           }).catch(console.error);
                         }
+                        router.push(`/tools/${tool.id}`);
                       }}
                     >
                       <Card
@@ -894,7 +900,7 @@ export default function HomePage() {
                         </div>
                       </CardContent>
                     </Card>
-                    </a>
+                    </div>
                   ))}
                 </div>
 

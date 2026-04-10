@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,6 +65,7 @@ const formatMonth = (month: string) => {
 };
 
 export default function RankingsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [rankings, setRankings] = useState<MonthlyRanking[]>([]);
   const [meta, setMeta] = useState<RankingsResponse['meta'] | null>(null);
@@ -384,7 +386,18 @@ export default function RankingsPage() {
                 rankings.map((item, index) => (
                   <div
                     key={item.id}
-                    className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors items-center"
+                    className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors items-center cursor-pointer"
+                    onClick={() => {
+                      // 记录来源页面
+                      if (typeof window !== 'undefined') {
+                        sessionStorage.setItem('backFrom', window.location.pathname);
+                      }
+                      if (item.tool_id) {
+                        router.push(`/tools/${item.tool_id}`);
+                      } else {
+                        window.location.href = item.tool_url;
+                      }
+                    }}
                   >
                     {/* 排名 */}
                     <div className="col-span-1">
@@ -414,12 +427,9 @@ export default function RankingsPage() {
                         />
                       </div>
                       <div className="min-w-0">
-                        <a
-                          href={item.tool_url}
-                          className="font-medium text-slate-800 dark:text-slate-100 hover:text-orange-500 transition-colors truncate block"
-                        >
+                        <span className="font-medium text-slate-800 dark:text-slate-100 hover:text-orange-500 transition-colors truncate block">
                           {item.tool_name}
-                        </a>
+                        </span>
                         <div className="flex items-center gap-2 mt-0.5">
                           {item.category && (
                             <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
