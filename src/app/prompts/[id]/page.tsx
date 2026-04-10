@@ -1,7 +1,29 @@
-import { notFound } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { useRouter } from 'next/navigation';
 import BackButton from '@/components/BackButton';
+import { Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
+
+const CATEGORY_ICONS: Record<string, string> = {
+  '视频生成': '🎬',
+  'AI绘画': '🎨',
+  '文案写作': '✍️',
+  '代码编程': '💻',
+  '数字人': '👤',
+  '音频生成': '🎵',
+  '图像处理': '🖼️',
+  '数据分析': '📊',
+  '营销文案': '📢',
+  '学习助手': '📚',
+  '其他': '📝',
+  '特效制作': '✨',
+  '音乐生成': '🎶',
+  '图片处理': '🖼️',
+  '写作助手': '✍️',
+};
 
 interface Prompt {
   id: number;
@@ -19,54 +41,66 @@ interface Prompt {
   };
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  '视频生成': '🎬',
-  'AI绘画': '🎨',
-  '文案写作': '✍️',
-  '代码编程': '💻',
-  '数字人': '👤',
-  '音频生成': '🎵',
-  '图像处理': '🖼️',
-  '数据分析': '📊',
-  '营销文案': '📢',
-  '学习助手': '📚',
-  '其他': '📝',
-};
+export default function PromptDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const router = useRouter();
+  const [prompt, setPrompt] = useState<Prompt | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const [id, setId] = useState<string>('');
 
-// 获取提示词详情
-async function getPrompt(id: string) {
-  const supabase = getSupabaseClient();
-  
-  const { data, error } = await supabase
-    .from('prompts')
-    .select('*, tools(id, name, logo)')
-    .eq('id', parseInt(id))
-    .eq('status', 'published')
-    .single();
+  useEffect(() => {
+    params.then(p => setId(p.id));
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
     
-  if (error || !data) {
+    const fetchPrompt = async () => {
+      try {
+        const res = await fetch(`/api/prompts/${id}`);
+        const data = await res.json();
+        
+        if (data.success) {
+          setPrompt(data.data);
+        } else {
+          router.push('/prompts');
+        }
+      } catch (error) {
+        console.error('获取提示词失败:', error);
+        router.push('/prompts');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPrompt();
+  }, [id, router]);
+
+  const handleCopy = async () => {
+    if (!prompt) return;
+    
+    try {
+      await navigator.clipboard.writeText(prompt.content);
+      setCopied(true);
+      toast.success('复制成功！');
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error('复制失败，请手动复制');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+      </div>
+    );
+  }
+
+  if (!prompt) {
     return null;
   }
-  
-  return data;
-}
 
-export default async function PromptDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const prompt = await getPrompt(id);
-  
-  if (!prompt) {
-    notFound();
-  }
-  
-  // 增加使用次数
-  const supabase = getSupabaseClient();
-  supabase
-    .from('prompts')
-    .update({ uses: (prompt.uses || 0) + 1 })
-    .eq('id', prompt.id)
-    .then(() => {});
-  
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -141,9 +175,26 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
               <span className="text-orange-500">✨</span>
               提示词内容
             </h2>
-            <div className="text-sm px-4 py-2 rounded border border-slate-200 bg-slate-50 text-slate-600">
-              📋 请手动复制下方内容
-            </div>
+            <button
+              onClick={handleCopy}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                copied 
+                  ? 'bg-green-500 text-white' 
+                  : 'bg-orange-500 text-white hover:bg-orange-600'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  已复制
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  一键复制
+                </>
+              )}
+            </button>
           </div>
           
           <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
@@ -159,7 +210,7 @@ export default async function PromptDetailPage({ params }: { params: Promise<{ i
             💡 使用技巧
           </h3>
           <ul className="space-y-2 text-sm text-slate-600">
-            <li>• 点击「复制」按钮将提示词复制到剪贴板</li>
+            <li>• 点击「一键复制」按钮将提示词复制到剪贴板</li>
             <li>• 在对应的AI工具中粘贴使用</li>
             <li>• 可以根据具体需求修改提示词细节</li>
             <li>• 好的提示词越具体，生成效果越好</li>
