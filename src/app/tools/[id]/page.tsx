@@ -215,9 +215,22 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
     }
   };
 
-  const handleGoBack = () => {
+  // 保存返回路径，防止被其他操作覆盖
+  const [savedBackFrom, setSavedBackFrom] = useState<string | null>(null);
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const backFrom = sessionStorage.getItem('backFrom');
+      if (backFrom) {
+        setSavedBackFrom(backFrom);
+      }
+    }
+  }, []);
+
+  const handleGoBack = () => {
+    if (typeof window !== 'undefined') {
+      // 优先使用保存的值
+      const backFrom = savedBackFrom || sessionStorage.getItem('backFrom');
       if (backFrom) {
         sessionStorage.removeItem('backFrom');
         router.push(backFrom);
