@@ -9,17 +9,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { secret_key, new_password, environment } = body;
 
-    // 根据环境选择密钥
+    // 根据环境选择密钥（必须显式指定 environment 参数）
     const devKey = process.env.ADMIN_RESET_KEY_DEV || 'oneclaw-dev-reset-2024';
     const prodKey = process.env.ADMIN_RESET_KEY || 'oneclaw-reset-2024';
     
-    // 允许通过 environment 参数或 secret_key 后缀来区分环境
-    const isDev = environment === 'dev' || request.headers.get('host')?.includes('dev.coze') || secret_key?.endsWith('-dev');
+    // 显式通过 environment 参数区分环境（避免依赖 host 判断）
+    const isDev = environment === 'dev';
+    const isProd = environment === 'prod';
+    
+    // 如果显式指定了环境，使用对应密钥
+    if (isDev) {
+      // 开发环境
+    } else if (isProd) {
+      // 生产环境
+    } else {
+      // 没有显式指定环境，拒绝请求，避免误操作
+      return NextResponse.json({ 
+        success: false, 
+        error: '必须显式指定 environment 参数（dev 或 prod）' 
+      }, { status: 400 });
+    }
+    
     const expectedKey = isDev ? devKey : prodKey;
     
-    // 如果提供了带环境后缀的密钥，也接受
-    const keyWithoutSuffix = secret_key?.replace(/-dev$/, '');
-    if (keyWithoutSuffix !== expectedKey && secret_key !== expectedKey) {
+    // 验证密钥
+    if (secret_key !== expectedKey) {
       return NextResponse.json({ 
         success: false, 
         error: '无效的密钥' 
