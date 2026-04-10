@@ -179,7 +179,7 @@ export default async function TutorialDetailPage({
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <img 
-                  src="/oneclaw-logo.png" 
+                  src="/oneclaw-logo.jpg" 
                   alt="OneClaw" 
                   width={28} 
                   height={28}
