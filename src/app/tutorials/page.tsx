@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +41,7 @@ const TUTORIAL_CATEGORIES = [
 ];
 
 export default function TutorialsPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -47,6 +49,20 @@ export default function TutorialsPage() {
   const [tutorials, setTutorials] = useState<Tutorial[]>([]);
   const [pagination, setPagination] = useState({ page: 1, total: 0, total_pages: 0 });
   const [category, setCategory] = useState('全部');
+
+  // 保存当前分页状态并跳转
+  const handleCardClick = (tutorialId: number) => {
+    if (typeof window !== 'undefined') {
+      const backState = {
+        page: pagination.page,
+        category: category,
+        search: searchQuery,
+        path: window.location.pathname + window.location.search
+      };
+      sessionStorage.setItem('backFrom', JSON.stringify(backState));
+    }
+    router.push(`/tutorials/${tutorialId}`);
+  };
 
   useEffect(() => {
     fetchTutorials(1);
@@ -173,7 +189,7 @@ export default function TutorialsPage() {
           <>
             <div className="space-y-4">
               {tutorials.map(tutorial => (
-                <Link key={tutorial.id} href={`/tutorials/${tutorial.id}`}>
+                <div key={tutorial.id} onClick={() => handleCardClick(tutorial.id)}>
                   <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer">
                     <CardContent className="p-4">
                       <div className="flex gap-4">
@@ -213,7 +229,7 @@ export default function TutorialsPage() {
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
 

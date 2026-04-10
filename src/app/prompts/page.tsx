@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export default function PromptsPage() {
+  const router = useRouter();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [pagination, setPagination] = useState<Pagination>({
@@ -58,6 +60,20 @@ export default function PromptsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+
+  // 保存当前分页状态并跳转
+  const handleCardClick = (promptId: number) => {
+    if (typeof window !== 'undefined') {
+      const backState = {
+        page: pagination.page,
+        category: selectedCategory,
+        search: searchQuery,
+        path: window.location.pathname + window.location.search
+      };
+      sessionStorage.setItem('backFrom', JSON.stringify(backState));
+    }
+    router.push(`/prompts/${promptId}`);
+  };
 
   const fetchData = async (page = 1) => {
     setLoading(true);
@@ -198,7 +214,7 @@ export default function PromptsPage() {
             {/* Prompt Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredPrompts.map((prompt) => (
-                <Link key={prompt.id} href={`/prompts/${prompt.id}`}>
+                <div key={prompt.id} onClick={() => handleCardClick(prompt.id)}>
                   <Card className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer group h-full">
                     <CardContent className="p-5">
                       <div className="flex items-start gap-4">
@@ -242,7 +258,7 @@ export default function PromptsPage() {
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
+                </div>
               ))}
             </div>
 

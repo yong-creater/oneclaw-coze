@@ -1249,7 +1249,13 @@ export default function HomePage() {
                         className="flex items-center gap-4 py-4 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-pointer group"
                         onClick={() => {
                           if (typeof window !== 'undefined') {
-                            sessionStorage.setItem('backFrom', window.location.pathname);
+                            const backState = {
+                              page: skillsPagination.page,
+                              search: skillSearch,
+                              category: skillCategory,
+                              path: window.location.pathname + window.location.search
+                            };
+                            sessionStorage.setItem('backFrom', JSON.stringify(backState));
                           }
                           router.push(`/skills/${skill.slug}`);
                         }}
