@@ -141,11 +141,11 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 };
 
 const MAIN_TABS = [
-  { key: 'rankings', label: '热门榜单', icon: TrendingUp },
-  { key: 'tools', label: '工具导航', icon: Video },
-  { key: 'prompts', label: '提示词库', icon: Lightbulb },
-  { key: 'tutorials', label: '教程库', icon: BookOpen },
-  { key: 'skills', label: 'Skill', icon: Sparkles },
+  { key: 'rankings', label: '排行榜', icon: TrendingUp },
+  { key: 'tools', label: 'AI应用', icon: Video },
+  { key: 'prompts', label: '提示词', icon: Lightbulb },
+  { key: 'skills', label: '技能', icon: Sparkles },
+  { key: 'tutorials', label: '教程', icon: BookOpen },
 ] as const;
 
 type MainTab = typeof MAIN_TABS[number]['key'];
@@ -577,11 +577,11 @@ export default function HomePage() {
                     key={tab.key}
                     onClick={() => {
                       // 切换 Tab 时清除该模块缓存，强制获取最新数据
-                      if (tab.key === 'tutorials') cache.clear('tutorials_all_1');
-                      if (tab.key === 'prompts') cache.clear('prompts_全部_1');
-                      if (tab.key === 'tools') cache.clear(`tools_all_1`);
-                      if (tab.key === 'skills') cache.clear(`skills_all_1`);
                       if (tab.key === 'rankings') cache.clear('rankings');
+                      if (tab.key === 'tools') cache.clear(`tools_all_1`);
+                      if (tab.key === 'prompts') cache.clear('prompts_全部_1');
+                      if (tab.key === 'skills') cache.clear(`skills_all_1`);
+                      if (tab.key === 'tutorials') cache.clear('tutorials_all_1');
                       setMainTab(tab.key);
                     }}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${

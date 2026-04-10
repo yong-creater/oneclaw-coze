@@ -29,10 +29,7 @@ import { Button } from '@/components/ui/button';
 
 const navigation = [
   { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
-  { name: '工具管理', href: '/admin/tools', icon: Wrench },
-  { name: '分类管理', href: '/admin/categories', icon: FolderTree },
-  { name: '标签管理', href: '/admin/tags', icon: Tags },
-  { name: '技能管理', href: '/admin/skills', icon: Sparkles },
+  { name: '排行榜', href: '/admin/rankings', icon: TrendingUp },
   { 
     name: '榜单管理', 
     href: '/admin/rankings', 
@@ -43,8 +40,12 @@ const navigation = [
       { name: '定时任务', href: '/admin/rankings/scheduler' },
     ]
   },
+  { name: 'AI应用管理', href: '/admin/tools', icon: Wrench },
+  { name: '分类管理', href: '/admin/categories', icon: FolderTree },
+  { name: '标签管理', href: '/admin/tags', icon: Tags },
+  { name: '提示词管理', href: '/admin/prompts', icon: FileText },
+  { name: '技能管理', href: '/admin/skills', icon: Sparkles },
   { name: '教程管理', href: '/admin/tutorials', icon: BookOpen },
-  { name: 'Prompt管理', href: '/admin/prompts', icon: FileText },
   { name: '评论审核', href: '/admin/reviews', icon: MessageSquare },
   { name: '会员管理', href: '/admin/members', icon: Users },
   { name: '订单管理', href: '/admin/orders', icon: CreditCard },
