@@ -20,22 +20,19 @@ export default function BackButton({ defaultText = '返回', defaultHref, classN
   const router = useRouter();
   const [savedBackState, setSavedBackState] = useState<BackState | null>(null);
 
-  // 组件加载时保存返回状态
+  // 组件加载时读取返回状态
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const backFrom = sessionStorage.getItem('backFrom');
       if (backFrom) {
         try {
-          // 尝试解析为 JSON 格式
           const state = JSON.parse(backFrom);
           if (state && state.path) {
             setSavedBackState(state);
           } else {
-            // 旧格式：纯路径字符串
             setSavedBackState({ path: backFrom });
           }
         } catch {
-          // 无法解析为 JSON，当作路径字符串处理
           setSavedBackState({ path: backFrom });
         }
       }
@@ -44,8 +41,23 @@ export default function BackButton({ defaultText = '返回', defaultHref, classN
 
   const handleGoBack = () => {
     if (typeof window !== 'undefined') {
-      const backState = savedBackState;
-      if (backState) {
+      // 始终优先使用 sessionStorage 中保存的返回状态
+      let backState = savedBackState;
+      
+      // 如果状态为空，尝试直接读取 sessionStorage
+      if (!backState) {
+        const backFrom = sessionStorage.getItem('backFrom');
+        if (backFrom) {
+          try {
+            const state = JSON.parse(backFrom);
+            backState = state && state.path ? state : { path: backFrom };
+          } catch {
+            backState = { path: backFrom };
+          }
+        }
+      }
+      
+      if (backState && backState.path) {
         sessionStorage.removeItem('backFrom');
         
         // 构建返回 URL，附加分页参数
@@ -72,12 +84,8 @@ export default function BackButton({ defaultText = '返回', defaultHref, classN
         return;
       }
       
-      // 如果没有保存的状态，尝试浏览器返回
-      if (window.history.length > 1) {
-        router.back();
-      } else {
-        router.push(defaultHref || '/');
-      }
+      // 如果没有保存的状态，返回首页
+      router.push(defaultHref || '/');
     } else {
       router.push(defaultHref || '/');
     }

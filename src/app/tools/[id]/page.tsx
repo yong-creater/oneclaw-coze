@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import BackButton from '@/components/BackButton';
 
 // ==================== 类型定义 ====================
 interface Tool {
@@ -216,31 +217,6 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   // 保存返回路径，防止被其他操作覆盖
-  const [savedBackFrom, setSavedBackFrom] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const backFrom = sessionStorage.getItem('backFrom');
-      if (backFrom) {
-        setSavedBackFrom(backFrom);
-      }
-    }
-  }, []);
-
-  const handleGoBack = () => {
-    if (typeof window !== 'undefined') {
-      // 优先使用保存的值
-      const backFrom = savedBackFrom || sessionStorage.getItem('backFrom');
-      if (backFrom) {
-        sessionStorage.removeItem('backFrom');
-        router.push(backFrom);
-      } else {
-        router.push('/');
-      }
-    } else {
-      router.push('/');
-    }
-  };
 
   const handleVisit = () => {
     if (!tool) return;
@@ -364,9 +340,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       {/* 顶部导航 */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <button onClick={handleGoBack} className="flex items-center gap-2 text-slate-600 hover:text-orange-500">
-            <span>← 返回</span>
-          </button>
+          <BackButton />
         </div>
       </header>
 
