@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
+      // Coze CDN
       {
         protocol: 'https',
         hostname: 'lf-coze-web-cdn.coze.cn',
@@ -25,6 +26,54 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '**.coze.cn',
+        pathname: '/**',
+      },
+      // Google Favicon API (排行榜工具图标)
+      {
+        protocol: 'https',
+        hostname: 'www.google.com',
+        pathname: '/s2/favicons/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'google.com',
+        pathname: '/s2/favicons/**',
+      },
+      // AI 工具官网
+      {
+        protocol: 'https',
+        hostname: 'chat.openai.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'claude.ai',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'kimi.moonshot.cn',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.midjourney.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'sora.com',
+        pathname: '/**',
+      },
+      // 通用图床和 CDN
+      {
+        protocol: 'https',
+        hostname: '**.amazonaws.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.cloudfront.net',
         pathname: '/**',
       },
     ],
