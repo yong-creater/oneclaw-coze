@@ -106,7 +106,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   
   return {
     title: `${skill.name} - 技能详情 - OneClaw`,
-    description: skill.description || `${skill.name} - 来自 SkillHub 的精选 AI 技能`,
+    description: skill.description || `${skill.name} - 来自 ClawHub 的精选 AI 技能`,
   };
 }
 
@@ -188,7 +188,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                         className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg font-medium transition-colors"
                       >
                         <ExternalLink className="w-4 h-4" />
-                        在 SkillHub 打开
+                        在 ClawHub 打开
                       </a>
                     )}
                   </div>
@@ -231,11 +231,11 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   <ul className="space-y-2 text-slate-600 dark:text-slate-300">
                     <li className="flex items-start gap-2">
                       <Star className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <span>来自 SkillHub 精选技能库</span>
+                      <span>来自 ClawHub 精选技能库</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Sparkles className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <span>经过安全检测，可放心使用</span>
+                      <span>经过 ClawHub 安全检测，可放心使用</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Download className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
@@ -250,10 +250,10 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">使用说明</h3>
                 <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 text-slate-600 dark:text-slate-300">
                   <p className="mb-3">
-                    1. 点击右上角「在 SkillHub 打开」按钮
+                    1. 点击右上角「在 ClawHub 打开」按钮
                   </p>
                   <p className="mb-3">
-                    2. 在 SkillHub 页面上点击「安装」或「使用」按钮
+                    2. 在 ClawHub 页面上点击「安装」或「使用」按钮
                   </p>
                   <p>
                     3. 按照 SkillHub 的指引完成技能的安装和使用
@@ -291,7 +291,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                     <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="font-medium text-slate-800 dark:text-slate-200">SkillHub</div>
+                    <div className="font-medium text-slate-800 dark:text-slate-200">ClawHub</div>
                     <div className="text-xs text-slate-500">精选 AI 技能社区</div>
                   </div>
                 </div>

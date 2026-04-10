@@ -1264,23 +1264,8 @@ export default function HomePage() {
                           </div>
                         </div>
                         
-                        {/* 右侧：标签和来源 */}
+                        {/* 右侧：来源 */}
                         <div className="flex items-center gap-4 flex-shrink-0">
-                          {/* 标签 */}
-                          {skill.tags && skill.tags.length > 0 && (
-                            <div className="hidden md:flex items-center gap-1">
-                              {skill.tags.slice(0, 2).map((tag: string, idx: number) => (
-                                <Badge 
-                                  key={idx}
-                                  variant="secondary"
-                                  className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                                >
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          
                           {/* 分类标签 */}
                           {skill.skill_categories && (
                             <span 
@@ -1293,7 +1278,7 @@ export default function HomePage() {
                           
                           {/* 来源 */}
                           <div className="text-xs text-slate-400">
-                            源自 SkillHub
+                            源自 ClawHub
                           </div>
                         </div>
                       </Link>
