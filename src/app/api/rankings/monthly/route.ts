@@ -43,10 +43,8 @@ export async function GET(request: NextRequest) {
       .eq('stats_month', targetMonth)
       .eq('data_status', 'valid');
     
-    // 地区筛选 - china 模式只显示 source_flag='cn' 的数据，global 模式显示所有数据
-    if (region === 'china') {
-      query = query.eq('source_flag', 'cn');
-    }
+    // 地区筛选 - china 模式显示所有数据（按国内排名排序），global 模式也显示所有数据
+    // 注：source_flag 为 'auto' 的数据既适用于全球也适用于国内榜单
     
     // 分类筛选
     if (category && category !== 'all') {
@@ -67,9 +65,11 @@ export async function GET(request: NextRequest) {
         query = query.order('growth_rate_num', { ascending: sortOrder === 'asc' });
         break;
       default:
-        // 根据地区选择对应的 rank 字段
+        // 根据地区选择对应的 rank 字段（country_rank 为空时使用 global_rank）
         if (region === 'china') {
-          query = query.order('country_rank', { ascending: true });
+          query = query.order('country_rank', { ascending: true, nullsFirst: true });
+          // 如果 country_rank 全为空，降级使用 global_rank
+          query = query.order('global_rank', { ascending: true });
         } else {
           query = query.order('global_rank', { ascending: true });
         }
@@ -87,11 +87,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
     
-    // 处理返回数据，根据地区返回对应的 rank
-    const processedRankings = (rankings || []).map((item: any) => ({
+    // 处理返回数据，根据地区返回对应的 rank（country_rank 为空时使用 global_rank）
+    const processedRankings = (rankings || []).map((item: any, index: number) => ({
       ...item,
-      display_rank: region === 'china' ? item.country_rank : item.global_rank,
-      display_rank_change: region === 'china' ? item.country_rank_change : item.global_rank_change,
+      display_rank: region === 'china' ? (item.country_rank || item.global_rank || index + 1) : item.global_rank,
+      display_rank_change: region === 'china' ? (item.country_rank_change || item.global_rank_change) : item.global_rank_change,
     }));
     
     // 获取可选月份列表
