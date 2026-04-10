@@ -1215,7 +1215,8 @@ export default function HomePage() {
                     const letter = skill.name.charAt(0).toUpperCase();
                     
                     return (
-                      <div 
+                      <Link 
+                        href={`/skills/${skill.slug}`}
                         key={skill.id}
                         className="flex items-center gap-4 py-4 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-pointer group"
                       >
@@ -1269,7 +1270,7 @@ export default function HomePage() {
                             源自 SkillHub
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>
