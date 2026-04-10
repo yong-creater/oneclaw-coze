@@ -126,22 +126,22 @@ const FREE_TYPE_COLORS: Record<string, string> = {
   '付费工具': 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
 };
 
-const CATEGORY_ICONS: Record<string, typeof Sparkles> = {
-  'video-generation': Sparkles,
-  'digital-human': Sparkles,
-  'video-editing': Sparkles,
-  'ai-dubbing': Sparkles,
-  'anime-creation': Sparkles,
-  'ai-image': Sparkles,
-  'ai-writing': Sparkles,
-  'ai-coding': Sparkles,
-  'ai-audio': Sparkles,
-  'ai-office': Sparkles,
-  'ai-marketing': Sparkles,
-  'ai-learning': Sparkles,
-  'ai-chat': Sparkles,
-  'ai-search': Sparkles,
-  'default': Sparkles,
+const CATEGORY_ICONS: Record<string, typeof Wand2> = {
+  'video-generation': Wand2,
+  'digital-human': Wand2,
+  'video-editing': Wand2,
+  'ai-dubbing': Wand2,
+  'anime-creation': Wand2,
+  'ai-image': Wand2,
+  'ai-writing': Wand2,
+  'ai-coding': Wand2,
+  'ai-audio': Wand2,
+  'ai-office': Wand2,
+  'ai-marketing': Wand2,
+  'ai-learning': Wand2,
+  'ai-chat': Wand2,
+  'ai-search': Wand2,
+  'default': Wand2,
 };
 
 const DIFFICULTY_COLORS: Record<string, string> = {
@@ -152,7 +152,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 const MAIN_TABS = [
   { key: 'rankings', label: '排行榜', icon: TrendingUp },
-  { key: 'tools', label: 'AI应用', icon: Sparkles },
+  { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
@@ -762,7 +762,7 @@ export default function HomePage() {
                     <span>全部工具</span>
                   </button>
                   {categories.map(cat => {
-                    const Icon = CATEGORY_ICONS[cat.slug] || Sparkles;
+                    const Icon = CATEGORY_ICONS[cat.slug] || Wand2;
                     const isActive = activeCategory === cat.slug;
                     return (
                       <button
