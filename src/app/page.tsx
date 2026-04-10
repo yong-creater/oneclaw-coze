@@ -209,6 +209,8 @@ export default function HomePage() {
             setMainTab(state.tab);
           }
         } catch {}
+        // 读取完后清除，避免影响其他操作
+        sessionStorage.removeItem('backFrom');
       }
     }
   }, []);

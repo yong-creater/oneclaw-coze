@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface BackButtonProps {
@@ -9,64 +8,39 @@ interface BackButtonProps {
   className?: string;
 }
 
-export default function BackButton({ defaultText = '返回', defaultHref, className = '' }: BackButtonProps) {
+export default function BackButton({ defaultText = '返回', defaultHref = '/', className = '' }: BackButtonProps) {
   const router = useRouter();
-  const [savedPath, setSavedPath] = useState<string | null>(null);
-
-  // 组件加载时读取返回路径
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const backFrom = sessionStorage.getItem('backFrom');
-      if (backFrom) {
-        try {
-          // 尝试解析 JSON
-          const state = JSON.parse(backFrom);
-          if (state && state.path) {
-            setSavedPath(state.path);
-          } else if (typeof backFrom === 'string' && backFrom.startsWith('/')) {
-            setSavedPath(backFrom);
-          }
-        } catch {
-          // 如果解析失败，直接使用字符串
-          if (backFrom.startsWith('/')) {
-            setSavedPath(backFrom);
-          }
-        }
-      }
-    }
-  }, []);
 
   const handleGoBack = () => {
     if (typeof window !== 'undefined') {
-      // 优先使用已保存的路径
-      let path = savedPath;
+      const backFrom = sessionStorage.getItem('backFrom');
       
-      // 如果没有保存的路径，尝试直接从 sessionStorage 读取
-      if (!path) {
-        const backFrom = sessionStorage.getItem('backFrom');
-        if (backFrom) {
-          try {
-            const state = JSON.parse(backFrom);
-            path = state && state.path ? state.path : backFrom;
-          } catch {
-            path = backFrom;
+      if (backFrom) {
+        // 尝试解析 JSON 获取路径
+        let path = backFrom;
+        try {
+          const state = JSON.parse(backFrom);
+          path = state.path || backFrom;
+        } catch {
+          // 保持原值
+        }
+        
+        // 确保 path 是有效的
+        if (path && typeof path === 'string' && path.startsWith('/')) {
+          // 如果目标是首页，保留 sessionStorage 让首页读取 tab
+          // 否则直接清除
+          if (path !== '/') {
+            sessionStorage.removeItem('backFrom');
           }
+          
+          router.push(path);
+          return;
         }
       }
-      
-      // 清除 sessionStorage
-      sessionStorage.removeItem('backFrom');
-      
-      // 如果有有效的路径，跳转到该路径
-      if (path && path.startsWith('/')) {
-        router.push(path);
-      } else {
-        // 否则返回首页
-        router.push(defaultHref || '/');
-      }
-    } else {
-      router.push(defaultHref || '/');
     }
+    
+    // 如果没有保存的路径，返回首页
+    router.push(defaultHref);
   };
 
   return (
