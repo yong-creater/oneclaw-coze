@@ -1199,86 +1199,79 @@ export default function HomePage() {
                 </div>
               </div>
 
-            {/* 技能列表 */}
+            {/* 技能列表 - SkillHub 风格 */}
             {skillsLoading ? (
               <div className="flex items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
               </div>
             ) : skills.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {skills.map(skill => (
-                    <Card 
-                      key={skill.id} 
-                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors overflow-hidden"
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3 mb-3">
-                          {skill.logo || skill.icon ? (
-                            <img 
-                              src={skill.logo || skill.icon || ''} 
-                              alt={skill.name}
-                              className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
-                            />
-                          ) : (
-                            <div 
-                              className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
-                              style={{ backgroundColor: skill.skill_categories?.color || '#FF6B35', opacity: 0.1 }}
-                            >
-                              <Sparkles className="w-5 h-5" style={{ color: skill.skill_categories?.color || '#FF6B35', opacity: 1 }} />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{skill.name}</h3>
-                            {skill.skill_categories && (
-                              <span 
-                                className="text-xs px-2 py-0.5 rounded-full"
-                                style={{ backgroundColor: skill.skill_categories.color, color: '#fff' }}
-                              >
-                                {skill.skill_categories.name}
-                              </span>
-                            )}
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {skills.map(skill => {
+                    // 生成字母标识的颜色
+                    const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316'];
+                    const colorIndex = skill.name.charCodeAt(0) % colors.length;
+                    const bgColor = colors[colorIndex];
+                    const letter = skill.name.charAt(0).toUpperCase();
+                    
+                    return (
+                      <div 
+                        key={skill.id}
+                        className="flex items-center gap-4 py-4 px-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors cursor-pointer group"
+                      >
+                        {/* 左侧：字母标识 + 标题 + 描述 */}
+                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                          <div 
+                            className="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold flex-shrink-0"
+                            style={{ backgroundColor: bgColor + '20' }}
+                          >
+                            <span style={{ color: bgColor }}>{letter}</span>
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-1 group-hover:text-orange-500 transition-colors">
+                              {skill.name}
+                            </h3>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">
+                              {skill.description || '暂无描述'}
+                            </p>
                           </div>
                         </div>
-                        <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-3">
-                          {skill.description || '暂无描述'}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">{skill.pricing}</Badge>
-                          <Badge variant="outline" className="text-xs">{skill.difficulty}</Badge>
+                        
+                        {/* 右侧：标签和来源 */}
+                        <div className="flex items-center gap-4 flex-shrink-0">
+                          {/* 标签 */}
+                          {skill.tags && skill.tags.length > 0 && (
+                            <div className="hidden md:flex items-center gap-1">
+                              {skill.tags.slice(0, 2).map((tag: string, idx: number) => (
+                                <Badge 
+                                  key={idx}
+                                  variant="secondary"
+                                  className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {/* 分类标签 */}
+                          {skill.skill_categories && (
+                            <span 
+                              className="hidden lg:inline-flex text-xs px-2 py-1 rounded-full"
+                              style={{ backgroundColor: skill.skill_categories.color + '20', color: skill.skill_categories.color }}
+                            >
+                              {skill.skill_categories.name}
+                            </span>
+                          )}
+                          
+                          {/* 来源 */}
+                          <div className="text-xs text-slate-400">
+                            源自 SkillHub
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-3">
-                          {skill.official_url && (
-                            <Button 
-                              size="sm" 
-                              className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
-                              onClick={() => window.open(skill.official_url!, '_blank')}
-                            >
-                              访问官网
-                            </Button>
-                          )}
-                          {skill.documentation_url && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => window.open(skill.documentation_url!, '_blank')}
-                            >
-                              文档
-                            </Button>
-                          )}
-                          {skill.github_url && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => window.open(skill.github_url!, '_blank')}
-                            >
-                              GitHub
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* 分页 */}
