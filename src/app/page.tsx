@@ -679,123 +679,193 @@ export default function HomePage() {
                 </div>
               </div>
             ) : rankings.length > 0 ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-slate-50 dark:bg-slate-700/50">
-                    <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
-                      <th className="px-6 py-4 font-medium w-20">排名</th>
-                      <th className="px-6 py-4 font-medium">工具</th>
-                      <th className="px-6 py-4 font-medium w-32">月访问量</th>
-                      <th className="px-6 py-4 font-medium w-24">增长率</th>
-                      <th className="px-6 py-4 font-medium w-24">分类</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                    {rankings.map((item, index) => {
-                      const rank = item.display_rank || item.rank || index + 1;
-                      const isTop3 = rank <= 3;
+              <div>
+                {/* Top 3 可视化区域 */}
+                {rankings.filter(item => (item.display_rank || item.rank || rankings.indexOf(item) + 1) <= 3).length > 0 && (
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    {[1, 2, 3].map(rank => {
+                      const topItem = rankings.find(item => (item.display_rank || item.rank || rankings.indexOf(item) + 1) === rank);
+                      if (!topItem) return null;
+                      
+                      const barHeights = ['h-40', 'h-32', 'h-24'];
+                      const barColors = [
+                        'from-yellow-400 via-orange-400 to-orange-500',
+                        'from-slate-300 via-slate-400 to-slate-500',
+                        'from-orange-300 via-amber-400 to-amber-500'
+                      ];
+                      const cardBgColors = [
+                        'bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/30 dark:to-orange-900/30',
+                        'bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-700/50',
+                        'bg-gradient-to-br from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20'
+                      ];
+                      
                       return (
-                        <tr 
-                          key={item.id} 
-                          className={`cursor-pointer transition-colors ${
-                            isTop3 
-                              ? rank === 1 
-                                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20' 
-                                : rank === 2 
-                                  ? 'bg-gradient-to-r from-slate-50 to-slate-50 dark:from-slate-800/50 dark:to-slate-700/50'
-                                  : 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20'
-                              : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
-                          }`}
+                        <div 
+                          key={rank}
+                          className={`${cardBgColors[rank - 1]} rounded-2xl p-6 cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg`}
                           onClick={() => {
-                            if (item.tool_id) {
-                              window.open(`/tools/${item.tool_id}`, '_blank');
+                            if (topItem.tool_id) {
+                              window.open(`/tools/${topItem.tool_id}`, '_blank');
                             } else {
-                              window.open(item.tool_url, '_blank');
+                              window.open(topItem.tool_url, '_blank');
                             }
                           }}
                         >
-                          <td className="px-6 py-4">
-                            {isTop3 ? (
-                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-lg ${
-                                rank === 1 
-                                  ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white' 
+                          {/* 排名标签 */}
+                          <div className="flex items-center justify-between mb-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white shadow-lg ${
+                              rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' :
+                              rank === 2 ? 'bg-gradient-to-br from-slate-300 to-slate-500' :
+                              'bg-gradient-to-br from-orange-400 to-amber-500'
+                            }`}>
+                              {rank === 1 ? '🥇' : rank === 2 ? '🥈' : '🥉'}
+                            </div>
+                            <span className={`text-4xl font-bold ${
+                              rank === 1 ? 'text-yellow-500' :
+                              rank === 2 ? 'text-slate-400' :
+                              'text-orange-500'
+                            }`}>
+                              #{rank}
+                            </span>
+                          </div>
+                          
+                          {/* 工具图标 */}
+                          <div className="flex justify-center mb-4">
+                            <img
+                              src={topItem.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(topItem.tool_url)}&sz=128`}
+                              alt={topItem.tool_name}
+                              className="w-16 h-16 rounded-2xl object-contain bg-white dark:bg-slate-800 shadow-md"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(topItem.tool_url)}&sz=128`;
+                              }}
+                            />
+                          </div>
+                          
+                          {/* 工具名称 */}
+                          <h3 className="text-lg font-bold text-slate-800 dark:text-white text-center mb-2 truncate">
+                            {topItem.tool_name}
+                          </h3>
+                          
+                          {/* 访问量 */}
+                          <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-3">
+                            {topItem.monthly_visits || '-'}
+                          </p>
+                          
+                          {/* 访问量柱状图 */}
+                          <div className="relative h-20 flex items-end justify-center gap-1">
+                            <div className={`absolute bottom-0 w-full ${barHeights[rank - 1]} bg-gradient-to-t ${barColors[rank - 1]} rounded-lg opacity-80`} />
+                            <div className="absolute bottom-0 w-full h-20 bg-white/30 dark:bg-slate-800/30 rounded-lg" />
+                          </div>
+                          
+                          {/* 增长率 */}
+                          {topItem.growth_rate && (
+                            <div className={`mt-3 text-center text-sm font-medium ${
+                              topItem.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'
+                            }`}>
+                              {topItem.growth_rate}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                
+                {/* 完整榜单表格 */}
+                <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 dark:bg-slate-700/50">
+                      <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
+                        <th className="px-4 py-3 font-medium w-16">排名</th>
+                        <th className="px-4 py-3 font-medium">工具</th>
+                        <th className="px-4 py-3 font-medium w-28">月访问量</th>
+                        <th className="px-4 py-3 font-medium w-24">增长率</th>
+                        <th className="px-4 py-3 font-medium w-24">分类</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                      {rankings.map((item, index) => {
+                        const rank = item.display_rank || item.rank || index + 1;
+                        const isTop3 = rank <= 3;
+                        return (
+                          <tr 
+                            key={item.id} 
+                            className={`cursor-pointer transition-colors ${
+                              isTop3 
+                                ? rank === 1 
+                                  ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20' 
                                   : rank === 2 
-                                    ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-white'
-                                    : 'bg-gradient-to-br from-orange-400 to-amber-500 text-white'
+                                    ? 'bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-700/50'
+                                    : 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20'
+                                : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                            }`}
+                            onClick={() => {
+                              if (item.tool_id) {
+                                window.open(`/tools/${item.tool_id}`, '_blank');
+                              } else {
+                                window.open(item.tool_url, '_blank');
+                              }
+                            }}
+                          >
+                            <td className="px-4 py-3">
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
+                                rank === 1 ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white shadow-md' :
+                                rank === 2 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-white shadow-md' :
+                                rank === 3 ? 'bg-gradient-to-br from-orange-400 to-amber-500 text-white shadow-md' :
+                                'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                               }`}>
                                 {rank}
                               </div>
-                            ) : (
-                              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                                {rank}
-                              </div>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              {isTop3 && rank === 1 && (
-                                <span className="text-2xl">🥇</span>
-                              )}
-                              {isTop3 && rank === 2 && (
-                                <span className="text-2xl">🥈</span>
-                              )}
-                              {isTop3 && rank === 3 && (
-                                <span className="text-2xl">🥉</span>
-                              )}
-                              {!isTop3 && (
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
                                 <img
                                   src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
                                   alt={item.tool_name}
-                                  className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
+                                  className="w-9 h-9 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
                                   onError={(e) => {
                                     (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
                                   }}
                                 />
-                              )}
-                              <div>
-                                <span className={`font-medium hover:text-orange-500 transition-colors ${
-                                  isTop3 
-                                    ? 'text-slate-800 dark:text-white text-base' 
-                                    : 'text-slate-800 dark:text-white'
-                                }`}>
-                                  {item.tool_name}
-                                </span>
-                                {item.tool_description && !isTop3 && (
-                                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                                    {item.tool_description}
-                                  </p>
-                                )}
+                                <div className="min-w-0">
+                                  <span className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors truncate block">
+                                    {item.tool_name}
+                                  </span>
+                                  {item.tool_description && !isTop3 && (
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                      {item.tool_description}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`font-medium ${
-                              isTop3 ? 'text-slate-700 dark:text-slate-200 text-base' : 'text-slate-700 dark:text-slate-200'
-                            }`}>
-                              {item.monthly_visits || '-'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            {item.growth_rate ? (
-                              <span className={`text-sm font-medium ${
-                                item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'
-                              }`}>
-                                {item.growth_rate}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                {item.monthly_visits || '-'}
                               </span>
-                            ) : (
-                              <span className="text-slate-400">-</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className="text-sm text-slate-500">
-                              {CATEGORY_SLUG_TO_NAME[item.category] || item.category || '-'}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            </td>
+                            <td className="px-4 py-3">
+                              {item.growth_rate ? (
+                                <span className={`text-sm font-medium ${
+                                  item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'
+                                }`}>
+                                  {item.growth_rate}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">-</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="text-sm text-slate-500 dark:text-slate-400">
+                                {CATEGORY_SLUG_TO_NAME[item.category] || item.category || '-'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             ) : (
               <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center">
