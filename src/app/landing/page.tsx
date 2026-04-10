@@ -251,7 +251,7 @@ export default async function LandingPage() {
                         {tool.name}
                       </h3>
                       <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                        {tool.categories?.name}
+                        {tool.categories?.[0]?.name}
                       </p>
                     </div>
                   </div>
@@ -306,21 +306,11 @@ export default async function LandingPage() {
                     {/* 二维码占位 */}
                     <div className="text-center">
                       <div className="w-40 h-40 bg-slate-200 rounded-lg flex items-center justify-center mb-2">
-                        <img 
-                          src="/qrcode-placeholder.svg" 
-                          alt="微信公众号二维码"
-                          className="w-36 h-36"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                          <svg className="w-16 h-16 mb-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 11h8a2 2 0 012 2v8a2 2 0 01-2 2H3a2 2 0 01-2-2v-8a2 2 0 012-2zm0 1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-8a1 1 0 00-1-1H3zm11.5-1a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm-9 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm7 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"/>
-                          </svg>
-                          <span className="text-sm">公众号二维码</span>
-                        </div>
+                        <svg className="w-16 h-16 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 11h8a2 2 0 012 2v8a2 2 0 01-2 2H3a2 2 0 01-2-2v-8a2 2 0 012-2zm0 1a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-8a1 1 0 00-1-1H3zm11.5-1a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm-9 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm7 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3z"/>
+                        </svg>
                       </div>
+                      <span className="text-sm text-slate-500">公众号二维码</span>
                     </div>
                   </div>
                   <p className="text-center text-sm text-slate-500">
