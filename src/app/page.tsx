@@ -1370,7 +1370,28 @@ export default function HomePage() {
 
       {/* 页脚 */}
       <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* 公众号推广 */}
+          <div className="flex flex-col items-center mb-8 pb-8 border-b border-slate-100 dark:border-slate-700">
+            <div className="flex items-center gap-4 mb-4">
+              <img 
+                src="/wechat-qrcode.jpg" 
+                alt="微信公众号" 
+                className="w-28 h-28 rounded-lg shadow-md"
+              />
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white mb-1">欢迎关注公众号</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+                  获取最新AI工具资讯、技巧与资源
+                </p>
+                <p className="text-xs text-slate-400">
+                  回复「AI」送你一份AI工具使用指南
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* 底部导航 */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <AnimatedLobster size={24} />

@@ -412,6 +412,50 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-slate-200 mt-12">
+        {/* 公众号推广 */}
+        <div className="max-w-4xl mx-auto px-4 py-6 border-b border-slate-100">
+          <div className="flex items-center gap-4">
+            <img 
+              src="/wechat-qrcode.jpg" 
+              alt="微信公众号" 
+              className="w-20 h-20 rounded-lg shadow-sm"
+            />
+            <div>
+              <h3 className="font-bold text-slate-900 mb-1">欢迎关注公众号</h3>
+              <p className="text-sm text-slate-500 mb-1">
+                获取最新AI工具资讯、技巧与资源
+              </p>
+              <p className="text-xs text-slate-400">
+                回复「AI」送你一份AI工具使用指南
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <img 
+                src="/oneclaw-logo.png" 
+                alt="OneClaw" 
+                width={28} 
+                height={28}
+                className="object-contain"
+              />
+              <span className="font-bold text-slate-900">OneClaw</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-500">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
