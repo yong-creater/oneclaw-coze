@@ -309,7 +309,7 @@ export default function HomePage() {
     setRankingsLoading(true);
     try {
       const regionParam = rankingsRegion === 'china' ? '&region=china' : '';
-      const res = await fetch(`/api/rankings/monthly?limit=30${regionParam}`);
+      const res = await fetch(`/api/rankings/monthly?limit=10${regionParam}`);
       const data = await res.json();
       
       if (data.success) {
@@ -652,7 +652,7 @@ export default function HomePage() {
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                     }`}
                   >
-                    全球Top50
+                    全球Top10
                   </button>
                   <button
                     onClick={() => setRankingsRegion('china')}
@@ -662,7 +662,7 @@ export default function HomePage() {
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                     }`}
                   >
-                    国内Top50
+                    国内Top10
                   </button>
                 </div>
               </div>
