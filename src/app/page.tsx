@@ -663,12 +663,12 @@ export default function HomePage() {
                 </h1>
                 
                 {/* Tab切换 */}
-                <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+                <div className="flex gap-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-lg p-1">
                   <button
                     onClick={() => setRankingsRegion('global')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                       rankingsRegion === 'global'
-                        ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
+                        ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                     }`}
                   >
@@ -676,9 +676,9 @@ export default function HomePage() {
                   </button>
                   <button
                     onClick={() => setRankingsRegion('china')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
                       rankingsRegion === 'china'
-                        ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm'
+                        ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                     }`}
                   >
@@ -693,15 +693,15 @@ export default function HomePage() {
 
             {/* 榜单内容 */}
             {rankingsLoading ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-8">
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-8">
                 <div className="flex items-center justify-center h-48">
                   <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
                 </div>
               </div>
             ) : rankings.length > 0 ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
                 <table className="w-full">
-                  <thead className="bg-slate-50 dark:bg-slate-700/50">
+                  <thead className="bg-slate-50/80 dark:bg-slate-700/50">
                     <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
                       <th className="px-6 py-4 font-medium w-20">排名</th>
                       <th className="px-6 py-4 font-medium">工具</th>
@@ -710,7 +710,7 @@ export default function HomePage() {
                       <th className="px-6 py-4 font-medium w-24">分类</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                  <tbody className="divide-y divide-slate-100/50 dark:divide-slate-700/50">
                     {rankings.map((item) => (
                       <tr 
                         key={item.id} 
@@ -806,8 +806,8 @@ export default function HomePage() {
           <div className="flex gap-6">
             {/* 左侧分类导航 */}
             <aside className="w-56 flex-shrink-0">
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 sticky top-24">
-                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm sticky top-24">
+                <div className="p-4 border-b border-slate-100 dark:border-slate-700">
                   <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
                 </div>
                 <nav className="p-2 space-y-0.5">
@@ -903,7 +903,7 @@ export default function HomePage() {
                       }}
                     >
                       <Card
-                        className="h-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-lg transition-all"
+                        className="h-full bg-white dark:bg-slate-800 hover:shadow-md hover:-translate-y-0.5 transition-all"
                       >
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
@@ -1236,8 +1236,8 @@ export default function HomePage() {
           <div className="flex gap-6">
             {/* 左侧分类导航 */}
             <aside className="w-56 flex-shrink-0">
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 sticky top-24">
-                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm sticky top-24">
+                <div className="p-4 border-b border-slate-100 dark:border-slate-700">
                   <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
                 </div>
                 <nav className="p-2 space-y-0.5">
