@@ -12,7 +12,11 @@ export default function BackButton({ defaultText = '返回', defaultHref, classN
   const router = useRouter();
 
   const handleGoBack = () => {
-    if (typeof window !== 'undefined') {
+    // 优先使用浏览器原生返回，如果有历史记录的话
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      // 如果没有历史记录或需要跳转到特定页面
       const backFrom = sessionStorage.getItem('backFrom');
       if (backFrom) {
         sessionStorage.removeItem('backFrom');
@@ -20,8 +24,6 @@ export default function BackButton({ defaultText = '返回', defaultHref, classN
       } else {
         router.push(defaultHref || '/');
       }
-    } else {
-      router.push(defaultHref || '/');
     }
   };
 
