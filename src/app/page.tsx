@@ -753,6 +753,16 @@ export default function HomePage() {
                   <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
                 </div>
                 <nav className="p-2 space-y-0.5">
+                  <button
+                    onClick={() => setActiveCategory('all')}
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                      activeCategory === 'all'
+                        ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span className="truncate flex-1 text-left">全部</span>
+                  </button>
                   {categories.map(cat => {
                     const isActive = activeCategory === cat.slug;
                     return (
@@ -1150,6 +1160,16 @@ export default function HomePage() {
                   <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
                 </div>
                 <nav className="p-2 space-y-0.5">
+                  <button
+                    onClick={() => { setSkillCategory('all'); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                      skillCategory === 'all'
+                        ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span className="truncate flex-1 text-left">全部</span>
+                  </button>
                   {skillCategories.map(cat => {
                     const isActive = skillCategory === cat.id;
                     return (
