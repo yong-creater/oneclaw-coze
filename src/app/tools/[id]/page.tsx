@@ -216,7 +216,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   const handleVisit = () => {
     if (!tool) return;
     const url = tool.promotion_url || tool.official_url;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.location.href = url;
   };
 
   const toggleFavorite = async () => {

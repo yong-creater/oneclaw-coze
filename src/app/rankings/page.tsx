@@ -416,8 +416,6 @@ export default function RankingsPage() {
                       <div className="min-w-0">
                         <a
                           href={item.tool_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="font-medium text-slate-800 dark:text-slate-100 hover:text-orange-500 transition-colors truncate block"
                         >
                           {item.tool_name}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -261,7 +262,7 @@ export default function HomePage() {
     'ai-search': 'AI搜索',
   };
 
-
+  const router = useRouter();
 
   // ==================== 初始化 ====================
   useEffect(() => {
@@ -690,9 +691,9 @@ export default function HomePage() {
                         className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
                         onClick={() => {
                           if (item.tool_id) {
-                            window.open(`/tools/${item.tool_id}`, '_blank');
+                            router.push(`/tools/${item.tool_id}`);
                           } else {
-                            window.open(item.tool_url, '_blank');
+                            window.location.href = item.tool_url;
                           }
                         }}
                       >
@@ -993,7 +994,7 @@ export default function HomePage() {
                     <Card 
                       key={prompt.id} 
                       className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
-                      onClick={() => window.open(`/prompts/${prompt.id}`, '_blank')}
+                      onClick={() => router.push(`/prompts/${prompt.id}`)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
@@ -1103,7 +1104,7 @@ export default function HomePage() {
                     <Card 
                       key={tutorial.id} 
                       className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
-                      onClick={() => window.open(`/tutorials/${tutorial.id}`, '_blank')}
+                      onClick={() => router.push(`/tutorials/${tutorial.id}`)}
                     >
                       <CardContent className="p-4">
                         <div className="flex gap-4">
