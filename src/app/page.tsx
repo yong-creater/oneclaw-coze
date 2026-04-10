@@ -1275,9 +1275,6 @@ export default function HomePage() {
                             </p>
                           </div>
                         </div>
-                        
-                        {/* 右侧：来源 */}
-                        </div>
                       </Link>
                     );
                   })}
