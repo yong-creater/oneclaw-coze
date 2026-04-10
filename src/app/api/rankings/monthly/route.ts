@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     
     // 查询参数
     const month = searchParams.get('month'); // YYYY-MM 格式
+    const region = searchParams.get('region') || 'global'; // global, china
     const type = searchParams.get('type') || 'hot'; // hot, growth, category, all
     const category = searchParams.get('category');
     const search = searchParams.get('search');
@@ -42,6 +43,14 @@ export async function GET(request: NextRequest) {
       .eq('stats_month', targetMonth)
       .eq('data_status', 'valid');
     
+    // 地区筛选 - china 模式只显示 source_flag='cn' 的数据
+    if (region === 'china') {
+      query = query.eq('source_flag', 'cn');
+    } else {
+      // 全球模式只显示 source_flag='global' 或空的数据
+      query = query.or(`source_flag.eq.global,source_flag.is.null`);
+    }
+    
     // 分类筛选
     if (category && category !== 'all') {
       query = query.eq('category', category);
@@ -52,7 +61,7 @@ export async function GET(request: NextRequest) {
       query = query.or(`tool_name.ilike.%${search}%,tool_description.ilike.%${search}%`);
     }
     
-    // 排序
+    // 排序 - 根据地区使用对应的 rank 字段
     switch (sortBy) {
       case 'visits':
         query = query.order('monthly_visits_num', { ascending: sortOrder === 'asc' });
@@ -61,7 +70,12 @@ export async function GET(request: NextRequest) {
         query = query.order('growth_rate_num', { ascending: sortOrder === 'asc' });
         break;
       default:
-        query = query.order('rank', { ascending: true });
+        // 根据地区选择对应的 rank 字段
+        if (region === 'china') {
+          query = query.order('country_rank', { ascending: true });
+        } else {
+          query = query.order('global_rank', { ascending: true });
+        }
     }
     
     // 分页
@@ -75,6 +89,13 @@ export async function GET(request: NextRequest) {
       console.error('获取榜单失败:', error);
       return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
+    
+    // 处理返回数据，根据地区返回对应的 rank
+    const processedRankings = (rankings || []).map((item: any) => ({
+      ...item,
+      display_rank: region === 'china' ? item.country_rank : item.global_rank,
+      display_rank_change: region === 'china' ? item.country_rank_change : item.global_rank_change,
+    }));
     
     // 获取可选月份列表
     const { data: monthsData } = await client
@@ -99,7 +120,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      data: rankings || [],
+      data: processedRankings,
       pagination: {
         page,
         limit,
@@ -110,6 +131,7 @@ export async function GET(request: NextRequest) {
         current_month: targetMonth,
         available_months: availableMonths,
         available_categories: availableCategories,
+        region,
       },
     }, {
       headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' }

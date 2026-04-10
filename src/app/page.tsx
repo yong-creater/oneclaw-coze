@@ -691,73 +691,109 @@ export default function HomePage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                    {rankings.map((item) => (
-                      <tr 
-                        key={item.id} 
-                        className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                        onClick={() => {
-                          if (item.tool_id) {
-                            window.open(`/tools/${item.tool_id}`, '_blank');
-                          } else {
-                            window.open(item.tool_url, '_blank');
-                          }
-                        }}
-                      >
-                        <td className="px-6 py-4">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                            item.rank === 1 ? 'bg-yellow-400 text-white' :
-                            item.rank === 2 ? 'bg-slate-300 text-white' :
-                            item.rank === 3 ? 'bg-orange-300 text-white' :
-                            'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                          }`}>
-                            {item.rank}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
-                              alt={item.tool_name}
-                              className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
-                              }}
-                            />
-                            <div>
-                              <span className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors">
-                                {item.tool_name}
-                              </span>
-                              {item.tool_description && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                                  {item.tool_description}
-                                </p>
+                    {rankings.map((item, index) => {
+                      const rank = item.display_rank || item.rank || index + 1;
+                      const isTop3 = rank <= 3;
+                      return (
+                        <tr 
+                          key={item.id} 
+                          className={`cursor-pointer transition-colors ${
+                            isTop3 
+                              ? rank === 1 
+                                ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20' 
+                                : rank === 2 
+                                  ? 'bg-gradient-to-r from-slate-50 to-slate-50 dark:from-slate-800/50 dark:to-slate-700/50'
+                                  : 'bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-700/30'
+                          }`}
+                          onClick={() => {
+                            if (item.tool_id) {
+                              window.open(`/tools/${item.tool_id}`, '_blank');
+                            } else {
+                              window.open(item.tool_url, '_blank');
+                            }
+                          }}
+                        >
+                          <td className="px-6 py-4">
+                            {isTop3 ? (
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shadow-lg ${
+                                rank === 1 
+                                  ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white' 
+                                  : rank === 2 
+                                    ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-white'
+                                    : 'bg-gradient-to-br from-orange-400 to-amber-500 text-white'
+                              }`}>
+                                {rank}
+                              </div>
+                            ) : (
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                {rank}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              {isTop3 && rank === 1 && (
+                                <span className="text-2xl">🥇</span>
                               )}
+                              {isTop3 && rank === 2 && (
+                                <span className="text-2xl">🥈</span>
+                              )}
+                              {isTop3 && rank === 3 && (
+                                <span className="text-2xl">🥉</span>
+                              )}
+                              {!isTop3 && (
+                                <img
+                                  src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
+                                  alt={item.tool_name}
+                                  className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
+                                  }}
+                                />
+                              )}
+                              <div>
+                                <span className={`font-medium hover:text-orange-500 transition-colors ${
+                                  isTop3 
+                                    ? 'text-slate-800 dark:text-white text-base' 
+                                    : 'text-slate-800 dark:text-white'
+                                }`}>
+                                  {item.tool_name}
+                                </span>
+                                {item.tool_description && !isTop3 && (
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                                    {item.tool_description}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                            {item.monthly_visits || '-'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {item.growth_rate ? (
-                            <span className={`text-sm font-medium ${
-                              item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`font-medium ${
+                              isTop3 ? 'text-slate-700 dark:text-slate-200 text-base' : 'text-slate-700 dark:text-slate-200'
                             }`}>
-                              {item.growth_rate}
+                              {item.monthly_visits || '-'}
                             </span>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-slate-500">
-                            {CATEGORY_SLUG_TO_NAME[item.category] || item.category || '-'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="px-6 py-4">
+                            {item.growth_rate ? (
+                              <span className={`text-sm font-medium ${
+                                item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'
+                              }`}>
+                                {item.growth_rate}
+                              </span>
+                            ) : (
+                              <span className="text-slate-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm text-slate-500">
+                              {CATEGORY_SLUG_TO_NAME[item.category] || item.category || '-'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
