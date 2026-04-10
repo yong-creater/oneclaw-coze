@@ -16,24 +16,43 @@ export default function BackButton({ defaultText = '返回', defaultHref = '/', 
       const backFrom = sessionStorage.getItem('backFrom');
       
       if (backFrom) {
-        // 尝试解析 JSON 获取路径
+        // 尝试解析 JSON 获取完整状态
         let path = backFrom;
+        let page: number | undefined;
+        let category: string | undefined;
+        let search: string | undefined;
+        let tab: string | undefined;
+        
         try {
           const state = JSON.parse(backFrom);
-          path = state.path || backFrom;
+          if (state) {
+            path = state.path || backFrom;
+            page = state.page;
+            category = state.category;
+            search = state.search;
+            tab = state.tab;
+          }
         } catch {
           // 保持原值
         }
         
         // 确保 path 是有效的
         if (path && typeof path === 'string' && path.startsWith('/')) {
+          // 构建返回 URL，附加分页和筛选参数
+          const params = new URLSearchParams();
+          if (page && page > 1) params.set('page', page.toString());
+          if (category && category !== 'all') params.set('category', category);
+          if (search) params.set('search', search);
+          
+          const queryString = params.toString();
+          const returnUrl = queryString ? `${path}?${queryString}` : path;
+          
           // 如果目标是首页，保留 sessionStorage 让首页读取 tab
-          // 否则直接清除
           if (path !== '/') {
             sessionStorage.removeItem('backFrom');
           }
           
-          router.push(path);
+          router.push(returnUrl);
           return;
         }
       }
