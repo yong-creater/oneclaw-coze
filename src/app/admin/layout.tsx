@@ -22,7 +22,8 @@ import {
   FileText,
   TrendingUp,
   Clock,
-  Settings
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -31,6 +32,7 @@ const navigation = [
   { name: '工具管理', href: '/admin/tools', icon: Wrench },
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
   { name: '标签管理', href: '/admin/tags', icon: Tags },
+  { name: '技能管理', href: '/admin/skills', icon: Sparkles },
   { 
     name: '榜单管理', 
     href: '/admin/rankings', 

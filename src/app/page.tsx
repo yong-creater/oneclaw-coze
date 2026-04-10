@@ -9,7 +9,8 @@ import {
   Video, Search, Film, Wand2, Palette, 
   Mic, Users, ChevronRight, Star, X,
   ChevronLeft, Eye, ThumbsUp, TrendingUp,
-  BookOpen, Lightbulb, Copy, Check
+  BookOpen, Lightbulb, Copy, Check,
+  Sparkles
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -85,6 +86,38 @@ interface Tutorial {
   created_at: string;
 }
 
+interface SkillCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  color: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+interface Skill {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  icon: string | null;
+  logo: string | null;
+  category_id: number | null;
+  official_url: string | null;
+  documentation_url: string | null;
+  github_url: string | null;
+  pricing: string;
+  difficulty: string;
+  tags: string[];
+  feature_list: string[];
+  is_featured: boolean;
+  is_active: boolean;
+  view_count: number;
+  skill_categories: { id: number; name: string; slug: string; color: string } | null;
+}
+
 // ==================== 常量 ====================
 const FREE_TYPE_COLORS: Record<string, string> = {
   '完全免费': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -112,6 +145,7 @@ const MAIN_TABS = [
   { key: 'tools', label: '工具导航', icon: Video },
   { key: 'prompts', label: '提示词库', icon: Lightbulb },
   { key: 'tutorials', label: '教程库', icon: BookOpen },
+  { key: 'skills', label: 'Skill', icon: Sparkles },
 ] as const;
 
 type MainTab = typeof MAIN_TABS[number]['key'];
@@ -186,6 +220,14 @@ export default function HomePage() {
   const [tutorialsPagination, setTutorialsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
   const [tutorialCategory, setTutorialCategory] = useState('全部');
   const [tutorialSearch, setTutorialSearch] = useState('');
+
+  // ==================== Skill 状态 ====================
+  const [skillCategories, setSkillCategories] = useState<SkillCategory[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [skillsLoading, setSkillsLoading] = useState(false);
+  const [skillsPagination, setSkillsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
+  const [skillCategory, setSkillCategory] = useState<number | 'all'>('all');
+  const [skillSearch, setSkillSearch] = useState('');
 
   // 分类选项
   const PROMPT_CATEGORIES = ['全部', '角色扮演', '场景描述', '风格迁移', '人物生成', '特效制作'];
@@ -430,6 +472,59 @@ export default function HomePage() {
       return () => clearTimeout(timer);
     }
   }, [tutorialSearch]);
+
+  // ==================== Skill 相关方法 ====================
+  const fetchSkillCategories = async () => {
+    try {
+      const res = await fetch('/api/skills/categories');
+      const data = await res.json();
+      if (data.success) {
+        setSkillCategories(data.data || []);
+      }
+    } catch (error) {
+      console.error('获取技能分类失败:', error);
+    }
+  };
+
+  const fetchSkills = async (page: number) => {
+    setSkillsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('page', page.toString());
+      params.set('limit', '24');
+      if (skillCategory !== 'all') params.set('category', skillCategory.toString());
+      if (skillSearch) params.set('search', skillSearch);
+
+      const res = await fetch(`/api/skills?${params}`);
+      const data = await res.json();
+      if (data.success) {
+        setSkills(data.data || []);
+        setSkillsPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('获取技能列表失败:', error);
+    } finally {
+      setSkillsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (mainTab === 'skills') {
+      fetchSkillCategories();
+    }
+  }, [mainTab]);
+
+  useEffect(() => {
+    if (mainTab === 'skills') fetchSkills(1);
+  }, [mainTab, skillCategory]);
+
+  // 技能搜索
+  useEffect(() => {
+    if (mainTab === 'skills') {
+      const timer = setTimeout(() => fetchSkills(1), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [skillSearch]);
 
   // ==================== 渲染 ====================
   return (
@@ -999,6 +1094,167 @@ export default function HomePage() {
                 <BookOpen className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300 mb-2">暂无教程</h3>
                 <p className="text-sm text-slate-500">教程内容正在编写中，敬请期待</p>
+              </div>
+            )}
+            </div>
+          </div>
+        )}
+
+        {/* ==================== Skill ==================== */}
+        {mainTab === 'skills' && (
+          <div className="flex gap-6">
+            {/* 左侧分类导航 */}
+            <aside className="w-56 flex-shrink-0">
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 sticky top-24">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                  <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
+                </div>
+                <nav className="p-2">
+                  <button
+                    onClick={() => { setSkillCategory('all'); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
+                    className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                      skillCategory === 'all'
+                        ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span className="truncate">全部</span>
+                  </button>
+                  {skillCategories.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => { setSkillCategory(cat.id); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
+                      className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
+                        skillCategory === cat.id
+                          ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {cat.icon && <span className="mr-2">{cat.icon}</span>}
+                      <span className="truncate">{cat.name}</span>
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </aside>
+
+            {/* 右侧内容 */}
+            <div className="flex-1 min-w-0">
+              {/* 搜索 */}
+              <div className="mb-4">
+                <div className="relative max-w-xl">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="搜索技能..."
+                    value={skillSearch}
+                    onChange={(e) => setSkillSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchSkills(1)}
+                    className="pl-12 pr-4 h-11 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  />
+                </div>
+              </div>
+
+            {/* 技能列表 */}
+            {skillsLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+              </div>
+            ) : skills.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {skills.map(skill => (
+                    <Card 
+                      key={skill.id} 
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors overflow-hidden"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3 mb-3">
+                          {skill.logo || skill.icon ? (
+                            <img 
+                              src={skill.logo || skill.icon || ''} 
+                              alt={skill.name}
+                              className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
+                            />
+                          ) : (
+                            <div 
+                              className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                              style={{ backgroundColor: skill.skill_categories?.color || '#FF6B35', opacity: 0.1 }}
+                            >
+                              <Sparkles className="w-5 h-5" style={{ color: skill.skill_categories?.color || '#FF6B35', opacity: 1 }} />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{skill.name}</h3>
+                            {skill.skill_categories && (
+                              <span 
+                                className="text-xs px-2 py-0.5 rounded-full"
+                                style={{ backgroundColor: skill.skill_categories.color, color: '#fff' }}
+                              >
+                                {skill.skill_categories.name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-3">
+                          {skill.description || '暂无描述'}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">{skill.pricing}</Badge>
+                          <Badge variant="outline" className="text-xs">{skill.difficulty}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2 mt-3">
+                          {skill.official_url && (
+                            <Button 
+                              size="sm" 
+                              className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                              onClick={() => window.open(skill.official_url!, '_blank')}
+                            >
+                              访问官网
+                            </Button>
+                          )}
+                          {skill.documentation_url && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => window.open(skill.documentation_url!, '_blank')}
+                            >
+                              文档
+                            </Button>
+                          )}
+                          {skill.github_url && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => window.open(skill.github_url!, '_blank')}
+                            >
+                              GitHub
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* 分页 */}
+                {skillsPagination.total_pages > 1 && (
+                  <div className="flex items-center justify-center gap-2 mt-6">
+                    <Button variant="outline" size="sm" disabled={skillsPagination.page === 1} onClick={() => fetchSkills(skillsPagination.page - 1)}>
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <span className="text-sm text-slate-500">{skillsPagination.page} / {skillsPagination.total_pages}</span>
+                    <Button variant="outline" size="sm" disabled={skillsPagination.page === skillsPagination.total_pages} onClick={() => fetchSkills(skillsPagination.page + 1)}>
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-16">
+                <Sparkles className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300 mb-2">暂无技能</h3>
+                <p className="text-sm text-slate-500">技能内容正在整理中，敬请期待</p>
               </div>
             )}
             </div>

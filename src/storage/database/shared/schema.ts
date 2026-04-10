@@ -353,3 +353,53 @@ export const rankingUpdateLogs = pgTable("ranking_update_logs", {
   index("ranking_update_logs_month_idx").on(table.updateMonth),
   index("ranking_update_logs_status_idx").on(table.status),
 ]);
+
+// ============================================
+// Skill 技能导航相关表
+// ============================================
+
+// 技能分类表
+export const skillCategories = pgTable("skill_categories", {
+  id: serial().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  icon: varchar("icon", { length: 100 }), // 图标名称或 emoji
+  color: varchar("color", { length: 20 }).default("#FF6B35"), // 分类主题色
+  sort_order: integer("sort_order").notNull().default(0),
+  is_active: boolean("is_active").notNull().default(true),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("skill_categories_slug_idx").on(table.slug),
+  index("skill_categories_sort_order_idx").on(table.sort_order),
+]);
+
+// 技能表
+export const skills = pgTable("skills", {
+  id: serial().primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  slug: varchar("slug", { length: 200 }).notNull().unique(),
+  description: text("description"),
+  icon: varchar("icon", { length: 500 }), // 图标 URL
+  logo: varchar("logo", { length: 500 }), // Logo URL
+  category_id: integer("category_id").references(() => skillCategories.id, { onDelete: "cascade" }),
+  official_url: varchar("official_url", { length: 500 }),
+  documentation_url: varchar("documentation_url", { length: 500 }), // 文档链接
+  github_url: varchar("github_url", { length: 500 }), // GitHub 链接
+  pricing: varchar("pricing", { length: 50 }).default("免费"), // 免费/付费/ Freemium
+  difficulty: varchar("difficulty", { length: 20 }).default("入门"), // 入门/进阶/高级
+  tags: jsonb("tags").$type<string[]>().default([]),
+  feature_list: jsonb("feature_list").$type<string[]>().default([]), // 功能特性列表
+  is_featured: boolean("is_featured").notNull().default(false),
+  is_active: boolean("is_active").notNull().default(true),
+  view_count: integer("view_count").notNull().default(0),
+  click_count: integer("click_count").notNull().default(0),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [
+  index("skills_category_id_idx").on(table.category_id),
+  index("skills_slug_idx").on(table.slug),
+  index("skills_is_featured_idx").on(table.is_featured),
+  index("skills_is_active_idx").on(table.is_active),
+]);
