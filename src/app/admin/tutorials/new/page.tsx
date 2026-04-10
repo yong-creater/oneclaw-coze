@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, BookOpen } from 'lucide-react';
+import { ArrowLeft, Save, BookOpen, FileText, Clipboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,17 +15,68 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { ImageUploader } from '@/components/ImageUploader';
 import { toast } from 'sonner';
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
 
 const CATEGORIES = [
   '入门教程', '进阶技巧', '案例分享', 'API对接', '最佳实践', '常见问题', '其他'
 ];
+
+// 简单的 Markdown 转 HTML
+function markdownToHtml(markdown: string): string {
+  let html = markdown;
+  
+  // 标题
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+  
+  // 粗体和斜体
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+  
+  // 代码块
+  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  html = html.replace(/`(.+?)`/g, '<code>$1</code>');
+  
+  // 链接
+  html = html.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+  
+  // 图片
+  html = html.replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" style="max-width:100%;" />');
+  
+  // 列表
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  html = html.replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+  
+  // 段落
+  html = html.replace(/\n\n/g, '</p><p>');
+  html = '<p>' + html + '</p>';
+  
+  // 清理空段落
+  html = html.replace(/<p>\s*<\/p>/g, '');
+  html = html.replace(/<p>(<h[1-6]>)/g, '$1');
+  html = html.replace(/(<\/h[1-6]>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<ul>)/g, '$1');
+  html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+  html = html.replace(/<p>(<pre>)/g, '$1');
+  html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+  
+  return html;
+}
+
+// 检测内容格式
+function detectFormat(content: string): 'html' | 'markdown' | 'plain' {
+  if (content.includes('<html') || content.includes('<p>') || content.includes('<div>')) {
+    return 'html';
+  }
+  if (content.includes('# ') || content.includes('**') || content.includes('- ')) {
+    return 'markdown';
+  }
+  return 'plain';
+}
 
 export default function NewTutorialPage() {
   const router = useRouter();
@@ -36,9 +87,45 @@ export default function NewTutorialPage() {
     category: '',
     difficulty: '入门',
     cover_image: '',
-    author: '',
+    author: '数字牧民',
     status: 'published'
   });
+  const [contentFormat, setContentFormat] = useState<'html' | 'markdown' | 'plain'>('html');
+  const [showFormatHint, setShowFormatHint] = useState(false);
+
+  // 检测内容格式变化
+  useEffect(() => {
+    if (formData.content) {
+      setContentFormat(detectFormat(formData.content));
+    }
+  }, [formData.content]);
+
+  // 粘贴时自动转换格式
+  const handlePaste = useCallback((e: React.ClipboardEvent) => {
+    const pastedText = e.clipboardData.getData('text');
+    if (!pastedText) return;
+
+    const format = detectFormat(pastedText);
+    
+    // 如果粘贴的是 Markdown，自动转换为 HTML
+    if (format === 'markdown' && !formData.content) {
+      e.preventDefault();
+      const html = markdownToHtml(pastedText);
+      setFormData(prev => ({ ...prev, content: html }));
+      setContentFormat('html');
+      toast.success('已自动将 Markdown 转换为 HTML');
+    }
+  }, [formData.content]);
+
+  // 手动转换
+  const handleConvert = () => {
+    if (contentFormat === 'markdown') {
+      const html = markdownToHtml(formData.content);
+      setFormData(prev => ({ ...prev, content: html }));
+      setContentFormat('html');
+      toast.success('已转换为 HTML');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,16 +218,43 @@ export default function NewTutorialPage() {
             </div>
             
             <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                内容 <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  内容 <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  {contentFormat === 'markdown' && (
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                      variant="outline"
+                      onClick={handleConvert}
+                      className="text-orange-500 border-orange-200 hover:bg-orange-50"
+                    >
+                      <FileText className="w-3 h-3 mr-1" />
+                      转换为 HTML
+                    </Button>
+                  )}
+                  <span className={`text-xs px-2 py-0.5 rounded ${
+                    contentFormat === 'html' ? 'bg-green-100 text-green-600' :
+                    contentFormat === 'markdown' ? 'bg-blue-100 text-blue-600' :
+                    'bg-slate-100 text-slate-600'
+                  }`}>
+                    {contentFormat === 'html' ? 'HTML' : contentFormat === 'markdown' ? 'Markdown' : '纯文本'}
+                  </span>
+                </div>
+              </div>
               <Textarea
                 value={formData.content}
                 onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="支持HTML格式..."
-                rows={15}
-                className="dark:bg-slate-700 font-mono text-sm"
+                onPaste={handlePaste}
+                placeholder="支持粘贴 Markdown 或 HTML 格式内容..."
+                rows={25}
+                className="dark:bg-slate-700 font-mono text-sm min-h-[500px]"
               />
+              <p className="text-xs text-slate-500 mt-1">
+                支持 Markdown（自动转 HTML）和 HTML 格式。粘贴 Markdown 内容时会自动转换。
+              </p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -184,11 +298,9 @@ export default function NewTutorialPage() {
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                   封面图
                 </label>
-                <Input
+                <ImageUploader 
                   value={formData.cover_image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
-                  placeholder="封面图URL"
-                  className="dark:bg-slate-700"
+                  onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
                 />
               </div>
               
