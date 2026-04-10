@@ -249,6 +249,8 @@ export default function HomePage() {
   const PROMPT_CATEGORIES = ['全部', '角色扮演', '场景描述', '风格迁移', '人物生成', '特效制作'];
   const TUTORIAL_CATEGORIES = ['全部', '入门教程', '进阶技巧', '案例分享', 'API对接'];
 
+
+
   // ==================== 初始化 ====================
   useEffect(() => {
     const id = getUserId();
@@ -825,14 +827,19 @@ export default function HomePage() {
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</h3>
-                              {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
-                                <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
-                              )}
-                              {tool.is_featured && !tool.sponsor_type && (
-                                <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
-                              )}
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <div className="flex items-center gap-2 flex-wrap min-w-0">
+                                <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</h3>
+                                {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
+                                  <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
+                                )}
+                                {tool.is_featured && !tool.sponsor_type && (
+                                  <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
+                                )}
+                              </div>
+                              <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 whitespace-nowrap flex-shrink-0">
+                                {tool.categories?.name || 'AI应用'}
+                              </span>
                             </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">{tool.highlight}</p>
                             <div className="flex items-center gap-2 flex-wrap">
