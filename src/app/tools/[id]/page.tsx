@@ -93,12 +93,6 @@ interface Review {
 }
 
 // ==================== 常量 ====================
-const FREE_TYPE_COLORS: Record<string, string> = {
-  '完全免费': 'bg-green-100 text-green-700',
-  '免费额度': 'bg-blue-100 text-blue-700',
-  '限时免费': 'bg-orange-100 text-orange-700',
-  '付费工具': 'bg-slate-100 text-slate-700',
-};
 
 // 星级评分组件
 function StarRating({ value, onChange, readonly = false, size = 'md' }: {
@@ -406,7 +400,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               {/* 一句话亮点 */}
               <p className="text-lg text-slate-700 mb-4 font-medium">{tool.highlight}</p>
               
-              {/* 评分和价格标签 */}
+              {/* 评分标签 */}
               <div className="flex flex-wrap items-center gap-4 mb-5">
                 {overallScore ? (
                   <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg shadow-sm border border-slate-100">
@@ -417,15 +411,6 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                 ) : (
                   <span className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-sm">暂无评分</span>
                 )}
-                <span className={`px-3 py-1.5 rounded-lg font-medium text-sm shadow-sm ${
-                  tool.free_type === '完全免费' 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
-                    : tool.free_type === '免费额度'
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                    : 'bg-slate-100 text-slate-600'
-                }`}>
-                  {tool.free_type}
-                </span>
               </div>
             </div>
             

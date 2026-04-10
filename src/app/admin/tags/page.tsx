@@ -22,7 +22,6 @@ interface Tag {
 
 const TAG_TYPES = [
   { value: 'feature', label: '功能标签', color: 'bg-blue-100 text-blue-700' },
-  { value: 'free_type', label: '免费类型', color: 'bg-green-100 text-green-700' },
   { value: 'duration', label: '时长标签', color: 'bg-purple-100 text-purple-700' },
   { value: 'scene', label: '场景标签', color: 'bg-orange-100 text-orange-700' },
   { value: 'license', label: '商用权限', color: 'bg-cyan-100 text-cyan-700' },

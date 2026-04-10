@@ -35,13 +35,6 @@ interface Pagination {
   total_pages: number;
 }
 
-const FREE_TYPE_COLORS: Record<string, string> = {
-  '完全免费': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  '免费额度': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  '限时免费': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  '付费工具': 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-};
-
 function ToolsAdminContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -305,11 +298,6 @@ function ToolsAdminContent() {
                       </td>
                       <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-300">
                         {tool.categories?.name || '-'}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${FREE_TYPE_COLORS[tool.free_type] || ''}`}>
-                          {tool.free_type}
-                        </span>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">

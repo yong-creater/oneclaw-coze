@@ -35,7 +35,6 @@ interface ToolFAQ {
   answer: string;
 }
 
-const FREE_TYPES = ['完全免费', '免费额度', '限时免费', '付费工具'];
 const LICENSE_TYPES = ['可免费商用', '需授权商用', '不可商用'];
 const DURATION_OPTIONS = ['30秒', '60秒', '2分钟', '5分钟', '10分钟', '无限制'];
 
@@ -54,8 +53,6 @@ export default function NewToolPage() {
     use_guide: '',
     category_id: '',
     sub_category_ids: [] as number[],
-    free_type: '免费额度',
-    free_quota_desc: '',
     feature_tags: [] as string[],
     max_duration: '60秒',
     official_url: '',
@@ -352,37 +349,6 @@ export default function NewToolPage() {
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                免费类型 <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={formData.free_type}
-                onChange={(e) => setFormData(prev => ({ ...prev, free_type: e.target.value }))}
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                required
-              >
-                {FREE_TYPES.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                免费额度说明
-              </label>
-              <input
-                type="text"
-                value={formData.free_quota_desc}
-                onChange={(e) => setFormData(prev => ({ ...prev, free_quota_desc: e.target.value }))}
-                placeholder="如：免费试用，付费版 $19/月起"
-                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
             </div>
 
             <div>

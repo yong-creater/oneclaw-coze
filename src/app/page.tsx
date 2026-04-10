@@ -119,13 +119,6 @@ interface Skill {
 }
 
 // ==================== 常量 ====================
-const FREE_TYPE_COLORS: Record<string, string> = {
-  '完全免费': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  '免费额度': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  '限时免费': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  '付费工具': 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-};
-
 const DIFFICULTY_COLORS: Record<string, string> = {
   '初级': 'bg-green-100 text-green-700',
   '中级': 'bg-yellow-100 text-yellow-700',
@@ -895,11 +888,7 @@ export default function HomePage() {
                               )}
                             </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">{tool.highlight}</p>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className={`text-xs px-2 py-0.5 rounded-full ${FREE_TYPE_COLORS[tool.free_type]}`}>
-                                {tool.free_type}
-                              </span>
-                            </div>
+
                           </div>
                         </div>
                       </CardContent>

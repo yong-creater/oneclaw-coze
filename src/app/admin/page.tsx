@@ -141,13 +141,6 @@ export default function AdminDashboard() {
     { name: '待审评论', value: stats.reviews_pending, icon: AlertTriangle, color: 'bg-red-500', href: '/admin/reviews' },
   ];
 
-  const FREE_TYPE_COLORS: Record<string, string> = {
-    '完全免费': 'bg-green-100 text-green-700',
-    '免费额度': 'bg-blue-100 text-blue-700',
-    '限时免费': 'bg-orange-100 text-orange-700',
-    '付费工具': 'bg-slate-100 text-slate-700',
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -281,9 +274,6 @@ export default function AdminDashboard() {
                     </div>
                     <p className="text-xs text-slate-500">{tool.producer}</p>
                   </div>
-                  <Badge className={FREE_TYPE_COLORS[tool.free_type] || ''}>
-                    {tool.free_type}
-                  </Badge>
                 </div>
               ))}
               {recentTools.length === 0 && (
