@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  Video, Search, Film, Wand2, Palette, 
+  Search, Film, Wand2, Palette, 
   Mic, Users, ChevronRight, Star, X,
   ChevronLeft, Eye, ThumbsUp, TrendingUp,
   BookOpen, Lightbulb, Copy, Check,
@@ -132,6 +132,7 @@ const CATEGORY_ICONS: Record<string, typeof Sparkles> = {
   'video-editing': Sparkles,
   'ai-dubbing': Sparkles,
   'anime-creation': Sparkles,
+  'ai-image': Sparkles,
   'ai-writing': Sparkles,
   'ai-coding': Sparkles,
   'ai-audio': Sparkles,
@@ -151,7 +152,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 const MAIN_TABS = [
   { key: 'rankings', label: '排行榜', icon: TrendingUp },
-  { key: 'tools', label: 'AI应用', icon: Video },
+  { key: 'tools', label: 'AI应用', icon: Sparkles },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
@@ -761,7 +762,7 @@ export default function HomePage() {
                     <span>全部工具</span>
                   </button>
                   {categories.map(cat => {
-                    const Icon = CATEGORY_ICONS[cat.slug] || Video;
+                    const Icon = CATEGORY_ICONS[cat.slug] || Sparkles;
                     const isActive = activeCategory === cat.slug;
                     return (
                       <button
@@ -909,7 +910,7 @@ export default function HomePage() {
               </>
             ) : (
               <div className="text-center py-16">
-                <Video className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+                <Sparkles className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-slate-600 dark:text-slate-300 mb-2">暂无匹配工具</h3>
                 <p className="text-sm text-slate-500 mb-4">尝试调整筛选条件</p>
                 <Button variant="outline" onClick={clearFilters}>清除筛选</Button>
