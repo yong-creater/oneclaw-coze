@@ -180,17 +180,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   
                   {/* 操作按钮 */}
                   <div className="flex items-center gap-3">
-                    {skill.official_url && (
-                      <a 
-                        href={skill.official_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg font-medium transition-colors"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        在 ClawHub 打开
-                      </a>
-                    )}
+                    {/* 按钮移至详情页底部展示 */}
                   </div>
                 </div>
                 
