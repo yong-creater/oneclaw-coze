@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, ExternalLink, Sparkles, Star, Download } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, BookOpen, List, Clock, CheckCircle, Download, Heart, ExternalLink, FileText, Code, Zap, Star, Shield } from 'lucide-react';
 
 // 获取技能详情
 async function getSkill(slug: string) {
@@ -106,7 +107,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   
   return {
     title: `${skill.name} - 技能详情 - OneClaw`,
-    description: skill.description || `${skill.name} - 来自 ClawHub 的精选 AI 技能`,
+    description: skill.description || `${skill.name} - OneClaw 精选 AI 技能`,
   };
 }
 
@@ -130,7 +131,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* 顶部导航 */}
       <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 py-3">
+        <div className="max-w-6xl mx-auto px-4 py-3">
           <div className="flex items-center gap-4">
             <Link 
               href="/" 
@@ -148,152 +149,235 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
       </div>
       
       {/* 主内容 */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-          {/* 技能头部 */}
-          <div className="p-8 border-b border-slate-100 dark:border-slate-700">
-            <div className="flex items-start gap-6">
-              {/* 字母标识 */}
-              <div 
-                className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold flex-shrink-0"
-                style={{ backgroundColor: bgColor + '20' }}
-              >
-                <span style={{ color: bgColor }}>{letter}</span>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* 技能头部卡片 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
+          <div className="p-8">
+            <div className="flex flex-col lg:flex-row gap-8">
+              {/* 左侧：技能图标 */}
+              <div className="flex-shrink-0">
+                <div 
+                  className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-bold shadow-lg"
+                  style={{ backgroundColor: bgColor + '20' }}
+                >
+                  <span style={{ color: bgColor }}>{letter}</span>
+                </div>
               </div>
               
-              {/* 技能信息 */}
+              {/* 中间：技能信息 */}
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+                    <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
                       {skill.name}
                     </h1>
-                    {skill.skill_categories && (
-                      <span 
-                        className="inline-flex text-sm px-3 py-1 rounded-full"
-                        style={{ backgroundColor: skill.skill_categories.color + '20', color: skill.skill_categories.color }}
-                      >
-                        {skill.skill_categories.name}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* 操作按钮 */}
-                  <div className="flex items-center gap-3">
-                    {/* 按钮移至详情页底部展示 */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {skill.skill_categories && (
+                        <Badge 
+                          className="text-sm px-3 py-1"
+                          style={{ backgroundColor: skill.skill_categories.color + '20', color: skill.skill_categories.color }}
+                        >
+                          {skill.skill_categories.name}
+                        </Badge>
+                      )}
+                      {skill.pricing && (
+                        <Badge variant="outline" className="text-sm px-3 py-1">
+                          {skill.pricing}
+                        </Badge>
+                      )}
+                      {skill.difficulty && (
+                        <Badge variant="outline" className="text-sm px-3 py-1">
+                          {skill.difficulty}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
-                {/* 描述 */}
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
                   {skill.description || '暂无详细描述。'}
                 </p>
+                
+                {/* 标签 */}
+                {skill.tags && skill.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {skill.tags.map((tag: string, idx: number) => (
+                      <span 
+                        key={idx}
+                        className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                {/* 技能元信息 */}
+                <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-1">
+                    <Download className="w-4 h-4" />
+                    <span>下载量</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Heart className="w-4 h-4" />
+                    <span>收藏</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Shield className="w-4 h-4" />
+                    <span>通过安全检测</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
           
-          {/* 技能详情 */}
-          <div className="p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* 左侧：主要信息 */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* 标签 */}
-              {skill.tags && skill.tags.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">功能标签</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {skill.tags.map((tag: string, idx: number) => (
-                      <Badge 
-                        key={idx}
-                        variant="secondary"
-                        className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
+          {/* 底部标签页 */}
+          <div className="border-t border-slate-100 dark:border-slate-700">
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="w-full justify-start rounded-none border-b bg-transparent h-12 px-4">
+                <TabsTrigger 
+                  value="overview"
+                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  概述
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="features"
+                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                >
+                  <List className="w-4 h-4 mr-2" />
+                  功能列表
+                </TabsTrigger>
+                {skill.documentation_url && (
+                  <TabsTrigger 
+                    value="docs"
+                    className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    文档
+                  </TabsTrigger>
+                )}
+                {skill.github_url && (
+                  <TabsTrigger 
+                    value="code"
+                    className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                  >
+                    <Code className="w-4 h-4 mr-2" />
+                    源码
+                  </TabsTrigger>
+                )}
+              </TabsList>
               
-              {/* 特点 */}
-              <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">技能特点</h3>
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                  <ul className="space-y-2 text-slate-600 dark:text-slate-300">
-                    <li className="flex items-start gap-2">
-                      <Star className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <span>来自 ClawHub 精选技能库</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Sparkles className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <span>经过 ClawHub 安全检测，可放心使用</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Download className="w-4 h-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <span>免费使用，无需付费</span>
-                    </li>
-                  </ul>
-                </div>
+              <div className="p-6">
+                {/* 概述标签页 */}
+                <TabsContent value="overview" className="mt-0">
+                  <div className="prose prose-slate dark:prose-invert max-w-none">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">技能描述</h3>
+                    <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {skill.description || '暂无详细描述。该技能数据来源于 OneClaw 精选技能库。'}
+                    </p>
+                    
+                    {/* 功能特点 */}
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mt-8 mb-4">技能特点</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                        <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
+                          <Star className="w-4 h-4 text-orange-500" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-800 dark:text-slate-200">精选技能</div>
+                          <div className="text-sm text-slate-500">来自 OneClaw 精选技能库</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                        <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-800 dark:text-slate-200">安全检测</div>
+                          <div className="text-sm text-slate-500">经过 OneClaw 安全检测</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                          <Zap className="w-4 h-4 text-blue-500" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-800 dark:text-slate-200">免费使用</div>
+                          <div className="text-sm text-slate-500">无需付费，直接使用</div>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                        <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                          <Clock className="w-4 h-4 text-purple-500" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-slate-800 dark:text-slate-200">持续更新</div>
+                          <div className="text-sm text-slate-500">技能库持续更新迭代</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                {/* 功能列表标签页 */}
+                <TabsContent value="features" className="mt-0">
+                  <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">功能列表</h3>
+                  {skill.feature_list && skill.feature_list.length > 0 ? (
+                    <ul className="space-y-3">
+                      {skill.feature_list.map((feature: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                          <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-slate-600 dark:text-slate-300">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-slate-500 dark:text-slate-400">暂无功能列表信息。</p>
+                  )}
+                </TabsContent>
+                
+                {/* 文档标签页 */}
+                {skill.documentation_url && (
+                  <TabsContent value="docs" className="mt-0">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">技能文档</h3>
+                    <a 
+                      href={skill.documentation_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      查看官方文档
+                    </a>
+                  </TabsContent>
+                )}
+                
+                {/* 源码标签页 */}
+                {skill.github_url && (
+                  <TabsContent value="code" className="mt-0">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">源码仓库</h3>
+                    <a 
+                      href={skill.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg transition-colors"
+                    >
+                      <Code className="w-4 h-4" />
+                      在 GitHub 查看
+                    </a>
+                  </TabsContent>
+                )}
               </div>
-              
-              {/* 使用说明 */}
-              <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">使用说明</h3>
-                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 text-slate-600 dark:text-slate-300">
-                  <p className="mb-3">
-                    1. 点击右上角「在 ClawHub 打开」按钮
-                  </p>
-                  <p className="mb-3">
-                    2. 在 ClawHub 页面上点击「安装」或「使用」按钮
-                  </p>
-                  <p>
-                    3. 按照 SkillHub 的指引完成技能的安装和使用
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* 右侧：信息卡片 */}
-            <div className="space-y-4">
-              {/* 技能信息 */}
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">技能信息</h4>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">价格</span>
-                    <span className="text-slate-800 dark:text-slate-200">{skill.pricing || '免费'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">难度</span>
-                    <span className="text-slate-800 dark:text-slate-200">{skill.difficulty || '入门'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">分类</span>
-                    <span className="text-slate-800 dark:text-slate-200">{skill.skill_categories?.name || '其他'}</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* 来源 */}
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">技能来源</h4>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-slate-800 dark:text-slate-200">ClawHub</div>
-                    <div className="text-xs text-slate-500">精选 AI 技能社区</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </Tabs>
           </div>
         </div>
         
         {/* 相关技能 */}
         {relatedSkills.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4">
               相关技能
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -307,17 +391,17 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
                   <Link
                     key={related.id}
                     href={`/skills/${related.slug}`}
-                    className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors"
+                    className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors group"
                   >
                     <div className="flex items-center gap-3">
                       <div 
-                        className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold flex-shrink-0"
+                        className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold flex-shrink-0"
                         style={{ backgroundColor: relatedBgColor + '20' }}
                       >
                         <span style={{ color: relatedBgColor }}>{relatedLetter}</span>
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
+                        <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate group-hover:text-orange-500 transition-colors">
                           {related.name}
                         </h3>
                         <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
