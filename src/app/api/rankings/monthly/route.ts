@@ -43,12 +43,9 @@ export async function GET(request: NextRequest) {
       .eq('stats_month', targetMonth)
       .eq('data_status', 'valid');
     
-    // 地区筛选 - china 模式只显示 source_flag='cn' 的数据
+    // 地区筛选 - china 模式只显示 source_flag='cn' 的数据，global 模式显示所有数据
     if (region === 'china') {
       query = query.eq('source_flag', 'cn');
-    } else {
-      // 全球模式只显示 source_flag='global' 或空的数据
-      query = query.or(`source_flag.eq.global,source_flag.is.null`);
     }
     
     // 分类筛选
