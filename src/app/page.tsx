@@ -195,8 +195,23 @@ const cache = {
 
 	// ==================== 主组件 ====================
 export default function HomePage() {
-  // 主Tab状态
+  // 主Tab状态 - 默认排行榜
   const [mainTab, setMainTab] = useState<MainTab>('rankings');
+
+  // 页面加载时，从 sessionStorage 读取返回的 tab
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const backFrom = sessionStorage.getItem('backFrom');
+      if (backFrom) {
+        try {
+          const state = JSON.parse(backFrom);
+          if (state && state.tab) {
+            setMainTab(state.tab);
+          }
+        } catch {}
+      }
+    }
+  }, []);
 
   // ==================== 榜单状态 ====================
   const [rankings, setRankings] = useState<RankingItem[]>([]);
@@ -692,7 +707,10 @@ export default function HomePage() {
                         onClick={() => {
                           // 记录来源页面
                           if (typeof window !== 'undefined') {
-                            const backState = { path: window.location.pathname + window.location.search || '/' };
+                            const backState = { 
+                              path: window.location.pathname + window.location.search || '/',
+                              tab: 'rankings'
+                            };
                             sessionStorage.setItem('backFrom', JSON.stringify(backState));
                           }
                           if (item.tool_id) {
@@ -856,7 +874,10 @@ export default function HomePage() {
                       onClick={() => {
                         // 记录来源页面到 sessionStorage
                         if (typeof window !== 'undefined') {
-                          const backState = { path: window.location.pathname + window.location.search || '/' };
+                          const backState = { 
+                            path: window.location.pathname + window.location.search || '/',
+                            tab: 'tools'
+                          };
                           sessionStorage.setItem('backFrom', JSON.stringify(backState));
                         }
                         // 异步记录浏览历史
@@ -1002,7 +1023,20 @@ export default function HomePage() {
                     <Card 
                       key={prompt.id} 
                       className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
-                      onClick={() => router.push(`/prompts/${prompt.id}`)}
+                      onClick={() => {
+                        // 记录来源页面
+                        if (typeof window !== 'undefined') {
+                          const backState = {
+                            page: promptsPagination.page,
+                            category: promptCategory,
+                            search: promptSearch,
+                            path: window.location.pathname + window.location.search,
+                            tab: 'prompts'
+                          };
+                          sessionStorage.setItem('backFrom', JSON.stringify(backState));
+                        }
+                        router.push(`/prompts/${prompt.id}`);
+                      }}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
@@ -1112,7 +1146,20 @@ export default function HomePage() {
                     <Card 
                       key={tutorial.id} 
                       className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
-                      onClick={() => router.push(`/tutorials/${tutorial.id}`)}
+                      onClick={() => {
+                        // 记录来源页面
+                        if (typeof window !== 'undefined') {
+                          const backState = {
+                            page: tutorialsPagination.page,
+                            category: tutorialCategory,
+                            search: tutorialSearch,
+                            path: window.location.pathname + window.location.search,
+                            tab: 'tutorials'
+                          };
+                          sessionStorage.setItem('backFrom', JSON.stringify(backState));
+                        }
+                        router.push(`/tutorials/${tutorial.id}`);
+                      }}
                     >
                       <CardContent className="p-4">
                         <div className="flex gap-4">
@@ -1255,7 +1302,8 @@ export default function HomePage() {
                               page: skillsPagination.page,
                               search: skillSearch,
                               category: skillCategory,
-                              path: window.location.pathname + window.location.search
+                              path: window.location.pathname + window.location.search,
+                              tab: 'skills'
                             };
                             sessionStorage.setItem('backFrom', JSON.stringify(backState));
                           }

@@ -68,7 +68,8 @@ export default function PromptsPage() {
         page: pagination.page,
         category: selectedCategory,
         search: searchQuery,
-        path: window.location.pathname + window.location.search
+        path: window.location.pathname + window.location.search,
+        tab: 'prompts'
       };
       sessionStorage.setItem('backFrom', JSON.stringify(backState));
     }

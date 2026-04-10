@@ -57,7 +57,8 @@ export default function TutorialsPage() {
         page: pagination.page,
         category: category,
         search: searchQuery,
-        path: window.location.pathname + window.location.search
+        path: window.location.pathname + window.location.search,
+        tab: 'tutorials'
       };
       sessionStorage.setItem('backFrom', JSON.stringify(backState));
     }
