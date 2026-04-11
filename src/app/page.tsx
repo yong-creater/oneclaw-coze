@@ -11,7 +11,7 @@ import {
   Search, Wand2, Star, X,
   ChevronLeft, ChevronRight, Eye, ThumbsUp, TrendingUp,
   BookOpen, Lightbulb, Copy, Check,
-  Sparkles, Feather
+  Sparkles, Feather, UserCircle, ImageIcon, Mountain
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -130,6 +130,7 @@ const MAIN_TABS = [
   { key: 'rankings', label: '排行榜', icon: TrendingUp },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
+  { key: 'novel', label: '小说创作', icon: Feather },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
 ] as const;
@@ -200,27 +201,37 @@ export default function HomePage() {
 
   // 页面加载时，从 sessionStorage 读取返回的 tab
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // 优先读取 homeTab（从详情页返回时设置）
-      const homeTab = sessionStorage.getItem('homeTab');
-      if (homeTab) {
-        setMainTab(homeTab as MainTab);
-        sessionStorage.removeItem('homeTab');
-        return;
-      }
-      
-      // 其次读取 backFrom
-      const backFrom = sessionStorage.getItem('backFrom');
-      if (backFrom) {
-        try {
-          const state = JSON.parse(backFrom);
-          if (state && state.tab) {
-            setMainTab(state.tab);
-          }
-        } catch {}
-        // 读取完后清除
-        sessionStorage.removeItem('backFrom');
-      }
+    if (typeof window === 'undefined') return;
+
+    // 优先从 URL 查询参数读取 tab
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && MAIN_TABS.some(t => t.key === tabParam)) {
+      setMainTab(tabParam as MainTab);
+      // 清除 URL 参数
+      window.history.replaceState({}, '', '/');
+      return;
+    }
+    
+    // 其次读取 homeTab（从详情页返回时设置）
+    const homeTab = sessionStorage.getItem('homeTab');
+    if (homeTab) {
+      setMainTab(homeTab as MainTab);
+      sessionStorage.removeItem('homeTab');
+      return;
+    }
+    
+    // 最后读取 backFrom
+    const backFrom = sessionStorage.getItem('backFrom');
+    if (backFrom) {
+      try {
+        const state = JSON.parse(backFrom);
+        if (state && state.tab) {
+          setMainTab(state.tab);
+        }
+      } catch {}
+      // 读取完后清除
+      sessionStorage.removeItem('backFrom');
     }
   }, []);
 
@@ -1104,6 +1115,110 @@ export default function HomePage() {
                 <p className="text-sm text-slate-500">提示词模板正在整理中，敬请期待</p>
               </div>
             )}
+            </div>
+          </div>
+        )}
+
+        {/* ==================== 小说创作 ==================== */}
+        {mainTab === 'novel' && (
+          <div className="max-w-4xl mx-auto">
+            {/* Hero Section */}
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-2xl p-8 mb-8">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                  <Feather className="w-8 h-8" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">小说创作大师</h2>
+                  <p className="text-white/80">AI 驱动的专业小说创作工具</p>
+                </div>
+              </div>
+              <p className="text-white/90">
+                专业的 AI 小说创作助手，支持洗稿润色、人物设定、绘画提示词生成、场景描写等功能，让你的创作更加高效。
+              </p>
+            </div>
+
+            {/* 功能卡片 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <Card className="bg-white dark:bg-slate-800 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/novel')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                      <Feather className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white">小说洗稿/润色</h3>
+                      <p className="text-sm text-slate-500">专业级文字优化</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    保留核心剧情，优化句式表达，提升文字质感，可直接用于发布。
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white dark:bg-slate-800 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/novel')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                      <UserCircle className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white">生成人物DNA</h3>
+                      <p className="text-sm text-slate-500">专业小说人设卡</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    打造立体、鲜活、有记忆点的人物，包含基础信息、性格设定、背景动机等。
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white dark:bg-slate-800 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/novel')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                      <ImageIcon className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white">AI绘画提示词</h3>
+                      <p className="text-sm text-slate-500">中英双语提示词</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    生成适配 Midjourney、Stable Diffusion 的高质量提示词。
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white dark:bg-slate-800 border-orange-200 dark:border-orange-800 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push('/novel')}>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center">
+                      <Mountain className="w-6 h-6 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-white">场景描写+绘图</h3>
+                      <p className="text-sm text-slate-500">场景描写+绘图提示词</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300">
+                    专业场景描写，搭配 AI 绘图提示词，让小说场景更生动。
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* 入口按钮 */}
+            <div className="text-center">
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white px-8"
+                onClick={() => router.push('/novel')}
+              >
+                <Feather className="w-5 h-5 mr-2" />
+                开始创作
+              </Button>
             </div>
           </div>
         )}
