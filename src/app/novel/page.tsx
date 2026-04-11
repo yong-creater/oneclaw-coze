@@ -12,6 +12,19 @@ import {
 import AnimatedLobster from '@/components/AnimatedLobster';
 
 // ============================================================
+// API 配置 - 请替换为你的 API2D Key
+// ============================================================
+const API2D_KEY = '';  // 请在这里填入你的 API2D Key，或通过环境变量 NEXT_PUBLIC_API2D_KEY 提供
+const API_BASE_URL = 'https://oa.api2d.net/v1';
+
+// 请求超时时间（毫秒）
+const REQUEST_TIMEOUT = 30000;
+
+// 请求频率限制：1分钟最多5次
+const RATE_LIMIT_WINDOW = 60000; // 1分钟
+const RATE_LIMIT_MAX = 5;
+
+// ============================================================
 // 专业提示词 - 不可修改
 // ============================================================
 
@@ -100,19 +113,56 @@ const MODELS = [
   { 
     id: 'claude-3-5-sonnet-20241022', 
     name: 'Claude 3.5 Sonnet', 
-    desc: '写作最强' 
+    desc: '写作最强',
+    recommend: '洗稿/人物DNA'
   },
   { 
     id: 'gemini-1.5-pro', 
     name: 'Gemini 1.5 Pro', 
-    desc: '长文本专业' 
+    desc: '长文本专业',
+    recommend: '长篇内容/场景'
   },
   { 
     id: 'gpt-4o', 
     name: 'GPT-4o', 
-    desc: '综合与绘图提示词最强' 
+    desc: '综合全能',
+    recommend: '绘画提示词'
   }
 ];
+
+// ============================================================
+// 请求频率限制管理器
+// ============================================================
+class RateLimiter {
+  private requests: number[] = [];
+
+  canMakeRequest(): boolean {
+    const now = Date.now();
+    // 清理过期的请求记录
+    this.requests = this.requests.filter(time => now - time < RATE_LIMIT_WINDOW);
+    return this.requests.length < RATE_LIMIT_MAX;
+  }
+
+  getRemainingRequests(): number {
+    const now = Date.now();
+    this.requests = this.requests.filter(time => now - time < RATE_LIMIT_WINDOW);
+    return RATE_LIMIT_MAX - this.requests.length;
+  }
+
+  getResetTime(): number {
+    const now = Date.now();
+    this.requests = this.requests.filter(time => now - time < RATE_LIMIT_WINDOW);
+    if (this.requests.length === 0) return 0;
+    const oldestRequest = Math.min(...this.requests);
+    return Math.ceil((oldestRequest + RATE_LIMIT_WINDOW - now) / 1000);
+  }
+
+  addRequest(): void {
+    this.requests.push(Date.now());
+  }
+}
+
+const rateLimiter = new RateLimiter();
 
 export default function NovelPage() {
   // 状态
@@ -125,8 +175,20 @@ export default function NovelPage() {
   const [copied, setCopied] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showModelDropdown, setShowModelDropdown] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState('');
 
   const outputRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // 获取 API Key
+  const getApiKey = useCallback((): string => {
+    // 优先使用环境变量
+    if (process.env.NEXT_PUBLIC_API2D_KEY) {
+      return process.env.NEXT_PUBLIC_API2D_KEY;
+    }
+    // 回退到本地配置
+    return API2D_KEY;
+  }, []);
 
   // 记住用户选择的模型
   useEffect(() => {
@@ -140,53 +202,130 @@ export default function NovelPage() {
     localStorage.setItem('novel-model', selectedModel);
   }, [selectedModel]);
 
-  // 提交处理
+  // 取消请求
+  const cancelRequest = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  }, []);
+
+  // 提交处理 - 纯前端直接调用 API2D
   const handleSubmit = useCallback(async () => {
+    // 输入验证
     if (!inputText.trim()) {
       setError('请输入内容');
       return;
     }
 
+    // API Key 检查
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      setError('API Key 未配置，请联系网站管理员配置 API2D Key');
+      return;
+    }
+
+    // 频率限制检查
+    if (!rateLimiter.canMakeRequest()) {
+      const resetTime = rateLimiter.getResetTime();
+      setRateLimitError(`请求过于频繁，请在 ${resetTime} 秒后重试`);
+      setTimeout(() => setRateLimitError(''), resetTime * 1000);
+      return;
+    }
+
+    // 重置状态
     setError('');
+    setRateLimitError('');
     setIsLoading(true);
     setOutputText('');
+
+    // 添加请求记录
+    rateLimiter.addRequest();
 
     const feature = FEATURES.find(f => f.id === activeFeature);
     const systemPrompt = SYSTEM_PROMPTS[activeFeature as keyof typeof SYSTEM_PROMPTS];
 
+    // 创建 AbortController 用于超时控制
+    abortControllerRef.current = new AbortController();
+    const timeoutId = setTimeout(() => {
+      abortControllerRef.current?.abort();
+    }, REQUEST_TIMEOUT);
+
     try {
-      const response = await fetch('/api/novel', {
+      // 直接从前端调用 API2D
+      const response = await fetch(`${API_BASE_URL}/chat/completions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
         body: JSON.stringify({
           model: selectedModel,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: inputText }
           ],
-          temperature: 0.7
-        })
+          temperature: 0.7,
+          max_tokens: 4096
+        }),
+        signal: abortControllerRef.current.signal
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || '请求失败');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error?.message || errorData.message || `请求失败 (${response.status})`;
+        
+        // 处理特定的错误码
+        if (response.status === 401) {
+          throw new Error('API Key 无效或已过期，请联系管理员');
+        } else if (response.status === 429) {
+          throw new Error('API 请求配额已用尽，请稍后再试');
+        } else if (response.status === 400) {
+          throw new Error(`请求参数错误: ${errorMessage}`);
+        } else {
+          throw new Error(errorMessage);
+        }
       }
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || '';
+      
+      if (!content) {
+        throw new Error('API 返回内容为空，请重试');
+      }
+
       setOutputText(content);
 
       // 滚动到输出区域
       setTimeout(() => {
         outputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
+
+      // 本地日志（不上传服务器）
+      console.log(`[Novel创作] 功能: ${feature?.name}, 模型: ${selectedModel}, 状态: 成功`);
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : '网络错误，请重试');
+      clearTimeout(timeoutId);
+      
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          setError(`请求超时（${REQUEST_TIMEOUT / 1000}秒），请重试或切换其他模型`);
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('网络错误，请检查网络连接后重试');
+      }
+      
+      console.log(`[Novel创作] 功能: ${feature?.name}, 模型: ${selectedModel}, 状态: 失败 -`, err);
     } finally {
+      clearTimeout(timeoutId);
+      abortControllerRef.current = null;
       setIsLoading(false);
     }
-  }, [inputText, selectedModel, activeFeature]);
+  }, [inputText, selectedModel, activeFeature, getApiKey]);
 
   // 复制结果
   const handleCopy = useCallback(async () => {
@@ -197,7 +336,7 @@ export default function NovelPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
     } catch {
-      setError('复制失败');
+      setError('复制失败，请手动选择内容复制');
     }
   }, [outputText]);
 
@@ -221,14 +360,24 @@ export default function NovelPage() {
 
   // 清空
   const handleClear = useCallback(() => {
+    cancelRequest();
     setInputText('');
     setOutputText('');
     setError('');
+    setRateLimitError('');
     setShowClearConfirm(false);
-  }, []);
+  }, [cancelRequest]);
+
+  // 组件卸载时取消请求
+  useEffect(() => {
+    return () => {
+      cancelRequest();
+    };
+  }, [cancelRequest]);
 
   const currentFeature = FEATURES.find(f => f.id === activeFeature);
   const currentModel = MODELS.find(m => m.id === selectedModel);
+  const remainingRequests = rateLimiter.getRemainingRequests();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
@@ -341,6 +490,14 @@ export default function NovelPage() {
                   );
                 })}
               </div>
+
+              {/* 剩余请求次数提示 */}
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                  <span>剩余请求次数</span>
+                  <span className={remainingRequests <= 1 ? 'text-red-500' : ''}>{remainingRequests} / {RATE_LIMIT_MAX}</span>
+                </div>
+              </div>
             </div>
           </aside>
 
@@ -374,7 +531,7 @@ export default function NovelPage() {
                     </button>
                     
                     {showModelDropdown && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl z-10">
+                      <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl z-10">
                         {MODELS.map((model) => (
                           <button
                             key={model.id}
@@ -387,10 +544,13 @@ export default function NovelPage() {
                             }`}
                           >
                             <div className={`w-2 h-2 rounded-full ${selectedModel === model.id ? 'bg-orange-500' : 'bg-slate-300'}`} />
-                            <div className="text-left">
+                            <div className="text-left flex-1">
                               <div className="font-medium text-sm text-slate-900 dark:text-white">{model.name}</div>
                               <div className="text-xs text-orange-600 dark:text-orange-400">{model.desc}</div>
                             </div>
+                            <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">
+                              {model.recommend}
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -414,6 +574,15 @@ export default function NovelPage() {
                   
                   {/* 操作按钮 */}
                   <div className="flex items-center gap-2">
+                    {isLoading && (
+                      <button
+                        onClick={cancelRequest}
+                        className="p-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="取消请求"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
                     <button
                       onClick={() => setShowClearConfirm(true)}
                       disabled={isLoading || (!inputText && !outputText)}
@@ -453,6 +622,14 @@ export default function NovelPage() {
                     >
                       <X className="w-4 h-4 text-red-500" />
                     </button>
+                  </div>
+                )}
+
+                {/* 频率限制提示 */}
+                {rateLimitError && (
+                  <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                    <span className="text-sm text-amber-600 dark:text-amber-400">{rateLimitError}</span>
                   </div>
                 )}
               </div>
