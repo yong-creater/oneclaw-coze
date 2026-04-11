@@ -1,4 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose';
+import bcrypt from 'bcryptjs';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'oneclaw-user-secret-key-2024';
@@ -7,9 +8,27 @@ const TOKEN_EXPIRES_IN = '30d'; // 用户Token有效期30天
 export interface User {
   user_id: string;
   openid?: string;
+  email?: string;
   nickname?: string;
   avatar_url?: string;
   phone?: string;
+  password_hash?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// 验证密码
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  try {
+    return await bcrypt.compare(password, hash);
+  } catch {
+    return false;
+  }
+}
+
+// 生成密码哈希
+export async function hashPassword(password: string): Promise<string> {
+  return await bcrypt.hash(password, 10);
 }
 
 // 生成用户ID
@@ -280,4 +299,143 @@ export async function mockWechatLogin(): Promise<{ user: User; token: string }> 
   await createUserSession(user.user_id, token);
   
   return { user, token };
+}
+
+// ============================================================
+// 邮箱登录相关函数
+// ============================================================
+
+// 检查邮箱是否已注册
+export async function checkEmailExists(email: string): Promise<boolean> {
+  const client = getSupabaseClient();
+  
+  const { data } = await client
+    .from('users')
+    .select('id')
+    .eq('email', email.toLowerCase())
+    .maybeSingle();
+  
+  return !!data;
+}
+
+// 邮箱注册
+export async function registerWithEmail(
+  email: string,
+  password: string,
+  nickname?: string
+): Promise<{ success: boolean; user?: User; token?: string; error?: string }> {
+  const client = getSupabaseClient();
+  
+  try {
+    // 检查邮箱是否已存在
+    const exists = await checkEmailExists(email);
+    if (exists) {
+      return { success: false, error: '该邮箱已被注册' };
+    }
+    
+    // 加密密码
+    const passwordHash = await hashPassword(password);
+    
+    // 生成用户ID
+    const userId = `email_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    
+    // 创建用户
+    const { data: newUser, error: userError } = await client
+      .from('users')
+      .insert({
+        user_id: userId,
+        email: email.toLowerCase(),
+        password_hash: passwordHash,
+        nickname: nickname || email.split('@')[0],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (userError) {
+      console.error('创建用户失败:', userError);
+      return { success: false, error: '注册失败，请稍后重试' };
+    }
+    
+    // 生成Token
+    const token = await generateUserToken(newUser);
+    
+    // 创建会话
+    await createUserSession(userId, token);
+    
+    return { success: true, user: newUser, token };
+  } catch (err) {
+    console.error('邮箱注册错误:', err);
+    return { success: false, error: '注册失败，请稍后重试' };
+  }
+}
+
+// 邮箱登录
+export async function loginWithEmail(
+  email: string,
+  password: string
+): Promise<{ success: boolean; user?: User; token?: string; error?: string }> {
+  const client = getSupabaseClient();
+  
+  try {
+    // 查找用户
+    const { data: user, error: userError } = await client
+      .from('users')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .maybeSingle();
+    
+    if (userError || !user) {
+      return { success: false, error: '邮箱或密码错误' };
+    }
+    
+    // 验证密码
+    const isValid = await verifyPassword(password, user.password_hash);
+    if (!isValid) {
+      return { success: false, error: '邮箱或密码错误' };
+    }
+    
+    // 生成Token
+    const token = await generateUserToken(user);
+    
+    // 创建会话
+    await createUserSession(user.user_id, token);
+    
+    return { success: true, user, token };
+  } catch (err) {
+    console.error('邮箱登录错误:', err);
+    return { success: false, error: '登录失败，请稍后重试' };
+  }
+}
+
+// 获取所有用户列表（用于后台管理）
+export async function getAllUsers(options?: {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+}): Promise<{ users: User[]; total: number }> {
+  const client = getSupabaseClient();
+  const page = options?.page || 1;
+  const pageSize = options?.pageSize || 20;
+  const offset = (page - 1) * pageSize;
+  
+  let query = client
+    .from('users')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false })
+    .range(offset, offset + pageSize - 1);
+  
+  if (options?.search) {
+    query = query.or(`email.ilike.%${options.search}%,nickname.ilike.%${options.search}%`);
+  }
+  
+  const { data: users, count, error } = await query;
+  
+  if (error) {
+    console.error('获取用户列表失败:', error);
+    return { users: [], total: 0 };
+  }
+  
+  return { users: (users || []) as User[], total: count || 0 };
 }

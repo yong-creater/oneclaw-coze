@@ -24,6 +24,7 @@ const navigation = [
   { name: '教程管理', href: '/admin/tutorials' },
   { name: '评论审核', href: '/admin/reviews' },
   { name: '会员管理', href: '/admin/members' },
+  { name: '用户管理', href: '/admin/users' },
   { name: '订单管理', href: '/admin/orders' },
   { name: '广告管理', href: '/admin/ads' },
   { name: '微信配置', href: '/admin/wechat' },

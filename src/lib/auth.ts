@@ -1,3 +1,4 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
@@ -177,5 +178,28 @@ export async function logout(token: string): Promise<void> {
     await client.from('admin_sessions').delete().eq('token', token);
   } catch (error) {
     console.error('删除会话失败:', error);
+  }
+}
+
+// 验证管理员 Token（用于 API 路由）
+export async function verifyAdminToken(request: NextRequest): Promise<{ success: boolean; user?: AdminUser; error?: string }> {
+  try {
+    const token = request.cookies.get('admin_token')?.value || 
+                  getTokenFromHeader(request.headers.get('authorization'));
+
+    if (!token) {
+      return { success: false, error: '未登录' };
+    }
+
+    const user = await validateSession(token);
+    
+    if (!user) {
+      return { success: false, error: '会话已过期' };
+    }
+
+    return { success: true, user };
+  } catch (error) {
+    console.error('验证管理员 Token 失败:', error);
+    return { success: false, error: '验证失败' };
   }
 }
