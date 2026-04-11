@@ -6,9 +6,21 @@ import {
   Wand2, User, ImageIcon, BookOpen, 
   Send, Trash2, Copy, Download, 
   Check, Loader2, AlertCircle, X,
-  ChevronDown, Sparkles, Feather, UserCircle, ImagePlus, Mountain
+  ChevronDown, Sparkles, Feather, UserCircle, ImagePlus, Mountain,
+  TrendingUp, Lightbulb
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
+import LoginModal from '@/components/LoginModal';
+
+// 导航 Tab 配置
+const MAIN_TABS = [
+  { key: 'rankings', label: '排行榜', icon: TrendingUp },
+  { key: 'tools', label: 'AI应用', icon: Wand2 },
+  { key: 'prompts', label: '提示词', icon: Lightbulb },
+  { key: 'skills', label: '技能', icon: Sparkles },
+  { key: 'tutorials', label: '教程', icon: BookOpen },
+  { key: 'novel', label: '小说创作', icon: Feather },
+] as const;
 
 // ============================================================
 // API 配置 - 请替换为你的 API2D Key
@@ -175,9 +187,23 @@ export default function NovelPage() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [rateLimitError, setRateLimitError] = useState('');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const outputRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // 检查登录状态
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const res = await fetch('/api/auth?action=check', { credentials: 'include' });
+        const data = await res.json();
+        setIsLoggedIn(data.authenticated);
+      } catch {}
+    };
+    checkLogin();
+  }, []);
 
   // 获取 API Key
   const getApiKey = useCallback((): string => {
@@ -380,62 +406,59 @@ export default function NovelPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* 顶部导航 */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+      {/* 顶部导航 - 与首页统一风格 */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
-                <AnimatedLobster size={20} />
-              </div>
-              <span className="font-bold text-lg text-slate-900 dark:text-white">OneClaw</span>
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <AnimatedLobster size={36} />
+              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                OneClaw
+              </span>
             </Link>
 
-            {/* 导航 Tab */}
-            <nav className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-full px-2 py-1">
-              <Link href="/" className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors">
-                热门榜单
-              </Link>
-              <Link href="/tools" className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors">
-                工具导航
-              </Link>
-              <Link href="/prompts" className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors">
-                提示词库
-              </Link>
-              <Link href="/tutorials" className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-full transition-colors">
-                教程库
-              </Link>
-              <Link href="/novel" className="px-4 py-2 text-sm font-medium bg-orange-500 text-white rounded-full transition-colors">
-                📝 小说创作
-              </Link>
-            </nav>
+            {/* 主导航Tab */}
+            <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-full p-1">
+              {MAIN_TABS.map(tab => {
+                const Icon = tab.icon;
+                const isActive = tab.key === 'novel';
+                return (
+                  <Link
+                    key={tab.key}
+                    href={tab.key === 'novel' ? '/novel' : `/${tab.key === 'rankings' ? '' : tab.key}`}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                      isActive
+                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-orange-500'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
 
-            {/* 登录按钮 */}
-            <button className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded-full hover:border-orange-500 hover:text-orange-500 transition-colors">
-              登录
-            </button>
-          </div>
-        </div>
-
-        {/* 移动端导航 */}
-        <div className="md:hidden border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-          <div className="flex overflow-x-auto px-2 py-2 gap-1 scrollbar-hide">
-            <Link href="/" className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap rounded-full">
-              热门榜单
-            </Link>
-            <Link href="/tools" className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap rounded-full">
-              工具导航
-            </Link>
-            <Link href="/prompts" className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap rounded-full">
-              提示词库
-            </Link>
-            <Link href="/tutorials" className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap rounded-full">
-              教程库
-            </Link>
-            <Link href="/novel" className="px-3 py-1.5 text-xs font-medium bg-orange-500 text-white whitespace-nowrap rounded-full">
-              📝 小说
-            </Link>
+            {/* 右侧按钮 */}
+            <div className="flex items-center gap-2">
+              {isLoggedIn ? (
+                <Link 
+                  href="/workspace"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="hidden sm:inline">工作台</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setShowLoginModal(true)}
+                  className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-600 rounded-full hover:border-orange-500 hover:text-orange-500 transition-colors"
+                >
+                  登录
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -782,10 +805,10 @@ export default function NovelPage() {
           {/* 底部导航 */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
-                <AnimatedLobster size={20} />
-              </div>
-              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+              <AnimatedLobster size={32} />
+              <span className="font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                OneClaw
+              </span>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
@@ -796,6 +819,11 @@ export default function NovelPage() {
           </div>
         </div>
       </footer>
+
+      {/* 登录弹窗 */}
+      {showLoginModal && (
+        <LoginModal open={true} onClose={() => setShowLoginModal(false)} />
+      )}
     </div>
   );
 }
