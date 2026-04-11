@@ -11,7 +11,7 @@ import {
   Search, Wand2, Star, X,
   ChevronLeft, ChevronRight, Eye, ThumbsUp, TrendingUp,
   BookOpen, Lightbulb, Copy, Check,
-  Sparkles
+  Sparkles, Feather
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -641,6 +641,14 @@ export default function HomePage() {
                   </button>
                 );
               })}
+              {/* 小说创作 - 独立页面入口 */}
+              <Link
+                href="/novel"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
+              >
+                <Feather className="w-4 h-4" />
+                <span className="hidden sm:inline">小说创作</span>
+              </Link>
             </div>
 
             {/* 右侧按钮 */}
