@@ -65,12 +65,12 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       </div>
       
       {/* 敲键盘的酷龙虾 - 使用 emoji 避免图片加载问题 */}
-      <span
-        className={`text-lg transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
+      <div
+        className={`flex items-center justify-center transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
         style={{ filter: 'saturate(1.3) brightness(1.1)' }}
       >
         🦞
-      </span>
+      </div>
     </div>
   );
 });
