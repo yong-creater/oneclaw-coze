@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { 
   Wand2, User, ImageIcon, BookOpen, 
@@ -758,7 +757,7 @@ export default function NovelPage() {
               <div className="relative flex-shrink-0">
                 <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-amber-400 rounded-xl blur-sm opacity-30"></div>
                 <div className="relative bg-white dark:bg-slate-800 rounded-lg p-2 shadow-md">
-                  <Image 
+                  <img 
                     src="/wechat-qrcode.jpg" 
                     alt="微信公众号" 
                     width={80}
