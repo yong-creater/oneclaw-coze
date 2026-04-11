@@ -64,15 +64,13 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           bg-white dark:bg-slate-800 border-l border-t border-slate-200 dark:border-slate-700 -rotate-45" />
       </div>
       
-      {/* 敲键盘的酷龙虾 - 使用 img 标签避免 Next.js Image 优化问题 */}
-      <img
-        src="/oneclaw-logo.png"
-        alt="OneClaw 龙虾"
-        width={size}
-        height={size}
-        className={`w-full h-full object-contain transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
-        style={{ filter: 'saturate(1.3) brightness(1.1) sepia(0.1)' }}
-      />
+      {/* 敲键盘的酷龙虾 - 使用 emoji 避免图片加载问题 */}
+      <span
+        className={`text-lg transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
+        style={{ filter: 'saturate(1.3) brightness(1.1)' }}
+      >
+        🦞
+      </span>
     </div>
   );
 });
