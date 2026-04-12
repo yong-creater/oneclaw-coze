@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
-const API_KEY = process.env.NEXT_PUBLIC_API2D_KEY;
+// 4sapi 配置
+const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
+const API4S_KEY = ENABLE_4SAPI ? (process.env.API4S_KEY || process.env.NEXT_PUBLIC_API2D_KEY || '') : '';
+const API_BASE_URL = process.env.API4S_URL || process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
 
 // 国内模型供应商（不走4sapi，用Coze免费）
 const DOMESTIC_PROVIDERS = ['doubao', 'deepseek', 'kimi', 'glm', 'qwen', 'minimax', 'ali', 'baidu', 'tencent', 'huawei', '字节', ' moonshot'];
@@ -191,12 +193,12 @@ export async function GET() {
       source: 'Coze 免费',
     })));
     
-    // 2. 从 4sapi 获取付费模型
-    if (API_KEY) {
+    // 2. 从 4sapi 获取付费模型（仅当启用4sapi时）
+    if (ENABLE_4SAPI && API4S_KEY) {
       try {
         const response = await fetch(`${API_BASE_URL}/v1/models`, {
           headers: {
-            'Authorization': `Bearer ${API_KEY}`,
+            'Authorization': `Bearer ${API4S_KEY}`,
           },
           next: { revalidate: 3600 }
         });
