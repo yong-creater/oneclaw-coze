@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   Send, Loader2, AlertCircle, Check, Copy, Download,
-  Feather, UserCircle, ImagePlus, Mountain
+  Feather, UserCircle, ImagePlus, Mountain, ChevronDown, X
 } from 'lucide-react';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
@@ -50,40 +50,84 @@ class RateLimiter {
   }
 }
 
+// 厂商配置
+const PROVIDERS = [
+  { id: 'doubao', name: '豆包', color: 'bg-red-500', textColor: 'text-white' },
+  { id: 'deepseek', name: 'DeepSeek', color: 'bg-blue-600', textColor: 'text-white' },
+  { id: 'kimi', name: 'Kimi', color: 'bg-yellow-400', textColor: 'text-slate-800' },
+  { id: 'glm', name: '智谱GLM', color: 'bg-gradient-to-r from-blue-500 via-green-500 to-red-500', textColor: 'text-white' },
+  { id: 'qwen', name: '通义Qwen', color: 'bg-orange-500', textColor: 'text-white' },
+  { id: 'minimax', name: 'MiniMax', color: 'bg-yellow-500', textColor: 'text-slate-800' },
+  { id: 'openai', name: 'OpenAI', color: 'bg-slate-700', textColor: 'text-white' },
+  { id: 'anthropic', name: 'Anthropic', color: 'bg-pink-500', textColor: 'text-white' },
+  { id: 'google', name: 'Google', color: 'bg-red-500', textColor: 'text-white' },
+  { id: 'xai', name: 'xAI', color: 'bg-white', textColor: 'text-slate-700', border: true },
+  { id: 'stability', name: 'Stability', color: 'bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500', textColor: 'text-white' },
+  { id: 'other', name: '其他', color: 'bg-slate-400', textColor: 'text-white' },
+];
+
+// 模型过滤规则
+const getModelFilter = (providerId: string) => {
+  switch (providerId) {
+    case 'doubao': return (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed');
+    case 'deepseek': return (m: any) => m.name.includes('DeepSeek') || m.id.includes('deepseek');
+    case 'kimi': return (m: any) => m.name.includes('Kimi') || m.id.includes('kimi');
+    case 'glm': return (m: any) => m.name.includes('GLM') || m.id.includes('glm');
+    case 'qwen': return (m: any) => m.name.includes('Qwen') || m.id.includes('qwen');
+    case 'minimax': return (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax');
+    case 'openai': return (m: any) => m.id.includes('gpt') || m.id.includes('dall') || m.id.includes('whisper') || m.id.includes('tts') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') || m.id.includes('chatgpt');
+    case 'anthropic': return (m: any) => m.id.includes('claude');
+    case 'google': return (m: any) => m.id.includes('gemini') || m.id.includes('veo') || m.id.includes('imagen');
+    case 'xai': return (m: any) => m.id.includes('grok');
+    case 'stability': return (m: any) => m.id.includes('flux') || m.id.includes('stability');
+    default: return () => true;
+  }
+};
+
 export default function NovelCreator() {
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedFeature, setSelectedFeature] = useState('polish');
-  const [selectedModel, setSelectedModel] = useState('deepseek-chat');
+  const [selectedModel, setSelectedModel] = useState('doubao-seed-2-0-pro-260215'); // 默认豆包 Seed Pro
+  const [showModelPicker, setShowModelPicker] = useState(false);
   const [modelProvider, setModelProvider] = useState('doubao');
+  const [modelSearch, setModelSearch] = useState('');
   const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const rateLimiter = new RateLimiter(RATE_LIMIT_MAX);
   
   const currentFeature = FEATURES.find(f => f.id === selectedFeature);
+  const currentModel = availableModels.find(m => m.id === selectedModel) || { 
+    id: 'doubao-seed-2-0-pro-260215', 
+    name: '豆包 Seed Pro', 
+    provider: '豆包',
+    isFree: true 
+  };
   
-  // 厂商列表（带品牌色）
-  const providers = [
-    { id: 'doubao', name: '豆包', color: 'bg-red-500', filter: (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed') },
-    { id: 'deepseek', name: 'DeepSeek', color: 'bg-blue-600', filter: (m: any) => m.name.includes('DeepSeek') || m.id.includes('deepseek') },
-    { id: 'kimi', name: 'Kimi', color: 'bg-yellow-400', filter: (m: any) => m.name.includes('Kimi') || m.id.includes('kimi') },
-    { id: 'glm', name: '智谱GLM', color: 'bg-gradient-to-r from-blue-500 via-green-500 to-red-500', filter: (m: any) => m.name.includes('GLM') || m.id.includes('glm') },
-    { id: 'qwen', name: '通义Qwen', color: 'bg-orange-500', filter: (m: any) => m.name.includes('Qwen') || m.id.includes('qwen') },
-    { id: 'minimax', name: 'MiniMax', color: 'bg-yellow-500', filter: (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax') },
-    { id: 'openai', name: 'OpenAI', color: 'bg-slate-700', filter: (m: any) => m.provider === 'OpenAI' || m.id.includes('gpt') || m.id.includes('dall') || m.id.includes('whisper') || m.id.includes('tts') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') },
-    { id: 'anthropic', name: 'Anthropic', color: 'bg-pink-500', filter: (m: any) => m.provider === 'Anthropic' || m.id.includes('claude') },
-    { id: 'google', name: 'Google', color: 'bg-red-500', filter: (m: any) => m.provider === 'Google' || m.id.includes('gemini') || m.id.includes('veo') },
-    { id: 'xai', name: 'xAI', color: 'bg-white border border-slate-300', textColor: 'text-slate-700', filter: (m: any) => m.provider === 'xAI' || m.id.includes('grok') },
-    { id: 'stability', color: 'bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500', name: 'Stability', filter: (m: any) => m.id.includes('flux') || m.id.includes('stability') },
-    { id: 'other', name: '其他', color: 'bg-slate-400', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'xAI'].includes(m.provider) && !m.id.includes('gpt') && !m.id.includes('dall') && !m.id.includes('whisper') && !m.id.includes('tts') && !m.id.includes('o1') && !m.id.includes('o3') && !m.id.includes('o4') && !m.id.includes('claude') && !m.id.includes('gemini') && !m.id.includes('veo') && !m.id.includes('grok') && !m.id.includes('flux') && !m.id.includes('stability') && !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
-  ];
-  const currentProviderModels = availableModels.filter(m => providers.find(p => p.id === modelProvider)?.filter(m));
+  const currentProviderModels = availableModels.filter(m => getModelFilter(modelProvider)(m));
+  const filteredModels = modelSearch 
+    ? currentProviderModels.filter(m => 
+        m.name.toLowerCase().includes(modelSearch.toLowerCase()) || 
+        m.id.toLowerCase().includes(modelSearch.toLowerCase())
+      )
+    : currentProviderModels;
+
+  // 关闭弹框
+  const closePicker = () => {
+    setShowModelPicker(false);
+    setModelSearch('');
+  };
+
+  // 选择模型
+  const handleSelectModel = (model: any) => {
+    setSelectedModel(model.id);
+    closePicker();
+  };
 
   useEffect(() => {
-    // 获取可用模型列表
     const fetchModels = async () => {
       try {
         const res = await fetch('/api/models');
@@ -97,6 +141,20 @@ export default function NovelCreator() {
     };
     fetchModels();
   }, []);
+
+  // 点击外部关闭弹框
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.model-picker-container') && !target.closest('.model-trigger')) {
+        setShowModelPicker(false);
+      }
+    };
+    if (showModelPicker) {
+      document.addEventListener('click', handleClickOutside);
+    }
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showModelPicker]);
 
   const getApiKey = useCallback((): string => {
     return process.env.NEXT_PUBLIC_API2D_KEY || '';
@@ -118,7 +176,6 @@ export default function NovelCreator() {
     const apiKey = getApiKey();
     const isCozeModel = availableModels.find(m => m.id === selectedModel)?.isFree;
     
-    // 检查是否需要API密钥
     if (!isCozeModel && !apiKey) {
       setError('请先配置 4sapi API Key（国外模型需要）');
       return;
@@ -145,7 +202,6 @@ export default function NovelCreator() {
       let response;
       
       if (isCozeModel) {
-        // 使用 Coze 内置免费模型
         response = await fetch('/api/llm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -160,7 +216,6 @@ export default function NovelCreator() {
           signal: abortController.signal
         });
       } else {
-        // 使用 4sapi 付费模型
         response = await fetch(`${API_BASE_URL}/v1/chat/completions`, {
           method: 'POST',
           headers: {
@@ -206,7 +261,6 @@ export default function NovelCreator() {
             if (data === '[DONE]') continue;
             try {
               const parsed = JSON.parse(data);
-              // 兼容两种响应格式
               const content = parsed.choices?.[0]?.delta?.content || parsed.content;
               if (content) {
                 result += typeof content === 'string' ? content : content.toString();
@@ -214,7 +268,6 @@ export default function NovelCreator() {
               }
             } catch { /* ignore parse errors */ }
           } else if (isCozeModel) {
-            // Coze 流式响应可能是纯文本
             try {
               result += line;
               setOutputText(result);
@@ -251,9 +304,17 @@ export default function NovelCreator() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // 获取当前模型的厂商配置
+  const getProviderConfig = (providerName: string) => {
+    const found = PROVIDERS.find(p => 
+      providerName.includes(p.name) || 
+      (p.name === '豆包' && providerName.includes('Coze'))
+    );
+    return found || PROVIDERS[11]; // 默认"其他"
+  };
+
   return (
     <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50">
-      {/* 主要内容 */}
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="text-center mb-4">
           <h2 className="text-2xl font-bold mb-1">
@@ -261,89 +322,150 @@ export default function NovelCreator() {
               AI 小说创作助手
             </span>
           </h2>
-          <p className="text-sm text-slate-500">基于 4sapi 213+ 优质模型，让创作更轻松</p>
+          <p className="text-sm text-slate-500">基于优质AI模型，让创作更轻松</p>
         </div>
 
-        {/* 功能选择 + 模型选择 - 顶部 */}
+        {/* 功能选择 - 顶部 */}
         <div className="bg-white rounded-2xl shadow-lg p-4 mb-4">
-          {/* 功能选择 */}
-          <div className="mb-4">
-            <div className="flex gap-2">
-              {FEATURES.map(f => {
-                const Icon = f.icon;
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => setSelectedFeature(f.id)}
-                    className={`flex-1 p-2.5 rounded-xl transition-all flex flex-col items-center gap-1.5 ${
-                      selectedFeature === f.id
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    <Icon className={`w-5 h-5 ${selectedFeature === f.id ? 'text-white' : 'text-slate-500'}`} />
-                    <span className={`font-medium text-xs ${selectedFeature === f.id ? 'text-white' : 'text-slate-700'}`}>
-                      {f.name}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 模型选择 */}
-          <div className="mb-3">
-            <label className="block text-xs font-medium text-slate-600 mb-2">选择模型</label>
-            
-            {/* 厂商标签页 */}
-            <div className="flex flex-wrap gap-1.5 mb-2">
-              {providers.map(p => {
-                const count = availableModels.filter(m => p.filter(m)).length;
-                if (count === 0) return null;
-                return (
-                  <button
-                    key={p.id}
-                    onClick={() => setModelProvider(p.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                      modelProvider === p.id
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    <span className={`w-3.5 h-3.5 rounded-full ${p.color} ${p.textColor || 'text-white'} flex items-center justify-center text-[8px] font-bold`}>
-                      {p.name.charAt(0)}
-                    </span>
-                    <span>{p.name}</span>
-                    <span className={`text-[10px] ${modelProvider === p.id ? 'text-white/80' : 'text-slate-400'}`}>({count})</span>
-                  </button>
-                );
-              })}
-            </div>
-            
-            {/* 模型平铺展示 */}
-            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-1.5 max-h-24 overflow-y-auto p-1">
-              {currentProviderModels.slice(0, 30).map(m => (
+          <div className="flex gap-2">
+            {FEATURES.map(f => {
+              const Icon = f.icon;
+              return (
                 <button
-                  key={m.id}
-                  onClick={() => setSelectedModel(m.id)}
-                  className={`p-2 rounded-lg text-left transition-all ${
-                    selectedModel === m.id
-                      ? 'bg-orange-100 border-2 border-orange-500'
-                      : 'bg-slate-50 border-2 border-transparent hover:bg-slate-100'
+                  key={f.id}
+                  onClick={() => setSelectedFeature(f.id)}
+                  className={`flex-1 p-2.5 rounded-xl transition-all flex flex-col items-center gap-1.5 ${
+                    selectedFeature === f.id
+                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  <div className="font-medium text-[11px] truncate">{m.name}</div>
+                  <Icon className={`w-5 h-5 ${selectedFeature === f.id ? 'text-white' : 'text-slate-500'}`} />
+                  <span className={`font-medium text-xs ${selectedFeature === f.id ? 'text-white' : 'text-slate-700'}`}>
+                    {f.name}
+                  </span>
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* 下方左右分栏：输入 + 输出 */}
+        {/* 输入输出区域 */}
         <div className="grid lg:grid-cols-2 gap-4">
           {/* 左侧：输入 */}
           <div className="bg-white rounded-2xl shadow-lg p-4">
-            <h3 className="font-semibold text-sm mb-3">{currentFeature?.name} - 输入内容</h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-sm">{currentFeature?.name} - 输入内容</h3>
+              
+              {/* 模型选择按钮 */}
+              <div className="relative">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowModelPicker(!showModelPicker);
+                  }}
+                  className="model-trigger flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                >
+                  {(() => {
+                    const providerConfig = getProviderConfig(currentModel.provider || '豆包');
+                    return (
+                      <span className={`w-5 h-5 rounded-full ${providerConfig.color} ${providerConfig.border ? 'border border-slate-300' : ''} ${providerConfig.textColor} flex items-center justify-center text-[10px] font-bold`}>
+                        {(currentModel.provider || '豆包').charAt(0)}
+                      </span>
+                    );
+                  })()}
+                  <span className="text-xs font-medium text-slate-700 max-w-[120px] truncate">
+                    {currentModel.name || '豆包 Seed Pro'}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                </button>
+                
+                {/* 模型选择弹框 */}
+                {showModelPicker && (
+                  <div 
+                    className="model-picker-container absolute top-full right-0 mt-2 w-[320px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* 搜索框 */}
+                    <div className="p-3 border-b border-slate-100">
+                      <input
+                        type="text"
+                        value={modelSearch}
+                        onChange={(e) => setModelSearch(e.target.value)}
+                        placeholder="搜索模型..."
+                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
+                        autoFocus
+                      />
+                    </div>
+                    
+                    {/* 厂商标签 */}
+                    <div className="p-2 border-b border-slate-100 overflow-x-auto">
+                      <div className="flex gap-1.5 min-w-max">
+                        {PROVIDERS.map(p => {
+                          const count = availableModels.filter(m => getModelFilter(p.id)(m)).length;
+                          if (count === 0 && p.id !== 'doubao') return null;
+                          return (
+                            <button
+                              key={p.id}
+                              onClick={() => setModelProvider(p.id)}
+                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                                modelProvider === p.id
+                                  ? `${p.color} ${p.border ? 'border border-slate-300' : ''} ${p.textColor}`
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              }`}
+                            >
+                              {p.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* 模型列表 */}
+                    <div className="max-h-64 overflow-y-auto">
+                      {filteredModels.length > 0 ? (
+                        <div className="p-2 space-y-1">
+                          {filteredModels.slice(0, 50).map(m => (
+                            <button
+                              key={m.id}
+                              onClick={() => handleSelectModel(m)}
+                              className={`w-full p-2.5 rounded-lg text-left transition-all flex items-center justify-between gap-2 ${
+                                selectedModel === m.id
+                                  ? 'bg-orange-100 border border-orange-500'
+                                  : 'hover:bg-slate-50'
+                              }`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-xs truncate">{m.name}</div>
+                                <div className="text-[10px] text-slate-400 truncate">{m.id}</div>
+                              </div>
+                              {selectedModel === m.id && (
+                                <Check className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                              )}
+                              {m.isFree && (
+                                <span className="text-[9px] px-1.5 py-0.5 bg-green-100 text-green-600 rounded">免费</span>
+                              )}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-4 text-center text-sm text-slate-400">
+                          暂无可用模型
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* 关闭按钮 */}
+                    <button
+                      onClick={closePicker}
+                      className="absolute top-2 right-2 p-1 hover:bg-slate-100 rounded-full"
+                    >
+                      <X className="w-4 h-4 text-slate-400" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
             
             <textarea
               value={inputText}
