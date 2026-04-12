@@ -87,20 +87,29 @@ const OWNER_MAP: Record<string, { name: string; logo: string }> = {
 
 // 模型名关键字映射厂商（兜底匹配）- 优先级从高到低
 const MODEL_KEYWORD_PROVIDER: Array<{ keywords: string[]; name: string; logo: string }> = [
-  // OpenAI 系列
-  { keywords: ['gpt-5', 'gpt-4', 'gpt-3.5', 'chatgpt', 'o1-', 'o3-', 'o4-', 'o4o', 'dall-e', 'davinci', 'babbage', 'text-davinci', 'whisper-', 'tts-', 'codex-', 'computer-use'], name: 'OpenAI', logo: '🤖' },
+  // Google 系列 (包括 veo, gemini, gemma, imagen)
+  { keywords: ['veo', 'gemini-', 'gemma-', 'imagen-'], name: 'Google', logo: '🔴' },
   
-  // Anthropic / Claude 系列 (通过vertex-ai)
-  { keywords: ['claude-', 'claude-sonnet', 'claude-opus', 'claude-haiku'], name: 'Anthropic', logo: '🧠' },
-  
-  // Google 系列
-  { keywords: ['gemini-', 'gemini/', 'veo', 'imagen-', 'gemma-'], name: 'Google', logo: '🔴' },
-  
-  // xAI 系列
+  // xAI 系列 (grok)
   { keywords: ['grok-', 'grok2', 'grok4', 'xai/'], name: 'xAI', logo: '💀' },
   
-  // Stability 系列
+  // Stability 系列 (flux)
   { keywords: ['flux-', 'flux1', 'flux2', 'stable-diffusion', 'stable-', 'sdxl', 'sd-'], name: 'Stability', logo: '⚡' },
+  
+  // Anthropic / Claude 系列
+  { keywords: ['claude-', 'claude-sonnet', 'claude-opus', 'claude-haiku', 'claude-3', 'claude-4'], name: 'Anthropic', logo: '🧠' },
+  
+  // OpenAI 系列 (包括 o1, o3, o4, gpt, dall-e, whisper, codex, computer-use, gpt-image)
+  { keywords: ['gpt-', 'o1-', 'o2-', 'o3-', 'o4-', 'dall-e', 'davinci', 'babbage', 'curie', 'ada', 'text-', 'whisper-', 'tts-', 'codex-', 'computer-use', 'chatgpt-', 'gpt-image', 'gpt-oss', 'omni-moderation', 'gpt-5'], name: 'OpenAI', logo: '🤖' },
+  
+  // 通义千问
+  { keywords: ['qwen-', 'qwen2', 'qwen3', 'tongyi', 'yi-', 'qwq-'], name: '通义千问', logo: '🏢' },
+  
+  // Kimi / Moonshot
+  { keywords: ['kimi-', 'moonshot-', 'moonshot/', 'kimi1-', 'kimi2-', 'kimi-k'], name: 'Kimi', logo: '🌙' },
+  
+  // 智谱AI
+  { keywords: ['glm-', 'chatglm', 'glm4', 'glm5', 'zhipu'], name: '智谱AI', logo: '📊' },
   
   // Mistral 系列
   { keywords: ['mistral-', 'mixtral', 'codestral', 'command-', 'pixtral'], name: 'Mistral', logo: '🌫️' },
@@ -113,15 +122,6 @@ const MODEL_KEYWORD_PROVIDER: Array<{ keywords: string[]; name: string; logo: st
   
   // DeepSeek 系列
   { keywords: ['deepseek-', 'deepseek/', 'ds-'], name: 'DeepSeek', logo: '🔵' },
-  
-  // 通义千问
-  { keywords: ['qwen-', 'qwen2', 'qwen3', 'tongyi', 'yi-', 'qwq-'], name: '通义千问', logo: '🏢' },
-  
-  // Kimi / Moonshot
-  { keywords: ['kimi-', 'moonshot-', 'moonshot/', 'kimi1-', 'kimi2-'], name: 'Kimi', logo: '🌙' },
-  
-  // 智谱AI
-  { keywords: ['glm-', 'chatglm', 'glm4', 'glm5', 'zhipu'], name: '智谱AI', logo: '📊' },
   
   // 百川
   { keywords: ['baichuan-', 'baichuan2', 'baichuan3'], name: '百川', logo: '💫' },
@@ -155,7 +155,7 @@ const MODEL_KEYWORD_PROVIDER: Array<{ keywords: string[]; name: string; logo: st
   { keywords: ['doubao-', '豆包'], name: '豆包', logo: '🦞' },
   
   // 功能分类
-  { keywords: ['embedding-', 'embed-', 'e5-', 'bge-', 'jina-embed', 'mxbai-embed'], name: '向量模型', logo: '📐' },
+  { keywords: ['embedding-', 'embed-', 'text-embedding', 'e5-', 'bge-', 'jina-embed', 'mxbai-embed'], name: '向量模型', logo: '📐' },
   { keywords: ['code-', 'codex', 'coder-', 'starcoder', 'codellama'], name: '代码模型', logo: '💻' },
   { keywords: ['vision-', 'vl-', 'llava', 'qwen-vl', ' INTERNLM'], name: '视觉模型', logo: '👁️' },
   { keywords: ['audio-', 'speech-', 'bark-', 'fish-speech'], name: 'AI音频', logo: '🎧' },
