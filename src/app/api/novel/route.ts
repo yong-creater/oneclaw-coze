@@ -3,14 +3,18 @@ import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 // 4sapi 配置
 const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
-const API4S_KEY = ENABLE_4SAPI ? (process.env.API4S_KEY || '') : '';
+const API4S_KEY = process.env.API4S_KEY || '';
 const API4S_URL = process.env.API4S_URL || 'https://4sapi.com';
 
-// 免费模型（Coze SDK）
+// Coze SDK 免费模型列表（豆包系列）
 const FREE_MODELS = [
   'doubao-seed-2-0-pro-260215',
-  'doubao-seed-1-6-251015', 
-  'doubao-seed-2-0-thinking-251125',
+  'doubao-seed-2-0-lite-260215',
+  'doubao-seed-2-0-mini-260215',
+  'doubao-seed-1-6-251015',
+  'doubao-seed-1-8-251228',
+  'doubao-seed-1-6-vision-250815',
+  'doubao-seed-1-6-thinking-250715',
   'doubao-pro-4k-240815',
   'doubao-pro-32k-240815',
   'doubao-lite-4k-240815',
@@ -40,16 +44,7 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt = SYSTEM_PROMPTS[feature] || SYSTEM_PROMPTS.polish;
     const targetModel = model || 'doubao-seed-1-6-251015';
-    
-    // 检查是否为免费模型
     const useFreeModel = isFreeModel(targetModel);
-    
-    // 如果是付费模型但未启用4sapi，返回错误
-    if (!useFreeModel && (!ENABLE_4SAPI || !API4S_KEY)) {
-      return NextResponse.json({ 
-        error: '付费模型未启用，请选择免费模型或联系管理员配置付费API' 
-      }, { status: 403 });
-    }
 
     const messages = [
       { role: 'system' as const, content: systemPrompt },
@@ -58,12 +53,11 @@ export async function POST(request: NextRequest) {
 
     const encoder = new TextEncoder();
 
-    // 设置 SSE 响应头
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // 如果是免费模型或未启用4sapi，使用 Coze SDK
-          if (useFreeModel || !ENABLE_4SAPI || !API4S_KEY) {
+          if (useFreeModel) {
+            // 方案1：Coze SDK 免费模型
             const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
             const config = new Config();
             const client = new LLMClient(config, customHeaders);
@@ -73,7 +67,7 @@ export async function POST(request: NextRequest) {
               temperature: 0.7,
               streaming: true
             };
-            
+
             const aiStream = client.stream(messages, llmConfig);
             
             for await (const chunk of aiStream) {
@@ -84,8 +78,14 @@ export async function POST(request: NextRequest) {
             controller.close();
             return;
           }
-          
-          // 使用 4sapi（付费模型）
+
+          // 方案2：付费模型走 4sapi
+          if (!ENABLE_4SAPI || !API4S_KEY) {
+            controller.enqueue(encoder.encode(`\n\n[错误: 付费模型未启用，请选择豆包模型或联系管理员配置付费API]`));
+            controller.close();
+            return;
+          }
+
           const response = await fetch(`${API4S_URL}/v1/chat/completions`, {
             method: 'POST',
             headers: {
