@@ -221,11 +221,34 @@ function exportToExcel(data: any[], filename: string) {
 }
 
 export default function NovelCreator() {
-  const [inputText, setInputText] = useState('');
-  const [outputText, setOutputText] = useState('');
+  // 每个功能的独立状态
+  const [featureStates, setFeatureStates] = useState<Record<string, { input: string; output: string }>>({
+    polish: { input: '', output: '' },
+    character: { input: '', output: '' },
+    imagePrompt: { input: '', output: '' },
+    scenePrompt: { input: '', output: '' },
+  });
+  const [selectedFeature, setSelectedFeature] = useState('polish');
+  
+  // 获取当前功能的输入输出
+  const currentInput = featureStates[selectedFeature]?.input || '';
+  const currentOutput = featureStates[selectedFeature]?.output || '';
+  
+  const setCurrentInput = (value: string) => {
+    setFeatureStates(prev => ({
+      ...prev,
+      [selectedFeature]: { ...prev[selectedFeature], input: value }
+    }));
+  };
+  
+  const setCurrentOutput = (value: string) => {
+    setFeatureStates(prev => ({
+      ...prev,
+      [selectedFeature]: { ...prev[selectedFeature], output: value }
+    }));
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [selectedFeature, setSelectedFeature] = useState('polish');
   const [selectedModel, setSelectedModel] = useState('doubao-seed-2-0-pro-260215');
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [modelProvider, setModelProvider] = useState('doubao');
@@ -305,7 +328,7 @@ export default function NovelCreator() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!inputText.trim()) {
+    if (!currentInput.trim()) {
       setError('请输入内容');
       return;
     }
@@ -317,7 +340,7 @@ export default function NovelCreator() {
 
     rateLimiter.addRequest();
     setError('');
-    setOutputText('');
+    setCurrentOutput('');
     setIsLoading(true);
 
     const abortController = new AbortController();
@@ -336,7 +359,7 @@ export default function NovelCreator() {
           model: selectedModel,
           messages: [
             { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
-            { role: 'user', content: inputText }
+            { role: 'user', content: currentInput }
           ],
           feature: selectedFeature,
           stream: true
@@ -364,7 +387,7 @@ export default function NovelCreator() {
         
         // 流式输出直接追加
         result += chunk;
-        setOutputText(result);
+        setCurrentOutput(result);
       }
     } catch (err: any) {
       clearTimeout(timeoutId);
@@ -380,7 +403,7 @@ export default function NovelCreator() {
   };
 
   const handleDownload = () => {
-    const blob = new Blob([outputText], { type: 'text/plain' });
+    const blob = new Blob([currentOutput], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -390,14 +413,14 @@ export default function NovelCreator() {
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(outputText);
+    await navigator.clipboard.writeText(currentOutput);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   // 导出为Excel
   const handleExportExcel = () => {
-    const characters = parseCharacterDNA(outputText);
+    const characters = parseCharacterDNA(currentOutput);
     if (characters.length === 0) {
       setError('暂无人物数据可导出');
       return;
@@ -557,8 +580,8 @@ export default function NovelCreator() {
             <h3 className="font-semibold text-lg mb-4">{currentFeature?.name}</h3>
             
             <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              value={currentInput}
+              onChange={(e) => setCurrentInput(e.target.value)}
               placeholder={currentFeature?.placeholder}
               className="flex-1 w-full p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed"
             />
@@ -575,7 +598,7 @@ export default function NovelCreator() {
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={!inputText.trim()}
+                  disabled={!currentInput.trim()}
                   className="px-10 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium text-lg"
                 >
                   <Send className="w-5 h-5" />
@@ -596,7 +619,7 @@ export default function NovelCreator() {
           <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-lg">生成结果</h3>
-              {outputText && (
+              {currentOutput && (
                 <div className="flex gap-2 relative">
                   <button
                     onClick={handleCopy}
@@ -647,7 +670,7 @@ export default function NovelCreator() {
 
             <div className="flex-1 relative">
               <textarea
-                value={outputText}
+                value={currentOutput}
                 readOnly
                 placeholder="生成的内容将显示在这里..."
                 className="w-full h-full p-4 border-2 border-slate-200 rounded-xl resize-none bg-slate-50 text-base leading-relaxed"
