@@ -320,52 +320,52 @@ export default function NovelPage() {
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 transition-colors"
               >
-                <optgroup label="🦞 Coze 免费模型">
+                <optgroup label="🦞 Coze 免费">
                   {availableModels.filter(m => m.isFree).map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} - {m.provider}
+                      {m.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="🤖 OpenAI">
-                  {availableModels.filter(m => m.provider === 'OpenAI' && !m.isFree).slice(0, 20).map(m => (
+                  {availableModels.filter(m => m.provider === 'OpenAI').slice(0, 30).map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {m.isFree ? '(免费)' : '(付费)'}
+                      {m.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="🔵 Anthropic">
-                  {availableModels.filter(m => m.provider === 'Anthropic' && !m.isFree).slice(0, 10).map(m => (
+                  {availableModels.filter(m => m.provider === 'Anthropic').slice(0, 15).map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {m.isFree ? '(免费)' : '(付费)'}
+                      {m.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="💙 Google">
-                  {availableModels.filter(m => m.provider === 'Google' && !m.isFree).slice(0, 10).map(m => (
+                  {availableModels.filter(m => m.provider === 'Google').slice(0, 15).map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {m.isFree ? '(免费)' : '(付费)'}
+                      {m.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="🌙 Moonshot">
-                  {availableModels.filter(m => m.provider === 'Moonshot' && !m.isFree).slice(0, 10).map(m => (
+                  {availableModels.filter(m => m.provider === 'Moonshot').slice(0, 10).map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {m.isFree ? '(免费)' : '(付费)'}
+                      {m.name}
                     </option>
                   ))}
                 </optgroup>
                 <optgroup label="💀 xAI">
-                  {availableModels.filter(m => m.provider === 'xAI' && !m.isFree).slice(0, 10).map(m => (
+                  {availableModels.filter(m => m.provider === 'xAI').slice(0, 10).map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {m.isFree ? '(免费)' : '(付费)'}
+                      {m.name}
                     </option>
                   ))}
                 </optgroup>
-                <optgroup label="📊 其他厂商">
-                  {availableModels.filter(m => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI', 'Coze'].includes(m.provider) && !m.isFree).slice(0, 20).map(m => (
+                <optgroup label="📦 其他">
+                  {availableModels.filter(m => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI', 'Coze'].includes(m.provider)).slice(0, 20).map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} - {m.provider} (付费)
+                      {m.name} - {m.provider}
                     </option>
                   ))}
                 </optgroup>
