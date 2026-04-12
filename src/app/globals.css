@@ -289,3 +289,62 @@ html {
   );
   background-size: 200% 100%;
 }
+
+/* ==================== 移动端适配 ==================== */
+
+/* 隐藏滚动条但保持滚动功能 */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* 移动端优化 */
+@media (max-width: 640px) {
+  /* 确保移动端可触摸 */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* 优化移动端输入框 */
+  input, textarea {
+    font-size: 16px !important; /* 防止iOS缩放 */
+  }
+  
+  /* 优化移动端间距 */
+  .px-4 {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* 移动端底部安全区域 */
+  main {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+/* 横屏手机适配 */
+@media (max-width: 640px) and (orientation: landscape) {
+  .lg\:flex-row {
+    flex-direction: column !important;
+  }
+}
+
+/* 超小屏幕适配 */
+@media (max-width: 380px) {
+  .px-4 {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* 移动端点击优化 */
+@media (hover: none) and (pointer: coarse) {
+  /* 移除hover效果，使用active替代 */
+  button:active, a:active {
+    opacity: 0.8;
+  }
+}

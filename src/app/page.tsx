@@ -251,6 +251,7 @@ export default function HomePage() {
   // 筛选状态
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showMoreCategories, setShowMoreCategories] = useState(false);
   
   // 用户相关
   const [userId, setUserId] = useState('');
@@ -622,7 +623,7 @@ export default function HomePage() {
               </span>
             </Link>
 
-            {/* 主导航Tab */}
+            {/* 主导航Tab - 移动端隐藏文字 */}
             <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-full p-1">
               {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
@@ -642,14 +643,14 @@ export default function HomePage() {
                       if (tab.key === 'tutorials') cache.clear('tutorials_all_1');
                       setMainTab(tab.key);
                     }}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
                         : 'text-slate-600 dark:text-slate-300 hover:text-orange-500'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
-                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="hidden md:inline">{tab.label}</span>
                   </button>
                 );
               })}
@@ -703,7 +704,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* 榜单内容 */}
+            {/* 榜单内容 - 桌面端表格，移动端卡片 */}
             {rankingsLoading ? (
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-8">
                 <div className="flex items-center justify-center h-48">
@@ -711,71 +712,72 @@ export default function HomePage() {
                 </div>
               </div>
             ) : rankings.length > 0 ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-slate-50/80 dark:bg-slate-700/50">
-                    <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
-                      <th className="px-6 py-4 font-medium w-20">排名</th>
-                      <th className="px-6 py-4 font-medium">工具</th>
-                      <th className="px-6 py-4 font-medium w-32">月访问量</th>
-                      <th className="px-6 py-4 font-medium w-24">增长率</th>
-                      <th className="px-6 py-4 font-medium w-24">分类</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100/50 dark:divide-slate-700/50">
-                    {rankings.map((item) => (
-                      <tr 
-                        key={item.id} 
-                        className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                        onClick={() => {
-                          // 记录来源页面
-                          if (typeof window !== 'undefined') {
-                            const backState = { 
-                              path: window.location.pathname + window.location.search || '/',
-                              tab: 'rankings'
-                            };
-                            sessionStorage.setItem('backFrom', JSON.stringify(backState));
-                          }
-                          if (item.tool_id) {
-                            router.push(`/tools/${item.tool_id}`);
-                          } else {
-                            window.location.href = item.tool_url;
-                          }
-                        }}
-                      >
-                        <td className="px-6 py-4">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                            item.rank === 1 ? 'bg-yellow-400 text-white' :
-                            item.rank === 2 ? 'bg-slate-300 text-white' :
-                            item.rank === 3 ? 'bg-orange-300 text-white' :
-                            'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                          }`}>
-                            {item.rank}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <img
-                              src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
-                              alt={item.tool_name}
-                              className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
-                              loading="lazy"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
-                              }}
-                            />
-                            <div>
-                              <span className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors">
-                                {item.tool_name}
-                              </span>
-                              {item.tool_description && (
-                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                                  {item.tool_description}
-                                </p>
-                              )}
+              <>
+                {/* 桌面端表格 */}
+                <div className="hidden md:block bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-slate-50/80 dark:bg-slate-700/50">
+                      <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
+                        <th className="px-6 py-4 font-medium w-20">排名</th>
+                        <th className="px-6 py-4 font-medium">工具</th>
+                        <th className="px-6 py-4 font-medium w-32">月访问量</th>
+                        <th className="px-6 py-4 font-medium w-24">增长率</th>
+                        <th className="px-6 py-4 font-medium w-24">分类</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100/50 dark:divide-slate-700/50">
+                      {rankings.map((item) => (
+                        <tr 
+                          key={item.id} 
+                          className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
+                          onClick={() => {
+                            if (typeof window !== 'undefined') {
+                              const backState = { 
+                                path: window.location.pathname + window.location.search || '/',
+                                tab: 'rankings'
+                              };
+                              sessionStorage.setItem('backFrom', JSON.stringify(backState));
+                            }
+                            if (item.tool_id) {
+                              router.push(`/tools/${item.tool_id}`);
+                            } else {
+                              window.location.href = item.tool_url;
+                            }
+                          }}
+                        >
+                          <td className="px-6 py-4">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                              item.rank === 1 ? 'bg-yellow-400 text-white' :
+                              item.rank === 2 ? 'bg-slate-300 text-white' :
+                              item.rank === 3 ? 'bg-orange-300 text-white' :
+                              'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                            }`}>
+                              {item.rank}
                             </div>
-                          </div>
-                        </td>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <img
+                                src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
+                                alt={item.tool_name}
+                                className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
+                                loading="lazy"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
+                                }}
+                              />
+                              <div>
+                                <span className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors">
+                                  {item.tool_name}
+                                </span>
+                                {item.tool_description && (
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                                    {item.tool_description}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
                         <td className="px-6 py-4">
                           <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
                             {item.monthly_visits || '-'}
@@ -801,10 +803,81 @@ export default function HomePage() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+                </div>
+                
+                {/* 移动端卡片列表 */}
+                <div className="md:hidden space-y-3">
+                  {rankings.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 cursor-pointer hover:shadow-md transition-shadow"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') {
+                          const backState = { 
+                            path: window.location.pathname + window.location.search || '/',
+                            tab: 'rankings'
+                          };
+                          sessionStorage.setItem('backFrom', JSON.stringify(backState));
+                        }
+                        if (item.tool_id) {
+                          router.push(`/tools/${item.tool_id}`);
+                        } else {
+                          window.location.href = item.tool_url;
+                        }
+                      }}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                          item.rank === 1 ? 'bg-yellow-400 text-white' :
+                          item.rank === 2 ? 'bg-slate-300 text-white' :
+                          item.rank === 3 ? 'bg-orange-300 text-white' :
+                          'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                        }`}>
+                          {item.rank}
+                        </div>
+                        <img
+                          src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
+                          alt={item.tool_name}
+                          className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700 flex-shrink-0"
+                          loading="lazy"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-slate-800 dark:text-white truncate">
+                            {item.tool_name}
+                          </div>
+                          {item.tool_description && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                              {item.tool_description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+                        <div className="flex items-center gap-4 text-sm">
+                          <span className="text-slate-500">
+                            <span className="text-slate-400">月访问:</span>{' '}
+                            <span className="font-medium text-slate-700 dark:text-slate-200">{item.monthly_visits || '-'}</span>
+                          </span>
+                          {item.growth_rate && (
+                            <span className={item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'}>
+                              {item.growth_rate}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded">
+                          {CATEGORY_SLUG_TO_NAME[item.category] || item.category || '-'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             ) : (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-12 text-center">
-                <TrendingUp className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-8 sm:p-12 text-center">
+                <TrendingUp className="w-10 sm:w-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
                 <p className="text-slate-500 dark:text-slate-400 mb-4">暂无榜单数据</p>
                 <p className="text-sm text-slate-400 dark:text-slate-500">
                   请联系管理员导入榜单数据
@@ -817,8 +890,8 @@ export default function HomePage() {
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
           <div className="flex gap-6">
-            {/* 左侧分类导航 */}
-            <aside className="w-56 flex-shrink-0">
+            {/* 左侧分类导航 - 桌面端侧边栏，移动端可折叠 */}
+            <aside className="hidden md:block w-56 flex-shrink-0">
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm sticky top-24">
                 <div className="p-4 border-b border-slate-100 dark:border-slate-700">
                   <h2 className="font-semibold text-slate-800 dark:text-white">分类</h2>
@@ -853,6 +926,69 @@ export default function HomePage() {
                 </nav>
               </div>
             </aside>
+            
+            {/* 移动端分类筛选 - 可折叠 */}
+            <div className="md:hidden w-full">
+              {/* 移动端分类选择器 */}
+              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="font-semibold text-slate-800 dark:text-white">选择分类</h2>
+                  <span className="text-sm text-orange-500">
+                    {activeCategory === 'all' ? '全部' : categories.find(c => c.slug === activeCategory)?.name}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setActiveCategory('all')}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      activeCategory === 'all'
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    全部
+                  </button>
+                  {categories.slice(0, 8).map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.slug)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        activeCategory === cat.slug
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+                {categories.length > 8 && (
+                  <button
+                    onClick={() => setShowMoreCategories(!showMoreCategories)}
+                    className="mt-2 text-sm text-orange-500 hover:text-orange-600"
+                  >
+                    {showMoreCategories ? '收起' : `更多分类 (${categories.length - 8})`}
+                  </button>
+                )}
+                {showMoreCategories && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {categories.slice(8).map(cat => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.slug)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                          activeCategory === cat.slug
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* 右侧内容 */}
             <div className="flex-1 min-w-0">

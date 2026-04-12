@@ -467,23 +467,23 @@ export default function NovelCreator() {
 
         {/* 第一层级：功能选择 + 模型选择 */}
         <div className="flex items-center justify-between mb-6">
-          {/* 功能选择 */}
-          <div className="flex items-center gap-2">
-            <div className="flex bg-slate-100 rounded-xl p-1.5 gap-1">
+          {/* 功能选择 - 移动端可横向滚动 */}
+          <div className="flex-1 min-w-0">
+            <div className="flex bg-slate-100 rounded-xl p-1.5 gap-1 overflow-x-auto scrollbar-hide">
               {FEATURES.map(f => {
                 const Icon = f.icon;
                 return (
                   <button
                     key={f.id}
                     onClick={() => setSelectedFeature(f.id)}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                    className={`px-3 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
                       selectedFeature === f.id
                         ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
                         : 'text-slate-600 hover:bg-white hover:shadow-sm'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
-                    {f.name}
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                    <span className="hidden xs:inline">{f.name}</span>
                   </button>
                 );
               })}
@@ -491,15 +491,15 @@ export default function NovelCreator() {
           </div>
           
           {/* 模型选择 */}
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowModelPicker(!showModelPicker);
               }}
-              className="model-trigger flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors"
+              className="model-trigger flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 rounded-xl transition-colors"
             >
-              <span className="text-sm font-medium text-slate-500">当前模型：</span>
+              <span className="hidden sm:inline text-sm font-medium text-slate-500">当前模型：</span>
               {(() => {
                 const providerConfig = getProviderConfig(currentModel.provider || '豆包');
                 return (
@@ -508,7 +508,7 @@ export default function NovelCreator() {
                   </span>
                 );
               })()}
-              <span className="font-medium text-slate-700">
+              <span className="font-medium text-slate-700 hidden sm:inline">
                 {currentModel.name || '豆包 Seed Pro'}
               </span>
               <ChevronDown className="w-4 h-4 text-slate-400" />
@@ -517,7 +517,7 @@ export default function NovelCreator() {
             {/* 模型选择弹框 */}
             {showModelPicker && (
               <div 
-                className="model-picker-container absolute top-full right-0 mt-3 w-[400px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+                className="model-picker-container absolute top-full right-0 sm:left-0 mt-3 w-[calc(100vw-2rem)] sm:w-[400px] max-w-[400px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-4 border-b border-slate-100">
@@ -597,24 +597,24 @@ export default function NovelCreator() {
           </div>
         </div>
 
-        {/* 第二层级：输入 + 输出区域 */}
-        <div className="flex gap-6 h-[600px]">
+        {/* 第二层级：输入 + 输出区域 - 移动端垂直布局 */}
+        <div className="flex flex-col lg:flex-row gap-6 lg:h-[600px]">
           {/* 左侧：输入 */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
-            <h3 className="font-semibold text-lg mb-4">{currentFeature?.name}</h3>
+          <div className="flex-1 bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col min-h-[300px] lg:min-h-0">
+            <h3 className="font-semibold text-lg mb-3 sm:mb-4">{currentFeature?.name}</h3>
             
             <textarea
               value={currentInput}
               onChange={(e) => setCurrentInput(e.target.value)}
               placeholder={currentFeature?.placeholder}
-              className="flex-1 w-full p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed"
+              className="flex-1 w-full p-3 sm:p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed"
             />
             
-            <div className="mt-4 flex items-center gap-4">
+            <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               {currentLoading ? (
                 <button
                   onClick={cancelRequest}
-                  className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center gap-2 font-medium"
+                  className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center justify-center gap-2 font-medium"
                 >
                   <AlertCircle className="w-5 h-5" />
                   取消生成
@@ -623,7 +623,7 @@ export default function NovelCreator() {
                 <button
                   onClick={handleSubmit}
                   disabled={!currentInput.trim()}
-                  className="px-10 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium text-lg"
+                  className="px-6 sm:px-10 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium text-base sm:text-lg"
                 >
                   <Send className="w-5 h-5" />
                   开始生成
@@ -632,16 +632,16 @@ export default function NovelCreator() {
               
               {currentError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {currentError}
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{currentError}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* 右侧：输出 */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
+          <div className="flex-1 bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col min-h-[300px] lg:min-h-0">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <h3 className="font-semibold text-lg">生成结果</h3>
               {currentOutput && (
                 <div className="flex gap-2 relative">
@@ -697,12 +697,12 @@ export default function NovelCreator() {
                 value={currentOutput}
                 readOnly
                 placeholder="生成的内容将显示在这里..."
-                className="w-full h-full p-4 border-2 border-slate-200 rounded-xl resize-none bg-slate-50 text-base leading-relaxed"
+                className="w-full h-full p-3 sm:p-4 border-2 border-slate-200 rounded-xl resize-none bg-slate-50 text-base leading-relaxed"
               />
               {currentLoading && (
                 <div className="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl">
                   <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-orange-500 mx-auto" />
+                    <Loader2 className="w-10 sm:w-12 h-10 sm:h-12 animate-spin text-orange-500 mx-auto" />
                     <p className="mt-4 text-base text-slate-600">正在生成...</p>
                   </div>
                 </div>
