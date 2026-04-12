@@ -9,9 +9,6 @@ import {
 import AnimatedLobster from '@/components/AnimatedLobster';
 import LoginModal from '@/components/LoginModal';
 
-const API2D_KEY = '';
-const API_BASE_URL = 'https://oa.api2d.net/v1';
-const REQUEST_TIMEOUT = 30000;
 const RATE_LIMIT_MAX = 5;
 
 const SYSTEM_PROMPTS: Record<string, string> = {
@@ -29,9 +26,9 @@ const FEATURES = [
 ];
 
 const MODELS = [
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5', recommend: '写作最强' },
-  { id: 'gemini-1.5-pro', name: 'Gemini Pro', recommend: '性价比高' },
-  { id: 'gpt-4o', name: 'GPT-4o', recommend: '均衡之选' }
+  { id: 'doubao-seed-1-6-251015', name: '豆包 Base', recommend: '默认模型' },
+  { id: 'doubao-seed-2-0-lite-260215', name: '豆包 Pro', recommend: '更强能力' },
+  { id: 'glm-4-7-251222', name: '智谱 GLM-4', recommend: '写作优化' }
 ];
 
 class RateLimiter {
@@ -75,10 +72,6 @@ export default function NovelPage() {
     checkLogin();
   }, []);
 
-  const getApiKey = useCallback((): string => {
-    return process.env.NEXT_PUBLIC_API2D_KEY || API2D_KEY;
-  }, []);
-
   const cancelRequest = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -89,10 +82,6 @@ export default function NovelPage() {
   const handleSubmit = async () => {
     if (!inputText.trim()) {
       setError('请输入内容');
-      return;
-    }
-    if (!getApiKey()) {
-      setError('请先配置 API Key');
       return;
     }
     if (!rateLimiter.canMakeRequest()) {
@@ -108,41 +97,41 @@ export default function NovelPage() {
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
-    const timeoutId = setTimeout(() => {
-      abortController.abort();
-    }, REQUEST_TIMEOUT);
-
     try {
-      const response = await fetch(API_BASE_URL + '/chat/completions', {
+      const response = await fetch('/api/novel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + getApiKey()
         },
         body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPTS[activeFeature] || '' },
-            { role: 'user', content: inputText }
-          ],
-          temperature: 0.7,
-          max_tokens: 4000
+          feature: activeFeature,
+          input: inputText,
+          model: selectedModel
         }),
         signal: abortController.signal
       });
 
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
-        throw new Error('请求失败');
+        const data = await response.json();
+        throw new Error(data.error || '请求失败');
       }
 
-      const data = await response.json();
-      setOutputText(data.choices?.[0]?.message?.content || '');
+      // 处理流式响应
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('无法读取响应');
+
+      const decoder = new TextDecoder();
+      let result = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        result += decoder.decode(value, { stream: true });
+        setOutputText(result);
+      }
     } catch (err: any) {
-      clearTimeout(timeoutId);
       if (err.name === 'AbortError') {
-        setError('请求超时');
+        setError('请求已取消');
       } else {
         setError(err.message || '生成失败');
       }
