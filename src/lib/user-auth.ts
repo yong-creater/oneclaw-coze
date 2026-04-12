@@ -328,8 +328,13 @@ export async function registerWithEmail(
   
   try {
     // 检查邮箱是否已存在
-    const exists = await checkEmailExists(email);
-    if (exists) {
+    const { data: existingUser } = await client
+      .from('users')
+      .select('user_id')
+      .eq('email', email.toLowerCase())
+      .maybeSingle();
+    
+    if (existingUser) {
       return { success: false, error: '该邮箱已被注册' };
     }
     
@@ -339,13 +344,13 @@ export async function registerWithEmail(
     // 生成用户ID
     const userId = `email_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     
-    // 创建用户
+    // 创建用户 - 使用user_id作为唯一标识，id使用数据库自增
     const { data: newUser, error: userError } = await client
       .from('users')
       .insert({
         user_id: userId,
         email: email.toLowerCase(),
-        password_hash: passwordHash,
+        encrypted_password: passwordHash,
         nickname: nickname || email.split('@')[0],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -354,7 +359,7 @@ export async function registerWithEmail(
       .single();
     
     if (userError) {
-      console.error('创建用户失败:', userError);
+      console.error('[注册] 创建用户失败, userError:', JSON.stringify(userError));
       return { success: false, error: '注册失败，请稍后重试' };
     }
     
@@ -366,7 +371,7 @@ export async function registerWithEmail(
     
     return { success: true, user: newUser, token };
   } catch (err) {
-    console.error('邮箱注册错误:', err);
+    console.error('[注册] 邮箱注册异常:', err);
     return { success: false, error: '注册失败，请稍后重试' };
   }
 }
@@ -390,8 +395,8 @@ export async function loginWithEmail(
       return { success: false, error: '邮箱或密码错误' };
     }
     
-    // 验证密码
-    const isValid = await verifyPassword(password, user.password_hash);
+    // 验证密码 - 使用表中的实际字段名 encrypted_password
+    const isValid = await verifyPassword(password, user.encrypted_password);
     if (!isValid) {
       return { success: false, error: '邮箱或密码错误' };
     }
@@ -400,7 +405,7 @@ export async function loginWithEmail(
     const token = await generateUserToken(user);
     
     // 创建会话
-    await createUserSession(user.user_id, token);
+    await createUserSession(user.id, token);
     
     return { success: true, user, token };
   } catch (err) {

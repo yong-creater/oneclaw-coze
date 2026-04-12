@@ -468,7 +468,7 @@ export default function NovelCreator() {
         {/* 第一层级：功能选择 + 模型选择 */}
         <div className="flex items-center justify-between mb-6">
           {/* 功能选择 - 移动端可横向滚动 */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1">
             <div className="flex bg-slate-100 rounded-xl p-1.5 gap-1 overflow-x-auto scrollbar-hide">
               {FEATURES.map(f => {
                 const Icon = f.icon;
@@ -607,7 +607,7 @@ export default function NovelCreator() {
               value={currentInput}
               onChange={(e) => setCurrentInput(e.target.value)}
               placeholder={currentFeature?.placeholder}
-              className="flex-1 w-full p-3 sm:p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed"
+              className="flex-1 w-full p-3 sm:p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed placeholder:text-slate-400 bg-white"
             />
             
             <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
