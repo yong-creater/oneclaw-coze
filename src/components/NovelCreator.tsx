@@ -90,7 +90,7 @@ export default function NovelCreator() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedFeature, setSelectedFeature] = useState('polish');
-  const [selectedModel, setSelectedModel] = useState('doubao-seed-2-0-pro-260215'); // 默认豆包 Seed Pro
+  const [selectedModel, setSelectedModel] = useState('doubao-seed-2-0-pro-260215');
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [modelProvider, setModelProvider] = useState('doubao');
   const [modelSearch, setModelSearch] = useState('');
@@ -115,13 +115,11 @@ export default function NovelCreator() {
       )
     : currentProviderModels;
 
-  // 关闭弹框
   const closePicker = () => {
     setShowModelPicker(false);
     setModelSearch('');
   };
 
-  // 选择模型
   const handleSelectModel = (model: any) => {
     setSelectedModel(model.id);
     closePicker();
@@ -142,7 +140,6 @@ export default function NovelCreator() {
     fetchModels();
   }, []);
 
-  // 点击外部关闭弹框
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -304,89 +301,85 @@ export default function NovelCreator() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // 获取当前模型的厂商配置
   const getProviderConfig = (providerName: string) => {
     const found = PROVIDERS.find(p => 
       providerName.includes(p.name) || 
       (p.name === '豆包' && providerName.includes('Coze'))
     );
-    return found || PROVIDERS[11]; // 默认"其他"
+    return found || PROVIDERS[11];
   };
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50">
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold mb-1">
+    <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-[calc(100vh-200px)]">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* 页面标题 */}
+        <div className="text-center mb-6">
+          <h2 className="text-3xl font-bold mb-2">
             <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
               AI 小说创作助手
             </span>
           </h2>
-          <p className="text-sm text-slate-500">基于优质AI模型，让创作更轻松</p>
+          <p className="text-slate-500">基于优质AI模型，让创作更轻松</p>
         </div>
 
-        {/* 功能选择 - 顶部 */}
-        <div className="bg-white rounded-2xl shadow-lg p-4 mb-4">
-          <div className="flex gap-2">
-            {FEATURES.map(f => {
-              const Icon = f.icon;
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => setSelectedFeature(f.id)}
-                  className={`flex-1 p-2.5 rounded-xl transition-all flex flex-col items-center gap-1.5 ${
-                    selectedFeature === f.id
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 ${selectedFeature === f.id ? 'text-white' : 'text-slate-500'}`} />
-                  <span className={`font-medium text-xs ${selectedFeature === f.id ? 'text-white' : 'text-slate-700'}`}>
-                    {f.name}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 输入输出区域 */}
-        <div className="grid lg:grid-cols-2 gap-4">
-          {/* 左侧：输入 */}
-          <div className="bg-white rounded-2xl shadow-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-sm">{currentFeature?.name} - 输入内容</h3>
+        {/* 主操作区域 - 全宽布局 */}
+        <div className="flex gap-6">
+          {/* 左侧：输入区域 */}
+          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
+            {/* 顶部工具栏 */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                {/* 功能选择 - 紧凑横向排列 */}
+                <div className="flex bg-slate-100 rounded-lg p-1">
+                  {FEATURES.map(f => {
+                    const Icon = f.icon;
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={() => setSelectedFeature(f.id)}
+                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+                          selectedFeature === f.id
+                            ? 'bg-white text-orange-600 shadow-sm'
+                            : 'text-slate-600 hover:text-slate-800'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        {f.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               
-              {/* 模型选择按钮 */}
+              {/* 模型选择 - 右侧 */}
               <div className="relative">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowModelPicker(!showModelPicker);
                   }}
-                  className="model-trigger flex items-center gap-2 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+                  className="model-trigger flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm"
                 >
                   {(() => {
                     const providerConfig = getProviderConfig(currentModel.provider || '豆包');
                     return (
-                      <span className={`w-5 h-5 rounded-full ${providerConfig.color} ${providerConfig.border ? 'border border-slate-300' : ''} ${providerConfig.textColor} flex items-center justify-center text-[10px] font-bold`}>
+                      <span className={`w-6 h-6 rounded-full ${providerConfig.color} ${providerConfig.border ? 'border border-slate-300' : ''} ${providerConfig.textColor} flex items-center justify-center text-[10px] font-bold`}>
                         {(currentModel.provider || '豆包').charAt(0)}
                       </span>
                     );
                   })()}
-                  <span className="text-xs font-medium text-slate-700 max-w-[120px] truncate">
+                  <span className="font-medium text-slate-700">
                     {currentModel.name || '豆包 Seed Pro'}
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
                 </button>
                 
                 {/* 模型选择弹框 */}
                 {showModelPicker && (
                   <div 
-                    className="model-picker-container absolute top-full right-0 mt-2 w-[320px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+                    className="model-picker-container absolute top-full right-0 mt-2 w-[360px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* 搜索框 */}
                     <div className="p-3 border-b border-slate-100">
                       <input
                         type="text"
@@ -398,7 +391,6 @@ export default function NovelCreator() {
                       />
                     </div>
                     
-                    {/* 厂商标签 */}
                     <div className="p-2 border-b border-slate-100 overflow-x-auto">
                       <div className="flex gap-1.5 min-w-max">
                         {PROVIDERS.map(p => {
@@ -421,23 +413,22 @@ export default function NovelCreator() {
                       </div>
                     </div>
                     
-                    {/* 模型列表 */}
-                    <div className="max-h-64 overflow-y-auto">
+                    <div className="max-h-72 overflow-y-auto">
                       {filteredModels.length > 0 ? (
                         <div className="p-2 space-y-1">
                           {filteredModels.slice(0, 50).map(m => (
                             <button
                               key={m.id}
                               onClick={() => handleSelectModel(m)}
-                              className={`w-full p-2.5 rounded-lg text-left transition-all flex items-center justify-between gap-2 ${
+                              className={`w-full p-3 rounded-lg text-left transition-all flex items-center justify-between gap-2 ${
                                 selectedModel === m.id
                                   ? 'bg-orange-100 border border-orange-500'
                                   : 'hover:bg-slate-50'
                               }`}
                             >
                               <div className="flex-1 min-w-0">
-                                <div className="font-medium text-xs truncate">{m.name}</div>
-                                <div className="text-[10px] text-slate-400 truncate">{m.id}</div>
+                                <div className="font-medium text-sm truncate">{m.name}</div>
+                                <div className="text-xs text-slate-400 truncate">{m.id}</div>
                               </div>
                               {selectedModel === m.id && (
                                 <Check className="w-4 h-4 text-orange-500 flex-shrink-0" />
@@ -455,7 +446,6 @@ export default function NovelCreator() {
                       )}
                     </div>
                     
-                    {/* 关闭按钮 */}
                     <button
                       onClick={closePicker}
                       className="absolute top-2 right-2 p-1 hover:bg-slate-100 rounded-full"
@@ -467,78 +457,82 @@ export default function NovelCreator() {
               </div>
             </div>
             
-            <textarea
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder={currentFeature?.placeholder}
-              className="w-full h-48 p-3 border-2 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-sm"
-            />
-            
-            <div className="mt-3 flex gap-2">
-              {isLoading ? (
-                <button
-                  onClick={cancelRequest}
-                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center justify-center gap-2 text-sm"
-                >
-                  <AlertCircle className="w-4 h-4" />
-                  取消生成
-                </button>
-              ) : (
-                <button
-                  onClick={handleSubmit}
-                  disabled={!inputText.trim()}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm"
-                >
-                  <Send className="w-4 h-4" />
-                  开始生成
-                </button>
-              )}
-            </div>
-
-            {error && (
-              <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs flex items-center gap-2">
-                <AlertCircle className="w-3.5 h-3.5" />
-                {error}
+            {/* 输入框 - 占满剩余空间 */}
+            <div className="flex-1 flex flex-col">
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder={currentFeature?.placeholder}
+                className="flex-1 w-full p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed"
+              />
+              
+              {/* 提交按钮 */}
+              <div className="mt-4 flex items-center gap-3">
+                {isLoading ? (
+                  <button
+                    onClick={cancelRequest}
+                    className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center gap-2 font-medium"
+                  >
+                    <AlertCircle className="w-5 h-5" />
+                    取消生成
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!inputText.trim()}
+                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium text-lg"
+                  >
+                    <Send className="w-5 h-5" />
+                    开始生成
+                  </button>
+                )}
+                
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    {error}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
 
-          {/* 右侧：输出 */}
-          <div className="bg-white rounded-2xl shadow-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-sm">生成结果</h3>
+          {/* 右侧：输出区域 */}
+          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-lg">生成结果</h3>
               {outputText && (
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                   <button
                     onClick={handleCopy}
-                    className="px-2.5 py-1 text-xs border rounded-lg hover:bg-slate-50 flex items-center gap-1"
+                    className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-1.5"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                     {copied ? '已复制' : '复制'}
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="px-2.5 py-1 text-xs border rounded-lg hover:bg-slate-50 flex items-center gap-1"
+                    className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-1.5"
                   >
-                    <Download className="w-3.5 h-3.5" />
+                    <Download className="w-4 h-4" />
                     下载
                   </button>
                 </div>
               )}
             </div>
 
-            <div className="relative">
+            <div className="flex-1 relative">
               <textarea
                 value={outputText}
                 readOnly
                 placeholder="生成的内容将显示在这里..."
-                className="w-full h-48 p-3 border-2 rounded-xl resize-none bg-slate-50 text-sm"
+                className="w-full h-full p-4 border-2 border-slate-200 rounded-xl resize-none bg-slate-50 text-base leading-relaxed"
               />
               {isLoading && (
-                <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl">
+                <div className="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl">
                   <div className="text-center">
-                    <Loader2 className="w-6 h-6 animate-spin text-orange-500 mx-auto" />
-                    <p className="mt-1.5 text-xs text-slate-600">正在生成...</p>
+                    <Loader2 className="w-10 h-10 animate-spin text-orange-500 mx-auto" />
+                    <p className="mt-3 text-base text-slate-600">正在生成...</p>
                   </div>
                 </div>
               )}
