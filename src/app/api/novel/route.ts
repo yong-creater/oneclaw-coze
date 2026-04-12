@@ -6,8 +6,9 @@ const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
 const API4S_KEY = process.env.API4S_KEY || '';
 const API4S_URL = process.env.API4S_URL || 'https://4sapi.com';
 
-// Coze SDK 免费模型列表（豆包系列）
+// Coze SDK 免费模型列表
 const FREE_MODELS = [
+  // 豆包系列
   'doubao-seed-2-0-pro-260215',
   'doubao-seed-2-0-lite-260215',
   'doubao-seed-2-0-mini-260215',
@@ -19,6 +20,33 @@ const FREE_MODELS = [
   'doubao-pro-32k-240815',
   'doubao-lite-4k-240815',
   'doubao-lite-32k-240815',
+  // 智谱AI (GLM)
+  'glm-4',
+  'glm-4-flash',
+  'glm-4-plus',
+  'glm-4v',
+  'glm-3-turbo',
+  'characterglm',
+  // 通义千问
+  'qwen-turbo',
+  'qwen-plus',
+  'qwen-max',
+  'qwen2-72b-instruct',
+  'qwen2-7b-instruct',
+  'qwen-coder-turbo',
+  // Kimi
+  'moonshot-v1-8k',
+  'moonshot-v1-32k',
+  'moonshot-v1-128k',
+  // DeepSeek
+  'deepseek-chat',
+  'deepseek-coder',
+  // 百川
+  'baichuan4',
+  'baichuan3-turbo',
+  // 其他
+  'yi-34b-chat',
+  'minimax-chat',
 ];
 
 // 检查是否为免费模型
