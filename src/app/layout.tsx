@@ -96,6 +96,11 @@ export const metadata: Metadata = {
     'applicable-device': 'pc,mobile',
     'mobile-agent': 'pc,mobile',
   },
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/apple-icon',
+  },
 };
 
 // JSON-LD 结构化数据
