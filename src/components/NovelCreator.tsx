@@ -142,8 +142,12 @@ export default function NovelCreator() {
     };
     if (showModelPicker) {
       document.addEventListener('click', handleClickOutside);
+      document.body.style.overflow = 'hidden'; // 禁止页面滚动
     }
-    return () => document.removeEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.body.style.overflow = ''; // 恢复页面滚动
+    };
   }, [showModelPicker]);
 
   const getApiKey = useCallback((): string => {
