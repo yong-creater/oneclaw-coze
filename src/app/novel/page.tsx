@@ -62,6 +62,7 @@ export default function NovelPage() {
   const [selectedModel, setSelectedModel] = useState('deepseek-chat');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [modelType, setModelType] = useState<'free' | 'paid'>('free');
   const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -69,6 +70,9 @@ export default function NovelPage() {
   
   const currentFeature = FEATURES.find(f => f.id === selectedFeature);
   const currentModel = availableModels.find(m => m.id === selectedModel) || { name: selectedModel, provider: 'Coze', providerLogo: '🦞', isFree: true };
+  const filteredModels = modelType === 'free' 
+    ? availableModels.filter(m => m.isFree)
+    : availableModels.filter(m => !m.isFree);
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -312,63 +316,97 @@ export default function NovelPage() {
               </div>
             </div>
 
-            {/* 模型选择 - 下拉选择 */}
+            {/* 模型选择 - 免费/付费切换 + 下拉 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
+              
+              {/* 免费/付费切换 */}
+              <div className="flex gap-2 mb-3">
+                <button
+                  onClick={() => setModelType('free')}
+                  className={`flex-1 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                    modelType === 'free'
+                      ? 'bg-green-500 text-white shadow-lg'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-current"></span>
+                  免费模型
+                </button>
+                <button
+                  onClick={() => setModelType('paid')}
+                  className={`flex-1 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                    modelType === 'paid'
+                      ? 'bg-amber-500 text-white shadow-lg'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-current"></span>
+                  付费模型
+                </button>
+              </div>
+              
+              {/* 模型下拉选择 */}
               <select
                 value={selectedModel}
                 onChange={(e) => setSelectedModel(e.target.value)}
                 className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 transition-colors"
               >
-                <optgroup label="🦞 Coze 免费">
-                  {availableModels.filter(m => m.isFree).map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="🤖 OpenAI">
-                  {availableModels.filter(m => m.provider === 'OpenAI').slice(0, 30).map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="🔵 Anthropic">
-                  {availableModels.filter(m => m.provider === 'Anthropic').slice(0, 15).map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="💙 Google">
-                  {availableModels.filter(m => m.provider === 'Google').slice(0, 15).map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="🌙 Moonshot">
-                  {availableModels.filter(m => m.provider === 'Moonshot').slice(0, 10).map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="💀 xAI">
-                  {availableModels.filter(m => m.provider === 'xAI').slice(0, 10).map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </optgroup>
-                <optgroup label="📦 其他">
-                  {availableModels.filter(m => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI', 'Coze'].includes(m.provider)).slice(0, 20).map(m => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} - {m.provider}
-                    </option>
-                  ))}
-                </optgroup>
+                <option value="">请选择模型...</option>
+                {modelType === 'free' ? (
+                  <optgroup label="🦞 Coze 免费">
+                    {filteredModels.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ) : (
+                  <>
+                    <optgroup label="🤖 OpenAI">
+                      {filteredModels.filter(m => m.provider === 'OpenAI').slice(0, 30).map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🔵 Anthropic">
+                      {filteredModels.filter(m => m.provider === 'Anthropic').slice(0, 15).map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="💙 Google">
+                      {filteredModels.filter(m => m.provider === 'Google').slice(0, 15).map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🌙 Moonshot">
+                      {filteredModels.filter(m => m.provider === 'Moonshot').slice(0, 10).map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="💀 xAI">
+                      {filteredModels.filter(m => m.provider === 'xAI').slice(0, 10).map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="📦 其他">
+                      {filteredModels.filter(m => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI'].includes(m.provider)).slice(0, 20).map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} - {m.provider}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </>
+                )}
               </select>
             </div>
 
