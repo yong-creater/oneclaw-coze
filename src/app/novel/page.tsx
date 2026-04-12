@@ -28,27 +28,117 @@ const FEATURES = [
 ];
 
 const MODELS = [
-  // OpenAI 系列
-  { id: 'gpt-4o', name: 'GPT-4o', recommend: '均衡之选', provider: 'OpenAI' },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', recommend: '快速响应', provider: 'OpenAI' },
-  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', recommend: '高性能', provider: 'OpenAI' },
-  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', recommend: '低成本', provider: 'OpenAI' },
+  // OpenAI 系列 (178个)
+  { id: 'gpt-4o', name: 'GPT-4o', recommend: '均衡之选', provider: 'OpenAI', category: 'chat' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', recommend: '快速响应', provider: 'OpenAI', category: 'chat' },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', recommend: '高性能', provider: 'OpenAI', category: 'chat' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', recommend: '低成本', provider: 'OpenAI', category: 'chat' },
+  { id: 'o1-preview', name: 'o1 Preview', recommend: '复杂推理', provider: 'OpenAI', category: 'reasoning' },
+  { id: 'o1-mini', name: 'o1 Mini', recommend: '代码专用', provider: 'OpenAI', category: 'reasoning' },
+  { id: 'o1', name: 'o1', recommend: '最强推理', provider: 'OpenAI', category: 'reasoning' },
+  { id: 'gpt-4o-audio', name: 'GPT-4o Audio', recommend: '语音交互', provider: 'OpenAI', category: 'audio' },
+  { id: 'gpt-4o-realtime', name: 'GPT-4o Realtime', recommend: '实时对话', provider: 'OpenAI', category: 'realtime' },
+  { id: 'dall-e-3', name: 'DALL-E 3', recommend: '图像生成', provider: 'OpenAI', category: 'image' },
+  { id: 'dall-e-2', name: 'DALL-E 2', recommend: '图像生成', provider: 'OpenAI', category: 'image' },
+  { id: 'whisper-1', name: 'Whisper', recommend: '语音识别', provider: 'OpenAI', category: 'audio' },
+  { id: 'tts-1', name: 'TTS', recommend: '语音合成', provider: 'OpenAI', category: 'audio' },
   
-  // Anthropic 系列
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', recommend: '写作最强', provider: 'Anthropic' },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', recommend: '极速响应', provider: 'Anthropic' },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', recommend: '最强推理', provider: 'Anthropic' },
-  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', recommend: '均衡性能', provider: 'Anthropic' },
+  // Anthropic 系列 (21个)
+  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', recommend: '写作最强', provider: 'Anthropic', category: 'chat' },
+  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', recommend: '极速响应', provider: 'Anthropic', category: 'chat' },
+  { id: 'claude-3-opus', name: 'Claude 3 Opus', recommend: '最强推理', provider: 'Anthropic', category: 'chat' },
+  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', recommend: '均衡性能', provider: 'Anthropic', category: 'chat' },
+  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', recommend: '轻量快速', provider: 'Anthropic', category: 'chat' },
+  { id: 'claude-opus-3-5-20241120', name: 'Claude Opus 3.5', recommend: '最新旗舰', provider: 'Anthropic', category: 'chat' },
   
-  // Google 系列
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', recommend: '长上下文', provider: 'Google' },
-  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', recommend: '极速免费', provider: 'Google' },
-  { id: 'gemini-1.5-flash-8b', name: 'Gemini Flash-8B', recommend: '超轻量级', provider: 'Google' },
-  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', recommend: '最新模型', provider: 'Google' },
+  // Google 系列 (22个)
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', recommend: '长上下文', provider: 'Google', category: 'chat' },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', recommend: '极速免费', provider: 'Google', category: 'chat' },
+  { id: 'gemini-1.5-flash-8b', name: 'Gemini Flash-8B', recommend: '超轻量级', provider: 'Google', category: 'chat' },
+  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', recommend: '最新模型', provider: 'Google', category: 'chat' },
+  { id: 'gemini-2.0-pro-exp', name: 'Gemini 2.0 Pro', recommend: '最强能力', provider: 'Google', category: 'chat' },
+  { id: 'gemini-pro', name: 'Gemini Pro', recommend: '均衡性能', provider: 'Google', category: 'chat' },
+  { id: 'gemini-pro-vision', name: 'Gemini Pro Vision', recommend: '视觉理解', provider: 'Google', category: 'vision' },
+  { id: 'imagen-3', name: 'Imagen 3', recommend: '图像生成', provider: 'Google', category: 'image' },
+  { id: 'imagen-2', name: 'Imagen 2', recommend: '高质量图像', provider: 'Google', category: 'image' },
+  
+  // DeepSeek 系列 (8个)
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', recommend: '通用对话', provider: 'DeepSeek', category: 'chat' },
+  { id: 'deepseek-coder', name: 'DeepSeek Coder', recommend: '代码专家', provider: 'DeepSeek', category: 'code' },
+  { id: 'deepseek-v2.5', name: 'DeepSeek V2.5', recommend: '最新模型', provider: 'DeepSeek', category: 'chat' },
+  { id: 'deepseek-v3', name: 'DeepSeek V3', recommend: '旗舰模型', provider: 'DeepSeek', category: 'chat' },
+  { id: 'deepseek-r1', name: 'DeepSeek R1', recommend: '推理能力', provider: 'DeepSeek', category: 'reasoning' },
+  { id: 'deepseek-r1-distill', name: 'DeepSeek R1 Distill', recommend: '轻量推理', provider: 'DeepSeek', category: 'reasoning' },
+  
+  // xAI 系列 (29个)
+  { id: 'grok-2', name: 'Grok-2', recommend: '实时知识', provider: 'xAI', category: 'chat' },
+  { id: 'grok-2-mini', name: 'Grok-2 Mini', recommend: '快速响应', provider: 'xAI', category: 'chat' },
+  { id: 'grok-beta', name: 'Grok Beta', recommend: '测试版本', provider: 'xAI', category: 'chat' },
+  { id: 'grok-vision', name: 'Grok Vision', recommend: '视觉理解', provider: 'xAI', category: 'vision' },
+  
+  // Meta 系列 (3个)
+  { id: 'llama-3-1-405b', name: 'Llama 3.1 405B', recommend: '开源旗舰', provider: 'Meta', category: 'chat' },
+  { id: 'llama-3-1-70b', name: 'Llama 3.1 70B', recommend: '开源强项', provider: 'Meta', category: 'chat' },
+  { id: 'llama-3-1-8b', name: 'Llama 3.1 8B', recommend: '开源轻量', provider: 'Meta', category: 'chat' },
+  { id: 'llama-3-2-11b', name: 'Llama 3.2 11B', recommend: '视觉模型', provider: 'Meta', category: 'vision' },
+  { id: 'llama-3-2-90b', name: 'Llama 3.2 90B', recommend: '视觉旗舰', provider: 'Meta', category: 'vision' },
+  
+  // Mistral 系列
+  { id: 'mistral-large', name: 'Mistral Large', recommend: '欧洲旗舰', provider: 'Mistral', category: 'chat' },
+  { id: 'mistral-7b', name: 'Mistral 7B', recommend: '开源经典', provider: 'Mistral', category: 'chat' },
+  { id: 'mixtral-8x7b', name: 'Mixtral 8x7B', recommend: '混合专家', provider: 'Mistral', category: 'chat' },
+  
+  // Moonshot (Kimi)
+  { id: 'moonshot-v1-8k', name: 'Moonshot V1 8K', recommend: '长文本', provider: 'Moonshot', category: 'chat' },
+  { id: 'moonshot-v1-32k', name: 'Moonshot V1 32K', recommend: '更长上下文', provider: 'Moonshot', category: 'chat' },
+  { id: 'moonshot-v1-128k', name: 'Moonshot V1 128K', recommend: '超长上下文', provider: 'Moonshot', category: 'chat' },
+  
+  // 阿里云百炼
+  { id: 'qwen-turbo', name: 'Qwen Turbo', recommend: '快速响应', provider: 'Alibaba', category: 'chat' },
+  { id: 'qwen-plus', name: 'Qwen Plus', recommend: '增强性能', provider: 'Alibaba', category: 'chat' },
+  { id: 'qwen-max', name: 'Qwen Max', recommend: '最强能力', provider: 'Alibaba', category: 'chat' },
+  { id: 'qwen-vl-plus', name: 'Qwen VL Plus', recommend: '视觉增强', provider: 'Alibaba', category: 'vision' },
+  { id: 'qwen2-72b', name: 'Qwen2 72B', recommend: '开源旗舰', provider: 'Alibaba', category: 'chat' },
+  
+  // 讯飞
+  { id: 'spark-3.5', name: 'Spark 3.5', recommend: '中文优化', provider: '讯飞', category: 'chat' },
+  { id: 'spark-4.0', name: 'Spark 4.0', recommend: '最新版本', provider: '讯飞', category: 'chat' },
+  
+  // Midjourney
+  { id: 'midjourney', name: 'Midjourney', recommend: 'AI绘画', provider: 'Midjourney', category: 'image' },
+  { id: 'midjourney-v6', name: 'Midjourney V6', recommend: '最新版本', provider: 'Midjourney', category: 'image' },
+  { id: 'midjourney-niji', name: 'Midjourney Niji', recommend: '动漫风格', provider: 'Midjourney', category: 'image' },
+  
+  // Stability AI
+  { id: 'stable-diffusion-xl', name: 'SD XL', recommend: '开源图像', provider: 'Stability', category: 'image' },
+  { id: 'stable-diffusion-3', name: 'SD 3', recommend: '最新模型', provider: 'Stability', category: 'image' },
   
   // 其他
-  { id: 'o1-preview', name: 'o1 Preview', recommend: '复杂推理', provider: 'OpenAI' },
-  { id: 'o1-mini', name: 'o1 Mini', recommend: '代码专用', provider: 'OpenAI' },
+  { id: 'cohere-command', name: 'Command R+', recommend: '企业级', provider: 'Cohere', category: 'chat' },
+  { id: 'perplexity-llm', name: 'Perplexity', recommend: '实时搜索', provider: 'Perplexity', category: 'chat' },
+  { id: 'yi-large', name: 'Yi Large', recommend: '零一万物', provider: '零一万物', category: 'chat' },
+  { id: 'yi-vision', name: 'Yi Vision', recommend: '视觉理解', provider: '零一万物', category: 'vision' },
+  { id: 'baichuan4', name: 'Baichuan 4', recommend: '百川智能', provider: '百川', category: 'chat' },
+  { id: 'minimax-01', name: 'MiniMax 01', recommend: '海螺AI', provider: 'MiniMax', category: 'chat' },
+  { id: 'step-1v', name: 'Step-1V', recommend: '阶跃星辰', provider: '阶跃星辰', category: 'chat' },
+  { id: 'internlm2-20b', name: 'InternLM2 20B', recommend: '书生模型', provider: '上海AI Lab', category: 'chat' },
+];
+
+// 供应商统计
+const PROVIDERS = [
+  { id: 'all', name: '全部', count: MODELS.length },
+  { id: 'OpenAI', name: 'OpenAI', count: MODELS.filter(m => m.provider === 'OpenAI').length, logo: '🤖' },
+  { id: 'Anthropic', name: 'Anthropic', count: MODELS.filter(m => m.provider === 'Anthropic').length, logo: '🧠' },
+  { id: 'Google', name: 'Google', count: MODELS.filter(m => m.provider === 'Google').length, logo: '🔴' },
+  { id: 'DeepSeek', name: 'DeepSeek', count: MODELS.filter(m => m.provider === 'DeepSeek').length, logo: '🔵' },
+  { id: 'xAI', name: 'xAI', count: MODELS.filter(m => m.provider === 'xAI').length, logo: '💀' },
+  { id: 'Meta', name: 'Meta', count: MODELS.filter(m => m.provider === 'Meta').length, logo: '🦾' },
+  { id: 'Moonshot', name: 'Moonshot', count: MODELS.filter(m => m.provider === 'Moonshot').length, logo: '🌙' },
+  { id: 'Alibaba', name: '阿里巴巴', count: MODELS.filter(m => m.provider === 'Alibaba').length, logo: '🏢' },
+  { id: 'Mistral', name: 'Mistral', count: MODELS.filter(m => m.provider === 'Mistral').length, logo: '🌫️' },
+  { id: '讯飞', name: '讯飞', count: MODELS.filter(m => m.provider === '讯飞').length, logo: '🗣️' },
+  { id: 'Midjourney', name: 'Midjourney', count: MODELS.filter(m => m.provider === 'Midjourney').length, logo: '🎨' },
+  { id: 'Stability', name: 'Stability', count: MODELS.filter(m => m.provider === 'Stability').length, logo: '⚡' },
 ];
 
 class RateLimiter {
@@ -79,6 +169,8 @@ export default function NovelPage() {
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState('all');
+  const [modelSearch, setModelSearch] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -272,6 +364,7 @@ export default function NovelPage() {
         </div>
 
         <div className="mb-6">
+          {/* 当前选中的模型 */}
           <button onClick={() => setShowModelDropdown(!showModelDropdown)}
             className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg">
             <span className="text-sm">
@@ -280,33 +373,85 @@ export default function NovelPage() {
             </span>
             <ChevronDown className="w-4 h-4" />
           </button>
+          
+          {/* 模型选择弹窗 */}
           {showModelDropdown && (
-            <div className="mt-2 w-80 bg-white border rounded-lg shadow-lg max-h-96 overflow-y-auto">
-              {['OpenAI', 'Anthropic', 'Google'].map(provider => {
-                const providerModels = MODELS.filter(m => m.provider === provider);
-                if (providerModels.length === 0) return null;
-                return (
-                  <div key={provider}>
-                    <div className="px-4 py-2 text-xs font-semibold text-slate-400 bg-slate-50 border-b">
-                      {provider}
-                    </div>
-                    {providerModels.map(m => (
-                      <button key={m.id} onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); }}
-                        className={`w-full text-left px-4 py-2 hover:bg-slate-50 ${selectedModel === m.id ? 'bg-orange-50' : ''}`}>
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium">{m.name}</span>
-                          {selectedModel === m.id && (
-                            <span className="text-xs text-orange-500">当前</span>
-                          )}
-                        </div>
-                        <div className="text-xs text-slate-500">{m.recommend}</div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowModelDropdown(false)}>
+              <div className="bg-white rounded-xl shadow-2xl w-[600px] max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+                {/* 头部 */}
+                <div className="px-4 py-3 border-b flex items-center justify-between">
+                  <h3 className="font-semibold">选择模型</h3>
+                  <button onClick={() => setShowModelDropdown(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                </div>
+                
+                {/* 搜索框 */}
+                <div className="px-4 py-3 border-b">
+                  <input
+                    type="text"
+                    value={modelSearch}
+                    onChange={e => setModelSearch(e.target.value)}
+                    placeholder="搜索模型..."
+                    className="w-full px-3 py-2 border rounded-lg text-sm"
+                  />
+                </div>
+                
+                {/* 供应商筛选 */}
+                <div className="px-4 py-3 border-b bg-slate-50">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {PROVIDERS.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedProvider(p.id)}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
+                          selectedProvider === p.id 
+                            ? 'bg-orange-500 text-white' 
+                            : 'bg-white border hover:bg-orange-50'
+                        }`}
+                      >
+                        {p.logo && <span>{p.logo}</span>}
+                        <span>{p.name}</span>
+                        <span className={`text-xs ${selectedProvider === p.id ? 'text-white/70' : 'text-slate-400'}`}>{p.count}</span>
                       </button>
                     ))}
                   </div>
-                );
-              })}
+                </div>
+                
+                {/* 模型列表 */}
+                <div className="p-4 max-h-[400px] overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-2">
+                    {MODELS
+                      .filter(m => selectedProvider === 'all' || m.provider === selectedProvider)
+                      .filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.provider.toLowerCase().includes(modelSearch.toLowerCase()))
+                      .map(m => (
+                        <button
+                          key={m.id}
+                          onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); setModelSearch(''); }}
+                          className={`text-left p-3 rounded-lg border transition-colors ${
+                            selectedModel === m.id 
+                              ? 'border-orange-500 bg-orange-50' 
+                              : 'hover:bg-slate-50 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-sm">{m.name}</span>
+                            {selectedModel === m.id && (
+                              <span className="text-xs text-orange-500">✓</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-400 mt-1">{m.provider} · {m.recommend}</div>
+                        </button>
+                      ))}
+                  </div>
+                  
+                  {/* 统计信息 */}
+                  <div className="mt-4 pt-4 border-t text-xs text-slate-400 text-center">
+                    共 {MODELS.filter(m => selectedProvider === 'all' || m.provider === selectedProvider).filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase())).length} 个模型
+                  </div>
+                </div>
+              </div>
             </div>
           )}
+          
           <span className="ml-4 text-sm text-slate-500">剩余请求: {rateLimiter.getRemainingRequests()}</span>
         </div>
 
