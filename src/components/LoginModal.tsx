@@ -27,6 +27,9 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ open, onClose, onSuccess }: LoginModalProps) {
+  // 显示注册表单
+  const [showRegister, setShowRegister] = useState(false);
+  
   // 邮箱登录状态
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -44,6 +47,7 @@ export default function LoginModal({ open, onClose, onSuccess }: LoginModalProps
 
   // 重置状态
   const resetStates = () => {
+    setShowRegister(false);
     setLoginEmail('');
     setLoginPassword('');
     setRegisterEmail('');
@@ -188,12 +192,9 @@ export default function LoginModal({ open, onClose, onSuccess }: LoginModalProps
         </DialogHeader>
 
         <Tabs defaultValue="login" className="w-full mt-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login" className="text-sm">
               账号登录
-            </TabsTrigger>
-            <TabsTrigger value="register" className="text-sm">
-              快速注册
             </TabsTrigger>
             <TabsTrigger value="wechat" className="text-sm relative">
               微信登录
@@ -201,32 +202,82 @@ export default function LoginModal({ open, onClose, onSuccess }: LoginModalProps
             </TabsTrigger>
           </TabsList>
 
-          {/* 邮箱登录 */}
+          {/* 邮箱登录/注册 */}
           <TabsContent value="login" className="space-y-4 mt-4">
-            <div className="space-y-3">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  type="email"
-                  placeholder="请输入邮箱"
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  className="pl-10"
-                  disabled={loading}
-                />
+            {showRegister ? (
+              // 注册表单
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-medium text-slate-700 dark:text-slate-300">注册新账号</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowRegister(false)}
+                    className="text-sm text-slate-400 hover:text-slate-600"
+                  >
+                    返回登录
+                  </button>
+                </div>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="email"
+                    placeholder="请输入邮箱"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    className="pl-10"
+                    disabled={loading}
+                  />
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="password"
+                    placeholder="请输入密码（至少6位）"
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    className="pl-10"
+                    disabled={loading}
+                  />
+                </div>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="请输入昵称（选填）"
+                    value={registerNickname}
+                    onChange={(e) => setRegisterNickname(e.target.value)}
+                    className="pl-10"
+                    disabled={loading}
+                  />
+                </div>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  type="password"
-                  placeholder="请输入密码"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="pl-10"
-                  disabled={loading}
-                />
+            ) : (
+              // 登录表单
+              <div className="space-y-3">
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="email"
+                    placeholder="请输入邮箱"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    className="pl-10"
+                    disabled={loading}
+                  />
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    type="password"
+                    placeholder="请输入密码"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    className="pl-10"
+                    disabled={loading}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {error && (
               <div className="flex items-center gap-2 text-sm text-red-500">
@@ -236,88 +287,54 @@ export default function LoginModal({ open, onClose, onSuccess }: LoginModalProps
             )}
 
             <Button
-              onClick={handleEmailLogin}
+              onClick={showRegister ? handleEmailRegister : handleEmailLogin}
               disabled={loading}
               className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  登录中...
+                  {showRegister ? '注册中...' : '登录中...'}
                 </>
               ) : (
-                '登录'
+                showRegister ? '注册' : '登录'
               )}
             </Button>
 
             <p className="text-xs text-slate-400 text-center">
-              登录即表示同意 <span className="text-orange-500 cursor-pointer">用户协议</span> 和 <span className="text-orange-500 cursor-pointer">隐私政策</span>
+              {showRegister ? (
+                <>注册即表示同意 <span className="text-orange-500 cursor-pointer">用户协议</span> 和 <span className="text-orange-500 cursor-pointer">隐私政策</span></>
+              ) : (
+                <>登录即表示同意 <span className="text-orange-500 cursor-pointer">用户协议</span> 和 <span className="text-orange-500 cursor-pointer">隐私政策</span></>
+              )}
             </p>
-          </TabsContent>
 
-          {/* 邮箱注册 */}
-          <TabsContent value="register" className="space-y-4 mt-4">
-            <div className="space-y-3">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  type="email"
-                  placeholder="请输入邮箱"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                  className="pl-10"
-                  disabled={loading}
-                />
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  type="password"
-                  placeholder="请输入密码（至少6位）"
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                  className="pl-10"
-                  disabled={loading}
-                />
-              </div>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  type="text"
-                  placeholder="请输入昵称（选填）"
-                  value={registerNickname}
-                  onChange={(e) => setRegisterNickname(e.target.value)}
-                  className="pl-10"
-                  disabled={loading}
-                />
-              </div>
+            {/* 切换登录/注册链接 */}
+            <div className="text-center pt-2 border-t border-slate-100">
+              {showRegister ? (
+                <>
+                  <span className="text-sm text-slate-500">已有账号？</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowRegister(false)}
+                    className="text-sm text-orange-500 hover:text-orange-600 font-medium ml-1"
+                  >
+                    立即登录
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm text-slate-500">还没有账号？</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowRegister(true)}
+                    className="text-sm text-orange-500 hover:text-orange-600 font-medium ml-1"
+                  >
+                    立即注册
+                  </button>
+                </>
+              )}
             </div>
-
-            {error && (
-              <div className="flex items-center gap-2 text-sm text-red-500">
-                <AlertCircle className="w-4 h-4" />
-                {error}
-              </div>
-            )}
-
-            <Button
-              onClick={handleEmailRegister}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  注册中...
-                </>
-              ) : (
-                '注册'
-              )}
-            </Button>
-
-            <p className="text-xs text-slate-400 text-center">
-              注册即表示同意 <span className="text-orange-500 cursor-pointer">用户协议</span> 和 <span className="text-orange-500 cursor-pointer">隐私政策</span>
-            </p>
           </TabsContent>
 
           {/* 微信登录（开发中） */}
