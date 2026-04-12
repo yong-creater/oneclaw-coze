@@ -353,56 +353,82 @@ export default function NovelPage() {
                 className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 transition-colors"
               >
                 <option value="">请选择模型...</option>
+                
                 {modelType === 'free' ? (
-                  <optgroup label="🦞 Coze 免费">
-                    {filteredModels.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                  </optgroup>
+                  <>
+                    <optgroup label="🦞 豆包 Seed">
+                      {filteredModels.filter(m => m.name.includes('豆包') || m.id.includes('doubao')).map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🔵 DeepSeek">
+                      {filteredModels.filter(m => m.name.includes('DeepSeek') || m.id.includes('deepseek')).map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🌙 Kimi">
+                      {filteredModels.filter(m => m.name.includes('Kimi') || m.id.includes('kimi')).map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="📊 智谱 GLM">
+                      {filteredModels.filter(m => m.name.includes('GLM') || m.id.includes('glm')).map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🏢 通义 Qwen">
+                      {filteredModels.filter(m => m.name.includes('Qwen') || m.id.includes('qwen')).map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="⚡ MiniMax">
+                      {filteredModels.filter(m => m.name.includes('MiniMax') || m.id.includes('minimax')).map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="📦 其他免费模型">
+                      {filteredModels.filter(m => 
+                        !m.name.includes('豆包') && !m.id.includes('doubao') &&
+                        !m.name.includes('DeepSeek') && !m.id.includes('deepseek') &&
+                        !m.name.includes('Kimi') && !m.id.includes('kimi') &&
+                        !m.name.includes('GLM') && !m.id.includes('glm') &&
+                        !m.name.includes('Qwen') && !m.id.includes('qwen') &&
+                        !m.name.includes('MiniMax') && !m.id.includes('minimax')
+                      ).map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </optgroup>
+                  </>
                 ) : (
                   <>
                     <optgroup label="🤖 OpenAI">
                       {filteredModels.filter(m => m.provider === 'OpenAI').slice(0, 30).map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}
-                        </option>
+                        <option key={m.id} value={m.id}>{m.name}</option>
                       ))}
                     </optgroup>
                     <optgroup label="🔵 Anthropic">
                       {filteredModels.filter(m => m.provider === 'Anthropic').slice(0, 15).map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}
-                        </option>
+                        <option key={m.id} value={m.id}>{m.name}</option>
                       ))}
                     </optgroup>
                     <optgroup label="💙 Google">
                       {filteredModels.filter(m => m.provider === 'Google').slice(0, 15).map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}
-                        </option>
+                        <option key={m.id} value={m.id}>{m.name}</option>
                       ))}
                     </optgroup>
                     <optgroup label="🌙 Moonshot">
                       {filteredModels.filter(m => m.provider === 'Moonshot').slice(0, 10).map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}
-                        </option>
+                        <option key={m.id} value={m.id}>{m.name}</option>
                       ))}
                     </optgroup>
                     <optgroup label="💀 xAI">
                       {filteredModels.filter(m => m.provider === 'xAI').slice(0, 10).map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name}
-                        </option>
+                        <option key={m.id} value={m.id}>{m.name}</option>
                       ))}
                     </optgroup>
                     <optgroup label="📦 其他">
                       {filteredModels.filter(m => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI'].includes(m.provider)).slice(0, 20).map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} - {m.provider}
-                        </option>
+                        <option key={m.id} value={m.id}>{m.name} - {m.provider}</option>
                       ))}
                     </optgroup>
                   </>
