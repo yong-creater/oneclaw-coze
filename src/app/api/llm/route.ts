@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
-// 4sapi 密钥（生产环境应使用环境变量或加密存储）
-const API4S_KEY = process.env.API4S_KEY || process.env.NEXT_PUBLIC_API2D_KEY || '';
+// 4sapi 配置（设为 false 可完全禁用付费模型）
+const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
+const API4S_KEY = ENABLE_4SAPI ? (process.env.API4S_KEY || process.env.NEXT_PUBLIC_API2D_KEY || '') : '';
 const API4S_URL = process.env.API4S_URL || 'https://4sapi.com';
 
 // 4sapi 模型映射（这些模型通过 4sapi 调用）
@@ -43,6 +44,16 @@ export async function POST(request: NextRequest) {
     // 如果有feature，替换system message
     if (feature && SYSTEM_PROMPTS[feature]) {
       messages[0] = { role: 'system', content: SYSTEM_PROMPTS[feature] };
+    }
+
+    // 检查是否为付费模型
+    const isPaidModel = isApi4sModel(model);
+    
+    // 如果是付费模型但未启用4sapi，返回错误
+    if (isPaidModel && (!ENABLE_4SAPI || !API4S_KEY)) {
+      return NextResponse.json({ 
+        error: '付费模型未启用，请选择免费模型或联系管理员配置付费API' 
+      }, { status: 403 });
     }
 
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
