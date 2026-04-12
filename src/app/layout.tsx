@@ -13,11 +13,6 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://oneclaw.shop'),
-  icons: {
-    icon: '/favicon.png',
-    shortcut: '/favicon.png',
-    apple: '/apple-touch-icon.png',
-  },
   title: {
     default: 'OneClaw - 全品类AI工具导航 | 精选238款优质AI工具',
     template: '%s | OneClaw AI工具导航',
