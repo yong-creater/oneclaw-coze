@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
 
-    const messages = [
+    const messages: { role: 'user' | 'system' | 'assistant'; content: string }[] = [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: input }
     ];
