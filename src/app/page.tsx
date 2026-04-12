@@ -120,6 +120,61 @@ interface Skill {
   skill_categories: { id: number; name: string; slug: string; color: string } | null;
 }
 
+// ==================== 工具Logo组件 ====================
+interface ToolLogoProps {
+  src?: string | null;
+  name: string;
+  url?: string;
+  size?: number;
+  className?: string;
+}
+
+// 工具Logo组件 - 带字母占位符
+function ToolLogo({ src, name, url, size = 40, className = '' }: ToolLogoProps) {
+  const fallbackSrc = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(url || 'https://example.com')}&sz=64`;
+  const letter = name.charAt(0).toUpperCase();
+  const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316'];
+  const colorIndex = letter.charCodeAt(0) % colors.length;
+  const bgColor = colors[colorIndex];
+  
+  return (
+    <div 
+      className={`relative rounded-lg overflow-hidden flex-shrink-0 ${className}`}
+      style={{ width: size, height: size }}
+    >
+      <img
+        src={src || fallbackSrc}
+        alt={name}
+        className="w-full h-full object-contain bg-slate-100 dark:bg-slate-700"
+        loading="lazy"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          if (target.src !== fallbackSrc) {
+            target.src = fallbackSrc;
+          } else {
+            // 如果Google Favicon也失败，显示字母
+            target.style.display = 'none';
+          }
+        }}
+        onLoad={(e) => {
+          const target = e.target as HTMLImageElement;
+          // 检查图片是否有效（不是空白图片）
+          if (target.naturalWidth === 0) {
+            target.style.display = 'none';
+          }
+        }}
+      />
+      {/* 备用字母图标 */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center font-bold text-white text-sm sm:text-base"
+        style={{ backgroundColor: bgColor }}
+      >
+        {letter}
+      </div>
+    </div>
+  );
+}
+
 // ==================== 常量 ====================
 const DIFFICULTY_COLORS: Record<string, string> = {
   '初级': 'bg-green-100 text-green-700',
@@ -614,11 +669,11 @@ export default function HomePage() {
       {/* 顶部导航 */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <AnimatedLobster size={36} />
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            {/* Logo - 防止被压缩 */}
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+              <AnimatedLobster size={32} className="sm:size-9" />
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent whitespace-nowrap">
                 OneClaw
               </span>
             </Link>
@@ -757,14 +812,11 @@ export default function HomePage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <img
-                                src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
-                                alt={item.tool_name}
-                                className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700"
-                                loading="lazy"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
-                                }}
+                              <ToolLogo
+                                src={item.tool_logo}
+                                name={item.tool_name}
+                                url={item.tool_url}
+                                size={40}
                               />
                               <div>
                                 <span className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors">
@@ -835,14 +887,12 @@ export default function HomePage() {
                         }`}>
                           {item.rank}
                         </div>
-                        <img
-                          src={item.tool_logo || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`}
-                          alt={item.tool_name}
-                          className="w-10 h-10 rounded-lg object-contain bg-slate-100 dark:bg-slate-700 flex-shrink-0"
-                          loading="lazy"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(item.tool_url)}&sz=64`;
-                          }}
+                        <ToolLogo
+                          src={item.tool_logo}
+                          name={item.tool_name}
+                          url={item.tool_url}
+                          size={40}
+                          className="flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-slate-800 dark:text-white truncate">
