@@ -181,8 +181,8 @@ export default function NovelPage() {
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [expandedProvider, setExpandedProvider] = useState<string | null>('OpenAI');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [modelSearch, setModelSearch] = useState('');
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -390,38 +390,88 @@ export default function NovelPage() {
           {/* 模型选择弹窗 */}
           {showModelDropdown && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowModelDropdown(false)}>
-              <div className="bg-white rounded-xl shadow-2xl w-[700px] max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+              <div className="bg-white rounded-xl shadow-2xl w-[800px] max-h-[85vh] overflow-hidden" onClick={e => e.stopPropagation()}>
                 {/* 头部 */}
                 <div className="px-4 py-3 border-b flex items-center justify-between">
-                  <h3 className="font-semibold">选择模型</h3>
+                  <h3 className="font-semibold text-lg">选择模型</h3>
                   <button onClick={() => setShowModelDropdown(false)} className="text-slate-400 hover:text-slate-600">✕</button>
                 </div>
                 
                 {/* 搜索框 */}
-                <div className="px-4 py-3 border-b">
-                  <input
-                    type="text"
-                    value={modelSearch}
-                    onChange={e => setModelSearch(e.target.value)}
-                    placeholder="搜索模型..."
-                    className="w-full px-3 py-2 border rounded-lg text-sm"
-                  />
+                <div className="px-4 py-3 border-b bg-white">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={modelSearch}
+                      onChange={e => setModelSearch(e.target.value)}
+                      placeholder="搜索模型..."
+                      className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+                  </div>
                 </div>
                 
-                {/* 分类筛选 */}
-                <div className="px-4 py-3 border-b bg-blue-50">
-                  <div className="flex items-center gap-1 text-xs text-blue-600 mb-2">
-                    <span>📂 模型分类</span>
+                {/* 一级分类导航 - 供应商 */}
+                <div className="px-4 py-3 border-b bg-gradient-to-r from-slate-50 to-slate-100">
+                  <div className="flex items-center gap-1 text-xs text-slate-500 mb-2 font-medium">
+                    <span>🏢 一级分类：供应商</span>
                   </div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    {CATEGORIES.map(c => {
-                      const count = MODELS.filter(m => m.category === c.id).length;
-                      if (c.id !== 'all' && count === 0) return null;
+                    {PROVIDERS.filter(p => {
+                      if (!modelSearch) return true;
+                      return p.name.toLowerCase().includes(modelSearch.toLowerCase()) || 
+                             MODELS.some(m => m.provider === p.id && m.name.toLowerCase().includes(modelSearch.toLowerCase()));
+                    }).map(p => {
+                      const providerModels = MODELS.filter(m => m.provider === p.id);
+                      return (
+                        <button
+                          key={p.id}
+                          onClick={() => { setExpandedProvider(p.id); setSelectedCategory(null); }}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all ${
+                            expandedProvider === p.id 
+                              ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' 
+                              : 'bg-white border hover:border-orange-300 hover:bg-orange-50'
+                          }`}
+                        >
+                          {p.logo && <span className="text-lg">{p.logo}</span>}
+                          <div className="text-left">
+                            <div className="font-medium">{p.name}</div>
+                            <div className={`text-xs ${expandedProvider === p.id ? 'text-white/70' : 'text-slate-400'}`}>{providerModels.length} 个模型</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                
+                {/* 二级分类导航 - 模型类型 */}
+                <div className="px-4 py-3 border-b bg-blue-50">
+                  <div className="flex items-center gap-1 text-xs text-blue-600 mb-2 font-medium">
+                    <span>📂 二级分类：{PROVIDERS.find(p => p.id === expandedProvider)?.name} 的模型类型</span>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      onClick={() => setSelectedCategory(null)}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                        selectedCategory === null 
+                          ? 'bg-blue-500 text-white' 
+                          : 'bg-white border hover:bg-blue-50'
+                      }`}
+                    >
+                      <span>🌐</span>
+                      <span>全部</span>
+                      <span className={`text-xs ${selectedCategory === null ? 'text-white/70' : 'text-slate-400'}`}>
+                        {MODELS.filter(m => m.provider === expandedProvider).length}
+                      </span>
+                    </button>
+                    {CATEGORIES.filter(c => c.id !== 'all').map(c => {
+                      const count = MODELS.filter(m => m.provider === expandedProvider && m.category === c.id).length;
+                      if (count === 0) return null;
                       return (
                         <button
                           key={c.id}
                           onClick={() => setSelectedCategory(c.id)}
-                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
                             selectedCategory === c.id 
                               ? 'bg-blue-500 text-white' 
                               : 'bg-white border hover:bg-blue-50'
@@ -429,37 +479,7 @@ export default function NovelPage() {
                         >
                           <span>{c.icon}</span>
                           <span>{c.name}</span>
-                          {c.id === 'all' && <span className={`text-xs ${selectedCategory === c.id ? 'text-white/70' : 'text-slate-400'}`}>{MODELS.length}</span>}
-                          {c.id !== 'all' && <span className={`text-xs ${selectedCategory === c.id ? 'text-white/70' : 'text-slate-400'}`}>{count}</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                {/* 供应商筛选 */}
-                <div className="px-4 py-3 border-b bg-slate-50">
-                  <div className="flex items-center gap-1 text-xs text-slate-500 mb-2">
-                    <span>🏢 供应商</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-wrap max-h-24 overflow-y-auto">
-                    {PROVIDERS.map(p => {
-                      const filteredModels = MODELS.filter(m => m.provider === p.id);
-                      const categoryModels = selectedCategory === 'all' ? filteredModels : filteredModels.filter(m => m.category === selectedCategory);
-                      if (p.id !== 'all' && categoryModels.length === 0) return null;
-                      return (
-                        <button
-                          key={p.id}
-                          onClick={() => setSelectedProvider(p.id)}
-                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
-                            selectedProvider === p.id 
-                              ? 'bg-orange-500 text-white' 
-                              : 'bg-white border hover:bg-orange-50'
-                          }`}
-                        >
-                          {p.logo && <span>{p.logo}</span>}
-                          <span>{p.name}</span>
-                          <span className={`text-xs ${selectedProvider === p.id ? 'text-white/70' : 'text-slate-400'}`}>{p.id === 'all' ? MODELS.length : categoryModels.length}</span>
+                          <span className={`text-xs ${selectedCategory === c.id ? 'text-white/70' : 'text-slate-400'}`}>{count}</span>
                         </button>
                       );
                     })}
@@ -467,45 +487,52 @@ export default function NovelPage() {
                 </div>
                 
                 {/* 模型列表 */}
-                <div className="p-4 max-h-[350px] overflow-y-auto">
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="p-4 max-h-[400px] overflow-y-auto">
+                  {/* 当前筛选信息 */}
+                  <div className="mb-3 text-sm text-slate-500">
+                    {PROVIDERS.find(p => p.id === expandedProvider)?.logo} {PROVIDERS.find(p => p.id === expandedProvider)?.name}
+                    {selectedCategory && (
+                      <> · {CATEGORIES.find(c => c.id === selectedCategory)?.icon} {CATEGORIES.find(c => c.id === selectedCategory)?.name}</>
+                    )}
+                    {modelSearch && <> · 搜索: {modelSearch}</>}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
                     {MODELS
-                      .filter(m => (selectedCategory === 'all' || m.category === selectedCategory))
-                      .filter(m => (selectedProvider === 'all' || m.provider === selectedProvider))
-                      .filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase()) || m.provider.toLowerCase().includes(modelSearch.toLowerCase()))
+                      .filter(m => m.provider === expandedProvider)
+                      .filter(m => selectedCategory === null || m.category === selectedCategory)
+                      .filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase()))
                       .map(m => (
                         <button
                           key={m.id}
-                          onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); setModelSearch(''); }}
-                          className={`text-left p-3 rounded-lg border transition-colors ${
+                          onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); }}
+                          className={`text-left p-4 rounded-xl border-2 transition-all ${
                             selectedModel === m.id 
-                              ? 'border-orange-500 bg-orange-50' 
-                              : 'hover:bg-slate-50 hover:border-slate-300'
+                              ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-amber-50 shadow-md' 
+                              : 'hover:border-orange-200 hover:bg-slate-50 border-slate-100'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">{m.name}</span>
+                            <span className="font-semibold">{m.name}</span>
                             {selectedModel === m.id && (
-                              <span className="text-xs text-orange-500">✓</span>
+                              <span className="flex items-center gap-1 text-xs text-orange-500 bg-orange-100 px-2 py-0.5 rounded-full">
+                                <span>✓</span> 已选择
+                              </span>
                             )}
                           </div>
-                          <div className="text-xs text-slate-400 mt-1">
-                            <span className="inline-flex items-center gap-1">
-                              <span>{PROVIDERS.find(p => p.id === m.provider)?.logo || '🏢'}</span>
-                              <span>{m.provider}</span>
-                              <span>·</span>
-                              <span>{CATEGORIES.find(c => c.id === m.category)?.icon}</span>
-                              <span>{CATEGORIES.find(c => c.id === m.category)?.name}</span>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className="inline-flex items-center gap-1 text-xs bg-slate-100 px-2 py-0.5 rounded">
+                              {CATEGORIES.find(c => c.id === m.category)?.icon} {CATEGORIES.find(c => c.id === m.category)?.name}
                             </span>
                           </div>
-                          <div className="text-xs text-orange-500 mt-1">{m.recommend}</div>
+                          <div className="text-sm text-orange-500 mt-2 font-medium">{m.recommend}</div>
                         </button>
                       ))}
                   </div>
                   
                   {/* 统计信息 */}
-                  <div className="mt-4 pt-4 border-t text-xs text-slate-400 text-center">
-                    共 {MODELS.filter(m => (selectedCategory === 'all' || m.category === selectedCategory)).filter(m => (selectedProvider === 'all' || m.provider === selectedProvider)).filter(m => !modelSearch || m.name.toLowerCase().includes(modelSearch.toLowerCase())).length} 个模型
+                  <div className="mt-4 pt-4 border-t text-sm text-slate-500 text-center">
+                    共 {MODELS.filter(m => m.provider === expandedProvider).filter(m => selectedCategory === null || m.category === selectedCategory).length} 个模型
                   </div>
                 </div>
               </div>
