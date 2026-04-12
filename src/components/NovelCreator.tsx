@@ -42,12 +42,6 @@ class RateLimiter {
     this.requests = this.requests.filter(t => now - t < 60000);
     return this.requests.length < this.maxRequests;
   }
-  
-  getRemainingRequests(): number {
-    const now = Date.now();
-    this.requests = this.requests.filter(t => now - t < 60000);
-    return Math.max(0, this.maxRequests - this.requests.length);
-  }
 }
 
 // 厂商配置
@@ -66,7 +60,6 @@ const PROVIDERS = [
   { id: 'other', name: '其他', color: 'bg-slate-400', textColor: 'text-white' },
 ];
 
-// 模型过滤规则
 const getModelFilter = (providerId: string) => {
   switch (providerId) {
     case 'doubao': return (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed');
@@ -311,9 +304,9 @@ export default function NovelCreator() {
 
   return (
     <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-[calc(100vh-200px)]">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* 页面标题 */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-2">
             <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
               AI 小说创作助手
@@ -322,182 +315,184 @@ export default function NovelCreator() {
           <p className="text-slate-500">基于优质AI模型，让创作更轻松</p>
         </div>
 
-        {/* 主操作区域 - 全宽布局 */}
-        <div className="flex gap-6">
-          {/* 左侧：输入区域 */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
-            {/* 顶部工具栏 */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                {/* 功能选择 - 紧凑横向排列 */}
-                <div className="flex bg-slate-100 rounded-lg p-1">
-                  {FEATURES.map(f => {
-                    const Icon = f.icon;
-                    return (
-                      <button
-                        key={f.id}
-                        onClick={() => setSelectedFeature(f.id)}
-                        className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
-                          selectedFeature === f.id
-                            ? 'bg-white text-orange-600 shadow-sm'
-                            : 'text-slate-600 hover:text-slate-800'
-                        }`}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                        {f.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              
-              {/* 模型选择 - 右侧 */}
-              <div className="relative">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowModelPicker(!showModelPicker);
-                  }}
-                  className="model-trigger flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm"
-                >
-                  {(() => {
-                    const providerConfig = getProviderConfig(currentModel.provider || '豆包');
-                    return (
-                      <span className={`w-6 h-6 rounded-full ${providerConfig.color} ${providerConfig.border ? 'border border-slate-300' : ''} ${providerConfig.textColor} flex items-center justify-center text-[10px] font-bold`}>
-                        {(currentModel.provider || '豆包').charAt(0)}
-                      </span>
-                    );
-                  })()}
-                  <span className="font-medium text-slate-700">
-                    {currentModel.name || '豆包 Seed Pro'}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-slate-400" />
-                </button>
-                
-                {/* 模型选择弹框 */}
-                {showModelPicker && (
-                  <div 
-                    className="model-picker-container absolute top-full right-0 mt-2 w-[360px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="p-3 border-b border-slate-100">
-                      <input
-                        type="text"
-                        value={modelSearch}
-                        onChange={(e) => setModelSearch(e.target.value)}
-                        placeholder="搜索模型..."
-                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
-                        autoFocus
-                      />
-                    </div>
-                    
-                    <div className="p-2 border-b border-slate-100 overflow-x-auto">
-                      <div className="flex gap-1.5 min-w-max">
-                        {PROVIDERS.map(p => {
-                          const count = availableModels.filter(m => getModelFilter(p.id)(m)).length;
-                          if (count === 0 && p.id !== 'doubao') return null;
-                          return (
-                            <button
-                              key={p.id}
-                              onClick={() => setModelProvider(p.id)}
-                              className={`px-2 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-                                modelProvider === p.id
-                                  ? `${p.color} ${p.border ? 'border border-slate-300' : ''} ${p.textColor}`
-                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                              }`}
-                            >
-                              {p.name}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    
-                    <div className="max-h-72 overflow-y-auto">
-                      {filteredModels.length > 0 ? (
-                        <div className="p-2 space-y-1">
-                          {filteredModels.slice(0, 50).map(m => (
-                            <button
-                              key={m.id}
-                              onClick={() => handleSelectModel(m)}
-                              className={`w-full p-3 rounded-lg text-left transition-all flex items-center justify-between gap-2 ${
-                                selectedModel === m.id
-                                  ? 'bg-orange-100 border border-orange-500'
-                                  : 'hover:bg-slate-50'
-                              }`}
-                            >
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-sm truncate">{m.name}</div>
-                                <div className="text-xs text-slate-400 truncate">{m.id}</div>
-                              </div>
-                              {selectedModel === m.id && (
-                                <Check className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                              )}
-                              {m.isFree && (
-                                <span className="text-[9px] px-1.5 py-0.5 bg-green-100 text-green-600 rounded">免费</span>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="p-4 text-center text-sm text-slate-400">
-                          暂无可用模型
-                        </div>
-                      )}
-                    </div>
-                    
+        {/* 第一层级：功能选择 + 模型选择 - 独立一行 */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between">
+            {/* 功能选择 - 左侧 */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-slate-600">选择功能：</span>
+              <div className="flex bg-slate-100 rounded-xl p-1.5 gap-1">
+                {FEATURES.map(f => {
+                  const Icon = f.icon;
+                  return (
                     <button
-                      onClick={closePicker}
-                      className="absolute top-2 right-2 p-1 hover:bg-slate-100 rounded-full"
+                      key={f.id}
+                      onClick={() => setSelectedFeature(f.id)}
+                      className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                        selectedFeature === f.id
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
+                          : 'text-slate-600 hover:bg-white hover:shadow-sm'
+                      }`}
                     >
-                      <X className="w-4 h-4 text-slate-400" />
+                      <Icon className="w-4 h-4" />
+                      {f.name}
                     </button>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </div>
             
-            {/* 输入框 - 占满剩余空间 */}
-            <div className="flex-1 flex flex-col">
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder={currentFeature?.placeholder}
-                className="flex-1 w-full p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed"
-              />
+            {/* 模型选择 - 右侧 */}
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowModelPicker(!showModelPicker);
+                }}
+                className="model-trigger flex items-center gap-3 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+              >
+                <span className="text-sm font-medium text-slate-500">当前模型：</span>
+                {(() => {
+                  const providerConfig = getProviderConfig(currentModel.provider || '豆包');
+                  return (
+                    <span className={`w-6 h-6 rounded-full ${providerConfig.color} ${providerConfig.border ? 'border border-slate-300' : ''} ${providerConfig.textColor} flex items-center justify-center text-[10px] font-bold`}>
+                      {(currentModel.provider || '豆包').charAt(0)}
+                    </span>
+                  );
+                })()}
+                <span className="font-medium text-slate-700">
+                  {currentModel.name || '豆包 Seed Pro'}
+                </span>
+                <ChevronDown className="w-4 h-4 text-slate-400" />
+              </button>
               
-              {/* 提交按钮 */}
-              <div className="mt-4 flex items-center gap-3">
-                {isLoading ? (
-                  <button
-                    onClick={cancelRequest}
-                    className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center gap-2 font-medium"
-                  >
-                    <AlertCircle className="w-5 h-5" />
-                    取消生成
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!inputText.trim()}
-                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium text-lg"
-                  >
-                    <Send className="w-5 h-5" />
-                    开始生成
-                  </button>
-                )}
-                
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
-                    {error}
+              {/* 模型选择弹框 */}
+              {showModelPicker && (
+                <div 
+                  className="model-picker-container absolute top-full right-0 mt-3 w-[400px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="p-4 border-b border-slate-100">
+                    <input
+                      type="text"
+                      value={modelSearch}
+                      onChange={(e) => setModelSearch(e.target.value)}
+                      placeholder="搜索模型名称或ID..."
+                      className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
+                      autoFocus
+                    />
                   </div>
-                )}
-              </div>
+                  
+                  <div className="p-3 border-b border-slate-100 bg-slate-50">
+                    <div className="flex gap-2 flex-wrap">
+                      {PROVIDERS.map(p => {
+                        const count = availableModels.filter(m => getModelFilter(p.id)(m)).length;
+                        if (count === 0 && p.id !== 'doubao') return null;
+                        return (
+                          <button
+                            key={p.id}
+                            onClick={() => setModelProvider(p.id)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              modelProvider === p.id
+                                ? `${p.color} ${p.border ? 'border border-slate-300' : ''} ${p.textColor}`
+                                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                            }`}
+                          >
+                            {p.name} ({count})
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  <div className="max-h-80 overflow-y-auto">
+                    {filteredModels.length > 0 ? (
+                      <div className="p-2 space-y-1">
+                        {filteredModels.slice(0, 60).map(m => (
+                          <button
+                            key={m.id}
+                            onClick={() => handleSelectModel(m)}
+                            className={`w-full p-3 rounded-lg text-left transition-all flex items-center justify-between gap-3 ${
+                              selectedModel === m.id
+                                ? 'bg-orange-100 border border-orange-500'
+                                : 'hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm truncate">{m.name}</div>
+                              <div className="text-xs text-slate-400 truncate">{m.id}</div>
+                            </div>
+                            {selectedModel === m.id && (
+                              <Check className="w-4 h-4 text-orange-500 flex-shrink-0" />
+                            )}
+                            {m.isFree && (
+                              <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-600 rounded-full">免费</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-6 text-center text-sm text-slate-400">
+                        暂无可用模型
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={closePicker}
+                    className="absolute top-3 right-3 p-1.5 hover:bg-slate-100 rounded-full"
+                  >
+                    <X className="w-4 h-4 text-slate-400" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 第二层级：输入 + 输出区域 */}
+        <div className="flex gap-6 h-[600px]">
+          {/* 左侧：输入 */}
+          <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
+            <h3 className="font-semibold text-lg mb-4">{currentFeature?.name}</h3>
+            
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={currentFeature?.placeholder}
+              className="flex-1 w-full p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed"
+            />
+            
+            <div className="mt-4 flex items-center gap-4">
+              {isLoading ? (
+                <button
+                  onClick={cancelRequest}
+                  className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center gap-2 font-medium"
+                >
+                  <AlertCircle className="w-5 h-5" />
+                  取消生成
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={!inputText.trim()}
+                  className="px-10 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium text-lg"
+                >
+                  <Send className="w-5 h-5" />
+                  开始生成
+                </button>
+              )}
+              
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* 右侧：输出区域 */}
+          {/* 右侧：输出 */}
           <div className="flex-1 bg-white rounded-2xl shadow-lg p-6 flex flex-col">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-lg">生成结果</h3>
@@ -531,8 +526,8 @@ export default function NovelCreator() {
               {isLoading && (
                 <div className="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl">
                   <div className="text-center">
-                    <Loader2 className="w-10 h-10 animate-spin text-orange-500 mx-auto" />
-                    <p className="mt-3 text-base text-slate-600">正在生成...</p>
+                    <Loader2 className="w-12 h-12 animate-spin text-orange-500 mx-auto" />
+                    <p className="mt-4 text-base text-slate-600">正在生成...</p>
                   </div>
                 </div>
               )}
