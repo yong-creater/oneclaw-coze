@@ -326,12 +326,12 @@ export default function NovelPage() {
               </div>
             </div>
 
-            {/* 模型选择 - 横排4卡片风格 */}
+            {/* 模型选择 - 2x2网格风格 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-700 mb-3">选择模型</label>
               
-              {/* 模型分类 横排4卡片 */}
-              <div className="grid grid-cols-4 gap-3">
+              {/* 模型分类 2x2 网格 */}
+              <div className="grid grid-cols-2 gap-3">
                 {MODEL_CATEGORIES.map(cat => {
                   const Icon = cat.icon;
                   const count = availableModels.filter(m => cat.filter(m)).length;
@@ -349,10 +349,10 @@ export default function NovelPage() {
                       }`}
                     >
                       <Icon className={`w-6 h-6 ${selectedModelCategory === cat.id ? 'text-orange-500' : 'text-slate-400'}`} />
-                      <span className={`font-medium text-sm ${selectedModelCategory === cat.id ? 'text-orange-600' : 'text-slate-700'}`}>
+                      <span className={`font-medium ${selectedModelCategory === cat.id ? 'text-orange-600' : 'text-slate-700'}`}>
                         {cat.name}
                       </span>
-                      <span className="text-xs text-slate-400">{count}</span>
+                      <span className="text-xs text-slate-400">{count}个模型</span>
                     </button>
                   );
                 })}
