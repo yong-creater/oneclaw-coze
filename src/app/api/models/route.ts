@@ -3,14 +3,28 @@ import { NextResponse } from 'next/server';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
 const API_KEY = process.env.NEXT_PUBLIC_API2D_KEY;
 
-interface Model {
-  id: string;
-  name: string;
-  provider: string;
-  providerLogo: string;
-  category: string;
-  recommend: string;
-}
+// 4sapi 供应商
+const FOURSAPI_PROVIDERS = ['openai', 'anthropic', 'google', 'xai', 'moonshot', 'mistral', 'stability', 'cohere', 'perplexity'];
+
+// Coze 免费模型
+const COZE_FREE_MODELS = [
+  { id: 'doubao-seed-2-0-pro-260215', name: '豆包 Seed Pro', category: '对话', recommend: '旗舰全能', provider: 'Coze', providerLogo: '🦞' },
+  { id: 'doubao-seed-2-0-lite-260215', name: '豆包 Seed Lite', category: '对话', recommend: '均衡性价比', provider: 'Coze', providerLogo: '🦞' },
+  { id: 'doubao-seed-2-0-mini-260215', name: '豆包 Seed Mini', category: '对话', recommend: '轻量快速', provider: 'Coze', providerLogo: '🦞' },
+  { id: 'doubao-seed-1-8-251228', name: '豆包 Seed 1.8', category: '对话', recommend: '多模态Agent', provider: 'Coze', providerLogo: '🦞' },
+  { id: 'doubao-seed-1-6-251015', name: '豆包 Seed 1.6', category: '对话', recommend: '能力多面手', provider: 'Coze', providerLogo: '🦞' },
+  { id: 'doubao-seed-1-6-vision-250815', name: '豆包 Seed Vision', category: '视觉', recommend: '视觉理解SOTA', provider: 'Coze', providerLogo: '🦞' },
+  { id: 'doubao-seed-1-6-thinking-250715', name: '豆包 Seed Thinking', category: '推理', recommend: '深度思考', provider: 'Coze', providerLogo: '🦞' },
+  { id: 'deepseek-v3-2-251201', name: 'DeepSeek V3', category: '对话', recommend: '平衡推理', provider: 'Coze', providerLogo: '🔵' },
+  { id: 'deepseek-r1-250528', name: 'DeepSeek R1', category: '推理', recommend: '671B满血推理', provider: 'Coze', providerLogo: '🔵' },
+  { id: 'kimi-k2-5-260127', name: 'Kimi K2.5', category: '对话', recommend: 'Kimi最智能', provider: 'Coze', providerLogo: '🌙' },
+  { id: 'kimi-k2-250905', name: 'Kimi K2', category: '对话', recommend: '万亿参数开源', provider: 'Coze', providerLogo: '🌙' },
+  { id: 'glm-5-0-260211', name: 'GLM-5', category: '对话', recommend: '智谱旗舰', provider: 'Coze', providerLogo: '📊' },
+  { id: 'glm-4-7-251222', name: 'GLM-4.7', category: '对话', recommend: '编程推理强', provider: 'Coze', providerLogo: '📊' },
+  { id: 'qwen-3-5-plus-260215', name: 'Qwen 3.5 Plus', category: '对话', recommend: '混合注意力', provider: 'Coze', providerLogo: '🏢' },
+  { id: 'minimax-m2-5-260212', name: 'MiniMax M2.5', category: '对话', recommend: '编码Agent SOTA', provider: 'Coze', providerLogo: '⚡' },
+  { id: 'minimax-m2-7-260318', name: 'MiniMax M2.7', category: '对话', recommend: '复杂Agent', provider: 'Coze', providerLogo: '⚡' },
+];
 
 // 模型供应商映射
 const PROVIDER_MAP: Record<string, { name: string; logo: string }> = {
@@ -25,17 +39,18 @@ const PROVIDER_MAP: Record<string, { name: string; logo: string }> = {
   'codex': { name: 'OpenAI Codex', logo: '🤖' },
   'mistral': { name: 'Mistral', logo: '🌫️' },
   'stability': { name: 'Stability', logo: '⚡' },
-  'custom': { name: '其他', logo: '⚡' },
+  'meta': { name: 'Meta', logo: '🦾' },
+  'cohere': { name: 'Cohere', logo: '🌊' },
+  'perplexity': { name: 'Perplexity', logo: '🔍' },
 };
 
 // 模型分类规则
 const CATEGORY_RULES: Array<{ keywords: string[]; category: string }> = [
-  { keywords: ['gpt-4o', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5', 'chatgpt'], category: '对话' },
+  { keywords: ['gpt-4o', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5'], category: '对话' },
   { keywords: ['claude'], category: '对话' },
   { keywords: ['gemini'], category: '对话' },
   { keywords: ['kimi', 'moonshot'], category: '对话' },
   { keywords: ['grok'], category: '对话' },
-  { keywords: ['deepseek'], category: '对话' },
   { keywords: ['qwen', 'yi-', 'baichuan'], category: '对话' },
   { keywords: ['o1', 'o3', 'o4', 'reasoning'], category: '推理' },
   { keywords: ['dall-e', 'flux', 'stable-diffusion', 'imagen', 'midjourney'], category: '图像' },
@@ -44,6 +59,7 @@ const CATEGORY_RULES: Array<{ keywords: string[]; category: string }> = [
   { keywords: ['embedding', 'vector'], category: '向量' },
   { keywords: ['codex', 'coder', 'code'], category: '代码' },
   { keywords: ['vision'], category: '视觉' },
+  { keywords: ['llama'], category: '对话' },
 ];
 
 // 推荐说明
@@ -103,42 +119,64 @@ function formatModelName(modelId: string): string {
     .join(' ');
 }
 
+// 判断是否为4sapi付费模型
+function is4sapiModel(owner: string): boolean {
+  const lowerOwner = owner.toLowerCase();
+  return FOURSAPI_PROVIDERS.some(p => lowerOwner.includes(p));
+}
+
 export async function GET() {
   try {
-    if (!API_KEY) {
-      return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
+    const models: any[] = [];
+    
+    // 1. 添加 Coze 免费模型
+    models.push(...COZE_FREE_MODELS.map(m => ({
+      ...m,
+      isFree: true,
+      source: 'Coze 免费',
+    })));
+    
+    // 2. 从 4sapi 获取付费模型
+    if (API_KEY) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/v1/models`, {
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`,
+          },
+          next: { revalidate: 3600 }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const rawModels = data.data || [];
+
+          rawModels.forEach((m: any) => {
+            if (!is4sapiModel(m.owned_by)) return; // 跳过非4sapi供应商
+            
+            const provider = getProviderInfo(m.owned_by);
+            
+            models.push({
+              id: m.id,
+              name: formatModelName(m.id),
+              provider: provider.name,
+              providerLogo: provider.logo,
+              category: getModelCategory(m.id),
+              recommend: getRecommend(m.id),
+              isFree: false,
+              source: '4sapi 付费',
+            });
+          });
+        }
+      } catch (e) {
+        console.error('Failed to fetch 4sapi models:', e);
+      }
     }
-
-    const response = await fetch(`${API_BASE_URL}/v1/models`, {
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-      },
-      next: { revalidate: 3600 }
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch models from 4sapi');
-    }
-
-    const data = await response.json();
-    const rawModels = data.data || [];
-
-    const models: Model[] = rawModels.map((m: any) => {
-      const provider = getProviderInfo(m.owned_by);
-      
-      return {
-        id: m.id,
-        name: formatModelName(m.id),
-        provider: provider.name,
-        providerLogo: provider.logo,
-        category: getModelCategory(m.id),
-        recommend: getRecommend(m.id),
-      };
-    });
 
     return NextResponse.json({
       success: true,
       total: models.length,
+      freeCount: models.filter(m => m.isFree).length,
+      paidCount: models.filter(m => !m.isFree).length,
       models,
     });
 

@@ -160,11 +160,16 @@ export default function NovelPage() {
       setError('请输入内容');
       return;
     }
+    
     const apiKey = getApiKey();
-    if (!apiKey) {
-      setError('请先配置 API Key');
+    const isCozeModel = availableModels.find(m => m.id === selectedModel)?.isFree;
+    
+    // 检查是否需要API密钥
+    if (!isCozeModel && !apiKey) {
+      setError('请先配置 4sapi API Key（国外模型需要）');
       return;
     }
+    
     if (!rateLimiter.canMakeRequest()) {
       setError('请求过于频繁，请稍后重试');
       return;
@@ -183,24 +188,44 @@ export default function NovelPage() {
     }, REQUEST_TIMEOUT);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/v1/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
-            { role: 'user', content: inputText }
-          ],
-          temperature: 0.7,
-          max_tokens: 4000,
-          stream: true
-        }),
-        signal: abortController.signal
-      });
+      let response;
+      
+      if (isCozeModel) {
+        // 使用 Coze 内置免费模型
+        response = await fetch('/api/llm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
+              { role: 'user', content: inputText }
+            ],
+            stream: true
+          }),
+          signal: abortController.signal
+        });
+      } else {
+        // 使用 4sapi 付费模型
+        response = await fetch(`${API_BASE_URL}/v1/chat/completions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiKey
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
+              { role: 'user', content: inputText }
+            ],
+            temperature: 0.7,
+            max_tokens: 4000,
+            stream: true
+          }),
+          signal: abortController.signal
+        });
+      }
 
       clearTimeout(timeoutId);
 
@@ -227,12 +252,19 @@ export default function NovelPage() {
             if (data === '[DONE]') continue;
             try {
               const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content;
+              // 兼容两种响应格式
+              const content = parsed.choices?.[0]?.delta?.content || parsed.content;
               if (content) {
-                result += content;
+                result += typeof content === 'string' ? content : content.toString();
                 setOutputText(result);
               }
             } catch { /* ignore parse errors */ }
+          } else if (isCozeModel) {
+            // Coze 流式响应可能是纯文本
+            try {
+              result += line;
+              setOutputText(result);
+            } catch { /* ignore */ }
           }
         }
       }
@@ -364,6 +396,16 @@ export default function NovelPage() {
                     
                     {/* 用户需求场景 */}
                     <div className="px-6 py-4 border-b bg-slate-50 max-h-[280px] overflow-y-auto">
+                      <div className="flex items-center gap-4 text-xs text-slate-500 mb-3">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                          Coze 免费模型
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                          4sapi 付费模型
+                        </span>
+                      </div>
                       <div className="flex items-center gap-1 text-xs text-slate-500 mb-3 font-medium">
                         <span>🎯 选择您的需求场景</span>
                       </div>
@@ -425,6 +467,11 @@ export default function NovelPage() {
                                         <div className="flex items-center gap-2">
                                           <span className="font-bold">{model.name}</span>
                                           {index === 0 && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">首选</span>}
+                                          {model.isFree ? (
+                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">免费</span>
+                                          ) : (
+                                            <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">付费</span>
+                                          )}
                                         </div>
                                         <div className="flex items-center gap-2 mt-1">
                                           <span className="text-sm">{model.providerLogo || '⚡'}</span>
@@ -476,14 +523,23 @@ export default function NovelPage() {
                                   }`}
                                 >
                                   <div className="flex items-center justify-between">
-                                    <span className="font-medium text-sm">{m.name}</span>
-                                    {selectedModel === m.id && <span className="text-orange-500">✓</span>}
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-xs">{m.providerLogo || '⚡'}</span>
-                                    <span className="text-xs text-slate-400">{m.provider}</span>
-                                    <span className="text-xs text-slate-300">·</span>
-                                    <span className="text-xs text-orange-500">{m.category}</span>
+                                    <div>
+                                      <div className="font-medium text-sm">{m.name}</div>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-xs">{m.providerLogo || '⚡'}</span>
+                                        <span className="text-xs text-slate-400">{m.provider}</span>
+                                        <span className="text-xs text-slate-300">·</span>
+                                        <span className="text-xs text-slate-400">{m.category}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex flex-col items-end gap-1">
+                                      {m.isFree ? (
+                                        <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">免费</span>
+                                      ) : (
+                                        <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">付费</span>
+                                      )}
+                                      {selectedModel === m.id && <span className="text-orange-500 text-xs">✓</span>}
+                                    </div>
                                   </div>
                                 </button>
                               ))}
