@@ -479,7 +479,7 @@ export default function NovelCreator() {
                     value={modelSearch}
                     onChange={(e) => setModelSearch(e.target.value)}
                     placeholder="搜索模型名称或ID..."
-                    className="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
+                    className="w-full px-4 py-2.5 pr-8 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
                     autoFocus
                   />
                 </div>
