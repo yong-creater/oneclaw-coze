@@ -88,79 +88,79 @@ const OWNER_MAP: Record<string, { name: string; logo: string }> = {
 // 模型名关键字映射厂商（兜底匹配）- 优先级从高到低
 const MODEL_KEYWORD_PROVIDER: Array<{ keywords: string[]; name: string; logo: string }> = [
   // Google 系列 (包括 veo, gemini, gemma, imagen)
-  { keywords: ['veo', 'gemini-', 'gemma-', 'imagen-'], name: 'Google', logo: '🔴' },
+  { keywords: ['veo', 'gemini', 'gemma-', 'imagen'], name: 'Google', logo: '🔴' },
   
   // xAI 系列 (grok)
-  { keywords: ['grok-', 'grok2', 'grok4', 'xai/'], name: 'xAI', logo: '💀' },
+  { keywords: ['grok'], name: 'xAI', logo: '💀' },
   
   // Stability 系列 (flux)
-  { keywords: ['flux-', 'flux1', 'flux2', 'stable-diffusion', 'stable-', 'sdxl', 'sd-'], name: 'Stability', logo: '⚡' },
+  { keywords: ['flux', 'stable-diffusion', 'sdxl'], name: 'Stability', logo: '⚡' },
   
   // Anthropic / Claude 系列
-  { keywords: ['claude-', 'claude-sonnet', 'claude-opus', 'claude-haiku', 'claude-3', 'claude-4'], name: 'Anthropic', logo: '🧠' },
+  { keywords: ['claude'], name: 'Anthropic', logo: '🧠' },
   
-  // OpenAI 系列 (包括 o1, o3, o4, gpt, dall-e, whisper, codex, computer-use, gpt-image)
-  { keywords: ['gpt-', 'o1-', 'o2-', 'o3-', 'o4-', 'dall-e', 'davinci', 'babbage', 'curie', 'ada', 'text-', 'whisper-', 'tts-', 'codex-', 'computer-use', 'chatgpt-', 'gpt-image', 'gpt-oss', 'omni-moderation', 'gpt-5'], name: 'OpenAI', logo: '🤖' },
+  // OpenAI 系列 (包括 o1, o3, o4, gpt, dall-e, whisper, codex, computer-use)
+  { keywords: ['gpt-', 'o1', 'o2', 'o3', 'o4', 'dall-e', 'davinci', 'babbage', 'curie', 'ada', 'whisper', 'tts-', 'codex', 'computer-use', 'chatgpt'], name: 'OpenAI', logo: '🤖' },
   
   // 通义千问
-  { keywords: ['qwen-', 'qwen2', 'qwen3', 'tongyi', 'yi-', 'qwq-'], name: '通义千问', logo: '🏢' },
+  { keywords: ['qwen', 'tongyi', 'qwq'], name: '通义千问', logo: '🏢' },
   
   // Kimi / Moonshot
-  { keywords: ['kimi-', 'moonshot-', 'moonshot/', 'kimi1-', 'kimi2-', 'kimi-k'], name: 'Kimi', logo: '🌙' },
+  { keywords: ['kimi', 'moonshot'], name: 'Kimi', logo: '🌙' },
   
   // 智谱AI
-  { keywords: ['glm-', 'chatglm', 'glm4', 'glm5', 'zhipu'], name: '智谱AI', logo: '📊' },
+  { keywords: ['glm', 'chatglm', 'zhipu'], name: '智谱AI', logo: '📊' },
   
   // Mistral 系列
-  { keywords: ['mistral-', 'mixtral', 'codestral', 'command-', 'pixtral'], name: 'Mistral', logo: '🌫️' },
+  { keywords: ['mistral', 'mixtral', 'codestral', 'pixtral'], name: 'Mistral', logo: '🌫️' },
   
   // Meta 系列
-  { keywords: ['llama-', 'llama2', 'llama3', 'llama4', 'meta-llama', 'llava-', 'llava1'], name: 'Meta', logo: '🦾' },
+  { keywords: ['llama', 'meta-llama', 'llava'], name: 'Meta', logo: '🦾' },
   
   // Cohere 系列
-  { keywords: ['cohere/', 'command-', 'c4ai-'], name: 'Cohere', logo: '🌊' },
+  { keywords: ['cohere', 'c4ai'], name: 'Cohere', logo: '🌊' },
   
   // DeepSeek 系列
-  { keywords: ['deepseek-', 'deepseek/', 'ds-'], name: 'DeepSeek', logo: '🔵' },
+  { keywords: ['deepseek', 'ds-'], name: 'DeepSeek', logo: '🔵' },
   
   // 百川
-  { keywords: ['baichuan-', 'baichuan2', 'baichuan3'], name: '百川', logo: '💫' },
+  { keywords: ['baichuan'], name: '百川', logo: '💫' },
   
   // MiniMax
-  { keywords: ['minimax-', 'abab-', 'minimax/'], name: 'MiniMax', logo: '⚡' },
+  { keywords: ['minimax', 'abab'], name: 'MiniMax', logo: '⚡' },
   
   // 其他热门厂商
-  { keywords: ['perplexity-', 'pplx-'], name: 'Perplexity', logo: '🔍' },
-  { keywords: ['nvidia-', 'nv-', 'nemotron'], name: 'NVIDIA', logo: '🟢' },
-  { keywords: ['cerebras-', 'cbr-'], name: 'Cerebras', logo: '🧮' },
-  { keywords: ['groq-', 'llama3-groq'], name: 'Groq', logo: '⚡' },
-  { keywords: ['lepton-'], name: 'Lepton', logo: '🔵' },
-  { keywords: ['nebius-', 'nebius/'], name: 'Nebius', logo: '🌐' },
-  { keywords: ['fireworks-', 'fw-', 'fireworks/'], name: 'Fireworks', logo: '🎆' },
-  { keywords: ['together-', 'togetherai/'], name: 'TogetherAI', logo: '🎯' },
-  { keywords: ['cloudflare-', 'workers-ai', '@cf/'], name: 'Cloudflare', logo: '☁️' },
+  { keywords: ['perplexity', 'pplx'], name: 'Perplexity', logo: '🔍' },
+  { keywords: ['nvidia', 'nemotron', 'nv-'], name: 'NVIDIA', logo: '🟢' },
+  { keywords: ['cerebras', 'cbr-'], name: 'Cerebras', logo: '🧮' },
+  { keywords: ['groq'], name: 'Groq', logo: '⚡' },
+  { keywords: ['lepton'], name: 'Lepton', logo: '🔵' },
+  { keywords: ['nebius'], name: 'Nebius', logo: '🌐' },
+  { keywords: ['fireworks', 'fw-'], name: 'Fireworks', logo: '🎆' },
+  { keywords: ['togetherai', 'together-'], name: 'TogetherAI', logo: '🎯' },
+  { keywords: ['cloudflare', 'workers-ai', '@cf/'], name: 'Cloudflare', logo: '☁️' },
   { keywords: ['github-copilot'], name: 'GitHub', logo: '🐙' },
-  { keywords: ['azure-', 'azure/'], name: 'Azure', logo: '☁️' },
-  { keywords: ['aws-', 'amazon-', 'bedrock-'], name: 'AWS', logo: '📦' },
-  { keywords: ['replicate-', 'replicate/'], name: 'Replicate', logo: '🔄' },
-  { keywords: ['novita-', 'novita/'], name: 'NovitaAI', logo: '✨' },
-  { keywords: ['hyperbolic-'], name: 'Hyperbolic', logo: '📈' },
-  { keywords: ['sambanova-', 'samba-'], name: 'SambaNova', logo: '💠' },
-  { keywords: ['abacus-', 'abacusai/'], name: 'AbacusAI', logo: '🔢' },
-  { keywords: ['stepfuny-', 'step-'], name: '阶跃星辰', logo: '🌟' },
-  { keywords: ['yi-', '01-ai', '01ai/'], name: '零一万物', logo: '💡' },
-  { keywords: ['spark-', 'xingguang'], name: '讯飞星火', logo: '🔥' },
-  { keywords: ['ernie-', 'ernie-bot', 'eb-'], name: '百度文心', logo: '🐉' },
-  { keywords: ['hunyuan-', 'hunyuan/'], name: '腾讯混元', logo: '🐧' },
-  { keywords: ['doubao-', '豆包'], name: '豆包', logo: '🦞' },
+  { keywords: ['azure'], name: 'Azure', logo: '☁️' },
+  { keywords: ['aws', 'amazon', 'bedrock'], name: 'AWS', logo: '📦' },
+  { keywords: ['replicate', 'replicate/'], name: 'Replicate', logo: '🔄' },
+  { keywords: ['novita'], name: 'NovitaAI', logo: '✨' },
+  { keywords: ['hyperbolic'], name: 'Hyperbolic', logo: '📈' },
+  { keywords: ['sambanova', 'samba-'], name: 'SambaNova', logo: '💠' },
+  { keywords: ['abacusai', 'abacus-'], name: 'AbacusAI', logo: '🔢' },
+  { keywords: ['stepfuny', 'step-'], name: '阶跃星辰', logo: '🌟' },
+  { keywords: ['01-ai', '01ai'], name: '零一万物', logo: '💡' },
+  { keywords: ['spark', 'xingguang'], name: '讯飞星火', logo: '🔥' },
+  { keywords: ['ernie', 'ernie-bot', 'eb-'], name: '百度文心', logo: '🐉' },
+  { keywords: ['hunyuan'], name: '腾讯混元', logo: '🐧' },
+  { keywords: ['doubao', '豆包'], name: '豆包', logo: '🦞' },
   
   // 功能分类
-  { keywords: ['embedding-', 'embed-', 'text-embedding', 'e5-', 'bge-', 'jina-embed', 'mxbai-embed'], name: '向量模型', logo: '📐' },
-  { keywords: ['code-', 'codex', 'coder-', 'starcoder', 'codellama'], name: '代码模型', logo: '💻' },
-  { keywords: ['vision-', 'vl-', 'llava', 'qwen-vl', ' INTERNLM'], name: '视觉模型', logo: '👁️' },
-  { keywords: ['audio-', 'speech-', 'bark-', 'fish-speech'], name: 'AI音频', logo: '🎧' },
-  { keywords: ['video-', 'video/', 'sora-', 'runway-', 'pika-'], name: 'AI视频', logo: '🎬' },
-  { keywords: ['image-', 'image/', 'dall-e', 'midjourney', 'gen-3'], name: 'AI绘画', logo: '🎨' },
+  { keywords: ['embedding', 'embed-', 'text-embedding', 'e5-', 'bge-', 'jina-embed'], name: '向量模型', logo: '📐' },
+  { keywords: ['codex', 'coder', 'starcoder', 'codellama'], name: '代码模型', logo: '💻' },
+  { keywords: ['vision', 'vl-', 'qwen-vl', 'internlm'], name: '视觉模型', logo: '👁️' },
+  { keywords: ['audio', 'speech', 'bark', 'fish-speech'], name: 'AI音频', logo: '🎧' },
+  { keywords: ['video-', 'video/', 'sora', 'runway', 'pika'], name: 'AI视频', logo: '🎬' },
+  { keywords: ['dall-e', 'midjourney', 'gen-3', 'gen-3a'], name: 'AI绘画', logo: '🎨' },
 ];
 
 // 模型分类规则
