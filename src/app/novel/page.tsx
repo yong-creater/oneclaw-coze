@@ -79,11 +79,12 @@ export default function NovelPage() {
     { id: 'glm', name: '智谱GLM', icon: '📊', filter: (m: any) => m.name.includes('GLM') || m.id.includes('glm') },
     { id: 'qwen', name: '通义Qwen', icon: '🏢', filter: (m: any) => m.name.includes('Qwen') || m.id.includes('qwen') },
     { id: 'minimax', name: 'MiniMax', icon: '⚡', filter: (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax') },
-    { id: 'openai', name: 'OpenAI', icon: '🤖', filter: (m: any) => m.provider === 'OpenAI' },
-    { id: 'anthropic', name: 'Anthropic', icon: '🧠', filter: (m: any) => m.provider === 'Anthropic' },
-    { id: 'google', name: 'Google', icon: '🔴', filter: (m: any) => m.provider === 'Google' },
-    { id: 'xai', name: 'xAI', icon: '💀', filter: (m: any) => m.provider === 'xAI' },
-    { id: 'other', name: '其他', icon: '📦', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'xAI'].includes(m.provider) && !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
+    { id: 'openai', name: 'OpenAI', icon: '🤖', filter: (m: any) => m.provider === 'OpenAI' || m.id.includes('gpt') || m.id.includes('dall') || m.id.includes('whisper') || m.id.includes('tts') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') },
+    { id: 'anthropic', name: 'Anthropic', icon: '🧠', filter: (m: any) => m.provider === 'Anthropic' || m.id.includes('claude') },
+    { id: 'google', name: 'Google', icon: '🔴', filter: (m: any) => m.provider === 'Google' || m.id.includes('gemini') || m.id.includes('veo') },
+    { id: 'xai', name: 'xAI', icon: '💀', filter: (m: any) => m.provider === 'xAI' || m.id.includes('grok') },
+    { id: 'stability', name: 'Stability', icon: '🎨', filter: (m: any) => m.id.includes('flux') || m.id.includes('stability') },
+    { id: 'other', name: '其他', icon: '📦', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'xAI'].includes(m.provider) && !m.id.includes('gpt') && !m.id.includes('dall') && !m.id.includes('whisper') && !m.id.includes('tts') && !m.id.includes('o1') && !m.id.includes('o3') && !m.id.includes('o4') && !m.id.includes('claude') && !m.id.includes('gemini') && !m.id.includes('veo') && !m.id.includes('grok') && !m.id.includes('flux') && !m.id.includes('stability') && !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
   ];
   const currentProviderModels = availableModels.filter(m => providers.find(p => p.id === modelProvider)?.filter(m));
 

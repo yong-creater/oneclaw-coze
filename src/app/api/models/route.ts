@@ -26,8 +26,8 @@ const COZE_FREE_MODELS = [
   { id: 'minimax-m2-7-260318', name: 'MiniMax M2.7', category: '对话', recommend: '复杂Agent', provider: 'Coze', providerLogo: '⚡' },
 ];
 
-// 模型供应商映射
-const PROVIDER_MAP: Record<string, { name: string; logo: string }> = {
+// 模型供应商映射（原始owner值）
+const OWNER_MAP: Record<string, { name: string; logo: string }> = {
   'openai': { name: 'OpenAI', logo: '🤖' },
   'anthropic': { name: 'Anthropic', logo: '🧠' },
   'google': { name: 'Google', logo: '🔴' },
@@ -44,6 +44,20 @@ const PROVIDER_MAP: Record<string, { name: string; logo: string }> = {
   'perplexity': { name: 'Perplexity', logo: '🔍' },
   'custom': { name: '其他', logo: '📦' },
 };
+
+// 模型名关键字映射厂商
+const MODEL_KEYWORD_PROVIDER: Array<{ keywords: string[]; name: string; logo: string }> = [
+  { keywords: ['claude', 'anthropic'], name: 'Anthropic', logo: '🧠' },
+  { keywords: ['gemini'], name: 'Google', logo: '🔴' },
+  { keywords: ['grok', 'xai'], name: 'xAI', logo: '💀' },
+  { keywords: ['flux', 'stability'], name: 'Stability', logo: '⚡' },
+  { keywords: ['veo'], name: 'Google', logo: '🔴' },
+  { keywords: ['mistral'], name: 'Mistral', logo: '🌫️' },
+  { keywords: ['llama', 'meta'], name: 'Meta', logo: '🦾' },
+  { keywords: ['cohere'], name: 'Cohere', logo: '🌊' },
+  { keywords: ['perplexity'], name: 'Perplexity', logo: '🔍' },
+  { keywords: ['o1', 'o3', 'o4', 'gpt-5'], name: 'OpenAI', logo: '🤖' },
+];
 
 // 模型分类规则
 const CATEGORY_RULES: Array<{ keywords: string[]; category: string }> = [
@@ -90,15 +104,39 @@ function getModelCategory(modelId: string): string {
   return '对话';
 }
 
-// 获取供应商信息
-function getProviderInfo(owner: string): { name: string; logo: string } {
+// 获取供应商信息（优先按owner，其次按模型名关键字）
+function getProviderInfo(modelId: string, owner: string): { name: string; logo: string } {
   const lowerOwner = owner.toLowerCase();
-  for (const [key, value] of Object.entries(PROVIDER_MAP)) {
+  
+  // 先按owner映射
+  for (const [key, value] of Object.entries(OWNER_MAP)) {
     if (lowerOwner.includes(key)) {
+      // 如果是custom，则按模型名关键字进一步识别
+      if (key === 'custom') {
+        const lowerId = modelId.toLowerCase();
+        for (const rule of MODEL_KEYWORD_PROVIDER) {
+          for (const keyword of rule.keywords) {
+            if (lowerId.includes(keyword)) {
+              return { name: rule.name, logo: rule.logo };
+            }
+          }
+        }
+      }
       return value;
     }
   }
-  return { name: owner, logo: '📦' };
+  
+  // 如果owner没匹配，按模型名关键字识别
+  const lowerId = modelId.toLowerCase();
+  for (const rule of MODEL_KEYWORD_PROVIDER) {
+    for (const keyword of rule.keywords) {
+      if (lowerId.includes(keyword)) {
+        return { name: rule.name, logo: rule.logo };
+      }
+    }
+  }
+  
+  return { name: '其他', logo: '📦' };
 }
 
 // 获取推荐说明
@@ -171,7 +209,7 @@ export async function GET() {
             // 跳过国内模型（走Coze免费）
             if (isDomesticModel(m.id, m.owned_by)) return;
             
-            const provider = getProviderInfo(m.owned_by);
+            const provider = getProviderInfo(m.id, m.owned_by);
             
             models.push({
               id: m.id,
