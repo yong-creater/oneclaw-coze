@@ -71,20 +71,20 @@ export default function NovelPage() {
   const currentFeature = FEATURES.find(f => f.id === selectedFeature);
   const currentModel = availableModels.find(m => m.id === selectedModel) || { name: selectedModel, provider: 'Coze', providerLogo: '🦞', isFree: true };
   
-  // 厂商列表
+  // 厂商列表（带品牌色）
   const providers = [
-    { id: 'doubao', name: '豆包', icon: '🦞', filter: (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed') },
-    { id: 'deepseek', name: 'DeepSeek', icon: '🔵', filter: (m: any) => m.name.includes('DeepSeek') || m.id.includes('deepseek') },
-    { id: 'kimi', name: 'Kimi', icon: '🌙', filter: (m: any) => m.name.includes('Kimi') || m.id.includes('kimi') },
-    { id: 'glm', name: '智谱GLM', icon: '📊', filter: (m: any) => m.name.includes('GLM') || m.id.includes('glm') },
-    { id: 'qwen', name: '通义Qwen', icon: '🏢', filter: (m: any) => m.name.includes('Qwen') || m.id.includes('qwen') },
-    { id: 'minimax', name: 'MiniMax', icon: '⚡', filter: (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax') },
-    { id: 'openai', name: 'OpenAI', icon: '🤖', filter: (m: any) => m.provider === 'OpenAI' || m.id.includes('gpt') || m.id.includes('dall') || m.id.includes('whisper') || m.id.includes('tts') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') },
-    { id: 'anthropic', name: 'Anthropic', icon: '🧠', filter: (m: any) => m.provider === 'Anthropic' || m.id.includes('claude') },
-    { id: 'google', name: 'Google', icon: '🔴', filter: (m: any) => m.provider === 'Google' || m.id.includes('gemini') || m.id.includes('veo') },
-    { id: 'xai', name: 'xAI', icon: '💀', filter: (m: any) => m.provider === 'xAI' || m.id.includes('grok') },
-    { id: 'stability', name: 'Stability', icon: '🎨', filter: (m: any) => m.id.includes('flux') || m.id.includes('stability') },
-    { id: 'other', name: '其他', icon: '📦', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'xAI'].includes(m.provider) && !m.id.includes('gpt') && !m.id.includes('dall') && !m.id.includes('whisper') && !m.id.includes('tts') && !m.id.includes('o1') && !m.id.includes('o3') && !m.id.includes('o4') && !m.id.includes('claude') && !m.id.includes('gemini') && !m.id.includes('veo') && !m.id.includes('grok') && !m.id.includes('flux') && !m.id.includes('stability') && !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
+    { id: 'doubao', name: '豆包', color: 'bg-red-500', filter: (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed') },
+    { id: 'deepseek', name: 'DeepSeek', color: 'bg-blue-600', filter: (m: any) => m.name.includes('DeepSeek') || m.id.includes('deepseek') },
+    { id: 'kimi', name: 'Kimi', color: 'bg-yellow-400', filter: (m: any) => m.name.includes('Kimi') || m.id.includes('kimi') },
+    { id: 'glm', name: '智谱GLM', color: 'bg-gradient-to-r from-blue-500 via-green-500 to-red-500', filter: (m: any) => m.name.includes('GLM') || m.id.includes('glm') },
+    { id: 'qwen', name: '通义Qwen', color: 'bg-orange-500', filter: (m: any) => m.name.includes('Qwen') || m.id.includes('qwen') },
+    { id: 'minimax', name: 'MiniMax', color: 'bg-yellow-500', filter: (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax') },
+    { id: 'openai', name: 'OpenAI', color: 'bg-slate-700', filter: (m: any) => m.provider === 'OpenAI' || m.id.includes('gpt') || m.id.includes('dall') || m.id.includes('whisper') || m.id.includes('tts') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') },
+    { id: 'anthropic', name: 'Anthropic', color: 'bg-pink-500', filter: (m: any) => m.provider === 'Anthropic' || m.id.includes('claude') },
+    { id: 'google', name: 'Google', color: 'bg-red-500', filter: (m: any) => m.provider === 'Google' || m.id.includes('gemini') || m.id.includes('veo') },
+    { id: 'xai', name: 'xAI', color: 'bg-white border border-slate-300', textColor: 'text-slate-700', filter: (m: any) => m.provider === 'xAI' || m.id.includes('grok') },
+    { id: 'stability', color: 'bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500', name: 'Stability', filter: (m: any) => m.id.includes('flux') || m.id.includes('stability') },
+    { id: 'other', name: '其他', color: 'bg-slate-400', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'xAI'].includes(m.provider) && !m.id.includes('gpt') && !m.id.includes('dall') && !m.id.includes('whisper') && !m.id.includes('tts') && !m.id.includes('o1') && !m.id.includes('o3') && !m.id.includes('o4') && !m.id.includes('claude') && !m.id.includes('gemini') && !m.id.includes('veo') && !m.id.includes('grok') && !m.id.includes('flux') && !m.id.includes('stability') && !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
   ];
   const currentProviderModels = availableModels.filter(m => providers.find(p => p.id === modelProvider)?.filter(m));
 
@@ -341,13 +341,15 @@ export default function NovelPage() {
                   <button
                     key={p.id}
                     onClick={() => setModelProvider(p.id)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1 ${
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
                       modelProvider === p.id
                         ? 'bg-orange-500 text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    <span>{p.icon}</span>
+                    <span className={`w-4 h-4 rounded-full ${p.color} ${p.textColor || 'text-white'} flex items-center justify-center text-[10px] font-bold`}>
+                      {p.name.charAt(0)}
+                    </span>
                     <span>{p.name}</span>
                     <span className={`text-xs ${modelProvider === p.id ? 'text-white/80' : 'text-slate-400'}`}>({count})</span>
                   </button>
