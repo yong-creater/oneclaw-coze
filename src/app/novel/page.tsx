@@ -62,7 +62,6 @@ export default function NovelPage() {
   const [selectedModel, setSelectedModel] = useState('deepseek-chat');
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [modelType, setModelType] = useState<'free' | 'paid'>('free');
   const [modelProvider, setModelProvider] = useState('doubao');
   const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
@@ -71,33 +70,22 @@ export default function NovelPage() {
   
   const currentFeature = FEATURES.find(f => f.id === selectedFeature);
   const currentModel = availableModels.find(m => m.id === selectedModel) || { name: selectedModel, provider: 'Coze', providerLogo: '🦞', isFree: true };
-  const filteredModels = modelType === 'free' 
-    ? availableModels.filter(m => m.isFree)
-    : availableModels.filter(m => !m.isFree);
   
-  // 免费模型厂商
-  const freeProviders = [
+  // 厂商列表
+  const providers = [
     { id: 'doubao', name: '豆包', icon: '🦞', filter: (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed') },
     { id: 'deepseek', name: 'DeepSeek', icon: '🔵', filter: (m: any) => m.name.includes('DeepSeek') || m.id.includes('deepseek') },
     { id: 'kimi', name: 'Kimi', icon: '🌙', filter: (m: any) => m.name.includes('Kimi') || m.id.includes('kimi') },
     { id: 'glm', name: '智谱GLM', icon: '📊', filter: (m: any) => m.name.includes('GLM') || m.id.includes('glm') },
     { id: 'qwen', name: '通义Qwen', icon: '🏢', filter: (m: any) => m.name.includes('Qwen') || m.id.includes('qwen') },
     { id: 'minimax', name: 'MiniMax', icon: '⚡', filter: (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax') },
-    { id: 'other-free', name: '其他', icon: '📦', filter: (m: any) => !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
-  ];
-  
-  // 付费模型厂商
-  const paidProviders = [
     { id: 'openai', name: 'OpenAI', icon: '🤖', filter: (m: any) => m.provider === 'OpenAI' },
-    { id: 'anthropic', name: 'Anthropic', icon: '🔵', filter: (m: any) => m.provider === 'Anthropic' },
-    { id: 'google', name: 'Google', icon: '💙', filter: (m: any) => m.provider === 'Google' },
-    { id: 'moonshot', name: 'Moonshot', icon: '🌙', filter: (m: any) => m.provider === 'Moonshot' },
+    { id: 'anthropic', name: 'Anthropic', icon: '🧠', filter: (m: any) => m.provider === 'Anthropic' },
+    { id: 'google', name: 'Google', icon: '🔴', filter: (m: any) => m.provider === 'Google' },
     { id: 'xai', name: 'xAI', icon: '💀', filter: (m: any) => m.provider === 'xAI' },
-    { id: 'other-paid', name: '其他', icon: '📦', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI'].includes(m.provider) },
+    { id: 'other', name: '其他', icon: '📦', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'xAI'].includes(m.provider) && !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
   ];
-  
-  const providers = modelType === 'free' ? freeProviders : paidProviders;
-  const currentProviderModels = filteredModels.filter(m => providers.find(p => p.id === modelProvider)?.filter(m));
+  const currentProviderModels = availableModels.filter(m => providers.find(p => p.id === modelProvider)?.filter(m));
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -344,34 +332,10 @@ export default function NovelPage() {
           <div className="mb-4">
             <label className="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
             
-            {/* 免费/付费切换 */}
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => { setModelType('free'); setModelProvider('doubao'); }}
-                className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                  modelType === 'free'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                免费模型
-              </button>
-              <button
-                onClick={() => { setModelType('paid'); setModelProvider('openai'); }}
-                className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                  modelType === 'paid'
-                    ? 'bg-amber-500 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                付费模型
-              </button>
-            </div>
-            
             {/* 厂商标签页 */}
             <div className="flex flex-wrap gap-2 mb-3">
               {providers.map(p => {
-                const count = filteredModels.filter(m => p.filter(m)).length;
+                const count = availableModels.filter(m => p.filter(m)).length;
                 return (
                   <button
                     key={p.id}
