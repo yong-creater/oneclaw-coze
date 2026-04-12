@@ -9,7 +9,9 @@ import {
 import AnimatedLobster from '@/components/AnimatedLobster';
 import LoginModal from '@/components/LoginModal';
 
-const RATE_LIMIT_MAX = 5;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
+const REQUEST_TIMEOUT = 60000;
+const RATE_LIMIT_MAX = 10;
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   polish: '你是专业小说编辑，擅长洗稿润色，保留核心剧情，优化句式表达，提升文字质感。',
@@ -26,9 +28,10 @@ const FEATURES = [
 ];
 
 const MODELS = [
-  { id: 'doubao-seed-1-6-251015', name: '豆包 Base', recommend: '默认模型' },
-  { id: 'doubao-seed-2-0-lite-260215', name: '豆包 Pro', recommend: '更强能力' },
-  { id: 'glm-4-7-251222', name: '智谱 GLM-4', recommend: '写作优化' }
+  { id: 'gpt-4o', name: 'GPT-4o', recommend: '均衡之选' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', recommend: '快速响应' },
+  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5', recommend: '写作最强' },
+  { id: 'gemini-1.5-pro', name: 'Gemini Pro', recommend: '性价比高' }
 ];
 
 class RateLimiter {
@@ -72,6 +75,10 @@ export default function NovelPage() {
     checkLogin();
   }, []);
 
+  const getApiKey = useCallback((): string => {
+    return process.env.NEXT_PUBLIC_API2D_KEY || '';
+  }, []);
+
   const cancelRequest = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -82,6 +89,11 @@ export default function NovelPage() {
   const handleSubmit = async () => {
     if (!inputText.trim()) {
       setError('请输入内容');
+      return;
+    }
+    const apiKey = getApiKey();
+    if (!apiKey) {
+      setError('请先配置 API Key');
       return;
     }
     if (!rateLimiter.canMakeRequest()) {
@@ -97,23 +109,35 @@ export default function NovelPage() {
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
+    const timeoutId = setTimeout(() => {
+      abortController.abort();
+    }, REQUEST_TIMEOUT);
+
     try {
-      const response = await fetch('/api/novel', {
+      const response = await fetch(`${API_BASE_URL}/v1/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + apiKey
         },
         body: JSON.stringify({
-          feature: activeFeature,
-          input: inputText,
-          model: selectedModel
+          model: selectedModel,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPTS[activeFeature] || '' },
+            { role: 'user', content: inputText }
+          ],
+          temperature: 0.7,
+          max_tokens: 4000,
+          stream: true
         }),
         signal: abortController.signal
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || '请求失败');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `请求失败 (${response.status})`);
       }
 
       // 处理流式响应
@@ -126,12 +150,29 @@ export default function NovelPage() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        result += decoder.decode(value, { stream: true });
-        setOutputText(result);
+        const chunk = decoder.decode(value, { stream: true });
+        
+        // 解析 SSE 格式的数据
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                result += content;
+                setOutputText(result);
+              }
+            } catch { /* ignore parse errors */ }
+          }
+        }
       }
     } catch (err: any) {
+      clearTimeout(timeoutId);
       if (err.name === 'AbortError') {
-        setError('请求已取消');
+        setError('请求超时');
       } else {
         setError(err.message || '生成失败');
       }
