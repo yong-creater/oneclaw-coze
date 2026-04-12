@@ -1,29 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FF8C42"/>
       <stop offset="100%" style="stop-color:#FF6B35"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="6" fill="url(#bg)"/>
-  <!-- 螃蟹身体 -->
-  <ellipse cx="16" cy="18" rx="7" ry="5" fill="#FFB347"/>
-  <!-- 螃蟹头 -->
-  <circle cx="16" cy="12" r="5" fill="#FFB347"/>
-  <!-- 左钳 -->
-  <path d="M8 14 Q5 12 4 14 Q5 16 8 15" fill="#FF8C42"/>
-  <path d="M4 14 L2 12 M4 14 L2 16" stroke="#FF8C42" stroke-width="1.2" stroke-linecap="round"/>
-  <!-- 右钳 -->
-  <path d="M24 14 Q27 12 28 14 Q27 16 24 15" fill="#FF8C42"/>
-  <path d="M28 14 L30 12 M28 14 L30 16" stroke="#FF8C42" stroke-width="1.2" stroke-linecap="round"/>
-  <!-- 眼睛 -->
-  <circle cx="14" cy="10" r="1.5" fill="white"/>
-  <circle cx="18" cy="10" r="1.5" fill="white"/>
-  <circle cx="14" cy="10" r="0.8" fill="#333"/>
-  <circle cx="18" cy="10" r="0.8" fill="#333"/>
-  <!-- 触角 -->
-  <path d="M13 7 Q11 5 10 6" stroke="#FF8C42" stroke-width="1" fill="none" stroke-linecap="round"/>
-  <path d="M19 7 Q21 5 22 6" stroke="#FF8C42" stroke-width="1" fill="none" stroke-linecap="round"/>
-  <!-- 嘴巴 -->
-  <path d="M14 14 Q16 15 18 14" stroke="#FF6B35" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+  <rect width="24" height="24" rx="4" fill="url(#bg)"/>
+  <ellipse cx="12" cy="14" rx="5" ry="3.5" fill="#FFB347"/>
+  <circle cx="12" cy="9" r="4" fill="#FFB347"/>
+  <path d="M6 11 Q3 9 2 11 Q3 13 6 12" fill="#FF8C42"/>
+  <path d="M18 11 Q21 9 22 11 Q21 13 18 12" fill="#FF8C42"/>
+  <circle cx="10" cy="8" r="1.2" fill="white"/>
+  <circle cx="14" cy="8" r="1.2" fill="white"/>
+  <circle cx="10" cy="8" r="0.6" fill="#333"/>
+  <circle cx="14" cy="8" r="0.6" fill="#333"/>
+  <path d="M10 5 Q8 3 7 4" stroke="#FF8C42" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+  <path d="M14 5 Q16 3 17 4" stroke="#FF8C42" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+  <path d="M10 11 Q12 12 14 11" stroke="#FF6B35" stroke-width="0.6" fill="none" stroke-linecap="round"/>
 </svg>
