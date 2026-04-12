@@ -468,7 +468,7 @@ export default function NovelCreator() {
         {/* 第一层级：功能选择 + 模型选择 */}
         <div className="flex items-center justify-between mb-6">
           {/* 功能选择 - 移动端可横向滚动 */}
-          <div className="flex-1">
+          <div className="flex-none">
             <div className="flex bg-slate-100 rounded-xl p-1.5 gap-1 overflow-x-auto scrollbar-hide">
               {FEATURES.map(f => {
                 const Icon = f.icon;
