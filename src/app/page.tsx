@@ -19,6 +19,7 @@ import SponsorBadge, { isSponsorActive } from '@/components/SponsorBadge';
 import AdBanner from '@/components/AdBanner';
 import UserButton from '@/components/UserButton';
 import Link from 'next/link';
+import NovelCreator from '@/components/NovelCreator';
 
 // ==================== 类型定义 ====================
 interface Category {
@@ -129,6 +130,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 const MAIN_TABS = [
   { key: 'rankings', label: '排行榜', icon: TrendingUp },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
+  { key: 'novel', label: '小说创作', icon: Feather },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
@@ -651,14 +653,6 @@ export default function HomePage() {
                   </button>
                 );
               })}
-              {/* 小说创作 - 独立页面入口 */}
-              <Link
-                href="/novel"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
-              >
-                <Feather className="w-4 h-4" />
-                <span className="hidden sm:inline">小说创作</span>
-              </Link>
             </div>
 
             {/* 右侧按钮 */}
@@ -1249,6 +1243,11 @@ export default function HomePage() {
             )}
             </div>
           </div>
+        )}
+
+        {/* ==================== 小说创作 ==================== */}
+        {mainTab === 'novel' && (
+          <NovelCreator />
         )}
 
         {/* ==================== Skill ==================== */}
