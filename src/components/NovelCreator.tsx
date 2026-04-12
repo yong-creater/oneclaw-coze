@@ -310,8 +310,7 @@ export default function NovelCreator() {
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             {/* 功能选择 - 左侧 */}
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-600">选择功能：</span>
+            <div className="flex items-center gap-2">
               <div className="flex bg-slate-100 rounded-xl p-1.5 gap-1">
                 {FEATURES.map(f => {
                   const Icon = f.icon;
@@ -340,7 +339,7 @@ export default function NovelCreator() {
                   e.stopPropagation();
                   setShowModelPicker(!showModelPicker);
                 }}
-                className="model-trigger flex items-center gap-3 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                className="model-trigger flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors"
               >
                 <span className="text-sm font-medium text-slate-500">当前模型：</span>
                 {(() => {
