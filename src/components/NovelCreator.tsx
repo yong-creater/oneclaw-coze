@@ -305,15 +305,6 @@ export default function NovelCreator() {
   return (
     <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-[calc(100vh-200px)]">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* 页面标题 */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2">
-            <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
-              AI 小说创作助手
-            </span>
-          </h2>
-          <p className="text-slate-500">基于优质AI模型，让创作更轻松</p>
-        </div>
 
         {/* 第一层级：功能选择 + 模型选择 - 独立一行 */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
