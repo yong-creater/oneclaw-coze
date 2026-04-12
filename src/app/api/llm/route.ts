@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
+// 4sapi 密钥（生产环境应使用环境变量或加密存储）
+const API4S_KEY = process.env.API4S_KEY || process.env.NEXT_PUBLIC_API2D_KEY || '';
+const API4S_URL = process.env.API4S_URL || 'https://4sapi.com';
+
+// 4sapi 模型映射（这些模型通过 4sapi 调用）
+const API4S_MODELS = [
+  'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4',
+  'claude-3-5-sonnet', 'claude-3-opus', 'claude-3-haiku',
+  'gemini-1.5-pro', 'gemini-1.5-flash',
+  'deepseek-chat', 'deepseek-coder',
+  'qwen-turbo', 'qwen-plus', 'qwen-max',
+  'glm-4', 'glm-4-flash', 'glm-4-plus',
+  'kimi-plus', 'kimi-nightly',
+  'minimax-chat', 'minimax-nlp',
+  'stability/stablelm', 'stability/sdxl',
+  'flux-pro', 'flux-dev',
+];
+
+// 检查是否为 4sapi 模型
+function isApi4sModel(model: string): boolean {
+  const lowerModel = model?.toLowerCase() || '';
+  return API4S_MODELS.some(m => lowerModel.includes(m.toLowerCase()));
+}
+
 const SYSTEM_PROMPTS: Record<string, string> = {
   polish: '你是专业小说编辑，擅长洗稿润色，保留核心剧情，优化句式表达，提升文字质感。',
   character: '你是小说人设专家，擅长打造鲜活的小说人物，生成完整的人物DNA设定卡。',
@@ -10,7 +34,7 @@ const SYSTEM_PROMPTS: Record<string, string> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const { model, messages, feature } = await request.json();
+    const { model, messages, feature, temperature, max_tokens } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json({ error: 'Invalid messages' }, { status: 400 });
@@ -25,18 +49,100 @@ export async function POST(request: NextRequest) {
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
 
+    // 设置 SSE 响应头
+    const encoder = new TextEncoder();
+    
+    // 判断使用哪个 API
+    if (isApi4sModel(model) && API4S_KEY) {
+      // 使用 4sapi
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            const response = await fetch(`${API4S_URL}/v1/chat/completions`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${API4S_KEY}`
+              },
+              body: JSON.stringify({
+                model: model,
+                messages: messages,
+                temperature: temperature ?? 0.7,
+                max_tokens: max_tokens ?? 4000,
+                stream: true
+              })
+            });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`4sapi error: ${response.status} - ${errorText}`);
+            }
+
+            const reader = response.body?.getReader();
+            if (!reader) {
+              throw new Error('No response body');
+            }
+
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split('\n');
+              buffer = lines.pop() || '';
+
+              for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                  const data = line.slice(6);
+                  if (data === '[DONE]') {
+                    controller.close();
+                    return;
+                  }
+                  try {
+                    const parsed = JSON.parse(data);
+                    const content = parsed.choices?.[0]?.delta?.content;
+                    if (content) {
+                      controller.enqueue(encoder.encode(content));
+                    }
+                  } catch (e) {
+                    // Ignore parse errors for partial data
+                  }
+                }
+              }
+            }
+            controller.close();
+          } catch (error: any) {
+            console.error('4sapi stream error:', error);
+            controller.enqueue(encoder.encode(`\n\n[错误: ${error.message || '生成失败'}]`));
+            controller.close();
+          }
+        }
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Transfer-Encoding': 'chunked',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+        },
+      });
+    }
+
+    // 使用 Coze SDK（免费模型）
     const llmConfig = {
       model: model || 'doubao-seed-1-6-251015',
-      temperature: 0.7,
+      temperature: temperature ?? 0.7,
       streaming: true
     };
 
-    // 设置 SSE 响应头
-    const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const aiStream = client.stream(messages, llmConfig);
+          const aiStream = client.stream(messages as any, llmConfig);
           
           for await (const chunk of aiStream) {
             if (chunk.content) {

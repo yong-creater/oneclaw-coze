@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
 const REQUEST_TIMEOUT = 60000;
 const RATE_LIMIT_MAX = 10;
 
@@ -298,10 +297,6 @@ export default function NovelCreator() {
     };
   }, [showModelPicker, showExportMenu]);
 
-  const getApiKey = useCallback((): string => {
-    return process.env.NEXT_PUBLIC_API2D_KEY || '';
-  }, []);
-
   const cancelRequest = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -312,14 +307,6 @@ export default function NovelCreator() {
   const handleSubmit = async () => {
     if (!inputText.trim()) {
       setError('请输入内容');
-      return;
-    }
-    
-    const apiKey = getApiKey();
-    const isCozeModel = availableModels.find(m => m.id === selectedModel)?.isFree;
-    
-    if (!isCozeModel && !apiKey) {
-      setError('请先配置 4sapi API Key');
       return;
     }
     
@@ -341,48 +328,27 @@ export default function NovelCreator() {
     }, REQUEST_TIMEOUT);
 
     try {
-      let response;
-      
-      if (isCozeModel) {
-        response = await fetch('/api/llm', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: selectedModel,
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
-              { role: 'user', content: inputText }
-            ],
-            stream: true
-          }),
-          signal: abortController.signal
-        });
-      } else {
-        response = await fetch(`${API_BASE_URL}/v1/chat/completions`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey
-          },
-          body: JSON.stringify({
-            model: selectedModel,
-            messages: [
-              { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
-              { role: 'user', content: inputText }
-            ],
-            temperature: 0.7,
-            max_tokens: 4000,
-            stream: true
-          }),
-          signal: abortController.signal
-        });
-      }
+      // 统一调用后端 API（后端处理 4sapi 密钥）
+      const response = await fetch('/api/llm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
+            { role: 'user', content: inputText }
+          ],
+          feature: selectedFeature,
+          stream: true
+        }),
+        signal: abortController.signal
+      });
 
       clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `请求失败 (${response.status})`);
+        throw new Error(errorData.error || `请求失败 (${response.status})`);
       }
 
       const reader = response.body?.getReader();
@@ -396,26 +362,9 @@ export default function NovelCreator() {
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         
-        const lines = chunk.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content || parsed.content;
-              if (content) {
-                result += typeof content === 'string' ? content : content.toString();
-                setOutputText(result);
-              }
-            } catch { /* ignore parse errors */ }
-          } else if (isCozeModel) {
-            try {
-              result += line;
-              setOutputText(result);
-            } catch { /* ignore */ }
-          }
-        }
+        // 流式输出直接追加
+        result += chunk;
+        setOutputText(result);
       }
     } catch (err: any) {
       clearTimeout(timeoutId);
