@@ -221,18 +221,20 @@ function exportToExcel(data: any[], filename: string) {
 }
 
 export default function NovelCreator() {
-  // 每个功能的独立状态
-  const [featureStates, setFeatureStates] = useState<Record<string, { input: string; output: string }>>({
-    polish: { input: '', output: '' },
-    character: { input: '', output: '' },
-    imagePrompt: { input: '', output: '' },
-    scenePrompt: { input: '', output: '' },
+  // 每个功能的独立状态（包括loading和error）
+  const [featureStates, setFeatureStates] = useState<Record<string, { input: string; output: string; loading: boolean; error: string }>>({
+    polish: { input: '', output: '', loading: false, error: '' },
+    character: { input: '', output: '', loading: false, error: '' },
+    imagePrompt: { input: '', output: '', loading: false, error: '' },
+    scenePrompt: { input: '', output: '', loading: false, error: '' },
   });
   const [selectedFeature, setSelectedFeature] = useState('polish');
   
   // 获取当前功能的输入输出
   const currentInput = featureStates[selectedFeature]?.input || '';
   const currentOutput = featureStates[selectedFeature]?.output || '';
+  const currentLoading = featureStates[selectedFeature]?.loading || false;
+  const currentError = featureStates[selectedFeature]?.error || '';
   
   const setCurrentInput = (value: string) => {
     setFeatureStates(prev => ({
@@ -247,8 +249,29 @@ export default function NovelCreator() {
       [selectedFeature]: { ...prev[selectedFeature], output: value }
     }));
   };
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  
+  const setCurrentLoading = (loading: boolean) => {
+    setFeatureStates(prev => ({
+      ...prev,
+      [selectedFeature]: { ...prev[selectedFeature], loading }
+    }));
+  };
+  
+  const setCurrentError = (error: string) => {
+    setFeatureStates(prev => ({
+      ...prev,
+      [selectedFeature]: { ...prev[selectedFeature], error }
+    }));
+  };
+  
+  // 每个功能独立的AbortController
+  const abortControllersRef = useRef<Record<string, AbortController | null>>({
+    polish: null,
+    character: null,
+    imagePrompt: null,
+    scenePrompt: null,
+  });
+  
   const [selectedModel, setSelectedModel] = useState('doubao-seed-2-0-pro-260215');
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [modelProvider, setModelProvider] = useState('doubao');
@@ -256,7 +279,7 @@ export default function NovelCreator() {
   const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const [exportError, setExportError] = useState('');
   const rateLimiter = new RateLimiter(RATE_LIMIT_MAX);
   
   const currentFeature = FEATURES.find(f => f.id === selectedFeature);
@@ -321,30 +344,31 @@ export default function NovelCreator() {
   }, [showModelPicker, showExportMenu]);
 
   const cancelRequest = useCallback(() => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
+    if (abortControllersRef.current[selectedFeature]) {
+      abortControllersRef.current[selectedFeature]?.abort();
+      abortControllersRef.current[selectedFeature] = null;
     }
-  }, []);
+    setCurrentLoading(false);
+  }, [selectedFeature, setCurrentLoading]);
 
   const handleSubmit = async () => {
     if (!currentInput.trim()) {
-      setError('请输入内容');
+      setCurrentError('请输入内容');
       return;
     }
     
     if (!rateLimiter.canMakeRequest()) {
-      setError('请求过于频繁，请稍后重试');
+      setCurrentError('请求过于频繁，请稍后重试');
       return;
     }
 
     rateLimiter.addRequest();
-    setError('');
+    setCurrentError('');
     setCurrentOutput('');
-    setIsLoading(true);
+    setCurrentLoading(true);
 
     const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+    abortControllersRef.current[selectedFeature] = abortController;
 
     const timeoutId = setTimeout(() => {
       abortController.abort();
@@ -392,13 +416,13 @@ export default function NovelCreator() {
     } catch (err: any) {
       clearTimeout(timeoutId);
       if (err.name === 'AbortError') {
-        setError('请求超时');
+        setCurrentError('请求超时');
       } else {
-        setError(err.message || '生成失败');
+        setCurrentError(err.message || '生成失败');
       }
     } finally {
-      setIsLoading(false);
-      abortControllerRef.current = null;
+      setCurrentLoading(false);
+      abortControllersRef.current[selectedFeature] = null;
     }
   };
 
@@ -422,7 +446,7 @@ export default function NovelCreator() {
   const handleExportExcel = () => {
     const characters = parseCharacterDNA(currentOutput);
     if (characters.length === 0) {
-      setError('暂无人物数据可导出');
+      setExportError('暂无人物数据可导出');
       return;
     }
     exportToExcel(characters, `人物DNA_${Date.now()}.xlsx`);
@@ -587,7 +611,7 @@ export default function NovelCreator() {
             />
             
             <div className="mt-4 flex items-center gap-4">
-              {isLoading ? (
+              {currentLoading ? (
                 <button
                   onClick={cancelRequest}
                   className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center gap-2 font-medium"
@@ -606,10 +630,10 @@ export default function NovelCreator() {
                 </button>
               )}
               
-              {error && (
+              {currentError && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
                   <AlertCircle className="w-4 h-4" />
-                  {error}
+                  {currentError}
                 </div>
               )}
             </div>
@@ -675,7 +699,7 @@ export default function NovelCreator() {
                 placeholder="生成的内容将显示在这里..."
                 className="w-full h-full p-4 border-2 border-slate-200 rounded-xl resize-none bg-slate-50 text-base leading-relaxed"
               />
-              {isLoading && (
+              {currentLoading && (
                 <div className="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl">
                   <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin text-orange-500 mx-auto" />
