@@ -302,24 +302,23 @@ export default function NovelPage() {
         <div className="grid lg:grid-cols-2 gap-8">
           {/* 左侧：输入 */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
-            {/* 功能选择 */}
+            {/* 功能选择 - 横向一行 */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 mb-3">选择功能</label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="flex gap-2">
                 {FEATURES.map(f => {
                   const Icon = f.icon;
                   return (
                     <button
                       key={f.id}
                       onClick={() => setSelectedFeature(f.id)}
-                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                      className={`flex-1 p-3 rounded-xl transition-all flex flex-col items-center gap-2 ${
                         selectedFeature === f.id
-                          ? 'border-orange-500 bg-amber-50 border-orange-500'
-                          : 'border-slate-200 hover:border-orange-200 bg-white'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                       }`}
                     >
-                      <Icon className={`w-6 h-6 ${selectedFeature === f.id ? 'text-orange-500' : 'text-slate-400'}`} />
-                      <span className={`font-medium ${selectedFeature === f.id ? 'text-orange-600' : 'text-slate-700'}`}>
+                      <Icon className={`w-5 h-5 ${selectedFeature === f.id ? 'text-white' : 'text-slate-500'}`} />
+                      <span className={`font-medium text-sm ${selectedFeature === f.id ? 'text-white' : 'text-slate-700'}`}>
                         {f.name}
                       </span>
                     </button>
