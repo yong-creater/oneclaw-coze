@@ -12,14 +12,54 @@ const RATE_LIMIT_MAX = 10;
 
 const SYSTEM_PROMPTS: Record<string, string> = {
   polish: '你是专业小说编辑，擅长洗稿润色，保留核心剧情，优化句式表达，提升文字质感。',
-  character: '你是小说人设专家，擅长打造鲜活的小说人物，生成完整的人物DNA设定卡。',
+  character: `你是专业的小说人物DNA设定师。请根据用户输入的小说内容，提取并生成结构化的人物AI绘画提示词。
+
+**输出格式要求：**
+
+核心人物：[人物定位描述]
+
+外貌特征：
+1. 人物特征：[身材、体型等]
+2. 人物特写：[特写类型]
+3. 人物脸部：[脸型、面容特点]
+4. 风格：[CG类型]
+
+外貌细节：
+1. 头发：[发型、发质描述]
+2. 眉毛：[眉形]
+3. 眼睛：[眼型、神态]
+4. 鼻子：[鼻型]
+5. 嘴唇：[唇型]
+6. 皮肤：[肤色、质感]
+7. 妆造：[妆容风格]
+
+服饰：
+[服装+配饰描述]
+
+场景：
+[环境设定]
+
+画面感：
+[氛围、质感描述]
+
+画质：
+[画质要求]
+
+构图：
+[构图风格]
+
+视图要求：
+[视图说明]
+
+请根据小说中的人物描写，按照上述格式生成详细的AI绘画提示词，风格要与小说一致（古风/现代/奇幻等）。`,
+
   imagePrompt: '你是AI绘画提示词工程师，生成适配Midjourney、Stable Diffusion的高质量提示词。',
   scenePrompt: '你是专业场景设计师，生成小说场景描写和配套的AI绘图提示词。'
 };
 
 const FEATURES = [
   { id: 'polish', name: '洗稿润色', icon: Feather, placeholder: '请输入需要洗稿润色的原文内容...' },
-  { id: 'character', name: '人物DNA', icon: UserCircle, placeholder: '请输入人物核心描述，如：冷漠的剑客、年迈的将军...' },
+  { id: 'character', name: '人物DNA', icon: UserCircle, placeholder: '请输入小说中的人物描写内容，系统将自动提取并生成结构化的AI绘画提示词...' },
   { id: 'imagePrompt', name: '绘画提示词', icon: ImagePlus, placeholder: '请描述你想要的画面，如：一个古风剑客站在悬崖边...' },
   { id: 'scenePrompt', name: '场景描写', icon: Mountain, placeholder: '请描述场景，如：雨夜的江南小镇、荒废的古庙...' }
 ];
