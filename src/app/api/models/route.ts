@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
 const API_KEY = process.env.NEXT_PUBLIC_API2D_KEY;
 
-// 4sapi 供应商
-const FOURSAPI_PROVIDERS = ['openai', 'anthropic', 'google', 'xai', 'moonshot', 'mistral', 'stability', 'cohere', 'perplexity'];
+// 国内模型供应商（不走4sapi，用Coze免费）
+const DOMESTIC_PROVIDERS = ['doubao', 'deepseek', 'kimi', 'glm', 'qwen', 'minimax', 'ali', 'baidu', 'tencent', 'huawei', '字节', ' moonshot'];
 
 // Coze 免费模型
 const COZE_FREE_MODELS = [
@@ -42,6 +42,7 @@ const PROVIDER_MAP: Record<string, { name: string; logo: string }> = {
   'meta': { name: 'Meta', logo: '🦾' },
   'cohere': { name: 'Cohere', logo: '🌊' },
   'perplexity': { name: 'Perplexity', logo: '🔍' },
+  'custom': { name: '其他', logo: '📦' },
 };
 
 // 模型分类规则
@@ -97,7 +98,7 @@ function getProviderInfo(owner: string): { name: string; logo: string } {
       return value;
     }
   }
-  return { name: owner, logo: '⚡' };
+  return { name: owner, logo: '📦' };
 }
 
 // 获取推荐说明
@@ -119,10 +120,26 @@ function formatModelName(modelId: string): string {
     .join(' ');
 }
 
+// 判断是否为国内模型（用Coze免费）
+function isDomesticModel(modelId: string, owner: string): boolean {
+  const lowerId = modelId.toLowerCase();
+  const lowerOwner = owner.toLowerCase();
+  
+  for (const keyword of DOMESTIC_PROVIDERS) {
+    if (lowerId.includes(keyword.toLowerCase()) || lowerOwner.includes(keyword.toLowerCase())) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // 判断是否为4sapi付费模型
 function is4sapiModel(owner: string): boolean {
   const lowerOwner = owner.toLowerCase();
-  return FOURSAPI_PROVIDERS.some(p => lowerOwner.includes(p));
+  // custom 也算，因为可能是三方模型
+  return !lowerOwner.includes('doubao') && !lowerOwner.includes('deepseek') && 
+         !lowerOwner.includes('kimi') && !lowerOwner.includes('glm') && 
+         !lowerOwner.includes('qwen') && !lowerOwner.includes('minimax');
 }
 
 export async function GET() {
@@ -151,7 +168,8 @@ export async function GET() {
           const rawModels = data.data || [];
 
           rawModels.forEach((m: any) => {
-            if (!is4sapiModel(m.owned_by)) return; // 跳过非4sapi供应商
+            // 跳过国内模型（走Coze免费）
+            if (isDomesticModel(m.id, m.owned_by)) return;
             
             const provider = getProviderInfo(m.owned_by);
             
