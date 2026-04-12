@@ -4,8 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Send, Loader2, AlertCircle, Check, Copy, Download,
-  Feather, UserCircle, ImagePlus, Mountain, 
-  Sparkles, MessageSquare, Brain, Wand2
+  ChevronDown, Feather, UserCircle, ImagePlus, Mountain
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import LoginModal from '@/components/LoginModal';
@@ -26,14 +25,6 @@ const FEATURES = [
   { id: 'character', name: '人物DNA', icon: UserCircle, placeholder: '请输入人物核心描述，如：冷漠的剑客、年迈的将军...' },
   { id: 'imagePrompt', name: '绘画提示词', icon: ImagePlus, placeholder: '请描述你想要的画面，如：一个古风剑客站在悬崖边...' },
   { id: 'scenePrompt', name: '场景描写', icon: Mountain, placeholder: '请描述场景，如：雨夜的江南小镇、荒废的古庙...' }
-];
-
-// 模型分类
-const MODEL_CATEGORIES = [
-  { id: 'free', name: '免费推荐', icon: Sparkles, filter: (m: any) => m.isFree, color: 'green' },
-  { id: 'chat', name: '对话模型', icon: MessageSquare, filter: (m: any) => m.category === '对话', color: 'blue' },
-  { id: 'reasoning', name: '推理模型', icon: Brain, filter: (m: any) => m.category === '推理', color: 'purple' },
-  { id: 'pro', name: '专业模型', icon: Wand2, filter: (m: any) => ['图像', '视觉', '音频', '向量'].includes(m.category), color: 'amber' },
 ];
 
 // Rate Limiter
@@ -69,10 +60,11 @@ export default function NovelPage() {
   const [error, setError] = useState('');
   const [selectedFeature, setSelectedFeature] = useState('polish');
   const [selectedModel, setSelectedModel] = useState('deepseek-chat');
+  const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [selectedModelCategory, setSelectedModelCategory] = useState('free');
-  const [showModelList, setShowModelList] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState('free');
+  const [modelSearch, setModelSearch] = useState('');
   const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -80,8 +72,6 @@ export default function NovelPage() {
   
   const currentFeature = FEATURES.find(f => f.id === selectedFeature);
   const currentModel = availableModels.find(m => m.id === selectedModel) || { name: selectedModel, provider: 'Coze', providerLogo: '🦞', isFree: true };
-  const currentCategory = MODEL_CATEGORIES.find(c => c.id === selectedModelCategory);
-  const filteredModels = availableModels.filter(m => currentCategory?.filter(m) ?? true).slice(0, 20);
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -326,36 +316,129 @@ export default function NovelPage() {
               </div>
             </div>
 
-            {/* 模型选择 - 2x2网格风格 */}
+            {/* 模型选择 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-700 mb-3">选择模型</label>
-              
-              {/* 模型分类 2x2 网格 */}
-              <div className="grid grid-cols-2 gap-3">
-                {MODEL_CATEGORIES.map(cat => {
-                  const Icon = cat.icon;
-                  const count = availableModels.filter(m => cat.filter(m)).length;
-                  return (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setSelectedModelCategory(cat.id);
-                        setShowModelList(true);
-                      }}
-                      className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                        selectedModelCategory === cat.id
-                          ? 'border-orange-500 bg-amber-50'
-                          : 'border-slate-200 bg-white hover:border-orange-200'
-                      }`}
-                    >
-                      <Icon className={`w-6 h-6 ${selectedModelCategory === cat.id ? 'text-orange-500' : 'text-slate-400'}`} />
-                      <span className={`font-medium ${selectedModelCategory === cat.id ? 'text-orange-600' : 'text-slate-700'}`}>
-                        {cat.name}
-                      </span>
-                      <span className="text-xs text-slate-400">{count}个模型</span>
-                    </button>
-                  );
-                })}
+              <div className="space-y-3">
+                {/* 供应商筛选 */}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSelectedProvider('all')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition-colors ${
+                      selectedProvider === 'all'
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    全部 ({availableModels.length})
+                  </button>
+                  <button
+                    onClick={() => setSelectedProvider('free')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition-colors flex items-center gap-1 ${
+                      selectedProvider === 'free'
+                        ? 'bg-green-500 text-white'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    免费 ({availableModels.filter(m => m.isFree).length})
+                  </button>
+                  <button
+                    onClick={() => setSelectedProvider('4sapi')}
+                    className={`px-3 py-1.5 rounded-full text-xs transition-colors ${
+                      selectedProvider === '4sapi'
+                        ? 'bg-amber-500 text-white'
+                        : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                    }`}
+                  >
+                    4sapi ({availableModels.filter(m => !m.isFree).length})
+                  </button>
+                </div>
+                
+                {/* 模型下拉选择 */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowModelDropdown(!showModelDropdown)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 border-slate-200 rounded-xl hover:border-orange-300 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{currentModel.providerLogo || '⚡'}</span>
+                      <div className="text-left">
+                        <div className="font-medium flex items-center gap-2">
+                          {currentModel.name}
+                          {currentModel.isFree ? (
+                            <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">免费</span>
+                          ) : (
+                            <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">付费</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-500">{currentModel.provider}</div>
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${showModelDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  {/* 模型下拉列表 */}
+                  {showModelDropdown && (
+                    <div className="absolute z-20 top-full left-0 right-0 mt-2 bg-white border-2 border-slate-200 rounded-xl shadow-lg max-h-80 overflow-y-auto">
+                      {/* 搜索框 */}
+                      <div className="p-2 border-b sticky top-0 bg-white">
+                        <input
+                          type="text"
+                          value={modelSearch}
+                          onChange={e => setModelSearch(e.target.value)}
+                          placeholder="搜索模型..."
+                          className="w-full px-3 py-2 border rounded-lg text-sm"
+                        />
+                      </div>
+                      
+                      {/* 模型列表 */}
+                      <div className="p-2">
+                        {availableModels
+                          .filter(m => {
+                            if (selectedProvider === 'free') return m.isFree;
+                            if (selectedProvider === '4sapi') return !m.isFree;
+                            return true;
+                          })
+                          .filter(m => 
+                            !modelSearch || 
+                            m.name.toLowerCase().includes(modelSearch.toLowerCase()) ||
+                            m.provider.toLowerCase().includes(modelSearch.toLowerCase())
+                          )
+                          .slice(0, 50)
+                          .map(m => (
+                            <button
+                              key={m.id}
+                              onClick={() => {
+                                setSelectedModel(m.id);
+                                setShowModelDropdown(false);
+                                setModelSearch('');
+                              }}
+                              className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between hover:bg-slate-50 ${
+                                selectedModel === m.id ? 'bg-orange-50' : ''
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{m.providerLogo || '⚡'}</span>
+                                <div>
+                                  <div className="font-medium text-sm">{m.name}</div>
+                                  <div className="text-xs text-slate-500">{m.provider}</div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {m.isFree ? (
+                                  <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">免费</span>
+                                ) : (
+                                  <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">付费</span>
+                                )}
+                                {selectedModel === m.id && <span className="text-orange-500">✓</span>}
+                              </div>
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
