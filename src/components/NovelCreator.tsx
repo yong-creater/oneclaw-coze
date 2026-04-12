@@ -483,7 +483,7 @@ export default function NovelCreator() {
                     }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="hidden xs:inline">{f.name}</span>
+                    <span className="hidden sm:inline">{f.name}</span>
                   </button>
                 );
               })}
