@@ -326,12 +326,12 @@ export default function NovelPage() {
               </div>
             </div>
 
-            {/* 模型选择 - 2x2网格风格 */}
+            {/* 模型选择 - 横排4卡片风格 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-700 mb-3">选择模型</label>
               
-              {/* 模型分类 2x2 网格 */}
-              <div className="grid grid-cols-2 gap-3 mb-3">
+              {/* 模型分类 横排4卡片 */}
+              <div className="grid grid-cols-4 gap-3">
                 {MODEL_CATEGORIES.map(cat => {
                   const Icon = cat.icon;
                   const count = availableModels.filter(m => cat.filter(m)).length;
@@ -345,110 +345,18 @@ export default function NovelPage() {
                       className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
                         selectedModelCategory === cat.id
                           ? 'border-orange-500 bg-amber-50'
-                          : 'border-slate-200 hover:border-orange-200 bg-white'
+                          : 'border-slate-200 bg-white hover:border-orange-200'
                       }`}
                     >
                       <Icon className={`w-6 h-6 ${selectedModelCategory === cat.id ? 'text-orange-500' : 'text-slate-400'}`} />
                       <span className={`font-medium text-sm ${selectedModelCategory === cat.id ? 'text-orange-600' : 'text-slate-700'}`}>
                         {cat.name}
                       </span>
-                      <span className="text-xs text-slate-400">{count} 个模型</span>
+                      <span className="text-xs text-slate-400">{count}</span>
                     </button>
                   );
                 })}
               </div>
-              
-              {/* 已选模型展示 */}
-              <div className="flex items-center justify-between px-4 py-3 bg-slate-50 rounded-xl border border-slate-200">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{currentModel.providerLogo || '⚡'}</span>
-                  <div className="text-left">
-                    <div className="font-medium flex items-center gap-2">
-                      {currentModel.name}
-                      {currentModel.isFree ? (
-                        <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">免费</span>
-                      ) : (
-                        <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">付费</span>
-                      )}
-                    </div>
-                    <div className="text-xs text-slate-500">{currentModel.provider} · {currentModel.category}</div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowModelList(!showModelList)}
-                  className="px-3 py-1.5 text-sm text-orange-500 hover:text-orange-600 font-medium"
-                >
-                  切换
-                </button>
-              </div>
-              
-              {/* 模型列表弹窗 */}
-              {showModelList && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowModelList(false)}>
-                  <div className="bg-white rounded-2xl shadow-2xl w-[700px] max-h-[80vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-                    <div className="px-6 py-4 border-b bg-gradient-to-r from-orange-500 to-amber-500 text-white">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-bold">选择模型</h3>
-                          <p className="text-sm text-white/80 mt-1">
-                            {currentCategory?.name} · 共 {filteredModels.length} 个模型
-                          </p>
-                        </div>
-                        <button onClick={() => setShowModelList(false)} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">✕</button>
-                      </div>
-                    </div>
-                    
-                    {/* 模型列表 */}
-                    <div className="p-4 max-h-[500px] overflow-y-auto">
-                      <div className="grid grid-cols-1 gap-2">
-                        {filteredModels.map(m => (
-                          <button
-                            key={m.id}
-                            onClick={() => {
-                              setSelectedModel(m.id);
-                              setShowModelList(false);
-                            }}
-                            className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center justify-between ${
-                              selectedModel === m.id 
-                                ? 'border-orange-500 bg-orange-50' 
-                                : 'border-slate-200 hover:border-orange-200 hover:bg-slate-50'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl">{m.providerLogo || '⚡'}</span>
-                              <div>
-                                <div className="font-medium">{m.name}</div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className="text-xs text-slate-500">{m.provider}</span>
-                                  <span className="text-slate-300">·</span>
-                                  <span className="text-xs text-orange-500">{m.recommend}</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {m.isFree ? (
-                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">免费</span>
-                              ) : (
-                                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">付费</span>
-                              )}
-                              {selectedModel === m.id && (
-                                <span className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm">✓</span>
-                              )}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                      
-                      {/* 切换分类提示 */}
-                      <div className="mt-4 pt-4 border-t text-center">
-                        <p className="text-sm text-slate-500">
-                          点击上方分类切换查看其他模型
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* 输入区域 */}
