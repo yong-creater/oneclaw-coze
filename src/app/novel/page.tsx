@@ -63,6 +63,7 @@ export default function NovelPage() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [modelType, setModelType] = useState<'free' | 'paid'>('free');
+  const [modelProvider, setModelProvider] = useState('doubao');
   const [availableModels, setAvailableModels] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -73,6 +74,30 @@ export default function NovelPage() {
   const filteredModels = modelType === 'free' 
     ? availableModels.filter(m => m.isFree)
     : availableModels.filter(m => !m.isFree);
+  
+  // 免费模型厂商
+  const freeProviders = [
+    { id: 'doubao', name: '豆包', icon: '🦞', filter: (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed') },
+    { id: 'deepseek', name: 'DeepSeek', icon: '🔵', filter: (m: any) => m.name.includes('DeepSeek') || m.id.includes('deepseek') },
+    { id: 'kimi', name: 'Kimi', icon: '🌙', filter: (m: any) => m.name.includes('Kimi') || m.id.includes('kimi') },
+    { id: 'glm', name: '智谱GLM', icon: '📊', filter: (m: any) => m.name.includes('GLM') || m.id.includes('glm') },
+    { id: 'qwen', name: '通义Qwen', icon: '🏢', filter: (m: any) => m.name.includes('Qwen') || m.id.includes('qwen') },
+    { id: 'minimax', name: 'MiniMax', icon: '⚡', filter: (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax') },
+    { id: 'other-free', name: '其他', icon: '📦', filter: (m: any) => !m.name.includes('豆包') && !m.id.includes('doubao') && !m.id.includes('seed') && !m.name.includes('DeepSeek') && !m.id.includes('deepseek') && !m.name.includes('Kimi') && !m.id.includes('kimi') && !m.name.includes('GLM') && !m.id.includes('glm') && !m.name.includes('Qwen') && !m.id.includes('qwen') && !m.name.includes('MiniMax') && !m.id.includes('minimax') },
+  ];
+  
+  // 付费模型厂商
+  const paidProviders = [
+    { id: 'openai', name: 'OpenAI', icon: '🤖', filter: (m: any) => m.provider === 'OpenAI' },
+    { id: 'anthropic', name: 'Anthropic', icon: '🔵', filter: (m: any) => m.provider === 'Anthropic' },
+    { id: 'google', name: 'Google', icon: '💙', filter: (m: any) => m.provider === 'Google' },
+    { id: 'moonshot', name: 'Moonshot', icon: '🌙', filter: (m: any) => m.provider === 'Moonshot' },
+    { id: 'xai', name: 'xAI', icon: '💀', filter: (m: any) => m.provider === 'xAI' },
+    { id: 'other-paid', name: '其他', icon: '📦', filter: (m: any) => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI'].includes(m.provider) },
+  ];
+  
+  const providers = modelType === 'free' ? freeProviders : paidProviders;
+  const currentProviderModels = filteredModels.filter(m => providers.find(p => p.id === modelProvider)?.filter(m));
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -316,124 +341,75 @@ export default function NovelPage() {
               </div>
             </div>
 
-            {/* 模型选择 - 免费/付费切换 + 下拉 */}
+            {/* 模型选择 - 标签页+平铺 */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
               
               {/* 免费/付费切换 */}
               <div className="flex gap-2 mb-3">
                 <button
-                  onClick={() => setModelType('free')}
-                  className={`flex-1 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                  onClick={() => { setModelType('free'); setModelProvider('doubao'); }}
+                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
                     modelType === 'free'
-                      ? 'bg-green-500 text-white shadow-lg'
+                      ? 'bg-green-500 text-white'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-current"></span>
                   免费模型
                 </button>
                 <button
-                  onClick={() => setModelType('paid')}
-                  className={`flex-1 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
+                  onClick={() => { setModelType('paid'); setModelProvider('openai'); }}
+                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
                     modelType === 'paid'
-                      ? 'bg-amber-500 text-white shadow-lg'
+                      ? 'bg-amber-500 text-white'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-current"></span>
                   付费模型
                 </button>
               </div>
               
-              {/* 模型下拉选择 */}
-              <select
-                value={selectedModel}
-                onChange={(e) => setSelectedModel(e.target.value)}
-                className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-orange-500 transition-colors"
-              >
-                <option value="">请选择模型...</option>
-                
-                {modelType === 'free' ? (
-                  <>
-                    <optgroup label="🦞 豆包 Seed">
-                      {filteredModels.filter(m => m.name.includes('豆包') || m.id.includes('doubao')).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="🔵 DeepSeek">
-                      {filteredModels.filter(m => m.name.includes('DeepSeek') || m.id.includes('deepseek')).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="🌙 Kimi">
-                      {filteredModels.filter(m => m.name.includes('Kimi') || m.id.includes('kimi')).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="📊 智谱 GLM">
-                      {filteredModels.filter(m => m.name.includes('GLM') || m.id.includes('glm')).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="🏢 通义 Qwen">
-                      {filteredModels.filter(m => m.name.includes('Qwen') || m.id.includes('qwen')).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="⚡ MiniMax">
-                      {filteredModels.filter(m => m.name.includes('MiniMax') || m.id.includes('minimax')).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="📦 其他免费模型">
-                      {filteredModels.filter(m => 
-                        !m.name.includes('豆包') && !m.id.includes('doubao') &&
-                        !m.name.includes('DeepSeek') && !m.id.includes('deepseek') &&
-                        !m.name.includes('Kimi') && !m.id.includes('kimi') &&
-                        !m.name.includes('GLM') && !m.id.includes('glm') &&
-                        !m.name.includes('Qwen') && !m.id.includes('qwen') &&
-                        !m.name.includes('MiniMax') && !m.id.includes('minimax')
-                      ).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                  </>
-                ) : (
-                  <>
-                    <optgroup label="🤖 OpenAI">
-                      {filteredModels.filter(m => m.provider === 'OpenAI').slice(0, 30).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="🔵 Anthropic">
-                      {filteredModels.filter(m => m.provider === 'Anthropic').slice(0, 15).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="💙 Google">
-                      {filteredModels.filter(m => m.provider === 'Google').slice(0, 15).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="🌙 Moonshot">
-                      {filteredModels.filter(m => m.provider === 'Moonshot').slice(0, 10).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="💀 xAI">
-                      {filteredModels.filter(m => m.provider === 'xAI').slice(0, 10).map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </optgroup>
-                    <optgroup label="📦 其他">
-                      {filteredModels.filter(m => !['OpenAI', 'Anthropic', 'Google', 'Moonshot', 'xAI'].includes(m.provider)).slice(0, 20).map(m => (
-                        <option key={m.id} value={m.id}>{m.name} - {m.provider}</option>
-                      ))}
-                    </optgroup>
-                  </>
-                )}
-              </select>
+              {/* 厂商标签页 */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {providers.map(p => {
+                  const count = filteredModels.filter(m => p.filter(m)).length;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setModelProvider(p.id)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1 ${
+                        modelProvider === p.id
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span>{p.icon}</span>
+                      <span>{p.name}</span>
+                      <span className={`text-xs ${modelProvider === p.id ? 'text-white/80' : 'text-slate-400'}`}>({count})</span>
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {/* 模型平铺展示 */}
+              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
+                {currentProviderModels.slice(0, 50).map(m => (
+                  <button
+                    key={m.id}
+                    onClick={() => setSelectedModel(m.id)}
+                    className={`p-3 rounded-lg text-left transition-all ${
+                      selectedModel === m.id
+                        ? 'bg-orange-100 border-2 border-orange-500'
+                        : 'bg-slate-50 border-2 border-transparent hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="font-medium text-sm truncate">{m.name}</div>
+                    {m.provider && m.provider !== 'Coze' && (
+                      <div className="text-xs text-slate-400 truncate">{m.provider}</div>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* 输入区域 */}
