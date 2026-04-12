@@ -27,247 +27,95 @@ const FEATURES = [
   { id: 'scenePrompt', name: '场景描写', icon: Mountain, placeholder: '请描述场景，如：雨夜的江南小镇、荒废的古庙...' }
 ];
 
-const MODELS = [
-  // OpenAI 系列 (178个)
-  { id: 'gpt-4o', name: 'GPT-4o', recommend: '均衡之选', provider: 'OpenAI', category: 'chat' },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', recommend: '快速响应', provider: 'OpenAI', category: 'chat' },
-  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', recommend: '高性能', provider: 'OpenAI', category: 'chat' },
-  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', recommend: '低成本', provider: 'OpenAI', category: 'chat' },
-  { id: 'o1-preview', name: 'o1 Preview', recommend: '复杂推理', provider: 'OpenAI', category: 'reasoning' },
-  { id: 'o1-mini', name: 'o1 Mini', recommend: '代码专用', provider: 'OpenAI', category: 'reasoning' },
-  { id: 'o1', name: 'o1', recommend: '最强推理', provider: 'OpenAI', category: 'reasoning' },
-  { id: 'gpt-4o-audio', name: 'GPT-4o Audio', recommend: '语音交互', provider: 'OpenAI', category: 'audio' },
-  { id: 'gpt-4o-realtime', name: 'GPT-4o Realtime', recommend: '实时对话', provider: 'OpenAI', category: 'realtime' },
-  { id: 'dall-e-3', name: 'DALL-E 3', recommend: '图像生成', provider: 'OpenAI', category: 'image' },
-  { id: 'dall-e-2', name: 'DALL-E 2', recommend: '图像生成', provider: 'OpenAI', category: 'image' },
-  { id: 'whisper-1', name: 'Whisper', recommend: '语音识别', provider: 'OpenAI', category: 'audio' },
-  { id: 'tts-1', name: 'TTS', recommend: '语音合成', provider: 'OpenAI', category: 'audio' },
-  
-  // Anthropic 系列 (21个)
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', recommend: '写作最强', provider: 'Anthropic', category: 'chat' },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', recommend: '极速响应', provider: 'Anthropic', category: 'chat' },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', recommend: '最强推理', provider: 'Anthropic', category: 'chat' },
-  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', recommend: '均衡性能', provider: 'Anthropic', category: 'chat' },
-  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', recommend: '轻量快速', provider: 'Anthropic', category: 'chat' },
-  { id: 'claude-opus-3-5-20241120', name: 'Claude Opus 3.5', recommend: '最新旗舰', provider: 'Anthropic', category: 'chat' },
-  
-  // Google 系列 (22个)
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', recommend: '长上下文', provider: 'Google', category: 'chat' },
-  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', recommend: '极速免费', provider: 'Google', category: 'chat' },
-  { id: 'gemini-1.5-flash-8b', name: 'Gemini Flash-8B', recommend: '超轻量级', provider: 'Google', category: 'chat' },
-  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', recommend: '最新模型', provider: 'Google', category: 'chat' },
-  { id: 'gemini-2.0-pro-exp', name: 'Gemini 2.0 Pro', recommend: '最强能力', provider: 'Google', category: 'chat' },
-  { id: 'gemini-pro', name: 'Gemini Pro', recommend: '均衡性能', provider: 'Google', category: 'chat' },
-  { id: 'gemini-pro-vision', name: 'Gemini Pro Vision', recommend: '视觉理解', provider: 'Google', category: 'vision' },
-  { id: 'imagen-3', name: 'Imagen 3', recommend: '图像生成', provider: 'Google', category: 'image' },
-  { id: 'imagen-2', name: 'Imagen 2', recommend: '高质量图像', provider: 'Google', category: 'image' },
-  
-  // DeepSeek 系列 (8个)
-  { id: 'deepseek-chat', name: 'DeepSeek Chat', recommend: '通用对话', provider: 'DeepSeek', category: 'chat' },
-  { id: 'deepseek-coder', name: 'DeepSeek Coder', recommend: '代码专家', provider: 'DeepSeek', category: 'code' },
-  { id: 'deepseek-v2.5', name: 'DeepSeek V2.5', recommend: '最新模型', provider: 'DeepSeek', category: 'chat' },
-  { id: 'deepseek-v3', name: 'DeepSeek V3', recommend: '旗舰模型', provider: 'DeepSeek', category: 'chat' },
-  { id: 'deepseek-r1', name: 'DeepSeek R1', recommend: '推理能力', provider: 'DeepSeek', category: 'reasoning' },
-  { id: 'deepseek-r1-distill', name: 'DeepSeek R1 Distill', recommend: '轻量推理', provider: 'DeepSeek', category: 'reasoning' },
-  
-  // xAI 系列 (29个)
-  { id: 'grok-2', name: 'Grok-2', recommend: '实时知识', provider: 'xAI', category: 'chat' },
-  { id: 'grok-2-mini', name: 'Grok-2 Mini', recommend: '快速响应', provider: 'xAI', category: 'chat' },
-  { id: 'grok-beta', name: 'Grok Beta', recommend: '测试版本', provider: 'xAI', category: 'chat' },
-  { id: 'grok-vision', name: 'Grok Vision', recommend: '视觉理解', provider: 'xAI', category: 'vision' },
-  
-  // Meta 系列 (3个)
-  { id: 'llama-3-1-405b', name: 'Llama 3.1 405B', recommend: '开源旗舰', provider: 'Meta', category: 'chat' },
-  { id: 'llama-3-1-70b', name: 'Llama 3.1 70B', recommend: '开源强项', provider: 'Meta', category: 'chat' },
-  { id: 'llama-3-1-8b', name: 'Llama 3.1 8B', recommend: '开源轻量', provider: 'Meta', category: 'chat' },
-  { id: 'llama-3-2-11b', name: 'Llama 3.2 11B', recommend: '视觉模型', provider: 'Meta', category: 'vision' },
-  { id: 'llama-3-2-90b', name: 'Llama 3.2 90B', recommend: '视觉旗舰', provider: 'Meta', category: 'vision' },
-  
-  // Mistral 系列
-  { id: 'mistral-large', name: 'Mistral Large', recommend: '欧洲旗舰', provider: 'Mistral', category: 'chat' },
-  { id: 'mistral-7b', name: 'Mistral 7B', recommend: '开源经典', provider: 'Mistral', category: 'chat' },
-  { id: 'mixtral-8x7b', name: 'Mixtral 8x7B', recommend: '混合专家', provider: 'Mistral', category: 'chat' },
-  
-  // Moonshot (Kimi)
-  { id: 'moonshot-v1-8k', name: 'Moonshot V1 8K', recommend: '长文本', provider: 'Moonshot', category: 'chat' },
-  { id: 'moonshot-v1-32k', name: 'Moonshot V1 32K', recommend: '更长上下文', provider: 'Moonshot', category: 'chat' },
-  { id: 'moonshot-v1-128k', name: 'Moonshot V1 128K', recommend: '超长上下文', provider: 'Moonshot', category: 'chat' },
-  
-  // 阿里云百炼
-  { id: 'qwen-turbo', name: 'Qwen Turbo', recommend: '快速响应', provider: 'Alibaba', category: 'chat' },
-  { id: 'qwen-plus', name: 'Qwen Plus', recommend: '增强性能', provider: 'Alibaba', category: 'chat' },
-  { id: 'qwen-max', name: 'Qwen Max', recommend: '最强能力', provider: 'Alibaba', category: 'chat' },
-  { id: 'qwen-vl-plus', name: 'Qwen VL Plus', recommend: '视觉增强', provider: 'Alibaba', category: 'vision' },
-  { id: 'qwen2-72b', name: 'Qwen2 72B', recommend: '开源旗舰', provider: 'Alibaba', category: 'chat' },
-  
-  // 讯飞
-  { id: 'spark-3.5', name: 'Spark 3.5', recommend: '中文优化', provider: '讯飞', category: 'chat' },
-  { id: 'spark-4.0', name: 'Spark 4.0', recommend: '最新版本', provider: '讯飞', category: 'chat' },
-  
-  // Midjourney
-  { id: 'midjourney', name: 'Midjourney', recommend: 'AI绘画', provider: 'Midjourney', category: 'image' },
-  { id: 'midjourney-v6', name: 'Midjourney V6', recommend: '最新版本', provider: 'Midjourney', category: 'image' },
-  { id: 'midjourney-niji', name: 'Midjourney Niji', recommend: '动漫风格', provider: 'Midjourney', category: 'image' },
-  
-  // Stability AI
-  { id: 'stable-diffusion-xl', name: 'SD XL', recommend: '开源图像', provider: 'Stability', category: 'image' },
-  { id: 'stable-diffusion-3', name: 'SD 3', recommend: '最新模型', provider: 'Stability', category: 'image' },
-  
-  // 其他
-  { id: 'cohere-command', name: 'Command R+', recommend: '企业级', provider: 'Cohere', category: 'chat' },
-  { id: 'perplexity-llm', name: 'Perplexity', recommend: '实时搜索', provider: 'Perplexity', category: 'chat' },
-  { id: 'yi-large', name: 'Yi Large', recommend: '零一万物', provider: '零一万物', category: 'chat' },
-  { id: 'yi-vision', name: 'Yi Vision', recommend: '视觉理解', provider: '零一万物', category: 'vision' },
-  { id: 'baichuan4', name: 'Baichuan 4', recommend: '百川智能', provider: '百川', category: 'chat' },
-  { id: 'minimax-01', name: 'MiniMax 01', recommend: '海螺AI', provider: 'MiniMax', category: 'chat' },
-  { id: 'step-1v', name: 'Step-1V', recommend: '阶跃星辰', provider: '阶跃星辰', category: 'chat' },
-  { id: 'internlm2-20b', name: 'InternLM2 20B', recommend: '书生模型', provider: '上海AI Lab', category: 'chat' },
-];
-
-// 模型分类
-const CATEGORIES = [
-  { id: 'all', name: '全部', icon: '🌐' },
-  { id: 'chat', name: '对话', icon: '💬' },
-  { id: 'vision', name: '视觉', icon: '👁️' },
-  { id: 'image', name: '图像', icon: '🎨' },
-  { id: 'audio', name: '音频', icon: '🔊' },
-  { id: 'code', name: '编程', icon: '💻' },
-  { id: 'reasoning', name: '推理', icon: '🧠' },
-  { id: 'realtime', name: '实时', icon: '⚡' },
-];
-
-// 用户需求场景分类
+// 用户需求场景分类 - 根据4sapi实际模型
 const USER_SCENARIOS = [
-  {
-    id: 'writing',
-    name: '写作助手',
-    icon: '✍️',
-    desc: '小说创作、文章撰写、博客内容',
-    models: ['gpt-4o', 'claude-3-5-sonnet-20241022', 'gemini-1.5-pro', 'deepseek-v3', 'qwen-max']
-  },
-  {
-    id: 'polish',
-    name: '洗稿润色',
-    icon: '✨',
-    desc: '文章改写、润色优化、语言提升',
-    models: ['claude-3-5-sonnet-20241022', 'gpt-4o', 'deepseek-v2.5', 'yi-large', 'qwen-plus']
-  },
-  {
-    id: 'character',
-    name: '人物设定',
-    icon: '👤',
-    desc: '角色创建、人物DNA、性格塑造',
-    models: ['gpt-4o', 'claude-3-5-sonnet-20241022', 'gemini-1.5-pro', 'deepseek-chat', 'moonshot-v1-32k']
-  },
-  {
-    id: 'scene',
-    name: '场景描写',
-    icon: '🏞️',
-    desc: '环境描写、氛围营造、画面感',
-    models: ['gpt-4o', 'claude-3-5-sonnet-20241022', 'gemini-1.5-pro', 'qwen-max', 'deepseek-chat']
-  },
-  {
-    id: 'code',
-    name: '代码助手',
-    icon: '💻',
-    desc: '编程开发、代码调试、技术解答',
-    models: ['claude-3-5-sonnet-20241022', 'gpt-4o', 'deepseek-coder', 'gemini-1.5-pro', 'qwen-turbo']
-  },
-  {
-    id: 'reasoning',
-    name: '复杂推理',
-    icon: '🧠',
-    desc: '数学计算、逻辑分析、问题解决',
-    models: ['o1-preview', 'o1', 'deepseek-r1', 'claude-3-opus', 'gemini-2.0-flash-exp']
-  },
-  {
-    id: 'image',
-    name: '图像生成',
-    icon: '🎨',
-    desc: 'AI绘画、图片创作、视觉设计',
-    models: ['dall-e-3', 'midjourney-v6', 'imagen-3', 'stable-diffusion-xl', 'dall-e-2']
-  },
-  {
-    id: 'vision',
-    name: '视觉理解',
-    icon: '👁️',
-    desc: '图片分析、内容识别、视觉问答',
-    models: ['gpt-4o', 'claude-3-5-sonnet-20241022', 'gemini-1.5-pro', 'yi-vision', 'qwen-vl-plus']
-  },
-  {
-    id: 'audio',
-    name: '语音处理',
-    icon: '🔊',
-    desc: '语音识别、语音合成、音频处理',
-    models: ['whisper-1', 'tts-1', 'spark-3.5', 'gemini-1.5-pro', 'qwen-turbo']
-  },
-  {
-    id: 'longtext',
-    name: '长文本处理',
-    icon: '📚',
-    desc: '长文档分析、书籍总结、多轮对话',
-    models: ['gemini-1.5-pro', 'moonshot-v1-128k', 'claude-3-5-sonnet-20241022', 'gpt-4o', 'qwen-max']
-  },
-  {
-    id: 'realtime',
-    name: '实时对话',
-    icon: '⚡',
-    desc: '即时响应、流畅交互、语音对话',
-    models: ['gpt-4o-realtime', 'gpt-4o-audio', 'gemini-2.0-flash-exp', 'claude-3-5-haiku-20241022', 'qwen-turbo']
-  },
-  {
-    id: 'free',
-    name: '免费使用',
-    icon: '🆓',
-    desc: '零成本体验、额度充足、性价比高',
-    models: ['gemini-1.5-flash', 'gpt-4o-mini', 'claude-3-5-haiku-20241022', 'gemini-1.5-flash-8b', 'mistral-7b']
-  },
+  { id: 'writing', name: '写作助手', icon: '✍️', desc: '小说创作、文章撰写、博客内容', keywords: ['gpt-4o', 'claude', 'gemini', 'kimi', 'grok', 'deepseek'] },
+  { id: 'polish', name: '洗稿润色', icon: '✨', desc: '文章改写、润色优化、语言提升', keywords: ['gpt-4o', 'claude', 'gemini', 'deepseek', 'kimi'] },
+  { id: 'character', name: '人物设定', icon: '👤', desc: '角色创建、人物DNA、性格塑造', keywords: ['gpt-4o', 'claude', 'gemini', 'kimi', 'grok'] },
+  { id: 'scene', name: '场景描写', icon: '🏞️', desc: '环境描写、氛围营造、画面感', keywords: ['gpt-4o', 'claude', 'gemini', 'kimi'] },
+  { id: 'code', name: '代码助手', icon: '💻', desc: '编程开发、代码调试、技术解答', keywords: ['claude', 'gpt-4o', 'deepseek', 'gemini', 'codex'] },
+  { id: 'reasoning', name: '复杂推理', icon: '🧠', desc: '数学计算、逻辑分析、问题解决', keywords: ['o1', 'o3', 'o4', 'claude', 'gemini', 'grok'] },
+  { id: 'image', name: '图像生成', icon: '🎨', desc: 'AI绘画、图片创作、视觉设计', keywords: ['dall-e', 'flux', 'stable-diffusion', 'imagen', 'midjourney'] },
+  { id: 'vision', name: '视觉理解', icon: '👁️', desc: '图片分析、内容识别、视觉问答', keywords: ['gpt-4o', 'claude', 'gemini', 'kimi', 'grok'] },
+  { id: 'audio', name: '语音处理', icon: '🔊', desc: '语音识别、语音合成、音频处理', keywords: ['whisper', 'tts', 'speech'] },
+  { id: 'longtext', name: '长文本处理', icon: '📚', desc: '长文档分析、书籍总结、多轮对话', keywords: ['gemini', 'kimi', 'claude', 'gpt-4o'] },
+  { id: 'realtime', name: '实时对话', icon: '⚡', desc: '即时响应、流畅交互、语音对话', keywords: ['gpt-4o', 'claude', 'gemini', 'grok'] },
+  { id: 'free', name: '免费使用', icon: '🆓', desc: '零成本体验、额度充足、性价比高', keywords: ['gpt-4o-mini', 'gemini', 'claude-haiku', 'deepseek'] },
 ];
 
-// 供应商统计
-const PROVIDERS = [
-  { id: 'OpenAI', name: 'OpenAI', count: MODELS.filter(m => m.provider === 'OpenAI').length, logo: '🤖' },
-  { id: 'Anthropic', name: 'Anthropic', count: MODELS.filter(m => m.provider === 'Anthropic').length, logo: '🧠' },
-  { id: 'Google', name: 'Google', count: MODELS.filter(m => m.provider === 'Google').length, logo: '🔴' },
-  { id: 'DeepSeek', name: 'DeepSeek', count: MODELS.filter(m => m.provider === 'DeepSeek').length, logo: '🔵' },
-  { id: 'xAI', name: 'xAI', count: MODELS.filter(m => m.provider === 'xAI').length, logo: '💀' },
-  { id: 'Meta', name: 'Meta', count: MODELS.filter(m => m.provider === 'Meta').length, logo: '🦾' },
-  { id: 'Moonshot', name: 'Moonshot', count: MODELS.filter(m => m.provider === 'Moonshot').length, logo: '🌙' },
-  { id: 'Alibaba', name: '阿里巴巴', count: MODELS.filter(m => m.provider === 'Alibaba').length, logo: '🏢' },
-  { id: 'Mistral', name: 'Mistral', count: MODELS.filter(m => m.provider === 'Mistral').length, logo: '🌫️' },
-];
+// 获取场景推荐模型
+function getScenarioModels(scenario: any, allModels: any[]) {
+  const matched = allModels.filter(m => {
+    const lowerId = m.id.toLowerCase();
+    return scenario.keywords.some((k: string) => lowerId.includes(k));
+  });
+  
+  const sorted = matched.sort((a, b) => {
+    const aIndex = scenario.keywords.findIndex((k: string) => a.id.toLowerCase().includes(k));
+    const bIndex = scenario.keywords.findIndex((k: string) => b.id.toLowerCase().includes(k));
+    return aIndex - bIndex;
+  });
+  
+  const seen = new Set();
+  const result: any[] = [];
+  for (const m of sorted) {
+    const key = scenario.keywords.find((k: string) => m.id.toLowerCase().includes(k));
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(m);
+    }
+    if (result.length >= 5) break;
+  }
+  
+  return result;
+}
 
+// Rate Limiter
 class RateLimiter {
   private requests: number[] = [];
+  private maxRequests: number;
+  
+  constructor(maxRequests: number) {
+    this.maxRequests = maxRequests;
+  }
+  
+  addRequest() {
+    this.requests.push(Date.now());
+  }
+  
   canMakeRequest(): boolean {
     const now = Date.now();
     this.requests = this.requests.filter(t => now - t < 60000);
-    return this.requests.length < RATE_LIMIT_MAX;
+    return this.requests.length < this.maxRequests;
   }
+  
   getRemainingRequests(): number {
-    return RATE_LIMIT_MAX - this.requests.length;
-  }
-  addRequest(): void {
-    this.requests.push(Date.now());
+    const now = Date.now();
+    this.requests = this.requests.filter(t => now - t < 60000);
+    return Math.max(0, this.maxRequests - this.requests.length);
   }
 }
 
-const rateLimiter = new RateLimiter();
-
 export default function NovelPage() {
-  const [activeFeature, setActiveFeature] = useState('polish');
-  const [selectedModel, setSelectedModel] = useState('claude-3-5-sonnet-20241022');
   const [inputText, setInputText] = useState('');
   const [outputText, setOutputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState('polish');
+  const [selectedModel, setSelectedModel] = useState('gpt-4o');
   const [showModelDropdown, setShowModelDropdown] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState<string | null>('writing');
   const [showAllModels, setShowAllModels] = useState(false);
+  const [availableModels, setAvailableModels] = useState<any[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const rateLimiter = new RateLimiter(RATE_LIMIT_MAX);
+  
+  const currentFeature = FEATURES.find(f => f.id === selectedFeature);
+  const currentModel = availableModels.find(m => m.id === selectedModel) || { name: selectedModel, provider: 'OpenAI', providerLogo: '🤖' };
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -278,6 +126,22 @@ export default function NovelPage() {
       } catch { /* ignore */ }
     };
     checkLogin();
+
+    const fetchModels = async () => {
+      setModelsLoading(true);
+      try {
+        const res = await fetch('/api/models');
+        const data = await res.json();
+        if (data.success) {
+          setAvailableModels(data.models);
+        }
+      } catch (e) {
+        console.error('Failed to fetch models:', e);
+      } finally {
+        setModelsLoading(false);
+      }
+    };
+    fetchModels();
   }, []);
 
   const getApiKey = useCallback((): string => {
@@ -328,7 +192,7 @@ export default function NovelPage() {
         body: JSON.stringify({
           model: selectedModel,
           messages: [
-            { role: 'system', content: SYSTEM_PROMPTS[activeFeature] || '' },
+            { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
             { role: 'user', content: inputText }
           ],
           temperature: 0.7,
@@ -345,7 +209,6 @@ export default function NovelPage() {
         throw new Error(errorData.error?.message || `请求失败 (${response.status})`);
       }
 
-      // 处理流式响应
       const reader = response.body?.getReader();
       if (!reader) throw new Error('无法读取响应');
 
@@ -357,7 +220,6 @@ export default function NovelPage() {
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         
-        // 解析 SSE 格式的数据
         const lines = chunk.split('\n');
         for (const line of lines) {
           if (line.startsWith('data: ')) {
@@ -383,296 +245,357 @@ export default function NovelPage() {
       }
     } finally {
       setIsLoading(false);
-      cancelRequest();
-    }
-  }
-
-  const handleCopy = async () => {
-    if (!outputText) return;
-    try {
-      await navigator.clipboard.writeText(outputText);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setError('复制失败');
+      abortControllerRef.current = null;
     }
   };
 
   const handleDownload = () => {
-    if (!outputText) return;
     const blob = new Blob([outputText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'novel.txt';
+    a.download = `novel_${selectedFeature}_${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  const currentFeature = FEATURES.find(f => f.id === activeFeature);
-  const currentModel = MODELS.find(m => m.id === selectedModel);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(outputText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <AnimatedLobster size={24} />
-              <span className="font-bold text-lg">OneClaw</span>
-            </Link>
-            <nav className="flex items-center gap-4">
-              <Link href="/" className="text-sm text-slate-600 hover:text-orange-500">返回首页</Link>
-              {isLoggedIn ? (
-                <Link href="/workspace" className="px-4 py-2 text-sm border rounded-full hover:border-orange-500">工作台</Link>
-              ) : (
-                <button onClick={() => setShowLoginModal(true)} className="px-4 py-2 text-sm border rounded-full hover:border-orange-500">登录</button>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
-
-      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex items-center gap-3">
-            <Feather className="w-8 h-8" />
-            <div>
-              <h1 className="text-2xl font-bold">小说创作大师</h1>
-              <p className="text-white/80 text-sm">AI 驱动的专业小说创作工具</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-wrap gap-3 mb-6">
-          {FEATURES.map(f => {
-            const Icon = f.icon;
-            return (
-              <button key={f.id} onClick={() => setActiveFeature(f.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${activeFeature === f.id ? 'bg-orange-500 text-white' : 'bg-white border'}`}>
-                <Icon className="w-4 h-4" />
-                {f.name}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mb-6">
-          {/* 当前选中的模型 */}
-          <button onClick={() => setShowModelDropdown(!showModelDropdown)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg">
-            <span className="text-sm">
-              <span className="font-medium">{currentModel?.name}</span>
-              <span className="ml-2 text-xs text-slate-400">[{currentModel?.provider}]</span>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
+      {/* 导航栏 */}
+      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <AnimatedLobster size={32} />
+            <span className="font-bold text-xl bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
+              OneClaw
             </span>
-            <ChevronDown className="w-4 h-4" />
-          </button>
-          
-          {/* 模型选择弹窗 */}
-          {showModelDropdown && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowModelDropdown(false)}>
-              <div className="bg-white rounded-2xl shadow-2xl w-[900px] max-h-[85vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-                {/* 头部 */}
-                <div className="px-6 py-4 border-b bg-gradient-to-r from-orange-500 to-amber-500 text-white">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold">选择适合的模型</h3>
-                      <p className="text-sm text-white/80 mt-1">根据您的需求，智能推荐最适合的AI模型</p>
-                    </div>
-                    <button onClick={() => setShowModelDropdown(false)} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">
-                      ✕
-                    </button>
-                  </div>
-                </div>
-                
-                {/* 用户需求场景 - 一级分类 */}
-                <div className="px-6 py-4 border-b bg-slate-50">
-                  <div className="flex items-center gap-1 text-xs text-slate-500 mb-3 font-medium">
-                    <span>🎯 选择您的需求场景</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-3">
-                    {USER_SCENARIOS.map(scenario => (
-                      <button
-                        key={scenario.id}
-                        onClick={() => setSelectedScenario(scenario.id)}
-                        className={`text-left p-4 rounded-xl transition-all ${
-                          selectedScenario === scenario.id 
-                            ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg scale-105' 
-                            : 'bg-white border hover:border-orange-300 hover:shadow-md'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">{scenario.icon}</span>
-                          <span className={`font-bold ${selectedScenario === scenario.id ? 'text-white' : 'text-slate-700'}`}>
-                            {scenario.name}
-                          </span>
-                        </div>
-                        <p className={`text-xs ${selectedScenario === scenario.id ? 'text-white/80' : 'text-slate-500'}`}>
-                          {scenario.desc}
-                        </p>
-                        <div className={`mt-2 text-xs ${selectedScenario === scenario.id ? 'text-white/60' : 'text-orange-500'}`}>
-                          {scenario.models.length} 个推荐模型
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* 推荐模型列表 */}
-                <div className="p-6 overflow-y-auto max-h-[400px]">
-                  {selectedScenario && (
-                    <div className="mb-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="text-2xl">{USER_SCENARIOS.find(s => s.id === selectedScenario)?.icon}</span>
-                        <h4 className="font-bold text-lg">
-                          {USER_SCENARIOS.find(s => s.id === selectedScenario)?.name} - 推荐模型
-                        </h4>
-                      </div>
-                      <div className="grid grid-cols-1 gap-3">
-                        {USER_SCENARIOS.find(s => s.id === selectedScenario)?.models.map((modelId, index) => {
-                          const model = MODELS.find(m => m.id === modelId);
-                          if (!model) return null;
-                          return (
-                            <button
-                              key={model.id}
-                              onClick={() => { setSelectedModel(model.id); setShowModelDropdown(false); }}
-                              className={`text-left p-4 rounded-xl border-2 transition-all ${
-                                selectedModel === model.id 
-                                  ? 'border-orange-500 bg-gradient-to-r from-orange-50 to-amber-50 shadow-lg' 
-                                  : 'hover:border-orange-200 hover:bg-slate-50 border-slate-200'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                                    index === 0 ? 'bg-yellow-400 text-white' : 
-                                    index === 1 ? 'bg-slate-300 text-white' : 
-                                    index === 2 ? 'bg-orange-300 text-white' : 'bg-slate-100 text-slate-600'
-                                  }`}>
-                                    {index + 1}
-                                  </span>
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-bold">{model.name}</span>
-                                      {index === 0 && (
-                                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">首选</span>
-                                      )}
-                                      {index < 3 && (
-                                        <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">推荐</span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <span className="text-sm">{PROVIDERS.find(p => p.id === model.provider)?.logo}</span>
-                                      <span className="text-sm text-slate-500">{model.provider}</span>
-                                      <span className="text-slate-300">·</span>
-                                      <span className="text-sm text-orange-500">{model.recommend}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                                {selectedModel === model.id && (
-                                  <span className="flex items-center gap-1 text-sm text-orange-500 bg-orange-100 px-3 py-1 rounded-full">
-                                    <span>✓</span> 已选择
-                                  </span>
-                                )}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* 查看全部模型按钮 */}
-                  <div className="text-center pt-4 border-t">
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-sm text-slate-600 hover:text-orange-500">
+              返回首页
+            </Link>
+            <button
+              onClick={() => isLoggedIn ? null : setShowLoginModal(true)}
+              className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg text-sm hover:from-orange-600 hover:to-amber-600"
+            >
+              {isLoggedIn ? '已登录' : '登录'}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* 主要内容 */}
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold mb-2">
+            <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
+              AI 小说创作助手
+            </span>
+          </h1>
+          <p className="text-slate-600">基于 4sapi 213+ 优质模型，让创作更轻松</p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* 左侧：输入 */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            {/* 功能选择 */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 mb-2">选择功能</label>
+              <div className="grid grid-cols-2 gap-3">
+                {FEATURES.map(f => {
+                  const Icon = f.icon;
+                  return (
                     <button
-                      onClick={() => setShowAllModels(!showAllModels)}
-                      className="text-orange-500 hover:text-orange-600 font-medium"
+                      key={f.id}
+                      onClick={() => setSelectedFeature(f.id)}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        selectedFeature === f.id
+                          ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-amber-50'
+                          : 'border-slate-200 hover:border-orange-200'
+                      }`}
                     >
-                      {showAllModels ? '收起全部模型 ↑' : '查看全部模型 ↓'}
+                      <Icon className={`w-6 h-6 mb-2 ${selectedFeature === f.id ? 'text-orange-500' : 'text-slate-400'}`} />
+                      <div className={`font-medium ${selectedFeature === f.id ? 'text-orange-600' : 'text-slate-700'}`}>
+                        {f.name}
+                      </div>
                     </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 模型选择 */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
+              <button onClick={() => setShowModelDropdown(!showModelDropdown)}
+                className="w-full flex items-center justify-between px-4 py-3 bg-white border-2 rounded-xl hover:border-orange-200 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{currentModel.providerLogo || '⚡'}</span>
+                  <div className="text-left">
+                    <div className="font-medium">{currentModel.name}</div>
+                    <div className="text-xs text-slate-500">{currentModel.provider}</div>
                   </div>
-                  
-                  {/* 全部模型列表 */}
-                  {showAllModels && (
-                    <div className="mt-4 pt-4">
-                      <h4 className="font-bold text-lg mb-4">全部可用模型</h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        {MODELS.map(m => (
+                </div>
+                <ChevronDown className="w-5 h-5 text-slate-400" />
+              </button>
+              
+              {/* 模型选择弹窗 */}
+              {showModelDropdown && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setShowModelDropdown(false)}>
+                  <div className="bg-white rounded-2xl shadow-2xl w-[900px] max-h-[85vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+                    <div className="px-6 py-4 border-b bg-gradient-to-r from-orange-500 to-amber-500 text-white">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-bold">选择适合的模型</h3>
+                          <p className="text-sm text-white/80 mt-1">
+                            4sapi 提供 {availableModels.length > 0 ? availableModels.length : '...'} 个可用模型
+                            {modelsLoading && <span className="ml-2">加载中...</span>}
+                          </p>
+                        </div>
+                        <button onClick={() => setShowModelDropdown(false)} className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center">✕</button>
+                      </div>
+                    </div>
+                    
+                    {/* 用户需求场景 */}
+                    <div className="px-6 py-4 border-b bg-slate-50 max-h-[280px] overflow-y-auto">
+                      <div className="flex items-center gap-1 text-xs text-slate-500 mb-3 font-medium">
+                        <span>🎯 选择您的需求场景</span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-3">
+                        {USER_SCENARIOS.map(scenario => (
                           <button
-                            key={m.id}
-                            onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); }}
-                            className={`text-left p-3 rounded-lg border transition-all ${
-                              selectedModel === m.id 
-                                ? 'border-orange-500 bg-orange-50' 
-                                : 'hover:bg-slate-50 border-slate-100'
+                            key={scenario.id}
+                            onClick={() => setSelectedScenario(scenario.id)}
+                            className={`text-left p-4 rounded-xl transition-all ${
+                              selectedScenario === scenario.id 
+                                ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg scale-105' 
+                                : 'bg-white border hover:border-orange-300 hover:shadow-md'
                             }`}
                           >
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium text-sm">{m.name}</span>
-                              {selectedModel === m.id && (
-                                <span className="text-orange-500">✓</span>
-                              )}
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-2xl">{scenario.icon}</span>
+                              <span className={`font-bold ${selectedScenario === scenario.id ? 'text-white' : 'text-slate-700'}`}>{scenario.name}</span>
                             </div>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs">{PROVIDERS.find(p => p.id === m.provider)?.logo}</span>
-                              <span className="text-xs text-slate-400">{m.provider}</span>
-                              <span className="text-xs text-slate-300">·</span>
-                              <span className="text-xs text-orange-500">{m.recommend}</span>
-                            </div>
+                            <p className={`text-xs ${selectedScenario === scenario.id ? 'text-white/80' : 'text-slate-500'}`}>{scenario.desc}</p>
                           </button>
                         ))}
                       </div>
                     </div>
-                  )}
+                    
+                    {/* 推荐模型列表 */}
+                    <div className="p-6 overflow-y-auto max-h-[400px]">
+                      {selectedScenario && (
+                        <div className="mb-6">
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="text-2xl">{USER_SCENARIOS.find(s => s.id === selectedScenario)?.icon}</span>
+                            <h4 className="font-bold text-lg">{USER_SCENARIOS.find(s => s.id === selectedScenario)?.name} - 推荐模型</h4>
+                          </div>
+                          
+                          {modelsLoading ? (
+                            <div className="text-center py-8 text-slate-500">
+                              <div className="animate-spin inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mb-2"></div>
+                              <p>正在加载模型...</p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 gap-3">
+                              {getScenarioModels(USER_SCENARIOS.find(s => s.id === selectedScenario), availableModels).map((model: any, index: number) => (
+                                <button
+                                  key={model.id}
+                                  onClick={() => { setSelectedModel(model.id); setShowModelDropdown(false); }}
+                                  className={`text-left p-4 rounded-xl border-2 transition-all ${
+                                    selectedModel === model.id 
+                                      ? 'border-orange-500 bg-gradient-to-r from-orange-50 to-amber-50 shadow-lg' 
+                                      : 'hover:border-orange-200 hover:bg-slate-50 border-slate-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                                        index === 0 ? 'bg-yellow-400 text-white' : 
+                                        index === 1 ? 'bg-slate-300 text-white' : 
+                                        index === 2 ? 'bg-orange-300 text-white' : 'bg-slate-100 text-slate-600'
+                                      }`}>{index + 1}</span>
+                                      <div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-bold">{model.name}</span>
+                                          {index === 0 && <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">首选</span>}
+                                        </div>
+                                        <div className="flex items-center gap-2 mt-1">
+                                          <span className="text-sm">{model.providerLogo || '⚡'}</span>
+                                          <span className="text-sm text-slate-500">{model.provider}</span>
+                                          <span className="text-slate-300">·</span>
+                                          <span className="text-sm text-orange-500">{model.recommend}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    {selectedModel === model.id && (
+                                      <span className="flex items-center gap-1 text-sm text-orange-500 bg-orange-100 px-3 py-1 rounded-full"><span>✓</span> 已选择</span>
+                                    )}
+                                  </div>
+                                </button>
+                              ))}
+                              
+                              {getScenarioModels(USER_SCENARIOS.find(s => s.id === selectedScenario), availableModels).length === 0 && (
+                                <div className="text-center py-8 text-slate-500">
+                                  <p>该场景暂无推荐的模型</p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <div className="text-center pt-4 border-t">
+                        <button onClick={() => setShowAllModels(!showAllModels)} className="text-orange-500 hover:text-orange-600 font-medium">
+                          {showAllModels ? '收起全部模型 ↑' : '查看全部模型 ↓'}
+                        </button>
+                      </div>
+                      
+                      {showAllModels && (
+                        <div className="mt-4 pt-4">
+                          <h4 className="font-bold text-lg mb-4">全部可用模型 ({availableModels.length} 个)</h4>
+                          {modelsLoading ? (
+                            <div className="text-center py-8 text-slate-500">
+                              <div className="animate-spin inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full mb-2"></div>
+                              <p>正在加载模型...</p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
+                              {availableModels.map((m: any) => (
+                                <button
+                                  key={m.id}
+                                  onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); }}
+                                  className={`text-left p-3 rounded-lg border transition-all ${
+                                    selectedModel === m.id ? 'border-orange-500 bg-orange-50' : 'hover:bg-slate-50 border-slate-100'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-medium text-sm">{m.name}</span>
+                                    {selectedModel === m.id && <span className="text-orange-500">✓</span>}
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-xs">{m.providerLogo || '⚡'}</span>
+                                    <span className="text-xs text-slate-400">{m.provider}</span>
+                                    <span className="text-xs text-slate-300">·</span>
+                                    <span className="text-xs text-orange-500">{m.category}</span>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
+              <span className="ml-4 text-sm text-slate-500">剩余请求: {rateLimiter.getRemainingRequests()}</span>
             </div>
-          )}
-          
-          <span className="ml-4 text-sm text-slate-500">剩余请求: {rateLimiter.getRemainingRequests()}</span>
-        </div>
 
-        <div className="mb-6">
-          <textarea value={inputText} onChange={(e) => setInputText(e.target.value)}
-            placeholder={currentFeature?.placeholder}
-            className="w-full h-48 p-4 bg-white border rounded-xl resize-none" />
-        </div>
+            {/* 输入区域 */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {currentFeature?.name} - 输入内容
+              </label>
+              <textarea
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                placeholder={currentFeature?.placeholder}
+                className="w-full h-48 p-4 border-2 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors"
+              />
+            </div>
 
-        <div className="flex items-center gap-4 mb-8">
-          <button onClick={isLoading ? cancelRequest : handleSubmit}
-            disabled={!inputText.trim() && !isLoading}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg font-medium disabled:opacity-50">
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-            {isLoading ? '生成中...' : '开始创作'}
-          </button>
-          {error && <span className="text-red-500 text-sm"><AlertCircle className="w-4 h-4 inline" /> {error}</span>}
-        </div>
+            {/* 提交按钮 */}
+            <div className="flex gap-3">
+              {isLoading ? (
+                <button
+                  onClick={cancelRequest}
+                  className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center justify-center gap-2"
+                >
+                  <AlertCircle className="w-5 h-5" />
+                  取消生成
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={!inputText.trim()}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  <Send className="w-5 h-5" />
+                  开始生成
+                </button>
+              )}
+            </div>
 
-        {(outputText || isLoading) && (
-          <div className="bg-white border rounded-xl">
-            <div className="flex items-center justify-between px-4 py-2 border-b">
-              <span className="text-sm font-medium">创作结果</span>
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                {error}
+              </div>
+            )}
+          </div>
+
+          {/* 右侧：输出 */}
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-lg">生成结果</h2>
               {outputText && (
                 <div className="flex gap-2">
-                  <button onClick={handleCopy} className="text-xs text-slate-500 hover:text-orange-500">
-                    {copied ? <Check className="w-3 h-3 inline" /> : <Copy className="w-3 h-3 inline" />} {copied ? '已复制' : '复制'}
+                  <button
+                    onClick={handleCopy}
+                    className="px-3 py-1.5 text-sm border rounded-lg hover:bg-slate-50 flex items-center gap-1"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                    {copied ? '已复制' : '复制'}
                   </button>
-                  <button onClick={handleDownload} className="text-xs text-slate-500 hover:text-orange-500">
-                    <Download className="w-3 h-3 inline" /> 下载
+                  <button
+                    onClick={handleDownload}
+                    className="px-3 py-1.5 text-sm border rounded-lg hover:bg-slate-50 flex items-center gap-1"
+                  >
+                    <Download className="w-4 h-4" />
+                    下载
                   </button>
                 </div>
               )}
             </div>
-            <div className="p-4 whitespace-pre-wrap">
-              {isLoading ? <span className="text-slate-500"><Loader2 className="w-5 h-5 animate-spin inline" /> AI 创作中...</span> : outputText}
+
+            <div className="relative">
+              <textarea
+                value={outputText}
+                readOnly
+                placeholder="生成的内容将显示在这里..."
+                className="w-full h-[500px] p-4 border-2 rounded-xl resize-none bg-slate-50"
+              />
+              {isLoading && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl">
+                  <div className="text-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto" />
+                    <p className="mt-2 text-sm text-slate-600">正在生成...</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </main>
 
-      {showLoginModal && <LoginModal open={true} onClose={() => setShowLoginModal(false)} />}
+      {/* 登录弹窗 */}
+      {showLoginModal && (
+        <LoginModal
+          open={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onSuccess={() => {
+            setShowLoginModal(false);
+            setIsLoggedIn(true);
+          }}
+        />
+      )}
     </div>
   );
 }
