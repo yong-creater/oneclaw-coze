@@ -28,10 +28,27 @@ const FEATURES = [
 ];
 
 const MODELS = [
-  { id: 'gpt-4o', name: 'GPT-4o', recommend: '均衡之选' },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', recommend: '快速响应' },
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5', recommend: '写作最强' },
-  { id: 'gemini-1.5-pro', name: 'Gemini Pro', recommend: '性价比高' }
+  // OpenAI 系列
+  { id: 'gpt-4o', name: 'GPT-4o', recommend: '均衡之选', provider: 'OpenAI' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', recommend: '快速响应', provider: 'OpenAI' },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', recommend: '高性能', provider: 'OpenAI' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', recommend: '低成本', provider: 'OpenAI' },
+  
+  // Anthropic 系列
+  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', recommend: '写作最强', provider: 'Anthropic' },
+  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', recommend: '极速响应', provider: 'Anthropic' },
+  { id: 'claude-3-opus', name: 'Claude 3 Opus', recommend: '最强推理', provider: 'Anthropic' },
+  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', recommend: '均衡性能', provider: 'Anthropic' },
+  
+  // Google 系列
+  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', recommend: '长上下文', provider: 'Google' },
+  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', recommend: '极速免费', provider: 'Google' },
+  { id: 'gemini-1.5-flash-8b', name: 'Gemini Flash-8B', recommend: '超轻量级', provider: 'Google' },
+  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', recommend: '最新模型', provider: 'Google' },
+  
+  // 其他
+  { id: 'o1-preview', name: 'o1 Preview', recommend: '复杂推理', provider: 'OpenAI' },
+  { id: 'o1-mini', name: 'o1 Mini', recommend: '代码专用', provider: 'OpenAI' },
 ];
 
 class RateLimiter {
@@ -257,18 +274,37 @@ export default function NovelPage() {
         <div className="mb-6">
           <button onClick={() => setShowModelDropdown(!showModelDropdown)}
             className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg">
-            <span className="text-sm">模型: <span className="font-medium">{currentModel?.name}</span></span>
+            <span className="text-sm">
+              <span className="font-medium">{currentModel?.name}</span>
+              <span className="ml-2 text-xs text-slate-400">[{currentModel?.provider}]</span>
+            </span>
             <ChevronDown className="w-4 h-4" />
           </button>
           {showModelDropdown && (
-            <div className="mt-2 w-48 bg-white border rounded-lg shadow-lg">
-              {MODELS.map(m => (
-                <button key={m.id} onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); }}
-                  className="w-full text-left px-4 py-2 hover:bg-slate-50">
-                  <div className="font-medium">{m.name}</div>
-                  <div className="text-xs text-slate-500">{m.recommend}</div>
-                </button>
-              ))}
+            <div className="mt-2 w-80 bg-white border rounded-lg shadow-lg max-h-96 overflow-y-auto">
+              {['OpenAI', 'Anthropic', 'Google'].map(provider => {
+                const providerModels = MODELS.filter(m => m.provider === provider);
+                if (providerModels.length === 0) return null;
+                return (
+                  <div key={provider}>
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-400 bg-slate-50 border-b">
+                      {provider}
+                    </div>
+                    {providerModels.map(m => (
+                      <button key={m.id} onClick={() => { setSelectedModel(m.id); setShowModelDropdown(false); }}
+                        className={`w-full text-left px-4 py-2 hover:bg-slate-50 ${selectedModel === m.id ? 'bg-orange-50' : ''}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{m.name}</span>
+                          {selectedModel === m.id && (
+                            <span className="text-xs text-orange-500">当前</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-slate-500">{m.recommend}</div>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
             </div>
           )}
           <span className="ml-4 text-sm text-slate-500">剩余请求: {rateLimiter.getRemainingRequests()}</span>
