@@ -6,24 +6,26 @@ const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
 const API4S_KEY = ENABLE_4SAPI ? (process.env.API4S_KEY || process.env.NEXT_PUBLIC_API2D_KEY || '') : '';
 const API4S_URL = process.env.API4S_URL || 'https://4sapi.com';
 
-// 4sapi 模型映射（这些模型通过 4sapi 调用）
-const API4S_MODELS = [
-  'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-4',
-  'claude-3-5-sonnet', 'claude-3-opus', 'claude-3-haiku',
-  'gemini-1.5-pro', 'gemini-1.5-flash',
-  'deepseek-chat', 'deepseek-coder',
-  'qwen-turbo', 'qwen-plus', 'qwen-max',
-  'glm-4', 'glm-4-flash', 'glm-4-plus',
-  'kimi-plus', 'kimi-nightly',
-  'minimax-chat', 'minimax-nlp',
-  'stability/stablelm', 'stability/sdxl',
-  'flux-pro', 'flux-dev',
+// 免费模型（Coze SDK）- 这些模型直接使用，不走 4sapi
+const FREE_MODELS = [
+  'doubao-seed-2-0-pro-260215',
+  'doubao-seed-1-6-251015', 
+  'doubao-seed-2-0-thinking-251125',
+  'doubao-pro-4k-240815',
+  'doubao-pro-32k-240815',
+  'doubao-lite-4k-240815',
+  'doubao-lite-32k-240815',
 ];
 
-// 检查是否为 4sapi 模型
-function isApi4sModel(model: string): boolean {
+// 检查是否为免费模型
+function isFreeModel(model: string): boolean {
   const lowerModel = model?.toLowerCase() || '';
-  return API4S_MODELS.some(m => lowerModel.includes(m.toLowerCase()));
+  return FREE_MODELS.some(m => lowerModel.includes(m.toLowerCase()));
+}
+
+// 检查是否为 4sapi 模型（排除免费模型）
+function isApi4sModel(model: string): boolean {
+  return !isFreeModel(model);
 }
 
 const SYSTEM_PROMPTS: Record<string, string> = {
