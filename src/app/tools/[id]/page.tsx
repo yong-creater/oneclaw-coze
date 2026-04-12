@@ -352,23 +352,23 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-orange-100/50 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-100/30 to-transparent rounded-full blur-3xl" />
         
-        <div className="relative max-w-5xl mx-auto px-4 py-10">
-          <div className="flex flex-col lg:flex-row items-start gap-8">
+        <div className="relative max-w-5xl mx-auto px-4 py-6 sm:py-10">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 sm:gap-6 lg:gap-8">
             {/* Logo - 精致圆形设计 */}
-            <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center justify-center overflow-hidden ring-4 ring-orange-100">
+            <div className="relative flex-shrink-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center justify-center overflow-hidden ring-4 ring-orange-100">
                 {tool.logo ? (
                   <img
                     src={tool.logo}
                     alt={tool.name}
-                    className="w-20 h-20 object-contain"
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                       (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
                     }}
                   />
                 ) : null}
-                <span className={`text-3xl font-bold text-slate-300 ${tool.logo ? 'hidden' : ''}`}>
+                <span className={`text-2xl sm:text-3xl font-bold text-slate-300 ${tool.logo ? 'hidden' : ''}`}>
                   {tool.name[0]}
                 </span>
               </div>
@@ -381,10 +381,10 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
             </div>
             
             {/* 工具信息 */}
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 w-full">
               {/* 标题行 */}
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
                   {tool.name}
                 </h1>
                 {tool.is_official && (
@@ -396,16 +396,16 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               </div>
               
               {/* 出品方 */}
-              <p className="text-slate-500 mb-4 flex items-center gap-2">
-                <span className="w-8 h-px bg-slate-200" />
+              <p className="text-slate-500 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                <span className="w-6 sm:w-8 h-px bg-slate-200" />
                 {tool.producer}
               </p>
               
               {/* 一句话亮点 */}
-              <p className="text-lg text-slate-700 mb-4 font-medium">{tool.highlight}</p>
+              <p className="text-base sm:text-lg text-slate-700 mb-3 sm:mb-4 font-medium">{tool.highlight}</p>
               
               {/* 评分标签 */}
-              <div className="flex flex-wrap items-center gap-4 mb-5">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-0 sm:mb-5">
                 {overallScore ? (
                   <div className="flex items-center gap-2 bg-white/80 px-3 py-1.5 rounded-lg shadow-sm border border-slate-100">
                     <StarRating value={Math.round(Number(overallScore))} readonly size="sm" />
@@ -418,28 +418,26 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             </div>
             
-            {/* CTA按钮组 - 垂直排列 */}
-            <div className="flex flex-col gap-3 w-full lg:w-auto">
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={handleVisit}
-                  className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-6 py-3 shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]"
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  立即使用
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={toggleFavorite}
-                  className={`px-4 py-3 border-2 transition-all ${
-                    isFavorited 
-                      ? 'border-red-200 bg-red-50 text-red-500 hover:bg-red-100' 
-                      : 'border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
-                  }`}
-                >
-                  <ThumbsUp className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
-                </Button>
-              </div>
+            {/* CTA按钮组 - 移动端水平排列 */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
+              <Button
+                onClick={handleVisit}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 sm:px-6 py-2.5 sm:py-3 shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                立即使用
+              </Button>
+              <Button
+                variant="outline"
+                onClick={toggleFavorite}
+                className={`px-4 py-2.5 sm:py-3 border-2 transition-all ${
+                  isFavorited 
+                    ? 'border-red-200 bg-red-50 text-red-500 hover:bg-red-100' 
+                    : 'border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-slate-300'
+                }`}
+              >
+                <ThumbsUp className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
+              </Button>
             </div>
           </div>
         </div>
