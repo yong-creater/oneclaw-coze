@@ -304,7 +304,7 @@ export default function NovelPage() {
 
       {/* 主要内容 */}
       <main className="max-w-6xl mx-auto px-4 py-8">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-4xl font-bold mb-2">
             <span className="bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">
               AI 小说创作助手
@@ -313,120 +313,116 @@ export default function NovelPage() {
           <p className="text-slate-600">基于 4sapi 213+ 优质模型，让创作更轻松</p>
         </div>
 
+        {/* 功能选择 + 模型选择 - 顶部 */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          {/* 功能选择 */}
+          <div className="mb-6">
+            <div className="flex gap-2">
+              {FEATURES.map(f => {
+                const Icon = f.icon;
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => setSelectedFeature(f.id)}
+                    className={`flex-1 p-3 rounded-xl transition-all flex flex-col items-center gap-2 ${
+                      selectedFeature === f.id
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    <Icon className={`w-5 h-5 ${selectedFeature === f.id ? 'text-white' : 'text-slate-500'}`} />
+                    <span className={`font-medium text-sm ${selectedFeature === f.id ? 'text-white' : 'text-slate-700'}`}>
+                      {f.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 模型选择 */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
+            
+            {/* 免费/付费切换 */}
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={() => { setModelType('free'); setModelProvider('doubao'); }}
+                className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                  modelType === 'free'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                免费模型
+              </button>
+              <button
+                onClick={() => { setModelType('paid'); setModelProvider('openai'); }}
+                className={`flex-1 py-2 rounded-lg font-medium transition-all ${
+                  modelType === 'paid'
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                付费模型
+              </button>
+            </div>
+            
+            {/* 厂商标签页 */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {providers.map(p => {
+                const count = filteredModels.filter(m => p.filter(m)).length;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setModelProvider(p.id)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1 ${
+                      modelProvider === p.id
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    <span>{p.icon}</span>
+                    <span>{p.name}</span>
+                    <span className={`text-xs ${modelProvider === p.id ? 'text-white/80' : 'text-slate-400'}`}>({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+            
+            {/* 模型平铺展示 */}
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 max-h-32 overflow-y-auto p-1">
+              {currentProviderModels.slice(0, 30).map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedModel(m.id)}
+                  className={`p-2 rounded-lg text-left transition-all ${
+                    selectedModel === m.id
+                      ? 'bg-orange-100 border-2 border-orange-500'
+                      : 'bg-slate-50 border-2 border-transparent hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="font-medium text-xs truncate">{m.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 下方左右分栏：输入 + 输出 */}
         <div className="grid lg:grid-cols-2 gap-8">
           {/* 左侧：输入 */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
-            {/* 功能选择 - 横向一行 */}
-            <div className="mb-6">
-              <div className="flex gap-2">
-                {FEATURES.map(f => {
-                  const Icon = f.icon;
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => setSelectedFeature(f.id)}
-                      className={`flex-1 p-3 rounded-xl transition-all flex flex-col items-center gap-2 ${
-                        selectedFeature === f.id
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                      }`}
-                    >
-                      <Icon className={`w-5 h-5 ${selectedFeature === f.id ? 'text-white' : 'text-slate-500'}`} />
-                      <span className={`font-medium text-sm ${selectedFeature === f.id ? 'text-white' : 'text-slate-700'}`}>
-                        {f.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 模型选择 - 标签页+平铺 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 mb-2">选择模型</label>
-              
-              {/* 免费/付费切换 */}
-              <div className="flex gap-2 mb-3">
-                <button
-                  onClick={() => { setModelType('free'); setModelProvider('doubao'); }}
-                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                    modelType === 'free'
-                      ? 'bg-green-500 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  免费模型
-                </button>
-                <button
-                  onClick={() => { setModelType('paid'); setModelProvider('openai'); }}
-                  className={`flex-1 py-2 rounded-lg font-medium transition-all ${
-                    modelType === 'paid'
-                      ? 'bg-amber-500 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  付费模型
-                </button>
-              </div>
-              
-              {/* 厂商标签页 */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                {providers.map(p => {
-                  const count = filteredModels.filter(m => p.filter(m)).length;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setModelProvider(p.id)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1 ${
-                        modelProvider === p.id
-                          ? 'bg-orange-500 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      <span>{p.icon}</span>
-                      <span>{p.name}</span>
-                      <span className={`text-xs ${modelProvider === p.id ? 'text-white/80' : 'text-slate-400'}`}>({count})</span>
-                    </button>
-                  );
-                })}
-              </div>
-              
-              {/* 模型平铺展示 */}
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1">
-                {currentProviderModels.slice(0, 50).map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => setSelectedModel(m.id)}
-                    className={`p-3 rounded-lg text-left transition-all ${
-                      selectedModel === m.id
-                        ? 'bg-orange-100 border-2 border-orange-500'
-                        : 'bg-slate-50 border-2 border-transparent hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="font-medium text-sm truncate">{m.name}</div>
-                    {m.provider && m.provider !== 'Coze' && (
-                      <div className="text-xs text-slate-400 truncate">{m.provider}</div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 输入区域 */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                {currentFeature?.name} - 输入内容
-              </label>
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                placeholder={currentFeature?.placeholder}
-                className="w-full h-48 p-4 border-2 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors"
-              />
-            </div>
-
-            {/* 提交按钮 */}
-            <div className="flex gap-3">
+            <h3 className="font-semibold text-lg mb-4">{currentFeature?.name} - 输入内容</h3>
+            
+            <textarea
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={currentFeature?.placeholder}
+              className="w-full h-64 p-4 border-2 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors"
+            />
+            
+            <div className="mt-4 flex gap-3">
               {isLoading ? (
                 <button
                   onClick={cancelRequest}
@@ -458,7 +454,7 @@ export default function NovelPage() {
           {/* 右侧：输出 */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-lg">生成结果</h2>
+              <h3 className="font-semibold text-lg">生成结果</h3>
               {outputText && (
                 <div className="flex gap-2">
                   <button
@@ -484,7 +480,7 @@ export default function NovelPage() {
                 value={outputText}
                 readOnly
                 placeholder="生成的内容将显示在这里..."
-                className="w-full h-[500px] p-4 border-2 rounded-xl resize-none bg-slate-50"
+                className="w-full h-64 p-4 border-2 rounded-xl resize-none bg-slate-50"
               />
               {isLoading && (
                 <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-xl">
