@@ -520,15 +520,21 @@ export default function NovelCreator() {
                 className="model-picker-container absolute top-full left-0 sm:left-0 mt-3 w-80 sm:w-[400px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-4 border-b border-slate-100">
+                <div className="p-4 border-b border-slate-100 flex items-center gap-2">
                   <input
                     type="text"
                     value={modelSearch}
                     onChange={(e) => setModelSearch(e.target.value)}
                     placeholder="搜索模型名称或ID..."
-                    className="w-full px-4 py-2.5 pr-8 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
+                    className="flex-1 px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
                     autoFocus
                   />
+                  <button
+                    onClick={closePicker}
+                    className="p-2 hover:bg-slate-100 rounded-lg"
+                  >
+                    <X className="w-4 h-4 text-slate-400" />
+                  </button>
                 </div>
                 
                 <div className="p-3 border-b border-slate-100 bg-slate-50">
@@ -585,13 +591,6 @@ export default function NovelCreator() {
                     </div>
                   )}
                 </div>
-                
-                <button
-                  onClick={closePicker}
-                  className="absolute top-3 right-3 p-1.5 hover:bg-slate-100 rounded-full"
-                >
-                  <X className="w-4 h-4 text-slate-400" />
-                </button>
               </div>
             )}
           </div>
