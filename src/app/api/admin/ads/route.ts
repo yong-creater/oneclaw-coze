@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const client = getSupabaseClient();
     const body = await request.json();
     
-    const { title, image_url, link_url, position, priority, starts_at, ends_at } = body;
+    const { title, description, image_url, link_url, position, priority, starts_at, ends_at, is_highlight, target_category } = body;
     
     if (!title || !link_url || !position || !starts_at || !ends_at) {
       return NextResponse.json({ success: false, error: '缺少必填字段' }, { status: 400 });
@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       .from('advertisements')
       .insert({
         title,
+        description: description || '',
         image_url: image_url || '',
         link_url,
         position,
@@ -46,6 +47,8 @@ export async function POST(request: NextRequest) {
         starts_at,
         ends_at,
         is_active: true,
+        is_highlight: is_highlight || false,
+        target_category: target_category || null,
         clicks: 0,
         impressions: 0,
       })

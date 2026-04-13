@@ -21,6 +21,7 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import BackButton from '@/components/BackButton';
+import { ToolDetailAd } from '@/components/AdBanner';
 
 // ==================== 类型定义 ====================
 interface Tool {
@@ -441,6 +442,11 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
         </div>
+      </div>
+
+      {/* 广告位 */}
+      <div className="max-w-5xl mx-auto px-4 py-4">
+        <ToolDetailAd toolId={tool.id} />
       </div>
 
       {/* Tab导航 - 简洁现代风格 */}

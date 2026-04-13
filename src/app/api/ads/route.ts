@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
       let query = client
         .from('advertisements')
-        .select('*')
+        .select('id, title, description, image_url, link_url, position, priority, clicks, impressions, starts_at, ends_at, is_active, is_highlight, target_category')
         .eq('is_active', true)
         .lte('starts_at', now)
         .gte('ends_at', now)
@@ -56,22 +56,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '缺少id参数' }, { status: 400 });
     }
 
-    const { error } = await client.rpc('increment_ad_clicks', { ad_id: id });
+    // 直接更新点击数
+    const { data: ad } = await client
+      .from('advertisements')
+      .select('clicks')
+      .eq('id', id)
+      .single();
 
-    if (error) {
-      // 如果RPC不存在，直接更新
-      const { data: ad } = await client
+    if (ad) {
+      await client
         .from('advertisements')
-        .select('clicks')
-        .eq('id', id)
-        .single();
-
-      if (ad) {
-        await client
-          .from('advertisements')
-          .update({ clicks: (ad.clicks || 0) + 1 })
-          .eq('id', id);
-      }
+        .update({ clicks: (ad.clicks || 0) + 1 })
+        .eq('id', id);
     }
 
     return NextResponse.json({ success: true });

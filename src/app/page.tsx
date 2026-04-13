@@ -16,7 +16,7 @@ import {
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
 import SponsorBadge, { isSponsorActive } from '@/components/SponsorBadge';
-import AdBanner from '@/components/AdBanner';
+import AdBanner, { HomeBanner, HomeInlineAd } from '@/components/AdBanner';
 import UserButton from '@/components/UserButton';
 import Link from 'next/link';
 import NovelCreator from '@/components/NovelCreator';
@@ -1056,7 +1056,7 @@ export default function HomePage() {
               </div>
 
             {/* 广告位 */}
-            <AdBanner position="home_banner" className="mb-6" />
+            <HomeBanner className="mb-6" />
 
             {/* 工具数量 */}
             <div className="flex items-center justify-between mb-4">
@@ -1071,64 +1071,72 @@ export default function HomePage() {
             ) : tools.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {tools.map(tool => (
-                    <div
-                      key={tool.id}
-                      className="block cursor-pointer"
-                      onClick={() => {
-                        // 记录来源页面到 sessionStorage
-                        if (typeof window !== 'undefined') {
-                          const backState = { 
-                            path: window.location.pathname + window.location.search || '/',
-                            tab: 'tools'
-                          };
-                          sessionStorage.setItem('backFrom', JSON.stringify(backState));
-                        }
-                        // 异步记录浏览历史
-                        if (userId) {
-                          fetch('/api/history', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ user_id: userId, tool_id: tool.id })
-                          }).catch(console.error);
-                        }
-                        router.push(`/tools/${tool.id}`);
-                      }}
-                    >
-                      <Card
-                        className="h-full bg-white dark:bg-slate-800 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                  {tools.map((tool, index) => (
+                    <>
+                      <div
+                        key={tool.id}
+                        className="block cursor-pointer"
+                        onClick={() => {
+                          // 记录来源页面到 sessionStorage
+                          if (typeof window !== 'undefined') {
+                            const backState = { 
+                              path: window.location.pathname + window.location.search || '/',
+                              tab: 'tools'
+                            };
+                            sessionStorage.setItem('backFrom', JSON.stringify(backState));
+                          }
+                          // 异步记录浏览历史
+                          if (userId) {
+                            fetch('/api/history', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ user_id: userId, tool_id: tool.id })
+                            }).catch(console.error);
+                          }
+                          router.push(`/tools/${tool.id}`);
+                        }}
                       >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-                            <img
-                              src={tool.logo}
-                              alt={tool.name}
-                              className="w-10 h-10 object-contain"
-                              loading="lazy"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
-                              }}
-                            />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</h3>
-                              {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
-                                <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
-                              )}
-                              {tool.is_featured && !tool.sponsor_type && (
-                                <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
-                              )}
+                        <Card
+                          className="h-full bg-white dark:bg-slate-800 hover:shadow-md hover:-translate-y-0.5 transition-all"
+                        >
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                              <img
+                                src={tool.logo}
+                                alt={tool.name}
+                                className="w-10 h-10 object-contain"
+                                loading="lazy"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
+                                }}
+                              />
                             </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">{tool.highlight}</p>
 
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</h3>
+                                {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
+                                  <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
+                                )}
+                                {tool.is_featured && !tool.sponsor_type && (
+                                  <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">{tool.highlight}</p>
+
+                            </div>
                           </div>
+                        </CardContent>
+                      </Card>
+                      </div>
+                      {/* 在第8个位置后插入内嵌广告 */}
+                      {index === 7 && (
+                        <div key="inline-ad" className="col-span-1 md:col-span-2 lg:col-span-3 xl:col-span-4">
+                          <HomeInlineAd className="mt-2" />
                         </div>
-                      </CardContent>
-                    </Card>
-                    </div>
+                      )}
+                    </>
                   ))}
                 </div>
 

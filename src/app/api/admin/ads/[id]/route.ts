@@ -15,6 +15,7 @@ export async function PUT(
     const updateData: Record<string, unknown> = {};
     
     if (body.title !== undefined) updateData.title = body.title;
+    if (body.description !== undefined) updateData.description = body.description;
     if (body.image_url !== undefined) updateData.image_url = body.image_url;
     if (body.link_url !== undefined) updateData.link_url = body.link_url;
     if (body.position !== undefined) updateData.position = body.position;
@@ -22,6 +23,8 @@ export async function PUT(
     if (body.starts_at !== undefined) updateData.starts_at = body.starts_at;
     if (body.ends_at !== undefined) updateData.ends_at = body.ends_at;
     if (body.is_active !== undefined) updateData.is_active = body.is_active;
+    if (body.is_highlight !== undefined) updateData.is_highlight = body.is_highlight;
+    if (body.target_category !== undefined) updateData.target_category = body.target_category;
     
     const { data, error } = await client
       .from('advertisements')
