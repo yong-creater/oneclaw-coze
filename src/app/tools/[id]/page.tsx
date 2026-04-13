@@ -451,444 +451,338 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         <ToolDetailAd toolId={tool.id} />
       </div>
 
-      {/* Tab导航 - 简洁现代风格 */}
-      <div className="bg-white border-b border-slate-200 sticky top-[49px] z-40">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center gap-1">
-            {[
-              { value: 'detail', label: '详情', icon: FileText },
-              { value: 'features', label: '功能', icon: Wand2 },
-              { value: 'pricing', label: '价格', icon: BarChart3 },
-              { value: 'reviews', label: '评价', icon: MessageSquare },
-            ].map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={`relative px-5 py-3.5 text-sm font-medium transition-colors flex items-center gap-2 ${
-                  activeTab === tab.value
-                    ? 'text-orange-500'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <tab.icon className="w-4 h-4" />
-                {tab.label}
-                {activeTab === tab.value && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-500 rounded-full" />
-                )}
-              </button>
+      <main className="max-w-5xl mx-auto px-4 pt-8 pb-8">
+        {/* 1. 核心功能 - 最重要 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Wand2 className="w-5 h-5 text-orange-500" />
+            核心功能
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {(tool.functions && tool.functions.length > 0) ? tool.functions.map((func, i) => (
+              <Card key={i} className="bg-white hover:shadow-md transition-shadow">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <Wand2 className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-1">{func.func_name}</h3>
+                      <p className="text-sm text-slate-600 leading-relaxed">{func.func_desc}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )) : [
+              { title: '智能处理', desc: '基于先进AI技术，精准理解用户需求，提供高质量处理结果。' },
+              { title: '高效便捷', desc: '操作简单直观，响应速度快，大幅提升工作和学习效率。' },
+              { title: '多场景适用', desc: '支持多种使用场景，满足学生、职场、创作者等不同人群需求。' },
+              { title: '安全可靠', desc: '数据安全有保障，服务稳定可靠，使用过程安全放心。' },
+            ].map((func, i) => (
+              <Card key={i} className="bg-white hover:shadow-md transition-shadow">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <Wand2 className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-1">{func.title}</h3>
+                      <p className="text-sm text-slate-600 leading-relaxed">{func.desc}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
-      </div>
+        </section>
 
-      <main className="max-w-5xl mx-auto px-4 pt-[100px] pb-8">
-        {/* Tab1: 工具详情 */}
-        {activeTab === 'detail' && (
-          <div className="space-y-8">
-            {/* 核心定义 */}
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-orange-500" />
-                关于{tool.name}
-              </h2>
-              <Card className="bg-white">
-                <CardContent className="p-5">
-                  <p className="text-slate-600 leading-relaxed">
-                    {tool.full_desc || `${tool.name}是由${tool.producer}推出的智能工具，${tool.highlight}。平台提供稳定、高效的服务，适用于多种使用场景。`}
-                  </p>
-                </CardContent>
-              </Card>
-            </section>
-
-            {/* 使用指南 */}
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-orange-500" />
-                快速上手
-              </h2>
-              <Card className="bg-white">
-                <CardContent className="p-5">
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                    {[
-                      { step: '1', title: '进入工具', desc: '点击「立即使用」按钮' },
-                      { step: '2', title: '开始使用', desc: '输入需求或选择功能' },
-                      { step: '3', title: '获取结果', desc: '等待处理完成' },
-                      { step: '4', title: '查看详情', desc: '浏览结果内容' },
-                      { step: '5', title: '进阶操作', desc: '使用高级功能' },
-                    ].map((item) => (
-                      <div key={item.step} className="flex flex-col items-center text-center">
-                        <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-semibold text-sm mb-2">
-                          {item.step}
-                        </div>
-                        <h3 className="font-medium text-slate-800 text-sm">{item.title}</h3>
-                        <p className="text-xs text-slate-400">{item.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-3 pt-4 border-t border-slate-100">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Globe2 className="w-4 h-4 text-slate-400" />
-                      网页端
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Smartphone className="w-4 h-4 text-slate-400" />
-                      移动端H5
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Phone className="w-4 h-4 text-slate-400" />
-                      小程序
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
-
-            {/* 核心使用场景 */}
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Layers className="w-5 h-5 text-orange-500" />
-                适用场景
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {(tool.scenes && tool.scenes.length > 0) ? tool.scenes.map((scene, i) => (
-                  <Card key={i} className="bg-white hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold flex items-center justify-center">
-                          {scene.scene_no.replace('#', '')}
-                        </span>
-                        <span className="text-sm font-medium text-orange-600">{scene.user_group}</span>
-                      </div>
-                      <p className="text-sm text-slate-600 leading-relaxed">{scene.scene_desc}</p>
-                    </CardContent>
-                  </Card>
-                )) : [
-                  { no: '1', user_group: '学生/科研人群', scene_desc: '用于学术资料检索、文献整理、课题调研，结构化输出大幅提升效率。' },
-                  { no: '2', user_group: '职场办公人群', scene_desc: '用于行业调研、竞品分析、文案素材搜集，一键整合核心信息。' },
-                  { no: '3', user_group: '内容创作人群', scene_desc: '用于素材搜集、信息溯源、多语言查询，支持来源标注保障准确性。' },
-                ].map((scene, i) => (
-                  <Card key={i} className="bg-white hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold flex items-center justify-center">
-                          {scene.no}
-                        </span>
-                        <span className="text-sm font-medium text-orange-600">{scene.user_group}</span>
-                      </div>
-                      <p className="text-sm text-slate-600 leading-relaxed">{scene.scene_desc}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+        {/* 2. 价格与权益 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-orange-500" />
+            价格与权益
+          </h2>
+          <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 mb-4">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-bold text-green-700">免费版</h3>
+                  <Badge className="bg-green-500 text-white text-xs">当前使用</Badge>
+                </div>
+                <div className="text-right">
+                  <span className="text-2xl font-bold text-green-600">¥0</span>
+                  <span className="text-sm text-slate-500 ml-1">/永久</span>
+                </div>
               </div>
-            </section>
-
-            {/* FAQ */}
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-orange-500" />
-                常见问题
-              </h2>
-              <Card className="bg-white">
-                <CardContent className="p-4">
-                  <Accordion type="multiple" className="w-full">
-                    {(tool.faqs && tool.faqs.length > 0) ? tool.faqs.map((faq, i) => (
-                      <AccordionItem key={i} value={`faq-${i}`}>
-                        <AccordionTrigger className="text-left font-medium text-slate-700 text-sm py-3">
-                          {faq.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-slate-600 text-sm pb-3">
-                          {faq.answer}
-                        </AccordionContent>
-                      </AccordionItem>
-                    )) : [
-                      { question: `${tool.name}是否免费？有没有使用限制？`, answer: `${tool.name}${tool.free_type === '完全免费' ? '基础功能完全免费，无使用次数限制' : `提供${tool.free_quota_desc || '免费额度供用户体验'}`}。` },
-                      { question: `如何联系客服或反馈问题？`, answer: `您可以通过官网联系页面提交反馈，或发送邮件至官方邮箱，我们会尽快处理您的问题。` },
-                      { question: `结果是否支持商用？`, answer: `关于商用授权，请参阅页面「价格权益」模块的详细说明。` },
-                      { question: `支持哪些使用终端？`, answer: `支持网页端、移动端H5、微信小程序等多终端使用，数据同步互通。` },
-                    ].map((faq, i) => (
-                      <AccordionItem key={i} value={`faq-${i}`}>
-                        <AccordionTrigger className="text-left font-medium text-slate-700 text-sm py-3">
-                          {faq.question}
-                        </AccordionTrigger>
-                        <AccordionContent className="text-slate-600 text-sm pb-3">
-                          {faq.answer}
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </CardContent>
-              </Card>
-            </section>
-          </div>
-        )}
-
-        {/* Tab2: 功能详解 */}
-        {activeTab === 'features' && (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Wand2 className="w-5 h-5 text-orange-500" />
-                核心功能
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(tool.functions && tool.functions.length > 0) ? tool.functions.map((func, i) => (
-                  <Card key={i} className="bg-white hover:shadow-md transition-shadow">
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
-                          <Search className="w-5 h-5 text-orange-500" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-800 mb-1">{func.func_name}</h3>
-                          <p className="text-sm text-slate-600 leading-relaxed">{func.func_desc}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )) : [
-                  { title: '智能处理', desc: '基于先进AI技术，精准理解用户需求，提供高质量处理结果。' },
-                  { title: '高效便捷', desc: '操作简单直观，响应速度快，大幅提升工作和学习效率。' },
-                  { title: '多场景适用', desc: '支持多种使用场景，满足学生、职场、创作者等不同人群需求。' },
-                  { title: '安全可靠', desc: '数据安全有保障，服务稳定可靠，使用过程安全放心。' },
-                ].map((func, i) => (
-                  <Card key={i} className="bg-white hover:shadow-md transition-shadow">
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
-                          <Wand2 className="w-5 h-5 text-orange-500" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-800 mb-1">{func.title}</h3>
-                          <p className="text-sm text-slate-600 leading-relaxed">{func.desc}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* Tab3: 价格权益 */}
-        {activeTab === 'pricing' && (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5 text-orange-500" />
-                价格与权益
-              </h2>
-              
-              {/* 免费版 */}
-              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 mb-4">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-bold text-green-700">免费版</h3>
-                      <Badge className="bg-green-500 text-white text-xs">当前使用</Badge>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-2xl font-bold text-green-600">¥0</span>
-                      <span className="text-sm text-slate-500 ml-1">/永久</span>
-                    </div>
-                  </div>
-                  <ul className="space-y-2 mb-4">
-                    {[
-                      '无使用次数限制',
-                      '核心功能完全开放',
-                      '支持多终端使用',
-                      tool.commercial_license || '基础结果可商用',
-                    ].map((right, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
-                        <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        {right}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button onClick={handleVisit} className="w-full bg-green-500 hover:bg-green-600">
-                    立即开始使用
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* 商用说明 */}
-              <Card className="bg-white">
-                <CardContent className="p-5">
-                  <h3 className="font-semibold text-slate-800 mb-3">商用授权说明</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {tool.commercial_license || '基础使用结果可免费商用，需遵守相关法律法规，尊重原内容知识产权。禁止用于违法违规用途。'}
-                  </p>
-                </CardContent>
-              </Card>
-            </section>
-          </div>
-        )}
-
-        {/* Tab4: 用户评价 */}
-        {activeTab === 'reviews' && (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-orange-500" />
-                用户评价
-              </h2>
-              
-              {/* 评分概览 */}
-              <Card className="bg-white mb-6">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <div className="text-4xl font-bold text-slate-800 mb-1">
-                        {overallScore || '-'}
-                      </div>
-                      {overallScore && <StarRating value={Math.round(Number(overallScore))} readonly size="lg" />}
-                      <p className="text-sm text-slate-500 mt-1">{reviewsPagination.total}条评价</p>
-                    </div>
-                    <div className="flex-1 grid grid-cols-4 gap-4">
-                      {[
-                        { label: '效果', value: ratings?.effect_score },
-                        { label: '易用性', value: ratings?.usability_score },
-                        { label: '额度', value: ratings?.quota_score },
-                        { label: '稳定性', value: ratings?.stability_score },
-                      ].map((item) => (
-                        <div key={item.label} className="text-center">
-                          <p className="text-lg font-bold text-slate-700">{item.value || '-'}</p>
-                          <p className="text-xs text-slate-400">{item.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 发表评价 */}
-              <Card className="bg-white mb-6">
-                <CardContent className="p-5">
-                  <h3 className="font-semibold text-slate-800 mb-3">发表评价</h3>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-4 gap-3">
-                      {[
-                        { key: 'effect_score', label: '效果' },
-                        { key: 'usability_score', label: '易用性' },
-                        { key: 'quota_score', label: '额度' },
-                        { key: 'stability_score', label: '稳定性' },
-                      ].map((item) => (
-                        <div key={item.key} className="flex flex-col items-center">
-                          <span className="text-xs text-slate-500 mb-1">{item.label}</span>
-                          <StarRating
-                            value={newRating[item.key as keyof typeof newRating]}
-                            onChange={(v) => setNewRating(prev => ({ ...prev, [item.key]: v }))}
-                            size="sm"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <Textarea
-                      placeholder="分享你的使用体验... (10-500字)"
-                      value={newReview}
-                      onChange={(e) => setNewReview(e.target.value)}
-                      rows={3}
-                      className="text-sm"
-                    />
-                    <Button
-                      onClick={submitReview}
-                      disabled={submitting || newReview.length < 10}
-                      className="bg-orange-500 hover:bg-orange-600"
-                    >
-                      {submitting ? '提交中...' : '发表评论'}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* 评论列表 */}
-              <Card className="bg-white">
-                <CardContent className="p-5">
-                  {reviews.length > 0 ? (
-                    <div className="space-y-4">
-                      {reviews.map((review) => (
-                        <div key={review.id} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm font-medium">
-                              {review.user_id.slice(-2).toUpperCase()}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-medium text-slate-700 text-sm">
-                                  用户_{review.user_id.slice(-4)}
-                                </span>
-                                {review.user_ratings && (
-                                  <StarRating value={Number(review.user_ratings.overall_score)} readonly size="sm" />
-                                )}
-                              </div>
-                              <p className="text-xs text-slate-400">
-                                {new Date(review.created_at).toLocaleDateString('zh-CN')}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-sm text-slate-600 pl-11">{review.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-slate-400">
-                      <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                      <p>暂无评价，期待你的分享</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </section>
-          </div>
-        )}
-
-        {/* Tab5: 数据洞察 */}
-        {activeTab === 'insights' && (
-          <div className="space-y-8">
-            <section>
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <BarChart className="w-5 h-5 text-orange-500" />
-                数据统计
-              </h2>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <ul className="space-y-2 mb-4">
                 {[
-                  { icon: Eye, label: '浏览量', value: tool.view_count || 0, color: 'bg-blue-50 text-blue-600' },
-                  { icon: ExternalLink, label: '访问量', value: tool.click_count || 0, color: 'bg-green-50 text-green-600' },
-                  { icon: MessageSquare, label: '评价数', value: reviewsPagination.total, color: 'bg-purple-50 text-purple-600' },
-                  { icon: Star, label: '综合评分', value: overallScore || '-', color: 'bg-amber-50 text-amber-600' },
+                  '无使用次数限制',
+                  '核心功能完全开放',
+                  '支持多终端使用',
+                  tool.commercial_license || '基础结果可商用',
+                ].map((right, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-slate-600">
+                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    {right}
+                  </li>
+                ))}
+              </ul>
+              <Button onClick={handleVisit} className="w-full bg-green-500 hover:bg-green-600">
+                立即开始使用
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* 3. 适用场景 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Layers className="w-5 h-5 text-orange-500" />
+            适用场景
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {(tool.scenes && tool.scenes.length > 0) ? tool.scenes.map((scene, i) => (
+              <Card key={i} className="bg-white hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold flex items-center justify-center">
+                      {scene.scene_no.replace('#', '')}
+                    </span>
+                    <span className="text-sm font-medium text-orange-600">{scene.user_group}</span>
+                  </div>
+                  <p className="text-sm text-slate-600 leading-relaxed">{scene.scene_desc}</p>
+                </CardContent>
+              </Card>
+            )) : [
+              { no: '1', user_group: '学生/科研人群', scene_desc: '用于学术资料检索、文献整理、课题调研，结构化输出大幅提升效率。' },
+              { no: '2', user_group: '职场办公人群', scene_desc: '用于行业调研、竞品分析、文案素材搜集，一键整合核心信息。' },
+              { no: '3', user_group: '内容创作人群', scene_desc: '用于素材搜集、信息溯源、多语言查询，支持来源标注保障准确性。' },
+            ].map((scene, i) => (
+              <Card key={i} className="bg-white hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold flex items-center justify-center">
+                      {scene.no}
+                    </span>
+                    <span className="text-sm font-medium text-orange-600">{scene.user_group}</span>
+                  </div>
+                  <p className="text-sm text-slate-600 leading-relaxed">{scene.scene_desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* 4. 关于工具 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-orange-500" />
+            关于{tool.name}
+          </h2>
+          <Card className="bg-white">
+            <CardContent className="p-5">
+              <p className="text-slate-600 leading-relaxed">
+                {tool.full_desc || `${tool.name}是由${tool.producer}推出的智能工具，${tool.highlight}。平台提供稳定、高效的服务，适用于多种使用场景。`}
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* 5. 快速上手 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-orange-500" />
+            快速上手
+          </h2>
+          <Card className="bg-white">
+            <CardContent className="p-5">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                {[
+                  { step: '1', title: '进入工具', desc: '点击「立即使用」按钮' },
+                  { step: '2', title: '开始使用', desc: '输入需求或选择功能' },
+                  { step: '3', title: '获取结果', desc: '等待处理完成' },
+                  { step: '4', title: '查看详情', desc: '浏览结果内容' },
+                  { step: '5', title: '进阶操作', desc: '使用高级功能' },
                 ].map((item) => (
-                  <Card key={item.label} className="bg-white">
-                    <CardContent className="p-4 text-center">
-                      <div className={`w-10 h-10 rounded-lg ${item.color} flex items-center justify-center mx-auto mb-2`}>
-                        <item.icon className="w-5 h-5" />
-                      </div>
-                      <p className="text-xl font-bold text-slate-800">{item.value}</p>
-                      <p className="text-xs text-slate-500">{item.label}</p>
-                    </CardContent>
-                  </Card>
+                  <div key={item.step} className="flex flex-col items-center text-center">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-semibold text-sm mb-2">
+                      {item.step}
+                    </div>
+                    <h3 className="font-medium text-slate-800 text-sm">{item.title}</h3>
+                    <p className="text-xs text-slate-400">{item.desc}</p>
+                  </div>
                 ))}
               </div>
+              
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Globe2 className="w-4 h-4 text-slate-400" />
+                  网页端
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Smartphone className="w-4 h-4 text-slate-400" />
+                  移动端H5
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                  <Phone className="w-4 h-4 text-slate-400" />
+                  小程序
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
 
-              {/* 热门标签 */}
-              {featureTags.length > 0 && (
-                <Card className="bg-white">
-                  <CardContent className="p-5">
-                    <h3 className="font-semibold text-slate-800 mb-3">相关标签</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {featureTags.slice(0, 10).map((tag, i) => (
-                        <span key={i} className="px-3 py-1.5 rounded-full text-sm bg-slate-100 text-slate-600">
-                          {tag}
-                        </span>
-                      ))}
+        {/* 6. 常见问题 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <HelpCircle className="w-5 h-5 text-orange-500" />
+            常见问题
+          </h2>
+          <Card className="bg-white">
+            <CardContent className="p-4">
+              <Accordion type="multiple" className="w-full">
+                {(tool.faqs && tool.faqs.length > 0) ? tool.faqs.map((faq, i) => (
+                  <AccordionItem key={i} value={`faq-${i}`}>
+                    <AccordionTrigger className="text-left font-medium text-slate-700 text-sm py-3">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 text-sm pb-3">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                )) : [
+                  { question: `${tool.name}是否免费？有没有使用限制？`, answer: `${tool.name}${tool.free_type === '完全免费' ? '基础功能完全免费，无使用次数限制' : `提供${tool.free_quota_desc || '免费额度供用户体验'}`}。` },
+                  { question: `如何联系客服或反馈问题？`, answer: `您可以通过官网联系页面提交反馈，或发送邮件至官方邮箱，我们会尽快处理您的问题。` },
+                  { question: `结果是否支持商用？`, answer: `关于商用授权，请参阅页面「价格权益」模块的详细说明。` },
+                  { question: `支持哪些使用终端？`, answer: `支持网页端、移动端H5、微信小程序等多终端使用，数据同步互通。` },
+                ].map((faq, i) => (
+                  <AccordionItem key={i} value={`faq-${i}`}>
+                    <AccordionTrigger className="text-left font-medium text-slate-700 text-sm py-3">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-slate-600 text-sm pb-3">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* 7. 用户评价 */}
+        <section className="mb-8">
+          <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-orange-500" />
+            用户评价
+          </h2>
+          
+          {/* 评分概览 */}
+          <Card className="bg-white mb-6">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-6">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-slate-800 mb-1">
+                    {overallScore || '-'}
+                  </div>
+                  {overallScore && <StarRating value={Math.round(Number(overallScore))} readonly size="lg" />}
+                  <p className="text-sm text-slate-500 mt-1">{reviewsPagination.total}条评价</p>
+                </div>
+                <div className="flex-1 grid grid-cols-4 gap-4">
+                  {[
+                    { label: '效果', value: ratings?.effect_score },
+                    { label: '易用性', value: ratings?.usability_score },
+                    { label: '额度', value: ratings?.quota_score },
+                    { label: '稳定性', value: ratings?.stability_score },
+                  ].map((item) => (
+                    <div key={item.label} className="text-center">
+                      <p className="text-lg font-bold text-slate-700">{item.value || '-'}</p>
+                      <p className="text-xs text-slate-400">{item.label}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 发表评价 */}
+          <Card className="bg-white mb-6">
+            <CardContent className="p-5">
+              <h3 className="font-semibold text-slate-800 mb-3">发表评价</h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-4 gap-3">
+                  {[
+                    { key: 'effect_score', label: '效果' },
+                    { key: 'usability_score', label: '易用性' },
+                    { key: 'quota_score', label: '额度' },
+                    { key: 'stability_score', label: '稳定性' },
+                  ].map((item) => (
+                    <div key={item.key} className="flex flex-col items-center">
+                      <span className="text-xs text-slate-500 mb-1">{item.label}</span>
+                      <StarRating
+                        value={newRating[item.key as keyof typeof newRating]}
+                        onChange={(v) => setNewRating(prev => ({ ...prev, [item.key]: v }))}
+                        size="sm"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <Textarea
+                  placeholder="分享你的使用体验... (10-500字)"
+                  value={newReview}
+                  onChange={(e) => setNewReview(e.target.value)}
+                  rows={3}
+                  className="text-sm"
+                />
+                <Button
+                  onClick={submitReview}
+                  disabled={submitting || newReview.length < 10}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {submitting ? '提交中...' : '发表评论'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 评论列表 */}
+          <Card className="bg-white">
+            <CardContent className="p-5">
+              {reviews.length > 0 ? (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-sm font-medium">
+                          {review.user_id.slice(-2).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-slate-700 text-sm">
+                              用户_{review.user_id.slice(-4)}
+                            </span>
+                            {review.user_ratings && (
+                              <StarRating value={Number(review.user_ratings.overall_score)} readonly size="sm" />
+                            )}
+                          </div>
+                          <p className="text-xs text-slate-400">
+                            {new Date(review.created_at).toLocaleDateString('zh-CN')}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600 pl-11">{review.content}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-slate-400">
+                  <MessageSquare className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                  <p>暂无评价，期待你的分享</p>
+                </div>
               )}
-            </section>
-          </div>
-        )}
+            </CardContent>
+          </Card>
+        </section>
       </main>
 
       {/* 底部运营区 */}
