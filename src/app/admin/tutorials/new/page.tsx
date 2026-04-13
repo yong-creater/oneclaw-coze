@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, BookOpen, FileText, Clipboard } from 'lucide-react';
+import { ArrowLeft, Save, BookOpen, FileText, Clipboard, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -78,6 +78,136 @@ function detectFormat(content: string): 'html' | 'markdown' | 'plain' {
   return 'plain';
 }
 
+// 富文本内容编辑器（支持粘贴图片和拖拽上传）
+function RichContentEditor({ 
+  value, 
+  onChange,
+  onFormatChange,
+  format 
+}: { 
+  value: string; 
+  onChange: (html: string) => void;
+  onFormatChange: (format: 'html' | 'markdown' | 'plain') => void;
+  format: 'html' | 'markdown' | 'plain';
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const uploadImage = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('请上传图片文件');
+      return null;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('图片大小不能超过 5MB');
+      return null;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'tutorials');
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success('图片上传成功');
+        return data.data.url;
+      } else {
+        toast.error(data.error || '上传失败');
+        return null;
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      toast.error('上传失败');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  }, []);
+
+  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file && textareaRef.current) {
+          const url = await uploadImage(file);
+          if (url) {
+            const textarea = textareaRef.current;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const imgHtml = `\n<img src="${url}" alt="图片" style="max-width:100%;border-radius:8px;margin:16px 0;" />\n`;
+            const newValue = value.substring(0, start) + imgHtml + value.substring(end);
+            onChange(newValue);
+            onFormatChange('html');
+            setTimeout(() => {
+              textarea.selectionStart = textarea.selectionEnd = start + imgHtml.length;
+              textarea.focus();
+            }, 0);
+          }
+        }
+        break;
+      }
+    }
+  }, [value, onChange, onFormatChange, uploadImage]);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const url = await uploadImage(file);
+      if (url && textareaRef.current) {
+        const textarea = textareaRef.current;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const imgHtml = `\n<img src="${url}" alt="图片" style="max-width:100%;border-radius:8px;margin:16px 0;" />\n`;
+        const newValue = value.substring(0, start) + imgHtml + value.substring(end);
+        onChange(newValue);
+        onFormatChange('html');
+      }
+    }
+  }, [value, onChange, onFormatChange, uploadImage]);
+
+  return (
+    <div className="relative">
+      <Textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onPaste={handlePaste}
+        onDrop={handleDrop}
+        onDragOver={(e) => e.preventDefault()}
+        placeholder="支持粘贴 Markdown 自动转 HTML，或直接粘贴/拖拽图片..."
+        rows={25}
+        className="dark:bg-slate-700 font-mono text-sm min-h-[500px]"
+      />
+      
+      {/* 上传指示器 */}
+      {uploading && (
+        <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center rounded-lg">
+          <div className="flex items-center gap-2 text-white bg-slate-800 px-4 py-2 rounded-lg">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>图片上传中...</span>
+          </div>
+        </div>
+      )}
+
+      <p className="text-xs text-slate-500 mt-1">
+        提示：可以直接粘贴截图，或拖拽图片上传。支持 Markdown 自动转换。
+      </p>
+    </div>
+  );
+}
+
 export default function NewTutorialPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -97,23 +227,6 @@ export default function NewTutorialPage() {
   useEffect(() => {
     if (formData.content) {
       setContentFormat(detectFormat(formData.content));
-    }
-  }, [formData.content]);
-
-  // 粘贴时自动转换格式
-  const handlePaste = useCallback((e: React.ClipboardEvent) => {
-    const pastedText = e.clipboardData.getData('text');
-    if (!pastedText) return;
-
-    const format = detectFormat(pastedText);
-    
-    // 如果粘贴的是 Markdown，自动转换为 HTML
-    if (format === 'markdown' && !formData.content) {
-      e.preventDefault();
-      const html = markdownToHtml(pastedText);
-      setFormData(prev => ({ ...prev, content: html }));
-      setContentFormat('html');
-      toast.success('已自动将 Markdown 转换为 HTML');
     }
   }, [formData.content]);
 
@@ -244,17 +357,12 @@ export default function NewTutorialPage() {
                   </span>
                 </div>
               </div>
-              <Textarea
+              <RichContentEditor
                 value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                onPaste={handlePaste}
-                placeholder="支持粘贴 Markdown 或 HTML 格式内容..."
-                rows={25}
-                className="dark:bg-slate-700 font-mono text-sm min-h-[500px]"
+                onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
+                onFormatChange={setContentFormat}
+                format={contentFormat}
               />
-              <p className="text-xs text-slate-500 mt-1">
-                支持 Markdown（自动转 HTML）和 HTML 格式。粘贴 Markdown 内容时会自动转换。
-              </p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">

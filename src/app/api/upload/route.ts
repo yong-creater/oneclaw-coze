@@ -1,25 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { validateSession } from '@/lib/auth';
 
-// 图片上传 API
+// 公开图片上传 API（用于教程封面、内容图片）
 export async function POST(request: NextRequest) {
   try {
-    // 验证登录
-    const token = request.cookies.get('admin_token')?.value;
-    if (!token) {
-      return NextResponse.json({ success: false, error: '请先登录' }, { status: 401 });
-    }
-
-    const user = await validateSession(token);
-    if (!user) {
-      return NextResponse.json({ success: false, error: '会话已过期' }, { status: 401 });
-    }
-
-    const supabase = getSupabaseClient();
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    const type = formData.get('type') as string || 'tutorials'; // tutorials, tools, covers
+    const type = formData.get('type') as string || 'uploads'; // tutorials, covers, content
 
     if (!file) {
       return NextResponse.json({ success: false, error: '没有上传文件' }, { status: 400 });
@@ -35,6 +21,10 @@ export async function POST(request: NextRequest) {
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json({ success: false, error: '图片大小不能超过 5MB' }, { status: 400 });
     }
+
+    // 使用动态导入避免在边缘环境问题
+    const { getSupabaseClient } = await import('@/storage/database/supabase-client');
+    const supabase = getSupabaseClient();
 
     // 生成唯一文件名
     const ext = file.name.split('.').pop() || 'jpg';

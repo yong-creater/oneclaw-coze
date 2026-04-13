@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Trash2, BookOpen, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, BookOpen, Loader2, Upload, Image as ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface Tutorial {
   id: number;
@@ -35,6 +36,309 @@ interface Tutorial {
 const CATEGORIES = [
   '入门教程', '进阶技巧', '案例分享', 'API对接', '最佳实践', '常见问题', '其他'
 ];
+
+// 封面图片上传组件
+function CoverImageUploader({ 
+  value, 
+  onChange 
+}: { 
+  value: string; 
+  onChange: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState(value);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPreview(value);
+  }, [value]);
+
+  const handleUpload = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('请上传图片文件');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('图片大小不能超过 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'tutorials');
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        onChange(data.data.url);
+        toast.success('封面上传成功');
+      } else {
+        toast.error(data.error || '上传失败');
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      toast.error('上传失败');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUpload(file);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleUpload(file);
+    }
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          handleUpload(file);
+        }
+        break;
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      {/* 当前封面预览 */}
+      {preview && (
+        <div className="relative w-full h-40 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-600">
+          <img 
+            src={preview} 
+            alt="封面预览" 
+            className="w-full h-full object-cover"
+            onError={() => setPreview('')}
+          />
+          <button
+            type="button"
+            onClick={() => { setPreview(''); onChange(''); }}
+            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* 上传区域 */}
+      <div
+        onDrop={handleDrop}
+        onDragOver={(e) => e.preventDefault()}
+        onPaste={handlePaste}
+        className={cn(
+          "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
+          "border-slate-300 dark:border-slate-600 hover:border-orange-400 dark:hover:border-orange-500",
+          uploading && "opacity-50 pointer-events-none"
+        )}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+        {uploading ? (
+          <div className="flex items-center justify-center gap-2 text-slate-500">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>上传中...</span>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-slate-500 dark:text-slate-400">
+            <Upload className="w-8 h-8" />
+            <p className="text-sm">点击上传 / 拖拽图片 / 粘贴截图</p>
+            <p className="text-xs">支持 JPG、PNG、WebP，最大 5MB</p>
+          </div>
+        )}
+      </div>
+
+      {/* URL输入 */}
+      <div className="flex gap-2">
+        <Input
+          value={value}
+          onChange={(e) => { onChange(e.target.value); setPreview(e.target.value); }}
+          placeholder="或输入封面图URL"
+          className="dark:bg-slate-700 flex-1"
+        />
+        {value && (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              const url = window.prompt('输入图片URL:', value);
+              if (url) {
+                onChange(url);
+                setPreview(url);
+              }
+            }}
+          >
+            <ImageIcon className="w-4 h-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 富文本内容编辑器（支持粘贴图片）
+function RichContentEditor({ 
+  value, 
+  onChange 
+}: { 
+  value: string; 
+  onChange: (html: string) => void;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadPos, setUploadPos] = useState({ top: 0, left: 0 });
+  const [showUpload, setShowUpload] = useState(false);
+
+  const uploadImage = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('请上传图片文件');
+      return null;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('图片大小不能超过 5MB');
+      return null;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'tutorials');
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success('图片上传成功');
+        return data.data.url;
+      } else {
+        toast.error(data.error || '上传失败');
+        return null;
+      }
+    } catch (error) {
+      console.error('上传失败:', error);
+      toast.error('上传失败');
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  }, []);
+
+  const handlePaste = useCallback(async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file && textareaRef.current) {
+          const url = await uploadImage(file);
+          if (url) {
+            // 在光标位置插入图片HTML
+            const textarea = textareaRef.current;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const imgHtml = `\n<img src="${url}" alt="图片" style="max-width:100%;border-radius:8px;margin:16px 0;" />\n`;
+            const newValue = value.substring(0, start) + imgHtml + value.substring(end);
+            onChange(newValue);
+            
+            // 恢复光标位置
+            setTimeout(() => {
+              textarea.selectionStart = textarea.selectionEnd = start + imgHtml.length;
+              textarea.focus();
+            }, 0);
+          }
+        }
+        break;
+      }
+    }
+  }, [value, onChange, uploadImage]);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const url = await uploadImage(file);
+      if (url && textareaRef.current) {
+        const textarea = textareaRef.current;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const imgHtml = `\n<img src="${url}" alt="图片" style="max-width:100%;border-radius:8px;margin:16px 0;" />\n`;
+        const newValue = value.substring(0, start) + imgHtml + value.substring(end);
+        onChange(newValue);
+      }
+    }
+  }, [value, onChange, uploadImage]);
+
+  return (
+    <div className="relative">
+      <Textarea
+        ref={textareaRef}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onPaste={handlePaste}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        placeholder="支持HTML格式，支持粘贴图片、拖拽图片上传..."
+        rows={15}
+        className="dark:bg-slate-700 font-mono text-sm"
+      />
+      
+      {/* 上传指示器 */}
+      {uploading && (
+        <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center rounded-lg">
+          <div className="flex items-center gap-2 text-white bg-slate-800 px-4 py-2 rounded-lg">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>图片上传中...</span>
+          </div>
+        </div>
+      )}
+
+      {/* 提示 */}
+      <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+        提示：可以直接粘贴截图，或拖拽图片到内容区上传图片
+      </p>
+    </div>
+  );
+}
 
 export default function EditTutorialPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -230,12 +534,9 @@ export default function EditTutorialPage({ params }: { params: Promise<{ id: str
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 内容 <span className="text-red-500">*</span>
               </label>
-              <Textarea
+              <RichContentEditor
                 value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="支持HTML格式..."
-                rows={15}
-                className="dark:bg-slate-700 font-mono text-sm"
+                onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
               />
             </div>
             
@@ -275,30 +576,26 @@ export default function EditTutorialPage({ params }: { params: Promise<{ id: str
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+            <div>
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                   封面图
                 </label>
-                <Input
+                <CoverImageUploader
                   value={formData.cover_image}
-                  onChange={(e) => setFormData(prev => ({ ...prev, cover_image: e.target.value }))}
-                  placeholder="封面图URL"
-                  className="dark:bg-slate-700"
+                  onChange={(url) => setFormData(prev => ({ ...prev, cover_image: url }))}
                 />
               </div>
-              
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                  作者
-                </label>
-                <Input
-                  value={formData.author}
-                  onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                  placeholder="作者名称"
-                  className="dark:bg-slate-700"
-                />
-              </div>
+            
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
+                作者
+              </label>
+              <Input
+                value={formData.author}
+                onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
+                placeholder="作者名称"
+                className="dark:bg-slate-700"
+              />
             </div>
             
             <div>
