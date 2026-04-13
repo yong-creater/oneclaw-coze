@@ -24,7 +24,6 @@ import {
   Image as ImageIcon, Upload, X, Loader2, ToggleLeft, ToggleRight, Link as LinkIcon
 } from 'lucide-react';
 import Link from 'next/link';
-import AnimatedLobster from '@/components/AnimatedLobster';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -381,50 +380,27 @@ export default function AdminAdsPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* 顶部导航 */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-slate-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/admin" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <AnimatedLobster size={40} />
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                  OneClaw Admin
-                </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400">广告管理</p>
-              </div>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="outline" size="sm">预览前台</Button>
-              </Link>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* 标题和操作 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">广告管理</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            管理全站广告位，支持多种展示位置
+          </p>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* 标题和操作 */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">广告管理</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-              管理全站广告位，支持多种展示位置
-            </p>
-          </div>
-          <Button
-            onClick={() => {
-              resetForm();
-              setEditingAd(null);
-              setDialogOpen(true);
-            }}
-            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            添加广告
-          </Button>
-        </div>
+        <Button
+          onClick={() => {
+            resetForm();
+            setEditingAd(null);
+            setDialogOpen(true);
+          }}
+          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          添加广告
+        </Button>
+      </div>
 
         {/* 广告位置说明 */}
         <Card className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 mb-6">
@@ -547,7 +523,7 @@ export default function AdminAdsPage() {
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {/* 添加/编辑对话框 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

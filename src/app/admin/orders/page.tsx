@@ -17,7 +17,6 @@ import {
   CheckCircle, XCircle, AlertCircle, RefreshCw
 } from 'lucide-react';
 import Link from 'next/link';
-import AnimatedLobster from '@/components/AnimatedLobster';
 
 // 订单状态配置
 const ORDER_STATUS = {
@@ -109,74 +108,51 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* 顶部导航 */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-slate-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/admin" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <AnimatedLobster size={40} />
+    <div className="space-y-6">
+      {/* 统计卡片 */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-white dark:bg-slate-800">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                  OneClaw Admin
-                </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400">订单管理</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">总订单数</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.total}</p>
               </div>
-            </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="outline" size="sm">前台首页</Button>
-              </Link>
+              <CreditCard className="w-8 h-8 text-slate-400" />
             </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-white dark:bg-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">总订单数</p>
-                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{stats.total}</p>
-                </div>
-                <CreditCard className="w-8 h-8 text-slate-400" />
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white dark:bg-slate-800">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">总收入</p>
+                <p className="text-2xl font-bold text-green-500">{formatAmount(stats.totalAmount)}</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white dark:bg-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">总收入</p>
-                  <p className="text-2xl font-bold text-green-500">{formatAmount(stats.totalAmount)}</p>
-                </div>
-                <CreditCard className="w-8 h-8 text-green-400" />
+              <CreditCard className="w-8 h-8 text-green-400" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white dark:bg-slate-800">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">待支付</p>
+                <p className="text-2xl font-bold text-yellow-500">{stats.pendingCount}</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white dark:bg-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">待支付</p>
-                  <p className="text-2xl font-bold text-yellow-500">{stats.pendingCount}</p>
-                </div>
-                <Clock className="w-8 h-8 text-yellow-400" />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="bg-white dark:bg-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">已完成</p>
-                  <p className="text-2xl font-bold text-blue-500">{stats.paidCount}</p>
+              <Clock className="w-8 h-8 text-yellow-400" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white dark:bg-slate-800">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">已完成</p>
+                <p className="text-2xl font-bold text-blue-500">{stats.paidCount}</p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-blue-400" />
               </div>
@@ -266,7 +242,6 @@ export default function AdminOrdersPage() {
             </CardContent>
           </Card>
         )}
-      </main>
-    </div>
+      </div>
   );
 }
