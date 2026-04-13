@@ -416,17 +416,11 @@ export default function HomePage() {
 
   // ==================== 工具相关方法 ====================
   const fetchCategories = async () => {
-    const cached = cache.get('categories');
-    if (cached) {
-      setCategories(cached);
-      return;
-    }
-    
+    // 跳过缓存，直接获取最新数据
     try {
-      const res = await fetch('/api/categories');
+      const res = await fetch(`/api/categories?t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {
-        cache.set('categories', data.data);
         setCategories(data.data);
       }
     } catch (error) {
