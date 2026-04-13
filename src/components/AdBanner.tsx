@@ -9,9 +9,7 @@ import { X, ExternalLink, Image as ImageIcon, Loader2 } from 'lucide-react';
 type AdPosition = 
   | 'home_banner'      // 首页横幅大图
   | 'home_inline'       // 首页工具卡片间
-  | 'sidebar'          // 侧边栏
-  | 'tool_detail'      // 工具详情页
-  | 'category_top';    // 分类顶部
+  | 'tool_detail';      // 工具详情页
 
 interface Advertisement {
   id: number;
@@ -216,144 +214,6 @@ export function HomeInlineAd({
   );
 }
 
-// 侧边栏广告
-export function SidebarAd({ className = '' }: { className?: string }) {
-  const [ads, setAds] = useState<Advertisement[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAds('sidebar').then(data => {
-      setAds(data);
-      setLoading(false);
-    });
-  }, []);
-
-  const handleClick = useCallback((ad: Advertisement) => {
-    recordClick(ad.id);
-    window.open(ad.link_url, '_blank');
-  }, []);
-
-  if (loading || ads.length === 0) return null;
-
-  const ad = ads[0];
-
-  return (
-    <Card className={`bg-white dark:bg-slate-800 overflow-hidden ${className}`}>
-      <CardContent className="p-0">
-        <div 
-          className="relative cursor-pointer group"
-          onClick={() => handleClick(ad)}
-        >
-          <img
-            src={ad.image_url}
-            alt={ad.title}
-            className="w-full h-auto object-cover"
-          />
-          <Badge variant="secondary" className="absolute top-2 right-2 bg-white/90 text-slate-500 text-xs">
-            广告
-          </Badge>
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// 工具详情页广告
-export function ToolDetailAd({ 
-  className = '',
-  toolId 
-}: { 
-  className?: string;
-  toolId?: number;
-}) {
-  const [ads, setAds] = useState<Advertisement[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAds('tool_detail').then(data => {
-      setAds(data);
-      setLoading(false);
-    });
-  }, [toolId]);
-
-  const handleClick = useCallback((ad: Advertisement) => {
-    recordClick(ad.id);
-    window.open(ad.link_url, '_blank');
-  }, []);
-
-  if (loading || ads.length === 0) return null;
-
-  const ad = ads[0];
-
-  return (
-    <Card className={`bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 ${className}`}>
-      <CardContent className="p-4">
-        <div 
-          className="flex items-center gap-4 cursor-pointer group"
-          onClick={() => handleClick(ad)}
-        >
-          <img
-            src={ad.image_url}
-            alt={ad.title}
-            className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-          />
-          <div className="flex-1 min-w-0">
-            <Badge variant="outline" className="text-xs mb-1">广告</Badge>
-            <h4 className="font-medium text-slate-800 dark:text-slate-100 line-clamp-2">
-              {ad.title}
-            </h4>
-            {ad.description && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
-                {ad.description}
-              </p>
-            )}
-          </div>
-          <ExternalLink className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition-colors flex-shrink-0" />
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// 分类顶部广告
-export function CategoryTopAd({ className = '' }: { className?: string }) {
-  const [ads, setAds] = useState<Advertisement[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchAds('category_top').then(data => {
-      setAds(data);
-      setLoading(false);
-    });
-  }, []);
-
-  const handleClick = useCallback((ad: Advertisement) => {
-    recordClick(ad.id);
-    window.open(ad.link_url, '_blank');
-  }, []);
-
-  if (loading || ads.length === 0) return null;
-
-  const ad = ads[0];
-
-  return (
-    <div 
-      className={`relative rounded-lg overflow-hidden cursor-pointer group ${className}`}
-      onClick={() => handleClick(ad)}
-    >
-      <img
-        src={ad.image_url}
-        alt={ad.title}
-        className="w-full h-20 md:h-24 object-cover"
-      />
-      <Badge variant="secondary" className="absolute top-2 right-2 bg-white/90 text-slate-500 text-xs">
-        广告
-      </Badge>
-    </div>
-  );
-}
-
 // 兼容旧接口的默认导出
 function AdBanner({ 
   position, 
@@ -365,12 +225,8 @@ function AdBanner({
       return <HomeBanner className={className} showClose={showClose} />;
     case 'home_inline':
       return <HomeInlineAd className={className} />;
-    case 'sidebar':
-      return <SidebarAd className={className} />;
     case 'tool_detail':
       return <ToolDetailAd className={className} />;
-    case 'category_top':
-      return <CategoryTopAd className={className} />;
     default:
       return null;
   }

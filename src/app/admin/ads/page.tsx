@@ -32,9 +32,7 @@ import { cn } from '@/lib/utils';
 const AD_POSITIONS = [
   { value: 'home_banner', label: '首页横幅大图', desc: '首页顶部Banner，支持多张轮播', size: '800x200' },
   { value: 'home_inline', label: '首页工具卡片间', desc: '工具列表第8个位置', size: '自适应' },
-  { value: 'sidebar', label: '侧边栏广告', desc: '页面右侧边栏', size: '300x250' },
   { value: 'tool_detail', label: '工具详情页', desc: '工具详情页推荐位', size: '自适应' },
-  { value: 'category_top', label: '分类顶部', desc: '分类页顶部Banner', size: '800x100' },
 ];
 
 interface Advertisement {
