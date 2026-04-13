@@ -185,6 +185,88 @@ interface Tool {
 2. **付费收录** - sponsor_type字段支持basic/premium/diamond
 3. **广告系统** - 多位置广告位管理
 
+## UI 设计规范 (CRITICAL)
+
+为保证全站 UI 风格统一，所有详情页面必须遵循以下规范：
+
+### 详情页统一结构
+
+所有详情页（工具/提示词/技能/教程）必须保持一致的页面结构：
+
+```
+┌─────────────────────────────────────────┐
+│  BackToHome 组件（返回首页按钮）         │
+├─────────────────────────────────────────┤
+│  主内容区（max-w-4xl）                   │
+│  ├── 面包屑/标题区                       │
+│  ├── 核心信息卡片                        │
+│  ├── 数据平铺区（无Tab，按重要程度排序）  │
+│  └── 相关推荐                            │
+├─────────────────────────────────────────┤
+│  WechatPromo 组件（公众号推广）          │
+└─────────────────────────────────────────┘
+```
+
+### 页面宽度规范
+
+| 页面类型 | 宽度 | 备注 |
+|----------|------|------|
+| 详情页 | `max-w-4xl` | 工具、提示词、技能、教程详情页 |
+| 列表页 | `max-w-7xl` | 工具列表、提示词库等 |
+| 弹窗/表单 | `max-w-md` ~ `max-w-2xl` | Dialog、Form等 |
+| 特殊页面 | 按需调整 | 如 about、membership |
+
+### 禁止使用的组件
+
+**详情页严禁使用 Tabs 组件！** 数据必须平铺展示，按重要程度排序。
+
+- ❌ 禁止：`Tabs` + `TabsContent` + `TabsTrigger`
+- ✅ 使用：平铺的 `section` 区块，按顺序展示
+
+### 统一组件使用
+
+| 组件 | 用途 | 导入路径 |
+|------|------|----------|
+| `BackToHome` | 返回首页按钮 | `@/components/BackToHome` |
+| `WechatPromo` | 公众号推广 | `@/components/WechatPromo` |
+| `LobsterLoading` | 加载状态 | `@/components/LobsterLoading` |
+
+### 卡片样式规范
+
+```tsx
+// 标准卡片
+<Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
+  <CardContent className="p-4">
+    {/* 内容 */}
+  </CardContent>
+</Card>
+```
+
+### 按钮样式规范
+
+```tsx
+// 主要按钮（橙色调）
+<Button className="bg-orange-500 hover:bg-orange-600 text-white">
+  操作
+</Button>
+
+// 次要按钮（slate色调）
+<Button variant="outline" className="border-slate-300 hover:bg-slate-50">
+  取消
+</Button>
+```
+
+### 主题色彩
+
+| 用途 | 颜色 | Tailwind 类 |
+|------|------|-------------|
+| 主题主色 | 橙色 | `orange-500` / `orange-600` |
+| 成功/免费 | 绿色 | `green-500` / `emerald-500` |
+| 警告 | 黄色 | `amber-500` / `yellow-500` |
+| 错误/付费 | 红色 | `red-500` / `rose-500` |
+| 信息 | 蓝色 | `blue-500` / `sky-500` |
+| 边框 | 灰色 | `slate-200` / `slate-700` |
+
 ## 后台管理系统
 
 访问地址: `/admin`
