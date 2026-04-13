@@ -118,6 +118,7 @@ function SortableItem({ id, item, onEdit, onDelete }: SortableItemProps) {
 export default function CategoriesAdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState({ name: '', slug: '', sort_order: 0 });
@@ -244,6 +245,7 @@ export default function CategoriesAdminPage() {
       
       const newCategories = arrayMove(categories, oldIndex, newIndex);
       setCategories(newCategories);
+      setIsSaving(true);
 
       // 更新排序
       try {
@@ -258,18 +260,19 @@ export default function CategoriesAdminPage() {
           body: JSON.stringify({ categories: updates }),
         });
 
-        const data = await res.json();
+        const result = await res.json();
         
-        if (data.success) {
+        if (result.success) {
           toast.success('排序已保存');
+          fetchData();
         } else {
-          toast.error(data.error || '保存失败');
-          fetchData(); // 恢复原顺序
+          toast.error(result.error || '保存失败');
         }
       } catch (error) {
         console.error('保存排序失败:', error);
         toast.error('保存排序失败');
-        fetchData(); // 恢复原顺序
+      } finally {
+        setIsSaving(false);
       }
     }
   };
