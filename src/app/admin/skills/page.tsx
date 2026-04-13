@@ -100,10 +100,23 @@ export default function AdminSkillsPage() {
   const [skillFilter, setSkillFilter] = useState<'all' | 'featured'>('all');
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, total_pages: 0 });
 
+  // 检查登录状态
   useEffect(() => {
-    const stored = localStorage.getItem('admin_token');
-    if (stored) setToken(stored);
+    checkAuth();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/admin/auth');
+      const data = await res.json();
+      if (data.success) {
+        setToken(data.data?.token || 'authenticated');
+        checkInitStatus();
+      }
+    } catch (error) {
+      console.error('检查登录状态失败:', error);
+    }
+  };
 
   // 检查初始化状态
   useEffect(() => {
