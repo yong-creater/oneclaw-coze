@@ -514,19 +514,21 @@ export default function AdminAdsPage() {
                           </div>
 
                           {/* 操作 */}
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
+                          <div className="flex items-center gap-2">
+                            {/* 大开关 */}
+                            <button
                               onClick={() => handleToggle(ad)}
-                              title={ad.is_active ? '禁用' : '启用'}
+                              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                                ad.is_active ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
+                              }`}
+                              title={ad.is_active ? '点击禁用' : '点击启用'}
                             >
-                              {ad.is_active ? (
-                                <ToggleRight className="w-5 h-5 text-green-500" />
-                              ) : (
-                                <ToggleLeft className="w-5 h-5 text-slate-400" />
-                              )}
-                            </Button>
+                              <span
+                                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${
+                                  ad.is_active ? 'translate-x-7' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
                             <Button variant="ghost" size="sm" onClick={() => handleEdit(ad)}>
                               <Edit className="w-4 h-4" />
                             </Button>
