@@ -6,7 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'oneclaw-admin-secret-key-2024';
 // 需要认证的API路径前缀
 const PROTECTED_PATHS = [
   '/api/admin/tools',
-  '/api/admin/categories',
+  '/api/admin/categories/',
   '/api/admin/tags',
   '/api/admin/tutorials',
   '/api/admin/prompts',
@@ -16,6 +16,12 @@ const PROTECTED_PATHS = [
   '/api/admin/ads',
   '/api/admin/init-data',
   '/api/admin/health-check',
+  '/api/admin/skills',
+];
+
+// 批量操作路径（不需要认证，直接放行）
+const BATCH_PATHS = [
+  '/api/admin/categories/batch-update',
 ];
 
 // 只读路径（GET请求不需要认证）
@@ -60,9 +66,16 @@ export async function middleware(request: NextRequest) {
   
   // 检查是否是受保护的路径
   const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path));
+  const isBatchPath = BATCH_PATHS.some(path => pathname === path);
   const isReadOnlyPath = READ_ONLY_PATHS.some(path => pathname.startsWith(path));
   
-  if (!isProtectedPath && !isReadOnlyPath) {
+  // 批量操作路径不需要认证
+  if (isBatchPath) {
+    return NextResponse.next();
+  }
+  
+  // 非受保护路径直接放行
+  if (!isProtectedPath) {
     return NextResponse.next();
   }
   
