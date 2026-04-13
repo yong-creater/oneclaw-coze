@@ -238,18 +238,20 @@ export default function RootLayout({
           }}
         />
         
-        {/* 百度统计 - beforeInteractive确保尽早加载以便被检测 */}
-        <Script id="baidu-analytics" strategy="beforeInteractive">
-          {`
-            var _hmt = _hmt || [];
-            (function() {
-              var hm = document.createElement("script");
-              hm.src = "https://hm.baidu.com/hm.js?f43feef2e8e09bcc3bca6c5f485ac461";
-              var s = document.getElementsByTagName("script")[0];
-              s.parentNode.insertBefore(hm, s);
-            })();
-          `}
-        </Script>
+        {/* 百度统计 - 直接内联脚本确保被检测 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              var _hmt = _hmt || [];
+              (function() {
+                var hm = document.createElement('script');
+                hm.src = 'https://hm.baidu.com/hm.js?f43feef2e8e09bcc3bca6c5f485ac461';
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(hm, s);
+              })();
+            `,
+          }}
+        />
         
 	        {/* Google Analytics */}
         {process.env.NEXT_PUBLIC_GA_ID && (
