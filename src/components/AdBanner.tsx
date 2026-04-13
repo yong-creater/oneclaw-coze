@@ -214,6 +214,63 @@ export function HomeInlineAd({
   );
 }
 
+// 工具详情页广告
+export function ToolDetailAd({ 
+  className = '',
+  toolId 
+}: { 
+  className?: string;
+  toolId?: number;
+}) {
+  const [ads, setAds] = useState<Advertisement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAds('tool_detail').then(data => {
+      setAds(data);
+      setLoading(false);
+    });
+  }, [toolId]);
+
+  const handleClick = useCallback((ad: Advertisement) => {
+    recordClick(ad.id);
+    window.open(ad.link_url, '_blank');
+  }, []);
+
+  if (loading || ads.length === 0) return null;
+
+  const ad = ads[0];
+
+  return (
+    <Card className={`bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 ${className}`}>
+      <CardContent className="p-4">
+        <div 
+          className="flex items-center gap-4 cursor-pointer group"
+          onClick={() => handleClick(ad)}
+        >
+          <img
+            src={ad.image_url}
+            alt={ad.title}
+            className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <Badge variant="outline" className="text-xs mb-1">广告</Badge>
+            <h4 className="font-medium text-slate-800 dark:text-slate-100 line-clamp-2">
+              {ad.title}
+            </h4>
+            {ad.description && (
+              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                {ad.description}
+              </p>
+            )}
+          </div>
+          <ExternalLink className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition-colors flex-shrink-0" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // 兼容旧接口的默认导出
 function AdBanner({ 
   position, 

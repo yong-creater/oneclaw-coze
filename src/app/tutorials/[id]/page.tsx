@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Eye, User, Calendar } from 'lucide-react';
 import TutorialLikeButton from '@/components/TutorialLikeButton';
-import BackButton from '@/components/BackButton';
+import BackToHome from '@/components/BackToHome';
 
 interface Tutorial {
   id: number;
@@ -119,7 +119,7 @@ export default async function TutorialDetailPage({ params }: { params: Promise<{
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <BackButton />
+          <BackToHome label="教程详情" />
         </div>
       </header>
 

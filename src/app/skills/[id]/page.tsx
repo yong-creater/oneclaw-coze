@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, BookOpen, List, Clock, CheckCircle, Download, Heart, ExternalLink, FileText, Code, Zap, Star, Shield } from 'lucide-react';
 import BackButton from '@/components/BackButton';
+import BackToHome from '@/components/BackToHome';
 import LobsterLoading from '@/components/LobsterLoading';
 
 // 获取技能详情
@@ -135,13 +136,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
       {/* 顶部导航 */}
       <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-4">
-            <BackButton defaultText="返回技能库" />
-            <div className="flex-1" />
-            <div className="text-sm text-slate-400">
-              技能库 / {skill.skill_categories?.name || '全部'}
-            </div>
-          </div>
+          <BackToHome label="技能详情" />
         </div>
       </div>
       

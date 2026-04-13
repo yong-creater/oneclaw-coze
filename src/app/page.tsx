@@ -788,9 +788,9 @@ export default function HomePage() {
                               sessionStorage.setItem('backFrom', JSON.stringify(backState));
                             }
                             if (item.tool_id) {
-                              router.push(`/tools/${item.tool_id}`);
+                              window.open(`/tools/${item.tool_id}`, '_blank');
                             } else {
-                              window.location.href = item.tool_url;
+                              window.open(item.tool_url, '_blank');
                             }
                           }}
                         >
@@ -866,9 +866,9 @@ export default function HomePage() {
                           sessionStorage.setItem('backFrom', JSON.stringify(backState));
                         }
                         if (item.tool_id) {
-                          router.push(`/tools/${item.tool_id}`);
+                          window.open(`/tools/${item.tool_id}`, '_blank');
                         } else {
-                          window.location.href = item.tool_url;
+                          window.open(item.tool_url, '_blank');
                         }
                       }}
                     >
@@ -1093,7 +1093,8 @@ export default function HomePage() {
                               body: JSON.stringify({ user_id: userId, tool_id: tool.id })
                             }).catch(console.error);
                           }
-                          router.push(`/tools/${tool.id}`);
+                          // 在新标签页打开
+                          window.open(`/tools/${tool.id}`, '_blank');
                         }}
                       >
                         <Card
@@ -1248,7 +1249,7 @@ export default function HomePage() {
                           };
                           sessionStorage.setItem('backFrom', JSON.stringify(backState));
                         }
-                        router.push(`/prompts/${prompt.id}`);
+                        window.open(`/prompts/${prompt.id}`, '_blank');
                       }}
                     >
                       <CardContent className="p-4">
@@ -1371,7 +1372,7 @@ export default function HomePage() {
                           };
                           sessionStorage.setItem('backFrom', JSON.stringify(backState));
                         }
-                        router.push(`/tutorials/${tutorial.id}`);
+                        window.open(`/tutorials/${tutorial.id}`, '_blank');
                       }}
                     >
                       <CardContent className="p-4">
@@ -1525,7 +1526,7 @@ export default function HomePage() {
                             };
                             sessionStorage.setItem('backFrom', JSON.stringify(backState));
                           }
-                          router.push(`/skills/${skill.slug}`);
+                          window.open(`/skills/${skill.slug}`, '_blank');
                         }}
                       >
                         {/* 左侧：字母标识 + 标题 + 描述 */}

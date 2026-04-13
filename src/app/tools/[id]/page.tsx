@@ -21,6 +21,7 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import BackButton from '@/components/BackButton';
+import BackToHome from '@/components/BackToHome';
 import { ToolDetailAd } from '@/components/AdBanner';
 
 // ==================== 类型定义 ====================
@@ -342,7 +343,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       {/* 顶部导航 */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <BackButton />
+          <BackToHome label="AI 工具详情" />
         </div>
       </header>
 
