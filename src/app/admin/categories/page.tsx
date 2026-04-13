@@ -236,13 +236,20 @@ export default function CategoriesAdminPage() {
           sort_order: index + 1,
         }));
 
-        await fetch('/api/admin/categories/batch-update', {
+        const res = await fetch('/api/admin/categories/batch-update', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ categories: updates }),
         });
 
-        toast.success('排序已保存');
+        const data = await res.json();
+        
+        if (data.success) {
+          toast.success('排序已保存');
+        } else {
+          toast.error(data.error || '保存失败');
+          fetchData(); // 恢复原顺序
+        }
       } catch (error) {
         console.error('保存排序失败:', error);
         toast.error('保存排序失败');
