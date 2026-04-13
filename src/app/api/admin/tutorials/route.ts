@@ -1,12 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 获取教程列表（后台）
+// 获取教程列表（后台）或单个教程详情
 export async function GET(request: NextRequest) {
   try {
     const client = getSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
     
+    // 如果有 id 参数，返回单个教程
+    const id = searchParams.get('id');
+    if (id) {
+      const { data, error } = await client
+        .from('tutorials')
+        .select('*, tools(id, name, logo)')
+        .eq('id', parseInt(id))
+        .single();
+      
+      if (error) {
+        return NextResponse.json({ success: false, error: '教程不存在' }, { status: 404 });
+      }
+      
+      return NextResponse.json({ success: true, data });
+    }
+    
+    // 否则返回列表
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
@@ -48,7 +65,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('获取教程列表失败:', error);
+    console.error('获取教程失败:', error);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : '获取失败' 
