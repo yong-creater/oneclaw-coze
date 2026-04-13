@@ -62,6 +62,16 @@ function SortableItem({ id, item, onEdit, onDelete }: SortableItemProps) {
     zIndex: isDragging ? 50 : 1,
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit();
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete();
+  };
+
   return (
     <div
       ref={setNodeRef}
@@ -87,7 +97,7 @@ function SortableItem({ id, item, onEdit, onDelete }: SortableItemProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={onEdit}
+          onClick={handleEdit}
           className="h-8 w-8 p-0"
         >
           <Edit2 className="w-4 h-4" />
@@ -95,7 +105,7 @@ function SortableItem({ id, item, onEdit, onDelete }: SortableItemProps) {
         <Button
           variant="ghost"
           size="sm"
-          onClick={onDelete}
+          onClick={handleDelete}
           className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
         >
           <Trash2 className="w-4 h-4" />
@@ -308,7 +318,13 @@ export default function CategoriesAdminPage() {
       )}
 
       {/* 编辑弹窗 */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open) {
+          setEditingId(null);
+          setForm({ name: '', slug: '', sort_order: 0 });
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{editingId ? '编辑分类' : '添加分类'}</DialogTitle>
