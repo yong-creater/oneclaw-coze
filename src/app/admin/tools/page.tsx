@@ -58,6 +58,8 @@ function ToolsAdminContent() {
       if (currentCategoryId && currentCategoryId !== 'all') {
         params.set('category_id', currentCategoryId);
       }
+      // 添加时间戳防止缓存
+      params.set('_t', Date.now().toString());
       
       const res = await fetch(`/api/admin/tools?${params}`);
       const data = await res.json();
@@ -75,7 +77,7 @@ function ToolsAdminContent() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch('/api/admin/init-data');
+      const res = await fetch(`/api/admin/init-data?_t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {
         setCategories(data.data.categories);
