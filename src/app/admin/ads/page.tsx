@@ -515,17 +515,17 @@ export default function AdminAdsPage() {
 
                           {/* 操作 */}
                           <div className="flex items-center gap-2">
-                            {/* 大开关 */}
+                            {/* 开关 */}
                             <button
                               onClick={() => handleToggle(ad)}
-                              className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
+                              className={`relative inline-flex h-6 w-10 items-center rounded-full transition-colors ${
                                 ad.is_active ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
                               }`}
                               title={ad.is_active ? '点击禁用' : '点击启用'}
                             >
                               <span
-                                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-lg transition-transform ${
-                                  ad.is_active ? 'translate-x-7' : 'translate-x-1'
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                                  ad.is_active ? 'translate-x-5' : 'translate-x-1'
                                 }`}
                               />
                             </button>
