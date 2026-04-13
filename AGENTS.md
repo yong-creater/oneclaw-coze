@@ -1,5 +1,56 @@
 # OneClaw (钳爪) - 全品类AI工具导航站
 
+## 铁律 (CRITICAL - 必须严格遵守)
+
+> **每次开发必须遵循以下铁律，违反将导致严重质量问题**
+
+### 铁律一：前后台 UI 规范必须分离
+
+| 规范项 | 前台 (/) | 后台 (/admin) |
+|--------|----------|---------------|
+| 宽度 | `max-w-7xl` 或 `max-w-4xl` | 无限制或 `max-w-7xl` |
+| 布局 | 基于 layout.tsx 全局布局 | 基于 admin/layout.tsx 侧边栏 |
+| 组件 | `BackToHome`, `WechatPromo`, `LobsterLoading` | shadcn/ui 标准组件 |
+| 禁止 | 独立 header/footer | 独立 header/min-h-screen |
+| 详情页 | 无 Tabs，数据平铺 | 按需使用 |
+
+**前台禁止**：Tabs 组件、独立 header/footer、后台组件
+**后台禁止**：AnimatedLobster、BackToHome、WechatPromo、独立 header/min-h-screen
+
+### 铁律二：每次开发完成后必须执行全面回归测试
+
+**测试流程（必须完整执行）**：
+
+1. **代码静态检查**
+   ```bash
+   pnpm lint
+   pnpm ts-check
+   ```
+
+2. **构建检查**
+   ```bash
+   pnpm build
+   ```
+
+3. **API 接口测试**（必须 100% 覆盖）
+   - 使用 `test_run` 工具并行测试所有接口
+   - 输出完整接口清单与测试结果
+
+4. **服务存活探测**
+   ```bash
+   curl -I http://localhost:5000
+   curl -I http://localhost:5000/admin
+   ```
+
+5. **日志健康检查**
+   ```bash
+   tail -n 50 /app/work/logs/bypass/app.log /app/work/logs/bypass/console.log | grep -iE "error|exception"
+   ```
+
+**禁止跳过任何测试步骤！**
+
+---
+
 ## 项目概述
 
 **OneClaw** - 全品类AI工具导航站，精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程、AI音频、AI办公、AI营销、AI学习、AI聊天、AI搜索等全品类。
