@@ -238,7 +238,7 @@ export default function RootLayout({
           }}
         />
         
-        {/* 百度统计 - 使用环境变量 NEXT_PUBLIC_BAIDU_ANALYTICS_ID */}
+        {/* 百度统计 */}
         {baiduAnalyticsId && (
           <Script
             id="baidu-analytics"
@@ -248,7 +248,7 @@ export default function RootLayout({
                 var _hmt = _hmt || [];
                 (function() {
                   var hm = document.createElement("script");
-                  hm.src = "https://hm.baidu.com/hm.js?${baiduAnalyticsId}";
+                  hm.src = "https://hm.baidu.com/hm.js?f43feef2e8e09bcc3bca6c5f485ac461";
                   var s = document.getElementsByTagName("script")[0]; 
                   s.parentNode.insertBefore(hm, s);
                 })();
