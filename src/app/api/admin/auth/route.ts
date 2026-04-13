@@ -92,7 +92,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       authenticated: true,
-      data: user,
+      data: {
+        user,
+        token,  // 返回 token 供前端使用
+      },
     });
   } catch (error) {
     console.error('验证登录状态失败:', error);
