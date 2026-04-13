@@ -231,36 +231,32 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           {/* 底部标签页 */}
           <div className="border-t border-slate-100 dark:border-slate-700">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="w-full justify-start rounded-none border-b bg-transparent h-12 px-4">
+              <TabsList className="w-full justify-start rounded-none bg-transparent border-b border-slate-200 dark:border-slate-700 h-auto p-0 gap-0">
                 <TabsTrigger 
                   value="overview"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                  className="data-[state=active]:bg-transparent data-[state=active]:text-orange-500 data-[state=active]:font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 px-4 py-3 h-auto"
                 >
-                  <BookOpen className="w-4 h-4 mr-2" />
                   概述
                 </TabsTrigger>
                 <TabsTrigger 
                   value="features"
-                  className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                  className="data-[state=active]:bg-transparent data-[state=active]:text-orange-500 data-[state=active]:font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 px-4 py-3 h-auto"
                 >
-                  <List className="w-4 h-4 mr-2" />
                   功能列表
                 </TabsTrigger>
                 {skill.documentation_url && (
                   <TabsTrigger 
                     value="docs"
-                    className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-orange-500 data-[state=active]:font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 px-4 py-3 h-auto"
                   >
-                    <FileText className="w-4 h-4 mr-2" />
                     文档
                   </TabsTrigger>
                 )}
                 {skill.github_url && (
                   <TabsTrigger 
                     value="code"
-                    className="data-[state=active]:bg-transparent data-[state=active]:border-b-2 data-[state=active]:border-orange-500 data-[state=active]:text-orange-500 rounded-none"
+                    className="data-[state=active]:bg-transparent data-[state=active]:text-orange-500 data-[state=active]:font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-orange-500 px-4 py-3 h-auto"
                   >
-                    <Code className="w-4 h-4 mr-2" />
                     源码
                   </TabsTrigger>
                 )}
