@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
-import AnimatedLobster from '@/components/AnimatedLobster';
+import { Lock, User, Eye, EyeOff, Loader2, Shield } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState('');
@@ -58,7 +57,9 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md relative z-10 bg-slate-800/50 border-slate-700 backdrop-blur-xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <AnimatedLobster size={60} />
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <Shield className="w-8 h-8 text-white" />
+            </div>
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
             OneClaw Admin
