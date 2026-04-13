@@ -187,13 +187,13 @@ interface Tool {
 
 ## UI 设计规范 (CRITICAL)
 
-为保证全站 UI 风格统一，前台和后台必须遵循各自的规范。
+为保证全站 UI 风格统一，前台和后台必须遵循各自的规范，禁止混用。
 
 ---
 
-### 一、前台网站规范
+# 一、前台网站规范
 
-#### 1.1 布局架构
+## 1.1 布局架构
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -208,7 +208,17 @@ interface Tool {
 └─────────────────────────────────────────────┘
 ```
 
-#### 1.2 详情页统一结构
+## 1.2 页面宽度规范
+
+| 页面类型 | 宽度 | 备注 |
+|----------|------|------|
+| 首页 | `max-w-7xl` | 全宽展示 |
+| 列表页 | `max-w-7xl` | 工具列表、提示词库等 |
+| 详情页 | `max-w-4xl mx-auto` | 工具、提示词、技能、教程 |
+| 弹窗/表单 | `max-w-md` ~ `max-w-2xl` | Dialog、Form等 |
+| 落地页 | `max-w-6xl` | 专题页、活动页 |
+
+## 1.3 详情页统一结构
 
 所有详情页（工具/提示词/技能/教程）必须保持一致：
 
@@ -226,24 +236,15 @@ interface Tool {
 └─────────────────────────────────────────┘
 ```
 
-#### 1.3 前台页面宽度规范
+## 1.4 前台禁止事项
 
-| 页面类型 | 宽度 | 备注 |
-|----------|------|------|
-| 首页 | `max-w-7xl` | 全宽展示 |
-| 列表页 | `max-w-7xl` | 工具列表、提示词库等 |
-| 详情页 | `max-w-4xl mx-auto` | 工具、提示词、技能、教程 |
-| 弹窗/表单 | `max-w-md` ~ `max-w-2xl` | Dialog、Form等 |
-| 落地页 | `max-w-6xl` | 专题页、活动页 |
+| 禁止项 | 说明 |
+|--------|------|
+| Tabs 组件 | 详情页严禁使用 Tabs，数据必须平铺展示 |
+| 独立布局 | 禁止创建独立 header/footer，必须使用 layout.tsx 的全局布局 |
+| 后台组件 | 禁止使用 admin/ 目录下的组件 |
 
-#### 1.4 禁止使用的组件
-
-**详情页严禁使用 Tabs 组件！** 数据必须平铺展示。
-
-- ❌ 禁止：`Tabs` + `TabsContent` + `TabsTrigger`
-- ✅ 使用：平铺的 `<section>` 区块，按重要程度排序
-
-#### 1.5 前台统一组件
+## 1.5 前台专用组件
 
 | 组件 | 用途 | 导入路径 |
 |------|------|----------|
@@ -251,37 +252,50 @@ interface Tool {
 | `WechatPromo` | 公众号推广 | `@/components/WechatPromo` |
 | `LobsterLoading` | 加载状态 | `@/components/LobsterLoading` |
 
+## 1.6 前台卡片样式
+
+```tsx
+// 标准卡片
+<Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
+  <CardContent className="p-4">
+    {/* 内容 */}
+  </CardContent>
+</Card>
+
+// 列表卡片（带hover效果）
+<Card className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200">
+  <CardContent className="p-5">
+    {/* 内容 */}
+  </CardContent>
+</Card>
+```
+
 ---
 
-### 二、后台管理系统规范
+# 二、后台管理系统规范
 
-#### 2.1 布局架构
-
-后台使用**侧边栏固定布局**，禁止使用独立 header：
+## 2.1 布局架构
 
 ```
 ┌──────────┬─────────────────────────────────┐
 │          │  Header (页面标题)              │
 │  Sidebar │─────────────────────────────────│
 │  (固定)  │                                 │
-│          │  主内容区 (max-w-7xl)            │
+│          │  主内容区 (无固定宽度限制)        │
 │          │                                 │
 │          │                                 │
 └──────────┴─────────────────────────────────┘
 ```
 
-#### 2.2 后台页面结构规范
+**核心原则**：后台所有页面都基于 `/app/admin/layout.tsx` 的侧边栏布局，不允许创建独立布局。
 
-**❌ 禁止在后台页面中：**
-- 创建独立的 `<header>` 导航
-- 使用 `min-h-screen` 或 `min-h-[100vh]`
-- 创建独立的 `<main>` 标签
-- 导入 `AnimatedLobster` 组件
+## 2.2 页面结构规范
 
 **✅ 正确的后台页面结构：**
 
 ```tsx
-export default function AdminPage() {
+// src/app/admin/xxx/page.tsx
+export default function AdminXxxPage() {
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
@@ -299,7 +313,19 @@ export default function AdminPage() {
 }
 ```
 
-#### 2.3 后台页面宽度规范
+**❌ 后台禁止事项：**
+
+| 禁止项 | 说明 | 正确做法 |
+|--------|------|----------|
+| `<header>` | 禁止创建独立导航 | 使用 layout 的 Header |
+| `min-h-screen` | 禁止全屏高度 | 使用 `space-y-6` 间距 |
+| `<main>` | 禁止独立 main 标签 | 使用 `<div>` 或 `<section>` |
+| `AnimatedLobster` | 禁止前台组件 | 不导入 |
+| `BackToHome` | 禁止前台组件 | 不导入 |
+| `WechatPromo` | 禁止前台组件 | 不导入 |
+| 独立 CSS | 禁止内联样式 | 使用 Tailwind 类 |
+
+## 2.3 后台页面宽度规范
 
 | 页面类型 | 宽度 | 备注 |
 |----------|------|------|
@@ -308,21 +334,10 @@ export default function AdminPage() {
 | 弹窗 | `max-w-md` ~ `max-w-2xl` | Dialog |
 | 仪表盘 | 无限制 | 统计卡片自适应 |
 
----
-
-### 三、通用 UI 规范
-
-#### 3.1 卡片样式
+## 2.4 后台卡片样式
 
 ```tsx
-// 前台卡片
-<Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
-  <CardContent className="p-4">
-    {/* 内容 */}
-  </CardContent>
-</Card>
-
-// 后台卡片
+// 后台标准卡片
 <Card className="bg-white dark:bg-slate-800">
   <CardHeader>
     <CardTitle>标题</CardTitle>
@@ -331,9 +346,35 @@ export default function AdminPage() {
     {/* 内容 */}
   </CardContent>
 </Card>
+
+// 后台紧凑卡片
+<Card className="bg-white dark:bg-slate-800">
+  <CardContent className="p-4">
+    {/* 内容 */}
+  </CardContent>
+</Card>
 ```
 
-#### 3.2 按钮样式
+## 2.5 后台常用组件
+
+```tsx
+// UI 组件
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+// Lucide 图标
+import { IconName } from 'lucide-react';
+```
+
+---
+
+# 三、通用规范（前后台共用）
+
+## 3.1 按钮样式
 
 ```tsx
 // 主要按钮（橙色调 - 用于重要操作）
@@ -349,13 +390,13 @@ export default function AdminPage() {
 // 危险按钮（删除等）
 <Button variant="destructive">删除</Button>
 
-// 图标按钮
+// 幽灵按钮（图标按钮）
 <Button variant="ghost" size="icon">
   <Icon className="w-4 h-4" />
 </Button>
 ```
 
-#### 3.3 主题色彩
+## 3.2 主题色彩
 
 | 用途 | 颜色 | Tailwind 类 |
 |------|------|-------------|
@@ -365,6 +406,45 @@ export default function AdminPage() {
 | 错误/付费 | 红色 | `red-500` / `rose-500` |
 | 信息 | 蓝色 | `blue-500` / `sky-500` |
 | 边框 | 灰色 | `slate-200` / `slate-700` |
+
+## 3.3 间距规范
+
+| 用途 | Tailwind 类 |
+|------|-------------|
+| 页面内大间距 | `space-y-6` 或 `gap-6` |
+| 卡片内间距 | `p-4` 或 `p-6` |
+| 元素间距 | `gap-2` 或 `gap-4` |
+| 标题与内容 | `mb-4` 或 `mt-6` |
+
+## 3.4 响应式断点
+
+| 断点 | Tailwind | 适用场景 |
+|------|----------|----------|
+| 手机 | 默认 | 移动端布局 |
+| 平板 | `md:` | 2列布局 |
+| 桌面 | `lg:` | 3-4列布局、侧边栏 |
+| 大屏 | `xl:` 或 `2xl:` | 全宽展示 |
+
+---
+
+# 四、检查清单
+
+## 前台开发检查
+
+- [ ] 是否使用 `max-w-7xl` 或 `max-w-4xl`
+- [ ] 详情页是否使用 `BackToHome` + `WechatPromo`
+- [ ] 详情页是否**没有** Tabs 组件
+- [ ] 是否**没有**导入后台组件
+
+## 后台开发检查
+
+- [ ] 是否**没有**独立 `<header>`
+- [ ] 是否**没有** `min-h-screen`
+- [ ] 是否**没有** `<main>` 标签
+- [ ] 是否**没有** `AnimatedLobster`
+- [ ] 是否**没有** `BackToHome`
+- [ ] 是否**没有** `WechatPromo`
+- [ ] 根元素是否使用 `<div className="space-y-6">`
 
 #### 3.4 间距规范
 
