@@ -23,6 +23,7 @@ import { notFound } from 'next/navigation';
 import BackButton from '@/components/BackButton';
 import BackToHome from '@/components/BackToHome';
 import { ToolDetailAd } from '@/components/AdBanner';
+import WechatPromo from '@/components/WechatPromo';
 
 // ==================== 类型定义 ====================
 interface Tool {
@@ -959,8 +960,11 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6">
-        <div className="max-w-5xl mx-auto px-4">
+      <footer className="bg-white border-t border-slate-200">
+        {/* 公众号推广 */}
+        <WechatPromo />
+        
+        <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <img src="/oneclaw-logo.png" alt="OneClaw" width={24} height={24} className="object-contain" />

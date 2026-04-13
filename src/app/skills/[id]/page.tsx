@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, BookOpen, List, Clock, CheckCircle, Download, Heart, ExternalLink, FileText, Code, Zap, Star, Shield } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 import BackToHome from '@/components/BackToHome';
+import WechatPromo from '@/components/WechatPromo';
 import LobsterLoading from '@/components/LobsterLoading';
 
 // 获取技能详情
@@ -406,38 +407,11 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
       </div>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-t from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
+      <footer className="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
         {/* 公众号推广 */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-900/20 dark:via-amber-900/20 dark:to-orange-900/20 rounded-2xl p-6 mb-6 border border-orange-100 dark:border-orange-800/30">
-            <div className="flex items-center gap-6">
-              <div className="relative flex-shrink-0">
-                <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-amber-400 rounded-xl blur-sm opacity-30"></div>
-                <div className="relative bg-white dark:bg-slate-800 rounded-lg p-2 shadow-md">
-                  <Image 
-                    src="/wechat-qrcode.jpg" 
-                    alt="微信公众号" 
-                    width={80}
-                    height={80}
-                    className="w-20 h-20 rounded-md"
-                  />
-                </div>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-slate-900 dark:text-white mb-1">欢迎关注公众号</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                  获取最新AI工具资讯、技巧与资源
-                </p>
-                <span className="inline-flex items-center gap-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full text-xs">
-                  <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
-                  回复「AI」送你一份AI工具使用指南
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+        <WechatPromo />
         
-        <div className="max-w-4xl mx-auto px-4 py-4 border-t border-slate-100 dark:border-slate-700">
+        <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Image 
