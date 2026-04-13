@@ -12,8 +12,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: '缺少分类数据' }, { status: 400 });
     }
 
-    // 批量更新
-    const updates = categories.map(async (item: { id: number; sort_order: number }) => {
+    // 串行更新确保稳定性
+    for (const item of categories) {
       const { error } = await client
         .from('categories')
         .update({ sort_order: item.sort_order })
@@ -21,19 +21,14 @@ export async function PUT(request: NextRequest) {
       
       if (error) {
         console.error(`更新分类 ${item.id} 失败:`, error);
-        return false;
+        return NextResponse.json({ 
+          success: false, 
+          error: `更新分类 ${item.id} 失败: ${error.message}` 
+        }, { status: 500 });
       }
-      return true;
-    });
-
-    const results = await Promise.all(updates);
-    const allSuccess = results.every(r => r);
-
-    if (allSuccess) {
-      return NextResponse.json({ success: true });
-    } else {
-      return NextResponse.json({ success: false, error: '部分更新失败' }, { status: 500 });
     }
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('批量更新分类失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
