@@ -136,13 +136,13 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* 顶部导航 */}
       <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-3">
+        <div className="max-w-4xl mx-auto px-4 py-3">
           <BackToHome label="技能详情" />
         </div>
       </div>
       
       {/* 主内容 */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 技能头部卡片 */}
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
           <div className="p-8">
@@ -411,7 +411,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
         {/* 公众号推广 */}
         <WechatPromo />
         
-        <div className="max-w-6xl mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Image 

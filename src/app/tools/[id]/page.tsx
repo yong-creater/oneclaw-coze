@@ -343,7 +343,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
     <div className="min-h-screen bg-slate-50">
       {/* 顶部导航 */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <BackToHome label="AI 工具详情" />
         </div>
       </header>
@@ -355,7 +355,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-orange-100/50 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-100/30 to-transparent rounded-full blur-3xl" />
         
-        <div className="relative max-w-5xl mx-auto px-4 py-6 sm:py-10">
+        <div className="relative max-w-4xl mx-auto px-4 py-6 sm:py-10">
           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 sm:gap-6 lg:gap-8">
             {/* Logo - 精致圆形设计 */}
             <div className="relative flex-shrink-0">
@@ -447,11 +447,11 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {/* 广告位 */}
-      <div className="max-w-5xl mx-auto px-4 py-4">
+      <div className="max-w-4xl mx-auto px-4 py-4">
         <ToolDetailAd toolId={tool.id} />
       </div>
 
-      <main className="max-w-5xl mx-auto px-4 pt-8 pb-8">
+      <main className="max-w-4xl mx-auto px-4 pt-8 pb-8">
         {/* 1. 核心功能 - 最重要 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -787,7 +787,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* 底部运营区 */}
       <div className="bg-slate-100 border-t border-slate-200 py-10">
-        <div className="max-w-5xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4">
           {/* 同类推荐 */}
           <section className="mb-8">
             <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
@@ -858,7 +858,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 公众号推广 */}
         <WechatPromo />
         
-        <div className="max-w-5xl mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <img src="/oneclaw-logo.png" alt="OneClaw" width={24} height={24} className="object-contain" />
