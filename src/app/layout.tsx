@@ -254,9 +254,8 @@ export default function RootLayout({
               `,
             }}
           />
-        )}
         
-        {/* Google Analytics */}
+	        {/* Google Analytics */}
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
             <Script
