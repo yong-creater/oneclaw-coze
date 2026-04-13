@@ -523,7 +523,6 @@ export default function AdminAdsPage() {
             ))}
           </div>
         )}
-      </div>
 
       {/* 添加/编辑对话框 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
