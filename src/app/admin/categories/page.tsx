@@ -138,7 +138,8 @@ export default function CategoriesAdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/categories');
+      // 添加时间戳防止缓存
+      const res = await fetch(`/api/categories?t=${Date.now()}`);
       const data = await res.json();
       if (data.success) {
         const sorted = [...data.data].sort((a: Category, b: Category) => a.sort_order - b.sort_order);

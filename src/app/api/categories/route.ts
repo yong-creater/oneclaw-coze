@@ -16,8 +16,6 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data
-    }, {
-      headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=3600' }
     });
   } catch (error) {
     console.error('获取分类失败:', error);
