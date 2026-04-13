@@ -168,6 +168,8 @@ export default function CategoriesAdminPage() {
   };
 
   const handleSave = async () => {
+    console.log('保存分类:', { editingId, form });
+    
     if (!form.name.trim() || !form.slug.trim()) {
       toast.error('请填写名称和别名');
       return;
@@ -180,6 +182,8 @@ export default function CategoriesAdminPage() {
         : '/api/admin/categories';
       const method = editingId ? 'PUT' : 'POST';
       
+      console.log('请求:', { url, method, body: form });
+      
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -187,6 +191,8 @@ export default function CategoriesAdminPage() {
       });
       
       const data = await res.json();
+      console.log('响应:', data);
+      
       if (data.success) {
         toast.success(editingId ? '更新成功' : '添加成功');
         closeDialog();
@@ -318,13 +324,7 @@ export default function CategoriesAdminPage() {
       )}
 
       {/* 编辑弹窗 */}
-      <Dialog open={dialogOpen} onOpenChange={(open) => {
-        setDialogOpen(open);
-        if (!open) {
-          setEditingId(null);
-          setForm({ name: '', slug: '', sort_order: 0 });
-        }
-      }}>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{editingId ? '编辑分类' : '添加分类'}</DialogTitle>
