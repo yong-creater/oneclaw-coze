@@ -517,7 +517,7 @@ export default function NovelCreator() {
             {/* 模型选择弹框 */}
             {showModelPicker && (
               <div 
-                className="model-picker-container absolute top-full right-0 sm:left-0 mt-3 w-[calc(100vw-2rem)] sm:w-[400px] max-w-[400px] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
+                className="model-picker-container absolute top-full left-0 sm:left-0 mt-3 w-80 sm:w-[400px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-4 border-b border-slate-100">
