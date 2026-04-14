@@ -57,7 +57,7 @@ interface ExpandedState {
 
 // ==================== 常量 ====================
 const MODULES = [
-  { value: '', label: '请选择模块（可选）' },
+  { value: 'optional', label: '请选择模块（可选）' },
   { value: '星链', label: '星链' },
   { value: 'C端APP', label: 'C端APP' },
   { value: '工作手机', label: '工作手机' },
