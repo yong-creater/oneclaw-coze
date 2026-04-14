@@ -238,12 +238,47 @@ export default function ProductPageGenerator() {
         throw new Error(data.error);
       }
       
+      // 保存使用记录
+      await fetch('/api/admin/utilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool_type: 'product_page',
+          input_data: { 
+            platform,
+            regions: selectedRegions,
+            category,
+            selling_points_length: sellingPoints.length,
+            image_types: selectedImageTypes,
+            quality,
+          },
+          output_data: { 
+            images_count: data.images?.length || 0,
+            has_compliance: !!data.compliance,
+          },
+          status: 'success',
+        }),
+      }).catch(console.error);
+      
       setGeneratingProgress('正在生成商品详情图...');
       setGeneratedImages(data.images || []);
       setComplianceReport(data.compliance || null);
       
     } catch (error: any) {
       console.error('生成失败:', error);
+      
+      // 保存失败记录
+      await fetch('/api/admin/utilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool_type: 'product_page',
+          input_data: { platform, regions: selectedRegions, category },
+          status: 'failed',
+          error_message: error.message || '生成失败',
+        }),
+      }).catch(console.error);
+      
       alert(error.message || '生成失败，请重试');
     } finally {
       setGenerating(false);

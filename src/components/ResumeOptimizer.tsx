@@ -59,6 +59,68 @@ export default function ResumeOptimizer() {
     setMatchScore(0);
   };
 
+  // 优化简历
+  const handleOptimize = async () => {
+    if (!resumeText && !resumeFile) {
+      setOptimizeError('请输入简历内容或上传简历文件');
+      return;
+    }
+
+    setOptimizing(true);
+    setOptimizeError('');
+
+    try {
+      const response = await fetch('/api/resume', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          resume: resumeText,
+          jd: jdText,
+        }),
+      });
+
+      const data = await response.json();
+
+      // 保存使用记录
+      await fetch('/api/admin/utilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool_type: 'resume',
+          input_data: { resume_length: resumeText.length, jd_length: jdText.length },
+          output_data: data.success ? { result_length: data.data?.length || 0 } : null,
+          status: data.success ? 'success' : 'failed',
+          error_message: data.error || null,
+        }),
+      }).catch(console.error);
+
+      if (data.success) {
+        setResult(data.data);
+        setMatchScore(85);
+      } else {
+        setOptimizeError(data.error || '优化失败，请重试');
+      }
+    } catch (error) {
+      console.error('优化失败:', error);
+      
+      // 保存失败记录
+      await fetch('/api/admin/utilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool_type: 'resume',
+          input_data: { resume_length: resumeText.length, jd_length: jdText.length },
+          status: 'failed',
+          error_message: '网络请求失败',
+        }),
+      }).catch(console.error);
+      
+      setOptimizeError('网络错误，请重试');
+    } finally {
+      setOptimizing(false);
+    }
+  };
+
   // 复制结果
   const handleCopyResult = () => {
     if (result) {
@@ -233,7 +295,7 @@ export default function ResumeOptimizer() {
             {/* 操作按钮 */}
             <div className="flex flex-wrap items-center justify-center gap-4">
               <PrimaryButton 
-                onClick={() => setResult('STAR优化后的简历内容...')}
+                onClick={handleOptimize}
                 disabled={!resumeText && !resumeFile}
                 loading={optimizing}
                 icon={<Sparkles />}

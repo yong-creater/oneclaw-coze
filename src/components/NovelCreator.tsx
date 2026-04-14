@@ -444,6 +444,24 @@ export default function NovelCreator() {
         throw new Error(data.error);
       }
       
+      // 保存使用记录
+      await fetch('/api/admin/utilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool_type: 'novel',
+          input_data: { 
+            content_length: polishedContent.polished.length, 
+            panels_count: panels.length,
+            platform: scriptPlatform,
+            style: scriptStyle,
+          },
+          output_data: data.success ? { script_length: data.content?.length || 0 } : null,
+          status: data.success ? 'success' : 'failed',
+          error_message: data.error || null,
+        }),
+      }).catch(console.error);
+      
       // 解析脚本数据
       setComicStory({
         id: generateId(),

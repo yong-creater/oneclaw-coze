@@ -345,6 +345,22 @@ export default function TestCraft() {
       // 解析测试用例
       const testCases = parseTestCases(fullContent);
       
+      // 保存使用记录
+      await fetch('/api/admin/utilities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool_type: 'testcraft',
+          input_data: { 
+            requirement: reqNode.title,
+            module,
+            ai_model: aiModel,
+          },
+          output_data: { test_cases_count: testCases.length },
+          status: 'success',
+        }),
+      }).catch(console.error);
+      
       // 更新mindmap
       const updateMindmap = (node: RequirementNode): RequirementNode => {
         if (node.id === reqId) {
