@@ -125,7 +125,7 @@ const getAllTestCases = (node: RequirementNode): TestCase[] => {
 export default function TestCraft() {
   // 状态
   const [title, setTitle] = useState('');
-  const [module, setModule] = useState('');
+  const [module, setModule] = useState('optional');
   const [aiModel, setAiModel] = useState('doubao-seed-2-0-pro-260215');
   const [description, setDescription] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
