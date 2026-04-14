@@ -58,13 +58,6 @@ function ModelGroupSelect({
               <span className="text-sm text-slate-800 dark:text-slate-200">
                 {selectedModel.provider} - {selectedModel.label}
               </span>
-              <span className={`text-xs px-1.5 py-0.5 rounded ${
-                selectedModel.region === '国内' 
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
-                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
-              }`}>
-                {selectedModel.region}
-              </span>
             </>
           )}
         </div>
@@ -112,13 +105,6 @@ function ModelGroupSelect({
                         }`}
                       >
                         <span className="text-sm text-slate-700 dark:text-slate-300">{model.label}</span>
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${
-                          model.region === '国内' 
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
-                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
-                        }`}>
-                          {model.region}
-                        </span>
                       </button>
                     ))}
                   </div>
