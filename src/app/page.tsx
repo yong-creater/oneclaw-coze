@@ -197,13 +197,13 @@ function UtilityToolsPage() {
               onClick={() => {
                 window.open(getToolUrl(tool.key), '_blank');
               }}
-              className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left overflow-hidden"
+              className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left overflow-hidden flex flex-col"
             >
               {/* 背景渐变装饰 */}
               <div className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
               
               {/* 内容 */}
-              <div className="relative">
+              <div className="relative flex-1">
                 <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
                   <Icon className="w-7 h-7 text-white" />
                 </div>
@@ -215,37 +215,39 @@ function UtilityToolsPage() {
                 <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
                   {tool.description}
                 </p>
-                
-                <div className="flex items-center gap-2 mt-4 text-orange-500 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+              </div>
+              
+              {/* 底部区域：默认显示开始使用，悬浮时显示标签 */}
+              <div className="relative mt-4">
+                {/* 默认显示 */}
+                <div className="flex items-center gap-2 text-orange-500 text-sm font-medium group-hover:opacity-0 transition-opacity h-6">
                   <span>开始使用</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
                 
                 {/* Hover显示核心卖点 */}
-                <div className="hidden group-hover:block absolute bottom-0 left-0 right-0 backdrop-blur-sm bg-white/80 dark:bg-slate-800/80 p-4 pt-6 rounded-b-2xl border-t border-slate-100 dark:border-slate-700/50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-                  <div className="flex flex-wrap gap-1.5">
-                    {tool.key === 'resume' && (
-                      <>
-                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs rounded-full">PDF上传</span>
-                        <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 text-xs rounded-full">JD精准匹配</span>
-                        <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 text-xs rounded-full">量化成果</span>
-                      </>
-                    )}
-                    {tool.key === 'novel' && (
-                      <>
-                        <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 text-xs rounded-full">深度洗稿</span>
-                        <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">漫画生图</span>
-                        <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-full">推文脚本</span>
-                      </>
-                    )}
-                    {tool.key === 'testcraft' && (
-                      <>
-                        <span className="px-2 py-0.5 bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 text-xs rounded-full">BDD格式</span>
-                        <span className="px-2 py-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/50 text-fuchsia-600 dark:text-fuchsia-400 text-xs rounded-full">批量导出</span>
-                        <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">一键生成</span>
-                      </>
-                    )}
-                  </div>
+                <div className="absolute inset-0 flex flex-wrap gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity py-1">
+                  {tool.key === 'resume' && (
+                    <>
+                      <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs rounded-full">PDF上传</span>
+                      <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 text-xs rounded-full">JD精准匹配</span>
+                      <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 text-xs rounded-full">量化成果</span>
+                    </>
+                  )}
+                  {tool.key === 'novel' && (
+                    <>
+                      <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 text-xs rounded-full">深度洗稿</span>
+                      <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">漫画生图</span>
+                      <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-full">推文脚本</span>
+                    </>
+                  )}
+                  {tool.key === 'testcraft' && (
+                    <>
+                      <span className="px-2 py-0.5 bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 text-xs rounded-full">BDD格式</span>
+                      <span className="px-2 py-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/50 text-fuchsia-600 dark:text-fuchsia-400 text-xs rounded-full">批量导出</span>
+                      <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">一键生成</span>
+                    </>
+                  )}
                 </div>
               </div>
             </button>
