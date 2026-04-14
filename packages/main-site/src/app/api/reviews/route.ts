@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAuth } from '@/lib/user-middleware';
+
+// 获取评论列表
+export async function GET(request: NextRequest) {
+  try {
+    const client = getSupabaseClient();
+    const { searchParams } = new URL(request.url);
+    const toolId = searchParams.get('tool_id');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+
+    if (!toolId) {
+      return NextResponse.json({ success: false, error: '缺少tool_id参数' }, { status: 400 });
+    }
+
+    // 获取工具的评论列表（只返回已审核通过的）
+    const offset = (page - 1) * limit;
+    
+    const { data: reviews, error, count } = await client
+      .from('user_reviews')
+      .select('*', { count: 'exact' })
+      .eq('tool_id', toolId)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
+    // 如果有评论，获取对应的评分数据
+    let reviewsWithRatings = reviews || [];
+    if (reviews && reviews.length > 0) {
+      const userIds = reviews.map(r => r.user_id);
+      const { data: ratings } = await client
+        .from('user_ratings')
+        .select('user_id, effect_score, usability_score, quota_score, stability_score, overall_score')
+        .eq('tool_id', toolId)
+        .in('user_id', userIds);
+
+      // 合并评分数据
+      const ratingsMap = new Map((ratings || []).map(r => [r.user_id, r]));
+      reviewsWithRatings = reviews.map(review => ({
+        ...review,
+        user_rating: ratingsMap.get(review.user_id) || null
+      }));
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: reviewsWithRatings,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit)
+      }
+    });
+  } catch (error) {
+    console.error('获取评论失败:', error);
+    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
+  }
+}
+
+// 创建评论
+export async function POST(request: NextRequest) {
+  try {
+    // 验证登录
+    const authResult = await requireAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
+    }
+    const { userId } = authResult;
+
+    const client = getSupabaseClient();
+    const body = await request.json();
+    const { tool_id, content } = body;
+
+    if (!tool_id || !content) {
+      return NextResponse.json({ success: false, error: '缺少必要参数' }, { status: 400 });
+    }
+
+    // 验证内容长度
+    if (content.length < 10 || content.length > 500) {
+      return NextResponse.json({ success: false, error: '评论长度需在10-500字之间' }, { status: 400 });
+    }
+
+    // 创建评论（默认pending状态，需要审核）
+    const { data, error } = await client
+      .from('user_reviews')
+      .insert({
+        user_id: userId,
+        tool_id,
+        content,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      data,
+      message: '评论已提交，等待审核'
+    });
+  } catch (error) {
+    console.error('创建评论失败:', error);
+    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
+  }
+}
