@@ -10,9 +10,9 @@ import { Input } from '@/components/ui/input';
 import { 
   Search, Wand2, Star, X,
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
-  BookOpen, Lightbulb, Copy, Check,
+  BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  Wrench, ChevronDown, ExternalLink
+  Wrench
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -209,7 +209,7 @@ function UtilityToolsPage() {
                 
                 <div className="flex items-center gap-2 mt-4 text-orange-500 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                   <span>开始使用</span>
-                  <ExternalLink className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
             </button>
@@ -254,8 +254,8 @@ const UTILITY_TOOLS = [
 type UtilityTool = typeof UTILITY_TOOLS[number]['key'];
 
 const MAIN_TABS = [
+  { key: 'utilities', label: '实用工具', icon: Wrench },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
-  { key: 'utilities', label: '实用工具', icon: Wrench, hasDropdown: true },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
@@ -695,65 +695,11 @@ export default function HomePage() {
               {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = mainTab === tab.key;
-                const hasDropdown = (tab as any).hasDropdown;
-                
-                if (hasDropdown) {
-                  return (
-                    <div key={tab.key} className="relative">
-                      <button
-                        onClick={() => setMainTab(tab.key)}
-                        className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                          isActive
-                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                            : 'text-slate-600 dark:text-slate-300 hover:text-orange-500'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        <span className="hidden md:inline">{tab.label}</span>
-                        <ChevronDown className={`w-3 h-3 transition-transform ${isActive ? 'rotate-180' : ''}`} />
-                      </button>
-                      
-                      {/* 下拉菜单 */}
-                      {isActive && (
-                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50">
-                          {UTILITY_TOOLS.map(tool => {
-                            const ToolIcon = tool.icon;
-                            return (
-                              <button
-                                key={tool.key}
-                                onClick={() => {
-                                  // 新开标签页
-                                  window.open(`/novel`, '_blank');
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
-                              >
-                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${tool.color} flex items-center justify-center`}>
-                                  <ToolIcon className="w-4 h-4 text-white" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-slate-800 dark:text-white text-sm">{tool.name}</div>
-                                  <div className="text-xs text-slate-500 truncate">{tool.description}</div>
-                                </div>
-                                <ExternalLink className="w-4 h-4 text-slate-400" />
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
                 
                 return (
                   <button
                     key={tab.key}
-                    onClick={() => {
-                      if (tab.key === 'tools') cache.clear(`tools_all_1`);
-                      if (tab.key === 'prompts') cache.clear('prompts_全部_1');
-                      if (tab.key === 'skills') cache.clear(`skills_all_1`);
-                      if (tab.key === 'tutorials') cache.clear('tutorials_all_1');
-                      setMainTab(tab.key);
-                    }}
+                    onClick={() => setMainTab(tab.key)}
                     className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
