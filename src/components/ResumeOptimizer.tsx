@@ -140,7 +140,7 @@ export default function ResumeOptimizer() {
         toolIcon={<FileText />}
         toolName="STAR简历优化"
         toolDescription="JD精准匹配 · STAR法则优化"
-        gradient="from-blue-500 to-cyan-500"
+        gradient="from-orange-500 to-amber-500"
       />
       
       {/* 主内容区 */}
@@ -152,7 +152,7 @@ export default function ResumeOptimizer() {
             {/* 标题区 */}
             <div className="text-center py-4">
               <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 flex items-center justify-center gap-2">
-                <Sparkles className="w-6 h-6 text-blue-500" />
+                <Sparkles className="w-6 h-6 text-orange-500" />
                 STAR简历深度优化
               </h1>
               <p className="text-slate-500">上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位要求</p>
@@ -164,7 +164,7 @@ export default function ResumeOptimizer() {
               <UtilityCard 
                 title="简历输入" 
                 icon={<FileText />}
-                gradient="from-blue-500 to-cyan-500"
+                gradient="from-orange-500 to-amber-500"
               >
                 <div className="p-6 space-y-4">
                   {/* 模式切换 */}
@@ -210,7 +210,7 @@ export default function ResumeOptimizer() {
                       
                       {resumeFile ? (
                         <div className="p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center">
-                          <FileText className="w-10 h-10 text-blue-500 mx-auto mb-2" />
+                          <FileText className="w-10 h-10 text-orange-500 mx-auto mb-2" />
                           <p className="text-sm text-slate-600 dark:text-slate-300">{resumePreview}</p>
                           <p className="text-xs text-slate-400 mt-1">
                             {parsedResume ? '✓ 已解析完成' : '正在解析...'}
@@ -222,7 +222,7 @@ export default function ResumeOptimizer() {
                               setParsedResume(null);
                               fileInputRef.current?.click();
                             }}
-                            className="mt-3 text-sm text-blue-500 hover:text-blue-600"
+                            className="mt-3 text-sm text-orange-500 hover:text-orange-600"
                           >
                             重新上传
                           </button>
@@ -346,14 +346,14 @@ export default function ResumeOptimizer() {
             {/* 匹配度报告 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
               <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-500" />
+                <TrendingUp className="w-5 h-5 text-orange-500" />
                 JD匹配度报告
               </h3>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="text-slate-600 dark:text-slate-400">总体匹配度</span>
-                    <span className="font-semibold text-blue-500">{matchScore || 85}%</span>
+                    <span className="font-semibold text-orange-500">{matchScore || 85}%</span>
                   </div>
                   <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
                     <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${matchScore || 85}%` }} />
@@ -378,9 +378,9 @@ export default function ResumeOptimizer() {
             
             {/* STAR优化结果 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-blue-500 to-cyan-500 bg-opacity-5">
+              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
                 <h3 className="font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                  <Star className="w-5 h-5 text-blue-500" />
+                  <Star className="w-5 h-5 text-orange-500" />
                   STAR法则优化内容
                 </h3>
               </div>
@@ -395,7 +395,7 @@ export default function ResumeOptimizer() {
                         <div className="text-sm text-slate-700 dark:text-slate-300">{item}</div>
                         <button
                           onClick={() => handleCopyStar(item)}
-                          className="absolute top-2 right-2 p-1 text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 p-1 text-slate-400 hover:text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Copy className="w-4 h-4" />
                         </button>
@@ -413,7 +413,7 @@ export default function ResumeOptimizer() {
                         <div className="text-sm text-slate-700 dark:text-slate-300">{item}</div>
                         <button
                           onClick={() => handleCopyStar(item)}
-                          className="absolute top-2 right-2 p-1 text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 p-1 text-slate-400 hover:text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Copy className="w-4 h-4" />
                         </button>
@@ -465,14 +465,14 @@ export default function ResumeOptimizer() {
             {/* STAR法则说明 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
               <h3 className="font-semibold text-slate-800 dark:text-white mb-3 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-blue-500" />
+                <BookOpen className="w-5 h-5 text-orange-500" />
                 STAR法则
               </h3>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li><span className="font-medium text-blue-500">S</span> - Situation 情境</li>
-                <li><span className="font-medium text-blue-500">T</span> - Task 任务</li>
-                <li><span className="font-medium text-blue-500">A</span> - Action 行动</li>
-                <li><span className="font-medium text-blue-500">R</span> - Result 结果</li>
+                <li><span className="font-medium text-orange-500">S</span> - Situation 情境</li>
+                <li><span className="font-medium text-orange-500">T</span> - Task 任务</li>
+                <li><span className="font-medium text-orange-500">A</span> - Action 行动</li>
+                <li><span className="font-medium text-orange-500">R</span> - Result 结果</li>
               </ul>
             </div>
             

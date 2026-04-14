@@ -82,8 +82,8 @@ const generateId = () => Math.random().toString(36).substring(2, 11);
 
 const getNodeIcon = (type: 'root' | 'requirement' | 'testcase') => {
   switch (type) {
-    case 'root': return <Sparkles className="w-4 h-4 text-violet-500" />;
-    case 'requirement': return <GitBranch className="w-4 h-4 text-fuchsia-500" />;
+    case 'root': return <Sparkles className="w-4 h-4 text-orange-500" />;
+    case 'requirement': return <GitBranch className="w-4 h-4 text-amber-500" />;
     case 'testcase': return <FileText className="w-4 h-4 text-blue-500" />;
   }
 };
@@ -867,13 +867,13 @@ export default function TestCraft() {
   const caseCount = mindmap ? countTestCases(mindmap) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800">
       {/* 统一头部 */}
       <UtilityHeader
         toolIcon={<FlaskConical />}
         toolName="AI测试用例"
         toolDescription="需求分析 · BDD用例 · 批量导出"
-        gradient="from-violet-500 to-fuchsia-500"
+        gradient="from-orange-500 to-amber-500"
       />
       
       {/* 主内容区 */}
@@ -887,7 +887,7 @@ export default function TestCraft() {
                 <button
                   onClick={handleAnalyze}
                   disabled={analyzing || !title.trim()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {analyzing ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -902,7 +902,7 @@ export default function TestCraft() {
                     <button
                       onClick={handleBatchGenerate}
                       disabled={generating}
-                      className="flex items-center gap-2 px-4 py-2 bg-violet-100 hover:bg-violet-200 text-violet-700 font-medium rounded-xl transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 font-medium rounded-xl transition-colors disabled:opacity-50"
                     >
                       {generating ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -914,7 +914,7 @@ export default function TestCraft() {
                     
                     <div className="flex items-center gap-3 ml-auto text-sm">
                       <span className="flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-violet-500" />
+                        <span className="w-2 h-2 rounded-full bg-orange-500" />
                         {reqCount} 需求点
                       </span>
                       <span className="flex items-center gap-1">
@@ -941,7 +941,7 @@ export default function TestCraft() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="输入需求标题"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
               </div>
               
@@ -951,7 +951,7 @@ export default function TestCraft() {
                 <select
                   value={module}
                   onChange={(e) => setModule(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 >
                   {MODULES.map(m => (
                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -965,7 +965,7 @@ export default function TestCraft() {
                 <select
                   value={aiModel}
                   onChange={(e) => setAiModel(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 >
                   {AI_MODELS.map(m => (
                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -981,7 +981,7 @@ export default function TestCraft() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="详细描述需求内容..."
                   rows={5}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
                 />
               </div>
               
@@ -994,7 +994,7 @@ export default function TestCraft() {
                     </span>
                     <button
                       onClick={mergeToDescription}
-                      className="text-xs text-violet-600 hover:text-violet-700"
+                      className="text-xs text-orange-600 hover:text-orange-700"
                     >
                       合并到描述
                     </button>
@@ -1045,7 +1045,7 @@ export default function TestCraft() {
                     ref={linkInputRef}
                     type="text"
                     placeholder="输入链接抓取内容"
-                    className="flex-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+                    className="flex-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
                   />
                   <button
                     onClick={handleLinkFetch}
@@ -1103,12 +1103,12 @@ export default function TestCraft() {
                 <div className="p-4 border-b border-slate-200 bg-slate-50">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-violet-500" />
+                      <Sparkles className="w-5 h-5 text-orange-500" />
                       <span className="font-semibold text-slate-800">{mindmap.title}</span>
                     </div>
                     <button
                       onClick={addRequirement}
-                      className="flex items-center gap-1 text-sm text-violet-600 hover:text-violet-700"
+                      className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-700"
                     >
                       <Plus className="w-4 h-4" />
                       添加需求点
@@ -1148,7 +1148,7 @@ export default function TestCraft() {
                                 onChange={(e) => setEditValue(e.target.value)}
                                 onBlur={() => saveEdit(mindmap.id, reqNode.id)}
                                 onKeyDown={(e) => e.key === 'Enter' && saveEdit(mindmap.id, reqNode.id)}
-                                className="flex-1 px-2 py-1 border border-violet-300 rounded focus:ring-2 focus:ring-violet-500"
+                                className="flex-1 px-2 py-1 border border-orange-300 rounded focus:ring-2 focus:ring-orange-500"
                                 autoFocus
                               />
                             ) : (
@@ -1208,7 +1208,7 @@ export default function TestCraft() {
                                     key={testCase.id}
                                     onClick={() => setSelectedCase(testCase)}
                                     className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                                      isSelected ? 'bg-violet-50 border border-violet-200' : 'hover:bg-slate-50'
+                                      isSelected ? 'bg-orange-50 border border-orange-200' : 'hover:bg-slate-50'
                                     }`}
                                   >
                                     <span className="text-sm text-slate-400 w-8">
@@ -1291,10 +1291,10 @@ export default function TestCraft() {
                   )}
                   
                   {/* 执行要点 */}
-                  <div className="p-4 rounded-xl border bg-violet-50 border-violet-200">
+                  <div className="p-4 rounded-xl border bg-orange-50 border-orange-200">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-medium text-violet-700">执行要点</span>
-                      <span className="text-xs text-violet-500">Tips</span>
+                      <span className="text-sm font-medium text-orange-700">执行要点</span>
+                      <span className="text-xs text-orange-500">Tips</span>
                     </div>
                     <ul className="text-sm text-slate-600 space-y-1">
                       <li>按 Given 准备好测试数据和环境</li>

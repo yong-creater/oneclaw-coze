@@ -621,13 +621,13 @@ export default function NovelCreator() {
   
   // ==================== 渲染 ====================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800">
       {/* 统一头部 */}
       <UtilityHeader
         toolIcon={<Feather />}
         toolName="网文创作工坊"
         toolDescription="小说洗稿 · 漫画生图 · 推文脚本"
-        gradient="from-purple-500 to-pink-500"
+        gradient="from-orange-500 to-amber-500"
       />
       
       {/* 标签页导航 */}
@@ -640,7 +640,7 @@ export default function NovelCreator() {
                 onClick={() => setActiveTab(key as typeof activeTab)}
                 className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
                   activeTab === key
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
@@ -663,7 +663,7 @@ export default function NovelCreator() {
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                      <BookOpen className="w-5 h-5 text-purple-500" />
+                      <BookOpen className="w-5 h-5 text-orange-500" />
                       小说导入
                     </h2>
                     <div className="flex gap-2">
@@ -671,7 +671,7 @@ export default function NovelCreator() {
                         onClick={() => setImportMode('paste')}
                         className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                           importMode === 'paste' 
-                            ? 'bg-purple-100 text-purple-600' 
+                            ? 'bg-orange-100 text-orange-600' 
                             : 'text-slate-500 hover:bg-slate-100'
                         }`}
                       >
@@ -681,7 +681,7 @@ export default function NovelCreator() {
                         onClick={() => setImportMode('upload')}
                         className={`px-3 py-1 text-sm rounded-lg transition-colors ${
                           importMode === 'upload' 
-                            ? 'bg-purple-100 text-purple-600' 
+                            ? 'bg-orange-100 text-orange-600' 
                             : 'text-slate-500 hover:bg-slate-100'
                         }`}
                       >
@@ -695,7 +695,7 @@ export default function NovelCreator() {
                       value={originalText}
                       onChange={(e) => setOriginalText(e.target.value)}
                       placeholder="请粘贴小说章节/全文内容..."
-                      className="w-full h-64 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm"
+                      className="w-full h-64 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
                     />
                   ) : (
                     <div className="space-y-4">
@@ -708,8 +708,8 @@ export default function NovelCreator() {
                       />
                       
                       {uploadFile ? (
-                        <div className="p-6 border-2 border-dashed border-purple-200 rounded-xl bg-purple-50 text-center">
-                          <FileText className="w-12 h-12 text-purple-500 mx-auto mb-2" />
+                        <div className="p-6 border-2 border-dashed border-orange-200 rounded-xl bg-orange-50 text-center">
+                          <FileText className="w-12 h-12 text-orange-500 mx-auto mb-2" />
                           <p className="text-sm text-slate-600">{uploadFile.name}</p>
                           <p className="text-xs text-slate-400 mt-1">
                             {(uploadFile.size / 1024).toFixed(1)} KB
@@ -720,7 +720,7 @@ export default function NovelCreator() {
                               setOriginalText('');
                               fileInputRef.current?.click();
                             }}
-                            className="mt-3 text-sm text-purple-500 hover:text-purple-600"
+                            className="mt-3 text-sm text-orange-500 hover:text-orange-600"
                           >
                             重新上传
                           </button>
@@ -728,7 +728,7 @@ export default function NovelCreator() {
                       ) : (
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full p-6 border-2 border-dashed border-slate-300 rounded-xl hover:border-purple-400 hover:bg-purple-50 transition-colors"
+                          className="w-full p-6 border-2 border-dashed border-slate-300 rounded-xl hover:border-orange-400 hover:bg-orange-50 transition-colors"
                         >
                           <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                           <p className="text-sm text-slate-500">点击上传TXT/Word文件</p>
@@ -742,7 +742,7 @@ export default function NovelCreator() {
                 {/* 洗稿配置 */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                   <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                    <Settings2 className="w-5 h-5 text-purple-500" />
+                    <Settings2 className="w-5 h-5 text-orange-500" />
                     洗稿配置
                   </h2>
                   
@@ -757,7 +757,7 @@ export default function NovelCreator() {
                       <select
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                       >
                         {AI_MODELS.map(m => (
                           <option key={m.value} value={m.value}>
@@ -772,7 +772,7 @@ export default function NovelCreator() {
                       <select
                         value={polishStyle}
                         onChange={(e) => setPolishStyle(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                       >
                         {POLISH_STYLES.map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
@@ -785,7 +785,7 @@ export default function NovelCreator() {
                       <select
                         value={polishIntensity}
                         onChange={(e) => setPolishIntensity(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                       >
                         {POLISH_INTENSITY.map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
@@ -808,7 +808,7 @@ export default function NovelCreator() {
                                   setExtraRequirements(prev => prev.filter(o => o !== opt));
                                 }
                               }}
-                              className="rounded text-purple-500"
+                              className="rounded text-orange-500"
                             />
                             <span className="text-sm text-slate-600">{opt}</span>
                           </label>
@@ -823,7 +823,7 @@ export default function NovelCreator() {
                   <button
                     onClick={handlePolish}
                     disabled={polishing || !originalText.trim()}
-                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                   >
                     {polishing ? (
                       <>
@@ -934,7 +934,7 @@ export default function NovelCreator() {
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
               <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <Image className="w-5 h-5 text-purple-500" />
+                <Image className="w-5 h-5 text-orange-500" />
                 漫画分镜拆解
               </h2>
               
@@ -945,7 +945,7 @@ export default function NovelCreator() {
                     value={sourceText}
                     onChange={(e) => setSourceText(e.target.value)}
                     placeholder="请输入或粘贴小说内容，系统将自动拆分为漫画分镜..."
-                    className="w-full h-40 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none text-sm"
+                    className="w-full h-40 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 resize-none text-sm"
                   />
                 </div>
                 
@@ -955,7 +955,7 @@ export default function NovelCreator() {
                     <select
                       value={panelCount}
                       onChange={(e) => setPanelCount(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="auto">按章节自动拆分</option>
                       <option value="4">4个分镜</option>
@@ -970,7 +970,7 @@ export default function NovelCreator() {
                     <select
                       value={panelStyle}
                       onChange={(e) => setPanelStyle(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                     >
                       {PANEL_STYLES.map(s => (
                         <option key={s.value} value={s.value}>{s.label}</option>
@@ -982,7 +982,7 @@ export default function NovelCreator() {
                 <button
                   onClick={handleSplitPanels}
                   disabled={splitting || !sourceText.trim()}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                 >
                   {splitting ? (
                     <>
@@ -1012,7 +1012,7 @@ export default function NovelCreator() {
                   {panels.map((panel, index) => (
                     <div key={panel.id} className="p-4 bg-slate-50 rounded-xl space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-purple-600">分镜 {index + 1}</span>
+                        <span className="font-medium text-orange-600">分镜 {index + 1}</span>
                         <div className="flex gap-2">
                           <button
                             onClick={() => deletePanel(panel.id)}
@@ -1030,7 +1030,7 @@ export default function NovelCreator() {
                             type="text"
                             value={panel.scene}
                             onChange={(e) => updatePanel(panel.id, 'scene', e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         <div>
@@ -1039,7 +1039,7 @@ export default function NovelCreator() {
                             type="text"
                             value={panel.emotion}
                             onChange={(e) => updatePanel(panel.id, 'emotion', e.target.value)}
-                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -1050,7 +1050,7 @@ export default function NovelCreator() {
                           type="text"
                           value={panel.characterAction}
                           onChange={(e) => updatePanel(panel.id, 'characterAction', e.target.value)}
-                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                         />
                       </div>
                       
@@ -1060,7 +1060,7 @@ export default function NovelCreator() {
                           type="text"
                           value={panel.dialogue}
                           onChange={(e) => updatePanel(panel.id, 'dialogue', e.target.value)}
-                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-orange-500"
                         />
                       </div>
                     </div>
@@ -1076,7 +1076,7 @@ export default function NovelCreator() {
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
               <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <Image className="w-5 h-5 text-purple-500" />
+                <Image className="w-5 h-5 text-orange-500" />
                 漫画生成配置
               </h2>
               
@@ -1086,7 +1086,7 @@ export default function NovelCreator() {
                   <select
                     value={imageQuality}
                     onChange={(e) => setImageQuality(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                   >
                     {IMAGE_QUALITY.map(q => (
                       <option key={q.value} value={q.value}>{q.label} ({q.size})</option>
@@ -1109,14 +1109,14 @@ export default function NovelCreator() {
                   value={imageStyleExtra}
                   onChange={(e) => setImageStyleExtra(e.target.value)}
                   placeholder="如：线条简洁、色彩明亮、人物表情夸张"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               
               <button
                 onClick={handleBatchGenerate}
                 disabled={generatingImages || panels.length === 0}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
               >
                 {generatingImages ? (
                   <>
@@ -1158,7 +1158,7 @@ export default function NovelCreator() {
                           {!panel.imageUrl && generatingPanelId !== panel.id && (
                             <button
                               onClick={() => handleGenerateImage(panel)}
-                              className="p-1.5 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                              className="p-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
                             >
                               <Sparkles className="w-4 h-4" />
                             </button>
@@ -1216,7 +1216,7 @@ export default function NovelCreator() {
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
               <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <FileCode className="w-5 h-5 text-purple-500" />
+                <FileCode className="w-5 h-5 text-orange-500" />
                 漫画推文脚本
               </h2>
               
@@ -1226,7 +1226,7 @@ export default function NovelCreator() {
                   <select
                     value={scriptPlatform}
                     onChange={(e) => setScriptPlatform(e.target.value as 'douyin' | 'xiaohongshu')}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="douyin">抖音</option>
                     <option value="xiaohongshu">小红书</option>
@@ -1238,7 +1238,7 @@ export default function NovelCreator() {
                   <select
                     value={scriptStyle}
                     onChange={(e) => setScriptStyle(e.target.value as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                   >
                     {SCRIPT_STYLES.map(s => (
                       <option key={s.value} value={s.value}>{s.label}</option>
@@ -1251,7 +1251,7 @@ export default function NovelCreator() {
                   <select
                     value={scriptDuration}
                     onChange={(e) => setScriptDuration(e.target.value as '15s' | '30s' | '60s')}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="15s">15秒</option>
                     <option value="30s">30秒</option>
@@ -1263,7 +1263,7 @@ export default function NovelCreator() {
               <button
                 onClick={handleGenerateScript}
                 disabled={generatingScript || !polishedContent?.polished || panels.length === 0}
-                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
               >
                 {generatingScript ? (
                   <>
@@ -1308,7 +1308,7 @@ export default function NovelCreator() {
                   {comicStory.script.map((item, index) => (
                     <div key={index} className="p-4 bg-slate-50 rounded-xl space-y-2">
                       <div className="flex items-center gap-3">
-                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                        <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-medium rounded">
                           镜头 {item.shot}
                         </span>
                         <span className="text-sm text-slate-500">时长: {item.time}</span>
@@ -1361,7 +1361,7 @@ export default function NovelCreator() {
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
               <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-purple-500" />
+                <Package className="w-5 h-5 text-orange-500" />
                 素材导出
               </h2>
               
@@ -1372,7 +1372,7 @@ export default function NovelCreator() {
                       type="checkbox"
                       checked={exportOptions.polishedText}
                       onChange={(e) => setExportOptions(prev => ({ ...prev, polishedText: e.target.checked }))}
-                      className="rounded text-purple-500"
+                      className="rounded text-orange-500"
                     />
                     <div>
                       <p className="text-sm font-medium text-slate-700">洗稿文本 (TXT)</p>
@@ -1390,7 +1390,7 @@ export default function NovelCreator() {
                       type="checkbox"
                       checked={exportOptions.panelScript}
                       onChange={(e) => setExportOptions(prev => ({ ...prev, panelScript: e.target.checked }))}
-                      className="rounded text-purple-500"
+                      className="rounded text-orange-500"
                     />
                     <div>
                       <p className="text-sm font-medium text-slate-700">漫画分镜脚本 (TXT)</p>
@@ -1408,7 +1408,7 @@ export default function NovelCreator() {
                       type="checkbox"
                       checked={exportOptions.comicImages}
                       onChange={(e) => setExportOptions(prev => ({ ...prev, comicImages: e.target.checked }))}
-                      className="rounded text-purple-500"
+                      className="rounded text-orange-500"
                     />
                     <div>
                       <p className="text-sm font-medium text-slate-700">漫画图片 (PNG)</p>
@@ -1428,7 +1428,7 @@ export default function NovelCreator() {
                       type="checkbox"
                       checked={exportOptions.storyScript}
                       onChange={(e) => setExportOptions(prev => ({ ...prev, storyScript: e.target.checked }))}
-                      className="rounded text-purple-500"
+                      className="rounded text-orange-500"
                     />
                     <div>
                       <p className="text-sm font-medium text-slate-700">推文脚本 (TXT)</p>
@@ -1446,7 +1446,7 @@ export default function NovelCreator() {
                       type="checkbox"
                       checked={exportOptions.subtitle}
                       onChange={(e) => setExportOptions(prev => ({ ...prev, subtitle: e.target.checked }))}
-                      className="rounded text-purple-500"
+                      className="rounded text-orange-500"
                     />
                     <div>
                       <p className="text-sm font-medium text-slate-700">字幕文件 (SRT)</p>
@@ -1461,7 +1461,7 @@ export default function NovelCreator() {
               
               <button
                 onClick={handleExportAll}
-                className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
               >
                 <Package className="w-5 h-5" />
                 一键导出素材包
@@ -1540,11 +1540,11 @@ export default function NovelCreator() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-purple-600 mb-3">洗稿后</h4>
-                  <div className="p-4 bg-purple-50 rounded-xl text-sm leading-relaxed">
+                  <h4 className="text-sm font-medium text-orange-600 mb-3">洗稿后</h4>
+                  <div className="p-4 bg-orange-50 rounded-xl text-sm leading-relaxed">
                     <p className="mb-3">脚步顿在玄关处，他下意识望向窗外。</p>
                     <p className="mb-3 mb-2">深吸一口气，他推开了那扇门——</p>
-                    <p className="text-purple-600 font-medium">湛蓝的天空下，阳光正好。</p>
+                    <p className="text-orange-600 font-medium">湛蓝的天空下，阳光正好。</p>
                   </div>
                 </div>
               </div>

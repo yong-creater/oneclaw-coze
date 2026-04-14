@@ -411,13 +411,13 @@ export default function ProductPageGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800">
       {/* 统一头部 */}
       <UtilityHeader
         toolIcon={<Globe />}
         toolName="出海详情页"
         toolDescription="合规适配 · 人文贴合 · 多平台兼容"
-        gradient="from-emerald-500 to-teal-500"
+        gradient="from-orange-500 to-amber-500"
       />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -431,7 +431,7 @@ export default function ProductPageGenerator() {
                 onClick={() => setShowConfig(!showConfig)}
               >
                 <div className="flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-emerald-500" />
+                  <Settings className="w-5 h-5 text-orange-500" />
                   <h2 className="font-semibold text-slate-800 dark:text-white">核心配置</h2>
                 </div>
                 {showConfig ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
@@ -447,7 +447,7 @@ export default function ProductPageGenerator() {
                     <select
                       value={platform}
                       onChange={(e) => setPlatform(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     >
                       {PLATFORMS.map(p => (
                         <option key={p.value} value={p.value}>{p.label}</option>
@@ -470,7 +470,7 @@ export default function ProductPageGenerator() {
                           onClick={() => toggleRegion(region.value)}
                           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                             selectedRegions.includes(region.value)
-                              ? 'bg-emerald-500 text-white shadow-md'
+                              ? 'bg-orange-500 text-white shadow-md'
                               : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                           }`}
                         >
@@ -488,7 +488,7 @@ export default function ProductPageGenerator() {
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     >
                       {CATEGORIES.map(c => (
                         <option key={c.value} value={c.value}>{c.label}</option>
@@ -506,12 +506,12 @@ export default function ProductPageGenerator() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-emerald-500" />
+                  <Sparkles className="w-5 h-5 text-orange-500" />
                   <h2 className="font-semibold text-slate-800 dark:text-white">商品卖点</h2>
                 </div>
                 <button
                   onClick={handleExtractPoints}
-                  className="text-sm text-emerald-500 hover:text-emerald-600 flex items-center gap-1"
+                  className="text-sm text-orange-500 hover:text-orange-600 flex items-center gap-1"
                 >
                   <Zap className="w-4 h-4" />
                   AI提炼卖点
@@ -522,7 +522,7 @@ export default function ProductPageGenerator() {
                 value={sellingPoints}
                 onChange={(e) => setSellingPoints(e.target.value)}
                 placeholder="请输入商品核心卖点（功能、材质、优势、场景等），越详细，生成的图片越精准..."
-                className="w-full h-40 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                className="w-full h-40 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
               />
               
               {/* 参考图上传 */}
@@ -540,7 +540,7 @@ export default function ProductPageGenerator() {
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
                   >
                     <Upload className="w-4 h-4 text-slate-400" />
                     <span className="text-sm text-slate-500">上传参考图</span>
@@ -568,7 +568,7 @@ export default function ProductPageGenerator() {
             {/* 图片配置 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
               <h2 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <Image className="w-5 h-5 text-emerald-500" />
+                <Image className="w-5 h-5 text-orange-500" />
                 图片配置
               </h2>
               
@@ -584,7 +584,7 @@ export default function ProductPageGenerator() {
                       onClick={() => toggleImageType(type.value)}
                       className={`p-3 rounded-xl text-center transition-all ${
                         selectedImageTypes.includes(type.value)
-                          ? 'bg-emerald-500 text-white shadow-md'
+                          ? 'bg-orange-500 text-white shadow-md'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                       }`}
                     >
@@ -606,7 +606,7 @@ export default function ProductPageGenerator() {
                       onClick={() => setQuality(q.value)}
                       className={`flex-1 p-3 rounded-xl text-center transition-all ${
                         quality === q.value
-                          ? 'bg-emerald-500 text-white shadow-md'
+                          ? 'bg-orange-500 text-white shadow-md'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                       }`}
                     >
@@ -629,7 +629,7 @@ export default function ProductPageGenerator() {
                       onClick={() => setTone(t.value)}
                       className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                         tone === t.value
-                          ? 'bg-emerald-500 text-white'
+                          ? 'bg-orange-500 text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                       }`}
                     >
@@ -650,7 +650,7 @@ export default function ProductPageGenerator() {
                       type="checkbox"
                       checked={detailOptions.highlightMaterial}
                       onChange={(e) => setDetailOptions(prev => ({ ...prev, highlightMaterial: e.target.checked }))}
-                      className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                      className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
                     />
                     <span className="text-sm text-slate-600 dark:text-slate-300">突出材质细节</span>
                   </label>
@@ -659,7 +659,7 @@ export default function ProductPageGenerator() {
                       type="checkbox"
                       checked={detailOptions.strengthenCompliance}
                       onChange={(e) => setDetailOptions(prev => ({ ...prev, strengthenCompliance: e.target.checked }))}
-                      className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                      className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
                     />
                     <span className="text-sm text-slate-600 dark:text-slate-300">强化合规标识</span>
                   </label>
@@ -668,7 +668,7 @@ export default function ProductPageGenerator() {
                       type="checkbox"
                       checked={detailOptions.optimizeScene}
                       onChange={(e) => setDetailOptions(prev => ({ ...prev, optimizeScene: e.target.checked }))}
-                      className="w-4 h-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500"
+                      className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
                     />
                     <span className="text-sm text-slate-600 dark:text-slate-300">优化场景真实感</span>
                   </label>
@@ -684,7 +684,7 @@ export default function ProductPageGenerator() {
                   value={extraRequirements}
                   onChange={(e) => setExtraRequirements(e.target.value)}
                   placeholder="输入图片细节需求，如：合规标识放置在右下角、场景图融入当地生活元素..."
-                  className="w-full h-20 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-emerald-500 resize-none"
+                  className="w-full h-20 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 resize-none"
                 />
               </div>
             </div>
@@ -709,7 +709,7 @@ export default function ProductPageGenerator() {
             {generatedImages.length > 0 && (
               <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                 <h2 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                  <Check className="w-5 h-5 text-emerald-500" />
+                  <Check className="w-5 h-5 text-orange-500" />
                   生成结果 ({generatedImages.length}张)
                 </h2>
                 
@@ -746,7 +746,7 @@ export default function ProductPageGenerator() {
                             </div>
                             <button
                               onClick={() => handleFixViolation(generatedImages[0]?.id || '', v.type)}
-                              className="text-xs text-emerald-500 hover:text-emerald-600 whitespace-nowrap"
+                              className="text-xs text-orange-500 hover:text-orange-600 whitespace-nowrap"
                             >
                               一键修复
                             </button>
@@ -827,7 +827,7 @@ export default function ProductPageGenerator() {
             {/* 核心卖点 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
               <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <Star className="w-5 h-5 text-emerald-500" />
+                <Star className="w-5 h-5 text-orange-500" />
                 核心优势
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -840,7 +840,7 @@ export default function ProductPageGenerator() {
                   { icon: Sparkles, text: '风格统一' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-lg">
-                    <item.icon className="w-4 h-4 text-emerald-500" />
+                    <item.icon className="w-4 h-4 text-orange-500" />
                     <span className="text-xs text-slate-600 dark:text-slate-400">{item.text}</span>
                   </div>
                 ))}
@@ -850,14 +850,14 @@ export default function ProductPageGenerator() {
             {/* 地区合规说明 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
               <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-emerald-500" />
+                <FileText className="w-5 h-5 text-orange-500" />
                 合规规则
               </h3>
               <div className="space-y-3">
                 {REGIONS.map(region => (
                   <div 
                     key={region.value}
-                    className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors"
+                    className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
                     onClick={() => setActiveRegion(activeRegion === region.value ? null : region.value)}
                   >
                     <div className="flex items-center justify-between">
@@ -870,7 +870,7 @@ export default function ProductPageGenerator() {
                         <ul className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
                           {region.regulations.map((r, i) => (
                             <li key={i} className="flex items-center gap-1">
-                              <Check className="w-3 h-3 text-emerald-500" />
+                              <Check className="w-3 h-3 text-orange-500" />
                               {r}
                             </li>
                           ))}
@@ -887,7 +887,7 @@ export default function ProductPageGenerator() {
             {/* 平台规则 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
               <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <Package className="w-5 h-5 text-emerald-500" />
+                <Package className="w-5 h-5 text-orange-500" />
                 平台规则
               </h3>
               <div className="space-y-3">
@@ -896,7 +896,7 @@ export default function ProductPageGenerator() {
                     key={p.value}
                     className={`p-3 rounded-xl transition-colors ${
                       platform === p.value 
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800' 
+                        ? 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800' 
                         : 'bg-slate-50 dark:bg-slate-900'
                     }`}
                   >
