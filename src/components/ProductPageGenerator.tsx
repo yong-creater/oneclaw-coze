@@ -2,11 +2,13 @@
 
 import { useState, useRef } from 'react';
 import { 
-  Globe, ArrowLeft, Loader2, Wand2, Download, Upload,
+  Globe, Loader2, Wand2, Download, Upload,
   Settings, Image, Check, AlertCircle, Copy, Sparkles,
   ChevronDown, ChevronUp, Eye, Trash2, Star, Package,
   Shield, Palette, FileText, Zap, RefreshCw, X
 } from 'lucide-react';
+import UtilityHeader from './UtilityHeader';
+import { PrimaryButton, ActionButton } from './UtilityComponents';
 import LoginButton from '@/components/LoginButton';
 
 // ==================== 类型定义 ====================
@@ -375,34 +377,14 @@ export default function ProductPageGenerator() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      {/* 顶部导航 */}
-      <div className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
-              <Globe className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-slate-800 dark:text-white">
-                出海商品详情页AI生成
-              </h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                合规适配 · 人文贴合 · 多平台兼容
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <LoginButton />
-            <button
-              onClick={() => window.close()}
-              className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              返回
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* 统一头部 */}
+      <UtilityHeader
+        toolIcon={<Globe />}
+        toolName="出海详情页"
+        toolDescription="合规适配 · 人文贴合 · 多平台兼容"
+        gradient="from-emerald-500 to-teal-500"
+        onBack={() => window.close()}
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -675,29 +657,18 @@ export default function ProductPageGenerator() {
 
             {/* 生成按钮 */}
             <div className="flex gap-4">
-              <button
+              <PrimaryButton 
                 onClick={handleGenerate}
                 disabled={generating || !sellingPoints.trim()}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                loading={generating}
+                icon={<Wand2 />}
+                className="flex-1"
               >
-                {generating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    {generatingProgress || '正在生成...'}
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="w-5 h-5" />
-                    立即生成
-                  </>
-                )}
-              </button>
-              <button
-                onClick={handleClear}
-                className="px-6 py-4 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors"
-              >
-                <Trash2 className="w-5 h-5 text-slate-400" />
-              </button>
+                {generatingProgress || '立即生成'}
+              </PrimaryButton>
+              <ActionButton variant="secondary" onClick={handleClear} icon={<Trash2 />}>
+                清空
+              </ActionButton>
             </div>
 
             {/* 生成结果 */}

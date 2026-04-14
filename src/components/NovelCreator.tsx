@@ -9,6 +9,7 @@ import {
   Settings2, Star, BookOpen, MessageSquare, RefreshCw
 } from 'lucide-react';
 import LoginButton from '@/components/LoginButton';
+import UtilityHeader from './UtilityHeader';
 import JSZip from 'jszip';
 
 // ==================== 类型定义 ====================
@@ -585,44 +586,20 @@ export default function NovelCreator() {
   
   // ==================== 渲染 ====================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
-      {/* 顶部导航栏 */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => window.close()}
-              className="flex items-center gap-1 text-slate-600 hover:text-orange-500 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm hidden sm:inline">返回</span>
-            </button>
-            
-            <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-            
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">🦞</span>
-              </div>
-              <span className="font-bold text-lg text-slate-800 hidden sm:inline">OneClaw</span>
-            </div>
-            
-            <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-            
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Feather className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-semibold text-slate-700">网文全栈AI创作工坊</span>
-            </div>
-          </div>
-          
-          <LoginButton />
-        </div>
-        
-        {/* 标签页导航 */}
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex gap-1 overflow-x-auto pb-2">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 dark:from-slate-900 dark:to-slate-800">
+      {/* 统一头部 */}
+      <UtilityHeader
+        toolIcon={<Feather />}
+        toolName="网文创作工坊"
+        toolDescription="小说洗稿 · 漫画生图 · 推文脚本"
+        gradient="from-purple-500 to-pink-500"
+        onBack={() => window.close()}
+      />
+      
+      {/* 标签页导航 */}
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex gap-1 overflow-x-auto">
             {Object.entries(tabNames).map(([key, name]) => (
               <button
                 key={key}
@@ -630,7 +607,7 @@ export default function NovelCreator() {
                 className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
                   activeTab === key
                     ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
-                    : 'text-slate-600 hover:bg-slate-100'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 {name}
@@ -641,7 +618,7 @@ export default function NovelCreator() {
       </div>
       
       {/* 主内容区 */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         
         {/* ==================== 标签1：小说导入/洗稿 ==================== */}
         {activeTab === 'polish' && (
