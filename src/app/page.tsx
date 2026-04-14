@@ -12,7 +12,7 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  Wrench, FileText, FlaskConical, Globe
+  FileText, FlaskConical, Globe
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -162,7 +162,7 @@ function ToolLogo({ src, name, url, size = 40, className = '' }: ToolLogoProps) 
   );
 }
 
-// ==================== 实用工具页面 ====================
+// ==================== 精选工具页面 ====================
 function UtilityToolsPage() {
   const [tools, setTools] = useState(UTILITY_TOOLS);
 
@@ -171,10 +171,10 @@ function UtilityToolsPage() {
       {/* 页面标题 */}
       <div className="text-center py-6">
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-          实用工具
+          精选工具
         </h1>
         <p className="text-slate-500 dark:text-slate-400">
-          AI驱动的实用工具，提升您的工作效率
+          AI驱动的精选工具，提升您的工作效率
         </p>
       </div>
 
@@ -276,7 +276,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   '高级': 'bg-red-100 text-red-700',
 };
 
-// 实用工具列表
+// 精选工具列表
 const UTILITY_TOOLS = [
   { 
     key: 'resume', 
@@ -311,7 +311,7 @@ const UTILITY_TOOLS = [
 type UtilityTool = typeof UTILITY_TOOLS[number]['key'];
 
 const MAIN_TABS = [
-  { key: 'utilities', label: '实用工具', icon: Wrench },
+  { key: 'utilities', label: '精选工具', icon: Star },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
@@ -1282,7 +1282,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ==================== 实用工具 ==================== */}
+        {/* ==================== 精选工具 ==================== */}
         {mainTab === 'utilities' && (
           <UtilityToolsPage />
         )}
