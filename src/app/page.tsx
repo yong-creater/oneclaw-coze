@@ -11,7 +11,8 @@ import {
   Search, Wand2, Star, X,
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check,
-  Sparkles, Feather, UserCircle, ImageIcon, Mountain
+  Sparkles, Feather, UserCircle, ImageIcon, Mountain,
+  Wrench, ChevronDown, ExternalLink
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -161,6 +162,77 @@ function ToolLogo({ src, name, url, size = 40, className = '' }: ToolLogoProps) 
   );
 }
 
+// ==================== 实用工具页面 ====================
+function UtilityToolsPage() {
+  const [tools, setTools] = useState(UTILITY_TOOLS);
+
+  return (
+    <div className="space-y-6">
+      {/* 页面标题 */}
+      <div className="text-center py-6">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+          实用工具
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400">
+          AI驱动的实用工具，提升您的工作效率
+        </p>
+      </div>
+
+      {/* 工具网格 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {tools.map(tool => {
+          const Icon = tool.icon;
+          return (
+            <button
+              key={tool.key}
+              onClick={() => {
+                window.open(`/novel`, '_blank');
+              }}
+              className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left overflow-hidden"
+            >
+              {/* 背景渐变装饰 */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
+              
+              {/* 内容 */}
+              <div className="relative">
+                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-7 h-7 text-white" />
+                </div>
+                
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-orange-500 transition-colors">
+                  {tool.name}
+                </h3>
+                
+                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+                  {tool.description}
+                </p>
+                
+                <div className="flex items-center gap-2 mt-4 text-orange-500 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span>开始使用</span>
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+              </div>
+            </button>
+          );
+        })}
+        
+        {/* 敬请期待卡片 */}
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4">
+            <Sparkles className="w-7 h-7 text-slate-400" />
+          </div>
+          <h3 className="text-lg font-bold text-slate-400 dark:text-slate-500 mb-2">
+            更多工具
+          </h3>
+          <p className="text-sm text-slate-400">
+            敬请期待...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ==================== 常量 ====================
 const DIFFICULTY_COLORS: Record<string, string> = {
   '初级': 'bg-green-100 text-green-700',
@@ -168,9 +240,22 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   '高级': 'bg-red-100 text-red-700',
 };
 
+// 实用工具列表
+const UTILITY_TOOLS = [
+  { 
+    key: 'novel', 
+    name: '小说创作', 
+    icon: Feather,
+    description: 'AI小说创作助手',
+    color: 'from-purple-500 to-pink-500'
+  },
+] as const;
+
+type UtilityTool = typeof UTILITY_TOOLS[number]['key'];
+
 const MAIN_TABS = [
   { key: 'tools', label: 'AI应用', icon: Wand2 },
-  { key: 'novel', label: '小说创作', icon: Feather },
+  { key: 'utilities', label: '实用工具', icon: Wrench, hasDropdown: true },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
@@ -610,11 +695,59 @@ export default function HomePage() {
               {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = mainTab === tab.key;
+                const hasDropdown = (tab as any).hasDropdown;
+                
+                if (hasDropdown) {
+                  return (
+                    <div key={tab.key} className="relative">
+                      <button
+                        onClick={() => setMainTab(tab.key)}
+                        className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                          isActive
+                            ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                            : 'text-slate-600 dark:text-slate-300 hover:text-orange-500'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span className="hidden md:inline">{tab.label}</span>
+                        <ChevronDown className={`w-3 h-3 transition-transform ${isActive ? 'rotate-180' : ''}`} />
+                      </button>
+                      
+                      {/* 下拉菜单 */}
+                      {isActive && (
+                        <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-2 z-50">
+                          {UTILITY_TOOLS.map(tool => {
+                            const ToolIcon = tool.icon;
+                            return (
+                              <button
+                                key={tool.key}
+                                onClick={() => {
+                                  // 新开标签页
+                                  window.open(`/novel`, '_blank');
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
+                              >
+                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${tool.color} flex items-center justify-center`}>
+                                  <ToolIcon className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium text-slate-800 dark:text-white text-sm">{tool.name}</div>
+                                  <div className="text-xs text-slate-500 truncate">{tool.description}</div>
+                                </div>
+                                <ExternalLink className="w-4 h-4 text-slate-400" />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
                 return (
                   <button
                     key={tab.key}
                     onClick={() => {
-                      // 切换 Tab 时清除该模块缓存，强制获取最新数据
                       if (tab.key === 'tools') cache.clear(`tools_all_1`);
                       if (tab.key === 'prompts') cache.clear('prompts_全部_1');
                       if (tab.key === 'skills') cache.clear(`skills_all_1`);
@@ -1146,9 +1279,9 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* ==================== 小说创作 ==================== */}
-        {mainTab === 'novel' && (
-          <NovelCreator />
+        {/* ==================== 实用工具 ==================== */}
+        {mainTab === 'utilities' && (
+          <UtilityToolsPage />
         )}
 
         {/* ==================== Skill ==================== */}
