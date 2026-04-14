@@ -32,11 +32,29 @@ export async function POST(request: NextRequest) {
       .eq('username', username)
       .single();
 
+    // 如果用户不存在，创建新用户
     if (findError || !admin) {
-      return NextResponse.json({ 
-        success: false, 
-        error: '用户不存在' 
-      }, { status: 404 });
+      const bcrypt = await import('bcryptjs');
+      const passwordHash = await bcrypt.hash(new_password, 10);
+
+      const { error: insertError } = await client
+        .from('admin_users')
+        .insert({
+          username,
+          password_hash: passwordHash,
+          email: `${username}@oneclaw.shop`,
+          role: 'admin',
+          is_active: true,
+        });
+
+      if (insertError) {
+        throw insertError;
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: '管理员创建成功，请使用新密码登录'
+      });
     }
 
     // 更新密码
