@@ -1,0 +1,28 @@
+{
+  "name": "@oneclaw/auth",
+  "version": "1.0.0",
+  "description": "OneClaw 统一认证 SDK，支持跨域 SSO",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "peerDependencies": {
+    "jose": "^5.0.0",
+    "next": ">=14.0.0"
+  },
+  "dependencies": {
+    "jose": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
