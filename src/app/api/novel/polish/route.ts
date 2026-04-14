@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// 4sapi 配置
-const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
-const API4S_KEY = process.env.API4S_KEY || '';
-const API4S_URL = process.env.API4S_URL || 'https://4sapi.com';
+// Coze API 配置
+const COZE_API_KEY = process.env.COZE_WORKLOAD_IDENTITY_API_KEY || process.env.OPENAI_API_KEY || '';
+const COZE_API_BASE = 'https://integration.coze.cn/api/v3';
 
 // Coze SDK 免费模型列表
 const FREE_MODELS = [
-  // 豆包系列
   'doubao-seed-2-0-pro-260215',
   'doubao-seed-2-0-lite-260215',
   'doubao-seed-2-0-mini-260215',
@@ -19,31 +17,25 @@ const FREE_MODELS = [
   'doubao-pro-32k-240815',
   'doubao-lite-4k-240815',
   'doubao-lite-32k-240815',
-  // 智谱AI (GLM)
   'glm-4',
   'glm-4-flash',
   'glm-4-plus',
   'glm-4v',
   'glm-3-turbo',
   'characterglm',
-  // 通义千问
   'qwen-turbo',
   'qwen-plus',
   'qwen-max',
   'qwen2-72b-instruct',
   'qwen2-7b-instruct',
   'qwen-coder-turbo',
-  // Kimi
   'moonshot-v1-8k',
   'moonshot-v1-32k',
   'moonshot-v1-128k',
-  // DeepSeek
   'deepseek-chat',
   'deepseek-coder',
-  // 百川
   'baichuan4',
   'baichuan3-turbo',
-  // 其他
   'yi-34b-chat',
   'minimax-chat',
 ];
@@ -67,6 +59,52 @@ const SYSTEM_PROMPT = `你是专业的网文洗稿专家，擅长将小说内容
 输出格式：
 直接输出洗稿后的完整小说文本，不要添加其他说明。`;
 
+// 调用 Coze API
+async function callCozeAPI(messages: any[], model: string): Promise<string> {
+  const response = await fetch(`${COZE_API_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${COZE_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: messages,
+      stream: false,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Coze API error: ${response.status} - ${errorText}`);
+  }
+
+  // 解析 SSE 格式响应
+  const text = await response.text();
+  const lines = text.split('\n');
+  let content = '';
+  let reasoningContent = '';
+  
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      try {
+        const data = JSON.parse(line.slice(6));
+        if (data.choices?.[0]?.delta?.content) {
+          content += data.choices[0].delta.content;
+        }
+        if (data.choices?.[0]?.delta?.reasoning_content) {
+          reasoningContent += data.choices[0].delta.reasoning_content;
+        }
+      } catch (e) {
+        // 跳过无效的JSON
+      }
+    }
+  }
+  
+  // 返回实际内容或推理内容
+  return content || reasoningContent || '';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { text, style, intensity, extraRequirements, model } = await request.json();
@@ -89,77 +127,26 @@ export async function POST(request: NextRequest) {
 ${text}`;
 
     const messages = [
-      { role: 'system' as const, content: SYSTEM_PROMPT },
-      { role: 'user' as const, content: userPrompt }
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userPrompt }
     ];
 
     const targetModel = model || 'doubao-seed-1-8-251228';
-    const useFreeModel = isFreeModel(targetModel);
 
     let content = '';
-
-    if (useFreeModel) {
-      // 方案1：Coze SDK 免费模型
-      const { LLMClient, Config, HeaderUtils } = await import('coze-coding-dev-sdk');
-      const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-      const config = new Config();
-      const client = new LLMClient(config, customHeaders);
-
-      const llmConfig = {
-        model: targetModel,
-        temperature: 0.7,
-        streaming: false
-      };
-
-      try {
-        const aiStream = client.stream(messages, llmConfig);
-        
-        for await (const chunk of aiStream) {
-          if (chunk && typeof chunk === 'object' && 'content' in chunk) {
-            content += (chunk as any).content || '';
-          } else if (typeof chunk === 'string') {
-            content += chunk;
-          }
-        }
-      } catch (llmError) {
-        console.error('LLM streaming error:', llmError);
-        throw new Error('AI服务调用失败，请重试');
-      }
+    
+    if (isFreeModel(targetModel)) {
+      // 使用 Coze API
+      content = await callCozeAPI(messages, targetModel);
     } else {
-      // 方案2：付费模型走 4sapi
-      if (!ENABLE_4SAPI || !API4S_KEY) {
-        throw new Error('付费模型未启用，请选择豆包模型或联系管理员配置付费API');
-      }
-
-      const response = await fetch(`${API4S_URL}/v1/chat/completions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API4S_KEY}`
-        },
-        body: JSON.stringify({
-          model: targetModel,
-          messages: messages,
-          temperature: 0.7,
-          max_tokens: 4000,
-          stream: false
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`4sapi error: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      content = data.choices?.[0]?.message?.content || '';
+      return NextResponse.json({ error: '付费模型未启用，请选择免费模型' }, { status: 400 });
     }
     
     if (!content) {
       throw new Error('AI未返回有效内容');
     }
     
-    // 估算原创度分数（基于内容长度）
+    // 估算原创度分数
     const score = Math.min(95, 85 + Math.floor(Math.random() * 10));
     
     return NextResponse.json({ content, score });
