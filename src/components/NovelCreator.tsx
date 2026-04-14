@@ -3,11 +3,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { 
   Send, Loader2, AlertCircle, Check, Copy, Download, FileSpreadsheet,
-  Feather, UserCircle, ImagePlus, Mountain, ChevronDown, X, LogOut
+  Feather, UserCircle, ImagePlus, Mountain, ChevronDown, X
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import { useAuth } from '@/hooks/useAuth';
-import LoginModal from '@/components/LoginModal';
+import LoginButton from '@/components/LoginButton';
 
 const REQUEST_TIMEOUT = 60000;
 const RATE_LIMIT_MAX = 10;
@@ -231,9 +230,6 @@ export default function NovelCreator() {
     scenePrompt: { input: '', output: '', loading: false, error: '' },
   });
   const [selectedFeature, setSelectedFeature] = useState('polish');
-  
-  // 使用统一的登录认证
-  const { user: authUser, authenticated, login, logout, requireAuth, showLogin, setShowLogin } = useAuth();
   
   // 获取当前功能的输入输出
   const currentInput = featureStates[selectedFeature]?.input || '';
@@ -494,36 +490,7 @@ export default function NovelCreator() {
             
             {/* 右侧：用户信息或登录 */}
             <div className="flex items-center gap-3">
-              {authenticated ? (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full">
-                  {authUser?.avatar_url ? (
-                    <img src={authUser.avatar_url} alt="" className="w-6 h-6 rounded-full" />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-                      <span className="text-white text-xs font-medium">
-                        {authUser?.nickname?.slice(0, 2).toUpperCase() || '用'}
-                      </span>
-                    </div>
-                  )}
-                  <span className="text-sm text-slate-600 hidden sm:inline">
-                    {authUser?.nickname || '用户'}
-                  </span>
-                  <button
-                    onClick={logout}
-                    className="ml-1 text-slate-400 hover:text-red-500 transition-colors"
-                    title="退出登录"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={login}
-                  className="px-5 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
-                >
-                  登录
-                </button>
-              )}
+              <LoginButton />
             </div>
           </div>
         </div>
@@ -777,12 +744,6 @@ export default function NovelCreator() {
           </div>
         </div>
       </div>
-      
-      {/* 登录弹窗 */}
-      <LoginModal 
-        open={showLogin} 
-        onClose={() => setShowLogin(false)} 
-      />
     </div>
   );
 }

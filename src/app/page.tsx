@@ -18,7 +18,7 @@ import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
 import SponsorBadge, { isSponsorActive } from '@/components/SponsorBadge';
 import AdBanner, { HomeBanner, HomeInlineAd } from '@/components/AdBanner';
-import UserButton from '@/components/UserButton';
+import LoginButton from '@/components/LoginButton';
 import Link from 'next/link';
 import NovelCreator from '@/components/NovelCreator';
 
@@ -715,7 +715,7 @@ export default function HomePage() {
 
             {/* 右侧按钮 */}
             <div className="flex items-center gap-2">
-              <UserButton />
+              <LoginButton />
             </div>
           </div>
         </div>
