@@ -1,141 +1,125 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { isVolcenginePgMode } from '@/lib/db';
 
 // 获取数据看板统计
 export async function GET(request: NextRequest) {
   try {
-    const client = getSupabaseClient();
+    let stats = {
+      total_tools: 0,
+      total_views: 0,
+      total_clicks: 0,
+      total_ratings: 0,
+      total_reviews: 0,
+      total_favorites: 0,
+      categories: [] as { name: string; count: number }[],
+      top_tools: [] as { name: string; click_count: number }[],
+      free_type_distribution: [] as { name: string; count: number }[],
+      recent_activity: [] as { date: string; count: number }[]
+    };
 
-    // 获取工具总数
-    const { count: totalTools } = await client
-      .from('tools')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true);
+    if (isVolcenginePgMode()) {
+      const { getPgPool } = await import('@/lib/db');
+      const pool = await getPgPool();
 
-    // 获取总浏览量
-    const { data: viewStats } = await client
-      .from('tools')
-      .select('view_count')
-      .eq('is_active', true);
+      // 获取工具总数和统计
+      const toolsResult = await pool.query(`
+        SELECT 
+          COUNT(*) as total_tools,
+          COALESCE(SUM(view_count), 0) as total_views,
+          COALESCE(SUM(click_count), 0) as total_clicks,
+          free_type,
+          DATE(created_at) as created_date
+        FROM tools 
+        WHERE is_active = true
+        GROUP BY free_type, DATE(created_at)
+      `);
 
-    const totalViews = viewStats?.reduce((sum, t) => sum + (t.view_count || 0), 0) || 0;
+      // 汇总统计
+      let totalTools = 0;
+      let totalViews = 0;
+      let totalClicks = 0;
+      const freeTypeCount: Record<string, number> = {};
+      const recentActivity: Record<string, number> = {};
 
-    // 获取总点击量
-    const { data: clickStats } = await client
-      .from('tools')
-      .select('click_count')
-      .eq('is_active', true);
-
-    const totalClicks = clickStats?.reduce((sum, t) => sum + (t.click_count || 0), 0) || 0;
-
-    // 获取用户评分数
-    const { count: totalRatings } = await client
-      .from('user_ratings')
-      .select('*', { count: 'exact', head: true });
-
-    // 获取分类分布
-    const { data: categories } = await client
-      .from('categories')
-      .select('name');
-
-    const categoryStats = await Promise.all(
-      (categories || []).map(async (cat) => {
-        const { count } = await client
-          .from('tools')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_active', true);
-
-        // 通过关联查询获取每个分类的工具数
-        return { name: cat.name, count: 0 };
-      })
-    );
-
-    // 简化：直接查询工具表获取分类统计
-    const { data: toolsWithCategory } = await client
-      .from('tools')
-      .select('categories(name)')
-      .eq('is_active', true);
-
-    const categoryCount: Record<string, number> = {};
-    toolsWithCategory?.forEach((t: any) => {
-      const name = t.categories?.name;
-      if (name) {
-        categoryCount[name] = (categoryCount[name] || 0) + 1;
+      for (const row of toolsResult.rows) {
+        totalTools += parseInt(row.total_tools);
+        totalViews += parseInt(row.total_views);
+        totalClicks += parseInt(row.total_clicks);
+        freeTypeCount[row.free_type] = (freeTypeCount[row.free_type] || 0) + parseInt(row.total_tools);
+        const dateStr = row.created_date;
+        recentActivity[dateStr] = (recentActivity[dateStr] || 0) + parseInt(row.total_tools);
       }
-    });
 
-    const categoryDistribution = Object.entries(categoryCount)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count);
+      stats.total_tools = totalTools;
+      stats.total_views = totalViews;
+      stats.total_clicks = totalClicks;
 
-    // 获取热门工具 TOP 5
-    const { data: topTools } = await client
-      .from('tools')
-      .select('name, click_count')
-      .eq('is_active', true)
-      .order('click_count', { ascending: false })
-      .limit(5);
+      // 分类分布
+      const categoryResult = await pool.query(`
+        SELECT c.name, COUNT(t.id) as count
+        FROM categories c
+        LEFT JOIN tools t ON t.category_id = c.id AND t.is_active = true
+        GROUP BY c.id, c.name
+        ORDER BY count DESC
+      `);
+      stats.categories = categoryResult.rows.map(r => ({ name: r.name, count: parseInt(r.count) }));
 
-    // 获取免费类型分布
-    const { data: freeTypeData } = await client
-      .from('tools')
-      .select('free_type')
-      .eq('is_active', true);
+      // 热门工具
+      const topToolsResult = await pool.query(`
+        SELECT name, click_count
+        FROM tools
+        WHERE is_active = true
+        ORDER BY click_count DESC
+        LIMIT 5
+      `);
+      stats.top_tools = topToolsResult.rows.map(r => ({ name: r.name, click_count: parseInt(r.click_count) }));
 
-    const freeTypeCount: Record<string, number> = {};
-    freeTypeData?.forEach((t: any) => {
-      freeTypeCount[t.free_type] = (freeTypeCount[t.free_type] || 0) + 1;
-    });
+      // 免费类型分布
+      stats.free_type_distribution = Object.entries(freeTypeCount).map(([name, count]) => ({ name, count }));
 
-    // 获取最近7天新增工具数（简化处理）
-    const { data: recentTools } = await client
-      .from('tools')
-      .select('created_at')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(30);
+      // 最近7天活动
+      const last7Days: { date: string; count: number }[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        last7Days.push({ date: dateStr, count: recentActivity[dateStr] || 0 });
+      }
+      stats.recent_activity = last7Days;
 
-    const last7Days: { date: string; count: number }[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      last7Days.push({ date: dateStr, count: 0 });
+      // 评分数
+      const ratingsResult = await pool.query(`SELECT COUNT(*) as count FROM user_ratings`);
+      stats.total_ratings = parseInt(ratingsResult.rows[0]?.count || '0');
+
+      // 评论数
+      const reviewsResult = await pool.query(`SELECT COUNT(*) as count FROM user_reviews`);
+      stats.total_reviews = parseInt(reviewsResult.rows[0]?.count || '0');
+
+      // 收藏数
+      const favoritesResult = await pool.query(`SELECT COUNT(*) as count FROM user_favorites`);
+      stats.total_favorites = parseInt(favoritesResult.rows[0]?.count || '0');
+    } else {
+      // Supabase 模式（备用）
+      const { query } = await import('@/lib/db');
+      
+      try {
+        const result = await query('tools', {
+          select: 'view_count, click_count, free_type, categories(name)',
+          eq: { is_active: true },
+          count: true,
+        });
+        
+        if (result.data) {
+          stats.total_tools = result.count || 0;
+          for (const t of result.data) {
+            stats.total_views += t.view_count || 0;
+            stats.total_clicks += t.click_count || 0;
+          }
+        }
+      } catch {}
     }
 
-    recentTools?.forEach((t: any) => {
-      const dateStr = t.created_at?.split('T')[0];
-      const dayIndex = last7Days.findIndex(d => d.date === dateStr);
-      if (dayIndex >= 0) {
-        last7Days[dayIndex].count++;
-      }
-    });
-
-    // 获取评论数
-    const { count: totalReviews } = await client
-      .from('user_reviews')
-      .select('*', { count: 'exact', head: true });
-
-    // 获取收藏数
-    const { count: totalFavorites } = await client
-      .from('user_favorites')
-      .select('*', { count: 'exact', head: true });
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        total_tools: totalTools || 0,
-        total_views: totalViews,
-        total_clicks: totalClicks,
-        total_ratings: totalRatings || 0,
-        total_reviews: totalReviews || 0,
-        total_favorites: totalFavorites || 0,
-        categories: categoryDistribution,
-        top_tools: topTools || [],
-        free_type_distribution: Object.entries(freeTypeCount).map(([name, count]) => ({ name, count })),
-        recent_activity: last7Days
-      }
-    });
+    return NextResponse.json({ success: true, data: stats });
   } catch (error) {
     console.error('获取数据看板失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });

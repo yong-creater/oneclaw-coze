@@ -1,22 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { isVolcenginePgMode } from '@/lib/db';
 
 // 获取标签列表
 export async function GET(request: NextRequest) {
   try {
-    const client = getSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type');
     
-    let query = client.from('tags').select('*').order('type, name');
-    
-    if (type) {
-      query = query.eq('type', type);
+    let data;
+
+    if (isVolcenginePgMode()) {
+      // 火山引擎 PostgreSQL 模式
+      const { getPgPool } = await import('@/lib/db');
+      const pool = await getPgPool();
+      
+      let sql = `SELECT * FROM tags`;
+      const params: any[] = [];
+      
+      if (type) {
+        sql += ` WHERE type = $1`;
+        params.push(type);
+      }
+      
+      sql += ` ORDER BY type, name`;
+      
+      const result = await pool.query(sql, params);
+      data = result.rows;
+    } else {
+      // Supabase 模式（备用）
+      const { query } = await import('@/lib/db');
+      const result = await query('tags', {
+        eq: type ? { type } : undefined,
+        order: { column: 'type', ascending: true },
+      });
+      data = result.data;
     }
-    
-    const { data, error } = await query;
-    
-    if (error) throw new Error(error.message);
     
     return NextResponse.json({
       success: true,
