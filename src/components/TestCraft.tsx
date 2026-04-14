@@ -10,6 +10,13 @@ import {
 import LoginButton from '@/components/LoginButton';
 import UtilityHeader from './UtilityHeader';
 import * as XLSX from 'xlsx';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // ==================== 类型定义 ====================
 interface TestCase {
@@ -948,29 +955,31 @@ export default function TestCraft() {
               {/* 模块 */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">所属模块</label>
-                <select
-                  value={module}
-                  onChange={(e) => setModule(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                >
-                  {MODULES.map(m => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
+                <Select value={module} onValueChange={setModule}>
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MODULES.map(m => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               {/* AI模型 */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">AI 模型</label>
-                <select
-                  value={aiModel}
-                  onChange={(e) => setAiModel(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                >
-                  {AI_MODELS.map(m => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
+                <Select value={aiModel} onValueChange={setAiModel}>
+                  <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {AI_MODELS.map(m => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               {/* 需求描述 */}

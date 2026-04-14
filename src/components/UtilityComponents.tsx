@@ -1,6 +1,13 @@
 'use client';
 
 import { ReactNode } from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface UtilityCardProps {
   title: string;
@@ -178,18 +185,18 @@ export function SelectField({ label, value, onChange, options, placeholder, icon
           {label}
         </label>
       )}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0 ${
           showBorder ? 'border border-slate-200 dark:border-slate-700' : 'border border-transparent'
-        }`}
-      >
-        {placeholder && <option value="">{placeholder}</option>}
-        {options.map(opt => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
+        }`}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(opt => (
+            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

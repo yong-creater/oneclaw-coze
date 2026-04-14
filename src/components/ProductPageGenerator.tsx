@@ -10,6 +10,13 @@ import {
 import UtilityHeader from './UtilityHeader';
 import { PrimaryButton, ActionButton } from './UtilityComponents';
 import LoginButton from '@/components/LoginButton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // ==================== 类型定义 ====================
 interface GeneratedImage {
@@ -444,15 +451,16 @@ export default function ProductPageGenerator() {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       目标平台
                     </label>
-                    <select
-                      value={platform}
-                      onChange={(e) => setPlatform(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                    >
-                      {PLATFORMS.map(p => (
-                        <option key={p.value} value={p.value}>{p.label}</option>
-                      ))}
-                    </select>
+                    <Select value={platform} onValueChange={setPlatform}>
+                      <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PLATFORMS.map(p => (
+                          <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <p className="mt-1 text-xs text-slate-500">
                       {PLATFORMS.find(p => p.value === platform)?.rules}
                     </p>
@@ -485,15 +493,16 @@ export default function ProductPageGenerator() {
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       商品类目
                     </label>
-                    <select
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                    >
-                      {CATEGORIES.map(c => (
-                        <option key={c.value} value={c.value}>{c.label}</option>
-                      ))}
-                    </select>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CATEGORIES.map(c => (
+                          <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <p className="mt-1 text-xs text-slate-500">
                       特点：{CATEGORIES.find(c => c.value === category)?.features.join('、')}
                     </p>

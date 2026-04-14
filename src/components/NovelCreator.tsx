@@ -11,6 +11,14 @@ import {
 import LoginButton from '@/components/LoginButton';
 import UtilityHeader from './UtilityHeader';
 import JSZip from 'jszip';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 // ==================== 类型定义 ====================
 interface StoryContent {
@@ -754,43 +762,46 @@ export default function NovelCreator() {
                         AI模型
                         <span className="text-xs text-slate-400 ml-1">(可选择国内外模型)</span>
                       </label>
-                      <select
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                      >
-                        {AI_MODELS.map(m => (
-                          <option key={m.value} value={m.value}>
-                            {m.label} - {m.region} ({m.provider})
-                          </option>
-                        ))}
-                      </select>
+                      <Select value={selectedModel} onValueChange={setSelectedModel}>
+                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {AI_MODELS.map(m => (
+                            <SelectItem key={m.value} value={m.value}>
+                              {m.label} - {m.region} ({m.provider})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">洗稿风格</label>
-                      <select
-                        value={polishStyle}
-                        onChange={(e) => setPolishStyle(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                      >
-                        {POLISH_STYLES.map(s => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </select>
+                      <Select value={polishStyle} onValueChange={setPolishStyle}>
+                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {POLISH_STYLES.map(s => (
+                            <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">洗稿强度</label>
-                      <select
-                        value={polishIntensity}
-                        onChange={(e) => setPolishIntensity(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                      >
-                        {POLISH_INTENSITY.map(s => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </select>
+                      <Select value={polishIntensity} onValueChange={setPolishIntensity}>
+                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {POLISH_INTENSITY.map(s => (
+                            <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <div>
@@ -952,30 +963,32 @@ export default function NovelCreator() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">分镜数量</label>
-                    <select
-                      value={panelCount}
-                      onChange={(e) => setPanelCount(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                    >
-                      <option value="auto">按章节自动拆分</option>
-                      <option value="4">4个分镜</option>
-                      <option value="6">6个分镜</option>
-                      <option value="8">8个分镜</option>
-                      <option value="12">12个分镜</option>
-                    </select>
+                    <Select value={panelCount} onValueChange={setPanelCount}>
+                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="auto">按章节自动拆分</SelectItem>
+                        <SelectItem value="4">4个分镜</SelectItem>
+                        <SelectItem value="6">6个分镜</SelectItem>
+                        <SelectItem value="8">8个分镜</SelectItem>
+                        <SelectItem value="12">12个分镜</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">分镜风格</label>
-                    <select
-                      value={panelStyle}
-                      onChange={(e) => setPanelStyle(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                    >
-                      {PANEL_STYLES.map(s => (
-                        <option key={s.value} value={s.value}>{s.label}</option>
-                      ))}
-                    </select>
+                    <Select value={panelStyle} onValueChange={setPanelStyle}>
+                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PANEL_STYLES.map(s => (
+                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
@@ -1083,15 +1096,16 @@ export default function NovelCreator() {
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">画质设置</label>
-                  <select
-                    value={imageQuality}
-                    onChange={(e) => setImageQuality(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                  >
-                    {IMAGE_QUALITY.map(q => (
-                      <option key={q.value} value={q.value}>{q.label} ({q.size})</option>
-                    ))}
-                  </select>
+                  <Select value={imageQuality} onValueChange={setImageQuality}>
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {IMAGE_QUALITY.map(q => (
+                        <SelectItem key={q.value} value={q.value}>{q.label} ({q.size})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>
@@ -1223,40 +1237,43 @@ export default function NovelCreator() {
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">发布平台</label>
-                  <select
-                    value={scriptPlatform}
-                    onChange={(e) => setScriptPlatform(e.target.value as 'douyin' | 'xiaohongshu')}
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                  >
-                    <option value="douyin">抖音</option>
-                    <option value="xiaohongshu">小红书</option>
-                  </select>
+                  <Select value={scriptPlatform} onValueChange={(v) => setScriptPlatform(v as 'douyin' | 'xiaohongshu')}>
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="douyin">抖音</SelectItem>
+                      <SelectItem value="xiaohongshu">小红书</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">推文风格</label>
-                  <select
-                    value={scriptStyle}
-                    onChange={(e) => setScriptStyle(e.target.value as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                  >
-                    {SCRIPT_STYLES.map(s => (
-                      <option key={s.value} value={s.value}>{s.label}</option>
-                    ))}
-                  </select>
+                  <Select value={scriptStyle} onValueChange={(v) => setScriptStyle(v as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}>
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SCRIPT_STYLES.map(s => (
+                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">推文时长</label>
-                  <select
-                    value={scriptDuration}
-                    onChange={(e) => setScriptDuration(e.target.value as '15s' | '30s' | '60s')}
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                  >
-                    <option value="15s">15秒</option>
-                    <option value="30s">30秒</option>
-                    <option value="60s">60秒</option>
-                  </select>
+                  <Select value={scriptDuration} onValueChange={(v) => setScriptDuration(v as '15s' | '30s' | '60s')}>
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15s">15秒</SelectItem>
+                      <SelectItem value="30s">30秒</SelectItem>
+                      <SelectItem value="60s">60秒</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
