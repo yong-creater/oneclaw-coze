@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
   Search, Wand2, Star, X,
-  ChevronLeft, ChevronRight, Eye, ThumbsUp, TrendingUp,
+  ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain
 } from 'lucide-react';
@@ -48,20 +48,6 @@ interface Tool {
   sponsor_type: string | null;
   sponsor_expires_at: string | null;
   categories: { name: string; slug: string };
-}
-
-interface RankingItem {
-  id: number;
-  rank: number;
-  tool_id: number | null;
-  tool_name: string;
-  tool_url: string;
-  tool_logo: string;
-  monthly_visits: string;
-  growth: string;
-  growth_rate: string;
-  category: string;
-  tool_description: string;
 }
 
 interface Prompt {
@@ -183,7 +169,6 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 };
 
 const MAIN_TABS = [
-  { key: 'rankings', label: '排行榜', icon: TrendingUp },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'novel', label: '小说创作', icon: Feather },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
@@ -253,7 +238,7 @@ const cache = {
 	// ==================== 主组件 ====================
 export default function HomePage() {
   // 主Tab状态 - 默认排行榜
-  const [mainTab, setMainTab] = useState<MainTab>('rankings');
+  const [mainTab, setMainTab] = useState<MainTab>('tools');
 
   // 页面加载时，从 sessionStorage 读取返回的 tab
   useEffect(() => {
@@ -290,12 +275,6 @@ export default function HomePage() {
       sessionStorage.removeItem('backFrom');
     }
   }, []);
-
-  // ==================== 榜单状态 ====================
-  const [rankings, setRankings] = useState<RankingItem[]>([]);
-  const [rankingsLoading, setRankingsLoading] = useState(true);
-  const [rankingsMonth, setRankingsMonth] = useState('');
-  const [rankingsRegion, setRankingsRegion] = useState<'global' | 'china'>('global');
 
   // ==================== 工具导航状态 ====================
   const [categories, setCategories] = useState<Category[]>([]);
@@ -365,54 +344,6 @@ export default function HomePage() {
     // 清理过期缓存
     cache.cleanup();
   }, []);
-
-  useEffect(() => {
-    // 并行加载所有数据
-    Promise.all([
-      fetchCategories(),
-      fetchRankings()
-    ]);
-  }, []);
-
-  // 榜单地区切换
-  useEffect(() => {
-    if (mainTab === 'rankings') {
-      cache.clear(`rankings_${rankingsRegion}`);
-      fetchRankings();
-    }
-  }, [rankingsRegion]);
-
-  // ==================== 榜单相关方法 ====================
-  const fetchRankings = async () => {
-    // 检查缓存（包含地区）
-    const cacheKey = `rankings_${rankingsRegion}`;
-    const cached = cache.get(cacheKey);
-    if (cached) {
-      setRankings(cached.data || []);
-      setRankingsMonth(cached.month || '');
-      setRankingsLoading(false);
-      return;
-    }
-    
-    setRankingsLoading(true);
-    try {
-      const regionParam = rankingsRegion === 'china' ? '&region=china' : '';
-      const res = await fetch(`/api/rankings/monthly?limit=10${regionParam}`);
-      const data = await res.json();
-      
-      if (data.success) {
-        const rankingsData = data.data || [];
-        const month = data.meta?.current_month || '';
-        cache.set(cacheKey, { data: rankingsData, month });
-        setRankings(rankingsData);
-        setRankingsMonth(month);
-      }
-    } catch (error) {
-      console.error('获取榜单失败:', error);
-    } finally {
-      setRankingsLoading(false);
-    }
-  };
 
   // ==================== 工具相关方法 ====================
   const fetchCategories = async () => {
@@ -682,10 +613,6 @@ export default function HomePage() {
                     key={tab.key}
                     onClick={() => {
                       // 切换 Tab 时清除该模块缓存，强制获取最新数据
-                      if (tab.key === 'rankings') {
-                        cache.clear('rankings_global');
-                        cache.clear('rankings_china');
-                      }
                       if (tab.key === 'tools') cache.clear(`tools_all_1`);
                       if (tab.key === 'prompts') cache.clear('prompts_全部_1');
                       if (tab.key === 'skills') cache.clear(`skills_all_1`);
@@ -714,223 +641,6 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* ==================== 热门榜单 ==================== */}
-        {mainTab === 'rankings' && (
-          <div>
-            {/* 页面标题和Tab切换 */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
-                  {rankingsMonth ? `${rankingsMonth.replace('-', '年')}月 AI工具榜单` : 'AI工具热门榜单'}
-                </h1>
-                
-                {/* Tab切换 */}
-                <div className="flex gap-1 bg-slate-100/50 dark:bg-slate-800/50 rounded-lg p-1">
-                  <button
-                    onClick={() => setRankingsRegion('global')}
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      rankingsRegion === 'global'
-                        ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    全球Top10
-                  </button>
-                  <button
-                    onClick={() => setRankingsRegion('china')}
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      rankingsRegion === 'china'
-                        ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    国内Top10
-                  </button>
-                </div>
-              </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                精选最受欢迎的AI工具，实时追踪热度变化
-              </p>
-            </div>
-
-            {/* 榜单内容 - 桌面端表格，移动端卡片 */}
-            {rankingsLoading ? (
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-8">
-                <div className="flex items-center justify-center h-48">
-                  <div className="animate-spin w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full" />
-                </div>
-              </div>
-            ) : rankings.length > 0 ? (
-              <>
-                {/* 桌面端表格 */}
-                <div className="hidden md:block bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-slate-50/80 dark:bg-slate-700/50">
-                      <tr className="text-left text-sm text-slate-500 dark:text-slate-400">
-                        <th className="px-6 py-4 font-medium w-20">排名</th>
-                        <th className="px-6 py-4 font-medium">工具</th>
-                        <th className="px-6 py-4 font-medium w-32">月访问量</th>
-                        <th className="px-6 py-4 font-medium w-24">增长率</th>
-                        <th className="px-6 py-4 font-medium w-24">分类</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100/50 dark:divide-slate-700/50">
-                      {rankings.map((item) => (
-                        <tr 
-                          key={item.id} 
-                          className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
-                          onClick={() => {
-                            if (typeof window !== 'undefined') {
-                              const backState = { 
-                                path: window.location.pathname + window.location.search || '/',
-                                tab: 'rankings'
-                              };
-                              sessionStorage.setItem('backFrom', JSON.stringify(backState));
-                            }
-                            if (item.tool_id) {
-                              window.open(`/tools/${item.tool_id}`, '_blank');
-                            } else {
-                              window.open(item.tool_url, '_blank');
-                            }
-                          }}
-                        >
-                          <td className="px-6 py-4">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                              item.rank === 1 ? 'bg-yellow-400 text-white' :
-                              item.rank === 2 ? 'bg-slate-300 text-white' :
-                              item.rank === 3 ? 'bg-orange-300 text-white' :
-                              'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                            }`}>
-                              {item.rank}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <ToolLogo
-                                src={item.tool_logo}
-                                name={item.tool_name}
-                                url={item.tool_url}
-                                size={40}
-                              />
-                              <div>
-                                <span className="font-medium text-slate-800 dark:text-white hover:text-orange-500 transition-colors">
-                                  {item.tool_name}
-                                </span>
-                                {item.tool_description && (
-                                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
-                                    {item.tool_description}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                            {item.monthly_visits || '-'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {item.growth_rate ? (
-                            <span className={`text-sm font-medium ${
-                              item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'
-                            }`}>
-                              {item.growth_rate}
-                            </span>
-                          ) : (
-                            <span className="text-slate-400">-</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="text-sm text-slate-500">
-                            {CATEGORY_SLUG_TO_NAME[item.category] || item.category || '-'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                </div>
-                
-                {/* 移动端卡片列表 */}
-                <div className="md:hidden space-y-3">
-                  {rankings.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          const backState = { 
-                            path: window.location.pathname + window.location.search || '/',
-                            tab: 'rankings'
-                          };
-                          sessionStorage.setItem('backFrom', JSON.stringify(backState));
-                        }
-                        if (item.tool_id) {
-                          window.open(`/tools/${item.tool_id}`, '_blank');
-                        } else {
-                          window.open(item.tool_url, '_blank');
-                        }
-                      }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                          item.rank === 1 ? 'bg-yellow-400 text-white' :
-                          item.rank === 2 ? 'bg-slate-300 text-white' :
-                          item.rank === 3 ? 'bg-orange-300 text-white' :
-                          'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                        }`}>
-                          {item.rank}
-                        </div>
-                        <ToolLogo
-                          src={item.tool_logo}
-                          name={item.tool_name}
-                          url={item.tool_url}
-                          size={40}
-                          className="flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-slate-800 dark:text-white truncate">
-                            {item.tool_name}
-                          </div>
-                          {item.tool_description && (
-                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                              {item.tool_description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-                        <div className="flex items-center gap-4 text-sm">
-                          <span className="text-slate-500">
-                            <span className="text-slate-400">月访问:</span>{' '}
-                            <span className="font-medium text-slate-700 dark:text-slate-200">{item.monthly_visits || '-'}</span>
-                          </span>
-                          {item.growth_rate && (
-                            <span className={item.growth_rate.includes('-') ? 'text-red-500' : 'text-green-500'}>
-                              {item.growth_rate}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded">
-                          {CATEGORY_SLUG_TO_NAME[item.category] || item.category || '-'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-8 sm:p-12 text-center">
-                <TrendingUp className="w-10 sm:w-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-                <p className="text-slate-500 dark:text-slate-400 mb-4">暂无榜单数据</p>
-                <p className="text-sm text-slate-400 dark:text-slate-500">
-                  请联系管理员导入榜单数据
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
           <div className="flex gap-6">

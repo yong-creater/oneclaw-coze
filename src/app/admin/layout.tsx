@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 
 const navigation = [
   { name: '仪表盘', href: '/admin' },
-  { name: '排行榜', href: '/admin/rankings' },
   { name: 'AI应用管理', href: '/admin/tools' },
   { name: '分类管理', href: '/admin/categories' },
   { name: '标签管理', href: '/admin/tags' },

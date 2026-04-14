@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { 
   Bot, 
   Sparkles, 
-  TrendingUp, 
   Star, 
   ArrowRight, 
   Zap, 
@@ -11,7 +10,8 @@ import {
   Users,
   ChevronRight,
   ExternalLink,
-  Play
+  Play,
+  Award
 } from 'lucide-react';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
@@ -19,16 +19,14 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 async function getStats() {
   const supabase = getSupabaseClient();
   
-  const [toolsCount, categoriesCount, rankingsCount] = await Promise.all([
+  const [toolsCount, categoriesCount] = await Promise.all([
     supabase.from('tools').select('id', { count: 'exact', head: true }).eq('is_active', true),
     supabase.from('categories').select('id', { count: 'exact', head: true }),
-    supabase.from('monthly_rankings').select('id', { count: 'exact', head: true }).eq('data_status', 'valid'),
   ]);
   
   return {
     tools: toolsCount.count || 0,
     categories: categoriesCount.count || 0,
-    rankings: rankingsCount.count || 0,
   };
 }
 
@@ -67,9 +65,6 @@ export default async function LandingPage() {
             
             {/* 导航 */}
             <nav className="hidden md:flex items-center gap-8">
-              <Link href="/?tab=rankings" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors">
-                排行榜
-              </Link>
               <Link href="/?tab=tools" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors">
                 AI应用
               </Link>
@@ -133,13 +128,6 @@ export default async function LandingPage() {
                 开始探索
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link 
-                href="/?tab=rankings"
-                className="flex items-center gap-2 px-8 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl font-semibold text-lg text-slate-700 dark:text-slate-200 transition-all"
-              >
-                <TrendingUp className="w-5 h-5" />
-                查看榜单
-              </Link>
             </div>
           </div>
         </div>
@@ -148,7 +136,7 @@ export default async function LandingPage() {
       {/* 统计数据 */}
       <section className="py-16 bg-slate-50 dark:bg-slate-800/50">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-3 gap-8">
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-orange-500 mb-2">{stats.tools}+</div>
               <div className="text-slate-600 dark:text-slate-400">精选工具</div>
@@ -156,10 +144,6 @@ export default async function LandingPage() {
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-orange-500 mb-2">{stats.categories}</div>
               <div className="text-slate-600 dark:text-slate-400">工具分类</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-orange-500 mb-2">{stats.rankings}+</div>
-              <div className="text-slate-600 dark:text-slate-400">榜单数据</div>
             </div>
             <div className="text-center">
               <div className="text-3xl md:text-4xl font-bold text-orange-500 mb-2">每日</div>
@@ -286,7 +270,7 @@ export default async function LandingPage() {
                   </li>
                   <li className="flex items-center gap-3">
                     <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4" />
+                      <Award className="w-4 h-4" />
                     </div>
                     <span>独家榜单和行业分析</span>
                   </li>

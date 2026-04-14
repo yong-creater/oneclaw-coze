@@ -286,12 +286,7 @@ export default function AdminDashboard() {
         {/* 热门工具 */}
         <Card>
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">热门工具 TOP 5</CardTitle>
-              <Link href="/rankings" className="text-sm text-orange-500 hover:text-orange-600">
-                查看榜单
-              </Link>
-            </div>
+            <CardTitle className="text-base">热门工具 TOP 5</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
