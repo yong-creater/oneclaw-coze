@@ -136,6 +136,11 @@ const POLISH_STYLES = [
   { value: '起点玄幻', label: '起点玄幻' },
   { value: '知乎盐文', label: '知乎盐文' },
   { value: '短剧口语化', label: '短剧口语化' },
+  { value: '飞卢风', label: '飞卢风' },
+  { value: '都市职场', label: '都市职场' },
+  { value: '穿越重生', label: '穿越重生' },
+  { value: '科幻末日', label: '科幻末日' },
+  { value: '武侠江湖', label: '武侠江湖' },
 ];
 
 const POLISH_INTENSITY = [
@@ -150,6 +155,11 @@ const PANEL_STYLES = [
   { value: '写实', label: '写实' },
   { value: '赛博朋克', label: '赛博朋克' },
   { value: '暗黑', label: '暗黑' },
+  { value: '水墨', label: '水墨' },
+  { value: '日漫', label: '日漫' },
+  { value: '美漫', label: '美漫' },
+  { value: '像素风', label: '像素风' },
+  { value: '浮世绘', label: '浮世绘' },
 ];
 
 const IMAGE_QUALITY = [
@@ -164,6 +174,11 @@ const SCRIPT_STYLES = [
   { value: '爽文', label: '爽文' },
   { value: '古风', label: '古风' },
   { value: '搞笑', label: '搞笑' },
+  { value: '恐怖', label: '恐怖' },
+  { value: '科幻', label: '科幻' },
+  { value: '都市', label: '都市' },
+  { value: '穿越', label: '穿越' },
+  { value: '逆袭', label: '逆袭' },
 ];
 
 // AI模型分组选项
