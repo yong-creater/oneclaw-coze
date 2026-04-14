@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useAuth } from '@/hooks/useAuth';
+import LoginModal from '@/components/LoginModal';
 
 const REQUEST_TIMEOUT = 60000;
 const RATE_LIMIT_MAX = 10;
@@ -232,7 +233,7 @@ export default function NovelCreator() {
   const [selectedFeature, setSelectedFeature] = useState('polish');
   
   // 使用统一的登录认证
-  const { user: authUser, authenticated, login, logout, requireAuth } = useAuth();
+  const { user: authUser, authenticated, login, logout, requireAuth, showLogin, setShowLogin } = useAuth();
   
   // 获取当前功能的输入输出
   const currentInput = featureStates[selectedFeature]?.input || '';
@@ -776,6 +777,12 @@ export default function NovelCreator() {
           </div>
         </div>
       </div>
+      
+      {/* 登录弹窗 */}
+      <LoginModal 
+        open={showLogin} 
+        onClose={() => setShowLogin(false)} 
+      />
     </div>
   );
 }
