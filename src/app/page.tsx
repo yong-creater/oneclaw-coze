@@ -379,8 +379,8 @@ const cache = {
 
 	// ==================== 主组件 ====================
 export default function HomePage() {
-  // 主Tab状态 - 默认排行榜
-  const [mainTab, setMainTab] = useState<MainTab>('tools');
+  // 主Tab状态 - 默认精选工具
+  const [mainTab, setMainTab] = useState<MainTab>('utilities');
 
   // 页面加载时，从 sessionStorage 读取返回的 tab
   useEffect(() => {
