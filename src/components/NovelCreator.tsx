@@ -230,6 +230,19 @@ export default function NovelCreator() {
   });
   const [selectedFeature, setSelectedFeature] = useState('polish');
   
+  // 用户ID
+  const [userId, setUserId] = useState<string>('');
+  
+  useEffect(() => {
+    // 获取或生成用户ID
+    let id = localStorage.getItem('user_id');
+    if (!id) {
+      id = 'user_' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('user_id', id);
+    }
+    setUserId(id);
+  }, []);
+  
   // 获取当前功能的输入输出
   const currentInput = featureStates[selectedFeature]?.input || '';
   const currentOutput = featureStates[selectedFeature]?.output || '';
@@ -462,7 +475,54 @@ export default function NovelCreator() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-[calc(100vh-200px)]">
+    <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-screen">
+      {/* 顶部品牌栏 */}
+      <div className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+          <div className="flex items-center justify-between">
+            {/* 左侧：应用 Logo + 网站 Logo */}
+            <div className="flex items-center gap-4">
+              {/* 网站 Logo */}
+              <div className="flex items-center gap-2">
+                <div className="text-2xl">🦞</div>
+                <span className="font-bold text-lg text-slate-800">OneClaw</span>
+              </div>
+              
+              {/* 分隔线 */}
+              <div className="hidden sm:block w-px h-6 bg-slate-200" />
+              
+              {/* 应用 Logo */}
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <Feather className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-semibold text-slate-700">小说创作</span>
+              </div>
+            </div>
+            
+            {/* 右侧：用户信息或登录 */}
+            <div className="flex items-center gap-3">
+              {userId ? (
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                    <span className="text-white text-xs font-medium">{userId.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                  <span className="text-sm text-slate-600 hidden sm:inline">用户</span>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {/* TODO: 打开登录弹窗 */}}
+                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-medium rounded-full transition-all shadow-md shadow-orange-500/20"
+                >
+                  登录
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 主内容区 */}
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* 第一层级：功能选择 + 模型选择 */}
