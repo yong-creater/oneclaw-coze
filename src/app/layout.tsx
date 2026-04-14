@@ -238,8 +238,10 @@ export default function RootLayout({
           }}
         />
         
-        {/* 百度统计 - 直接内联脚本确保被检测 */}
-        <script
+        {/* 百度统计 - 使用 afterInteractive 策略避免 hydration mismatch */}
+        <Script
+          id="baidu-analytics"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               var _hmt = _hmt || [];
