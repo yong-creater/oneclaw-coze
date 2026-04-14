@@ -20,6 +20,118 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 
+// 分组模型选择器组件
+function ModelGroupSelect({ 
+  value, 
+  onChange 
+}: { 
+  value: string; 
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [expandedProviders, setExpandedProviders] = useState<string[]>(['豆包']);
+  
+  const selectedModel = AI_MODELS.find(m => m.value === value);
+  const selectedGroup = AI_MODEL_GROUPS.find(g => 
+    g.models.some(m => m.value === value)
+  );
+  
+  const toggleProvider = (provider: string) => {
+    setExpandedProviders(prev => 
+      prev.includes(provider) 
+        ? prev.filter(p => p !== provider)
+        : [...prev, provider]
+    );
+  };
+  
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          {selectedModel && (
+            <>
+              <span className="text-sm">{selectedGroup?.icon}</span>
+              <span className="text-sm text-slate-800 dark:text-slate-200">
+                {selectedModel.provider} - {selectedModel.label}
+              </span>
+              <span className={`text-xs px-1.5 py-0.5 rounded ${
+                selectedModel.region === '国内' 
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+              }`}>
+                {selectedModel.region}
+              </span>
+            </>
+          )}
+        </div>
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {open && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setOpen(false)} 
+          />
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg z-50 max-h-80 overflow-y-auto">
+            {AI_MODEL_GROUPS.map(group => (
+              <div key={group.provider} className="border-b border-slate-100 dark:border-slate-700 last:border-b-0">
+                {/* 厂商标题 */}
+                <button
+                  type="button"
+                  onClick={() => toggleProvider(group.provider)}
+                  className="w-full px-4 py-2.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span>{group.icon}</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">{group.provider}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400">{group.models.length}个模型</span>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${expandedProviders.includes(group.provider) ? 'rotate-180' : ''}`} />
+                  </div>
+                </button>
+                
+                {/* 模型列表 */}
+                {expandedProviders.includes(group.provider) && (
+                  <div className="bg-slate-50/50 dark:bg-slate-900/50">
+                    {group.models.map(model => (
+                      <button
+                        key={model.value}
+                        type="button"
+                        onClick={() => {
+                          onChange(model.value);
+                          setOpen(false);
+                        }}
+                        className={`w-full px-4 py-2.5 pl-10 flex items-center justify-between hover:bg-white dark:hover:bg-slate-700 transition-colors ${
+                          value === model.value ? 'bg-orange-50 dark:bg-orange-900/20' : ''
+                        }`}
+                      >
+                        <span className="text-sm text-slate-700 dark:text-slate-300">{model.label}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded ${
+                          model.region === '国内' 
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-400'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+                        }`}>
+                          {model.region}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ==================== 类型定义 ====================
 interface StoryContent {
   original: string;
@@ -90,18 +202,56 @@ const SCRIPT_STYLES = [
   { value: '搞笑', label: '搞笑' },
 ];
 
-// AI模型选项
-const AI_MODELS = [
-  { value: 'doubao-seed-1-8-251228', label: '豆包 Seed 1.8', region: '国内', provider: 'Coze' },
-  { value: 'deepseek-v3-2-251201', label: 'DeepSeek V3', region: '国外', provider: 'Coze' },
-  { value: 'deepseek-r1-250528', label: 'DeepSeek R1', region: '国外', provider: 'Coze' },
-  { value: 'kimi-k2-5-260127', label: 'Kimi K2.5', region: '国外', provider: 'Coze' },
-  { value: 'kimi-k2-250905', label: 'Kimi K2', region: '国外', provider: 'Coze' },
-  { value: 'glm-5-0-260211', label: 'GLM-5', region: '国内', provider: 'Coze' },
-  { value: 'qwen-3-5-plus-260215', label: 'Qwen 3.5 Plus', region: '国内', provider: 'Coze' },
-  { value: 'doubao-seed-2-0-pro-260215', label: '豆包 Seed Pro', region: '国内', provider: 'Coze' },
-  { value: 'doubao-seed-2-0-lite-260215', label: '豆包 Seed Lite', region: '国内', provider: 'Coze' },
+// AI模型分组选项
+const AI_MODEL_GROUPS = [
+  {
+    provider: '豆包',
+    icon: '🦜',
+    models: [
+      { value: 'doubao-seed-1-8-251228', label: 'Seed 1.8', region: '国内' },
+      { value: 'doubao-seed-2-0-pro-260215', label: 'Seed 2.0 Pro', region: '国内' },
+      { value: 'doubao-seed-2-0-lite-260215', label: 'Seed 2.0 Lite', region: '国内' },
+    ]
+  },
+  {
+    provider: 'DeepSeek',
+    icon: '🔮',
+    models: [
+      { value: 'deepseek-v3-2-251201', label: 'V3', region: '国外' },
+      { value: 'deepseek-r1-250528', label: 'R1 (推理)', region: '国外' },
+    ]
+  },
+  {
+    provider: 'Kimi',
+    icon: '🌙',
+    models: [
+      { value: 'kimi-k2-5-260127', label: 'K2.5', region: '国外' },
+      { value: 'kimi-k2-250905', label: 'K2', region: '国外' },
+    ]
+  },
+  {
+    provider: 'GLM',
+    icon: '📊',
+    models: [
+      { value: 'glm-5-0-260211', label: 'GLM-5', region: '国内' },
+    ]
+  },
+  {
+    provider: 'Qwen',
+    icon: '🏔️',
+    models: [
+      { value: 'qwen-3-5-plus-260215', label: 'Qwen 3.5 Plus', region: '国内' },
+    ]
+  },
 ];
+
+// 扁平化的模型列表（用于默认选中和快速查找）
+const AI_MODELS = AI_MODEL_GROUPS.flatMap(group => 
+  group.models.map(m => ({
+    ...m,
+    provider: group.provider
+  }))
+);
 
 // ==================== 工具函数 ====================
 const generateId = () => Math.random().toString(36).substring(2, 11);
@@ -760,20 +910,9 @@ export default function NovelCreator() {
                       <label className="block text-sm font-medium text-slate-700 mb-1">
                         <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                         AI模型
-                        <span className="text-xs text-slate-400 ml-1">(可选择国内外模型)</span>
+                        <span className="text-xs text-slate-400 ml-1">(按厂商分组选择)</span>
                       </label>
-                      <Select value={selectedModel} onValueChange={setSelectedModel}>
-                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {AI_MODELS.map(m => (
-                            <SelectItem key={m.value} value={m.value}>
-                              {m.label} - {m.region} ({m.provider})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
                     </div>
                     
                     <div>
