@@ -21,7 +21,7 @@ const navigation = [
   { name: '提示词管理', href: '/admin/prompts' },
   { name: '技能管理', href: '/admin/skills' },
   { name: '教程管理', href: '/admin/tutorials' },
-  { name: '实用工具', href: '/admin/utilities' },
+  { name: '精选工具', href: '/admin/utilities' },
   { name: '评论审核', href: '/admin/reviews' },
   { name: '会员管理', href: '/admin/members' },
   { name: '用户管理', href: '/admin/users' },

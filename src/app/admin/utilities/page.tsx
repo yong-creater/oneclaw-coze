@@ -183,8 +183,8 @@ export default function UtilitiesPage() {
     <div className="space-y-6">
       {/* 页面标题 */}
       <div>
-        <h2 className="text-2xl font-bold">实用工具管理</h2>
-        <p className="text-sm text-slate-500">查看和管理实用工具的使用记录</p>
+        <h2 className="text-2xl font-bold">精选工具</h2>
+        <p className="text-sm text-slate-500">查看和管理精选工具的使用记录</p>
       </div>
 
       {/* 统计卡片 */}
