@@ -14,20 +14,6 @@ function loadEnv(): void {
   }
 
   try {
-    // 尝试动态加载 dotenv
-    try {
-      // 使用 ES module 的动态导入
-      import('dotenv').then(dotenv => {
-        dotenv.config();
-      }).catch(() => {});
-      if (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY) {
-        envLoaded = true;
-        return;
-      }
-    } catch {
-      // dotenv not available
-    }
-
     const pythonCode = `
 import os
 import sys
