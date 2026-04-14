@@ -76,7 +76,14 @@ function ModelGroupSelect({
                     : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
               >
-                <div className="font-medium">{model.label}</div>
+                <div className="font-medium flex items-center gap-2">
+                  {model.label}
+                  {model.region === '付费' && (
+                    <span className="text-xs px-1.5 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded">
+                      付费
+                    </span>
+                  )}
+                </div>
                 <div className={`text-xs mt-0.5 ${model.value === value ? 'text-white/80' : 'text-slate-500'}`}>
                   {model.provider}
                 </div>
@@ -165,39 +172,66 @@ const AI_MODEL_GROUPS = [
     provider: '豆包',
     icon: '🦜',
     models: [
-      { value: 'doubao-seed-1-8-251228', label: 'Seed 1.8', region: '国内' },
-      { value: 'doubao-seed-2-0-pro-260215', label: 'Seed 2.0 Pro', region: '国内' },
-      { value: 'doubao-seed-2-0-lite-260215', label: 'Seed 2.0 Lite', region: '国内' },
+      { value: 'doubao-seed-1-8-251228', label: 'Seed 1.8', region: '免费' },
+      { value: 'doubao-seed-2-0-pro-260215', label: 'Seed 2.0 Pro', region: '免费' },
+      { value: 'doubao-seed-2-0-lite-260215', label: 'Seed 2.0 Lite', region: '免费' },
     ]
   },
   {
     provider: 'DeepSeek',
     icon: '🔮',
     models: [
-      { value: 'deepseek-v3-2-251201', label: 'V3', region: '国外' },
-      { value: 'deepseek-r1-250528', label: 'R1 (推理)', region: '国外' },
+      { value: 'deepseek-v3-2-251201', label: 'V3', region: '免费' },
+      { value: 'deepseek-r1-250528', label: 'R1 (推理)', region: '免费' },
     ]
   },
   {
     provider: 'Kimi',
     icon: '🌙',
     models: [
-      { value: 'kimi-k2-5-260127', label: 'K2.5', region: '国外' },
-      { value: 'kimi-k2-250905', label: 'K2', region: '国外' },
+      { value: 'kimi-k2-5-260127', label: 'K2.5', region: '免费' },
+      { value: 'kimi-k2-250905', label: 'K2', region: '免费' },
     ]
   },
   {
     provider: 'GLM',
     icon: '📊',
     models: [
-      { value: 'glm-5-0-260211', label: 'GLM-5', region: '国内' },
+      { value: 'glm-5-0-260211', label: 'GLM-5', region: '免费' },
     ]
   },
   {
     provider: 'Qwen',
     icon: '🏔️',
     models: [
-      { value: 'qwen-3-5-plus-260215', label: 'Qwen 3.5 Plus', region: '国内' },
+      { value: 'qwen-3-5-plus-260215', label: 'Qwen 3.5 Plus', region: '免费' },
+    ]
+  },
+  // 4sAPI 付费模型
+  {
+    provider: 'GPT (4sAPI)',
+    icon: '🤖',
+    models: [
+      { value: 'gpt-4o', label: 'GPT-4o', region: '付费' },
+      { value: 'gpt-4o-mini', label: 'GPT-4o Mini', region: '付费' },
+      { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', region: '付费' },
+    ]
+  },
+  {
+    provider: 'Claude (4sAPI)',
+    icon: '🧠',
+    models: [
+      { value: 'claude-3-5-sonnet', label: 'Claude 3.5 Sonnet', region: '付费' },
+      { value: 'claude-3-5-haiku', label: 'Claude 3.5 Haiku', region: '付费' },
+      { value: 'claude-sonnet-4', label: 'Claude Sonnet 4', region: '付费' },
+    ]
+  },
+  {
+    provider: 'Gemini (4sAPI)',
+    icon: '✨',
+    models: [
+      { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', region: '付费' },
+      { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', region: '付费' },
     ]
   },
 ];

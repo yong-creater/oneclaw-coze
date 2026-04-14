@@ -4,7 +4,24 @@ import { NextRequest, NextResponse } from 'next/server';
 const COZE_API_KEY = process.env.COZE_WORKLOAD_IDENTITY_API_KEY || process.env.OPENAI_API_KEY || '';
 const COZE_API_BASE = 'https://integration.coze.cn/api/v3';
 
-// Coze SDK 免费模型列表
+// 4sAPI 配置
+const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
+const API4S_KEY = process.env.API4S_KEY || '';
+const API4S_URL = process.env.API4S_URL || 'https://4sapi.com/v1';
+
+// 4sAPI 专属模型列表
+const API4S_MODELS = [
+  'gpt-4o',
+  'gpt-4o-mini', 
+  'gpt-4-turbo',
+  'claude-3-5-sonnet',
+  'claude-3-5-haiku',
+  'claude-sonnet-4',
+  'gemini-2.0-flash',
+  'gemini-1.5-pro',
+];
+
+// 免费模型列表 (Coze)
 const FREE_MODELS = [
   'doubao-seed-2-0-pro-260215',
   'doubao-seed-2-0-lite-260215',
@@ -40,10 +57,44 @@ const FREE_MODELS = [
   'minimax-chat',
 ];
 
-// 检查是否为免费模型
+// 检查是否为免费模型 (Coze)
 function isFreeModel(model: string): boolean {
   const lowerModel = model?.toLowerCase() || '';
   return FREE_MODELS.some(m => lowerModel.includes(m.toLowerCase()));
+}
+
+// 检查是否为 4sAPI 模型
+function is4sapiModel(model: string): boolean {
+  const lowerModel = model?.toLowerCase() || '';
+  return API4S_MODELS.some(m => lowerModel.includes(m.toLowerCase()));
+}
+
+// 调用 4sAPI
+async function call4sapiAPI(messages: any[], model: string): Promise<string> {
+  if (!ENABLE_4SAPI || !API4S_KEY) {
+    throw new Error('4sAPI 未启用或未配置密钥');
+  }
+
+  const response = await fetch(`${API4S_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API4S_KEY}`,
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: messages,
+      stream: false,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`4sAPI error: ${response.status} - ${errorText}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || '';
 }
 
 // 推文脚本生成系统提示词
@@ -145,10 +196,12 @@ ${text.substring(0, 2000)}...
 
     let content = '';
     
-    if (isFreeModel(targetModel)) {
+    if (is4sapiModel(targetModel)) {
+      content = await call4sapiAPI(messages, targetModel);
+    } else if (isFreeModel(targetModel)) {
       content = await callCozeAPI(messages, targetModel);
     } else {
-      return NextResponse.json({ error: '付费模型未启用，请选择免费模型' }, { status: 400 });
+      return NextResponse.json({ error: '不支持的模型，请选择免费模型或4sAPI模型' }, { status: 400 });
     }
     
     if (!content) {
