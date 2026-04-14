@@ -28,8 +28,17 @@ export const LobsterLoading = memo(function LobsterLoading({
 
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
-      <div className={animationClass} style={{ filter: 'saturate(1.3) brightness(1.1) sepia(0.1)' }}>
-        <span style={{ fontSize: size }}>🦞</span>
+      <div className={animationClass}>
+        <Image
+          src="/oneclaw-logo.png?v=10"
+          alt="OneClaw 龙虾"
+          width={size}
+          height={size}
+          className="object-contain"
+          style={{ filter: 'saturate(1.3) brightness(1.1) sepia(0.1)' }}
+          priority
+          unoptimized
+        />
       </div>
       {text && (
         <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">
