@@ -343,6 +343,8 @@ export default function HomePage() {
     setUserId(id);
     // 清理过期缓存
     cache.cleanup();
+    // 获取分类列表
+    fetchCategories();
   }, []);
 
   // ==================== 工具相关方法 ====================
