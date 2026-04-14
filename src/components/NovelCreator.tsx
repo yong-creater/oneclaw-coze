@@ -519,7 +519,7 @@ export default function NovelCreator() {
               ) : (
                 <button
                   onClick={login}
-                  className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-medium rounded-full transition-all shadow-md shadow-orange-500/20"
+                  className="px-5 py-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
                 >
                   登录
                 </button>
