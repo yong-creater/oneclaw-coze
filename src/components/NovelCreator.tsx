@@ -532,6 +532,7 @@ export default function NovelCreator() {
           prompt,
           quality: imageQuality,
           style: panelStyle,
+          model: selectedModel,
         }),
       });
       
@@ -1105,7 +1106,15 @@ export default function NovelCreator() {
                   />
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
+                      AI模型
+                    </label>
+                    <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
+                  </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">分镜数量</label>
                     <Select value={panelCount} onValueChange={setPanelCount}>
@@ -1238,7 +1247,15 @@ export default function NovelCreator() {
                 漫画生成配置
               </h2>
               
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
+                    AI模型
+                  </label>
+                  <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
+                </div>
+                
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">画质设置</label>
                   <Select value={imageQuality} onValueChange={setImageQuality}>
@@ -1379,46 +1396,56 @@ export default function NovelCreator() {
                 漫画推文脚本
               </h2>
               
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="space-y-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">发布平台</label>
-                  <Select value={scriptPlatform} onValueChange={(v) => setScriptPlatform(v as 'douyin' | 'xiaohongshu')}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="douyin">抖音</SelectItem>
-                      <SelectItem value="xiaohongshu">小红书</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
+                    AI模型
+                  </label>
+                  <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">推文风格</label>
-                  <Select value={scriptStyle} onValueChange={(v) => setScriptStyle(v as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SCRIPT_STYLES.map(s => (
-                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">推文时长</label>
-                  <Select value={scriptDuration} onValueChange={(v) => setScriptDuration(v as '15s' | '30s' | '60s')}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="15s">15秒</SelectItem>
-                      <SelectItem value="30s">30秒</SelectItem>
-                      <SelectItem value="60s">60秒</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">发布平台</label>
+                    <Select value={scriptPlatform} onValueChange={(v) => setScriptPlatform(v as 'douyin' | 'xiaohongshu')}>
+                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="douyin">抖音</SelectItem>
+                        <SelectItem value="xiaohongshu">小红书</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">推文风格</label>
+                    <Select value={scriptStyle} onValueChange={(v) => setScriptStyle(v as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}>
+                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SCRIPT_STYLES.map(s => (
+                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">推文时长</label>
+                    <Select value={scriptDuration} onValueChange={(v) => setScriptDuration(v as '15s' | '30s' | '60s')}>
+                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15s">15秒</SelectItem>
+                        <SelectItem value="30s">30秒</SelectItem>
+                        <SelectItem value="60s">60秒</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               
