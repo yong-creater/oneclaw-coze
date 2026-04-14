@@ -12,7 +12,7 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  Wrench
+  Wrench, FileText
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -182,11 +182,18 @@ function UtilityToolsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {tools.map(tool => {
           const Icon = tool.icon;
+          const getToolUrl = (key: string) => {
+            const urls: Record<string, string> = {
+              resume: '/resume',
+              novel: '/novel',
+            };
+            return urls[key] || '/';
+          };
           return (
             <button
               key={tool.key}
               onClick={() => {
-                window.open(`/novel`, '_blank');
+                window.open(getToolUrl(tool.key), '_blank');
               }}
               className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left overflow-hidden"
             >
@@ -210,6 +217,26 @@ function UtilityToolsPage() {
                 <div className="flex items-center gap-2 mt-4 text-orange-500 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
                   <span>开始使用</span>
                   <ArrowRight className="w-4 h-4" />
+                </div>
+                
+                {/* Hover显示核心卖点 */}
+                <div className="hidden group-hover:block absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white dark:from-slate-800 via-white/90 dark:via-slate-800/90 to-transparent p-4 pt-8">
+                  <div className="flex flex-wrap gap-1.5">
+                    {tool.key === 'resume' && (
+                      <>
+                        <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs rounded-full">PDF上传</span>
+                        <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 text-xs rounded-full">JD精准匹配</span>
+                        <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 text-xs rounded-full">量化成果</span>
+                      </>
+                    )}
+                    {tool.key === 'novel' && (
+                      <>
+                        <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 text-xs rounded-full">洗稿润色</span>
+                        <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">批量处理</span>
+                        <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-full">多场景适配</span>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </button>
@@ -243,10 +270,17 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 // 实用工具列表
 const UTILITY_TOOLS = [
   { 
+    key: 'resume', 
+    name: 'STAR简历优化', 
+    icon: FileText,
+    description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  { 
     key: 'novel', 
     name: '小说创作', 
     icon: Feather,
-    description: 'AI小说创作助手',
+    description: 'AI小说创作助手，洗稿润色一键搞定',
     color: 'from-purple-500 to-pink-500'
   },
 ] as const;
