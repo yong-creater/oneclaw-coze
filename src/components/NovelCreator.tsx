@@ -26,14 +26,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// 快捷键说明提示
-const KEYBOARD_HINTS = [
-  { key: '1-5', desc: '快速切换厂商' },
-  { key: '↑↓', desc: '选择模型' },
-  { key: 'Enter', desc: '确认' },
-  { key: 'Esc', desc: '关闭' },
-];
-
 // 分组模型选择器组件 - 弹框模式
 function ModelGroupSelect({ 
   value, 
@@ -43,92 +35,14 @@ function ModelGroupSelect({
   onChange: (v: string) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [activeProviderIndex, setActiveProviderIndex] = useState(0);
-  const [activeModelIndex, setActiveModelIndex] = useState(0);
   
   const selectedModel = AI_MODELS.find(m => m.value === value);
-  const currentGroup = AI_MODEL_GROUPS[activeProviderIndex];
-  const currentModel = currentGroup?.models[activeModelIndex];
-  
-  // 打开弹框时定位到当前选中的模型
-  const handleOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
-    if (isOpen) {
-      // 定位到当前选中的厂商
-      const providerIdx = AI_MODEL_GROUPS.findIndex(g => 
-        g.models.some(m => m.value === value)
-      );
-      if (providerIdx >= 0) {
-        setActiveProviderIndex(providerIdx);
-        // 定位到当前选中的模型
-        const modelIdx = AI_MODEL_GROUPS[providerIdx].models.findIndex(
-          m => m.value === value
-        );
-        if (modelIdx >= 0) {
-          setActiveModelIndex(modelIdx);
-        }
-      }
-    }
-  };
-  
-  // 键盘事件处理
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!open) return;
-    
-    switch (e.key) {
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-        const idx = parseInt(e.key) - 1;
-        if (idx < AI_MODEL_GROUPS.length) {
-          setActiveProviderIndex(idx);
-          setActiveModelIndex(0);
-        }
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        if (activeModelIndex < currentGroup.models.length - 1) {
-          setActiveModelIndex(prev => prev + 1);
-        }
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        if (activeModelIndex > 0) {
-          setActiveModelIndex(prev => prev - 1);
-        }
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (currentModel) {
-          onChange(currentModel.value);
-          setOpen(false);
-        }
-        break;
-      case 'Escape':
-        setOpen(false);
-        break;
-    }
-  };
-  
-  // 切换厂商时重置模型索引
-  const handleProviderClick = (idx: number) => {
-    setActiveProviderIndex(idx);
-    setActiveModelIndex(0);
-  };
-  
-  // 选择模型
-  const handleModelSelect = (modelValue: string) => {
-    onChange(modelValue);
-    setOpen(false);
-  };
   
   return (
     <div>
       <button
         type="button"
-        onClick={() => handleOpenChange(true)}
+        onClick={() => setOpen(true)}
         className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
       >
         <div className="flex items-center gap-2">
@@ -143,16 +57,11 @@ function ModelGroupSelect({
             </>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded">
-            ⌨️ 快捷键
-          </span>
-          <ChevronDown className="w-4 h-4 text-slate-400" />
-        </div>
+        <ChevronDown className="w-4 h-4 text-slate-400" />
       </button>
       
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-md max-h-[80vh] flex flex-col" onKeyDown={handleKeyDown}>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[70vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-orange-500" />
@@ -160,60 +69,38 @@ function ModelGroupSelect({
             </DialogTitle>
           </DialogHeader>
           
-          {/* 快捷键提示 */}
-          <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-            {KEYBOARD_HINTS.map(hint => (
-              <span key={hint.key} className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded">
-                <kbd className="px-1 py-0.5 bg-white dark:bg-slate-600 rounded text-xs font-mono">{hint.key}</kbd>
-                {hint.desc}
-              </span>
+          {/* 模型列表 - 按厂商分组平铺 */}
+          <div className="overflow-y-auto flex-1 space-y-4">
+            {AI_MODEL_GROUPS.map(group => (
+              <div key={group.provider}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">{group.icon}</span>
+                  <span className="font-medium text-slate-800 dark:text-slate-200">{group.provider}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {group.models.map(model => (
+                    <button
+                      key={model.value}
+                      type="button"
+                      onClick={() => {
+                        onChange(model.value);
+                        setOpen(false);
+                      }}
+                      className={`px-4 py-3 rounded-xl text-left transition-all ${
+                        model.value === value
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg scale-[1.02]'
+                          : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      <div className="font-medium">{model.label}</div>
+                      {model.value === value && (
+                        <Check className="w-4 h-4 mt-1" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
-          </div>
-          
-          {/* 厂商列表 */}
-          <div className="flex gap-4 flex-1 overflow-hidden">
-            {/* 左侧厂商列表 */}
-            <div className="w-32 border-r border-slate-200 dark:border-slate-700 pr-4 space-y-1">
-              {AI_MODEL_GROUPS.map((group, idx) => (
-                <button
-                  key={group.provider}
-                  type="button"
-                  onClick={() => handleProviderClick(idx)}
-                  className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2 transition-colors ${
-                    activeProviderIndex === idx 
-                      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' 
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-                  }`}
-                >
-                  <span>{group.icon}</span>
-                  <span className="text-sm font-medium">{group.provider}</span>
-                  <kbd className="ml-auto text-xs bg-slate-200 dark:bg-slate-600 px-1 rounded">{idx + 1}</kbd>
-                </button>
-              ))}
-            </div>
-            
-            {/* 右侧模型列表 */}
-            <div className="flex-1 overflow-y-auto space-y-1">
-              {currentGroup?.models.map((model, idx) => (
-                <button
-                  key={model.value}
-                  type="button"
-                  onClick={() => handleModelSelect(model.value)}
-                  className={`w-full px-3 py-2 rounded-lg text-left flex items-center justify-between transition-colors ${
-                    activeProviderIndex === AI_MODEL_GROUPS.findIndex(g => 
-                      g.models.some(m => m.value === value)
-                    ) && activeModelIndex === idx
-                      ? 'bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-                  } ${model.value === value ? 'ring-2 ring-orange-500' : ''}`}
-                >
-                  <span className="text-sm text-slate-800 dark:text-slate-200">{model.label}</span>
-                  {model.value === value && (
-                    <Check className="w-4 h-4 text-orange-500" />
-                  )}
-                </button>
-              ))}
-            </div>
           </div>
           
           {/* 底部确认 */}
@@ -223,22 +110,13 @@ function ModelGroupSelect({
                 {selectedModel?.provider} - {selectedModel?.label}
               </span>
             </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                onClick={() => currentModel && handleModelSelect(currentModel.value)}
-                className="px-4 py-2 text-sm bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-lg hover:from-orange-600 hover:to-amber-600 transition-colors"
-              >
-                确认选择
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              关闭
+            </button>
           </div>
         </DialogContent>
       </Dialog>
