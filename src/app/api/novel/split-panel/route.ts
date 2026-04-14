@@ -24,7 +24,7 @@ const SYSTEM_PROMPT = `你是专业的漫画分镜师，擅长将小说内容拆
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, count, style } = await request.json();
+    const { text, count, style, model } = await request.json();
 
     if (!text) {
       return NextResponse.json({ error: '请提供小说内容' }, { status: 400 });
@@ -51,7 +51,7 @@ ${text}`;
     const client = new LLMClient(config, customHeaders);
 
     const llmConfig = {
-      model: 'doubao-seed-1-6-251015',
+      model: model || 'doubao-seed-1-8-251228',
       temperature: 0.7,
       streaming: false
     };

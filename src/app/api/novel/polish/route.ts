@@ -16,7 +16,7 @@ const SYSTEM_PROMPT = `你是专业的网文洗稿专家，擅长将小说内容
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, style, intensity, extraRequirements } = await request.json();
+    const { text, style, intensity, extraRequirements, model } = await request.json();
 
     if (!text) {
       return NextResponse.json({ error: '请提供小说内容' }, { status: 400 });
@@ -45,8 +45,9 @@ ${text}`;
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
 
+    // 使用传入的模型或默认模型
     const llmConfig = {
-      model: 'doubao-seed-1-6-251015',
+      model: model || 'doubao-seed-1-8-251228',
       temperature: 0.7,
       streaming: false
     };

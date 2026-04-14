@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const client = new LLMClient(config, customHeaders);
 
     const llmConfig = {
-      model: 'doubao-seed-1-6-251015',
+      model: 'doubao-seed-1-8-251228',
       temperature: 0.7,
       streaming: false
     };

@@ -29,7 +29,7 @@ const SYSTEM_PROMPT = `你是专业的短视频脚本策划师，擅长为漫画
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, panels, platform, style, duration } = await request.json();
+    const { text, panels, platform, style, duration, model } = await request.json();
 
     if (!text) {
       return NextResponse.json({ error: '请提供小说内容' }, { status: 400 });
@@ -65,7 +65,7 @@ ${text.substring(0, 2000)}...
     const client = new LLMClient(config, customHeaders);
 
     const llmConfig = {
-      model: 'doubao-seed-1-6-251015',
+      model: model || 'doubao-seed-1-8-251228',
       temperature: 0.7,
       streaming: false
     };

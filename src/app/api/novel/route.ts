@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     const systemPrompt = SYSTEM_PROMPTS[feature] || SYSTEM_PROMPTS.polish;
-    const targetModel = model || 'doubao-seed-1-6-251015';
+    const targetModel = model || 'doubao-seed-1-8-251228';
     const useFreeModel = isFreeModel(targetModel);
 
     const messages = [

@@ -82,6 +82,19 @@ const SCRIPT_STYLES = [
   { value: '搞笑', label: '搞笑' },
 ];
 
+// AI模型选项
+const AI_MODELS = [
+  { value: 'doubao-seed-1-8-251228', label: '豆包 Seed 1.8', region: '国内', provider: 'Coze' },
+  { value: 'deepseek-v3-2-251201', label: 'DeepSeek V3', region: '国外', provider: 'Coze' },
+  { value: 'deepseek-r1-250528', label: 'DeepSeek R1', region: '国外', provider: 'Coze' },
+  { value: 'kimi-k2-5-260127', label: 'Kimi K2.5', region: '国外', provider: 'Coze' },
+  { value: 'kimi-k2-250905', label: 'Kimi K2', region: '国外', provider: 'Coze' },
+  { value: 'glm-5-0-260211', label: 'GLM-5', region: '国内', provider: 'Coze' },
+  { value: 'qwen-3-5-plus-260215', label: 'Qwen 3.5 Plus', region: '国内', provider: 'Coze' },
+  { value: 'doubao-seed-2-0-pro-260215', label: '豆包 Seed Pro', region: '国内', provider: 'Coze' },
+  { value: 'doubao-seed-2-0-lite-260215', label: '豆包 Seed Lite', region: '国内', provider: 'Coze' },
+];
+
 // ==================== 工具函数 ====================
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
@@ -109,6 +122,7 @@ export default function NovelCreator() {
   const [polishing, setPolishing] = useState(false);
   const [polishedContent, setPolishedContent] = useState<StoryContent | null>(null);
   const [showExample, setShowExample] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('doubao-seed-1-8-251228');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -155,6 +169,7 @@ export default function NovelCreator() {
           style: polishStyle,
           intensity: polishIntensity,
           extraRequirements,
+          model: selectedModel,
         }),
       });
       
@@ -247,6 +262,7 @@ export default function NovelCreator() {
           text: sourceText,
           count: panelCount,
           style: panelStyle,
+          model: selectedModel,
         }),
       });
       
@@ -435,6 +451,7 @@ export default function NovelCreator() {
           platform: scriptPlatform,
           style: scriptStyle,
           duration: scriptDuration,
+          model: selectedModel,
         }),
       });
       
@@ -730,6 +747,26 @@ export default function NovelCreator() {
                   </h2>
                   
                   <div className="space-y-4">
+                    {/* AI模型选择 */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">
+                        <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
+                        AI模型
+                        <span className="text-xs text-slate-400 ml-1">(可选择国内外模型)</span>
+                      </label>
+                      <select
+                        value={selectedModel}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      >
+                        {AI_MODELS.map(m => (
+                          <option key={m.value} value={m.value}>
+                            {m.label} - {m.region} ({m.provider})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">洗稿风格</label>
                       <select
@@ -822,10 +859,15 @@ export default function NovelCreator() {
                 {polishedContent ? (
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
                     <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <Check className="w-5 h-5 text-green-500" />
-                        洗稿完成
-                      </h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                          <Check className="w-5 h-5 text-green-500" />
+                          洗稿完成
+                        </h2>
+                        <Badge variant="outline" className="text-xs">
+                          {AI_MODELS.find(m => m.value === selectedModel)?.label || '豆包'}
+                        </Badge>
+                      </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleCopy(polishedContent.polished || '')}

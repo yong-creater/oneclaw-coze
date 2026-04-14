@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     const encoder = new TextEncoder();
-    const targetModel = model || 'doubao-seed-1-6-251015';
+    const targetModel = model || 'doubao-seed-1-8-251228';
     const useFreeModel = isFreeModel(targetModel);
 
     // 免费模型走 Coze SDK，付费模型走 4sapi
