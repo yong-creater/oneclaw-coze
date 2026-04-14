@@ -134,7 +134,7 @@ export default function ResumeOptimizer() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 dark:from-slate-900 dark:to-slate-800">
       {/* 统一头部 */}
       <UtilityHeader
         toolIcon={<FileText />}
@@ -173,8 +173,8 @@ export default function ResumeOptimizer() {
                       onClick={() => setResumeMode('paste')}
                       className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                         resumeMode === 'paste' 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                       }`}
                     >
                       粘贴文本
@@ -183,8 +183,8 @@ export default function ResumeOptimizer() {
                       onClick={() => setResumeMode('upload')}
                       className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
                         resumeMode === 'upload' 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
                       }`}
                     >
                       上传PDF
@@ -209,7 +209,7 @@ export default function ResumeOptimizer() {
                       />
                       
                       {resumeFile ? (
-                        <div className="p-6 border-2 border-dashed border-blue-200 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-center">
+                        <div className="p-6 border-2 border-dashed border-orange-300 dark:border-orange-600 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-center">
                           <FileText className="w-10 h-10 text-orange-500 mx-auto mb-2" />
                           <p className="text-sm text-slate-600 dark:text-slate-300">{resumePreview}</p>
                           <p className="text-xs text-slate-400 mt-1">
@@ -230,7 +230,7 @@ export default function ResumeOptimizer() {
                       ) : (
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full p-8 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                          className="w-full p-8 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
                         >
                           <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                           <p className="text-sm text-slate-500">点击上传PDF简历</p>
@@ -356,7 +356,7 @@ export default function ResumeOptimizer() {
                     <span className="font-semibold text-orange-500">{matchScore || 85}%</span>
                   </div>
                   <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${matchScore || 85}%` }} />
+                    <div className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full" style={{ width: `${matchScore || 85}%` }} />
                   </div>
                 </div>
                 
