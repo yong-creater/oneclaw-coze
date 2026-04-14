@@ -26,7 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-// 分组模型选择器组件 - 弹框模式
+// 分组模型选择器组件 - Tab切换模式
 function ModelGroupSelect({ 
   value, 
   onChange 
@@ -36,13 +36,25 @@ function ModelGroupSelect({
 }) {
   const [open, setOpen] = useState(false);
   
+  // 默认展开当前选中的厂商
+  const selectedGroup = AI_MODEL_GROUPS.find(g => 
+    g.models.some(m => m.value === value)
+  );
+  const [activeProvider, setActiveProvider] = useState(selectedGroup?.provider || AI_MODEL_GROUPS[0]?.provider);
+  
+  const currentModels = AI_MODEL_GROUPS.find(g => g.provider === activeProvider)?.models || [];
   const selectedModel = AI_MODELS.find(m => m.value === value);
   
   return (
     <div>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          // 重置到当前选中模型所在的厂商
+          const group = AI_MODEL_GROUPS.find(g => g.models.some(m => m.value === value));
+          if (group) setActiveProvider(group.provider);
+          setOpen(true);
+        }}
         className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
       >
         <div className="flex items-center gap-2">
@@ -61,7 +73,7 @@ function ModelGroupSelect({
       </button>
       
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[70vh] flex flex-col">
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-orange-500" />
@@ -69,44 +81,60 @@ function ModelGroupSelect({
             </DialogTitle>
           </DialogHeader>
           
-          {/* 模型列表 - 按厂商分组平铺 */}
-          <div className="overflow-y-auto flex-1 space-y-4">
+          {/* 厂商Tab切换 */}
+          <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700 pb-3 overflow-x-auto">
             {AI_MODEL_GROUPS.map(group => (
-              <div key={group.provider}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">{group.icon}</span>
-                  <span className="font-medium text-slate-800 dark:text-slate-200">{group.provider}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {group.models.map(model => (
-                    <button
-                      key={model.value}
-                      type="button"
-                      onClick={() => {
-                        onChange(model.value);
-                        setOpen(false);
-                      }}
-                      className={`px-4 py-3 rounded-xl text-left transition-all ${
-                        model.value === value
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg scale-[1.02]'
-                          : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
-                      }`}
-                    >
-                      <div className="font-medium">{model.label}</div>
-                      {model.value === value && (
-                        <Check className="w-4 h-4 mt-1" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <button
+                key={group.provider}
+                type="button"
+                onClick={() => setActiveProvider(group.provider)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
+                  activeProvider === group.provider
+                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                    : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`}
+              >
+                <span>{group.icon}</span>
+                <span className="text-sm font-medium">{group.provider}</span>
+                <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                  activeProvider === group.provider 
+                    ? 'bg-white/20' 
+                    : 'bg-slate-200 dark:bg-slate-600'
+                }`}>
+                  {group.models.length}
+                </span>
+              </button>
             ))}
           </div>
           
-          {/* 底部确认 */}
+          {/* 模型列表 */}
+          <div className="grid grid-cols-3 gap-3 max-h-[300px] overflow-y-auto py-2">
+            {currentModels.map(model => (
+              <button
+                key={model.value}
+                type="button"
+                onClick={() => {
+                  onChange(model.value);
+                  setOpen(false);
+                }}
+                className={`p-4 rounded-xl text-center transition-all ${
+                  model.value === value
+                    ? 'bg-gradient-to-br from-orange-500 to-amber-500 text-white shadow-lg scale-[1.02]'
+                    : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">{model.label}</div>
+                {model.value === value && (
+                  <Check className="w-4 h-4 mx-auto" />
+                )}
+              </button>
+            ))}
+          </div>
+          
+          {/* 底部 */}
           <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-slate-700">
             <div className="text-sm text-slate-500">
-              当前选择：<span className="font-medium text-slate-800 dark:text-slate-200">
+              已选择：<span className="font-medium text-orange-500">
                 {selectedModel?.provider} - {selectedModel?.label}
               </span>
             </div>
