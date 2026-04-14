@@ -223,9 +223,16 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   // 保存返回路径，防止被其他操作覆盖
 
   const handleVisit = () => {
-    if (!tool) return;
+    if (!tool) {
+      alert('工具数据加载中，请稍候...');
+      return;
+    }
     const url = tool.promotion_url || tool.official_url;
-    window.location.href = url;
+    if (!url) {
+      alert('该工具暂未配置访问链接');
+      return;
+    }
+    window.open(url, '_blank');
   };
 
   const toggleFavorite = async () => {
