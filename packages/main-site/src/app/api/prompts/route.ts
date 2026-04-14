@@ -1,146 +1,114 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { isVolcenginePgMode } from '@/lib/db';
 
 // 获取Prompt列表
 export async function GET(request: NextRequest) {
   try {
-    const client = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const toolId = searchParams.get('tool_id');
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '12');
+    const offset = (page - 1) * limit;
 
-    // 检查表是否存在
-    try {
-      let query = client
-        .from('prompts')
-        .select('*, tools(id, name, logo)', { count: 'exact' })
-        .eq('status', 'published')
-        .order('uses', { ascending: false });
+    let data: any[] = [];
+    let total = 0;
 
-      if (toolId) {
-        query = query.eq('tool_id', toolId);
-      }
-      if (category) {
-        query = query.eq('category', category);
-      }
-      if (search) {
-        // 使用 ilike 进行模糊匹配（中文支持更好）
-        query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
-      }
+    if (isVolcenginePgMode()) {
+      try {
+        const { getPgPool } = await import('@/lib/db');
+        const pool = await getPgPool();
 
-      const offset = (page - 1) * limit;
-      const { data: prompts, error, count } = await query.range(offset, offset + limit - 1);
+        let sql = `
+          SELECT p.*, t.id as tool_id, t.name as tool_name, t.logo as tool_logo
+          FROM prompts p
+          LEFT JOIN tools t ON p.tool_id = t.id
+          WHERE p.status = 'published'
+        `;
+        let countSql = `SELECT COUNT(*) as total FROM prompts p WHERE p.status = 'published'`;
+        const params: any[] = [];
+        const countParams: any[] = [];
+        let paramIndex = 1;
+        let countIndex = 1;
 
-      if (error) {
-        // 如果表不存在，返回空数据
-        if (error.message.includes('Could not find')) {
-          return NextResponse.json({
-            success: true,
-            data: [],
-            pagination: { page, limit, total: 0, total_pages: 0 }
-          });
+        if (toolId) {
+          sql += ` AND p.tool_id = $${paramIndex}`;
+          countSql += ` AND p.tool_id = $${countIndex}`;
+          params.push(toolId);
+          countParams.push(toolId);
+          paramIndex++;
+          countIndex++;
         }
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-      }
-
-      return NextResponse.json({
-        success: true,
-        data: prompts || [],
-        pagination: {
-          page,
-          limit,
-          total: count || 0,
-          total_pages: Math.ceil((count || 0) / limit)
+        if (category) {
+          sql += ` AND p.category = $${paramIndex}`;
+          countSql += ` AND p.category = $${countIndex}`;
+          params.push(category);
+          countParams.push(category);
+          paramIndex++;
+          countIndex++;
         }
+        if (search) {
+          sql += ` AND (p.title ILIKE $${paramIndex} OR p.content ILIKE $${paramIndex})`;
+          countSql += ` AND (p.title ILIKE $${countIndex} OR p.content ILIKE $${countIndex})`;
+          params.push(`%${search}%`);
+          countParams.push(`%${search}%`);
+          paramIndex++;
+          countIndex++;
+        }
+
+        sql += ` ORDER BY p.uses DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        params.push(limit, offset);
+
+        const [result, countResult] = await Promise.all([
+          pool.query(sql, params),
+          pool.query(countSql, countParams)
+        ]);
+
+        data = result.rows;
+        total = parseInt(countResult.rows[0]?.total || '0');
+      } catch (dbError) {
+        // 表不存在时返回空数据
+        return NextResponse.json({
+          success: true,
+          data: [],
+          pagination: { page, limit, total: 0, total_pages: 0 }
+        });
+      }
+    } else {
+      // Supabase 模式（备用）
+      const { query } = await import('@/lib/db');
+      const eq: any = { status: 'published' };
+      if (toolId) eq['tool_id'] = toolId;
+      if (category) eq['category'] = category;
+      
+      const result = await query('prompts', {
+        select: '*, tools(id, name, logo)',
+        eq,
+        order: { column: 'uses', ascending: false },
+        limit,
+        offset,
+        count: true,
       });
-    } catch (tableError) {
-      // 表不存在时返回空数据
-      return NextResponse.json({
-        success: true,
-        data: [],
-        pagination: { page, limit, total: 0, total_pages: 0 }
-      });
+      data = result.data || [];
+      total = result.count || 0;
     }
+
+    return NextResponse.json({
+      success: true,
+      data,
+      pagination: {
+        page,
+        limit,
+        total,
+        total_pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
-    console.error('获取Prompt失败:', error);
-    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
-  }
-}
-
-// 创建Prompt
-export async function POST(request: NextRequest) {
-  try {
-    const client = getSupabaseClient();
-    const body = await request.json();
-    const { title, content, tool_id, category, tags, author } = body;
-
-    if (!title || !content || !category) {
-      return NextResponse.json({ success: false, error: '缺少必要参数' }, { status: 400 });
-    }
-
-    const { data, error } = await client
-      .from('prompts')
-      .insert({
-        title,
-        content,
-        tool_id,
-        category,
-        tags: tags || [],
-        author,
-        status: 'published'
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, data });
-  } catch (error) {
-    console.error('创建Prompt失败:', error);
-    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
-  }
-}
-
-// 增加使用次数
-export async function PATCH(request: NextRequest) {
-  try {
-    const client = getSupabaseClient();
-    const body = await request.json();
-    const { id } = body;
-
-    if (!id) {
-      return NextResponse.json({ success: false, error: '缺少id参数' }, { status: 400 });
-    }
-
-    // 获取当前使用次数
-    const { data: prompt } = await client
-      .from('prompts')
-      .select('uses')
-      .eq('id', id)
-      .single();
-
-    if (!prompt) {
-      return NextResponse.json({ success: false, error: 'Prompt不存在' }, { status: 404 });
-    }
-
-    // 更新使用次数
-    const { error } = await client
-      .from('prompts')
-      .update({ uses: (prompt.uses || 0) + 1 })
-      .eq('id', id);
-
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('更新Prompt失败:', error);
-    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
+    console.error('获取Prompts失败:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : '获取失败' 
+    }, { status: 500 });
   }
 }

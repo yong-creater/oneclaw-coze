@@ -76,7 +76,7 @@ function isSupabaseMode(): boolean {
   return !!(process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY);
 }
 
-async function getPgPool() {
+export async function getPgPool() {
   if (pgPool) return pgPool;
   
   loadEnv();

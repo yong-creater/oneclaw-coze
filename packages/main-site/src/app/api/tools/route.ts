@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { query, isVolcenginePgMode } from '@/lib/db';
 
 // 获取前台工具列表
 export async function GET(request: NextRequest) {
   try {
-    const client = getSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
     
     // 分页参数
@@ -18,46 +17,92 @@ export async function GET(request: NextRequest) {
     const feature_tags = searchParams.get('features')?.split(',').filter(Boolean) || [];
     const search = searchParams.get('search');
     
-    // 构建基础查询 - 使用JOIN直接关联分类，避免额外查询
-    let query = client
-      .from('tools')
-      .select('*, categories!inner(id, name, slug)', { count: 'exact' })
-      .eq('is_active', true);
+    // 构建基础查询
+    const where: Record<string, any> = { is_active: true };
     
-    // 分类筛选 - 直接用关联表的slug筛选
+    // 分类筛选
     if (category_slug && category_slug !== 'all') {
-      query = query.eq('categories.slug', category_slug);
+      where['category_slug'] = category_slug;
     }
     
     // 免费类型筛选
     if (free_types.length > 0) {
-      query = query.in('free_type', free_types);
-    }
-    
-    // 功能标签筛选 (使用数组重叠)
-    if (feature_tags.length > 0) {
-      query = query.contains('feature_tags', feature_tags);
+      where['free_type'] = free_types;
     }
     
     // 搜索
     if (search) {
-      query = query.or(`name.ilike.%${search}%,producer.ilike.%${search}%,highlight.ilike.%${search}%`);
+      where['search'] = search;
     }
     
-    // 排序：推荐优先，然后按创建时间降序
-    query = query
-      .order('is_featured', { ascending: false })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    let data;
+    let total = 0;
     
-    const { data, error, count } = await query;
+    if (isVolcenginePgMode()) {
+      // 火山引擎 PostgreSQL 模式
+      const { getPgPool } = await import('@/lib/db');
+      const pool = await getPgPool();
+      
+      // 构建动态 SQL
+      let sql = `
+        SELECT t.*, c.name as category_name, c.slug as category_slug
+        FROM tools t
+        LEFT JOIN categories c ON t.category_id = c.id
+        WHERE t.is_active = true
+      `;
+      const params: any[] = [];
+      let paramIndex = 1;
+      
+      if (category_slug && category_slug !== 'all') {
+        sql += ` AND c.slug = $${paramIndex}`;
+        params.push(category_slug);
+        paramIndex++;
+      }
+      
+      if (free_types.length > 0) {
+        sql += ` AND t.free_type = ANY($${paramIndex})`;
+        params.push(free_types);
+        paramIndex++;
+      }
+      
+      if (search) {
+        sql += ` AND (t.name ILIKE $${paramIndex} OR t.producer ILIKE $${paramIndex} OR t.highlight ILIKE $${paramIndex})`;
+        params.push(`%${search}%`);
+        paramIndex++;
+      }
+      
+      // 获取总数
+      const countSql = sql.replace('SELECT t.*, c.name as category_name, c.slug as category_slug', 'SELECT COUNT(*) as total');
+      const countResult = await pool.query(countSql, params);
+      total = parseInt(countResult.rows[0]?.total || '0');
+      
+      // 排序
+      sql += ` ORDER BY t.is_featured DESC, t.created_at DESC`;
+      
+      // 分页
+      sql += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+      params.push(limit, offset);
+      
+      const result = await pool.query(sql, params);
+      data = result.rows;
+    } else {
+      // Supabase 模式（备用）
+      const result = await query('tools', {
+        select: '*, categories(name, slug)',
+        eq: { is_active: true },
+        order: { column: 'is_featured', ascending: false },
+        limit,
+        offset,
+        count: true,
+      });
+      data = result.data;
+      total = result.count || 0;
+    }
     
-    if (error) throw new Error(error.message);
-    
-    // 添加缓存头，静态数据缓存更长时间
+    // 添加缓存头
     const cacheControl = search || free_types.length || feature_tags.length
-      ? 'public, max-age=30, stale-while-revalidate=60' // 有筛选参数，短缓存
-      : 'public, max-age=60, stale-while-revalidate=300'; // 无筛选，长缓存
+      ? 'public, max-age=30, stale-while-revalidate=60'
+      : 'public, max-age=60, stale-while-revalidate=300';
     
     return NextResponse.json({
       success: true,
@@ -65,8 +110,8 @@ export async function GET(request: NextRequest) {
       pagination: {
         page,
         limit,
-        total: count || 0,
-        total_pages: Math.ceil((count || 0) / limit),
+        total,
+        total_pages: Math.ceil(total / limit),
       }
     }, {
       headers: { 'Cache-Control': cacheControl }

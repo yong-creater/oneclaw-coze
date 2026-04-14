@@ -1,12 +1,13 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
+import pg from 'pg';
+
+const { Pool } = pg;
 
 let envLoaded = false;
 
-interface SupabaseCredentials {
-  url: string;
-  anonKey: string;
-}
+// 火山引擎 PostgreSQL 连接池
+let pgPool: InstanceType<typeof Pool> | null = null;
 
 function loadEnv(): void {
   if (envLoaded) return;
@@ -22,17 +23,15 @@ function loadEnv(): void {
     envLoaded = true;
     return;
   }
+  
+  // 如果有 PGHOST，也认为已加载
+  if (process.env.PGHOST) {
+    envLoaded = true;
+    return;
+  }
 
   try {
-    // 尝试动态加载 dotenv
-    import('dotenv').then(dotenv => {
-      dotenv.config();
-    }).catch(() => {});
-    if (process.env.COZE_SUPABASE_URL || process.env.DATABASE_URL) {
-      envLoaded = true;
-      return;
-    }
-
+    // 尝试从扣子平台获取环境变量
     const pythonCode = `
 import os
 import sys
@@ -76,129 +75,88 @@ except Exception as e:
   }
 }
 
+// 判断是否使用火山引擎 PostgreSQL 模式
+function isVolcenginePgMode(): boolean {
+  loadEnv();
+  return !!(process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGPASSWORD));
+}
+
+// 判断是否使用 Supabase 模式
 function isSupabaseMode(): boolean {
+  loadEnv();
   return !!(process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY);
 }
 
-function getSupabaseCredentials(): SupabaseCredentials {
-  loadEnv();
-
-  const url = process.env.COZE_SUPABASE_URL;
-  const anonKey = process.env.COZE_SUPABASE_ANON_KEY;
-
-  // 在构建时，如果环境变量不存在，返回占位符
-  if (!url || !anonKey) {
-    return { 
-      url: 'https://placeholder.supabase.co', 
-      anonKey: 'placeholder-key' 
-    };
-  }
-
-  return { url, anonKey };
-}
-
-function getSupabaseServiceRoleKey(): string | undefined {
-  loadEnv();
-  return process.env.COZE_SUPABASE_SERVICE_ROLE_KEY;
-}
-
-// 获取火山引擎 PostgreSQL 连接信息
-function getVolcenginePgConfig() {
+// 获取火山引擎 PostgreSQL 连接池
+async function getPgPool() {
+  if (pgPool) return pgPool;
+  
   loadEnv();
   
-  // 优先使用 DATABASE_URL
+  const config: any = {};
+  
   if (process.env.DATABASE_URL) {
-    return { connectionString: process.env.DATABASE_URL };
-  }
-  
-  // 否则使用单独的参数
-  const host = process.env.PGHOST;
-  const port = process.env.PGPORT || '5432';
-  const user = process.env.PGUSER || 'postgres';
-  const password = process.env.PGPASSWORD;
-  const database = process.env.PGDATABASE || 'postgres';
-  
-  if (!host || !password) {
-    return null;
-  }
-  
-  return {
-    host,
-    port: parseInt(port),
-    user,
-    password,
-    database,
-  };
-}
-
-// 判断是否使用火山引擎模式
-function isVolcengineMode(): boolean {
-  loadEnv();
-  return !isSupabaseMode() && !!(process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGPASSWORD));
-}
-
-// 创建 Supabase 客户端（用于 Supabase 模式）
-function getSupabaseClient(token?: string): SupabaseClient {
-  const { url, anonKey } = getSupabaseCredentials();
-
-  let key: string;
-  if (token) {
-    key = anonKey;
+    // 直接使用连接字符串
+    config.connectionString = process.env.DATABASE_URL;
   } else {
-    const serviceRoleKey = getSupabaseServiceRoleKey();
-    key = serviceRoleKey ?? anonKey;
+    // 使用单独的参数
+    config.host = process.env.PGHOST || 'localhost';
+    config.port = parseInt(process.env.PGPORT || '5432');
+    config.user = process.env.PGUSER || 'postgres';
+    config.password = process.env.PGPASSWORD || '';
+    config.database = process.env.PGDATABASE || 'postgres';
   }
+  
+  pgPool = new Pool(config);
+  return pgPool;
+}
 
-  if (token) {
-    return createClient(url, key, {
-      global: {
-        headers: { Authorization: `Bearer ${token}` },
-      },
-      db: {
-        timeout: 60000,
-      },
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-  }
-
-  return createClient(url, key, {
-    db: {
-      timeout: 60000,
-    },
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
+// 获取 Supabase 客户端
+export function getSupabaseClient() {
+  loadEnv();
+  
+  const url = process.env.COZE_SUPABASE_URL || 'https://placeholder.supabase.co';
+  const anonKey = process.env.COZE_SUPABASE_ANON_KEY || 'placeholder-key';
+  
+  return createClient(url, anonKey, {
+    db: { timeout: 60000 },
+    auth: { autoRefreshToken: false, persistSession: false },
   });
 }
 
-// 创建 pg 客户端（用于火山引擎 PostgreSQL 模式）
-async function getPgClient() {
-  const { default: pg } = await import('pg');
-  const { Pool } = pg;
-  
-  const config = getVolcenginePgConfig();
-  if (!config) {
-    throw new Error('火山引擎数据库配置不完整');
+// 统一的数据库查询接口
+export async function query(sql: string, params?: any[]) {
+  if (isVolcenginePgMode()) {
+    // 使用火山引擎 PostgreSQL
+    const pool = await getPgPool();
+    const result = await pool.query(sql, params);
+    return { rows: result.rows, rowCount: result.rowCount };
+  } else if (isSupabaseMode()) {
+    // 使用 Supabase
+    const client = getSupabaseClient();
+    // 对于简单查询，转换为 Supabase 格式
+    // 这里需要根据 SQL 内容做简单转换
+    const result = await client.rpc('exec_sql', { sql, params: params || [] });
+    return { rows: result.data || [], rowCount: result.data?.length || 0 };
   }
   
-  const pool = new Pool(config);
-  return pool;
+  throw new Error('未配置数据库连接');
 }
 
-// 统一的数据库客户端接口
-export async function getDatabase() {
-  if (isSupabaseMode()) {
-    return getSupabaseClient();
-  } else if (isVolcengineMode()) {
-    return await getPgClient();
-  } else {
-    throw new Error('未配置数据库，请设置 COZE_SUPABASE_URL 或 DATABASE_URL');
-  }
+// 直接执行 SQL（用于 pg 客户端）
+export async function pgQuery(sql: string, params?: any[]) {
+  const pool = await getPgPool();
+  const result = await pool.query(sql, params);
+  return result;
 }
 
-// 为了兼容现有代码，导出这些
-export { loadEnv, getSupabaseCredentials, getSupabaseServiceRoleKey, getSupabaseClient, isSupabaseMode, isVolcengineMode, getVolcenginePgConfig };
+// 获取数据库类型
+export function getDbType(): 'volcengine' | 'supabase' | 'none' {
+  loadEnv();
+  if (isVolcenginePgMode()) return 'volcengine';
+  if (isSupabaseMode()) return 'supabase';
+  return 'none';
+}
+
+// 导出
+export { loadEnv, isVolcenginePgMode, isSupabaseMode, getPgPool };

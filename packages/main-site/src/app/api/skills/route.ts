@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { isVolcenginePgMode } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     
     const page = parseInt(searchParams.get('page') || '1');
@@ -14,62 +13,91 @@ export async function GET(request: NextRequest) {
     const difficulty = searchParams.get('difficulty');
 
     const offset = (page - 1) * limit;
+    let data: any[] = [];
+    let total = 0;
 
-    let query = supabase
-      .from('skills')
-      .select(`
-        *,
-        skill_categories (
-          id,
-          name,
-          slug,
-          color
-        )
-      `, { count: 'exact' })
-      .eq('is_active', true)
-      .order('is_featured', { ascending: false })
-      .order('view_count', { ascending: false })
-      .range(offset, offset + limit - 1);
+    if (isVolcenginePgMode()) {
+      const { getPgPool } = await import('@/lib/db');
+      const pool = await getPgPool();
 
-    if (category && category !== 'all') {
-      query = query.eq('category_id', parseInt(category));
-    }
+      let sql = `
+        SELECT s.*, sc.id as "skill_categories.id", sc.name as "skill_categories.name",
+               sc.slug as "skill_categories.slug", sc.color as "skill_categories.color"
+        FROM skills s
+        LEFT JOIN skill_categories sc ON s.category_id = sc.id
+        WHERE s.is_active = true
+      `;
+      let countSql = `SELECT COUNT(*) as total FROM skills WHERE is_active = true`;
+      const params: any[] = [];
+      const countParams: any[] = [];
+      let paramIndex = 1;
 
-    if (featured === 'true') {
-      query = query.eq('is_featured', true);
-    }
+      if (category && category !== 'all') {
+        sql += ` AND s.category_id = $${paramIndex}`;
+        countSql += ` AND category_id = $${paramIndex}`;
+        params.push(category);
+        countParams.push(category);
+        paramIndex++;
+      }
 
-    if (search) {
-      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
-    }
+      if (featured === 'true') {
+        sql += ` AND s.is_featured = true`;
+        countSql += ` AND is_featured = true`;
+      }
 
-    if (difficulty) {
-      query = query.eq('difficulty', difficulty);
-    }
+      if (search) {
+        sql += ` AND (s.name ILIKE $${paramIndex} OR s.description ILIKE $${paramIndex})`;
+        countSql += ` AND (name ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`;
+        params.push(`%${search}%`);
+        countParams.push(`%${search}%`);
+        paramIndex++;
+      }
 
-    const { data, error, count } = await query;
+      if (difficulty) {
+        sql += ` AND s.difficulty = $${paramIndex}`;
+        countSql += ` AND difficulty = $${paramIndex}`;
+        params.push(difficulty);
+        countParams.push(difficulty);
+        paramIndex++;
+      }
 
-    if (error) {
-      console.error('获取技能列表失败:', error);
-      return NextResponse.json({ success: false, error: '获取技能列表失败' }, { status: 500 });
-    }
+      sql += ` ORDER BY s.is_featured DESC, s.view_count DESC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+      params.push(limit, offset);
 
-    // 更新浏览量
-    if (data && data.length > 0) {
-      const ids = data.map(s => s.id);
-      try {
-        await supabase.rpc('increment_skill_views', { skill_ids: ids });
-      } catch {}
+      const [listResult, countResult] = await Promise.all([
+        pool.query(sql, params),
+        pool.query(countSql, countParams)
+      ]);
+
+      data = listResult.rows;
+      total = parseInt(countResult.rows[0]?.total || '0');
+    } else {
+      const { query } = await import('@/lib/db');
+      const eq: any = { is_active: true };
+      if (category && category !== 'all') eq['category_id'] = parseInt(category);
+      if (featured === 'true') eq['is_featured'] = true;
+      if (difficulty) eq['difficulty'] = difficulty;
+
+      const result = await query('skills', {
+        select: `*, skill_categories (id, name, slug, color)`,
+        eq,
+        order: { column: 'is_featured', ascending: false },
+        limit,
+        offset,
+        count: true,
+      });
+      data = result.data || [];
+      total = result.count || 0;
     }
 
     return NextResponse.json({
       success: true,
-      data: data || [],
+      data,
       pagination: {
         page,
         limit,
-        total: count || 0,
-        total_pages: Math.ceil((count || 0) / limit)
+        total,
+        total_pages: Math.ceil(total / limit)
       }
     });
   } catch (error) {
