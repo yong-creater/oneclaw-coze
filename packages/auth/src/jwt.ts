@@ -26,7 +26,7 @@ export async function signToken(payload: Omit<JWTPayload, 'iat' | 'exp' | 'iss'>
   const token = await new jose.SignJWT(payload as jose.JWTPayload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuer(AUTH_CONFIG.jwt.issuer)
-    .setAudience(AUTH_CONFIG.jwt.audience)
+    .setAudience([...AUTH_CONFIG.jwt.audience] as string[])
     .setIssuedAt()
     .setExpirationTime(AUTH_CONFIG.jwt.expiresIn)
     .sign(secret);
@@ -41,7 +41,7 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
     
     const { payload } = await jose.jwtVerify(token, secret, {
       issuer: AUTH_CONFIG.jwt.issuer,
-      audience: AUTH_CONFIG.jwt.audience,
+      audience: [...AUTH_CONFIG.jwt.audience] as string[],
     });
     
     return payload as unknown as JWTPayload;

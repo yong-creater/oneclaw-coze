@@ -5,8 +5,6 @@
   --color-foreground: hsl(222.2 84% 4.9%);
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(222.2 84% 4.9%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222.2 84% 4.9%);
   --color-primary: hsl(24.6 95% 53.1%);
   --color-primary-foreground: hsl(210 40% 98%);
   --color-secondary: hsl(210 40% 96.1%);
@@ -23,12 +21,11 @@
   --radius: 0.5rem;
 }
 
-/* 暗色模式 */
-.dark {
-  color-scheme: dark;
-}
-
 body {
   margin: 0;
   padding: 0;
+}
+
+.dark {
+  color-scheme: dark;
 }

@@ -23,7 +23,7 @@ export { AUTH_CONFIG, getAppId, getMainDomain, getAdminDomain } from './config.j
 export { signToken, verifyToken, decodeToken, getCookieConfig, type JWTPayload } from './jwt.js';
 
 // 服务端中间件
-export { withAuth, getCurrentUser, createAuthResponse, clearAuthCookie } from './middleware.js';
+export { withAuth, getCurrentUser as getCurrentUserServer, createAuthResponse, clearAuthCookie } from './middleware.js';
 
 // 前端工具
 export {
