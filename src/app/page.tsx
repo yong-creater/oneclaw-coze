@@ -222,7 +222,7 @@ function UtilityToolsPage() {
                 </div>
                 
                 {/* Hover显示核心卖点 */}
-                <div className="hidden group-hover:block absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white dark:from-slate-800 via-white/90 dark:via-slate-800/90 to-transparent p-4 pt-8">
+                <div className="hidden group-hover:block absolute bottom-0 left-0 right-0 backdrop-blur-sm bg-white/80 dark:bg-slate-800/80 p-4 pt-6 rounded-b-2xl border-t border-slate-100 dark:border-slate-700/50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                   <div className="flex flex-wrap gap-1.5">
                     {tool.key === 'resume' && (
                       <>
