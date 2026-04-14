@@ -55,6 +55,24 @@ function getTokenFromHeader(authHeader: string | null): string | null {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host') || '';
+  
+  // ============================================
+  // 二级域名路由处理
+  // ============================================
+  
+  // admin.oneclaw.shop → 重定向到 /admin
+  if (hostname.startsWith('admin.')) {
+    if (!pathname.startsWith('/admin')) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/admin' + (pathname === '/' ? '' : pathname);
+      return NextResponse.redirect(url);
+    }
+  }
+  
+  // ============================================
+  // API 认证处理
+  // ============================================
   
   // 检查是否是首次初始化路径
   const isFirstTimeInit = FIRST_TIME_INIT_PATHS.some(path => pathname.startsWith(path));
