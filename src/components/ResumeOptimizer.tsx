@@ -161,30 +161,35 @@ export default function ResumeOptimizer() {
             {/* 输入卡片区 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* 简历输入卡片 */}
-              <UtilityCard 
-                title="简历输入" 
-                icon={<FileText />}
-                gradient="from-orange-500 to-amber-500"
-              >
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                {/* 标题栏 */}
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-orange-500" />
+                    <h2 className="font-semibold text-slate-800 dark:text-white">简历输入</h2>
+                  </div>
+                </div>
+                
+                {/* 内容区 */}
                 <div className="p-6 space-y-4">
                   {/* 模式切换 */}
                   <div className="flex gap-2">
                     <button
                       onClick={() => setResumeMode('paste')}
-                      className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                      className={`px-4 py-2 text-sm rounded-lg transition-all ${
                         resumeMode === 'paste' 
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white' 
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' 
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                       }`}
                     >
                       粘贴文本
                     </button>
                     <button
                       onClick={() => setResumeMode('upload')}
-                      className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                      className={`px-4 py-2 text-sm rounded-lg transition-all ${
                         resumeMode === 'upload' 
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white' 
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' 
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                       }`}
                     >
                       上传PDF
@@ -196,7 +201,7 @@ export default function ResumeOptimizer() {
                       value={resumeText}
                       onChange={(e) => setResumeText(e.target.value)}
                       placeholder="请粘贴简历全文（纯文本），系统将自动解析结构..."
-                      className="w-full h-56 p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      className="w-full h-48 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   ) : (
                     <div className="space-y-4">
@@ -210,10 +215,10 @@ export default function ResumeOptimizer() {
                       
                       {resumeFile ? (
                         <div className="p-6 border-2 border-dashed border-orange-300 dark:border-orange-600 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-center">
-                          <FileText className="w-10 h-10 text-orange-500 mx-auto mb-2" />
-                          <p className="text-sm text-slate-600 dark:text-slate-300">{resumePreview}</p>
-                          <p className="text-xs text-slate-400 mt-1">
-                            {parsedResume ? '✓ 已解析完成' : '正在解析...'}
+                          <FileText className="w-10 h-10 text-orange-500 mx-auto mb-3" />
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{resumePreview}</p>
+                          <p className="text-xs text-slate-500 mt-2">
+                            {parsedResume ? '已解析完成' : '正在解析...'}
                           </p>
                           <button
                             onClick={() => {
@@ -222,7 +227,7 @@ export default function ResumeOptimizer() {
                               setParsedResume(null);
                               fileInputRef.current?.click();
                             }}
-                            className="mt-3 text-sm text-orange-500 hover:text-orange-600"
+                            className="mt-3 text-sm text-orange-500 hover:text-orange-600 font-medium"
                           >
                             重新上传
                           </button>
@@ -230,11 +235,11 @@ export default function ResumeOptimizer() {
                       ) : (
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="w-full p-8 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                          className="w-full p-8 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all text-center"
                         >
-                          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                          <p className="text-sm text-slate-500">点击上传PDF简历</p>
-                          <p className="text-xs text-slate-400 mt-1">支持多页PDF，单文件不超过10MB</p>
+                          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-3" />
+                          <p className="text-sm font-medium text-slate-500">点击上传PDF简历</p>
+                          <p className="text-xs text-slate-400 mt-2">支持多页PDF，单文件不超过10MB</p>
                         </button>
                       )}
                       
@@ -242,46 +247,51 @@ export default function ResumeOptimizer() {
                         <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2">
                           <p className="text-sm font-medium text-slate-700 dark:text-slate-300">已识别的简历结构：</p>
                           {parsedResume.basicInfo && (
-                            <p className="text-xs text-slate-500">✓ 基本信息：{parsedResume.basicInfo}</p>
+                            <p className="text-xs text-slate-500">基本信息：{parsedResume.basicInfo}</p>
                           )}
                           {parsedResume.experience && (
-                            <p className="text-xs text-slate-500">✓ 工作经历：已识别</p>
+                            <p className="text-xs text-slate-500">工作经历：已识别</p>
                           )}
                           {parsedResume.projects && (
-                            <p className="text-xs text-slate-500">✓ 项目经历：已识别</p>
+                            <p className="text-xs text-slate-500">项目经历：已识别</p>
                           )}
                           {parsedResume.skills && (
-                            <p className="text-xs text-slate-500">✓ 技能证书：已识别</p>
+                            <p className="text-xs text-slate-500">技能证书：已识别</p>
                           )}
                         </div>
                       )}
                     </div>
                   )}
                 </div>
-              </UtilityCard>
+              </div>
               
-              {/* JD输入卡片 */}
-              <UtilityCard 
-                title="岗位JD" 
-                icon={<Target />}
-                gradient="from-cyan-500 to-teal-500"
-              >
-                <div className="p-6 space-y-4">
+              {/* JD输入卡片 - 统一高度 */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                {/* 标题栏 */}
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-orange-500" />
+                    <h2 className="font-semibold text-slate-800 dark:text-white">岗位JD</h2>
+                  </div>
+                </div>
+                
+                {/* 内容区 */}
+                <div className="p-6 space-y-4 flex flex-col h-[calc(100%-57px)]">
                   <textarea
                     value={jdText}
                     onChange={(e) => setJdText(e.target.value)}
                     placeholder="请粘贴目标岗位JD全文（支持复制Boss直聘、智联等平台JD），系统将自动拆解核心关键词..."
-                    className="w-full h-56 p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full h-48 flex-1 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   
                   {jdKeywords.length > 0 && (
-                    <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-xl">
-                      <p className="text-sm text-cyan-700 dark:text-cyan-300 mb-2">
-                        已识别 {jdKeywords.length} 个核心关键词：
+                    <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                      <p className="text-sm text-orange-700 dark:text-orange-300 mb-3 font-medium">
+                        已识别 {jdKeywords.length} 个核心关键词
                       </p>
                       <div className="flex flex-wrap gap-2">
                         {jdKeywords.map((keyword, i) => (
-                          <span key={i} className="px-2 py-1 bg-cyan-100 dark:bg-cyan-800 text-cyan-700 dark:text-cyan-200 text-xs rounded-full">
+                          <span key={i} className="px-3 py-1 bg-orange-100 dark:bg-orange-800 text-orange-700 dark:text-orange-200 text-xs rounded-full">
                             {keyword}
                           </span>
                         ))}
@@ -289,7 +299,7 @@ export default function ResumeOptimizer() {
                     </div>
                   )}
                 </div>
-              </UtilityCard>
+              </div>
             </div>
             
             {/* 操作按钮 */}
