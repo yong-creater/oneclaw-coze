@@ -232,9 +232,9 @@ function UtilityToolsPage() {
                     )}
                     {tool.key === 'novel' && (
                       <>
-                        <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 text-xs rounded-full">洗稿润色</span>
-                        <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">批量处理</span>
-                        <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-full">多场景适配</span>
+                        <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 text-xs rounded-full">深度洗稿</span>
+                        <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">漫画生图</span>
+                        <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-full">推文脚本</span>
                       </>
                     )}
                     {tool.key === 'testcraft' && (
@@ -286,9 +286,9 @@ const UTILITY_TOOLS = [
   },
   { 
     key: 'novel', 
-    name: '小说创作', 
+    name: '网文创作工坊', 
     icon: Feather,
-    description: 'AI小说创作助手，洗稿润色一键搞定',
+    description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
     color: 'from-purple-500 to-pink-500'
   },
   { 

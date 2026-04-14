@@ -1,749 +1,1521 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
-  Send, Loader2, AlertCircle, Check, Copy, Download, FileSpreadsheet,
-  Feather, UserCircle, ImagePlus, Mountain, ChevronDown, X
+  Feather, ArrowLeft, Upload, Sparkles, Loader2, 
+  FileText, Copy, Download, Check, X, ChevronDown,
+  ChevronRight, Zap, Wand2, Image, FileCode, Package,
+  AlertCircle, Plus, Trash2, Eye, Edit3, Save,
+  Settings2, Star, BookOpen, MessageSquare, RefreshCw
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
 import LoginButton from '@/components/LoginButton';
+import JSZip from 'jszip';
 
-const REQUEST_TIMEOUT = 60000;
-const RATE_LIMIT_MAX = 10;
+// ==================== 类型定义 ====================
+interface StoryContent {
+  original: string;
+  polished?: string;
+  originalityScore?: number;
+  importMode: 'paste' | 'upload' | 'generate';
+}
 
-const SYSTEM_PROMPTS: Record<string, string> = {
-  polish: `你是拥有10年以上网文/传统小说编辑经验的专业编辑，擅长全题材小说（都市、古言、玄幻、现言、悬疑等）的洗稿与润色，核心要求如下：
-1. 洗稿逻辑：保留原文核心剧情、人物关系、核心设定，替换句式结构、优化词汇表达，避免重复原文句式，同时提升文字质感，杜绝抄袭风险；
-2. 润色标准：优化文笔流畅度，强化场景氛围、动作细节、心理描写，修正口语化、语病、逻辑漏洞，统一文风（贴合原文风格，不突兀）；
-3. 输出要求：段落分明，重点情节（冲突、转折、细节）适当加粗，无冗余语句，不添加任何额外解释，直接输出洗稿润色后的完整内容，可直接用于小说发布。`,
+interface ComicPanel {
+  id: string;
+  scene: string;
+  characterAction: string;
+  dialogue: string;
+  emotion: string;
+  imageUrl?: string;
+  prompt?: string;
+}
 
-  character: `你是专业的AI绘画提示词生成师，根据用户输入的小说人物描写，生成专业的人物AI绘画提示词。
+interface ComicStory {
+  id: string;
+  platform: 'douyin' | 'xiaohongshu';
+  style: '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑';
+  duration: '15s' | '30s' | '60s';
+  script: {
+    time: string;
+    shot: number;
+    narration: string;
+    subtitle: string;
+    bgm: string;
+    hashtags: string[];
+  }[];
+}
 
-**输出格式（必须严格按此格式输出）：**
-
-核心人物：[人物定位，如"绝色古风美男"]
-1.人物特征:[身材描述]
-2.人物特写:[特写类型]
-3.人物脸部:[脸型描述]
-4.风格:[CG风格]
-
-外貌：[整体外貌描述]
-1.头发:[发型描述]
-2.眉毛:[眉形描述]
-3.眼睛:[眼型描述]
-4.鼻子:[鼻型描述]
-5.嘴唇:[唇型描述]
-6.皮肤:[肤色描述]
-7.妆造:[妆容描述]
-
-服饰：[服饰描述]
-场景：[场景设定]
-画面感：[氛围描述]
-画质：[画质要求]
-构图：[构图要求]
-画面为人物三视图：[三视图描述]
-最左侧单独放大头部细节展示
-
-**重要：**
-1. 严格按照上述格式输出，每一项都要有内容
-2. 如果是多个人物，每个人之间用"========"分隔
-3. 不要添加任何额外解释或说明
-4. 风格要与小说一致（古风/现代/奇幻等）`,
-
-  imagePrompt: `你是资深AI绘画提示词工程师，擅长打造适配Midjourney、Stable Diffusion的高质量提示词，严格遵循以下要求，输出格式固定，细节拉满，无冗余：
-【中文主体提示词】（1-2句概括核心，精准贴合用户需求，补充风格、氛围、细节）
-【英文Prompt】（专业级，按优先级排序：核心主体+风格+光影+构图+细节+质感，关键词精准，无多余词汇）
-【Negative Prompt】（精准规避低质量画面，如"lowres, blurry, watermark, text, ugly, deformed, bad anatomy"）`,
-
-  scenePrompt: `你是专业小说场景设计师+AI绘画提示词工程师，严格完成两项任务，输出格式固定，氛围感拉满，适配小说创作+配图需求，无冗余信息：
-【小说场景描写】（专业级，贴合小说题材，注重氛围渲染、细节刻画、感官描写，段落分明，可直接插入小说章节）
-【中文提示词】（贴合场景描写，精准概括核心场景、氛围、细节）
-【英文Prompt】（专业级，核心场景+风格+光影+细节+构图）
-【Negative Prompt】（规避低质量画面）`
-};
-
-const FEATURES = [
-  { id: 'polish', name: '洗稿润色', icon: Feather, placeholder: '请输入需要洗稿润色的小说内容...' },
-  { id: 'character', name: '人物DNA', icon: UserCircle, placeholder: '请输入人物核心描述，如：冷漠的剑客、年迈的将军、绝色美人等...' },
-  { id: 'imagePrompt', name: '绘画提示词', icon: ImagePlus, placeholder: '请描述你想要的画面，如：一个古风剑客站在悬崖边...' },
-  { id: 'scenePrompt', name: '场景描写', icon: Mountain, placeholder: '请描述场景，如：雨夜的江南小镇、荒废的古庙...' }
+// ==================== 常量 ====================
+const POLISH_STYLES = [
+  { value: '番茄爽文', label: '番茄爽文' },
+  { value: '晋江言情', label: '晋江言情' },
+  { value: '起点玄幻', label: '起点玄幻' },
+  { value: '知乎盐文', label: '知乎盐文' },
+  { value: '短剧口语化', label: '短剧口语化' },
 ];
 
-// Rate Limiter
-class RateLimiter {
-  private requests: number[] = [];
-  private maxRequests: number;
-  
-  constructor(maxRequests: number) {
-    this.maxRequests = maxRequests;
-  }
-  
-  addRequest() {
-    this.requests.push(Date.now());
-  }
-  
-  canMakeRequest(): boolean {
-    const now = Date.now();
-    this.requests = this.requests.filter(t => now - t < 60000);
-    return this.requests.length < this.maxRequests;
-  }
-}
-
-// 厂商配置
-const PROVIDERS = [
-  { id: 'doubao', name: '豆包', color: 'bg-red-500', textColor: 'text-white' },
-  { id: 'deepseek', name: 'DeepSeek', color: 'bg-blue-600', textColor: 'text-white' },
-  { id: 'kimi', name: 'Kimi', color: 'bg-yellow-400', textColor: 'text-slate-800' },
-  { id: 'glm', name: '智谱GLM', color: 'bg-gradient-to-r from-blue-500 via-green-500 to-red-500', textColor: 'text-white' },
-  { id: 'qwen', name: '通义Qwen', color: 'bg-orange-500', textColor: 'text-white' },
-  { id: 'minimax', name: 'MiniMax', color: 'bg-yellow-500', textColor: 'text-slate-800' },
-  { id: 'openai', name: 'OpenAI', color: 'bg-slate-700', textColor: 'text-white' },
-  { id: 'anthropic', name: 'Anthropic', color: 'bg-pink-500', textColor: 'text-white' },
-  { id: 'google', name: 'Google', color: 'bg-red-500', textColor: 'text-white' },
-  { id: 'xai', name: 'xAI', color: 'bg-white', textColor: 'text-slate-700', border: true },
-  { id: 'stability', name: 'Stability', color: 'bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500', textColor: 'text-white' },
-  { id: 'other', name: '其他', color: 'bg-slate-400', textColor: 'text-white' },
+const POLISH_INTENSITY = [
+  { value: '轻度', label: '轻度-仅改句式' },
+  { value: '中度', label: '中度-改写用词+句式' },
+  { value: '重度', label: '重度-重构叙事逻辑' },
 ];
 
-const getModelFilter = (providerId: string) => {
-  switch (providerId) {
-    case 'doubao': return (m: any) => m.name.includes('豆包') || m.id.includes('doubao') || m.id.includes('seed');
-    case 'deepseek': return (m: any) => m.name.includes('DeepSeek') || m.id.includes('deepseek');
-    case 'kimi': return (m: any) => m.name.includes('Kimi') || m.id.includes('kimi');
-    case 'glm': return (m: any) => m.name.includes('GLM') || m.id.includes('glm');
-    case 'qwen': return (m: any) => m.name.includes('Qwen') || m.id.includes('qwen');
-    case 'minimax': return (m: any) => m.name.includes('MiniMax') || m.id.includes('minimax');
-    case 'openai': return (m: any) => m.id.includes('gpt') || m.id.includes('dall') || m.id.includes('o1') || m.id.includes('o3') || m.id.includes('o4') || m.id.includes('chatgpt');
-    case 'anthropic': return (m: any) => m.id.includes('claude');
-    case 'google': return (m: any) => m.id.includes('gemini') || m.id.includes('veo') || m.id.includes('imagen');
-    case 'xai': return (m: any) => m.id.includes('grok');
-    case 'stability': return (m: any) => m.id.includes('flux') || m.id.includes('stability');
-    default: return () => true;
-  }
-};
+const PANEL_STYLES = [
+  { value: '古风', label: '古风' },
+  { value: 'Q版', label: 'Q版' },
+  { value: '写实', label: '写实' },
+  { value: '赛博朋克', label: '赛博朋克' },
+  { value: '暗黑', label: '暗黑' },
+];
 
-// 解析人物DNA输出为结构化数据
-function parseCharacterDNA(text: string) {
-  const characters: any[] = [];
-  const sections = text.split(/========+/).filter(s => s.trim());
-  
-  sections.forEach((section, index) => {
-    const lines = section.split('\n');
-    const char: any = {
-      序号: index + 1,
-      核心人物: '',
-      '人物特征': '',
-      '人物特写': '',
-      '人物脸部': '',
-      '风格': '',
-      '外貌': '',
-      '头发': '',
-      '眉毛': '',
-      '眼睛': '',
-      '鼻子': '',
-      '嘴唇': '',
-      '皮肤': '',
-      '妆造': '',
-      '服饰': '',
-      '场景': '',
-      '画面感': '',
-      '画质': '',
-      '构图': '',
-      '三视图': '',
-      '头部细节': ''
-    };
-    
-    lines.forEach(line => {
-      line = line.trim();
-      if (line.startsWith('核心人物：')) char.核心人物 = line.replace('核心人物：', '').trim();
-      else if (line.match(/^1\.人物特征/)) char['人物特征'] = line.replace(/^1\.人物特征[：:]/, '').trim();
-      else if (line.match(/^2\.人物特写/)) char['人物特写'] = line.replace(/^2\.人物特写[：:]/, '').trim();
-      else if (line.match(/^3\.人物脸部/)) char['人物脸部'] = line.replace(/^3\.人物脸部[：:]/, '').trim();
-      else if (line.match(/^4\.风格/)) char['风格'] = line.replace(/^4\.风格[：:]/, '').trim();
-      else if (line.startsWith('外貌：')) char['外貌'] = line.replace('外貌：', '').trim();
-      else if (line.match(/^1\.头发/)) char['头发'] = line.replace(/^1\.头发[：:]/, '').trim();
-      else if (line.match(/^2\.眉毛/)) char['眉毛'] = line.replace(/^2\.眉毛[：:]/, '').trim();
-      else if (line.match(/^3\.眼睛/)) char['眼睛'] = line.replace(/^3\.眼睛[：:]/, '').trim();
-      else if (line.match(/^4\.鼻子/)) char['鼻子'] = line.replace(/^4\.鼻子[：:]/, '').trim();
-      else if (line.match(/^5\.嘴唇/)) char['嘴唇'] = line.replace(/^5\.嘴唇[：:]/, '').trim();
-      else if (line.match(/^6\.皮肤/)) char['皮肤'] = line.replace(/^6\.皮肤[：:]/, '').trim();
-      else if (line.match(/^7\.妆造/)) char['妆造'] = line.replace(/^7\.妆造[：:]/, '').trim();
-      else if (line.startsWith('服饰：')) char['服饰'] = line.replace('服饰：', '').trim();
-      else if (line.startsWith('场景：')) char['场景'] = line.replace('场景：', '').trim();
-      else if (line.startsWith('画面感：')) char['画面感'] = line.replace('画面感：', '').trim();
-      else if (line.startsWith('画质：')) char['画质'] = line.replace('画质：', '').trim();
-      else if (line.startsWith('构图：')) char['构图'] = line.replace('构图：', '').trim();
-      else if (line.includes('三视图')) char['三视图'] = line.trim();
-      else if (line.includes('头部细节')) char['头部细节'] = line.trim();
-    });
-    
-    if (char.核心人物 || char['人物特征']) {
-      characters.push(char);
-    }
-  });
-  
-  return characters;
-}
+const IMAGE_QUALITY = [
+  { value: '512', label: '标清', size: '512×512' },
+  { value: '1024', label: '高清', size: '1024×1024' },
+  { value: '2048', label: '超清', size: '2048×2048' },
+];
 
-// 导出为Excel
-function exportToExcel(data: any[], filename: string) {
-  if (data.length === 0) return;
-  
-  const ws = XLSX.utils.json_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '人物DNA');
-  
-  // 设置列宽
-  ws['!cols'] = [
-    { wch: 8 },   // 序号
-    { wch: 20 },  // 核心人物
-    { wch: 20 },  // 人物特征
-    { wch: 15 },  // 人物特写
-    { wch: 15 },  // 人物脸部
-    { wch: 25 },  // 风格
-    { wch: 30 },  // 外貌
-    { wch: 25 },  // 头发
-    { wch: 15 },  // 眉毛
-    { wch: 25 },  // 眼睛
-    { wch: 15 },  // 鼻子
-    { wch: 15 },  // 嘴唇
-    { wch: 20 },  // 皮肤
-    { wch: 15 },  // 妆造
-    { wch: 25 },  // 服饰
-    { wch: 15 },  // 场景
-    { wch: 30 },  // 画面感
-    { wch: 30 },  // 画质
-    { wch: 20 },  // 构图
-    { wch: 40 },  // 三视图
-    { wch: 40 },  // 头部细节
-  ];
-  
-  XLSX.writeFile(wb, filename);
-}
+const SCRIPT_STYLES = [
+  { value: '悬疑', label: '悬疑' },
+  { value: '甜宠', label: '甜宠' },
+  { value: '爽文', label: '爽文' },
+  { value: '古风', label: '古风' },
+  { value: '搞笑', label: '搞笑' },
+];
 
+// ==================== 工具函数 ====================
+const generateId = () => Math.random().toString(36).substring(2, 11);
+
+// ==================== 主组件 ====================
 export default function NovelCreator() {
-  // 每个功能的独立状态（包括loading和error）
-  const [featureStates, setFeatureStates] = useState<Record<string, { input: string; output: string; loading: boolean; error: string }>>({
-    polish: { input: '', output: '', loading: false, error: '' },
-    character: { input: '', output: '', loading: false, error: '' },
-    imagePrompt: { input: '', output: '', loading: false, error: '' },
-    scenePrompt: { input: '', output: '', loading: false, error: '' },
-  });
-  const [selectedFeature, setSelectedFeature] = useState('polish');
+  // Tab状态
+  const [activeTab, setActiveTab] = useState<'polish' | 'panel' | 'generate' | 'script' | 'export'>('polish');
   
-  // 获取当前功能的输入输出
-  const currentInput = featureStates[selectedFeature]?.input || '';
-  const currentOutput = featureStates[selectedFeature]?.output || '';
-  const currentLoading = featureStates[selectedFeature]?.loading || false;
-  const currentError = featureStates[selectedFeature]?.error || '';
-  
-  const setCurrentInput = (value: string) => {
-    setFeatureStates(prev => ({
-      ...prev,
-      [selectedFeature]: { ...prev[selectedFeature], input: value }
-    }));
+  // 标签页名称
+  const tabNames = {
+    polish: '小说导入/洗稿',
+    panel: '漫画分镜拆解',
+    generate: '漫画生图',
+    script: '推文脚本',
+    export: '素材导出',
   };
   
-  const setCurrentOutput = (value: string) => {
-    setFeatureStates(prev => ({
-      ...prev,
-      [selectedFeature]: { ...prev[selectedFeature], output: value }
-    }));
-  };
+  // ==================== 标签1：小说导入/洗稿 ====================
+  const [importMode, setImportMode] = useState<'paste' | 'upload'>('paste');
+  const [originalText, setOriginalText] = useState('');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [polishStyle, setPolishStyle] = useState('番茄爽文');
+  const [polishIntensity, setPolishIntensity] = useState('中度');
+  const [extraRequirements, setExtraRequirements] = useState<string[]>([]);
+  const [polishing, setPolishing] = useState(false);
+  const [polishedContent, setPolishedContent] = useState<StoryContent | null>(null);
+  const [showExample, setShowExample] = useState(false);
   
-  const setCurrentLoading = (loading: boolean) => {
-    setFeatureStates(prev => ({
-      ...prev,
-      [selectedFeature]: { ...prev[selectedFeature], loading }
-    }));
-  };
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const setCurrentError = (error: string) => {
-    setFeatureStates(prev => ({
-      ...prev,
-      [selectedFeature]: { ...prev[selectedFeature], error }
-    }));
-  };
-  
-  // 每个功能独立的AbortController
-  const abortControllersRef = useRef<Record<string, AbortController | null>>({
-    polish: null,
-    character: null,
-    imagePrompt: null,
-    scenePrompt: null,
-  });
-  
-  const [selectedModel, setSelectedModel] = useState('doubao-seed-2-0-pro-260215');
-  const [showModelPicker, setShowModelPicker] = useState(false);
-  const [modelProvider, setModelProvider] = useState('doubao');
-  const [modelSearch, setModelSearch] = useState('');
-  const [availableModels, setAvailableModels] = useState<any[]>([]);
-  const [copied, setCopied] = useState(false);
-  const [showExportMenu, setShowExportMenu] = useState(false);
-  const [exportError, setExportError] = useState('');
-  const rateLimiter = new RateLimiter(RATE_LIMIT_MAX);
-  
-  const currentFeature = FEATURES.find(f => f.id === selectedFeature);
-  const currentModel = availableModels.find(m => m.id === selectedModel) || { 
-    id: 'doubao-seed-2-0-pro-260215', 
-    name: '豆包 Seed Pro', 
-    provider: '豆包',
-    isFree: true 
-  };
-  
-  const currentProviderModels = availableModels.filter(m => getModelFilter(modelProvider)(m));
-  const filteredModels = modelSearch 
-    ? currentProviderModels.filter(m => 
-        m.name.toLowerCase().includes(modelSearch.toLowerCase()) || 
-        m.id.toLowerCase().includes(modelSearch.toLowerCase())
-      )
-    : currentProviderModels;
-
-  const closePicker = () => {
-    setShowModelPicker(false);
-    setModelSearch('');
-  };
-
-  const handleSelectModel = (model: any) => {
-    setSelectedModel(model.id);
-    closePicker();
-  };
-
-  useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const res = await fetch('/api/models');
-        const data = await res.json();
-        if (data.success) {
-          setAvailableModels(data.models);
-        }
-      } catch (e) {
-        console.error('Failed to fetch models:', e);
-      }
-    };
-    fetchModels();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.model-picker-container') && !target.closest('.model-trigger')) {
-        setShowModelPicker(false);
-      }
-      if (!target.closest('.export-menu-container')) {
-        setShowExportMenu(false);
-      }
-    };
-    if (showModelPicker || showExportMenu) {
-      document.addEventListener('click', handleClickOutside);
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-      document.body.style.overflow = '';
-    };
-  }, [showModelPicker, showExportMenu]);
-
-  const cancelRequest = useCallback(() => {
-    if (abortControllersRef.current[selectedFeature]) {
-      abortControllersRef.current[selectedFeature]?.abort();
-      abortControllersRef.current[selectedFeature] = null;
-    }
-    setCurrentLoading(false);
-  }, [selectedFeature, setCurrentLoading]);
-
-  const handleSubmit = async () => {
-    if (!currentInput.trim()) {
-      setCurrentError('请输入内容');
+  // 处理文件上传
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.name.endsWith('.txt') && !file.name.endsWith('.docx')) {
+      alert('请上传TXT或Word格式文件');
       return;
     }
     
-    if (!rateLimiter.canMakeRequest()) {
-      setCurrentError('请求过于频繁，请稍后重试');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('文件大小不能超过10MB');
       return;
     }
-
-    rateLimiter.addRequest();
-    setCurrentError('');
-    setCurrentOutput('');
-    setCurrentLoading(true);
-
-    const abortController = new AbortController();
-    abortControllersRef.current[selectedFeature] = abortController;
-
-    const timeoutId = setTimeout(() => {
-      abortController.abort();
-    }, REQUEST_TIMEOUT);
-
+    
+    setUploadFile(file);
+    
     try {
-      // 统一调用后端 API（后端处理 4sapi 密钥）
-      const response = await fetch('/api/llm', {
+      const text = await file.text();
+      setOriginalText(text);
+    } catch (error) {
+      alert('文件读取失败');
+    }
+  };
+  
+  // 洗稿处理
+  const handlePolish = async () => {
+    if (!originalText.trim()) {
+      alert('请先导入小说内容');
+      return;
+    }
+    
+    setPolishing(true);
+    
+    try {
+      const response = await fetch('/api/novel/polish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            { role: 'system', content: SYSTEM_PROMPTS[selectedFeature] || '' },
-            { role: 'user', content: currentInput }
-          ],
-          feature: selectedFeature,
-          stream: true
+          text: originalText,
+          style: polishStyle,
+          intensity: polishIntensity,
+          extraRequirements,
         }),
-        signal: abortController.signal
       });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `请求失败 (${response.status})`);
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
       }
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('无法读取响应');
-
-      const decoder = new TextDecoder();
-      let result = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        
-        // 流式输出直接追加
-        result += chunk;
-        setCurrentOutput(result);
-      }
-    } catch (err: any) {
-      clearTimeout(timeoutId);
-      if (err.name === 'AbortError') {
-        setCurrentError('请求超时');
-      } else {
-        setCurrentError(err.message || '生成失败');
-      }
+      
+      setPolishedContent({
+        original: originalText,
+        polished: data.content,
+        originalityScore: data.score || 90,
+        importMode,
+      });
+      
+      // 自动切换到洗稿结果
+      setActiveTab('polish');
+      
+    } catch (error: any) {
+      console.error('洗稿失败:', error);
+      alert(error.message || '洗稿失败，请重试');
     } finally {
-      setCurrentLoading(false);
-      abortControllersRef.current[selectedFeature] = null;
+      setPolishing(false);
     }
   };
-
-  const handleDownload = () => {
-    const blob = new Blob([currentOutput], { type: 'text/plain' });
+  
+  // 复制内容
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
+  };
+  
+  // 导出TXT
+  const handleExportTXT = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `novel_${selectedFeature}_${Date.now()}.txt`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
   };
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(currentOutput);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  
+  // 清空输入
+  const handleClearInput = () => {
+    if (confirm('确定要清空所有输入吗？')) {
+      setOriginalText('');
+      setUploadFile(null);
+      setPolishedContent(null);
+    }
   };
-
-  // 导出为Excel
-  const handleExportExcel = () => {
-    const characters = parseCharacterDNA(currentOutput);
-    if (characters.length === 0) {
-      setExportError('暂无人物数据可导出');
+  
+  // ==================== 标签2：漫画分镜拆解 ====================
+  const [sourceText, setSourceText] = useState(polishedContent?.polished || '');
+  const [panelCount, setPanelCount] = useState('auto');
+  const [panelStyle, setPanelStyle] = useState('古风');
+  const [panels, setPanels] = useState<ComicPanel[]>([]);
+  const [splitting, setSplitting] = useState(false);
+  
+  // 当洗稿完成后同步文本
+  useEffect(() => {
+    if (polishedContent?.polished) {
+      setSourceText(polishedContent.polished);
+    }
+  }, [polishedContent]);
+  
+  // 拆解分镜
+  const handleSplitPanels = async () => {
+    if (!sourceText.trim()) {
+      alert('请先导入小说内容');
       return;
     }
-    exportToExcel(characters, `人物DNA_${Date.now()}.xlsx`);
-    setShowExportMenu(false);
+    
+    setSplitting(true);
+    
+    try {
+      const response = await fetch('/api/novel/split-panel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: sourceText,
+          count: panelCount,
+          style: panelStyle,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // 解析分镜数据
+      const parsedPanels = parsePanelData(data.content);
+      setPanels(parsedPanels);
+      
+    } catch (error: any) {
+      console.error('分镜拆解失败:', error);
+      alert(error.message || '分镜拆解失败，请重试');
+    } finally {
+      setSplitting(false);
+    }
   };
-
-  const getProviderConfig = (providerName: string) => {
-    const found = PROVIDERS.find(p => 
-      providerName.includes(p.name) || 
-      (p.name === '豆包' && providerName.includes('Coze'))
-    );
-    return found || PROVIDERS[11];
+  
+  // 解析分镜数据
+  const parsePanelData = (content: string): ComicPanel[] => {
+    const panels: ComicPanel[] = [];
+    const lines = content.split('\n');
+    let currentPanel: Partial<ComicPanel> | null = null;
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      if (/^分镜\d+[:：]/.test(trimmed) || /^场景\d+[:：]/.test(trimmed)) {
+        if (currentPanel?.scene) {
+          panels.push(currentPanel as ComicPanel);
+        }
+        currentPanel = {
+          id: generateId(),
+          scene: trimmed.replace(/^分镜\d+[:：]\s*/, '').replace(/^场景\d+[:：]\s*/, ''),
+          characterAction: '',
+          dialogue: '',
+          emotion: '',
+        };
+      } else if (currentPanel) {
+        if (/^人物动作[:：]/.test(trimmed)) {
+          currentPanel.characterAction = trimmed.replace(/^人物动作[:：]\s*/, '');
+        } else if (/^对话[:：]/.test(trimmed) || /^台词[:：]/.test(trimmed)) {
+          currentPanel.dialogue = trimmed.replace(/^(对话|台词)[:：]\s*/, '');
+        } else if (/^情绪[:：]/.test(trimmed) || /^情感[:：]/.test(trimmed)) {
+          currentPanel.emotion = trimmed.replace(/^(情绪|情感)[:：]\s*/, '');
+        }
+      }
+    }
+    
+    if (currentPanel?.scene) {
+      panels.push(currentPanel as ComicPanel);
+    }
+    
+    // 如果解析失败，创建一个默认分镜
+    if (panels.length === 0 && content.trim()) {
+      const count = parseInt(panelCount) || 6;
+      for (let i = 0; i < count; i++) {
+        panels.push({
+          id: generateId(),
+          scene: `场景 ${i + 1}`,
+          characterAction: '人物动作描述',
+          dialogue: '对话内容',
+          emotion: '情绪表达',
+        });
+      }
+    }
+    
+    return panels;
   };
-
+  
+  // 更新分镜
+  const updatePanel = (id: string, field: keyof ComicPanel, value: string) => {
+    setPanels(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
+  
+  // 删除分镜
+  const deletePanel = (id: string) => {
+    if (confirm('确定要删除这个分镜吗？')) {
+      setPanels(prev => prev.filter(p => p.id !== id));
+    }
+  };
+  
+  // ==================== 标签3：漫画生图 ====================
+  const [imageQuality, setImageQuality] = useState('1024');
+  const [imageStyleExtra, setImageStyleExtra] = useState('');
+  const [generatingImages, setGeneratingImages] = useState(false);
+  const [generatingPanelId, setGeneratingPanelId] = useState<string | null>(null);
+  
+  // 生成单张图片
+  const handleGenerateImage = async (panel: ComicPanel) => {
+    setGeneratingPanelId(panel.id);
+    
+    try {
+      const prompt = `漫画风格，${panelStyle}，场景：${panel.scene}，人物动作：${panel.characterAction}，情绪：${panel.emotion}，${imageStyleExtra}`;
+      
+      const response = await fetch('/api/novel/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt,
+          quality: imageQuality,
+          style: panelStyle,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // 更新分镜图片
+      setPanels(prev => prev.map(p => 
+        p.id === panel.id ? { ...p, imageUrl: data.imageUrl, prompt } : p
+      ));
+      
+    } catch (error: any) {
+      console.error('生图失败:', error);
+      alert(error.message || '生图失败，请重试');
+    } finally {
+      setGeneratingPanelId(null);
+    }
+  };
+  
+  // 批量生图
+  const handleBatchGenerate = async () => {
+    if (panels.length === 0) {
+      alert('请先拆分漫画分镜');
+      return;
+    }
+    
+    setGeneratingImages(true);
+    
+    for (const panel of panels) {
+      await handleGenerateImage(panel);
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 避免API限流
+    }
+    
+    setGeneratingImages(false);
+  };
+  
+  // 下载单张图片
+  const handleDownloadImage = async (panel: ComicPanel) => {
+    if (!panel.imageUrl) return;
+    
+    try {
+      const response = await fetch(panel.imageUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comic_panel_${panel.id}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      alert('图片下载失败');
+    }
+  };
+  
+  // ==================== 标签4：漫画推文脚本 ====================
+  const [scriptPlatform, setScriptPlatform] = useState<'douyin' | 'xiaohongshu'>('douyin');
+  const [scriptStyle, setScriptStyle] = useState<'悬疑' | '甜宠' | '爽文' | '古风' | '搞笑'>('爽文');
+  const [scriptDuration, setScriptDuration] = useState<'15s' | '30s' | '60s'>('30s');
+  const [comicStory, setComicStory] = useState<ComicStory | null>(null);
+  const [generatingScript, setGeneratingScript] = useState(false);
+  
+  // 生成推文脚本
+  const handleGenerateScript = async () => {
+    if (!polishedContent?.polished || panels.length === 0) {
+      alert('请先完成洗稿和分镜拆解');
+      return;
+    }
+    
+    setGeneratingScript(true);
+    
+    try {
+      const response = await fetch('/api/novel/generate-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: polishedContent.polished,
+          panels: panels.length,
+          platform: scriptPlatform,
+          style: scriptStyle,
+          duration: scriptDuration,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // 解析脚本数据
+      setComicStory({
+        id: generateId(),
+        platform: scriptPlatform,
+        style: scriptStyle,
+        duration: scriptDuration,
+        script: parseScriptData(data.content),
+      });
+      
+    } catch (error: any) {
+      console.error('脚本生成失败:', error);
+      alert(error.message || '脚本生成失败，请重试');
+    } finally {
+      setGeneratingScript(false);
+    }
+  };
+  
+  // 解析脚本数据
+  const parseScriptData = (content: string): ComicStory['script'] => {
+    const script: ComicStory['script'] = [];
+    const lines = content.split('\n');
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      const timeMatch = trimmed.match(/时长[:：](\d+秒)/);
+      const shotMatch = trimmed.match(/镜头[:：](\d+)/);
+      const narrationMatch = trimmed.match(/旁白[:：](.+)/);
+      const subtitleMatch = trimmed.match(/字幕[:：](.+)/);
+      const bgmMatch = trimmed.match(/背景音乐[:：](.+)/);
+      const hashtagMatch = trimmed.match(/话题[:：](.+)/);
+      
+      if (timeMatch || shotMatch || narrationMatch || subtitleMatch) {
+        script.push({
+          time: timeMatch ? timeMatch[1] : '0秒',
+          shot: shotMatch ? parseInt(shotMatch[1]) : script.length + 1,
+          narration: narrationMatch ? narrationMatch[1].trim() : '',
+          subtitle: subtitleMatch ? subtitleMatch[1].trim() : '',
+          bgm: bgmMatch ? bgmMatch[1].trim() : '',
+          hashtags: hashtagMatch ? hashtagMatch[1].split(/[,，]/).map(t => t.trim()) : [],
+        });
+      }
+    }
+    
+    // 如果解析失败，创建默认脚本
+    if (script.length === 0) {
+      const durationSeconds = parseInt(scriptDuration) || 30;
+      const shotCount = Math.min(panels.length, Math.ceil(durationSeconds / 5));
+      
+      for (let i = 0; i < shotCount; i++) {
+        script.push({
+          time: `${(i + 1) * 5}秒`,
+          shot: i + 1,
+          narration: `旁白内容 ${i + 1}`,
+          subtitle: `字幕内容 ${i + 1}`,
+          bgm: '背景音乐建议',
+          hashtags: ['#漫画推文', '#短剧', '#热门'],
+        });
+      }
+    }
+    
+    return script;
+  };
+  
+  // 导出SRT字幕
+  const handleExportSRT = () => {
+    if (!comicStory) return;
+    
+    let srtContent = '';
+    comicStory.script.forEach((item, index) => {
+      srtContent += `${index + 1}\n`;
+      srtContent += `00:00:${item.time.replace('秒', '00')} --> 00:00:${parseInt(item.time) + 5}秒00\n`;
+      srtContent += `${item.subtitle}\n\n`;
+    });
+    
+    handleExportTXT(srtContent, `字幕_${new Date().toISOString().split('T')[0]}.srt`);
+  };
+  
+  // ==================== 标签5：素材导出 ====================
+  const [exportOptions, setExportOptions] = useState({
+    polishedText: true,
+    panelScript: true,
+    comicImages: true,
+    storyScript: true,
+    subtitle: false,
+    imageQuality: '1024',
+  });
+  
+  // 一键导出
+  const handleExportAll = async () => {
+    const selectedOptions = Object.entries(exportOptions).filter(([key, value]) => value === true || parseInt(String(value)) > 0);
+    
+    if (selectedOptions.length === 0) {
+      alert('请选择需要导出的素材类型');
+      return;
+    }
+    
+    const zip = new JSZip();
+    
+    // 洗稿文本
+    if (exportOptions.polishedText && polishedContent?.polished) {
+      zip.file(`洗稿文本_${new Date().toISOString().split('T')[0]}.txt`, polishedContent.polished);
+    }
+    
+    // 分镜脚本
+    if (exportOptions.panelScript && panels.length > 0) {
+      const panelScript = panels.map((p, i) => 
+        `【分镜${i + 1}】\n场景：${p.scene}\n人物动作：${p.characterAction}\n对话：${p.dialogue}\n情绪：${p.emotion}\n`
+      ).join('\n');
+      zip.file(`漫画分镜脚本_${new Date().toISOString().split('T')[0]}.txt`, panelScript);
+    }
+    
+    // 推文脚本
+    if (exportOptions.storyScript && comicStory) {
+      const scriptContent = comicStory.script.map((s, i) => 
+        `【镜头${s.shot}】\n时长：${s.time}\n旁白：${s.narration}\n字幕：${s.subtitle}\n背景音乐：${s.bgm}\n话题：${s.hashtags.join(', ')}\n`
+      ).join('\n');
+      zip.file(`推文脚本_${new Date().toISOString().split('T')[0]}.txt`, scriptContent);
+    }
+    
+    // 字幕文件
+    if (exportOptions.subtitle && comicStory) {
+      let srtContent = '';
+      comicStory.script.forEach((item, index) => {
+        srtContent += `${index + 1}\n`;
+        srtContent += `00:00:${item.time.replace('秒', '00')} --> 00:00:${parseInt(item.time) + 5}秒00\n`;
+        srtContent += `${item.subtitle}\n\n`;
+      });
+      zip.file(`字幕_${new Date().toISOString().split('T')[0]}.srt`, srtContent);
+    }
+    
+    // 生成并下载压缩包
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `网文创作素材_${new Date().toISOString().split('T')[0]}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  
+  // ==================== 渲染 ====================
   return (
-    <div className="bg-gradient-to-br from-orange-50 via-white to-amber-50 min-h-screen">
-      {/* 顶部品牌栏 */}
-      <div className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center justify-between">
-            {/* 左侧：应用 Logo + 网站 Logo */}
-            <div className="flex items-center gap-4">
-              {/* 网站 Logo */}
-              <div className="flex items-center gap-2">
-                <div className="text-2xl">🦞</div>
-                <span className="font-bold text-lg text-slate-800">OneClaw</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
+      {/* 顶部导航栏 */}
+      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => window.close()}
+              className="flex items-center gap-1 text-slate-600 hover:text-orange-500 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="text-sm hidden sm:inline">返回</span>
+            </button>
+            
+            <div className="w-px h-6 bg-slate-200 hidden sm:block" />
+            
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">🦞</span>
               </div>
-              
-              {/* 分隔线 */}
-              <div className="hidden sm:block w-px h-6 bg-slate-200" />
-              
-              {/* 应用 Logo */}
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <Feather className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-semibold text-slate-700">小说创作</span>
-              </div>
+              <span className="font-bold text-lg text-slate-800 hidden sm:inline">OneClaw</span>
             </div>
             
-            {/* 右侧：用户信息或登录 */}
-            <div className="flex items-center gap-3">
-              <LoginButton />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 主内容区 */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-
-        {/* 第一层级：功能选择 + 模型选择 */}
-        <div className="flex items-center justify-between mb-6">
-          {/* 功能选择 - 移动端可横向滚动 */}
-          <div className="flex-none">
-            <div className="flex bg-slate-100 rounded-xl p-1.5 gap-1 overflow-x-auto scrollbar-hide">
-              {FEATURES.map(f => {
-                const Icon = f.icon;
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => setSelectedFeature(f.id)}
-                    className={`px-3 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${
-                      selectedFeature === f.id
-                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
-                        : 'text-slate-600 hover:bg-white hover:shadow-sm'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 flex-shrink-0" />
-                    <span className="hidden sm:inline">{f.name}</span>
-                  </button>
-                );
-              })}
+            <div className="w-px h-6 bg-slate-200 hidden sm:block" />
+            
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Feather className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-semibold text-slate-700">网文全栈AI创作工坊</span>
             </div>
           </div>
           
-          {/* 模型选择 */}
-          <div className="relative flex-shrink-0">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowModelPicker(!showModelPicker);
-              }}
-              className="model-trigger flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 rounded-xl transition-colors"
-            >
-              <span className="hidden sm:inline text-sm font-medium text-slate-500">当前模型：</span>
-              {(() => {
-                const providerConfig = getProviderConfig(currentModel.provider || '豆包');
-                return (
-                  <span className={`w-6 h-6 rounded-full ${providerConfig.color} ${providerConfig.border ? 'border border-slate-300' : ''} ${providerConfig.textColor} flex items-center justify-center text-[10px] font-bold`}>
-                    {(currentModel.provider || '豆包').charAt(0)}
-                  </span>
-                );
-              })()}
-              <span className="font-medium text-slate-700 hidden sm:inline">
-                {currentModel.name || '豆包 Seed Pro'}
-              </span>
-              <ChevronDown className="w-4 h-4 text-slate-400" />
-            </button>
-            
-            {/* 模型选择弹框 */}
-            {showModelPicker && (
-              <div 
-                className="model-picker-container absolute top-full left-0 sm:left-0 mt-3 w-80 sm:w-[400px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
+          <LoginButton />
+        </div>
+        
+        {/* 标签页导航 */}
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex gap-1 overflow-x-auto pb-2">
+            {Object.entries(tabNames).map(([key, name]) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key as typeof activeTab)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+                  activeTab === key
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
               >
-                <div className="p-4 border-b border-slate-100 flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={modelSearch}
-                    onChange={(e) => setModelSearch(e.target.value)}
-                    placeholder="搜索模型名称或ID..."
-                    className="flex-1 px-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-orange-500"
-                    autoFocus
-                  />
-                  <button
-                    onClick={closePicker}
-                    className="p-2 hover:bg-slate-100 rounded-lg"
-                  >
-                    <X className="w-4 h-4 text-slate-400" />
-                  </button>
-                </div>
-                
-                <div className="p-3 border-b border-slate-100 bg-slate-50">
-                  <div className="flex gap-2 flex-wrap">
-                    {PROVIDERS.map(p => {
-                      const count = availableModels.filter(m => getModelFilter(p.id)(m)).length;
-                      if (count === 0 && p.id !== 'doubao') return null;
-                      return (
-                        <button
-                          key={p.id}
-                          onClick={() => setModelProvider(p.id)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                            modelProvider === p.id
-                              ? `${p.color} ${p.border ? 'border border-slate-300' : ''} ${p.textColor}`
-                              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                          }`}
-                        >
-                          {p.name} ({count})
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                <div className="max-h-80 overflow-y-auto">
-                  {filteredModels.length > 0 ? (
-                    <div className="p-2 space-y-1">
-                      {filteredModels.slice(0, 60).map(m => (
-                        <button
-                          key={m.id}
-                          onClick={() => handleSelectModel(m)}
-                          className={`w-full p-3 rounded-lg text-left transition-all flex items-center justify-between gap-3 ${
-                            selectedModel === m.id
-                              ? 'bg-orange-100 border border-orange-500'
-                              : 'hover:bg-slate-50'
-                          }`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">{m.name}</div>
-                            <div className="text-xs text-slate-400 truncate">{m.id}</div>
-                          </div>
-                          {selectedModel === m.id && (
-                            <Check className="w-4 h-4 text-orange-500 flex-shrink-0" />
-                          )}
-                          {m.isFree && (
-                            <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-600 rounded-full">免费</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-6 text-center text-sm text-slate-400">
-                      暂无可用模型
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+                {name}
+              </button>
+            ))}
           </div>
         </div>
-
-        {/* 第二层级：输入 + 输出区域 - 移动端垂直布局 */}
-        <div className="flex flex-col lg:flex-row gap-6 lg:h-[600px]">
-          {/* 左侧：输入 */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col min-h-[300px] lg:min-h-0">
-            <h3 className="font-semibold text-lg mb-3 sm:mb-4">{currentFeature?.name}</h3>
-            
-            <textarea
-              value={currentInput}
-              onChange={(e) => setCurrentInput(e.target.value)}
-              placeholder={currentFeature?.placeholder}
-              className="flex-1 w-full p-3 sm:p-4 border-2 border-slate-200 rounded-xl resize-none focus:outline-none focus:border-orange-500 transition-colors text-base leading-relaxed placeholder:text-slate-400 bg-white"
-            />
-            
-            <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              {currentLoading ? (
-                <button
-                  onClick={cancelRequest}
-                  className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 flex items-center justify-center gap-2 font-medium"
-                >
-                  <AlertCircle className="w-5 h-5" />
-                  取消生成
-                </button>
-              ) : (
-                <button
-                  onClick={handleSubmit}
-                  disabled={!currentInput.trim()}
-                  className="px-6 sm:px-10 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium text-base sm:text-lg"
-                >
-                  <Send className="w-5 h-5" />
-                  开始生成
-                </button>
-              )}
-              
-              {currentError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <span className="truncate">{currentError}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 右侧：输出 */}
-          <div className="flex-1 bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col min-h-[300px] lg:min-h-0">
-            <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h3 className="font-semibold text-lg">生成结果</h3>
-              {currentOutput && (
-                <div className="flex gap-2 relative">
-                  <button
-                    onClick={handleCopy}
-                    className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-1.5"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                    {copied ? '已复制' : '复制'}
-                  </button>
-                  <button
-                    onClick={handleDownload}
-                    className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-1.5"
-                  >
-                    <Download className="w-4 h-4" />
-                    下载
-                  </button>
-                  {/* Excel导出按钮 - 仅人物DNA功能显示 */}
-                  {selectedFeature === 'character' && (
-                    <div className="relative export-menu-container">
+      </div>
+      
+      {/* 主内容区 */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        
+        {/* ==================== 标签1：小说导入/洗稿 ==================== */}
+        {activeTab === 'polish' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* 左侧：输入区域 */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                      <BookOpen className="w-5 h-5 text-purple-500" />
+                      小说导入
+                    </h2>
+                    <div className="flex gap-2">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowExportMenu(!showExportMenu);
-                        }}
-                        className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-1.5 bg-green-50"
+                        onClick={() => setImportMode('paste')}
+                        className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                          importMode === 'paste' 
+                            ? 'bg-purple-100 text-purple-600' 
+                            : 'text-slate-500 hover:bg-slate-100'
+                        }`}
                       >
-                        <FileSpreadsheet className="w-4 h-4 text-green-600" />
-                        导出Excel
+                        粘贴文本
                       </button>
-                      {showExportMenu && (
-                        <div 
-                          className="absolute top-full right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-slate-200 z-50 overflow-hidden"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                      <button
+                        onClick={() => setImportMode('upload')}
+                        className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                          importMode === 'upload' 
+                            ? 'bg-purple-100 text-purple-600' 
+                            : 'text-slate-500 hover:bg-slate-100'
+                        }`}
+                      >
+                        上传文件
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {importMode === 'paste' ? (
+                    <textarea
+                      value={originalText}
+                      onChange={(e) => setOriginalText(e.target.value)}
+                      placeholder="请粘贴小说章节/全文内容..."
+                      className="w-full h-64 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm"
+                    />
+                  ) : (
+                    <div className="space-y-4">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".txt,.docx"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                      />
+                      
+                      {uploadFile ? (
+                        <div className="p-6 border-2 border-dashed border-purple-200 rounded-xl bg-purple-50 text-center">
+                          <FileText className="w-12 h-12 text-purple-500 mx-auto mb-2" />
+                          <p className="text-sm text-slate-600">{uploadFile.name}</p>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {(uploadFile.size / 1024).toFixed(1)} KB
+                          </p>
                           <button
-                            onClick={handleExportExcel}
-                            className="w-full px-4 py-2.5 text-sm text-left hover:bg-slate-50 flex items-center gap-2"
+                            onClick={() => {
+                              setUploadFile(null);
+                              setOriginalText('');
+                              fileInputRef.current?.click();
+                            }}
+                            className="mt-3 text-sm text-purple-500 hover:text-purple-600"
                           >
-                            <FileSpreadsheet className="w-4 h-4 text-green-600" />
-                            导出为 Excel
+                            重新上传
                           </button>
                         </div>
+                      ) : (
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full p-6 border-2 border-dashed border-slate-300 rounded-xl hover:border-purple-400 hover:bg-purple-50 transition-colors"
+                        >
+                          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                          <p className="text-sm text-slate-500">点击上传TXT/Word文件</p>
+                          <p className="text-xs text-slate-400 mt-1">单个文件不超过10MB</p>
+                        </button>
                       )}
                     </div>
                   )}
                 </div>
-              )}
-            </div>
-
-            <div className="flex-1 relative">
-              <textarea
-                value={currentOutput}
-                readOnly
-                placeholder="生成的内容将显示在这里..."
-                className="w-full h-full p-3 sm:p-4 border-2 border-slate-200 rounded-xl resize-none bg-slate-50 text-base leading-relaxed"
-              />
-              {currentLoading && (
-                <div className="absolute inset-0 bg-white/90 flex items-center justify-center rounded-xl">
-                  <div className="text-center">
-                    <Loader2 className="w-10 sm:w-12 h-10 sm:h-12 animate-spin text-orange-500 mx-auto" />
-                    <p className="mt-4 text-base text-slate-600">正在生成...</p>
+                
+                {/* 洗稿配置 */}
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                  <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                    <Settings2 className="w-5 h-5 text-purple-500" />
+                    洗稿配置
+                  </h2>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">洗稿风格</label>
+                      <select
+                        value={polishStyle}
+                        onChange={(e) => setPolishStyle(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      >
+                        {POLISH_STYLES.map(s => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">洗稿强度</label>
+                      <select
+                        value={polishIntensity}
+                        onChange={(e) => setPolishIntensity(e.target.value)}
+                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                      >
+                        {POLISH_INTENSITY.map(s => (
+                          <option key={s.value} value={s.value}>{s.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">额外需求</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['删减水字数', '强化爽点', '保留伏笔', '量化冲突'].map(opt => (
+                          <label key={opt} className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-lg cursor-pointer hover:bg-slate-100">
+                            <input
+                              type="checkbox"
+                              checked={extraRequirements.includes(opt)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setExtraRequirements(prev => [...prev, opt]);
+                                } else {
+                                  setExtraRequirements(prev => prev.filter(o => o !== opt));
+                                }
+                              }}
+                              className="rounded text-purple-500"
+                            />
+                            <span className="text-sm text-slate-600">{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )}
+                
+                {/* 操作按钮 */}
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={handlePolish}
+                    disabled={polishing || !originalText.trim()}
+                    className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                  >
+                    {polishing ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        正在深度洗稿...
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-5 h-5" />
+                        立即洗稿
+                      </>
+                    )}
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowExample(true)}
+                    className="px-4 py-3 border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                  >
+                    查看示例
+                  </button>
+                  
+                  <button
+                    onClick={handleClearInput}
+                    className="px-4 py-3 border border-slate-200 hover:bg-slate-50 rounded-xl transition-colors"
+                  >
+                    清空输入
+                  </button>
+                </div>
+              </div>
+              
+              {/* 右侧：输出区域 */}
+              <div className="space-y-6">
+                {polishedContent ? (
+                  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <Check className="w-5 h-5 text-green-500" />
+                        洗稿完成
+                      </h2>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleCopy(polishedContent.polished || '')}
+                          className="flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"
+                        >
+                          <Copy className="w-4 h-4" />
+                          复制
+                        </button>
+                        <button
+                          onClick={() => handleExportTXT(polishedContent.polished || '', `洗稿文本_${new Date().toISOString().split('T')[0]}.txt`)}
+                          className="flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"
+                        >
+                          <Download className="w-4 h-4" />
+                          导出
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* 原创度评分 */}
+                    <div className="flex items-center gap-4 p-4 bg-green-50 rounded-xl mb-4">
+                      <div className="relative w-16 h-16">
+                        <svg className="w-16 h-16 transform -rotate-90">
+                          <circle cx="32" cy="32" r="28" stroke="#e2e8f0" strokeWidth="4" fill="none" />
+                          <circle
+                            cx="32" cy="32" r="28"
+                            stroke="#22c55e"
+                            strokeWidth="4"
+                            fill="none"
+                            strokeDasharray={`${(polishedContent.originalityScore || 0) * 1.76} 176`}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-lg font-bold text-green-600">{polishedContent.originalityScore || 90}%</span>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-green-700">原创度评分</p>
+                        <p className="text-xs text-green-600">洗稿后原创度显著提升</p>
+                      </div>
+                    </div>
+                    
+                    {/* 洗稿内容 */}
+                    <div className="max-h-96 overflow-y-auto p-4 bg-slate-50 rounded-xl text-sm leading-relaxed whitespace-pre-wrap">
+                      {polishedContent.polished}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-2xl p-12 shadow-sm border border-slate-200 text-center">
+                    <Wand2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-slate-600 mb-2">开始洗稿创作</h3>
+                    <p className="text-sm text-slate-400">
+                      导入小说内容，点击「立即洗稿」开始深度洗稿
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* ==================== 标签2：漫画分镜拆解 ==================== */}
+        {activeTab === 'panel' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Image className="w-5 h-5 text-purple-500" />
+                漫画分镜拆解
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">小说内容</label>
+                  <textarea
+                    value={sourceText}
+                    onChange={(e) => setSourceText(e.target.value)}
+                    placeholder="请输入或粘贴小说内容，系统将自动拆分为漫画分镜..."
+                    className="w-full h-40 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none text-sm"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">分镜数量</label>
+                    <select
+                      value={panelCount}
+                      onChange={(e) => setPanelCount(e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="auto">按章节自动拆分</option>
+                      <option value="4">4个分镜</option>
+                      <option value="6">6个分镜</option>
+                      <option value="8">8个分镜</option>
+                      <option value="12">12个分镜</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">分镜风格</label>
+                    <select
+                      value={panelStyle}
+                      onChange={(e) => setPanelStyle(e.target.value)}
+                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                    >
+                      {PANEL_STYLES.map(s => (
+                        <option key={s.value} value={s.value}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleSplitPanels}
+                  disabled={splitting || !sourceText.trim()}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                >
+                  {splitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      正在拆解分镜...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      立即拆解
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            
+            {/* 分镜列表 */}
+            {panels.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-slate-800">
+                    分镜列表 ({panels.length}个)
+                  </h2>
+                </div>
+                
+                <div className="space-y-4">
+                  {panels.map((panel, index) => (
+                    <div key={panel.id} className="p-4 bg-slate-50 rounded-xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-purple-600">分镜 {index + 1}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => deletePanel(panel.id)}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1">场景</label>
+                          <input
+                            type="text"
+                            value={panel.scene}
+                            onChange={(e) => updatePanel(panel.id, 'scene', e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1">情绪</label>
+                          <input
+                            type="text"
+                            value={panel.emotion}
+                            onChange={(e) => updatePanel(panel.id, 'emotion', e.target.value)}
+                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">人物动作</label>
+                        <input
+                          type="text"
+                          value={panel.characterAction}
+                          onChange={(e) => updatePanel(panel.id, 'characterAction', e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">对话</label>
+                        <input
+                          type="text"
+                          value={panel.dialogue}
+                          onChange={(e) => updatePanel(panel.id, 'dialogue', e.target.value)}
+                          className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* ==================== 标签3：漫画生图 ==================== */}
+        {activeTab === 'generate' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Image className="w-5 h-5 text-purple-500" />
+                漫画生成配置
+              </h2>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">画质设置</label>
+                  <select
+                    value={imageQuality}
+                    onChange={(e) => setImageQuality(e.target.value)}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                  >
+                    {IMAGE_QUALITY.map(q => (
+                      <option key={q.value} value={q.value}>{q.label} ({q.size})</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">当前风格</label>
+                  <div className="px-4 py-2 bg-slate-100 rounded-xl text-slate-600">
+                    {panelStyle}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-1">风格细节（可选）</label>
+                <input
+                  type="text"
+                  value={imageStyleExtra}
+                  onChange={(e) => setImageStyleExtra(e.target.value)}
+                  placeholder="如：线条简洁、色彩明亮、人物表情夸张"
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+              
+              <button
+                onClick={handleBatchGenerate}
+                disabled={generatingImages || panels.length === 0}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+              >
+                {generatingImages ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    正在批量生成...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5" />
+                    批量生成所有漫画图
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {/* 漫画图展示 */}
+            {panels.length > 0 && (
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <h2 className="text-lg font-semibold text-slate-800 mb-4">
+                  漫画图 ({panels.filter(p => p.imageUrl).length}/{panels.length})
+                </h2>
+                
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {panels.map((panel, index) => (
+                    <div key={panel.id} className="space-y-2">
+                      <div className="aspect-square bg-slate-100 rounded-xl overflow-hidden relative">
+                        {panel.imageUrl ? (
+                          <img src={panel.imageUrl} alt={`分镜${index + 1}`} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Image className="w-12 h-12 text-slate-300" />
+                          </div>
+                        )}
+                        
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          {generatingPanelId === panel.id && (
+                            <Loader2 className="w-5 h-5 animate-spin text-white" />
+                          )}
+                          {!panel.imageUrl && generatingPanelId !== panel.id && (
+                            <button
+                              onClick={() => handleGenerateImage(panel)}
+                              className="p-1.5 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                            >
+                              <Sparkles className="w-4 h-4" />
+                            </button>
+                          )}
+                          {panel.imageUrl && (
+                            <>
+                              <button
+                                onClick={() => handleDownloadImage(panel)}
+                                className="p-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleGenerateImage(panel)}
+                                className="p-1.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                              >
+                                <RefreshCw className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-slate-500 truncate">分镜 {index + 1}: {panel.scene}</p>
+                      
+                      {panel.prompt && (
+                        <button
+                          onClick={() => handleCopy(panel.prompt || '')}
+                          className="w-full flex items-center justify-center gap-1 px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 rounded"
+                        >
+                          <Copy className="w-3 h-3" />
+                          复制提示词
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {panels.length === 0 && (
+              <div className="bg-white rounded-2xl p-12 shadow-sm border border-slate-200 text-center">
+                <Image className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-slate-600 mb-2">暂无漫画分镜</h3>
+                <p className="text-sm text-slate-400">
+                  请先在「漫画分镜拆解」标签页拆分漫画分镜
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* ==================== 标签4：漫画推文脚本 ==================== */}
+        {activeTab === 'script' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <FileCode className="w-5 h-5 text-purple-500" />
+                漫画推文脚本
+              </h2>
+              
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">发布平台</label>
+                  <select
+                    value={scriptPlatform}
+                    onChange={(e) => setScriptPlatform(e.target.value as 'douyin' | 'xiaohongshu')}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="douyin">抖音</option>
+                    <option value="xiaohongshu">小红书</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">推文风格</label>
+                  <select
+                    value={scriptStyle}
+                    onChange={(e) => setScriptStyle(e.target.value as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                  >
+                    {SCRIPT_STYLES.map(s => (
+                      <option key={s.value} value={s.value}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">推文时长</label>
+                  <select
+                    value={scriptDuration}
+                    onChange={(e) => setScriptDuration(e.target.value as '15s' | '30s' | '60s')}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="15s">15秒</option>
+                    <option value="30s">30秒</option>
+                    <option value="60s">60秒</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button
+                onClick={handleGenerateScript}
+                disabled={generatingScript || !polishedContent?.polished || panels.length === 0}
+                className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+              >
+                {generatingScript ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    正在生成脚本...
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="w-5 h-5" />
+                    生成推文脚本
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {/* 脚本展示 */}
+            {comicStory && (
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-slate-800">
+                    推文脚本 ({comicStory.script.length}个镜头)
+                  </h2>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleCopy(JSON.stringify(comicStory.script, null, 2))}
+                      className="flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                      <Copy className="w-4 h-4" />
+                      复制
+                    </button>
+                    <button
+                      onClick={handleExportSRT}
+                      className="flex items-center gap-1 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 rounded-lg"
+                    >
+                      <Download className="w-4 h-4" />
+                      导出字幕
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {comicStory.script.map((item, index) => (
+                    <div key={index} className="p-4 bg-slate-50 rounded-xl space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs font-medium rounded">
+                          镜头 {item.shot}
+                        </span>
+                        <span className="text-sm text-slate-500">时长: {item.time}</span>
+                      </div>
+                      
+                      <div>
+                        <span className="text-xs text-slate-500">旁白：</span>
+                        <p className="text-sm text-slate-700">{item.narration}</p>
+                      </div>
+                      
+                      <div>
+                        <span className="text-xs text-slate-500">字幕：</span>
+                        <p className="text-sm text-slate-700">{item.subtitle}</p>
+                      </div>
+                      
+                      <div>
+                        <span className="text-xs text-slate-500">背景音乐：</span>
+                        <p className="text-sm text-slate-700">{item.bgm}</p>
+                      </div>
+                      
+                      {item.hashtags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {item.hashtags.map((tag, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-pink-100 text-pink-600 text-xs rounded-full">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {!comicStory && (
+              <div className="bg-white rounded-2xl p-12 shadow-sm border border-slate-200 text-center">
+                <FileCode className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-slate-600 mb-2">暂无推文脚本</h3>
+                <p className="text-sm text-slate-400">
+                  请先完成洗稿和分镜拆解，然后生成推文脚本
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* ==================== 标签5：素材导出 ==================== */}
+        {activeTab === 'export' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <Package className="w-5 h-5 text-purple-500" />
+                素材导出
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100">
+                    <input
+                      type="checkbox"
+                      checked={exportOptions.polishedText}
+                      onChange={(e) => setExportOptions(prev => ({ ...prev, polishedText: e.target.checked }))}
+                      className="rounded text-purple-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">洗稿文本 (TXT)</p>
+                      <p className="text-xs text-slate-500">深度洗稿后的完整小说文本</p>
+                    </div>
+                    {polishedContent?.polished && (
+                      <Check className="w-5 h-5 text-green-500 ml-auto" />
+                    )}
+                  </label>
+                </div>
+                
+                <div>
+                  <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100">
+                    <input
+                      type="checkbox"
+                      checked={exportOptions.panelScript}
+                      onChange={(e) => setExportOptions(prev => ({ ...prev, panelScript: e.target.checked }))}
+                      className="rounded text-purple-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">漫画分镜脚本 (TXT)</p>
+                      <p className="text-xs text-slate-500">所有分镜的场景、动作、对话描述</p>
+                    </div>
+                    {panels.length > 0 && (
+                      <Check className="w-5 h-5 text-green-500 ml-auto" />
+                    )}
+                  </label>
+                </div>
+                
+                <div>
+                  <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100">
+                    <input
+                      type="checkbox"
+                      checked={exportOptions.comicImages}
+                      onChange={(e) => setExportOptions(prev => ({ ...prev, comicImages: e.target.checked }))}
+                      className="rounded text-purple-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">漫画图片 (PNG)</p>
+                      <p className="text-xs text-slate-500">生成的漫画图片文件</p>
+                    </div>
+                    {panels.filter(p => p.imageUrl).length > 0 && (
+                      <span className="ml-auto text-xs text-slate-500">
+                        {panels.filter(p => p.imageUrl).length}张
+                      </span>
+                    )}
+                  </label>
+                </div>
+                
+                <div>
+                  <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100">
+                    <input
+                      type="checkbox"
+                      checked={exportOptions.storyScript}
+                      onChange={(e) => setExportOptions(prev => ({ ...prev, storyScript: e.target.checked }))}
+                      className="rounded text-purple-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">推文脚本 (TXT)</p>
+                      <p className="text-xs text-slate-500">完整的漫画推文脚本内容</p>
+                    </div>
+                    {comicStory && (
+                      <Check className="w-5 h-5 text-green-500 ml-auto" />
+                    )}
+                  </label>
+                </div>
+                
+                <div>
+                  <label className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100">
+                    <input
+                      type="checkbox"
+                      checked={exportOptions.subtitle}
+                      onChange={(e) => setExportOptions(prev => ({ ...prev, subtitle: e.target.checked }))}
+                      className="rounded text-purple-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-slate-700">字幕文件 (SRT)</p>
+                      <p className="text-xs text-slate-500">可导入视频编辑软件的字幕文件</p>
+                    </div>
+                    {comicStory && (
+                      <Check className="w-5 h-5 text-green-500 ml-auto" />
+                    )}
+                  </label>
+                </div>
+              </div>
+              
+              <button
+                onClick={handleExportAll}
+                className="w-full mt-6 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+              >
+                <Package className="w-5 h-5" />
+                一键导出素材包
+              </button>
+            </div>
+            
+            {/* 导出预览 */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800 mb-4">导出内容预览</h2>
+              
+              <div className="space-y-3">
+                {exportOptions.polishedText && polishedContent?.polished && (
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <FileText className="w-5 h-5 text-green-500" />
+                    <span className="text-sm text-slate-700">洗稿文本_{new Date().toISOString().split('T')[0]}.txt</span>
+                  </div>
+                )}
+                
+                {exportOptions.panelScript && panels.length > 0 && (
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <FileText className="w-5 h-5 text-green-500" />
+                    <span className="text-sm text-slate-700">漫画分镜脚本_{new Date().toISOString().split('T')[0]}.txt ({panels.length}个分镜)</span>
+                  </div>
+                )}
+                
+                {exportOptions.comicImages && panels.filter(p => p.imageUrl).length > 0 && (
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <Image className="w-5 h-5 text-green-500" />
+                    <span className="text-sm text-slate-700">漫画图片 ({panels.filter(p => p.imageUrl).length}张PNG)</span>
+                  </div>
+                )}
+                
+                {exportOptions.storyScript && comicStory && (
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <FileText className="w-5 h-5 text-green-500" />
+                    <span className="text-sm text-slate-700">推文脚本_{new Date().toISOString().split('T')[0]}.txt</span>
+                  </div>
+                )}
+                
+                {exportOptions.subtitle && comicStory && (
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                    <FileText className="w-5 h-5 text-green-500" />
+                    <span className="text-sm text-slate-700">字幕_{new Date().toISOString().split('T')[0]}.srt</span>
+                  </div>
+                )}
+                
+                {!polishedContent && panels.length === 0 && !comicStory && (
+                  <div className="text-center py-8 text-slate-400">
+                    暂无可导出的素材，请先完成创作流程
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* 示例弹窗 */}
+      {showExample && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800">洗稿示例对比</h3>
+              <button onClick={() => setShowExample(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-80px)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-slate-500 mb-3">原文</h4>
+                  <div className="p-4 bg-slate-50 rounded-xl text-sm leading-relaxed">
+                    <p className="mb-3">他走到门口，看了看外面。</p>
+                    <p className="mb-3">然后他打开了门，走了出去。</p>
+                    <p>他看到天空很蓝。</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-purple-600 mb-3">洗稿后</h4>
+                  <div className="p-4 bg-purple-50 rounded-xl text-sm leading-relaxed">
+                    <p className="mb-3">脚步顿在玄关处，他下意识望向窗外。</p>
+                    <p className="mb-3 mb-2">深吸一口气，他推开了那扇门——</p>
+                    <p className="text-purple-600 font-medium">湛蓝的天空下，阳光正好。</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
