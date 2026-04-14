@@ -861,7 +861,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src="/oneclaw-logo.png" alt="OneClaw" width={24} height={24} className="object-contain" />
+              <span className="text-2xl">🦞</span>
               <span className="font-bold text-slate-700">OneClaw</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-500">

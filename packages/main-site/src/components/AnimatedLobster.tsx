@@ -65,14 +65,12 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       </div>
       
       {/* 敲键盘的酷龙虾 */}
-      <img
-        src="/oneclaw-logo.png"
-        alt="OneClaw 龙虾"
-        width={size}
-        height={size}
-        className={`w-full h-full object-contain transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
+      <div
+        className={`w-full h-full flex items-center justify-center text-4xl transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
         style={{ filter: 'saturate(1.3) brightness(1.1)' }}
-      />
+      >
+        🦞
+      </div>
     </div>
   );
 });
