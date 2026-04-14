@@ -2,7 +2,7 @@ import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'oneclaw-user-secret-key-2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'oneclaw-sso-secret-key-2024';
 const TOKEN_EXPIRES_IN = '30d'; // 用户Token有效期30天
 
 export interface User {
