@@ -12,7 +12,7 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  Wrench, FileText, FlaskConical
+  Wrench, FileText, FlaskConical, Globe
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -187,6 +187,7 @@ function UtilityToolsPage() {
               resume: '/resume',
               novel: '/novel',
               testcraft: '/testcraft',
+              productpage: '/product-page',
             };
             return urls[key] || '/';
           };
@@ -297,6 +298,13 @@ const UTILITY_TOOLS = [
     icon: FlaskConical,
     description: 'AI智能生成测试用例，支持BDD格式、批量导出',
     color: 'from-violet-500 to-fuchsia-500'
+  },
+  { 
+    key: 'productpage', 
+    name: '出海详情页', 
+    icon: Globe,
+    description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
+    color: 'from-emerald-500 to-teal-500'
   },
 ] as const;
 
