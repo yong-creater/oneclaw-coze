@@ -196,7 +196,7 @@ export default function ResumeOptimizer() {
                       value={resumeText}
                       onChange={(e) => setResumeText(e.target.value)}
                       placeholder="请粘贴简历全文（纯文本），系统将自动解析结构..."
-                      className="w-full h-56 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+                      className="w-full h-56 p-4 bg-white dark:bg-slate-800 border border-transparent dark:border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   ) : (
                     <div className="space-y-4">
@@ -271,7 +271,7 @@ export default function ResumeOptimizer() {
                     value={jdText}
                     onChange={(e) => setJdText(e.target.value)}
                     placeholder="请粘贴目标岗位JD全文（支持复制Boss直聘、智联等平台JD），系统将自动拆解核心关键词..."
-                    className="w-full h-56 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-cyan-500 resize-none text-sm"
+                    className="w-full h-56 p-4 bg-white dark:bg-slate-800 border border-transparent dark:border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   
                   {jdKeywords.length > 0 && (

@@ -695,7 +695,7 @@ export default function NovelCreator() {
                       value={originalText}
                       onChange={(e) => setOriginalText(e.target.value)}
                       placeholder="请粘贴小说章节/全文内容..."
-                      className="w-full h-64 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none text-sm"
+                      className="w-full h-64 p-4 border border-transparent rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   ) : (
                     <div className="space-y-4">
@@ -757,7 +757,7 @@ export default function NovelCreator() {
                       <select
                         value={selectedModel}
                         onChange={(e) => setSelectedModel(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                       >
                         {AI_MODELS.map(m => (
                           <option key={m.value} value={m.value}>
@@ -772,7 +772,7 @@ export default function NovelCreator() {
                       <select
                         value={polishStyle}
                         onChange={(e) => setPolishStyle(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                       >
                         {POLISH_STYLES.map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
@@ -785,7 +785,7 @@ export default function NovelCreator() {
                       <select
                         value={polishIntensity}
                         onChange={(e) => setPolishIntensity(e.target.value)}
-                        className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                       >
                         {POLISH_INTENSITY.map(s => (
                           <option key={s.value} value={s.value}>{s.label}</option>
@@ -955,7 +955,7 @@ export default function NovelCreator() {
                     <select
                       value={panelCount}
                       onChange={(e) => setPanelCount(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                     >
                       <option value="auto">按章节自动拆分</option>
                       <option value="4">4个分镜</option>
@@ -970,7 +970,7 @@ export default function NovelCreator() {
                     <select
                       value={panelStyle}
                       onChange={(e) => setPanelStyle(e.target.value)}
-                      className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                     >
                       {PANEL_STYLES.map(s => (
                         <option key={s.value} value={s.value}>{s.label}</option>
@@ -1086,7 +1086,7 @@ export default function NovelCreator() {
                   <select
                     value={imageQuality}
                     onChange={(e) => setImageQuality(e.target.value)}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                   >
                     {IMAGE_QUALITY.map(q => (
                       <option key={q.value} value={q.value}>{q.label} ({q.size})</option>
@@ -1109,7 +1109,7 @@ export default function NovelCreator() {
                   value={imageStyleExtra}
                   onChange={(e) => setImageStyleExtra(e.target.value)}
                   placeholder="如：线条简洁、色彩明亮、人物表情夸张"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                 />
               </div>
               
@@ -1226,7 +1226,7 @@ export default function NovelCreator() {
                   <select
                     value={scriptPlatform}
                     onChange={(e) => setScriptPlatform(e.target.value as 'douyin' | 'xiaohongshu')}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                   >
                     <option value="douyin">抖音</option>
                     <option value="xiaohongshu">小红书</option>
@@ -1238,7 +1238,7 @@ export default function NovelCreator() {
                   <select
                     value={scriptStyle}
                     onChange={(e) => setScriptStyle(e.target.value as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                   >
                     {SCRIPT_STYLES.map(s => (
                       <option key={s.value} value={s.value}>{s.label}</option>
@@ -1251,7 +1251,7 @@ export default function NovelCreator() {
                   <select
                     value={scriptDuration}
                     onChange={(e) => setScriptDuration(e.target.value as '15s' | '30s' | '60s')}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                   >
                     <option value="15s">15秒</option>
                     <option value="30s">30秒</option>

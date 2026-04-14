@@ -166,9 +166,10 @@ interface SelectFieldProps {
   options: SelectOption[];
   placeholder?: string;
   icon?: ReactNode;
+  showBorder?: boolean;
 }
 
-export function SelectField({ label, value, onChange, options, placeholder, icon }: SelectFieldProps) {
+export function SelectField({ label, value, onChange, options, placeholder, icon, showBorder = true }: SelectFieldProps) {
   return (
     <div>
       {label && (
@@ -180,7 +181,9 @@ export function SelectField({ label, value, onChange, options, placeholder, icon
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+        className={`w-full px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+          showBorder ? 'border border-slate-200 dark:border-slate-700' : 'border border-transparent'
+        }`}
       >
         {placeholder && <option value="">{placeholder}</option>}
         {options.map(opt => (
@@ -198,16 +201,21 @@ interface TextareaFieldProps {
   placeholder?: string;
   rows?: number;
   className?: string;
+  showBorder?: boolean;
 }
 
-export function TextareaField({ value, onChange, placeholder, rows = 6, className = '' }: TextareaFieldProps) {
+export function TextareaField({ value, onChange, placeholder, rows = 6, className = '', showBorder = true }: TextareaFieldProps) {
   return (
     <textarea
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className={`w-full p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors ${className}`}
+      className={`w-full p-4 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors resize-none ${className} ${
+        showBorder 
+          ? 'border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500' 
+          : 'border border-transparent focus:ring-2 focus:ring-orange-500 focus:border-transparent'
+      }`}
     />
   );
 }

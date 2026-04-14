@@ -941,7 +941,7 @@ export default function TestCraft() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="输入需求标题"
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
               
@@ -951,7 +951,7 @@ export default function TestCraft() {
                 <select
                   value={module}
                   onChange={(e) => setModule(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 >
                   {MODULES.map(m => (
                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -965,7 +965,7 @@ export default function TestCraft() {
                 <select
                   value={aiModel}
                   onChange={(e) => setAiModel(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 >
                   {AI_MODELS.map(m => (
                     <option key={m.value} value={m.value}>{m.label}</option>
@@ -981,7 +981,7 @@ export default function TestCraft() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="详细描述需求内容..."
                   rows={5}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
               
@@ -1045,7 +1045,7 @@ export default function TestCraft() {
                     ref={linkInputRef}
                     type="text"
                     placeholder="输入链接抓取内容"
-                    className="flex-1 px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                    className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   <button
                     onClick={handleLinkFetch}
