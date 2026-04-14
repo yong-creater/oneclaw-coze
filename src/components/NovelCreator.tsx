@@ -703,7 +703,7 @@ export default function NovelCreator() {
                       value={originalText}
                       onChange={(e) => setOriginalText(e.target.value)}
                       placeholder="请粘贴小说章节/全文内容..."
-                      className="w-full h-64 p-4 border border-transparent rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      className="w-full h-64 p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   ) : (
                     <div className="space-y-4">
@@ -763,7 +763,7 @@ export default function NovelCreator() {
                         <span className="text-xs text-slate-400 ml-1">(可选择国内外模型)</span>
                       </label>
                       <Select value={selectedModel} onValueChange={setSelectedModel}>
-                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -779,7 +779,7 @@ export default function NovelCreator() {
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">洗稿风格</label>
                       <Select value={polishStyle} onValueChange={setPolishStyle}>
-                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -793,7 +793,7 @@ export default function NovelCreator() {
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">洗稿强度</label>
                       <Select value={polishIntensity} onValueChange={setPolishIntensity}>
-                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                        <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -964,7 +964,7 @@ export default function NovelCreator() {
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">分镜数量</label>
                     <Select value={panelCount} onValueChange={setPanelCount}>
-                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -980,7 +980,7 @@ export default function NovelCreator() {
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">分镜风格</label>
                     <Select value={panelStyle} onValueChange={setPanelStyle}>
-                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                      <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1097,7 +1097,7 @@ export default function NovelCreator() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">画质设置</label>
                   <Select value={imageQuality} onValueChange={setImageQuality}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1123,7 +1123,7 @@ export default function NovelCreator() {
                   value={imageStyleExtra}
                   onChange={(e) => setImageStyleExtra(e.target.value)}
                   placeholder="如：线条简洁、色彩明亮、人物表情夸张"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-transparent rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                 />
               </div>
               
@@ -1238,7 +1238,7 @@ export default function NovelCreator() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">发布平台</label>
                   <Select value={scriptPlatform} onValueChange={(v) => setScriptPlatform(v as 'douyin' | 'xiaohongshu')}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1251,7 +1251,7 @@ export default function NovelCreator() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">推文风格</label>
                   <Select value={scriptStyle} onValueChange={(v) => setScriptStyle(v as '悬疑' | '甜宠' | '爽文' | '古风' | '搞笑')}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1265,7 +1265,7 @@ export default function NovelCreator() {
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">推文时长</label>
                   <Select value={scriptDuration} onValueChange={(v) => setScriptDuration(v as '15s' | '30s' | '60s')}>
-                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border-transparent focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
+                    <SelectTrigger className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
