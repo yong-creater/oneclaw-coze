@@ -79,7 +79,6 @@ export default function ResumeOptimizer() {
         toolName="STAR简历优化"
         toolDescription="JD精准匹配 · STAR法则优化"
         gradient="from-blue-500 to-cyan-500"
-        onBack={() => window.close()}
       />
       
       {/* 主内容区 */}

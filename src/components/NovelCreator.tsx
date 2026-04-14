@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { 
-  Feather, ArrowLeft, Upload, Sparkles, Loader2, 
+  Feather, Upload, Sparkles, Loader2, 
   FileText, Copy, Download, Check, X, ChevronDown,
   ChevronRight, Zap, Wand2, Image, FileCode, Package,
   AlertCircle, Plus, Trash2, Eye, Edit3, Save,
@@ -593,7 +593,6 @@ export default function NovelCreator() {
         toolName="网文创作工坊"
         toolDescription="小说洗稿 · 漫画生图 · 推文脚本"
         gradient="from-purple-500 to-pink-500"
-        onBack={() => window.close()}
       />
       
       {/* 标签页导航 */}

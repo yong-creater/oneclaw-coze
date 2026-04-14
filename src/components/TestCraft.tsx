@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
-  FlaskConical, Sparkles, ArrowLeft, Upload, Link, 
+  FlaskConical, Sparkles, Upload, Link, 
   FileText, GitBranch, Zap, ChevronRight, ChevronDown,
   Trash2, Plus, X, Download, Loader2, Check, AlertCircle,
   Eye, Edit3, Save, Copy, FileSpreadsheet
 } from 'lucide-react';
 import LoginButton from '@/components/LoginButton';
+import UtilityHeader from './UtilityHeader';
 import * as XLSX from 'xlsx';
 
 // ==================== 类型定义 ====================
@@ -850,50 +851,22 @@ export default function TestCraft() {
   const caseCount = mindmap ? countTestCases(mindmap) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50">
-      {/* 顶部导航栏 */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => window.close()}
-              className="flex items-center gap-1 text-slate-600 hover:text-orange-500 transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm hidden sm:inline">返回</span>
-            </button>
-            
-            <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-            
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                <FlaskConical className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-lg text-slate-800 hidden sm:inline">OneClaw</span>
-            </div>
-            
-            <div className="w-px h-6 bg-slate-200 hidden sm:block" />
-            
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                <FlaskConical className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-semibold text-slate-700">TestCraft</span>
-              <span className="text-xs text-slate-400 hidden sm:inline">AI 生成测试用例</span>
-            </div>
-          </div>
-          
-          <LoginButton />
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-violet-50 dark:from-slate-900 dark:to-slate-800">
+      {/* 统一头部 */}
+      <UtilityHeader
+        toolIcon={<FlaskConical />}
+        toolName="AI测试用例"
+        toolDescription="需求分析 · BDD用例 · 批量导出"
+        gradient="from-violet-500 to-fuchsia-500"
+      />
       
       {/* 主内容区 */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左侧：需求输入 */}
           <div className="lg:col-span-1 space-y-6">
             {/* Header操作区 */}
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={handleAnalyze}

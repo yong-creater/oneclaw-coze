@@ -1,15 +1,14 @@
 'use client';
 
-import { ArrowLeft } from 'lucide-react';
-import LoginButton from './LoginButton';
 import { ReactNode } from 'react';
+import LoginButton from './LoginButton';
+import Link from 'next/link';
 
 interface UtilityHeaderProps {
   toolIcon: ReactNode;
   toolName: string;
   toolDescription?: string;
   gradient: string;
-  onBack?: () => void;
 }
 
 export default function UtilityHeader({
@@ -17,39 +16,25 @@ export default function UtilityHeader({
   toolName,
   toolDescription,
   gradient,
-  onBack
 }: UtilityHeaderProps) {
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      window.close();
-    }
-  };
-
   return (
     <div className="sticky top-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* 左侧：Logo + 工具信息 */}
+        {/* 左侧：主站Logo + 工具信息 */}
         <div className="flex items-center gap-4">
-          {/* 返回按钮 */}
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-1 text-slate-600 hover:text-orange-500 dark:text-slate-400 dark:hover:text-orange-400 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm hidden sm:inline">返回</span>
-          </button>
-          
-          <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
-          
-          {/* OneClaw Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-sm">🦞</span>
-            </div>
-            <span className="font-bold text-lg text-slate-800 dark:text-white hidden sm:inline">OneClaw</span>
-          </div>
+          {/* 主站Logo - 与主站一致 */}
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <img 
+              src="/oneclaw-logo.png" 
+              alt="OneClaw" 
+              width={32} 
+              height={32}
+              className="object-contain"
+            />
+            <span className="font-bold text-lg text-slate-800 dark:text-white hidden sm:inline">
+              <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
+            </span>
+          </Link>
           
           <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
           

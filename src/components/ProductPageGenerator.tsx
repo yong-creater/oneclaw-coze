@@ -383,7 +383,6 @@ export default function ProductPageGenerator() {
         toolName="出海详情页"
         toolDescription="合规适配 · 人文贴合 · 多平台兼容"
         gradient="from-emerald-500 to-teal-500"
-        onBack={() => window.close()}
       />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
