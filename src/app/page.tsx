@@ -12,7 +12,7 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  Wrench, FileText
+  Wrench, FileText, FlaskConical
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -186,6 +186,7 @@ function UtilityToolsPage() {
             const urls: Record<string, string> = {
               resume: '/resume',
               novel: '/novel',
+              testcraft: '/testcraft',
             };
             return urls[key] || '/';
           };
@@ -236,6 +237,13 @@ function UtilityToolsPage() {
                         <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-full">多场景适配</span>
                       </>
                     )}
+                    {tool.key === 'testcraft' && (
+                      <>
+                        <span className="px-2 py-0.5 bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 text-xs rounded-full">BDD格式</span>
+                        <span className="px-2 py-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/50 text-fuchsia-600 dark:text-fuchsia-400 text-xs rounded-full">批量导出</span>
+                        <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">一键生成</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -282,6 +290,13 @@ const UTILITY_TOOLS = [
     icon: Feather,
     description: 'AI小说创作助手，洗稿润色一键搞定',
     color: 'from-purple-500 to-pink-500'
+  },
+  { 
+    key: 'testcraft', 
+    name: 'AI测试用例', 
+    icon: FlaskConical,
+    description: 'AI智能生成测试用例，支持BDD格式、批量导出',
+    color: 'from-violet-500 to-fuchsia-500'
   },
 ] as const;
 
