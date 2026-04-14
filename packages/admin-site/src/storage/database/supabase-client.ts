@@ -9,23 +9,28 @@ interface SupabaseCredentials {
 }
 
 function loadEnv(): void {
-  if (envLoaded || (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY)) {
+  if (envLoaded) return;
+  
+  // 如果已经有环境变量，直接使用
+  if (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY) {
+    envLoaded = true;
+    return;
+  }
+
+  // 如果有 DATABASE_URL（火山引擎 PostgreSQL），也认为已加载
+  if (process.env.DATABASE_URL) {
+    envLoaded = true;
     return;
   }
 
   try {
     // 尝试动态加载 dotenv
-    try {
-      // 使用 ES module 的动态导入
-      import('dotenv').then(dotenv => {
-        dotenv.config();
-      }).catch(() => {});
-      if (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY) {
-        envLoaded = true;
-        return;
-      }
-    } catch {
-      // dotenv not available
+    import('dotenv').then(dotenv => {
+      dotenv.config();
+    }).catch(() => {});
+    if (process.env.COZE_SUPABASE_URL || process.env.DATABASE_URL) {
+      envLoaded = true;
+      return;
     }
 
     const pythonCode = `
@@ -71,13 +76,16 @@ except Exception as e:
   }
 }
 
+function isSupabaseMode(): boolean {
+  return !!(process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY);
+}
+
 function getSupabaseCredentials(): SupabaseCredentials {
   loadEnv();
 
   const url = process.env.COZE_SUPABASE_URL;
   const anonKey = process.env.COZE_SUPABASE_ANON_KEY;
 
-  // 在构建时，如果环境变量不存在，返回占位符（不会实际使用）
   if (!url || !anonKey) {
     return { 
       url: 'https://placeholder.supabase.co', 
@@ -130,4 +138,36 @@ function getSupabaseClient(token?: string): SupabaseClient {
   });
 }
 
-export { loadEnv, getSupabaseCredentials, getSupabaseServiceRoleKey, getSupabaseClient };
+// 获取火山引擎 PostgreSQL 连接信息
+function getVolcenginePgConfig() {
+  loadEnv();
+  
+  if (process.env.DATABASE_URL) {
+    return { connectionString: process.env.DATABASE_URL };
+  }
+  
+  const host = process.env.PGHOST;
+  const port = process.env.PGPORT || '5432';
+  const user = process.env.PGUSER || 'postgres';
+  const password = process.env.PGPASSWORD;
+  const database = process.env.PGDATABASE || 'postgres';
+  
+  if (!host || !password) {
+    return null;
+  }
+  
+  return {
+    host,
+    port: parseInt(port),
+    user,
+    password,
+    database,
+  };
+}
+
+function isVolcengineMode(): boolean {
+  loadEnv();
+  return !isSupabaseMode() && !!(process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGPASSWORD));
+}
+
+export { loadEnv, getSupabaseCredentials, getSupabaseServiceRoleKey, getSupabaseClient, isSupabaseMode, isVolcengineMode, getVolcenginePgConfig };
