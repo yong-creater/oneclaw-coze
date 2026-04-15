@@ -424,49 +424,43 @@ export default function ResumeOptimizer() {
           </div>
         ) : (
           /* 结果区域 */
-          <div className="space-y-6">
-            {/* 结果头部 */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                  <Check className="w-6 h-6 text-green-500" />
-                  优化完成
-                </h2>
-                <p className="text-slate-500 mt-1">您的STAR法则优化版简历已生成，点击下载获取专业PDF简历</p>
-              </div>
-              <ActionButton variant="secondary" onClick={handleClearAll}>
-                <ArrowLeft className="w-4 h-4" />
-                继续优化
-              </ActionButton>
-            </div>
-            
-            {/* 主内容区：左侧简历预览 + 右侧辅助信息 */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="space-y-4">
+            {/* 简历预览 + 辅助信息 */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               {/* 左侧 - 简历预览（占3/4宽度） */}
               <div className="lg:col-span-3 space-y-4">
                 {/* 简历预览 */}
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-between">
-                    <h3 className="font-semibold text-white flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      优化后简历
-                    </h3>
+                  {/* 顶部工具栏 */}
+                  <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
                     {/* 模板选择 */}
-                    <div className="flex items-center gap-1 bg-white/20 rounded-lg p-1">
-                      {(Object.entries(templates) as [ResumeTemplateType, typeof templates.classic][]).map(([key, template]) => (
-                        <button
-                          key={key}
-                          onClick={() => setSelectedTemplate(key)}
-                          className={`px-3 py-1 text-xs rounded-md transition-all ${
-                            selectedTemplate === key
-                              ? 'bg-white text-orange-600 font-medium'
-                              : 'text-white/80 hover:text-white hover:bg-white/10'
-                          }`}
-                        >
-                          {template.name}
-                        </button>
-                      ))}
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-slate-500">模板：</span>
+                      <div className="flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
+                        {(Object.entries(templates) as [ResumeTemplateType, typeof templates.classic][]).map(([key, template]) => (
+                          <button
+                            key={key}
+                            onClick={() => setSelectedTemplate(key)}
+                            className={`px-3 py-1 text-xs rounded-md transition-all ${
+                              selectedTemplate === key
+                                ? 'bg-orange-500 text-white font-medium'
+                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                            }`}
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </div>
                     </div>
+                    {/* 下载按钮 */}
+                    <button
+                      onClick={handleExportPDF}
+                      disabled={exporting}
+                      className="px-4 py-1.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                      {exporting ? '导出中...' : '下载PDF'}
+                    </button>
                   </div>
                   
                   <div className="p-6 bg-slate-100 dark:bg-slate-900 overflow-auto max-h-[65vh]">
@@ -485,22 +479,6 @@ export default function ResumeOptimizer() {
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* 操作按钮 */}
-                <div className="flex items-center justify-center gap-4">
-                  <button
-                    onClick={handleExportPDF}
-                    disabled={exporting}
-                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    {exporting ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <FileDown className="w-5 h-5" />
-                    )}
-                    {exporting ? '导出中...' : '下载PDF简历'}
-                  </button>
                 </div>
               </div>
               
