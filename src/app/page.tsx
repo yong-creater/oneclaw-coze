@@ -217,24 +217,20 @@ function UtilityToolsPage() {
                 </p>
               </div>
               
-              {/* 底部区域：使用案例 */}
-              <div className="relative mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-                {/* 默认显示开始使用 */}
+              {/* 底部区域：默认显示开始使用，悬浮时显示标签 */}
+              <div className="relative mt-4">
+                {/* 默认显示 */}
                 <div className="flex items-center gap-2 text-orange-500 text-sm font-medium group-hover:opacity-0 transition-opacity h-6">
                   <span>开始使用</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
                 
-                {/* Hover显示使用案例 */}
-                <div className="absolute inset-x-0 top-4 opacity-0 group-hover:opacity-100 transition-opacity space-y-2">
-                  {tool.useCases?.map((useCase, idx) => (
-                    <div key={idx} className="flex items-start gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-gradient-to-r ${tool.color}`} />
-                      <div>
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{useCase.title}</span>
-                        <span className="text-xs text-slate-400 ml-1">- {useCase.desc}</span>
-                      </div>
-                    </div>
+                {/* Hover显示核心卖点标签 */}
+                <div className="absolute inset-0 flex flex-wrap gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity py-1">
+                  {tool.tags?.map((tag, idx) => (
+                    <span key={idx} className={`px-2 py-0.5 text-xs rounded-full bg-gradient-to-r ${tool.color} text-white shadow-sm`}>
+                      {tag}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -253,6 +249,152 @@ function UtilityToolsPage() {
           <p className="text-sm text-slate-400">
             敬请期待...
           </p>
+        </div>
+      </div>
+
+      {/* 使用案例展示模块 */}
+      <div className="mt-12">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+            热门使用场景
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400">
+            发现这些工具的更多可能
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* STAR简历优化案例 */}
+          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800 dark:text-white">STAR简历优化</h3>
+                <p className="text-xs text-slate-500">职场晋升必备</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-blue-600 dark:text-blue-400 text-xs font-bold">1</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">校招求职</p>
+                  <p className="text-xs text-slate-500">应届生简历优化，突出项目经验，提升简历通过率</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-cyan-600 dark:text-cyan-400 text-xs font-bold">2</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">社招跳槽</p>
+                  <p className="text-xs text-slate-500">量化工作成果，让面试官一眼看到你的价值</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 网文创作工坊案例 */}
+          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-100 dark:border-purple-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                <Feather className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800 dark:text-white">网文创作工坊</h3>
+                <p className="text-xs text-slate-500">内容创作者利器</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-purple-600 dark:text-purple-400 text-xs font-bold">1</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">小说改编</p>
+                  <p className="text-xs text-slate-500">番茄小说爆款文改编为漫画脚本，快速产出</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-pink-600 dark:text-pink-400 text-xs font-bold">2</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">短剧创作</p>
+                  <p className="text-xs text-slate-500">网文改短剧，批量产出推文素材，引流变现</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI测试用例案例 */}
+          <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20 rounded-2xl p-6 border border-violet-100 dark:border-violet-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                <FlaskConical className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800 dark:text-white">AI测试用例</h3>
+                <p className="text-xs text-slate-500">测试工程师效率工具</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-violet-600 dark:text-violet-400 text-xs font-bold">1</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">功能测试</p>
+                  <p className="text-xs text-slate-500">快速生成边界条件和异常场景，覆盖全面</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-fuchsia-600 dark:text-fuchsia-400 text-xs font-bold">2</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">回归测试</p>
+                  <p className="text-xs text-slate-500">历史用例批量复用，效率提升10倍</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 出海详情页案例 */}
+          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-6 border border-emerald-100 dark:border-emerald-800">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                <Globe className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-slate-800 dark:text-white">出海详情页</h3>
+                <p className="text-xs text-slate-500">跨境卖家必备</p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold">1</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">亚马逊Listing</p>
+                  <p className="text-xs text-slate-500">符合亚马逊规范的多语言详情页，一键生成</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
+                <div className="w-6 h-6 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-teal-600 dark:text-teal-400 text-xs font-bold">2</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">多平台分发</p>
+                  <p className="text-xs text-slate-500">速卖通/eBay/Shopee统一模板，批量发布</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -274,6 +416,7 @@ const UTILITY_TOOLS = [
     icon: FileText,
     description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
     color: 'from-blue-500 to-cyan-500',
+    tags: ['PDF上传', 'JD精准匹配', '量化成果'],
     useCases: [
       { title: '校招求职', desc: '应届生简历优化，突出项目经验' },
       { title: '社招跳槽', desc: '量化工作成果，提升面试邀约率' },
@@ -286,6 +429,7 @@ const UTILITY_TOOLS = [
     icon: Feather,
     description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
     color: 'from-purple-500 to-pink-500',
+    tags: ['深度洗稿', '漫画生图', '推文脚本'],
     useCases: [
       { title: '小说改编', desc: '番茄小说爆款文改编为漫画脚本' },
       { title: 'IP孵化', desc: '原创故事快速生成多形式内容' },
@@ -298,6 +442,7 @@ const UTILITY_TOOLS = [
     icon: FlaskConical,
     description: 'AI智能生成测试用例，支持BDD格式、批量导出',
     color: 'from-violet-500 to-fuchsia-500',
+    tags: ['BDD格式', '批量导出', '一键生成'],
     useCases: [
       { title: '功能测试', desc: '快速生成边界条件和异常场景' },
       { title: '接口测试', desc: '自动化生成API测试用例' },
@@ -310,6 +455,7 @@ const UTILITY_TOOLS = [
     icon: Globe,
     description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
     color: 'from-emerald-500 to-teal-500',
+    tags: ['多语言', '海外合规', '批量分发'],
     useCases: [
       { title: '亚马逊Listing', desc: '符合亚马逊规范的多语言详情页' },
       { title: '独立站详情', desc: 'Shopify/WooCommerce适配版本' },
