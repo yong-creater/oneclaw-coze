@@ -389,7 +389,14 @@ export default function ResumeOptimizer() {
                   <textarea
                     value={resumeText}
                     onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="请粘贴简历全文，或上传PDF自动解析...\n\n建议包含：\n• 个人信息（姓名、联系方式）\n• 教育背景\n• 工作经历\n• 项目经验\n• 专业技能"
+                    placeholder={`请粘贴简历全文，或上传PDF自动解析...
+
+建议包含：
+• 个人信息（姓名、联系方式）
+• 教育背景
+• 工作经历
+• 项目经验
+• 专业技能`}
                     className="w-full h-[calc(100%-40px)] min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
                   />
                   
@@ -422,15 +429,13 @@ export default function ResumeOptimizer() {
                 </div>
               </div>
               
-              {/* 匹配效果连接线 */}
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden lg:flex items-center">
-                <div className="relative">
-                  <div className="flex items-center gap-3 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-lg border border-orange-200 dark:border-orange-800">
-                    <Sparkles className="w-5 h-5 text-orange-500 animate-pulse" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">JD匹配</span>
-                    <div className="flex items-center gap-1">
-                      <div className="w-8 h-2 bg-gradient-to-r from-orange-500 to-red-500 rounded-full animate-pulse" />
-                    </div>
+              {/* 柔和的匹配连接效果 */}
+              <div className="absolute inset-0 pointer-events-none hidden lg:block">
+                <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-orange-200 dark:via-orange-800 to-transparent" />
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="bg-gradient-to-r from-orange-100 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 px-6 py-1.5 rounded-full border border-orange-200 dark:border-orange-700 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-orange-500" />
+                    <span className="text-sm font-medium text-orange-600 dark:text-orange-400 whitespace-nowrap">JD精准匹配</span>
                   </div>
                 </div>
               </div>
