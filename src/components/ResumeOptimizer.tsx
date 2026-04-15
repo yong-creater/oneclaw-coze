@@ -1,14 +1,17 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   FileText, Upload, Sparkles, Loader2, Target, 
   Check, AlertCircle, Copy, Download, ArrowLeft,
-  Lightbulb, Star, TrendingUp, BookOpen
+  Lightbulb, Star, TrendingUp, BookOpen, FileDown,
+  Eye, Palette, X, ChevronDown
 } from 'lucide-react';
 import UtilityHeader from './UtilityHeader';
 import { UtilityCard, FormField, PrimaryButton, ActionButton } from './UtilityComponents';
 import LoginButton from './LoginButton';
+import { ResumeTemplateSelector, ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
+import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
 
 export default function ResumeOptimizer() {
   // 简历输入状态
@@ -29,7 +32,15 @@ export default function ResumeOptimizer() {
   const [matchScore, setMatchScore] = useState(0);
   const [showExample, setShowExample] = useState(false);
   
+  // PDF导出相关状态
+  const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplateType>('modern');
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resumePreviewRef = useRef<HTMLDivElement>(null);
 
   // 处理PDF上传
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,6 +181,47 @@ export default function ResumeOptimizer() {
   // 复制单条STAR
   const handleCopyStar = (star: string) => {
     navigator.clipboard.writeText(star);
+  };
+
+  // 处理优化成功后的结果
+  useEffect(() => {
+    if (result) {
+      // 从结果中解析简历数据
+      try {
+        const parsed = parseResumeFromAI(result);
+        if (parsed.name || parsed.experience?.length) {
+          setResumeData(parsed);
+        } else {
+          // 如果解析失败，使用示例数据
+          setResumeData(generateSampleResumeData());
+        }
+      } catch {
+        setResumeData(generateSampleResumeData());
+      }
+    }
+  }, [result]);
+
+  // 导出PDF
+  const handleExportPDF = async () => {
+    if (!resumeData) return;
+    
+    setExporting(true);
+    try {
+      await exportResumeToPDF('resume-pdf-preview', `优化简历_${resumeData.name || '简历'}`);
+    } catch (error) {
+      console.error('导出失败:', error);
+      alert('PDF导出失败，请重试');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // 预览简历
+  const handlePreviewResume = () => {
+    if (!resumeData) {
+      setResumeData(generateSampleResumeData());
+    }
+    setShowPreview(true);
   };
 
   return (
@@ -475,8 +527,19 @@ export default function ResumeOptimizer() {
             
             {/* 操作按钮 */}
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <PrimaryButton icon={<Download />}>
-                下载优化简历
+              <ActionButton 
+                variant="secondary" 
+                onClick={handlePreviewResume}
+                icon={<Eye className="w-4 h-4" />}
+              >
+                预览简历
+              </ActionButton>
+              <PrimaryButton 
+                icon={exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                onClick={handleExportPDF}
+                disabled={exporting}
+              >
+                {exporting ? '导出中...' : '导出PDF'}
               </PrimaryButton>
               <ActionButton variant="secondary" onClick={() => { setResult(null); setMatchScore(0); }}>
                 <ArrowLeft className="w-4 h-4" />
@@ -545,6 +608,77 @@ export default function ResumeOptimizer() {
                   70%以下 需优化
                 </li>
               </ul>
+            </div>
+          </div>
+        )}
+
+        {/* 简历预览弹窗 */}
+        {showPreview && resumeData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
+              {/* 弹窗头部 */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-white" />
+                  <h2 className="text-lg font-semibold text-white">简历预览 & 导出</h2>
+                </div>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="p-2 text-white/80 hover:text-white rounded-lg hover:bg-white/20 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* 模板选择 */}
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
+                <ResumeTemplateSelector
+                  selectedTemplate={selectedTemplate}
+                  onSelect={setSelectedTemplate}
+                />
+              </div>
+
+              {/* 简历内容区 */}
+              <div className="flex-1 overflow-auto bg-slate-100 dark:bg-slate-950 p-6">
+                <div className="flex justify-center">
+                  <div className="shadow-xl">
+                    <div 
+                      id="resume-pdf-preview"
+                      className="bg-white"
+                      style={{
+                        width: '210mm',
+                        minHeight: '297mm',
+                        transform: 'scale(0.6)',
+                        transformOrigin: 'top center',
+                      }}
+                    >
+                      <ResumePreview template={selectedTemplate} data={resumeData} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 底部操作栏 */}
+              <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-between">
+                <div className="text-sm text-slate-500">
+                  当前模板：<span className="font-medium text-slate-700 dark:text-slate-300">{templates[selectedTemplate].name}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <ActionButton 
+                    variant="secondary" 
+                    onClick={() => setShowPreview(false)}
+                  >
+                    关闭
+                  </ActionButton>
+                  <PrimaryButton 
+                    icon={exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                    onClick={handleExportPDF}
+                    disabled={exporting}
+                  >
+                    {exporting ? '导出中...' : '下载PDF'}
+                  </PrimaryButton>
+                </div>
+              </div>
             </div>
           </div>
         )}
