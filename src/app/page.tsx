@@ -418,7 +418,7 @@ function UtilityToolsPage() {
           </Link>
 
           {/* 3C配件日出千单，转化率提升180% */}
-          <Link href="/productpage" className="group relative overflow-hidden rounded-2xl h-[400px]">
+          <Link href="/product-page" className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
               src="/case-ecommerce.jpg" 
               alt="出海详情页案例"
@@ -459,7 +459,7 @@ function UtilityToolsPage() {
               </div>
               
               <Link 
-                href="/productpage"
+                href="/product-page"
                 className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
               >
                 <span>一键生成爆款详情页</span>
