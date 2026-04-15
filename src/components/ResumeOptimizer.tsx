@@ -432,123 +432,122 @@ export default function ResumeOptimizer() {
                   <Check className="w-6 h-6 text-green-500" />
                   优化完成
                 </h2>
-                <p className="text-slate-500 mt-1">您的STAR法则优化版简历已生成</p>
+                <p className="text-slate-500 mt-1">您的STAR法则优化版简历已生成，点击下载获取专业PDF简历</p>
               </div>
-              <div className="flex gap-2">
-                <ActionButton variant="secondary" onClick={handleCopyResult} icon={<Copy />}>
-                  复制全文
-                </ActionButton>
-                <ActionButton variant="secondary" onClick={handleClearAll} icon={<ArrowLeft />}>
-                  重新优化
-                </ActionButton>
-              </div>
+              <ActionButton variant="secondary" onClick={handleClearAll}>
+                <ArrowLeft className="w-4 h-4" />
+                继续优化
+              </ActionButton>
             </div>
             
-            {/* 匹配度报告 */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-orange-500" />
-                JD匹配度报告
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 dark:text-slate-400">总体匹配度</span>
-                    <span className="font-semibold text-orange-500">{matchScore || 85}%</span>
+            {/* 主内容区：左侧简历预览 + 右侧辅助信息 */}
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* 左侧 - 简历预览（占3/4宽度） */}
+              <div className="lg:col-span-3 space-y-4">
+                {/* 简历预览 */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-between">
+                    <h3 className="font-semibold text-white flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      优化后简历
+                    </h3>
+                    {/* 模板选择 */}
+                    <div className="flex items-center gap-1 bg-white/20 rounded-lg p-1">
+                      {(Object.entries(templates) as [ResumeTemplateType, typeof templates.classic][]).map(([key, template]) => (
+                        <button
+                          key={key}
+                          onClick={() => setSelectedTemplate(key)}
+                          className={`px-3 py-1 text-xs rounded-md transition-all ${
+                            selectedTemplate === key
+                              ? 'bg-white text-orange-600 font-medium'
+                              : 'text-white/80 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          {template.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
-                    <div className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full" style={{ width: `${matchScore || 85}%` }} />
+                  
+                  <div className="p-6 bg-slate-100 dark:bg-slate-900 overflow-auto max-h-[65vh]">
+                    <div className="flex justify-center">
+                      <div 
+                        id="resume-pdf-preview"
+                        className="bg-white shadow-xl"
+                        style={{
+                          width: '210mm',
+                          minHeight: '297mm',
+                          transform: 'scale(0.75)',
+                          transformOrigin: 'top center',
+                        }}
+                      >
+                        <ResumePreview template={selectedTemplate} data={resumeData || generateSampleResumeData()} />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  {[
-                    { label: '技能匹配', score: 90 },
-                    { label: '经验匹配', score: 85 },
-                    { label: '项目匹配', score: 80 },
-                    { label: '关键词覆盖', score: 88 },
-                  ].map((item, i) => (
-                    <div key={i} className="text-center p-3 bg-slate-50 dark:bg-slate-900 rounded-xl">
-                      <div className="text-2xl font-bold text-slate-800 dark:text-white">{item.score}%</div>
-                      <div className="text-xs text-slate-500">{item.label}</div>
-                    </div>
-                  ))}
+                {/* 操作按钮 */}
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={handleExportPDF}
+                    disabled={exporting}
+                    className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {exporting ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <FileDown className="w-5 h-5" />
+                    )}
+                    {exporting ? '导出中...' : '下载PDF简历'}
+                  </button>
                 </div>
               </div>
-            </div>
-            
-            {/* STAR优化结果 - 替换为简历预览 */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
-                <h3 className="font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-orange-500" />
-                  优化后简历预览
-                </h3>
-              </div>
               
-              <div className="p-4">
-                {/* 模板选择 */}
-                <div className="mb-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Palette className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">选择模板风格</span>
+              {/* 右侧 - 辅助信息（精简展示，占1/4宽度） */}
+              <div className="space-y-4">
+                {/* 匹配度 */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-slate-700 dark:text-slate-300 text-sm">JD匹配度</h4>
+                    <span className={`text-xl font-bold ${matchScore >= 80 ? 'text-green-500' : matchScore >= 60 ? 'text-amber-500' : 'text-red-500'}`}>
+                      {matchScore || 85}%
+                    </span>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {(Object.entries(templates) as [ResumeTemplateType, typeof templates.classic][]).map(([key, template]) => (
-                      <button
-                        key={key}
-                        onClick={() => setSelectedTemplate(key)}
-                        className={`p-2 rounded-lg border-2 transition-all ${
-                          selectedTemplate === key
-                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                            : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
-                        }`}
-                      >
-                        <div className={`aspect-[3/4] rounded mb-1.5 ${template.preview} p-1`}>
-                          <div className="w-full h-full bg-white rounded shadow-sm" />
-                        </div>
-                        <div className={`text-xs font-medium ${
-                          selectedTemplate === key ? 'text-orange-600' : 'text-slate-600 dark:text-slate-400'
-                        }`}>
-                          {template.name}
-                        </div>
-                      </button>
+                  <div className="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${matchScore >= 80 ? 'bg-green-500' : matchScore >= 60 ? 'bg-amber-500' : 'bg-red-500'}`} 
+                      style={{ width: `${matchScore || 85}%` }} 
+                    />
+                  </div>
+                </div>
+                
+                {/* 关键词匹配 */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                  <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2 text-sm">已匹配关键词</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {['React', 'TypeScript', 'Vue', 'Node.js'].map((kw, i) => (
+                      <span key={i} className="px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 text-xs rounded-full">
+                        {kw}
+                      </span>
                     ))}
                   </div>
                 </div>
                 
-                {/* 简历预览 */}
-                <div className="bg-slate-100 dark:bg-slate-900 p-4 rounded-xl overflow-hidden">
-                  <div className="flex justify-center">
-                    <div 
-                      id="resume-pdf-preview"
-                      className="bg-white shadow-lg"
-                      style={{
-                        width: '210mm',
-                        transform: 'scale(0.55)',
-                        transformOrigin: 'top center',
-                      }}
-                    >
-                      <ResumePreview template={selectedTemplate} data={resumeData || generateSampleResumeData()} />
-                    </div>
+                {/* 复制原文 */}
+                <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                  <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2 text-sm">原始简历</h4>
+                  <div className="text-xs text-slate-500 dark:text-slate-400 line-clamp-4 max-h-20 overflow-hidden">
+                    {resumeText || '未提供原始简历'}
                   </div>
+                  <button 
+                    onClick={handleCopyResult}
+                    className="mt-2 text-xs text-orange-500 hover:text-orange-600"
+                  >
+                    复制原文
+                  </button>
                 </div>
               </div>
-            </div>
-            
-            {/* 操作按钮 */}
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <PrimaryButton 
-                icon={exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
-                onClick={handleExportPDF}
-                disabled={exporting}
-              >
-                {exporting ? '导出中...' : '下载PDF简历'}
-              </PrimaryButton>
-              <ActionButton variant="secondary" onClick={() => { setResult(null); setMatchScore(0); }}>
-                <ArrowLeft className="w-4 h-4" />
-                继续优化
-              </ActionButton>
             </div>
           </div>
         )}
