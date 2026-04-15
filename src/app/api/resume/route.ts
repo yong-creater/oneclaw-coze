@@ -51,7 +51,18 @@ export async function POST(request: NextRequest) {
         throw new Error('AI未返回有效内容');
       }
 
-      return NextResponse.json({ content: response.content });
+      // 解析匹配分数
+      let matchScore = 85;
+      const scoreMatch = response.content.match(/匹配评分[：:]\s*(\d+)/);
+      if (scoreMatch) {
+        matchScore = parseInt(scoreMatch[1], 10);
+      }
+
+      return NextResponse.json({ 
+        success: true, 
+        data: response.content,
+        matchScore,
+      });
     } catch (llmError: any) {
       console.error('Resume optimization error:', llmError);
       throw new Error('AI服务调用失败，请重试');

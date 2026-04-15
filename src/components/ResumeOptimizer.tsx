@@ -146,7 +146,7 @@ export default function ResumeOptimizer() {
 
       if (data.success) {
         setResult(data.data);
-        setMatchScore(85);
+        setMatchScore(data.matchScore || 85);
       } else {
         setOptimizeError(data.error || '优化失败，请重试');
       }
@@ -477,49 +477,60 @@ export default function ResumeOptimizer() {
               </div>
             </div>
             
-            {/* STAR优化结果 */}
+            {/* STAR优化结果 - 替换为简历预览 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
                 <h3 className="font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                  <Star className="w-5 h-5 text-orange-500" />
-                  STAR法则优化内容
+                  <FileText className="w-5 h-5 text-orange-500" />
+                  优化后简历预览
                 </h3>
               </div>
               
-              <div className="p-6 space-y-6">
-                {/* 工作经历 */}
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">工作经历</h4>
-                  <div className="space-y-3">
-                    {['主导完成XX项目，实现XX目标', '带领团队达成XX业绩'].map((item, i) => (
-                      <div key={i} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl relative group">
-                        <div className="text-sm text-slate-700 dark:text-slate-300">{item}</div>
-                        <button
-                          onClick={() => handleCopyStar(item)}
-                          className="absolute top-2 right-2 p-1 text-slate-400 hover:text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                      </div>
+              <div className="p-4">
+                {/* 模板选择 */}
+                <div className="mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Palette className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">选择模板风格</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {(Object.entries(templates) as [ResumeTemplateType, typeof templates.classic][]).map(([key, template]) => (
+                      <button
+                        key={key}
+                        onClick={() => setSelectedTemplate(key)}
+                        className={`p-2 rounded-lg border-2 transition-all ${
+                          selectedTemplate === key
+                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
+                        }`}
+                      >
+                        <div className={`aspect-[3/4] rounded mb-1.5 ${template.preview} p-1`}>
+                          <div className="w-full h-full bg-white rounded shadow-sm" />
+                        </div>
+                        <div className={`text-xs font-medium ${
+                          selectedTemplate === key ? 'text-orange-600' : 'text-slate-600 dark:text-slate-400'
+                        }`}>
+                          {template.name}
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>
                 
-                {/* 项目经历 */}
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">项目经历</h4>
-                  <div className="space-y-3">
-                    {['采用XX技术方案，解决XX问题'].map((item, i) => (
-                      <div key={i} className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl relative group">
-                        <div className="text-sm text-slate-700 dark:text-slate-300">{item}</div>
-                        <button
-                          onClick={() => handleCopyStar(item)}
-                          className="absolute top-2 right-2 p-1 text-slate-400 hover:text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                {/* 简历预览 */}
+                <div className="bg-slate-100 dark:bg-slate-900 p-4 rounded-xl overflow-hidden">
+                  <div className="flex justify-center">
+                    <div 
+                      id="resume-pdf-preview"
+                      className="bg-white shadow-lg"
+                      style={{
+                        width: '210mm',
+                        transform: 'scale(0.55)',
+                        transformOrigin: 'top center',
+                      }}
+                    >
+                      <ResumePreview template={selectedTemplate} data={resumeData || generateSampleResumeData()} />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -527,23 +538,16 @@ export default function ResumeOptimizer() {
             
             {/* 操作按钮 */}
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <ActionButton 
-                variant="secondary" 
-                onClick={handlePreviewResume}
-                icon={<Eye className="w-4 h-4" />}
-              >
-                预览简历
-              </ActionButton>
               <PrimaryButton 
                 icon={exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
                 onClick={handleExportPDF}
                 disabled={exporting}
               >
-                {exporting ? '导出中...' : '导出PDF'}
+                {exporting ? '导出中...' : '下载PDF简历'}
               </PrimaryButton>
               <ActionButton variant="secondary" onClick={() => { setResult(null); setMatchScore(0); }}>
                 <ArrowLeft className="w-4 h-4" />
-                返回修改
+                继续优化
               </ActionButton>
             </div>
           </div>
