@@ -448,8 +448,8 @@ export default function ResumeOptimizer() {
                     className="w-full flex-1 min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   
-                  {jdKeywords.length > 0 && (
-                    <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                  {jdKeywords.length > 0 ? (
+                    <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl mt-4 flex-shrink-0">
                       <p className="text-sm text-orange-700 dark:text-orange-300 mb-3 font-medium">
                         已识别 {jdKeywords.length} 个核心关键词
                       </p>
@@ -460,6 +460,10 @@ export default function ResumeOptimizer() {
                           </span>
                         ))}
                       </div>
+                    </div>
+                  ) : (
+                    <div className="pt-4 flex-shrink-0">
+                      <div className="h-[62px]" /> {/* 占位保持高度一致 */}
                     </div>
                   )}
                 </div>
