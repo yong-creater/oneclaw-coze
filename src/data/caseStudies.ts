@@ -496,33 +496,33 @@ export const PRODUCT_CASES: ProductCase[] = [
     title: '一套素材打全球，转化率提升180%',
     subtitle: '智能手表 · 出海多平台适配',
     product: 'GT-Watch Pro 智能运动手表',
-    originalImage: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_09710216-7c4e-437e-9b2d-ffdcd194489b.jpeg',
+    originalImage: '/case-images/watch-original.jpg',
     regions: [
       {
         id: 'eu',
         name: '欧盟版',
-        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_89ef0078-e708-4654-8c06-fa690d0ec7c6.jpeg',
+        image: '/case-images/watch-eu.jpg',
         complianceScore: 98,
         marks: ['CE标识', 'WEEE标志', '多语言警告语', '环保材料说明']
       },
       {
         id: 'us',
         name: '美国版',
-        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_9d0e94da-429b-4a9a-bd16-f8012d979344.jpeg',
+        image: '/case-images/watch-us.jpg',
         complianceScore: 96,
         marks: ['FDA描述合规', 'FCC认证标注', '英文警告语', '运动场景']
       },
       {
         id: 'jp',
         name: '日本版',
-        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_947e9f22-ca6a-402b-8a3a-320fb51b4e63.jpeg',
+        image: '/case-images/watch-jp.jpg',
         complianceScore: 95,
         marks: ['PSE标识', '日语标注', 'JIS规格说明', '简约色调']
       },
       {
         id: 'sea',
         name: '东南亚版',
-        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_3aa01991-10dc-4643-9966-9ecdf887ad89.jpeg',
+        image: '/case-images/watch-sea.jpg',
         complianceScore: 94,
         marks: ['无宗教元素', '多语言标注', '价格含税标识', '本地审美']
       }
