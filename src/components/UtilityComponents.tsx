@@ -186,7 +186,7 @@ export function SelectField({ label, value, onChange, options, placeholder, icon
         </label>
       )}
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:border-orange-500 transition-colors ${
+        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:border-orange-500 transition-colors hover:border-slate-300 dark:hover:border-slate-600 ${
           showBorder ? 'border-2 border-slate-200 dark:border-slate-700' : 'border-2 border-transparent'
         }`}>
           <SelectValue placeholder={placeholder} />
@@ -218,7 +218,7 @@ export function TextareaField({ value, onChange, placeholder, rows = 6, classNam
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className={`w-full p-4 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors resize-none ${className} ${
+      className={`w-full p-4 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors resize-none hover:border-slate-300 dark:hover:border-slate-600 ${className} ${
         showBorder 
           ? 'border-2 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500' 
           : 'border-2 border-transparent focus:outline-none focus:border-orange-500'

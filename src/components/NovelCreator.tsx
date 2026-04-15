@@ -860,7 +860,7 @@ export default function NovelCreator() {
                       value={originalText}
                       onChange={(e) => setOriginalText(e.target.value)}
                       placeholder="请粘贴小说章节/全文内容..."
-                      className="w-full h-64 p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      className="w-full h-64 p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 hover:border-slate-300 dark:hover:border-slate-600 transition-colors resize-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   ) : (
                     <div className="space-y-4">
