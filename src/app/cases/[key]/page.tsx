@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -654,9 +655,10 @@ function TestCaseStudy({ caseData }: { caseData: TestCase }) {
   );
 }
 
-// 出海详情页案例展示 - 展示工具最终输出的各地区合规详情图
+// 出海详情页案例展示 - 展示原始图和各地区优化后的详情图
 function ProductCaseStudy({ caseData }: { caseData: ProductCase }) {
   const [activeRegion, setActiveRegion] = useState<string>('eu');
+  const [showOriginal, setShowOriginal] = useState(false);
   
   const regionColors: Record<string, string> = {
     eu: 'from-blue-500 to-indigo-500',
@@ -665,7 +667,7 @@ function ProductCaseStudy({ caseData }: { caseData: ProductCase }) {
     sea: 'from-yellow-500 to-orange-500'
   };
   
-  const currentRegion = caseData.after.regionImages.find(r => r.region === activeRegion);
+  const currentRegion = caseData.regions.find(r => r.id === activeRegion);
   
   return (
     <div className="space-y-8">
@@ -673,8 +675,8 @@ function ProductCaseStudy({ caseData }: { caseData: ProductCase }) {
       <Card className="bg-white dark:bg-slate-800">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/50 dark:to-amber-900/50 flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-orange-500" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50 flex items-center justify-center">
+              <Globe className="w-6 h-6 text-emerald-500" />
             </div>
             <div>
               <h3 className="font-bold text-slate-800 dark:text-white">{caseData.product}</h3>
@@ -684,97 +686,142 @@ function ProductCaseStudy({ caseData }: { caseData: ProductCase }) {
         </CardContent>
       </Card>
       
-      {/* 各地区详情图展示 */}
-      <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border-orange-200 dark:border-orange-800">
+      {/* 原始图 vs 优化后图 对比展示 */}
+      <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
-              <Globe className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 dark:text-white">AI生成 - 各地区详情图</h3>
-              <p className="text-xs text-slate-500">自动适配法规要求 + 文化习惯 + 平台规范</p>
+              <h3 className="font-bold text-slate-800 dark:text-white">AI详情图生成效果</h3>
+              <p className="text-xs text-slate-500">一键生成各地区合规详情图</p>
             </div>
           </div>
           
           {/* 地区切换 */}
           <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-            {caseData.after.regionImages.map(region => (
+            <button
+              onClick={() => setShowOriginal(true)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                showOriginal
+                  ? 'bg-gradient-to-r from-slate-500 to-slate-600 text-white shadow-md'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+              }`}
+            >
+              原始图
+            </button>
+            {caseData.regions.map(region => (
               <button
-                key={region.region}
-                onClick={() => setActiveRegion(region.region)}
+                key={region.id}
+                onClick={() => { setActiveRegion(region.id); setShowOriginal(false); }}
                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                  activeRegion === region.region
-                    ? `bg-gradient-to-r ${regionColors[region.region]} text-white shadow-md`
+                  !showOriginal && activeRegion === region.id
+                    ? `bg-gradient-to-r ${regionColors[region.id]} text-white shadow-md`
                     : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`}
               >
-                {region.regionName}
+                {region.name}
               </button>
             ))}
           </div>
           
-          {/* 当前地区详情图预览 */}
-          {currentRegion && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg">
-              {/* 图片展示区 */}
-              <div className={`relative h-64 bg-gradient-to-br ${regionColors[currentRegion.region]} opacity-90`}>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/90 dark:bg-slate-800/90 rounded-2xl p-6 max-w-md text-center shadow-xl">
-                    <div className="w-full h-32 bg-slate-100 dark:bg-slate-700 rounded-xl mb-4 flex items-center justify-center">
-                      <div className="text-center">
-                        <ImageIcon className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                        <p className="text-xs text-slate-500">详情图预览</p>
+          {/* 图片展示 */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg">
+            {showOriginal ? (
+              /* 原始图 */
+              <div className="relative">
+                <div className="relative h-[400px] bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/20 dark:to-orange-900/20">
+                  <Image 
+                    src={caseData.originalImage} 
+                    alt="原始详情图"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    原始版本
+                  </div>
+                  <div className="absolute bottom-4 left-4 right-4 bg-black/60 text-white p-3 rounded-xl">
+                    <p className="text-sm font-medium mb-1">存在的问题</p>
+                    <ul className="text-xs space-y-0.5 opacity-90">
+                      <li>• 无合规标识（CE/FCC/PSE）</li>
+                      <li>• 中文素材，不符合海外市场</li>
+                      <li>• 夸大宣传用语</li>
+                      <li>• 无本地化语言</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ) : currentRegion && (
+              /* 各地区优化后的图 */
+              <div className="relative">
+                <div className="relative h-[400px]">
+                  <Image 
+                    src={currentRegion.image} 
+                    alt={`${currentRegion.name}详情图`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute top-4 left-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    {currentRegion.name}
+                  </div>
+                </div>
+                
+                {/* 合规信息 */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-green-500" />
+                      <span className="font-medium text-slate-800 dark:text-white">合规评分</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-32 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
+                          style={{ width: `${currentRegion.complianceScore}%` }}
+                        />
                       </div>
+                      <span className="text-xl font-bold text-green-600">{currentRegion.complianceScore}%</span>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-300">{currentRegion.imageDescription}</p>
                   </div>
-                </div>
-                
-                {/* 地区标识 */}
-                <div className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 px-3 py-1 rounded-full">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {currentRegion.regionName}
-                  </span>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {currentRegion.marks.map((mark, i) => (
+                      <Badge 
+                        key={i}
+                        className="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                      >
+                        <Check className="w-3 h-3 mr-1" />
+                        {mark}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
               </div>
-              
-              {/* 合规信息 */}
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-green-500" />
-                    <span className="font-medium text-slate-800 dark:text-white">合规评分</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-                        style={{ width: `${currentRegion.compliance.score}%` }}
-                      />
-                    </div>
-                    <span className="text-lg font-bold text-green-600">{currentRegion.compliance.score}%</span>
-                  </div>
-                </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {currentRegion.compliance.marks.map((mark, i) => (
-                    <Badge 
-                      key={i}
-                      className="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                    >
-                      <Check className="w-3 h-3 mr-1" />
-                      {mark}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+            )}
+          </div>
+          
+          {/* 效果数据 */}
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-emerald-500">{caseData.regions.length}</p>
+              <p className="text-xs text-slate-500 mt-1">地区版本</p>
             </div>
-          )}
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-green-500">98%+</p>
+              <p className="text-xs text-slate-500 mt-1">合规通过率</p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center">
+              <p className="text-2xl font-bold text-violet-500">{caseData.result.conversion}</p>
+              <p className="text-xs text-slate-500 mt-1">转化率提升</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
       
-      {/* 合规修复对比 */}
+      {/* 合规问题修复 */}
       <Card className="bg-white dark:bg-slate-800">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-4">
@@ -783,7 +830,7 @@ function ProductCaseStudy({ caseData }: { caseData: ProductCase }) {
           </div>
           
           <div className="space-y-3">
-            {caseData.after.complianceSummary.issues.map((issue, i) => (
+            {caseData.complianceSummary.issues.map((issue, i) => (
               <div 
                 key={i}
                 className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl"
@@ -807,45 +854,24 @@ function ProductCaseStudy({ caseData }: { caseData: ProductCase }) {
         </CardContent>
       </Card>
       
-      {/* 效果对比 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white dark:bg-slate-800 border-red-200 dark:border-red-800">
-          <CardContent className="p-6">
-            <Badge variant="destructive" className="mb-4">优化前</Badge>
-            <div className="space-y-2">
-              {caseData.before.issues.map((issue, i) => (
-                <div key={i} className="flex items-start gap-2 text-sm text-slate-500">
-                  <span className="text-red-400 mt-0.5">-</span>
-                  <span>{issue}</span>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-              <p className="text-xs text-red-600 dark:text-red-400">
-                存在多地区下架风险，转化率低
-              </p>
-            </div>
+      {/* 效果数据卡 */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card className="bg-gradient-to-br from-emerald-500 to-teal-500 border-emerald-200">
+          <CardContent className="p-6 text-center text-white">
+            <p className="text-2xl font-bold mb-1">{caseData.result.conversion}</p>
+            <p className="text-xs opacity-80">转化率提升</p>
           </CardContent>
         </Card>
-        
-        <Card className="bg-white dark:bg-slate-800 border-green-200 dark:border-green-800">
-          <CardContent className="p-6">
-            <Badge className="bg-green-100 text-green-600 mb-4">AI优化后</Badge>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
-                <p className="text-xl font-bold text-green-600">{caseData.after.regionImages.length}</p>
-                <p className="text-xs text-green-500">地区版本</p>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
-                <p className="text-xl font-bold text-green-600">98%+</p>
-                <p className="text-xs text-green-500">合规通过率</p>
-              </div>
-            </div>
-            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <p className="text-xs text-green-600 dark:text-green-400">
-                {caseData.after.complianceSummary.overall}
-              </p>
-            </div>
+        <Card className="bg-gradient-to-br from-violet-500 to-purple-500 border-violet-200">
+          <CardContent className="p-6 text-center text-white">
+            <p className="text-2xl font-bold mb-1">{caseData.result.regions.split('/').length}个</p>
+            <p className="text-xs opacity-80">覆盖地区</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-orange-500 to-amber-500 border-orange-200">
+          <CardContent className="p-6 text-center text-white">
+            <p className="text-2xl font-bold mb-1">3分钟</p>
+            <p className="text-xs opacity-80">生成一套素材</p>
           </CardContent>
         </Card>
       </div>

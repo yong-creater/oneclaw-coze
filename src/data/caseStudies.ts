@@ -106,35 +106,28 @@ export interface TestCase {
   };
 }
 
+export interface ProductRegion {
+  id: string;
+  name: string;
+  image: string;
+  complianceScore: number;
+  marks: string[];
+}
+
 export interface ProductCase {
   id: string;
   title: string;
   subtitle: string;
   product: string;
-  before: {
-    description: string;
-    issues: string[];
-  };
-  after: {
-    // 各地区适配的详情图
-    regionImages: {
-      region: string;
-      regionName: string;
-      imageDescription: string;
-      compliance: {
-        score: number;
-        marks: string[];  // 合规标识
-      };
+  originalImage: string;
+  regions: ProductRegion[];
+  complianceSummary: {
+    overall: string;
+    issues: {
+      type: string;
+      original: string;
+      fixed: string;
     }[];
-    // 合规报告汇总
-    complianceSummary: {
-      overall: string;
-      issues: {
-        type: string;
-        original: string;
-        fixed: string;
-      }[];
-    };
   };
   result: {
     conversion: string;
@@ -503,64 +496,45 @@ export const PRODUCT_CASES: ProductCase[] = [
     title: '一套素材打全球，转化率提升180%',
     subtitle: '智能手表 · 出海多平台适配',
     product: 'GT-Watch Pro 智能运动手表',
-    before: {
-      description: '统一使用中文市场详情页素材，未针对各地区法规和文化习惯进行适配',
-      issues: [
-        '未标注CE/UKCA等法规标识（欧盟/英国禁售风险）',
-        '未考虑文化禁忌（如部分图案在东南亚敏感）',
-        '未适配各平台尺寸要求（亚马逊白底 vs TikTok竖版）',
-        '夸大宣传用语违反广告法（多个地区）',
-        '缺少本地化语言标注'
-      ]
-    },
-    after: {
-      regionImages: [
-        {
-          region: 'eu',
-          regionName: '欧盟版',
-          imageDescription: '白底主图 + CE认证标识 + 德/法/意多语言标注 + 简洁环保风格',
-          compliance: {
-            score: 98,
-            marks: ['CE标识', 'WEEE标志', '多语言警告语', '环保材料说明']
-          }
-        },
-        {
-          region: 'us',
-          regionName: '美国版',
-          imageDescription: '自然光场景图 + FDA合规描述 + 英文为主 + 突出运动性能',
-          compliance: {
-            score: 96,
-            marks: ['FDA描述合规', 'FCC认证标注', '英文警告语', '运动场景']
-          }
-        },
-        {
-          region: 'jp',
-          regionName: '日本版',
-          imageDescription: '素雅极简风格 + PSE标识 + 日语标注 + 科技感展示',
-          compliance: {
-            score: 95,
-            marks: ['PSE标识', '日语标注', 'JIS规格说明', '简约色调']
-          }
-        },
-        {
-          region: 'sea',
-          regionName: '东南亚版',
-          imageDescription: '生活场景图 + 本土模特 + 多语言(泰/越/印尼) + 鲜艳色调',
-          compliance: {
-            score: 94,
-            marks: ['无宗教元素', '多语言标注', '价格含税标识', '本地审美']
-          }
-        }
-      ],
-      complianceSummary: {
-        overall: '4大地区全覆盖，合规通过率98%+，无下架风险',
-        issues: [
-          { type: '法规标识', original: '无任何法规标识', fixed: '按地区添加CE/FCC/PSE等强制标识' },
-          { type: '文化适配', original: '统一中文素材', fixed: '色调、场景、模特本地化' },
-          { type: '平台适配', original: '单一尺寸素材', fixed: '自动生成各平台标准尺寸' },
-          { type: '语言合规', original: '夸大宣传用语', fixed: '符合各国广告法的规范表述' }
-        ]
+    originalImage: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_09710216-7c4e-437e-9b2d-ffdcd194489b.jpeg',
+    regions: [
+      {
+        id: 'eu',
+        name: '欧盟版',
+        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_89ef0078-e708-4654-8c06-fa690d0ec7c6.jpeg',
+        complianceScore: 98,
+        marks: ['CE标识', 'WEEE标志', '多语言警告语', '环保材料说明']
+      },
+      {
+        id: 'us',
+        name: '美国版',
+        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_9d0e94da-429b-4a9a-bd16-f8012d979344.jpeg',
+        complianceScore: 96,
+        marks: ['FDA描述合规', 'FCC认证标注', '英文警告语', '运动场景']
+      },
+      {
+        id: 'jp',
+        name: '日本版',
+        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_947e9f22-ca6a-402b-8a3a-320fb51b4e63.jpeg',
+        complianceScore: 95,
+        marks: ['PSE标识', '日语标注', 'JIS规格说明', '简约色调']
+      },
+      {
+        id: 'sea',
+        name: '东南亚版',
+        image: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_3aa01991-10dc-4643-9966-9ecdf887ad89.jpeg',
+        complianceScore: 94,
+        marks: ['无宗教元素', '多语言标注', '价格含税标识', '本地审美']
       }
+    ],
+    complianceSummary: {
+      overall: '4大地区全覆盖，合规通过率98%+，无下架风险',
+      issues: [
+        { type: '法规标识', original: '无任何法规标识', fixed: '按地区添加CE/FCC/PSE等强制标识' },
+        { type: '文化适配', original: '统一中文素材', fixed: '色调、场景、模特本地化' },
+        { type: '平台适配', original: '单一尺寸素材', fixed: '自动生成各平台标准尺寸' },
+        { type: '语言合规', original: '夸大宣传用语', fixed: '符合各国广告法的规范表述' }
+      ]
     },
     result: {
       conversion: '+180%',
