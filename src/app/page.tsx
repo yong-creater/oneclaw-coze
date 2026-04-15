@@ -259,142 +259,126 @@ function UtilityToolsPage() {
             热门使用场景
           </h2>
           <p className="text-slate-500 dark:text-slate-400">
-            发现这些工具的更多可能
+            点击进入，探索更多可能
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* STAR简历优化案例 */}
-          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border border-blue-100 dark:border-blue-800">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
-                <FileText className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-800 dark:text-white">STAR简历优化</h3>
-                <p className="text-xs text-slate-500">职场晋升必备</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-blue-600 dark:text-blue-400 text-xs font-bold">1</span>
+          <Link href="/resume" className="group relative overflow-hidden rounded-2xl h-[280px]">
+            <img 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_6983e487-501e-4265-8bf5-09a6fe3c97b2.jpeg" 
+              alt="STAR简历优化"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-end p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                  <FileText className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">校招求职</p>
-                  <p className="text-xs text-slate-500">应届生简历优化，突出项目经验，提升简历通过率</p>
+                  <h3 className="font-bold text-white text-lg">STAR简历优化</h3>
+                  <p className="text-white/60 text-sm">职场晋升必备神器</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-cyan-600 dark:text-cyan-400 text-xs font-bold">2</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">社招跳槽</p>
-                  <p className="text-xs text-slate-500">量化工作成果，让面试官一眼看到你的价值</p>
-                </div>
+              <div className="flex gap-3">
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  校招求职
+                </span>
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  社招跳槽
+                </span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* 网文创作工坊案例 */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-100 dark:border-purple-800">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Feather className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-800 dark:text-white">网文创作工坊</h3>
-                <p className="text-xs text-slate-500">内容创作者利器</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-purple-600 dark:text-purple-400 text-xs font-bold">1</span>
+          <Link href="/novel" className="group relative overflow-hidden rounded-2xl h-[280px]">
+            <img 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a79eea54-8177-4a16-b4da-16193d457b17.jpeg" 
+              alt="网文创作工坊"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-end p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                  <Feather className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">小说改编</p>
-                  <p className="text-xs text-slate-500">番茄小说爆款文改编为漫画脚本，快速产出</p>
+                  <h3 className="font-bold text-white text-lg">网文创作工坊</h3>
+                  <p className="text-white/60 text-sm">内容创作者利器</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-pink-600 dark:text-pink-400 text-xs font-bold">2</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">短剧创作</p>
-                  <p className="text-xs text-slate-500">网文改短剧，批量产出推文素材，引流变现</p>
-                </div>
+              <div className="flex gap-3">
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  小说改编
+                </span>
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  短剧创作
+                </span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* AI测试用例案例 */}
-          <div className="bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20 rounded-2xl p-6 border border-violet-100 dark:border-violet-800">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                <FlaskConical className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-800 dark:text-white">AI测试用例</h3>
-                <p className="text-xs text-slate-500">测试工程师效率工具</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-violet-600 dark:text-violet-400 text-xs font-bold">1</span>
+          <Link href="/testcraft" className="group relative overflow-hidden rounded-2xl h-[280px]">
+            <img 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_7d7df097-1b02-4c09-a030-1dda3f58540b.jpeg" 
+              alt="AI测试用例"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-end p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg">
+                  <FlaskConical className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">功能测试</p>
-                  <p className="text-xs text-slate-500">快速生成边界条件和异常场景，覆盖全面</p>
+                  <h3 className="font-bold text-white text-lg">AI测试用例</h3>
+                  <p className="text-white/60 text-sm">测试工程师效率工具</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-fuchsia-100 dark:bg-fuchsia-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-fuchsia-600 dark:text-fuchsia-400 text-xs font-bold">2</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">回归测试</p>
-                  <p className="text-xs text-slate-500">历史用例批量复用，效率提升10倍</p>
-                </div>
+              <div className="flex gap-3">
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  功能测试
+                </span>
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  回归测试
+                </span>
               </div>
             </div>
-          </div>
+          </Link>
 
           {/* 出海详情页案例 */}
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-6 border border-emerald-100 dark:border-emerald-800">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                <Globe className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-slate-800 dark:text-white">出海详情页</h3>
-                <p className="text-xs text-slate-500">跨境卖家必备</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-emerald-600 dark:text-emerald-400 text-xs font-bold">1</span>
+          <Link href="/productpage" className="group relative overflow-hidden rounded-2xl h-[280px]">
+            <img 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_9481ae7a-810f-42be-ba02-5c9535b3cda2.jpeg" 
+              alt="出海详情页"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 flex flex-col justify-end p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
+                  <Globe className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">亚马逊Listing</p>
-                  <p className="text-xs text-slate-500">符合亚马逊规范的多语言详情页，一键生成</p>
+                  <h3 className="font-bold text-white text-lg">出海详情页</h3>
+                  <p className="text-white/60 text-sm">跨境卖家必备</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-white/60 dark:bg-slate-800/60 rounded-xl">
-                <div className="w-6 h-6 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-teal-600 dark:text-teal-400 text-xs font-bold">2</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">多平台分发</p>
-                  <p className="text-xs text-slate-500">速卖通/eBay/Shopee统一模板，批量发布</p>
-                </div>
+              <div className="flex gap-3">
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  亚马逊Listing
+                </span>
+                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
+                  多平台分发
+                </span>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </div>
