@@ -383,9 +383,8 @@ export default function ResumeOptimizer() {
                   </div>
                 </div>
                 
-                {/* 内容区 */}
-                <div className="p-6 flex flex-col flex-1 min-h-[320px]">
-                  {/* 简历文本输入框 */}
+                {/* 内容区 - 固定高度 */}
+                <div className="p-6 flex flex-col" style={{ height: '360px' }}>
                   <textarea
                     value={resumeText}
                     onChange={(e) => setResumeText(e.target.value)}
@@ -397,18 +396,18 @@ export default function ResumeOptimizer() {
 • 工作经历
 • 项目经验
 • 专业技能`}
-                    className="w-full flex-1 min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
+                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
                   />
                   
-                  {/* 上传PDF + 解析提示 */}
-                  <div className="flex items-center justify-between pt-4 flex-shrink-0">
+                  {/* 底部区域 */}
+                  <div className="mt-3 flex items-center justify-between">
                     {parsedResume ? (
                       <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
                         <Check className="w-3.5 h-3.5" />
                         PDF已解析完成
                       </div>
                     ) : (
-                      <div />
+                      <span />
                     )}
                     
                     <input
@@ -439,33 +438,37 @@ export default function ResumeOptimizer() {
                   </div>
                 </div>
                 
-                {/* 内容区 */}
-                <div className="p-6 flex flex-col flex-1 min-h-[320px]">
+                {/* 内容区 - 固定高度，与左侧完全一致 */}
+                <div className="p-6 flex flex-col" style={{ height: '360px' }}>
                   <textarea
                     value={jdText}
                     onChange={(e) => setJdText(e.target.value)}
                     placeholder="请粘贴目标岗位JD全文（支持复制Boss直聘、智联等平台JD），系统将自动拆解核心关键词..."
-                    className="w-full flex-1 min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   
-                  {jdKeywords.length > 0 ? (
-                    <div className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl mt-4 flex-shrink-0">
-                      <p className="text-sm text-orange-700 dark:text-orange-300 mb-3 font-medium">
-                        已识别 {jdKeywords.length} 个核心关键词
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {jdKeywords.map((keyword, i) => (
-                          <span key={i} className="px-3 py-1 bg-orange-100 dark:bg-orange-800 text-orange-700 dark:text-orange-200 text-xs rounded-full">
-                            {keyword}
-                          </span>
-                        ))}
+                  {/* 底部区域 - 固定高度占位 */}
+                  <div className="mt-3">
+                    {jdKeywords.length > 0 ? (
+                      <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+                        <p className="text-xs text-orange-700 dark:text-orange-300 mb-2 font-medium">
+                          已识别 {jdKeywords.length} 个核心关键词
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {jdKeywords.slice(0, 8).map((keyword, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-orange-100 dark:bg-orange-800 text-orange-700 dark:text-orange-200 text-xs rounded-full">
+                              {keyword}
+                            </span>
+                          ))}
+                          {jdKeywords.length > 8 && (
+                            <span className="px-2 py-0.5 text-xs text-slate-500">+{jdKeywords.length - 8}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="pt-4 flex-shrink-0">
-                      <div className="h-[62px]" /> {/* 占位保持高度一致 */}
-                    </div>
-                  )}
+                    ) : (
+                      <div className="h-[56px]" />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
