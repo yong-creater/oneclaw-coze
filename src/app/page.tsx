@@ -419,7 +419,7 @@ function UtilityToolsPage() {
           </div>
 
           {/* 3C配件日出千单，转化率提升180% */}
-          <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/product-page')}>
+          <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/cases/product-page')}>
             <img 
               src="/case-ecommerce.jpg" 
               alt="出海详情页案例"
@@ -460,10 +460,10 @@ function UtilityToolsPage() {
               </div>
               
               <button 
-                onClick={(e) => { e.stopPropagation(); router.push('/product-page'); }}
+                onClick={(e) => { e.stopPropagation(); router.push('/cases/product-page'); }}
                 className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
               >
-                <span>一键生成爆款详情页</span>
+                <span>查看出海案例</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
