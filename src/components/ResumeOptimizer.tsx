@@ -372,7 +372,7 @@ export default function ResumeOptimizer() {
             </div>
             
             {/* 输入卡片区 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* 简历输入卡片 */}
               <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {/* 标题栏 */}
@@ -425,17 +425,6 @@ export default function ResumeOptimizer() {
                       <Upload className="w-3.5 h-3.5" />
                       上传PDF
                     </button>
-                  </div>
-                </div>
-              </div>
-              
-              {/* 柔和的匹配连接效果 */}
-              <div className="absolute inset-0 pointer-events-none hidden lg:block">
-                <div className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-px bg-gradient-to-b from-transparent via-orange-200 dark:via-orange-800 to-transparent" />
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                  <div className="bg-gradient-to-r from-orange-100 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 px-6 py-1.5 rounded-full border border-orange-200 dark:border-orange-700 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm font-medium text-orange-600 dark:text-orange-400 whitespace-nowrap">JD精准匹配</span>
                   </div>
                 </div>
               </div>
