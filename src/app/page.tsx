@@ -12,7 +12,7 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  FileText, FlaskConical, Globe
+  FileText, FlaskConical, Globe, TrendingUp
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -265,13 +265,24 @@ function UtilityToolsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 从简历石沉大海到斩获字节offer */}
-          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
-            <img 
-              src="/case-resume-bg.jpg" 
-              alt="简历优化案例"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+          <Link href="/resume" className="group relative overflow-hidden rounded-2xl h-[400px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500">
+              {/* 简历主题装饰 */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-8 left-8 w-32 h-40 bg-white rounded-lg shadow-xl transform -rotate-6" />
+                <div className="absolute top-12 left-16 w-32 h-40 bg-white/90 rounded-lg shadow-xl transform rotate-3" />
+                <div className="absolute bottom-12 right-8 w-24 h-24 bg-white/20 rounded-full" />
+                <div className="absolute top-1/2 right-16 w-16 h-16 bg-white/10 rounded-full" />
+              </div>
+              {/* 字节跳动标志 */}
+              <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
+                <span className="text-white font-bold text-sm">字节跳动</span>
+              </div>
+              {/* 成功符号 */}
+              <div className="absolute bottom-6 left-6 w-12 h-12 bg-white/30 rounded-full flex items-center justify-center">
+                <Check className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
@@ -313,16 +324,27 @@ function UtilityToolsPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-          </div>
+          </Link>
 
           {/* 1小时产出10条推文，月入5万+ */}
-          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
-            <img 
-              src="/case-novel-bg.jpg" 
-              alt="小说创作案例"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+          <Link href="/novel" className="group relative overflow-hidden rounded-2xl h-[400px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-500 to-fuchsia-500">
+              {/* 创作主题装饰 */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-8 right-8 w-20 h-28 bg-white rounded-lg shadow-xl transform rotate-6" />
+                <div className="absolute top-16 right-12 w-16 h-24 bg-white/90 rounded-lg shadow-xl transform -rotate-3" />
+                <div className="absolute bottom-16 left-12 w-20 h-20 bg-white/20 rounded-full" />
+                <div className="absolute top-1/3 left-8 text-6xl opacity-20">📝</div>
+              </div>
+              {/* 收益标志 */}
+              <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
+                <span className="text-white font-bold text-sm">¥ +50,000</span>
+              </div>
+              {/* 创作符号 */}
+              <div className="absolute bottom-6 right-6 w-12 h-12 bg-white/30 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
@@ -364,16 +386,27 @@ function UtilityToolsPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-          </div>
+          </Link>
 
           {/* 10分钟生成200+用例，漏测率降低60% */}
-          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
-            <img 
-              src="/case-testing-bg.jpg" 
-              alt="测试用例案例"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+          <Link href="/testcraft" className="group relative overflow-hidden rounded-2xl h-[400px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-500 to-indigo-500">
+              {/* 测试主题装饰 */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 w-48 h-32 bg-white rounded-lg shadow-xl" />
+                <div className="absolute bottom-20 left-16 w-12 h-12 bg-green-400 rounded-lg transform rotate-12" />
+                <div className="absolute bottom-12 left-24 w-10 h-10 bg-green-400/80 rounded-lg transform -rotate-6" />
+                <div className="absolute top-16 left-1/3 w-8 h-8 bg-amber-400 rounded-full" />
+              </div>
+              {/* 数据标志 */}
+              <div className="absolute top-6 right-6 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
+                <span className="text-white font-bold text-sm">200+ 用例</span>
+              </div>
+              {/* 检测符号 */}
+              <div className="absolute bottom-6 left-6 w-12 h-12 bg-white/30 rounded-full flex items-center justify-center">
+                <Check className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg">
@@ -415,16 +448,27 @@ function UtilityToolsPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-          </div>
+          </Link>
 
           {/* 3C配件日出千单，转化率提升180% */}
-          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
-            <img 
-              src="/case-ecommerce-bg.jpg" 
-              alt="出海详情页案例"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+          <Link href="/productpage" className="group relative overflow-hidden rounded-2xl h-[400px]">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-600 via-teal-500 to-cyan-500">
+              {/* 电商主题装饰 */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-8 right-8 w-20 h-20 bg-white rounded-lg shadow-xl transform rotate-6" />
+                <div className="absolute top-16 right-16 w-16 h-16 bg-white/80 rounded-lg shadow-xl transform -rotate-3" />
+                <div className="absolute bottom-16 left-12 w-24 h-16 bg-white/20 rounded-lg" />
+                <div className="absolute top-1/2 left-8 w-10 h-10 bg-white/30 rounded-full" />
+              </div>
+              {/* 销售标志 */}
+              <div className="absolute top-6 left-6 bg-white/20 backdrop-blur-sm rounded-2xl px-4 py-2">
+                <span className="text-white font-bold text-sm">📦 日出千单</span>
+              </div>
+              {/* 增长符号 */}
+              <div className="absolute bottom-6 right-6 w-12 h-12 bg-white/30 rounded-full flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+            </div>
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
@@ -466,7 +510,7 @@ function UtilityToolsPage() {
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </div>
