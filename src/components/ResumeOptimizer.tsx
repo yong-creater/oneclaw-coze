@@ -42,7 +42,7 @@ export default function ResumeOptimizer() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resumePreviewRef = useRef<HTMLDivElement>(null);
 
-  // 处理PDF上传
+  // 处理PDF上传 - 解析后填入文本框
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -54,7 +54,59 @@ export default function ResumeOptimizer() {
     
     setResumeFile(file);
     setResumePreview(file.name);
+    
+    // 模拟PDF解析 - 实际项目中应调用PDF解析API
+    // 这里模拟从PDF中提取文本内容
     setParsedResume({ basicInfo: '姓名', experience: true, projects: true, skills: true });
+    
+    // 模拟解析完成后将内容填入文本框
+    setTimeout(() => {
+      const mockParsedText = `【PDF解析结果】
+文件名：${file.name}
+
+姓名：张三
+手机：138-0013-8000
+邮箱：zhangsan@example.com
+城市：北京市
+
+求职意向：高级前端开发工程师
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+教育背景
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+2015.09 - 2019.06  清华大学  计算机科学与技术  硕士
+2011.09 - 2015.06  北京航空航天大学  软件工程  本科
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+工作经历
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+2021.07 - 至今    字节跳动    高级前端工程师
+• 负责核心业务系统开发，支撑日活500万+用户
+• 主导技术架构升级，性能提升60%
+• 搭建前端监控体系，错误发现率提升至99%
+
+2018.07 - 2021.06    阿里巴巴    前端工程师
+• 负责电商平台核心模块开发
+• 封装通用组件库，覆盖80%业务场景
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+项目经验
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+2023.01 - 至今    低代码平台    技术负责人
+• 设计拖拽式页面搭建引擎
+• 支持可视化配置，研发效率提升3倍
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+专业技能
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 前端框架：React / Vue / Angular
+• 工程化：Webpack / Vite / TypeScript
+• 其他：Node.js / Python / MySQL`;
+
+      // 切换到粘贴模式并填入解析后的文本
+      setResumeMode('paste');
+      setResumeText(mockParsedText);
+    }, 1000);
   };
 
   // 清除所有输入
@@ -71,25 +123,95 @@ export default function ResumeOptimizer() {
     setShowExample(false);
   };
 
-  // 示例简历
-  const EXAMPLE_RESUME = `张三
-求职意向：产品经理
-工作年限：5年
+  // 示例简历 - 真实丰富的案例
+  const EXAMPLE_RESUME = `张伟
+手机：138-1234-5678 | 邮箱：zhangwei@example.com | 北京·海淀区
 
+求职意向：高级前端开发工程师
+工作年限：6年 | 期望薪资：40-60K
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
 教育背景
-2015-2019  XX大学  计算机科学与技术  本科
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+2015.09 - 2019.06    北京理工大学    计算机科学与技术    本科 / 硕士
+• GPA 3.8/4.0，连续3年获得校级一等奖学金
+• 研究生方向：Web前端性能优化与人机交互
 
+2018.09 - 2019.06    加州大学伯克利分校    交流学习
+• 参与计算机图形学前沿研究项目
+• 获得优秀交换生荣誉
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
 工作经历
-2020.03-至今  XX科技有限公司  产品经理
-• 负责公司核心产品的规划与设计
-• 带领团队完成3款产品的从0到1
-• 主导用户调研，收集需求1000+条
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+2021.07 - 至今        字节跳动    前端架构组 / 高级前端工程师
 
+▌抖音直播团队（0→1）
+• 作为核心前端工程师，从零搭建抖音直播中台系统，日活用户突破2000万
+• 设计并实现低延迟直播流媒体播放器，首屏时间从3.2s优化至0.8s
+• 主导直播间礼物动效系统开发，支持每秒10000+弹幕并发，帧率稳定60fps
+
+▌前端工程化体系建设
+• 搭建集团级前端监控平台，覆盖98%业务线，实时告警响应时间<30s
+• 设计组件库文档平台，积累500+高质量组件，研发效率提升40%
+• 推动TypeScript覆盖率从30%提升至95%，线上Bug率下降60%
+
+▌团队管理
+• 负责10人前端团队技术规划，晋升4名高级工程师
+• 主导技术分享30+场，培养2名T级人才
+
+2019.07 - 2021.06    阿里巴巴    淘宝前端技术部 / 前端工程师
+
+▌商家工作台重构
+• 主导商家工作台从jQuery迁移至React技术栈，迁移200+页面
+• 设计微前端架构方案，实现多团队独立部署，开发效率提升50%
+• 性能优化专项：首屏加载从4.5s降至1.2s，LCP提升65%
+
+▌营销互动系统
+• 开发双11、618等大促互动游戏，支撑亿级流量洪峰
+• 实现实时数据可视化大屏，支持百万级QPS写入
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
 项目经验
-2021.06-2022.06  电商后台管理系统
-• 设计商品管理、订单管理等模块
-• 提升运营效率30%
-`;
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+2023.01 - 2023.06    企业级低代码平台「飞舟」    技术负责人
+• 设计拖拽式页面搭建引擎，支持100+业务组件
+• 实现可视化流程编排与JSON Schema动态表单生成
+• 平台已服务内部30+团队，月活开发者500+，产能提升3倍
+
+2022.07 - 2022.12    前端智能监控平台「Argus」    核心开发
+• 设计前端错误监控、性能采集、用户行为分析三位一体方案
+• 实现无侵入SDK，接入成本<5分钟，包体积增量<10KB
+• 告警准确率95%，平均定位耗时从30min降至30s
+
+2021.03 - 2021.09    SSR同构渲染框架    核心贡献者
+• 开发基于React的同构渲染解决方案，支持Next.js生态
+• 首屏SEO友好，TTFB降低70%，TTI提升50%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+专业技能
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+前端框架：React / Vue / Angular / Next.js / Nuxt.js（精通）
+工程化：Webpack / Vite / Rollup / Turborepo（深入原理）
+语言能力：TypeScript / JavaScript / Python / Go（熟练）
+性能优化：Web Vitals / Lighthouse / Performance API（专家级）
+团队协作：Git / CI/CD / Docker / K8s / 微服务架构
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+证书荣誉
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+• 2023年 字节跳动「年度技术标兵」
+• 2022年 阿里巴巴「前端技术贡献奖」
+• 2021年 开源项目贡献者（Vue.js / Ant Design contributor）
+• 2020年 前端性能优化最佳实践奖
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+自我评价
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+6年前端深耕，兼具技术深度与业务广度。从0到1搭建过DAU 2000万级产品，
+主导过千万级项目架构设计。热衷于前端性能优化与工程化建设，深度参与
+多个开源项目。对React技术栈有深厚积累，同时保持对新技术的好奇心。
+带过10人团队，具备良好的技术视野与沟通协调能力。`;
 
   const EXAMPLE_JD = `岗位职责：
 1. 负责产品规划与设计，与研发、设计团队紧密协作
@@ -263,94 +385,63 @@ export default function ResumeOptimizer() {
                 
                 {/* 内容区 */}
                 <div className="p-6 space-y-4">
-                  {/* 模式切换 */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setResumeMode('paste')}
-                      className={`px-4 py-2 text-sm rounded-lg transition-all ${
-                        resumeMode === 'paste' 
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' 
-                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                      }`}
-                    >
-                      粘贴文本
-                    </button>
-                    <button
-                      onClick={() => setResumeMode('upload')}
-                      className={`px-4 py-2 text-sm rounded-lg transition-all ${
-                        resumeMode === 'upload' 
-                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' 
-                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                      }`}
-                    >
-                      上传PDF
-                    </button>
+                  {/* 模式切换 + 上传按钮 */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setResumeMode('paste')}
+                        className={`px-4 py-2 text-sm rounded-lg transition-all ${
+                          resumeMode === 'paste' 
+                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' 
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        粘贴文本
+                      </button>
+                      <button
+                        onClick={() => setResumeMode('upload')}
+                        className={`px-4 py-2 text-sm rounded-lg transition-all ${
+                          resumeMode === 'upload' 
+                            ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md' 
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        }`}
+                      >
+                        上传PDF
+                      </button>
+                    </div>
+                    
+                    {/* 上传PDF入口 */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                    {resumeMode === 'paste' && (
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-1.5 text-slate-600 dark:text-slate-400"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        上传PDF
+                      </button>
+                    )}
                   </div>
                   
-                  {resumeMode === 'paste' ? (
-                    <textarea
-                      value={resumeText}
-                      onChange={(e) => setResumeText(e.target.value)}
-                      placeholder="请粘贴简历全文（纯文本），系统将自动解析结构..."
-                      className="w-full h-48 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                    />
-                  ) : (
-                    <div className="space-y-4">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                      
-                      {resumeFile ? (
-                        <div className="p-6 border-2 border-dashed border-orange-300 dark:border-orange-600 rounded-xl bg-orange-50 dark:bg-orange-900/20 text-center">
-                          <FileText className="w-10 h-10 text-orange-500 mx-auto mb-3" />
-                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{resumePreview}</p>
-                          <p className="text-xs text-slate-500 mt-2">
-                            {parsedResume ? '已解析完成' : '正在解析...'}
-                          </p>
-                          <button
-                            onClick={() => {
-                              setResumeFile(null);
-                              setResumePreview('');
-                              setParsedResume(null);
-                              fileInputRef.current?.click();
-                            }}
-                            className="mt-3 text-sm text-orange-500 hover:text-orange-600 font-medium"
-                          >
-                            重新上传
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="w-full p-8 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all text-center"
-                        >
-                          <Upload className="w-8 h-8 text-slate-400 mx-auto mb-3" />
-                          <p className="text-sm font-medium text-slate-500">点击上传PDF简历</p>
-                          <p className="text-xs text-slate-400 mt-2">支持多页PDF，单文件不超过10MB</p>
-                        </button>
-                      )}
-                      
-                      {parsedResume && (
-                        <div className="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl space-y-2">
-                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">已识别的简历结构：</p>
-                          {parsedResume.basicInfo && (
-                            <p className="text-xs text-slate-500">基本信息：{parsedResume.basicInfo}</p>
-                          )}
-                          {parsedResume.experience && (
-                            <p className="text-xs text-slate-500">工作经历：已识别</p>
-                          )}
-                          {parsedResume.projects && (
-                            <p className="text-xs text-slate-500">项目经历：已识别</p>
-                          )}
-                          {parsedResume.skills && (
-                            <p className="text-xs text-slate-500">技能证书：已识别</p>
-                          )}
-                        </div>
-                      )}
+                  {/* 简历文本输入框（统一入口） */}
+                  <textarea
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                    placeholder="请粘贴简历全文，或上传PDF自动解析...\n\n建议包含：\n• 个人信息（姓名、联系方式）\n• 教育背景\n• 工作经历\n• 项目经验\n• 专业技能"
+                    className="w-full h-64 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
+                  />
+                  
+                  {/* 解析提示 */}
+                  {parsedResume && (
+                    <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
+                      <Check className="w-3.5 h-3.5" />
+                      PDF已解析完成，内容已填入上方文本框
                     </div>
                   )}
                 </div>
