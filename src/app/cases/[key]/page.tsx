@@ -245,11 +245,11 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
       
       {/* 原始简历 */}
       {activeSection === 'before' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="bg-white dark:bg-slate-800 border-red-200 dark:border-red-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <Badge variant="destructive" className="bg-red-100 text-red-600">优化前</Badge>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <Badge variant="destructive" className="bg-red-100 text-red-600">原始简历</Badge>
                 <button 
                   onClick={() => onCopy(caseData.before.resume, 'before-resume')}
                   className="text-slate-400 hover:text-slate-600"
@@ -257,36 +257,36 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
                   {copiedId === 'before-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
-                <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">存在的问题：</p>
-                <ul className="space-y-1">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-3">
+                <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">问题点：</p>
+                <ul className="space-y-0.5">
                   {caseData.before.highlight.map((item, i) => (
-                    <li key={i} className="text-xs text-red-500/80 flex items-start gap-2">
+                    <li key={i} className="text-xs text-red-500/80 flex items-start gap-1.5">
                       <span className="text-red-400 mt-0.5">•</span>
                       {item}
                     </li>
                   ))}
                 </ul>
               </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 font-mono bg-slate-50 dark:bg-slate-900 p-4 rounded-xl">
+              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl leading-relaxed">
                 {caseData.before.resume}
               </pre>
             </CardContent>
           </Card>
           
-          <div className="space-y-4">
-            <Card className="bg-white dark:bg-slate-800">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-slate-800 dark:text-white">目标岗位JD</h3>
-                  <Target className="w-5 h-5 text-orange-500" />
+          <Card className="bg-white dark:bg-slate-800">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-orange-500" />
+                  <h3 className="font-medium text-slate-800 dark:text-white text-sm">目标JD</h3>
                 </div>
-                <pre className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl">
-                  {caseData.jd}
-                </pre>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+              <pre className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl leading-relaxed">
+                {caseData.jd}
+              </pre>
+            </CardContent>
+          </Card>
         </div>
       )}
       
@@ -294,12 +294,9 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
       {activeSection === 'after' && (
         <div className="space-y-6">
           <Card className="bg-white dark:bg-slate-800 border-green-200 dark:border-green-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <Badge className="bg-green-100 text-green-600">优化后</Badge>
-                  <span className="text-sm text-slate-500">使用STAR法则 · 量化成果</span>
-                </div>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <Badge className="bg-green-100 text-green-600">优化后简历</Badge>
                 <button 
                   onClick={() => onCopy(caseData.after.resume, 'after-resume')}
                   className="text-slate-400 hover:text-slate-600"
@@ -307,55 +304,35 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
                   {copiedId === 'after-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 font-mono bg-slate-50 dark:bg-slate-900 p-4 rounded-xl">
+              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl leading-relaxed">
                 {caseData.after.resume}
               </pre>
             </CardContent>
           </Card>
           
           {/* 优化对比 */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-orange-500" />
-              关键优化点
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <Zap className="w-4 h-4 text-orange-500" />
+              关键优化
             </h3>
-            {caseData.after.changes.map((change, i) => (
-              <Card key={i} className={`border-orange-200 dark:border-orange-800 ${expandedChanges === i ? 'ring-2 ring-orange-500' : ''}`}>
-                <CardContent className="p-4">
-                  <button 
-                    onClick={() => setExpandedChanges(expandedChanges === i ? null : i)}
-                    className="w-full flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 font-bold text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {caseData.after.changes.map((change, i) => (
+                <Card key={i} className="border-orange-100 dark:border-orange-900/50 bg-orange-50/50 dark:bg-orange-900/10">
+                  <CardContent className="p-3">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-500 font-bold text-xs flex-shrink-0 mt-0.5">
                         {i + 1}
                       </div>
-                      <div className="text-left">
-                        <p className="text-sm text-slate-600 dark:text-slate-400 line-through">
-                          {change.before}
-                        </p>
-                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                          → {change.after}
-                        </p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-slate-400 line-through truncate">{change.before}</p>
+                        <p className="text-sm text-green-600 dark:text-green-400 font-medium mt-0.5">{change.after}</p>
                       </div>
                     </div>
-                    {expandedChanges === i ? (
-                      <ChevronUp className="w-5 h-5 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-5 h-5 text-slate-400" />
-                    )}
-                  </button>
-                  {expandedChanges === i && (
-                    <div className="mt-4 pl-11 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
-                      <p className="text-xs text-blue-600 dark:text-blue-400">
-                        <span className="font-medium">优化理由：</span>
-                        {change.reason}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       )}
