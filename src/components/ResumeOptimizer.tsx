@@ -57,6 +57,45 @@ export default function ResumeOptimizer() {
     setResult(null);
     setOptimizeError('');
     setMatchScore(0);
+    setShowExample(false);
+  };
+
+  // 示例简历
+  const EXAMPLE_RESUME = `张三
+求职意向：产品经理
+工作年限：5年
+
+教育背景
+2015-2019  XX大学  计算机科学与技术  本科
+
+工作经历
+2020.03-至今  XX科技有限公司  产品经理
+• 负责公司核心产品的规划与设计
+• 带领团队完成3款产品的从0到1
+• 主导用户调研，收集需求1000+条
+
+项目经验
+2021.06-2022.06  电商后台管理系统
+• 设计商品管理、订单管理等模块
+• 提升运营效率30%
+`;
+
+  const EXAMPLE_JD = `岗位职责：
+1. 负责产品规划与设计，与研发、设计团队紧密协作
+2. 深入了解用户需求，主导用户调研和数据分析
+3. 制定产品路线图，推动产品迭代优化
+
+任职要求：
+1. 本科及以上学历，3年以上产品经验
+2. 熟悉互联网产品设计流程
+3. 具备良好的沟通协调能力和数据分析能力
+4. 有电商或SaaS产品经验优先`;
+
+  // 查看示例
+  const handleShowExample = () => {
+    setResumeText(EXAMPLE_RESUME);
+    setJdText(EXAMPLE_JD);
+    setShowExample(false);
   };
 
   // 优化简历
@@ -313,7 +352,7 @@ export default function ResumeOptimizer() {
                 立即优化
               </PrimaryButton>
               
-              <ActionButton variant="secondary" onClick={() => setShowExample(true)}>
+              <ActionButton variant="secondary" onClick={handleShowExample}>
                 <Lightbulb className="w-4 h-4" />
                 查看示例
               </ActionButton>
