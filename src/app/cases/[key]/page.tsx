@@ -24,7 +24,7 @@ import {
   Image as ImageIcon,
   AlertTriangle
 } from 'lucide-react';
-import { ALL_CASES, ResumeCase, NovelCase, TestCase, ProductCase } from '@/data/caseStudies';
+import { ALL_CASES, ResumeCase, NovelCase, TestCase, TestCaseStep, TestCaseDetail, ProductCase } from '@/data/caseStudies';
 
 const ICON_MAP: Record<string, React.ElementType> = {
   FileText,
@@ -124,7 +124,7 @@ export default function CaseStudyPage() {
             <ResultShowcase 
               data={{
                 coverage: (caseData.case as TestCase).result.coverage,
-                timeSaved: (caseData.case as TestCase).result.timeSaved,
+                efficiency: (caseData.case as TestCase).result.efficiency,
                 company: '电商后台系统'
               }}
             />
@@ -204,6 +204,7 @@ function ResultShowcase({ data }: { data: Record<string, string> }) {
             {k === 'revenue' && '月收入'}
             {k === 'coverage' && '测试覆盖率'}
             {k === 'timeSaved' && '节省时间'}
+            {k === 'efficiency' && '生成效率'}
           </p>
         </div>
       ))}
@@ -397,34 +398,54 @@ function NovelCaseStudy({ caseData, onCopy, copiedId }: {
   );
 }
 
-// 测试用例案例展示 - 展示工具最终输出的拆解效果
+// 测试用例案例展示 - 展示拆解过程和最终测试用例成果
 function TestCaseStudy({ caseData }: { caseData: TestCase }) {
-  const [expandedModule, setExpandedModule] = useState<number | null>(null);
-  const [activeView, setActiveView] = useState<'modules' | 'scenarios'>('modules');
+  const [expandedCase, setExpandedCase] = useState<number | null>(0);
+  const [activeTab, setActiveTab] = useState<'summary' | 'cases'>('summary');
+  
+  const levelColors: Record<string, string> = {
+    'P0': 'bg-red-100 text-red-600',
+    'P1': 'bg-amber-100 text-amber-600',
+    'P2': 'bg-blue-100 text-blue-600'
+  };
+  
+  const typeColors: Record<string, string> = {
+    '功能测试': 'bg-green-100 text-green-600',
+    '异常测试': 'bg-orange-100 text-orange-600',
+    '边界测试': 'bg-purple-100 text-purple-600'
+  };
   
   return (
     <div className="space-y-8">
       {/* 需求输入 */}
       <Card className="bg-white dark:bg-slate-800">
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Badge variant="outline" className="text-slate-500">输入需求</Badge>
-            <span className="text-xs text-slate-400">电商后台订单系统</span>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-white">{caseData.requirement.description}</h3>
+              <p className="text-sm text-slate-500">{caseData.subtitle}</p>
+            </div>
           </div>
-          <pre className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-line">
-            {caseData.before.requirement}
-          </pre>
-          <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-            <p className="text-sm text-amber-600 dark:text-amber-400">
-              <span className="font-medium">原测试用例：</span>
-              仅 {caseData.before.testCases.length} 条，覆盖严重不足
-            </p>
+          
+          <div className="bg-violet-50 dark:bg-violet-900/20 rounded-xl p-4">
+            <p className="text-sm font-medium text-violet-600 mb-2">需求拆解要点：</p>
+            <ul className="space-y-1">
+              {caseData.requirement.details.map((detail, i) => (
+                <li key={i} className="text-sm text-slate-600 dark:text-slate-400 flex items-start gap-2">
+                  <span className="text-violet-400 mt-0.5">{i + 1}.</span>
+                  {detail}
+                </li>
+              ))}
+            </ul>
           </div>
         </CardContent>
       </Card>
       
       {/* 智能拆解结果 */}
-      <Card className="bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:from-violet-900/20 dark:to-fuchsia-900/20 border-violet-200 dark:border-violet-800">
+      <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -433,136 +454,199 @@ function TestCaseStudy({ caseData }: { caseData: TestCase }) {
               </div>
               <div>
                 <h3 className="font-bold text-slate-800 dark:text-white">AI智能拆解结果</h3>
-                <p className="text-xs text-slate-500">基于需求自动分析功能模块与测试场景</p>
+                <p className="text-xs text-slate-500">自动分析功能模块 · 识别测试场景 · 生成完整用例</p>
               </div>
             </div>
-            <Badge className="bg-violet-100 text-violet-600">{caseData.after.summary.totalCases} 条用例</Badge>
           </div>
           
           {/* 统计卡片 */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center shadow-sm">
-              <p className="text-2xl font-bold text-violet-600">{caseData.after.summary.totalModules}</p>
-              <p className="text-xs text-slate-500 mt-1">功能模块</p>
+          <div className="grid grid-cols-6 gap-3 mb-6">
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+              <p className="text-2xl font-bold text-violet-600">{caseData.stats.modules}</p>
+              <p className="text-xs text-slate-500">功能模块</p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center shadow-sm">
-              <p className="text-2xl font-bold text-fuchsia-600">{caseData.after.summary.totalScenarios}</p>
-              <p className="text-xs text-slate-500 mt-1">测试场景</p>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+              <p className="text-2xl font-bold text-fuchsia-600">{caseData.stats.scenarios}</p>
+              <p className="text-xs text-slate-500">测试场景</p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center shadow-sm">
-              <p className="text-2xl font-bold text-purple-600">{caseData.after.summary.totalCases}</p>
-              <p className="text-xs text-slate-500 mt-1">测试用例</p>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+              <p className="text-2xl font-bold text-purple-600">{caseData.stats.cases}</p>
+              <p className="text-xs text-slate-500">测试用例</p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center shadow-sm">
-              <p className="text-2xl font-bold text-green-600">{caseData.after.summary.coverage}</p>
-              <p className="text-xs text-slate-500 mt-1">覆盖率</p>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+              <p className="text-2xl font-bold text-red-500">{caseData.stats.p0}</p>
+              <p className="text-xs text-slate-500">P0用例</p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+              <p className="text-2xl font-bold text-amber-500">{caseData.stats.p1}</p>
+              <p className="text-xs text-slate-500">P1用例</p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-3 text-center shadow-sm">
+              <p className="text-2xl font-bold text-blue-500">{caseData.stats.p2}</p>
+              <p className="text-xs text-slate-500">P2用例</p>
             </div>
           </div>
           
-          {/* 功能模块展示 */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-4">
-              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">功能模块拆解</h4>
-              <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-            </div>
-            
-            {caseData.after.modules.map((mod, i) => (
-              <Card 
-                key={mod.id}
-                className={`bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 transition-all ${
-                  expandedModule === i ? 'ring-2 ring-violet-500' : 'hover:border-violet-300'
-                }`}
-              >
-                <CardContent className="p-4">
-                  <button 
-                    onClick={() => setExpandedModule(expandedModule === i ? null : i)}
-                    className="w-full"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 flex items-center justify-center">
-                          <span className="font-mono text-sm font-bold text-violet-600">{mod.id}</span>
-                        </div>
-                        <div className="text-left">
-                          <div className="flex items-center gap-2">
-                            <p className="font-semibold text-slate-800 dark:text-white">{mod.name}</p>
-                            <Badge variant="outline" className="text-xs">
-                              {mod.scenarios.length} 个场景
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-slate-500 mt-0.5">{mod.description}</p>
-                        </div>
-                      </div>
-                      {expandedModule === i ? (
-                        <ChevronUp className="w-5 h-5 text-slate-400" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5 text-slate-400" />
-                      )}
-                    </div>
-                  </button>
-                  
-                  {expandedModule === i && (
-                    <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-                      <p className="text-xs font-medium text-slate-500 mb-3">覆盖测试场景：</p>
-                      <div className="flex flex-wrap gap-2">
-                        {mod.scenarios.map((scenario, j) => (
-                          <Badge 
-                            key={j}
-                            variant="secondary"
-                            className="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
-                          >
-                            {scenario}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+          {/* Tab切换 */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setActiveTab('summary')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === 'summary'
+                  ? 'bg-violet-500 text-white'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              功能模块
+            </button>
+            <button
+              onClick={() => setActiveTab('cases')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                activeTab === 'cases'
+                  ? 'bg-violet-500 text-white'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              测试用例详情 ({caseData.stats.cases}条)
+            </button>
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* 效果对比 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white dark:bg-slate-800 border-red-200 dark:border-red-800">
-          <CardContent className="p-6">
-            <Badge variant="destructive" className="mb-4">优化前</Badge>
-            <div className="space-y-2">
-              {caseData.before.testCases.map((tc, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-slate-500">
-                  <span className="text-red-400">-</span>
-                  {tc}
+          
+          {activeTab === 'summary' ? (
+            /* 功能模块列表 */
+            <div className="space-y-3">
+              {caseData.breakdown.modules.map((mod) => (
+                <div 
+                  key={mod.id}
+                  className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm"
+                >
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/50 dark:to-purple-900/50 flex items-center justify-center">
+                      <span className="font-mono text-sm font-bold text-violet-600">{mod.id}</span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-800 dark:text-white">{mod.name}</p>
+                      <p className="text-xs text-slate-500">{mod.description}</p>
+                    </div>
+                    <Badge variant="outline">{mod.scenarios.length} 场景</Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {mod.scenarios.map((scenario, i) => (
+                      <span 
+                        key={i}
+                        className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-xs text-slate-600 dark:text-slate-300"
+                      >
+                        {scenario}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
-              <p className="text-xs text-red-600 dark:text-red-400">
-                覆盖率仅 6%，功能场景缺失严重
-              </p>
+          ) : (
+            /* 测试用例详情列表 */
+            <div className="space-y-3">
+              {caseData.breakdown.testCases.map((tc, i) => (
+                <Card 
+                  key={tc.id}
+                  className={`bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 transition-all ${
+                    expandedCase === i ? 'ring-2 ring-violet-500' : ''
+                  }`}
+                >
+                  <CardContent className="p-4">
+                    <button 
+                      onClick={() => setExpandedCase(expandedCase === i ? null : i)}
+                      className="w-full"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="w-16 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center flex-shrink-0">
+                            <span className="font-mono text-xs font-bold text-violet-600">{tc.id}</span>
+                          </div>
+                          <div className="text-left flex-1 min-w-0">
+                            <p className="font-medium text-slate-800 dark:text-white truncate">{tc.title}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge className={`text-xs ${levelColors[tc.level]}`}>{tc.level}</Badge>
+                              <Badge className={`text-xs ${typeColors[tc.type]}`}>{tc.type}</Badge>
+                              <span className="text-xs text-slate-400 hidden sm:inline">{tc.module}</span>
+                            </div>
+                          </div>
+                        </div>
+                        {expandedCase === i ? (
+                          <ChevronUp className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                        )}
+                      </div>
+                    </button>
+                    
+                    {expandedCase === i && (
+                      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 space-y-4">
+                        {/* 前置条件 */}
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 mb-2">前置条件</p>
+                          <ul className="space-y-1">
+                            {tc.precondition.map((pre, j) => (
+                              <li key={j} className="text-sm text-slate-600 dark:text-slate-400 flex items-start gap-2">
+                                <span className="text-violet-400">•</span>
+                                {pre}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        
+                        {/* 测试步骤 */}
+                        <div>
+                          <p className="text-xs font-medium text-slate-500 mb-2">测试步骤</p>
+                          <div className="space-y-2">
+                            {tc.steps.map((step) => (
+                              <div key={step.step} className="flex gap-3 text-sm">
+                                <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 text-xs font-medium text-slate-500">
+                                  {step.step}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-slate-700 dark:text-slate-300">
+                                    <span className="font-medium">操作：</span>{step.action}
+                                    {step.data && <span className="text-slate-400"> [{step.data}]</span>}
+                                  </p>
+                                  <p className="text-green-600 dark:text-green-400 mt-1">
+                                    <span className="font-medium">预期：</span>{step.expected}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* 标签 */}
+                        <div className="flex flex-wrap gap-2">
+                          {tc.tags.map((tag, j) => (
+                            <Badge key={j} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      {/* 效果数据 */}
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="bg-gradient-to-br from-green-500 to-emerald-500 border-green-200">
+          <CardContent className="p-6 text-center text-white">
+            <p className="text-3xl font-bold mb-1">{caseData.result.efficiency}</p>
+            <p className="text-sm opacity-80">测试用例生成效率</p>
           </CardContent>
         </Card>
-        
-        <Card className="bg-white dark:bg-slate-800 border-green-200 dark:border-green-800">
-          <CardContent className="p-6">
-            <Badge className="bg-green-100 text-green-600 mb-4">AI优化后</Badge>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
-                <p className="text-xl font-bold text-green-600">{caseData.after.summary.totalModules}</p>
-                <p className="text-xs text-green-500">功能模块</p>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 text-center">
-                <p className="text-xl font-bold text-green-600">{caseData.after.summary.totalCases}</p>
-                <p className="text-xs text-green-500">测试用例</p>
-              </div>
-            </div>
-            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-              <p className="text-xs text-green-600 dark:text-green-400">
-                覆盖率 {caseData.after.summary.coverage}，覆盖所有功能点、异常场景、边界条件
-              </p>
-            </div>
+        <Card className="bg-gradient-to-br from-violet-500 to-purple-500 border-violet-200">
+          <CardContent className="p-6 text-center text-white">
+            <p className="text-3xl font-bold mb-1">{caseData.result.coverage}</p>
+            <p className="text-sm opacity-80">功能场景覆盖率</p>
           </CardContent>
         </Card>
       </div>
