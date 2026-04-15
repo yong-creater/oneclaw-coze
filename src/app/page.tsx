@@ -319,7 +319,7 @@ function UtilityToolsPage() {
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_287f1d5f-2bb6-4450-ad9a-80b022285add.jpeg" 
-              alt="网文创作案例"
+              alt="小说创作案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
@@ -342,7 +342,7 @@ function UtilityToolsPage() {
                     <span className="text-white/80 text-sm">漫画博主 · 抖音涨粉 3万</span>
                   </div>
                   <p className="text-white/70 text-xs leading-relaxed">
-                    网文作者"云起"将番茄爆款《都市狂少》深度洗稿后，配合AI生图功能产出50集漫画内容，首月抖音涨粉3万。
+                    小说作者"云起"将番茄爆款《都市狂少》深度洗稿后，配合AI生图功能产出50集漫画内容，首月抖音涨粉3万。
                   </p>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
@@ -497,7 +497,7 @@ const UTILITY_TOOLS = [
   },
   { 
     key: 'novel', 
-    name: '网文创作工坊', 
+    name: '小说创作工坊', 
     icon: Feather,
     description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
     color: 'from-purple-500 to-pink-500',
@@ -505,7 +505,7 @@ const UTILITY_TOOLS = [
     useCases: [
       { title: '小说改编', desc: '番茄小说爆款文改编为漫画脚本' },
       { title: 'IP孵化', desc: '原创故事快速生成多形式内容' },
-      { title: '短剧创作', desc: '网文改短剧，批量产出推文素材' },
+      { title: '短剧创作', desc: '小说改短剧，批量产出推文素材' },
     ]
   },
   { 

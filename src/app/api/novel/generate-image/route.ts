@@ -98,7 +98,7 @@ async function call4sapiAPI(messages: any[], model: string): Promise<string> {
 }
 
 // 生图提示词模板
-const SYSTEM_PROMPT = `你是专业的AI漫画图像生成专家，擅长生成高质量的网文风格漫画图片。
+const SYSTEM_PROMPT = `你是专业的AI漫画图像生成专家，擅长生成高质量的小说风格漫画图片。
 
 核心要求：
 1. 根据分镜描述生成专业、生动的漫画提示词

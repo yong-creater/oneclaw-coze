@@ -61,7 +61,7 @@ interface UsageLog {
 
 const TOOL_INFO: Record<string, { name: string; icon: typeof FileText; color: string }> = {
   resume: { name: '简历优化', icon: FileText, color: 'text-blue-500' },
-  novel: { name: '网文创作', icon: BookOpen, color: 'text-purple-500' },
+  novel: { name: '小说创作', icon: BookOpen, color: 'text-purple-500' },
   product_page: { name: '出海详情页', icon: ShoppingBag, color: 'text-green-500' },
   testcraft: { name: 'AI测试用例', icon: TestTube2, color: 'text-orange-500' },
 };
@@ -303,7 +303,7 @@ export default function UtilitiesPage() {
                 <SelectContent>
                   <SelectItem value="all">全部工具</SelectItem>
                   <SelectItem value="resume">简历优化</SelectItem>
-                  <SelectItem value="novel">网文创作</SelectItem>
+                  <SelectItem value="novel">小说创作</SelectItem>
                   <SelectItem value="product_page">出海详情页</SelectItem>
                   <SelectItem value="testcraft">AI测试用例</SelectItem>
                 </SelectContent>

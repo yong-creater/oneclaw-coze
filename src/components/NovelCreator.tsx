@@ -779,7 +779,7 @@ export default function NovelCreator() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `网文创作素材_${new Date().toISOString().split('T')[0]}.zip`;
+    a.download = `小说创作素材_${new Date().toISOString().split('T')[0]}.zip`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -790,7 +790,7 @@ export default function NovelCreator() {
       {/* 统一头部 */}
       <UtilityHeader
         toolIcon={<Feather />}
-        toolName="网文创作工坊"
+        toolName="小说创作工坊"
         toolDescription="小说洗稿 · 漫画生图 · 推文脚本"
         gradient="from-orange-500 to-amber-500"
       />

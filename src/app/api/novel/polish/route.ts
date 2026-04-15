@@ -98,7 +98,7 @@ async function call4sapiAPI(messages: any[], model: string): Promise<string> {
 }
 
 // 洗稿系统提示词
-const SYSTEM_PROMPT = `你是专业的网文洗稿专家，擅长将小说内容进行深度改写，保持剧情人设不变的同时显著提升原创度。
+const SYSTEM_PROMPT = `你是专业的小说洗稿专家，擅长将小说内容进行深度改写，保持剧情人设不变的同时显著提升原创度。
 
 核心要求：
 1. 严格保留剧情、人物设定、伏笔等核心元素
