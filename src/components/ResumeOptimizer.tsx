@@ -396,7 +396,7 @@ export default function ResumeOptimizer() {
 • 工作经历
 • 项目经验
 • 专业技能`}
-                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
+                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
                   />
                   
                   {/* 底部区域 */}
@@ -444,7 +444,7 @@ export default function ResumeOptimizer() {
                     value={jdText}
                     onChange={(e) => setJdText(e.target.value)}
                     placeholder="请粘贴目标岗位JD全文（支持复制Boss直聘、智联等平台JD），系统将自动拆解核心关键词..."
-                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   
                   {/* 底部区域 - 固定高度占位 */}

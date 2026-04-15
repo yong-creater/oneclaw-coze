@@ -531,7 +531,7 @@ export default function ProductPageGenerator() {
                 value={sellingPoints}
                 onChange={(e) => setSellingPoints(e.target.value)}
                 placeholder="请输入商品核心卖点（功能、材质、优势、场景等），越详细，生成的图片越精准..."
-                className="w-full h-40 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full h-40 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               
               {/* 参考图上传 */}
@@ -693,7 +693,7 @@ export default function ProductPageGenerator() {
                   value={extraRequirements}
                   onChange={(e) => setExtraRequirements(e.target.value)}
                   placeholder="输入图片细节需求，如：合规标识放置在右下角、场景图融入当地生活元素..."
-                  className="w-full h-20 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="w-full h-20 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 />
               </div>
             </div>

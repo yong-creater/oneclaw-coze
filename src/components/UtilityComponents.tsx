@@ -186,8 +186,8 @@ export function SelectField({ label, value, onChange, options, placeholder, icon
         </label>
       )}
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 focus:ring-2 focus:ring-orange-500 focus:ring-offset-0 ${
-          showBorder ? 'border border-slate-200 dark:border-slate-700' : 'border border-transparent'
+        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:border-orange-500 transition-colors ${
+          showBorder ? 'border-2 border-slate-200 dark:border-slate-700' : 'border-2 border-transparent'
         }`}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -220,8 +220,8 @@ export function TextareaField({ value, onChange, placeholder, rows = 6, classNam
       rows={rows}
       className={`w-full p-4 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors resize-none ${className} ${
         showBorder 
-          ? 'border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-orange-500 focus:border-orange-500' 
-          : 'border border-transparent focus:ring-2 focus:ring-orange-500 focus:border-transparent'
+          ? 'border-2 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500' 
+          : 'border-2 border-transparent focus:outline-none focus:border-orange-500'
       }`}
     />
   );
