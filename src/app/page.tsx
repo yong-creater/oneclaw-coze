@@ -265,7 +265,7 @@ function UtilityToolsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 从简历石沉大海到斩获字节offer */}
-          <div className="group relative overflow-hidden rounded-2xl">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_6983e487-501e-4265-8bf5-09a6fe3c97b2.jpeg" 
               alt="简历优化案例"
@@ -316,7 +316,7 @@ function UtilityToolsPage() {
           </div>
 
           {/* 1小时产出10条推文，月入5万+ */}
-          <div className="group relative overflow-hidden rounded-2xl">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a79eea54-8177-4a16-b4da-16193d457b17.jpeg" 
               alt="网文创作案例"
@@ -367,7 +367,7 @@ function UtilityToolsPage() {
           </div>
 
           {/* 10分钟生成200+用例，漏测率降低60% */}
-          <div className="group relative overflow-hidden rounded-2xl">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_7d7df097-1b02-4c09-a030-1dda3f58540b.jpeg" 
               alt="测试用例案例"
@@ -418,7 +418,7 @@ function UtilityToolsPage() {
           </div>
 
           {/* 3C配件日出千单，转化率提升180% */}
-          <div className="group relative overflow-hidden rounded-2xl">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_9481ae7a-810f-42be-ba02-5c9535b3cda2.jpeg" 
               alt="出海详情页案例"
