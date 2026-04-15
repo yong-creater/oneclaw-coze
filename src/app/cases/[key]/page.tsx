@@ -217,58 +217,68 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
   onCopy: (text: string, id: string) => void;
   copiedId: string | null;
 }) {
-  const [showAfter, setShowAfter] = useState(false);
+  const [activeTab, setActiveTab] = useState<'after' | 'before'>('after');
   
   return (
     <div className="space-y-6">
-      {!showAfter ? (
-        <>
-          {/* 优化前 - 原始简历 */}
-          <Card className="bg-white dark:bg-slate-800 border-red-200 dark:border-red-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <Badge variant="destructive" className="bg-red-100 text-red-600">优化前</Badge>
-                <button 
-                  onClick={() => onCopy(caseData.before.resume, 'before-resume')}
-                  className="text-slate-400 hover:text-slate-600"
-                >
-                  {copiedId === 'before-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-3">
-                <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">存在问题：</p>
-                <ul className="space-y-0.5">
-                  {caseData.before.highlight.map((item, i) => (
-                    <li key={i} className="text-xs text-red-500/80 flex items-start gap-1.5">
-                      <span className="text-red-400 mt-0.5">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl leading-relaxed">
-                {caseData.before.resume}
-              </pre>
-            </CardContent>
-          </Card>
-          
-          <div className="flex justify-center">
-            <Button 
-              onClick={() => setShowAfter(true)}
-              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
-            >
-              查看优化结果
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
-        </>
+      {/* Tab切换 */}
+      <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
+        <button
+          onClick={() => setActiveTab('after')}
+          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'after'
+              ? 'bg-white dark:bg-slate-700 text-green-500 shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          优化后
+        </button>
+        <button
+          onClick={() => setActiveTab('before')}
+          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'before'
+              ? 'bg-white dark:bg-slate-700 text-red-500 shadow-sm'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          优化前
+        </button>
+      </div>
+      
+      {activeTab === 'before' ? (
+        <Card className="bg-white dark:bg-slate-800 border-red-200 dark:border-red-800">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <Badge variant="destructive" className="bg-red-100 text-red-600">原始简历</Badge>
+              <button 
+                onClick={() => onCopy(caseData.before.resume, 'before-resume')}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                {copiedId === 'before-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
+              <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">存在问题：</p>
+              <ul className="space-y-1">
+                {caseData.before.highlight.map((item, i) => (
+                  <li key={i} className="text-sm text-red-500/80 flex items-start gap-2">
+                    <span className="text-red-400 mt-0.5">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl leading-relaxed">
+              {caseData.before.resume}
+            </pre>
+          </CardContent>
+        </Card>
       ) : (
-        <>
-          {/* 优化后 */}
+        <div className="space-y-6">
           <Card className="bg-white dark:bg-slate-800 border-green-200 dark:border-green-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <Badge className="bg-green-100 text-green-600">优化后</Badge>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <Badge className="bg-green-100 text-green-600">优化后简历</Badge>
                 <button 
                   onClick={() => onCopy(caseData.after.resume, 'after-resume')}
                   className="text-slate-400 hover:text-slate-600"
@@ -276,47 +286,35 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
                   {copiedId === 'after-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl leading-relaxed">
+              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl leading-relaxed">
                 {caseData.after.resume}
               </pre>
             </CardContent>
           </Card>
           
           {/* 关键优化 */}
-          <div className="space-y-2">
-            <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-orange-500" />
-              关键优化
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {caseData.after.changes.map((change, i) => (
-                <Card key={i} className="border-orange-100 dark:border-orange-900/50 bg-orange-50/50 dark:bg-orange-900/10">
-                  <CardContent className="p-2.5">
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-500 font-bold text-xs flex-shrink-0">
-                        {i + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-400 line-through truncate">{change.before}</p>
-                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">{change.after}</p>
-                      </div>
+          <Card className="bg-slate-50 dark:bg-slate-800/50">
+            <CardContent className="p-6">
+              <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-4">
+                <Zap className="w-4 h-4 text-orange-500" />
+                关键优化
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {caseData.after.changes.map((change, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-white dark:bg-slate-900 rounded-xl">
+                    <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-500 font-bold text-xs flex-shrink-0">
+                      {i + 1}
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-          
-          <div className="flex justify-center">
-            <Button 
-              variant="outline"
-              onClick={() => setShowAfter(false)}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              返回原始简历
-            </Button>
-          </div>
-        </>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-slate-400 line-through">{change.before}</p>
+                      <p className="text-sm text-green-600 dark:text-green-400 font-medium mt-1">{change.after}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
