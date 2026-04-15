@@ -374,17 +374,17 @@ export default function ResumeOptimizer() {
             {/* 输入卡片区 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* 简历输入卡片 */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {/* 标题栏 */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5 flex-shrink-0">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
                   <div className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-500" />
                     <h2 className="font-semibold text-slate-800 dark:text-white">简历输入</h2>
                   </div>
                 </div>
                 
-                {/* 内容区 - 固定高度 */}
-                <div className="p-6 flex flex-col" style={{ height: '360px' }}>
+                {/* 内容区 */}
+                <div className="p-6 space-y-4">
                   <textarea
                     value={resumeText}
                     onChange={(e) => setResumeText(e.target.value)}
@@ -396,11 +396,11 @@ export default function ResumeOptimizer() {
 • 工作经历
 • 项目经验
 • 专业技能`}
-                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
+                    className="w-full min-h-[200px] p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-y text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
                   />
                   
                   {/* 底部区域 */}
-                  <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                     {parsedResume ? (
                       <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
                         <Check className="w-3.5 h-3.5" />
@@ -429,44 +429,41 @@ export default function ResumeOptimizer() {
               </div>
               
               {/* JD输入卡片 */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {/* 标题栏 */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5 flex-shrink-0">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
                   <div className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-orange-500" />
                     <h2 className="font-semibold text-slate-800 dark:text-white">岗位JD</h2>
                   </div>
                 </div>
                 
-                {/* 内容区 - 固定高度，与左侧完全一致 */}
-                <div className="p-6 flex flex-col" style={{ height: '360px' }}>
+                {/* 内容区 */}
+                <div className="p-6 space-y-4">
                   <textarea
                     value={jdText}
                     onChange={(e) => setJdText(e.target.value)}
                     placeholder="请粘贴目标岗位JD全文（支持复制Boss直聘、智联等平台JD），系统将自动拆解核心关键词..."
-                    className="w-full flex-1 p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full min-h-[200px] p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-y text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   
-                  {/* 底部区域 - 固定高度占位 */}
-                  <div className="mt-3">
+                  {/* 底部关键词区 */}
+                  <div>
                     {jdKeywords.length > 0 ? (
                       <div className="p-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
                         <p className="text-xs text-orange-700 dark:text-orange-300 mb-2 font-medium">
                           已识别 {jdKeywords.length} 个核心关键词
                         </p>
                         <div className="flex flex-wrap gap-1.5">
-                          {jdKeywords.slice(0, 8).map((keyword, i) => (
+                          {jdKeywords.map((keyword, i) => (
                             <span key={i} className="px-2 py-0.5 bg-orange-100 dark:bg-orange-800 text-orange-700 dark:text-orange-200 text-xs rounded-full">
                               {keyword}
                             </span>
                           ))}
-                          {jdKeywords.length > 8 && (
-                            <span className="px-2 py-0.5 text-xs text-slate-500">+{jdKeywords.length - 8}</span>
-                          )}
                         </div>
                       </div>
                     ) : (
-                      <div className="h-[56px]" />
+                      <div className="h-[52px]" /> /* 占位保持初始高度一致 */
                     )}
                   </div>
                 </div>
