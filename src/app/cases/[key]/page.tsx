@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   ArrowLeft, 
   ArrowRight, 
@@ -216,40 +217,17 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
   onCopy: (text: string, id: string) => void;
   copiedId: string | null;
 }) {
-  const [activeSection, setActiveSection] = useState<'before' | 'jd' | 'after'>('before');
-  const [expandedChanges, setExpandedChanges] = useState<number | null>(0);
+  const [showAfter, setShowAfter] = useState(false);
   
   return (
-    <div className="space-y-8">
-      {/* 切换标签 */}
-      <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
-        {[
-          { key: 'before', label: '原始简历', icon: FileText },
-          { key: 'jd', label: '目标JD', icon: Target },
-          { key: 'after', label: '优化后', icon: Sparkles }
-        ].map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveSection(tab.key as typeof activeSection)}
-            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-              activeSection === tab.key
-                ? 'bg-white dark:bg-slate-700 text-orange-500 shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
-          </button>
-        ))}
-      </div>
-      
-      {/* 原始简历 */}
-      {activeSection === 'before' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="space-y-6">
+      {!showAfter ? (
+        <>
+          {/* 优化前 - 原始简历 */}
           <Card className="bg-white dark:bg-slate-800 border-red-200 dark:border-red-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <Badge variant="destructive" className="bg-red-100 text-red-600">原始简历</Badge>
+                <Badge variant="destructive" className="bg-red-100 text-red-600">优化前</Badge>
                 <button 
                   onClick={() => onCopy(caseData.before.resume, 'before-resume')}
                   className="text-slate-400 hover:text-slate-600"
@@ -258,7 +236,7 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
                 </button>
               </div>
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-3">
-                <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">问题点：</p>
+                <p className="text-xs font-medium text-red-600 dark:text-red-400 mb-1">存在问题：</p>
                 <ul className="space-y-0.5">
                   {caseData.before.highlight.map((item, i) => (
                     <li key={i} className="text-xs text-red-500/80 flex items-start gap-1.5">
@@ -274,29 +252,23 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
             </CardContent>
           </Card>
           
-          <Card className="bg-white dark:bg-slate-800">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-orange-500" />
-                  <h3 className="font-medium text-slate-800 dark:text-white text-sm">目标JD</h3>
-                </div>
-              </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl leading-relaxed">
-                {caseData.jd}
-              </pre>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-      
-      {/* 优化后 */}
-      {activeSection === 'after' && (
-        <div className="space-y-6">
+          <div className="flex justify-center">
+            <Button 
+              onClick={() => setShowAfter(true)}
+              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
+            >
+              查看优化结果
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* 优化后 */}
           <Card className="bg-white dark:bg-slate-800 border-green-200 dark:border-green-800">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <Badge className="bg-green-100 text-green-600">优化后简历</Badge>
+                <Badge className="bg-green-100 text-green-600">优化后</Badge>
                 <button 
                   onClick={() => onCopy(caseData.after.resume, 'after-resume')}
                   className="text-slate-400 hover:text-slate-600"
@@ -304,29 +276,29 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
                   {copiedId === 'after-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl leading-relaxed">
+              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-3 rounded-xl leading-relaxed">
                 {caseData.after.resume}
               </pre>
             </CardContent>
           </Card>
           
-          {/* 优化对比 */}
+          {/* 关键优化 */}
           <div className="space-y-2">
             <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
               <Zap className="w-4 h-4 text-orange-500" />
               关键优化
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {caseData.after.changes.map((change, i) => (
                 <Card key={i} className="border-orange-100 dark:border-orange-900/50 bg-orange-50/50 dark:bg-orange-900/10">
-                  <CardContent className="p-3">
+                  <CardContent className="p-2.5">
                     <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-500 font-bold text-xs flex-shrink-0 mt-0.5">
+                      <div className="w-5 h-5 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-500 font-bold text-xs flex-shrink-0">
                         {i + 1}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-slate-400 line-through truncate">{change.before}</p>
-                        <p className="text-sm text-green-600 dark:text-green-400 font-medium mt-0.5">{change.after}</p>
+                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">{change.after}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -334,7 +306,17 @@ function ResumeCaseStudy({ caseData, onCopy, copiedId }: {
               ))}
             </div>
           </div>
-        </div>
+          
+          <div className="flex justify-center">
+            <Button 
+              variant="outline"
+              onClick={() => setShowAfter(false)}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              返回原始简历
+            </Button>
+          </div>
+        </>
       )}
     </div>
   );
