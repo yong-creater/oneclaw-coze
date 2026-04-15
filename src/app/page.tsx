@@ -267,7 +267,7 @@ function UtilityToolsPage() {
           {/* 从简历石沉大海到斩获字节offer */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_6983e487-501e-4265-8bf5-09a6fe3c97b2.jpeg" 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_60070504-cc77-46ee-9011-d7b5bdb25f0b.jpeg" 
               alt="简历优化案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -318,7 +318,7 @@ function UtilityToolsPage() {
           {/* 1小时产出10条推文，月入5万+ */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a79eea54-8177-4a16-b4da-16193d457b17.jpeg" 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_e06f8626-52aa-4fbf-987d-34e4716c0361.jpeg" 
               alt="网文创作案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -369,7 +369,7 @@ function UtilityToolsPage() {
           {/* 10分钟生成200+用例，漏测率降低60% */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_7d7df097-1b02-4c09-a030-1dda3f58540b.jpeg" 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_5487912d-538a-401e-889d-9c68865fbd34.jpeg" 
               alt="测试用例案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -420,7 +420,7 @@ function UtilityToolsPage() {
           {/* 3C配件日出千单，转化率提升180% */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_9481ae7a-810f-42be-ba02-5c9535b3cda2.jpeg" 
+              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_142851d0-9493-48c5-997c-34550b27744b.jpeg" 
               alt="出海详情页案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
