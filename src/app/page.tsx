@@ -187,7 +187,7 @@ function UtilityToolsPage() {
               resume: '/resume',
               novel: '/novel',
               testcraft: '/testcraft',
-              productpage: '/product-page',
+              productpage: '/productpage',
             };
             return urls[key] || '/';
           };
