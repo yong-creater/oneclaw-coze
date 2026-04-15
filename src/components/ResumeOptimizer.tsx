@@ -376,7 +376,7 @@ export default function ResumeOptimizer() {
               {/* 简历输入卡片 */}
               <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {/* 标题栏 */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700">
                   <div className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-500" />
                     <h2 className="font-semibold text-slate-800 dark:text-white">简历输入</h2>
@@ -431,7 +431,7 @@ export default function ResumeOptimizer() {
               {/* JD输入卡片 */}
               <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                 {/* 标题栏 */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700">
                   <div className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-orange-500" />
                     <h2 className="font-semibold text-slate-800 dark:text-white">岗位JD</h2>
