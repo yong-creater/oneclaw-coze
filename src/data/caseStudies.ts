@@ -46,6 +46,13 @@ export interface NovelCase {
   };
 }
 
+export interface TestCaseModule {
+  id: string;
+  name: string;
+  description: string;
+  scenarios: string[];
+}
+
 export interface TestCase {
   id: string;
   title: string;
@@ -57,16 +64,15 @@ export interface TestCase {
     testCases: string[];
   };
   after: {
-    testCases: {
-      id: string;
-      module: string;
-      title: string;
-      precondition: string;
-      steps: string[];
-      expectedResult: string;
-      priority: string;
-      type: string;
-    }[];
+    // 拆解出的功能模块
+    modules: TestCaseModule[];
+    // 汇总统计
+    summary: {
+      totalModules: number;
+      totalScenarios: number;
+      totalCases: number;
+      coverage: string;
+    };
   };
   result: {
     coverage: string;
@@ -254,87 +260,46 @@ export const TEST_CASES: TestCase[] = [
       ]
     },
     after: {
-      testCases: [
+      // 拆解出的功能模块
+      modules: [
         {
-          id: 'TC_ORDER_001',
-          module: '购物车模块',
-          title: '商品添加到购物车',
-          precondition: '用户已登录，商品有库存',
-          steps: [
-            '1. 进入商品详情页',
-            '2. 点击"加入购物车"按钮',
-            '3. 填写购买数量（2件）',
-            '4. 点击"确认添加"',
-            '5. 进入购物车页面'
-          ],
-          expectedResult: '购物车中显示该商品，数量为2，商品信息完整，总价正确',
-          priority: 'P0',
-          type: '功能测试'
+          id: 'MOD_01',
+          name: '商品管理模块',
+          description: '商品浏览、搜索、详情查看',
+          scenarios: ['商品列表展示', '商品搜索过滤', '商品详情查看', '库存状态显示']
         },
         {
-          id: 'TC_ORDER_002',
-          module: '订单模块',
-          title: '正常下单支付成功',
-          precondition: '购物车中有商品，收货地址已设置，余额充足',
-          steps: [
-            '1. 进入购物车，点击"去结算"',
-            '2. 确认订单信息（商品、数量、地址）',
-            '3. 选择支付方式为"余额支付"',
-            '4. 点击"确认支付"',
-            '5. 输入支付密码',
-            '6. 等待支付结果返回'
-          ],
-          expectedResult: '支付成功页面，订单状态显示"已支付"，收到短信通知，余额扣减正确',
-          priority: 'P0',
-          type: '功能测试'
+          id: 'MOD_02',
+          name: '购物车模块',
+          description: '商品添加、修改数量、删除、结算',
+          scenarios: ['添加商品到购物车', '修改购买数量', '删除购物车商品', '购物车价格计算', '结算前库存校验']
         },
         {
-          id: 'TC_ORDER_003',
-          module: '订单模块',
-          title: '余额不足时支付失败',
-          precondition: '购物车中有商品，收货地址已设置，账户余额不足',
-          steps: [
-            '1. 进入购物车，点击"去结算"',
-            '2. 确认订单信息',
-            '3. 选择支付方式为"余额支付"',
-            '4. 点击"确认支付"',
-            '5. 输入支付密码'
-          ],
-          expectedResult: '弹出提示"余额不足，请充值"，订单状态保持"待支付"，余额未扣减',
-          priority: 'P0',
-          type: '异常测试'
+          id: 'MOD_03',
+          name: '订单确认模块',
+          description: '地址选择、优惠使用、订单信息确认',
+          scenarios: ['地址簿选择', '新增收货地址', '优惠券使用', '订单信息确认', '备注信息填写']
         },
         {
-          id: 'TC_ORDER_004',
-          module: '订单模块',
-          title: '订单超时自动取消',
-          precondition: '创建订单后不进行支付',
-          steps: [
-            '1. 创建新订单，进入待支付状态',
-            '2. 不进行任何操作',
-            '3. 等待15分钟（订单超时时间）',
-            '4. 查看订单状态'
-          ],
-          expectedResult: '订单状态自动变更为"已取消"，库存释放，提示"订单超时已自动取消"',
-          priority: 'P1',
-          type: '边界测试'
+          id: 'MOD_04',
+          name: '支付模块',
+          description: '支付方式选择、支付流程、结果处理',
+          scenarios: ['余额支付', '第三方支付', '支付密码验证', '支付超时处理', '支付异常恢复']
         },
         {
-          id: 'TC_ORDER_005',
-          module: '物流模块',
-          title: '商家发货后状态更新',
-          precondition: '订单已支付，商家有发货权限',
-          steps: [
-            '1. 商家后台选择已支付订单',
-            '2. 点击"发货"按钮',
-            '3. 填写物流公司和运单号',
-            '4. 点击"确认发货"'
-          ],
-          expectedResult: '订单状态变更为"已发货"，显示物流信息，用户收到发货通知短信',
-          priority: 'P0',
-          type: '功能测试'
+          id: 'MOD_05',
+          name: '订单状态模块',
+          description: '订单状态流转、状态查询、通知推送',
+          scenarios: ['待支付→已支付', '已支付→已发货', '已发货→确认收货', '订单超时取消', '退款申请处理']
         }
-      ]
+      ],
+      // 汇总统计
+      summary: {
+        totalModules: 5,
+        totalScenarios: 23,
+        totalCases: 47,
+        coverage: '98%'
+      }
     },
     result: {
       coverage: '98%',
