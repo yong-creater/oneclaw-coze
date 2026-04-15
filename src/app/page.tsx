@@ -164,6 +164,7 @@ function ToolLogo({ src, name, url, size = 40, className = '' }: ToolLogoProps) 
 
 // ==================== 精选工具页面 ====================
 function UtilityToolsPage() {
+  const router = useRouter();
   const [tools, setTools] = useState(UTILITY_TOOLS);
 
   return (
@@ -265,7 +266,7 @@ function UtilityToolsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* 从简历石沉大海到斩获字节offer */}
-          <Link href="/resume" className="group relative overflow-hidden rounded-2xl h-[400px]">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/resume')}>
             <img 
               src="/case-resume.jpg" 
               alt="简历优化案例"
@@ -305,18 +306,18 @@ function UtilityToolsPage() {
                 </div>
               </div>
               
-              <Link 
-                href="/resume"
+              <button 
+                onClick={(e) => { e.stopPropagation(); router.push('/resume'); }}
                 className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
               >
                 <span>免费优化我的简历</span>
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
             </div>
-          </Link>
+          </div>
 
           {/* 1小时产出10条推文，月入5万+ */}
-          <Link href="/novel" className="group relative overflow-hidden rounded-2xl h-[400px]">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/novel')}>
             <img 
               src="/case-novel.jpg" 
               alt="小说创作案例"
@@ -356,18 +357,18 @@ function UtilityToolsPage() {
                 </div>
               </div>
               
-              <Link 
-                href="/novel"
+              <button 
+                onClick={(e) => { e.stopPropagation(); router.push('/novel'); }}
                 className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
               >
                 <span>开始我的创作之旅</span>
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
             </div>
-          </Link>
+          </div>
 
           {/* 10分钟生成200+用例，漏测率降低60% */}
-          <Link href="/testcraft" className="group relative overflow-hidden rounded-2xl h-[400px]">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/testcraft')}>
             <img 
               src="/case-testing.jpg" 
               alt="测试用例案例"
@@ -407,18 +408,18 @@ function UtilityToolsPage() {
                 </div>
               </div>
               
-              <Link 
-                href="/testcraft"
+              <button 
+                onClick={(e) => { e.stopPropagation(); router.push('/testcraft'); }}
                 className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
               >
                 <span>告别手动编写用例</span>
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
             </div>
-          </Link>
+          </div>
 
           {/* 3C配件日出千单，转化率提升180% */}
-          <Link href="/product-page" className="group relative overflow-hidden rounded-2xl h-[400px]">
+          <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/product-page')}>
             <img 
               src="/case-ecommerce.jpg" 
               alt="出海详情页案例"
@@ -458,15 +459,15 @@ function UtilityToolsPage() {
                 </div>
               </div>
               
-              <Link 
-                href="/product-page"
+              <button 
+                onClick={(e) => { e.stopPropagation(); router.push('/product-page'); }}
                 className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
               >
                 <span>一键生成爆款详情页</span>
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
     </div>
@@ -607,6 +608,8 @@ const cache = {
 
 	// ==================== 主组件 ====================
 export default function HomePage() {
+  const router = useRouter();
+  
   // 主Tab状态 - 默认精选工具
   const [mainTab, setMainTab] = useState<MainTab>('utilities');
 
@@ -704,8 +707,6 @@ export default function HomePage() {
     'ai-chat': 'AI聊天',
     'ai-search': 'AI搜索',
   };
-
-  const router = useRouter();
 
   // ==================== 初始化 ====================
   useEffect(() => {

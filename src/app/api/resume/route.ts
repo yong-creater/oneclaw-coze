@@ -31,48 +31,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '请提供简历和JD内容' }, { status: 400 });
     }
 
-    const messages = [
-      { role: 'system' as const, content: systemPrompt || SYSTEM_PROMPT },
-      { role: 'user' as const, content: `请根据以下简历和JD进行优化：\n\n【简历原文】\n${resume}\n\n【目标岗位JD】\n${jd}` }
-    ];
-
-    // 使用Coze SDK
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
 
-    const llmConfig = {
-      model: 'doubao-seed-1-8-251228',
-      temperature: 0.7,
-      streaming: false
-    };
+    const messages = [
+      { role: 'system' as const, content: systemPrompt || SYSTEM_PROMPT },
+      { role: 'user' as const, content: `请根据以下简历和JD进行优化：\n\n【简历原文】\n${resume}\n\n【目标岗位JD】\n${jd}` },
+    ];
 
-    // 非流式调用
-    let content = '';
-    
     try {
-      const aiStream = client.stream(messages, llmConfig);
-      
-      for await (const chunk of aiStream) {
-        if (chunk && typeof chunk === 'object' && 'content' in chunk) {
-          content += (chunk as any).content || '';
-        } else if (typeof chunk === 'string') {
-          content += chunk;
-        }
+      // 使用 invoke 方法（非流式）
+      const response = await client.invoke(messages, {
+        model: 'doubao-seed-1-8-251228',
+        temperature: 0.7,
+      });
+
+      if (!response || !response.content) {
+        throw new Error('AI未返回有效内容');
       }
-    } catch (llmError) {
-      console.error('LLM streaming error:', llmError);
+
+      return NextResponse.json({ content: response.content });
+    } catch (llmError: any) {
+      console.error('Resume optimization error:', llmError);
       throw new Error('AI服务调用失败，请重试');
     }
-    
-    if (!content) {
-      throw new Error('AI未返回有效内容');
-    }
-    
-    return NextResponse.json({ content });
-    
+
   } catch (error: any) {
-    console.error('Resume optimization error:', error);
-    return NextResponse.json({ error: error.message || '优化失败，请重试' }, { status: 500 });
+    console.error('Resume API error:', error);
+    return NextResponse.json({ error: error.message || '简历优化失败' }, { status: 500 });
   }
 }

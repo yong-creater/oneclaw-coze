@@ -31,69 +31,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '请提供需求内容' }, { status: 400 });
     }
 
+    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    const config = new Config();
+    const client = new LLMClient(config, customHeaders);
+
     const messages = [
       { role: 'system' as const, content: SYSTEM_PROMPT },
-      { role: 'user' as const, content: `需求标题：${title || '未命名需求'}\n所属模块：${module || '通用'}\n\n需求内容：\n${requirement}` }
+      { role: 'user' as const, content: `需求标题：${title || '未命名需求'}\n所属模块：${module || '通用'}\n\n需求内容：\n${requirement}` },
     ];
 
-    const encoder = new TextEncoder();
+    try {
+      // 使用 invoke 方法（非流式）
+      const response = await client.invoke(messages, {
+        model: 'doubao-seed-1-8-251228',
+        temperature: 0.7,
+      });
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-          const config = new Config();
-          const client = new LLMClient(config, customHeaders);
-          
-          const llmConfig = {
-            model: 'doubao-seed-1-8-251228',
-            temperature: 0.7,
-            streaming: false
-          };
-
-          // 非流式调用
-          let fullContent = '';
-          try {
-            const aiStream = client.stream(messages, llmConfig);
-            
-            for await (const chunk of aiStream) {
-              let content: string | undefined;
-              
-              if (chunk && typeof chunk === 'object') {
-                content = (chunk as { content?: string }).content;
-              } else if (typeof chunk === 'string') {
-                content = chunk;
-              }
-              
-              if (content && content.length > 0) {
-                fullContent += content;
-                controller.enqueue(encoder.encode(`data: ${content}\n\n`));
-              }
-            }
-          } catch (llmError) {
-            console.error('LLM streaming error:', llmError);
-            controller.error(llmError);
-            return;
-          }
-          
-          controller.close();
-        } catch (error: any) {
-          console.error('Stream error:', error);
-          controller.error(error);
-        }
+      if (!response || !response.content) {
+        throw new Error('AI未返回有效内容');
       }
-    });
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+      return NextResponse.json({ content: response.content });
+    } catch (llmError: any) {
+      console.error('TestCraft analyze error:', llmError);
+      throw new Error('分析服务调用失败，请重试');
+    }
 
   } catch (error: any) {
-    console.error('Analyze requirements error:', error);
+    console.error('TestCraft analyze API error:', error);
     return NextResponse.json({ error: error.message || '分析失败' }, { status: 500 });
   }
 }
