@@ -265,13 +265,13 @@ function UtilityToolsPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* STAR简历优化案例 */}
-          <Link href="/resume" className="group relative overflow-hidden rounded-2xl h-[280px]">
+          <div className="group relative overflow-hidden rounded-2xl">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_6983e487-501e-4265-8bf5-09a6fe3c97b2.jpeg" 
               alt="STAR简历优化"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
@@ -279,28 +279,50 @@ function UtilityToolsPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-lg">STAR简历优化</h3>
-                  <p className="text-white/60 text-sm">职场晋升必备神器</p>
+                  <p className="text-white/60 text-sm">已帮助 10,000+ 用户获得面试机会</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  校招求职
-                </span>
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  社招跳槽
-                </span>
+              
+              {/* 案例详情 */}
+              <div className="space-y-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-blue-500 rounded text-white text-xs font-medium">校招求职</span>
+                    <span className="text-white/80 text-sm">应届生 · 简历通过率提升 200%</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    李明，23届计算机毕业生，通过STAR法则重构项目经历，突出"独立开发""性能优化"等关键词，成功入职字节跳动。
+                  </p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-cyan-500 rounded text-white text-xs font-medium">社招跳槽</span>
+                    <span className="text-white/80 text-sm">职场人 · offer薪资提升 40%</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    王芳，5年产品经验，量化工作成果为"提升转化率35%"，配合JD精准匹配，收获多个大厂offer。
+                  </p>
+                </div>
               </div>
+              
+              <Link 
+                href="/resume"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
+              >
+                <span>立即体验</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          </Link>
+          </div>
 
           {/* 网文创作工坊案例 */}
-          <Link href="/novel" className="group relative overflow-hidden rounded-2xl h-[280px]">
+          <div className="group relative overflow-hidden rounded-2xl">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a79eea54-8177-4a16-b4da-16193d457b17.jpeg" 
               alt="网文创作工坊"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
@@ -308,28 +330,50 @@ function UtilityToolsPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-lg">网文创作工坊</h3>
-                  <p className="text-white/60 text-sm">内容创作者利器</p>
+                  <p className="text-white/60 text-sm">创作者月收入突破 50,000+</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  小说改编
-                </span>
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  短剧创作
-                </span>
+              
+              {/* 案例详情 */}
+              <div className="space-y-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-purple-500 rounded text-white text-xs font-medium">小说改编</span>
+                    <span className="text-white/80 text-sm">漫画博主 · 10万+ 播放量</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    网文作者"云起"将番茄爆款《都市狂少》洗稿后，配合生图功能产出50集漫画内容，首月抖音涨粉3万。
+                  </p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-pink-500 rounded text-white text-xs font-medium">短剧创作</span>
+                    <span className="text-white/80 text-sm">短剧达人 · 佣金日入 5000+</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    利用推文脚本功能，1小时产出10条挂载素材，配合AI配音，单条视频佣金最高突破2万元。
+                  </p>
+                </div>
               </div>
+              
+              <Link 
+                href="/novel"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
+              >
+                <span>立即体验</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          </Link>
+          </div>
 
           {/* AI测试用例案例 */}
-          <Link href="/testcraft" className="group relative overflow-hidden rounded-2xl h-[280px]">
+          <div className="group relative overflow-hidden rounded-2xl">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_7d7df097-1b02-4c09-a030-1dda3f58540b.jpeg" 
               alt="AI测试用例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg">
@@ -337,28 +381,50 @@ function UtilityToolsPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-lg">AI测试用例</h3>
-                  <p className="text-white/60 text-sm">测试工程师效率工具</p>
+                  <p className="text-white/60 text-sm">测试效率提升 10 倍</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  功能测试
-                </span>
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  回归测试
-                </span>
+              
+              {/* 案例详情 */}
+              <div className="space-y-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-violet-500 rounded text-white text-xs font-medium">功能测试</span>
+                    <span className="text-white/80 text-sm">大厂QA · 用例覆盖率 95%</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    某大厂测试工程师张工，输入PRD文档后，10分钟生成200+测试用例，覆盖正常、边界、异常场景，漏测率降低60%。
+                  </p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-fuchsia-500 rounded text-white text-xs font-medium">接口测试</span>
+                    <span className="text-white/80 text-sm">全栈开发 · 交付周期缩短 50%</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    前端开发者小李，使用接口描述自动生成测试用例，开发自测覆盖率从40%提升至85%，上线后bug减少70%。
+                  </p>
+                </div>
               </div>
+              
+              <Link 
+                href="/testcraft"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
+              >
+                <span>立即体验</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          </Link>
+          </div>
 
           {/* 出海详情页案例 */}
-          <Link href="/productpage" className="group relative overflow-hidden rounded-2xl h-[280px]">
+          <div className="group relative overflow-hidden rounded-2xl">
             <img 
               src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_9481ae7a-810f-42be-ba02-5c9535b3cda2.jpeg" 
               alt="出海详情页"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
             <div className="absolute inset-0 flex flex-col justify-end p-6">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg">
@@ -366,19 +432,41 @@ function UtilityToolsPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-lg">出海详情页</h3>
-                  <p className="text-white/60 text-sm">跨境卖家必备</p>
+                  <p className="text-white/60 text-sm">跨境卖家日出千单</p>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  亚马逊Listing
-                </span>
-                <span className="px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm hover:bg-white/30 transition-colors">
-                  多平台分发
-                </span>
+              
+              {/* 案例详情 */}
+              <div className="space-y-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-emerald-500 rounded text-white text-xs font-medium">亚马逊Listing</span>
+                    <span className="text-white/80 text-sm">3C配件 · 转化率提升 180%</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    深圳卖家陈总，输入产品关键词后一键生成符合亚马逊规范的英文详情页，A+内容点击率提升2倍，月销量翻3番。
+                  </p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-teal-500 rounded text-white text-xs font-medium">多平台分发</span>
+                    <span className="text-white/80 text-sm">服装独立站 · 效率提升 500%</span>
+                  </div>
+                  <p className="text-white/70 text-xs leading-relaxed">
+                    独立站卖家小王，一套产品详情自动适配Shopify、WooCommerce、速卖通多平台，节省80%翻译和改版时间。
+                  </p>
+                </div>
               </div>
+              
+              <Link 
+                href="/productpage"
+                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
+              >
+                <span>立即体验</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
     </div>
