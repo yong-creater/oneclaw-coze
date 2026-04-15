@@ -173,6 +173,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.20.0
+      pg-protocol:
+        specifier: ^1.13.0
+        version: 1.13.0
       react:
         specifier: 19.2.3
         version: 19.2.3
