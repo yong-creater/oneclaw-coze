@@ -374,9 +374,9 @@ export default function ResumeOptimizer() {
             {/* 输入卡片区 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* 简历输入卡片 */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
                 {/* 标题栏 */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <FileText className="w-5 h-5 text-orange-500" />
                     <h2 className="font-semibold text-slate-800 dark:text-white">简历输入</h2>
@@ -384,7 +384,7 @@ export default function ResumeOptimizer() {
                 </div>
                 
                 {/* 内容区 */}
-                <div className="p-6 space-y-4">
+                <div className="p-6 flex flex-col flex-1 min-h-[320px]">
                   {/* 简历文本输入框 */}
                   <textarea
                     value={resumeText}
@@ -397,11 +397,11 @@ export default function ResumeOptimizer() {
 • 工作经历
 • 项目经验
 • 专业技能`}
-                    className="w-full h-[calc(100%-40px)] min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
+                    className="w-full flex-1 min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
                   />
                   
                   {/* 上传PDF + 解析提示 */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between pt-4 flex-shrink-0">
                     {parsedResume ? (
                       <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
                         <Check className="w-3.5 h-3.5" />
@@ -429,10 +429,10 @@ export default function ResumeOptimizer() {
                 </div>
               </div>
               
-              {/* JD输入卡片 - 统一高度 */}
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              {/* JD输入卡片 */}
+              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col">
                 {/* 标题栏 */}
-                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5">
+                <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-orange-500 to-amber-500 bg-opacity-5 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <Target className="w-5 h-5 text-orange-500" />
                     <h2 className="font-semibold text-slate-800 dark:text-white">岗位JD</h2>
@@ -440,12 +440,12 @@ export default function ResumeOptimizer() {
                 </div>
                 
                 {/* 内容区 */}
-                <div className="p-6 space-y-4 flex flex-col h-[calc(100%-57px)]">
+                <div className="p-6 flex flex-col flex-1 min-h-[320px]">
                   <textarea
                     value={jdText}
                     onChange={(e) => setJdText(e.target.value)}
                     placeholder="请粘贴目标岗位JD全文（支持复制Boss直聘、智联等平台JD），系统将自动拆解核心关键词..."
-                    className="w-full h-[calc(100%-40px)] min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full flex-1 min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
                   />
                   
                   {jdKeywords.length > 0 && (
