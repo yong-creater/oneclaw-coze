@@ -267,7 +267,7 @@ function UtilityToolsPage() {
           {/* 从简历石沉大海到斩获字节offer */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_dae77823-56a4-4399-bfe9-3d7bb5ec0e45.jpeg" 
+              src="/case-resume-bg.jpg" 
               alt="简历优化案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -318,7 +318,7 @@ function UtilityToolsPage() {
           {/* 1小时产出10条推文，月入5万+ */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_287f1d5f-2bb6-4450-ad9a-80b022285add.jpeg" 
+              src="/case-novel-bg.jpg" 
               alt="小说创作案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -369,7 +369,7 @@ function UtilityToolsPage() {
           {/* 10分钟生成200+用例，漏测率降低60% */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_b6ac5163-eb12-4f9d-aba2-1d685ba9213e.jpeg" 
+              src="/case-testing-bg.jpg" 
               alt="测试用例案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -420,7 +420,7 @@ function UtilityToolsPage() {
           {/* 3C配件日出千单，转化率提升180% */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_75342009-45e4-4484-8133-81f9413de40b.jpeg" 
+              src="/case-ecommerce-bg.jpg" 
               alt="出海详情页案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
