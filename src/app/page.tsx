@@ -217,37 +217,25 @@ function UtilityToolsPage() {
                 </p>
               </div>
               
-              {/* 底部区域：默认显示开始使用，悬浮时显示标签 */}
-              <div className="relative mt-4">
-                {/* 默认显示 */}
+              {/* 底部区域：使用案例 */}
+              <div className="relative mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                {/* 默认显示开始使用 */}
                 <div className="flex items-center gap-2 text-orange-500 text-sm font-medium group-hover:opacity-0 transition-opacity h-6">
                   <span>开始使用</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
                 
-                {/* Hover显示核心卖点 */}
-                <div className="absolute inset-0 flex flex-wrap gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity py-1">
-                  {tool.key === 'resume' && (
-                    <>
-                      <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs rounded-full">PDF上传</span>
-                      <span className="px-2 py-0.5 bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 text-xs rounded-full">JD精准匹配</span>
-                      <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 text-xs rounded-full">量化成果</span>
-                    </>
-                  )}
-                  {tool.key === 'novel' && (
-                    <>
-                      <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 text-xs rounded-full">深度洗稿</span>
-                      <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">漫画生图</span>
-                      <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-400 text-xs rounded-full">推文脚本</span>
-                    </>
-                  )}
-                  {tool.key === 'testcraft' && (
-                    <>
-                      <span className="px-2 py-0.5 bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 text-xs rounded-full">BDD格式</span>
-                      <span className="px-2 py-0.5 bg-fuchsia-100 dark:bg-fuchsia-900/50 text-fuchsia-600 dark:text-fuchsia-400 text-xs rounded-full">批量导出</span>
-                      <span className="px-2 py-0.5 bg-pink-100 dark:bg-pink-900/50 text-pink-600 dark:text-pink-400 text-xs rounded-full">一键生成</span>
-                    </>
-                  )}
+                {/* Hover显示使用案例 */}
+                <div className="absolute inset-x-0 top-4 opacity-0 group-hover:opacity-100 transition-opacity space-y-2">
+                  {tool.useCases?.map((useCase, idx) => (
+                    <div key={idx} className="flex items-start gap-2">
+                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-gradient-to-r ${tool.color}`} />
+                      <div>
+                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{useCase.title}</span>
+                        <span className="text-xs text-slate-400 ml-1">- {useCase.desc}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </button>
@@ -285,28 +273,48 @@ const UTILITY_TOOLS = [
     name: 'STAR简历优化', 
     icon: FileText,
     description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
-    color: 'from-blue-500 to-cyan-500'
+    color: 'from-blue-500 to-cyan-500',
+    useCases: [
+      { title: '校招求职', desc: '应届生简历优化，突出项目经验' },
+      { title: '社招跳槽', desc: '量化工作成果，提升面试邀约率' },
+      { title: '简历升级', desc: 'STAR法则重构，让经历更有说服力' },
+    ]
   },
   { 
     key: 'novel', 
     name: '网文创作工坊', 
     icon: Feather,
     description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
-    color: 'from-purple-500 to-pink-500'
+    color: 'from-purple-500 to-pink-500',
+    useCases: [
+      { title: '小说改编', desc: '番茄小说爆款文改编为漫画脚本' },
+      { title: 'IP孵化', desc: '原创故事快速生成多形式内容' },
+      { title: '短剧创作', desc: '网文改短剧，批量产出推文素材' },
+    ]
   },
   { 
     key: 'testcraft', 
     name: 'AI测试用例', 
     icon: FlaskConical,
     description: 'AI智能生成测试用例，支持BDD格式、批量导出',
-    color: 'from-violet-500 to-fuchsia-500'
+    color: 'from-violet-500 to-fuchsia-500',
+    useCases: [
+      { title: '功能测试', desc: '快速生成边界条件和异常场景' },
+      { title: '接口测试', desc: '自动化生成API测试用例' },
+      { title: '回归测试', desc: '历史用例批量复用，效率翻倍' },
+    ]
   },
   { 
     key: 'productpage', 
     name: '出海详情页', 
     icon: Globe,
     description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
-    color: 'from-emerald-500 to-teal-500'
+    color: 'from-emerald-500 to-teal-500',
+    useCases: [
+      { title: '亚马逊Listing', desc: '符合亚马逊规范的多语言详情页' },
+      { title: '独立站详情', desc: 'Shopify/WooCommerce适配版本' },
+      { title: '多平台分发', desc: '速卖通/eBay/Shopee统一模板' },
+    ]
   },
 ] as const;
 
