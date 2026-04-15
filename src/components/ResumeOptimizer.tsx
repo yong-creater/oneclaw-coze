@@ -531,15 +531,24 @@ export default function ResumeOptimizer() {
                         ))}
                       </div>
                     </div>
-                    {/* 下载按钮 */}
-                    <button
-                      onClick={handleExportPDF}
-                      disabled={exporting}
-                      className="px-4 py-1.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all disabled:opacity-50 flex items-center gap-2"
-                    >
-                      {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
-                      {exporting ? '导出中...' : '下载PDF'}
-                    </button>
+                    {/* 返回修改 + 下载按钮 */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleClearAll}
+                        className="px-3 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center gap-1.5 text-slate-600 dark:text-slate-400"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                        返回修改
+                      </button>
+                      <button
+                        onClick={handleExportPDF}
+                        disabled={exporting}
+                        className="px-4 py-1.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
+                        {exporting ? '导出中...' : '下载PDF'}
+                      </button>
+                    </div>
                   </div>
                   
                   <div className="p-6 bg-slate-100 dark:bg-slate-900 overflow-auto max-h-[65vh]">
