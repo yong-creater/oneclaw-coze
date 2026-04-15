@@ -267,7 +267,7 @@ function UtilityToolsPage() {
           {/* 从简历石沉大海到斩获字节offer */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_9bc5aab4-e1ff-470e-89de-21e41cbaa9ec.jpeg" 
+              src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=800&q=80" 
               alt="简历优化案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -318,7 +318,7 @@ function UtilityToolsPage() {
           {/* 1小时产出10条推文，月入5万+ */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_0ff20331-489e-41ee-a0fb-73d57f0f6483.jpeg" 
+              src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80" 
               alt="网文创作案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -369,7 +369,7 @@ function UtilityToolsPage() {
           {/* 10分钟生成200+用例，漏测率降低60% */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_120888b8-06b6-4434-88be-618fd62edbfd.jpeg" 
+              src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&q=80" 
               alt="测试用例案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
@@ -420,7 +420,7 @@ function UtilityToolsPage() {
           {/* 3C配件日出千单，转化率提升180% */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px]">
             <img 
-              src="https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_8576b6f4-34fe-4d08-b090-183affa14b4a.jpeg" 
+              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" 
               alt="出海详情页案例"
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
