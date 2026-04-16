@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendVerificationEmail, generateCode, isValidEmail } from '@/lib/email';
-import { storeCode, getCodeStatus, CODE_EXPIRY } from '@/lib/verify-code';
+import { storeCode, getCodeStatus, CODE_EXPIRY } from '@/lib/verify-code-db';
 
 // 发送验证码
 export async function POST(request: NextRequest) {

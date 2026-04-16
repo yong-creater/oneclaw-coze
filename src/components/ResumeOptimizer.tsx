@@ -544,7 +544,7 @@ export default function ResumeOptimizer() {
                         {templates[selectedTemplate].name}
                       </span>
                     </div>
-                    {/* 返回修改 + 下载按钮 */}
+                    {/* 返回修改 + 预览 + 下载按钮 */}
                     <div className="flex items-center gap-2">
                       <button
                         onClick={handleClearAll}
@@ -552,6 +552,13 @@ export default function ResumeOptimizer() {
                       >
                         <ArrowLeft className="w-3.5 h-3.5" />
                         返回修改
+                      </button>
+                      <button
+                        onClick={handlePreviewResume}
+                        className="px-3 py-1.5 text-xs border border-orange-300 dark:border-orange-700 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all flex items-center gap-1.5 text-orange-600 dark:text-orange-400"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        全屏预览
                       </button>
                       <button
                         onClick={handleExportPDF}

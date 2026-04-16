@@ -13,7 +13,7 @@ import {
   createUserSession
 } from '@/lib/user-auth';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { verifyCode } from '@/lib/verify-code';
+import { verifyCode } from '@/lib/verify-code-db';
 
 // 获取登录二维码 / 检查登录状态
 export async function GET(request: NextRequest) {
@@ -198,8 +198,12 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      // 验证验证码
-      const codeResult = await verifyCode(email, code, 'login');
+      // 验证验证码（同时检查 register 和 login 两种类型）
+      let codeResult = await verifyCode(email, code, 'login');
+      if (!codeResult.valid) {
+        // 如果 login 类型失败，尝试 register 类型（注册流程发的验证码）
+        codeResult = await verifyCode(email, code, 'register');
+      }
       if (!codeResult.valid) {
         return NextResponse.json(
           { success: false, error: codeResult.error },
