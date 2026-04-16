@@ -150,22 +150,17 @@ export async function sendVerificationEmail(
   code: string, 
   type: 'register' | 'login' = 'register'
 ): Promise<{ success: boolean; configured: boolean; error?: string }> {
-  // 开发环境：模拟发送
-  const isDev = process.env.NODE_ENV === 'development' || process.env.COZE_PROJECT_ENV === 'DEV';
-  
-  if (isDev) {
-    console.log(`[Email] 开发环境模拟发送验证码到 ${to}: ${code}`);
-    return { success: true, configured: false };
-  }
-
-  // 生产环境：使用阿里云
+  // 检查阿里云配置
   const hasAliyunConfig = process.env.ALIYUN_ACCESS_KEY_ID && process.env.ALIYUN_ACCESS_KEY_SECRET;
   
+  // 未配置阿里云：模拟发送
   if (!hasAliyunConfig) {
-    console.log(`[Email] 阿里云邮件推送未配置，模拟发送验证码到 ${to}: ${code}`);
+    console.log(`[Email] 未配置阿里云邮件推送，模拟发送验证码到 ${to}: ${code}`);
     return { success: true, configured: false };
   }
 
+  // 已配置阿里云：使用阿里云发送
+  console.log(`[Email] 使用阿里云邮件推送发送验证码到 ${to}: ${code}`);
   const template = getVerificationEmailTemplate(code);
   const result = await sendEmailViaAliyun(to, template.subject, template.html);
 
