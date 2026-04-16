@@ -4,15 +4,14 @@ import { UserProvider, useUser } from '@/contexts/UserContext';
 import LoginModal from '@/components/LoginModal';
 
 function UserAuthWrapper({ children }: { children: React.ReactNode }) {
-  const { showLoginModal, setShowLoginModal, login } = useUser();
+  const { showLoginModal, setShowLoginModal } = useUser();
   
   return (
     <>
       {children}
       <LoginModal 
         open={showLoginModal} 
-        onClose={() => setShowLoginModal(false)}
-        onSuccess={login}
+        onOpenChange={setShowLoginModal}
       />
     </>
   );

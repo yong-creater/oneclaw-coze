@@ -214,10 +214,7 @@ export default function WorkspacePage() {
         </div>
         <LoginModal
           open={false}
-          onClose={() => {}}
-          onSuccess={() => {
-            window.location.reload();
-          }}
+          onOpenChange={() => {}}
         />
       </div>
     );
