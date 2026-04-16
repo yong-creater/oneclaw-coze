@@ -1,73 +1,119 @@
-import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
-// 邮件配置
-interface EmailConfig {
-  host: string;
-  port: number;
-  secure: boolean;
-  user: string;
-  pass: string;
-  from: string;
-}
+// 阿里云 DirectMail API 发送邮件
+export async function sendEmailViaAliyun(
+  toAddress: string,
+  subject: string,
+  htmlBody: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const accessKeyId = process.env.ALIYUN_ACCESS_KEY_ID;
+  const accessKeySecret = process.env.ALIYUN_ACCESS_KEY_SECRET;
+  const region = process.env.ALIYUN_DIRECT_MAIL_REGION || 'cn-hangzhou';
+  const accountName = process.env.ALIYUN_MAIL_FROM;
 
-function getEmailConfig(): EmailConfig | null {
-  const host = process.env.SMTP_HOST;
-  const port = parseInt(process.env.SMTP_PORT || '587');
-  const secure = process.env.SMTP_SECURE === 'true';
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM || 'OneClaw <noreply@oneclaw.shop>';
-
-  if (!host || !user || !pass) {
-    return null;
+  if (!accessKeyId || !accessKeySecret || !accountName) {
+    return { success: false, error: '阿里云邮件推送配置不完整' };
   }
 
-  return { host, port, secure, user, pass, from };
+  try {
+    const timestamp = new Date().toISOString().replace(/\.\d{3}Z$/, '.000Z');
+    
+    // 构建请求参数（按字母顺序排序）
+    const params: Record<string, string> = {
+      AccessKeyId: accessKeyId,
+      AccountName: accountName,
+      Action: 'SingleSendMail',
+      AddressType: '1',
+      Format: 'JSON',
+      HtmlBody: htmlBody,
+      RegionId: region,
+      ReplyToAddress: 'false',
+      SignatureMethod: 'HMAC-SHA1',
+      SignatureNonce: Date.now().toString(),
+      SignatureVersion: '1.0',
+      Subject: subject,
+      Timestamp: timestamp,
+      ToAddress: toAddress,
+      Version: '2015-11-23',
+    };
+
+    // 1. 构造规范化查询字符串
+    const sortedKeys = Object.keys(params).sort();
+    const canonicalizedQueryString = sortedKeys
+      .map(key => `${percentEncode(key)}=${percentEncode(params[key])}`)
+      .join('&');
+
+    // 2. 构造待签名字符串
+    const stringToSign = `GET&${percentEncode('/')}&${percentEncode(canonicalizedQueryString)}`;
+
+    // 3. 计算签名
+    const signature = crypto
+      .createHmac('sha1', `${accessKeySecret}&`)
+      .update(stringToSign)
+      .digest('base64');
+
+    // 4. 添加签名到参数
+    params.Signature = signature;
+
+    // 5. 构造最终 URL
+    const queryString = sortedKeys
+      .map(key => `${percentEncode(key)}=${percentEncode(params[key])}`)
+      .join('&');
+    
+    const url = `https://dm.${region}.aliyuncs.com/?${queryString}`;
+
+    console.log('[Aliyun DirectMail] 发送请求到:', `https://dm.${region}.aliyuncs.com/`);
+    console.log('[Aliyun DirectMail] 参数:', JSON.stringify(params));
+
+    const response = await fetch(url, {
+      method: 'GET',
+    });
+
+    const result = await response.json();
+    console.log('[Aliyun DirectMail] 响应:', JSON.stringify(result));
+
+    if (response.ok && result.Code === 'OK') {
+      return { success: true, messageId: result.MessageId };
+    } else {
+      return { success: false, error: result.Message || result.Code || `HTTP ${response.status}` };
+    }
+  } catch (error: any) {
+    console.error('[Aliyun DirectMail] 发送失败:', error.message);
+    return { success: false, error: error.message };
+  }
 }
 
-// 创建 transporter
-function createTransporter() {
-  const config = getEmailConfig();
-  
-  if (!config) {
-    console.warn('[Email] SMTP配置未完成，邮件发送将被记录到日志');
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: {
-      user: config.user,
-      pass: config.pass,
-    },
-  });
+// URL 编码（RFC 3986）
+function percentEncode(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/\+/g, '%20')
+    .replace(/\*/g, '%2A')
+    .replace(/~/g, '%7E')
+    .replace(/%/g, '%25');
 }
 
 // 验证码邮件模板
-function getVerificationEmailTemplate(code: string, action: 'register' | 'login' | 'reset' = 'register'): { subject: string; html: string } {
-  const actionText = action === 'register' ? '注册' : action === 'login' ? '登录' : '重置密码';
+function getVerificationEmailTemplate(code: string) {
   return {
-    subject: action === 'reset' ? 'OneClaw 重置密码验证码' : 'OneClaw 邮箱验证码',
+    subject: 'OneClaw - 邮箱验证码',
     html: `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>邮箱验证码</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
-    .container { max-width: 480px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .header { background: linear-gradient(135deg, #f97316 0%, #f59e0b 100%); padding: 24px; text-align: center; }
-    .header h1 { color: white; margin: 0; font-size: 24px; }
-    .content { padding: 32px 24px; text-align: center; }
-    .code-box { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px; padding: 20px 40px; margin: 20px 0; }
-    .code { font-size: 32px; font-weight: bold; color: #d97706; letter-spacing: 8px; }
-    .tips { color: #6b7280; font-size: 14px; line-height: 1.6; }
-    .footer { background: #f9fafb; padding: 16px 24px; text-align: center; color: #9ca3af; font-size: 12px; }
-    .warning { color: #ef4444; font-size: 12px; margin-top: 16px; }
+    body { margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: #f5f5f5; }
+    .container { max-width: 500px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #ff6b35, #f7931e); padding: 30px; text-align: center; }
+    .header h1 { color: #fff; margin: 0; font-size: 24px; font-weight: 600; }
+    .content { padding: 40px 30px; text-align: center; }
+    .title { font-size: 18px; color: #333; margin-bottom: 20px; }
+    .code-box { background: #fff7ed; border: 2px dashed #f7931e; border-radius: 8px; padding: 20px 40px; display: inline-block; margin: 20px 0; }
+    .code { font-size: 36px; font-weight: bold; color: #ff6b35; letter-spacing: 8px; }
+    .tips { color: #666; font-size: 14px; line-height: 1.8; }
+    .warning { color: #999; font-size: 12px; margin-top: 20px; }
+    .footer { background: #fafafa; padding: 20px; text-align: center; border-top: 1px solid #eee; }
+    .footer p { color: #999; font-size: 12px; margin: 5px 0; }
   </style>
 </head>
 <body>
@@ -76,12 +122,12 @@ function getVerificationEmailTemplate(code: string, action: 'register' | 'login'
       <h1>🦞 OneClaw</h1>
     </div>
     <div class="content">
-      <h2 style="color: #1f2937; margin: 0 0 16px;">邮箱验证码</h2>
+      <p class="title">您的验证码</p>
       <div class="code-box">
         <div class="code">${code}</div>
       </div>
       <p class="tips">
-        您正在${actionText} OneClaw 账号，验证码有效期为 <strong>10 分钟</strong>。
+        您正在注册 OneClaw 账号，验证码有效期为 <strong>10 分钟</strong>。
       </p>
       <p class="warning">
         如非本人操作，请忽略此邮件。
@@ -98,45 +144,50 @@ function getVerificationEmailTemplate(code: string, action: 'register' | 'login'
   };
 }
 
-// 发送验证码邮件
+// 发送验证码邮件（兼容旧接口）
 export async function sendVerificationEmail(
   to: string, 
   code: string, 
   type: 'register' | 'login' = 'register'
 ): Promise<{ success: boolean; configured: boolean; error?: string }> {
-  const transporter = createTransporter();
-  const template = getVerificationEmailTemplate(code);
-
-  // 如果没有配置 SMTP
-  if (!transporter) {
-    console.log(`[Email] SMTP未配置，模拟发送验证码到 ${to}: ${code}`);
+  // 开发环境：模拟发送
+  const isDev = process.env.NODE_ENV === 'development' || process.env.COZE_PROJECT_ENV === 'DEV';
+  
+  if (isDev) {
+    console.log(`[Email] 开发环境模拟发送验证码到 ${to}: ${code}`);
     return { success: true, configured: false };
   }
 
-  try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || 'OneClaw <noreply@oneclaw.shop>',
-      to,
-      subject: template.subject,
-      html: template.html,
-    });
+  // 生产环境：使用阿里云
+  const hasAliyunConfig = process.env.ALIYUN_ACCESS_KEY_ID && process.env.ALIYUN_ACCESS_KEY_SECRET;
+  
+  if (!hasAliyunConfig) {
+    console.log(`[Email] 阿里云邮件推送未配置，模拟发送验证码到 ${to}: ${code}`);
+    return { success: true, configured: false };
+  }
 
-    console.log(`[Email] 验证码已真实发送至 ${to}`);
+  const template = getVerificationEmailTemplate(code);
+  const result = await sendEmailViaAliyun(to, template.subject, template.html);
+
+  if (result.success) {
+    console.log(`[Aliyun DirectMail] 验证码已发送至 ${to}, MessageId: ${result.messageId}`);
     return { success: true, configured: true };
-  } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : '发送失败';
-    console.error('[Email] 发送验证码失败:', errMsg);
-    return { success: false, configured: true, error: '邮件发送失败' };
+  } else {
+    console.error(`[Aliyun DirectMail] 发送失败:`, result.error);
+    return { success: false, configured: true, error: result.error };
   }
 }
 
-// 验证邮箱格式
-export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+// 旧接口兼容（已废弃）
+export function createTransporter() {
+  // 返回 null 表示使用阿里云 DirectMail
+  return null;
 }
 
-// 生成6位验证码
+export function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export function generateCode(): string {
-  return Math.random().toString().slice(2, 8).padStart(6, '0');
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
