@@ -123,8 +123,9 @@ export async function sendVerificationEmail(
 
     console.log(`[Email] 验证码已真实发送至 ${to}`);
     return { success: true, configured: true };
-  } catch (error: any) {
-    console.error('[Email] 发送验证码失败:', error.message);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : '发送失败';
+    console.error('[Email] 发送验证码失败:', errMsg);
     return { success: false, configured: true, error: '邮件发送失败' };
   }
 }
