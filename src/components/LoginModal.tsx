@@ -1,964 +1,371 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { X, Mail, Lock, MessageSquare, User, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { 
-  X, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Send, 
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  Smartphone
-} from 'lucide-react';
-import AnimatedLobster from './AnimatedLobster';
-import EmailInput from './ui/email-input';
-import WechatPromo from './WechatPromo';
-import { useUser } from '@/contexts/UserContext';
+import EmailInput from '@/components/ui/email-input';
 
 interface LoginModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultTab?: 'login' | 'register';
+  onSuccess?: (user: any) => void;
 }
 
-type LoginStep = 'choose' | 'password' | 'code' | 'set-password';
-type RegisterStep = 'email' | 'verify' | 'password';
+// 登录方式
+type LoginType = 'wechat' | 'email-code';
 
-export default function LoginModal({ open, onOpenChange, defaultTab = 'login' }: LoginModalProps) {
-  const { user, loading } = useUser();
-  const [mode, setMode] = useState<'login' | 'register'>(defaultTab);
-  
-  // 刷新登录状态
-  const refresh = async () => {
-    const res = await fetch('/api/auth');
-    const data = await res.json();
-    if (data.success && data.authenticated) {
-      window.location.reload();
-    }
-  };
-  
-  // 登录状态
-  const [loginStep, setLoginStep] = useState<LoginStep>('choose');
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [loginCode, setLoginCode] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState('');
-  
-  // 注册状态
-  const [registerStep, setRegisterStep] = useState<RegisterStep>('email');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerCode, setRegisterCode] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
-  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [registerLoading, setRegisterLoading] = useState(false);
-  const [registerError, setRegisterError] = useState('');
-  const [codeSent, setCodeSent] = useState(false);
-  const [codeCooldown, setCodeCooldown] = useState(0);
-  const [devCode, setDevCode] = useState(''); // 开发环境显示的验证码
-  
-  // 微信登录
-  const [wechatQRUrl, setWechatQRUrl] = useState('');
-  const [wechatSceneId, setWechatSceneId] = useState('');
-  const [wechatChecking, setWechatChecking] = useState(false);
-
-  // 登录成功
-  useEffect(() => {
-    if (user && !loading) {
-      onOpenChange(false);
-      refresh();
-    }
-  }, [user, loading, onOpenChange]);
-
-  // 倒计时
-  useEffect(() => {
-    if (codeCooldown > 0) {
-      const timer = setTimeout(() => setCodeCooldown(codeCooldown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [codeCooldown]);
+export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModalProps) {
+  const [loginType, setLoginType] = useState<LoginType | null>(null);
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const [devMode, setDevMode] = useState(false);
 
   // 发送验证码
-  const sendCode = async (email: string, type: 'register' | 'login') => {
-    setRegisterLoading(true);
-    setLoginError('');
-    
-    try {
-      const response = await fetch('/api/auth/code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, type })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setCodeSent(true);
-        setCodeCooldown(60);
-        // 开发环境显示验证码
-        if (data.devCode) {
-          setDevCode(data.devCode);
-        }
-      } else {
-        setLoginError(data.error || '发送失败');
-      }
-    } catch {
-      setLoginError('网络错误，请重试');
-    } finally {
-      setRegisterLoading(false);
-    }
-  };
-
-  // 登录方式选择
-  const handleChooseLogin = (step: LoginStep) => {
-    setLoginStep(step);
-    setLoginError('');
-    setLoginPassword('');
-    setLoginCode('');
-    setLoginEmail('');
-  };
-
-  // 密码登录
-  const handlePasswordLogin = async () => {
-    if (!loginEmail || !loginPassword) {
-      setLoginError('请输入邮箱和密码');
+  const sendCode = async () => {
+    if (!email) {
+      setError('请输入邮箱地址');
       return;
     }
     
-    setLoginLoading(true);
-    setLoginError('');
+    setLoading(true);
+    setError('');
     
     try {
-      const response = await fetch('/api/auth', {
+      const res = await fetch('/api/auth/code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'email_login',
-          email: loginEmail,
-          password: loginPassword
-        })
+        body: JSON.stringify({ email, type: 'register' })
       });
       
-      const data = await response.json();
+      const data = await res.json();
       
       if (data.success) {
-        await refresh?.();
+        // 开发环境直接显示验证码
+        if (data.devCode) {
+          setSuccess(`验证码: ${data.devCode} (开发环境演示)`);
+        } else {
+          setSuccess('验证码已发送，请查收邮件');
+        }
+        setCountdown(60);
       } else {
-        setLoginError(data.error || '登录失败');
+        setError(data.error || '发送失败');
       }
-    } catch {
-      setLoginError('网络错误，请重试');
+    } catch (e) {
+      setError('网络错误，请重试');
     } finally {
-      setLoginLoading(false);
+      setLoading(false);
     }
   };
 
   // 验证码登录
-  const handleCodeLogin = async () => {
-    if (!loginEmail || !loginCode) {
-      setLoginError('请输入邮箱和验证码');
+  const handleEmailLogin = async () => {
+    if (!email || !code) {
+      setError('请填写完整信息');
       return;
     }
     
-    setLoginLoading(true);
-    setLoginError('');
+    setLoading(true);
+    setError('');
     
     try {
-      const response = await fetch('/api/auth', {
+      const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'email_code_login',
-          email: loginEmail,
-          code: loginCode
+          email,
+          code
         })
       });
       
-      const data = await response.json();
+      const data = await res.json();
       
       if (data.success) {
-        // 如果是新用户（没有设置过密码），引导设置密码
-        if (data.isNewUser) {
-          setLoginStep('set-password');
-        } else {
-          await refresh?.();
+        setSuccess('登录成功！');
+        if (onSuccess) {
+          onSuccess(data.user);
         }
+        setTimeout(() => {
+          onOpenChange(false);
+          window.location.reload();
+        }, 500);
       } else {
-        setLoginError(data.error || '登录失败');
+        setError(data.error || '登录失败');
       }
-    } catch {
-      setLoginError('网络错误，请重试');
+    } catch (e) {
+      setError('网络错误，请重试');
     } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  // 设置密码
-  const handleSetPassword = async () => {
-    if (!registerPassword || !registerConfirmPassword) {
-      setLoginError('请输入密码');
-      return;
-    }
-    
-    if (registerPassword !== registerConfirmPassword) {
-      setLoginError('两次密码不一致');
-      return;
-    }
-    
-    if (registerPassword.length < 6) {
-      setLoginError('密码至少6个字符');
-      return;
-    }
-    
-    setLoginLoading(true);
-    setLoginError('');
-    
-    try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'set_password',
-          email: loginEmail,
-          password: registerPassword,
-          confirmPassword: registerConfirmPassword
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        await refresh?.();
-      } else {
-        setLoginError(data.error || '设置失败');
-      }
-    } catch {
-      setLoginError('网络错误，请重试');
-    } finally {
-      setLoginLoading(false);
-    }
-  };
-
-  // 发送注册验证码
-  const handleSendRegisterCode = async () => {
-    if (!registerEmail) {
-      setRegisterError('请输入邮箱');
-      return;
-    }
-    
-    await sendCode(registerEmail, 'register');
-  };
-
-  // 注册验证码登录
-  const handleVerifyRegisterCode = async () => {
-    if (!registerCode) {
-      setRegisterError('请输入验证码');
-      return;
-    }
-    
-    setRegisterLoading(true);
-    setRegisterError('');
-    
-    try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'email_code_login',
-          email: registerEmail,
-          code: registerCode
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        // 新用户引导设置密码
-        if (data.isNewUser) {
-          setRegisterStep('password');
-        } else {
-          await refresh?.();
-        }
-      } else {
-        setRegisterError(data.error || '验证失败');
-      }
-    } catch {
-      setRegisterError('网络错误，请重试');
-    } finally {
-      setRegisterLoading(false);
-    }
-  };
-
-  // 完成注册（设置密码）
-  const handleCompleteRegister = async () => {
-    if (!registerPassword || !registerConfirmPassword) {
-      setRegisterError('请输入密码');
-      return;
-    }
-    
-    if (registerPassword !== registerConfirmPassword) {
-      setRegisterError('两次密码不一致');
-      return;
-    }
-    
-    if (registerPassword.length < 6) {
-      setRegisterError('密码至少6个字符');
-      return;
-    }
-    
-    setRegisterLoading(true);
-    setRegisterError('');
-    
-    try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'set_password',
-          email: registerEmail,
-          password: registerPassword,
-          confirmPassword: registerConfirmPassword
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        await refresh?.();
-      } else {
-        setRegisterError(data.error || '设置失败');
-      }
-    } catch {
-      setRegisterError('网络错误，请重试');
-    } finally {
-      setRegisterLoading(false);
-    }
-  };
-
-  // 模拟登录（开发环境）
-  const handleMockLogin = async () => {
-    setLoginLoading(true);
-    
-    try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'mock_login' })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        await refresh?.();
-      }
-    } finally {
-      setLoginLoading(false);
+      setLoading(false);
     }
   };
 
   // 微信扫码登录
-  const handleWechatLogin = async () => {
-    setWechatChecking(true);
+  const handleWechatLogin = () => {
+    // TODO: 实现微信扫码登录
+    setError('微信登录功能开发中，请使用邮箱验证码登录');
+  };
+
+  // 模拟登录（开发环境）
+  const handleMockLogin = async () => {
+    setLoading(true);
+    setError('');
     
     try {
-      // 获取二维码
-      const qrResponse = await fetch('/api/auth?action=qrcode');
-      const qrData = await qrResponse.json();
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'mock_login',
+          userId: 'dev_user_001'
+        })
+      });
       
-      if (qrData.success) {
-        setWechatQRUrl(qrData.data.qrUrl);
-        setWechatSceneId(qrData.data.sceneId);
-        
-        // 轮询检查扫码状态
-        const checkLogin = async () => {
-          const checkResponse = await fetch(`/api/auth?action=check&sceneId=${wechatSceneId}`);
-          const checkData = await checkResponse.json();
-          
-          if (checkData.status === 'confirmed') {
-            await refresh?.();
-            setWechatChecking(false);
-          } else if (checkData.status === 'scanned') {
-            // 用户已扫码，等待确认
-            setTimeout(checkLogin, 1000);
-          } else {
-            // 继续轮询
-            setTimeout(checkLogin, 2000);
-          }
-        };
-        
-        checkLogin();
+      const data = await res.json();
+      
+      if (data.success) {
+        setSuccess('模拟登录成功！');
+        if (onSuccess) {
+          onSuccess(data.user);
+        }
+        setTimeout(() => {
+          onOpenChange(false);
+          window.location.reload();
+        }, 500);
+      } else {
+        setError(data.error || '登录失败');
       }
-    } catch {
-      setWechatChecking(false);
+    } catch (e) {
+      setError('网络错误，请重试');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // 倒计时
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+
+  // 检测开发环境
+  useEffect(() => {
+    setDevMode(process.env.NODE_ENV === 'development');
+  }, []);
+
   if (!open) return null;
 
+  // ==================== 选择登录方式 ====================
+  if (!loginType) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden">
+          {/* 头部 */}
+          <div className="relative p-6 pb-4 bg-gradient-to-r from-orange-500 to-red-500">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="absolute top-4 right-4 p-1 rounded-full hover:bg-white/20 transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            <h2 className="text-xl font-bold text-white">欢迎来到 OneClaw</h2>
+            <p className="text-sm text-white/80 mt-1">登录后解锁更多功能</p>
+          </div>
+
+          {/* 登录方式选择 */}
+          <div className="p-6 space-y-4">
+            <h3 className="text-sm font-medium text-slate-500 mb-3">选择登录方式</h3>
+            
+            {/* 微信扫码登录 */}
+            <button
+              onClick={() => setLoginType('wechat')}
+              className="w-full p-4 rounded-xl border-2 border-green-200 dark:border-green-800 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all flex items-center gap-4"
+            >
+              <div className="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 text-white">
+                  <path fill="currentColor" d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.269-.03-.406-.03zm-2.053 2.986c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
+                </svg>
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-slate-800 dark:text-slate-200">微信扫码登录</div>
+                <div className="text-sm text-slate-500">使用微信扫一扫快速登录</div>
+              </div>
+            </button>
+
+            {/* 邮箱验证码登录 */}
+            <button
+              onClick={() => setLoginType('email-code')}
+              className="w-full p-4 rounded-xl border-2 border-orange-200 dark:border-orange-800 hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all flex items-center gap-4"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                <Mail className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-left">
+                <div className="font-semibold text-slate-800 dark:text-slate-200">邮箱验证码登录</div>
+                <div className="text-sm text-slate-500">输入邮箱，通过验证码登录</div>
+              </div>
+            </button>
+
+            {/* 开发环境模拟登录 */}
+            {devMode && (
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={handleMockLogin}
+                  className="w-full p-3 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm text-slate-500 flex items-center justify-center gap-2"
+                >
+                  <AlertCircle className="w-4 h-4" />
+                  模拟登录（开发环境）
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==================== 微信扫码登录 ====================
+  if (loginType === 'wechat') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden">
+          <div className="p-6 pb-4 bg-gradient-to-r from-green-500 to-emerald-500">
+            <button
+              onClick={() => setLoginType(null)}
+              className="absolute top-4 left-4 p-1 rounded-full hover:bg-white/20 transition-colors"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            <h2 className="text-xl font-bold text-white">微信扫码登录</h2>
+            <p className="text-sm text-white/80 mt-1">使用微信扫描下方二维码</p>
+          </div>
+
+          <div className="p-6 text-center">
+            <div className="w-48 h-48 mx-auto mb-4 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
+              <div className="text-slate-400">
+                <svg className="w-16 h-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg>
+                <p className="text-sm">二维码加载中...</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-500">打开微信扫一扫</p>
+            
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
+            <button
+              onClick={() => setLoginType(null)}
+              className="mt-4 text-sm text-slate-500 hover:text-slate-700"
+            >
+              返回选择其他登录方式
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ==================== 邮箱验证码登录 ====================
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* 背景 */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={() => onOpenChange(false)}
-      />
-      
-      {/* 弹窗 */}
-      <Card className="relative w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl">
-        <button
-          onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-        >
-          <X className="w-5 h-5" />
-        </button>
-        
-        <CardHeader className="text-center pb-2">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
-              <AnimatedLobster size={32} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden">
+        <div className="p-6 pb-4 bg-gradient-to-r from-orange-500 to-red-500">
+          <button
+            onClick={() => setLoginType(null)}
+            className="absolute top-4 left-4 p-1 rounded-full hover:bg-white/20 transition-colors"
+          >
+            <X className="w-5 h-5 text-white" />
+          </button>
+          <h2 className="text-xl font-bold text-white">邮箱验证码登录</h2>
+          <p className="text-sm text-white/80 mt-1">输入邮箱，我们会发送验证码到您的邮箱</p>
+        </div>
+
+        <div className="p-6 space-y-4">
+          {/* 邮箱输入 */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              邮箱地址
+            </label>
+            <EmailInput
+              value={email}
+              onChange={setEmail}
+              placeholder="your@email.com"
+            />
+          </div>
+
+          {/* 验证码输入 */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              验证码
+            </label>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="输入6位验证码"
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                onClick={sendCode}
+                disabled={loading || countdown > 0}
+                className="whitespace-nowrap"
+              >
+                {countdown > 0 ? `${countdown}s` : '获取验证码'}
+              </Button>
             </div>
           </div>
-          <CardTitle className="text-xl">欢迎来到 OneClaw</CardTitle>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            登录后解锁更多功能
-          </p>
-        </CardHeader>
-        
-        <CardContent className="space-y-4">
-          {/* 登录选项 */}
-          {loginStep === 'choose' && (
-            <>
-              <Tabs value={mode} onValueChange={(v) => setMode(v as 'login' | 'register')}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="login">登录</TabsTrigger>
-                  <TabsTrigger value="register">注册</TabsTrigger>
-                </TabsList>
-                
-                {/* 登录表单 */}
-                <TabsContent value="login" className="space-y-4 mt-4">
-                  {/* 密码登录 */}
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start h-auto py-4"
-                    onClick={() => handleChooseLogin('password')}
-                  >
-                    <Lock className="w-5 h-5 mr-3 text-orange-500" />
-                    <div className="text-left">
-                      <div className="font-medium">邮箱密码登录</div>
-                      <div className="text-xs text-slate-500">使用邮箱和密码登录</div>
-                    </div>
-                  </Button>
-                  
-                  {/* 验证码登录 */}
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start h-auto py-4"
-                    onClick={() => handleChooseLogin('code')}
-                  >
-                    <Smartphone className="w-5 h-5 mr-3 text-orange-500" />
-                    <div className="text-left">
-                      <div className="font-medium">验证码登录</div>
-                      <div className="text-xs text-slate-500">输入验证码快速登录</div>
-                    </div>
-                  </Button>
-                  
-                  <Separator />
-                  
-                  {/* 微信登录 */}
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start h-auto py-4"
-                    onClick={handleWechatLogin}
-                    disabled={wechatChecking}
-                  >
-                    <div className="w-5 h-5 mr-3 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">
-                      W
-                    </div>
-                    <div className="text-left">
-                      <div className="font-medium">微信登录</div>
-                      <div className="text-xs text-slate-500">使用微信扫码登录</div>
-                    </div>
-                  </Button>
-                  
-                  {/* 开发环境模拟登录 */}
-                  {process.env.NODE_ENV === 'development' && (
-                    <>
-                      <Separator />
-                      <Button
-                        variant="ghost"
-                        className="w-full"
-                        onClick={handleMockLogin}
-                        disabled={loginLoading}
-                      >
-                        <Loader2 className={`w-4 h-4 mr-2 ${loginLoading ? 'animate-spin' : ''}`} />
-                        模拟登录（开发环境）
-                      </Button>
-                    </>
-                  )}
-                </TabsContent>
-                
-                {/* 注册表单 */}
-                <TabsContent value="register" className="space-y-4 mt-4">
-                  {registerStep === 'email' && (
-                    <>
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                            邮箱地址
-                          </label>
-                          <EmailInput
-                            value={registerEmail}
-                            onChange={setRegisterEmail}
-                            placeholder="输入邮箱地址"
-                            className="mt-1"
-                          />
-                        </div>
-                        
-                        {registerError && (
-                          <div className="flex items-center gap-2 text-sm text-red-500">
-                            <AlertCircle className="w-4 h-4" />
-                            {registerError}
-                          </div>
-                        )}
-                        
-                        <Button
-                          className="w-full bg-orange-500 hover:bg-orange-600"
-                          onClick={handleSendRegisterCode}
-                          disabled={registerLoading || codeCooldown > 0}
-                        >
-                          {registerLoading ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Send className="w-4 h-4 mr-2" />
-                          )}
-                          {codeCooldown > 0 ? `${codeCooldown}秒后重发` : '发送验证码'}
-                        </Button>
-                        
-                        {/* 开发环境显示验证码 */}
-                        {devCode && (
-                          <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                            <div className="text-xs text-amber-600 dark:text-amber-400">
-                              开发环境验证码：<span className="font-mono font-bold">{devCode}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </>
-                  )}
-                  
-                  {registerStep === 'verify' && (
-                    <>
-                      <div className="text-center mb-4">
-                        <div className="text-sm text-slate-500">
-                          验证码已发送至
-                        </div>
-                        <div className="font-medium text-orange-500">{registerEmail}</div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                            验证码
-                          </label>
-                          <Input
-                            type="text"
-                            placeholder="输入6位验证码"
-                            value={registerCode}
-                            onChange={(e) => setRegisterCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            className="mt-1 text-center text-lg tracking-widest font-mono"
-                            maxLength={6}
-                          />
-                        </div>
-                        
-                        {registerError && (
-                          <div className="flex items-center gap-2 text-sm text-red-500">
-                            <AlertCircle className="w-4 h-4" />
-                            {registerError}
-                          </div>
-                        )}
-                        
-                        <Button
-                          className="w-full bg-orange-500 hover:bg-orange-600"
-                          onClick={handleVerifyRegisterCode}
-                          disabled={registerLoading || registerCode.length !== 6}
-                        >
-                          {registerLoading ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                          )}
-                          验证并登录
-                        </Button>
-                        
-                        <div className="flex justify-between text-sm">
-                          <button
-                            type="button"
-                            className="text-slate-500 hover:text-orange-500"
-                            onClick={() => setRegisterStep('email')}
-                          >
-                            返回修改邮箱
-                          </button>
-                          <button
-                            type="button"
-                            className="text-slate-500 hover:text-orange-500"
-                            onClick={handleSendRegisterCode}
-                            disabled={codeCooldown > 0}
-                          >
-                            {codeCooldown > 0 ? `${codeCooldown}秒后重发` : '重新发送'}
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                  
-                  {registerStep === 'password' && (
-                    <>
-                      <div className="text-center mb-4">
-                        <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
-                        <div className="text-lg font-medium">邮箱验证成功！</div>
-                        <div className="text-sm text-slate-500">
-                          最后一步：设置密码
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                            设置密码
-                          </label>
-                          <div className="relative mt-1">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <Input
-                              type={showRegisterPassword ? 'text' : 'password'}
-                              placeholder="至少6个字符"
-                              value={registerPassword}
-                              onChange={(e) => setRegisterPassword(e.target.value)}
-                              className="pl-10 pr-10"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                            >
-                              {showRegisterPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                            确认密码
-                          </label>
-                          <div className="relative mt-1">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <Input
-                              type={showRegisterPassword ? 'text' : 'password'}
-                              placeholder="再次输入密码"
-                              value={registerConfirmPassword}
-                              onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-                              className="pl-10"
-                            />
-                          </div>
-                        </div>
-                        
-                        {registerError && (
-                          <div className="flex items-center gap-2 text-sm text-red-500">
-                            <AlertCircle className="w-4 h-4" />
-                            {registerError}
-                          </div>
-                        )}
-                        
-                        <Button
-                          className="w-full bg-orange-500 hover:bg-orange-600"
-                          onClick={handleCompleteRegister}
-                          disabled={registerLoading}
-                        >
-                          {registerLoading ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                          )}
-                          完成注册
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </>
+
+          {/* 提示信息 */}
+          <div className="text-xs text-slate-500 space-y-1">
+            <p>• 如果邮箱未注册，系统会自动创建新账号</p>
+            <p>• 验证码10分钟内有效</p>
+          </div>
+
+          {/* 错误提示 */}
+          {error && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {error}
+            </div>
           )}
 
-          {/* 密码登录表单 */}
-          {loginStep === 'password' && (
-            <>
-              <Button
-                variant="ghost"
-                className="mb-2"
-                onClick={() => handleChooseLogin('choose')}
-              >
-                ← 返回
-              </Button>
-              
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    邮箱地址
-                  </label>
-                  <EmailInput
-                    value={loginEmail}
-                    onChange={setLoginEmail}
-                    placeholder="输入邮箱地址"
-                    className="mt-1"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    密码
-                  </label>
-                  <div className="relative mt-1">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="输入密码"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                      onKeyDown={(e) => e.key === 'Enter' && handlePasswordLogin()}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-                
-                {loginError && (
-                  <div className="flex items-center gap-2 text-sm text-red-500">
-                    <AlertCircle className="w-4 h-4" />
-                    {loginError}
-                  </div>
-                )}
-                
-                <Button
-                  className="w-full bg-orange-500 hover:bg-orange-600"
-                  onClick={handlePasswordLogin}
-                  disabled={loginLoading}
-                >
-                  {loginLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                  )}
-                  登录
-                </Button>
-              </div>
-            </>
+          {/* 成功提示 */}
+          {success && (
+            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400 text-sm flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 flex-shrink-0" />
+              {success}
+            </div>
           )}
 
-          {/* 验证码登录表单 */}
-          {loginStep === 'code' && (
-            <>
-              <Button
-                variant="ghost"
-                className="mb-2"
-                onClick={() => handleChooseLogin('choose')}
-              >
-                ← 返回
-              </Button>
-              
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    邮箱地址
-                  </label>
-                  <EmailInput
-                    value={loginEmail}
-                    onChange={setLoginEmail}
-                    placeholder="输入邮箱地址"
-                    className="mt-1"
-                  />
-                </div>
-                
-                {!codeSent ? (
-                  <Button
-                    className="w-full bg-orange-500 hover:bg-orange-600"
-                    onClick={() => sendCode(loginEmail, 'login')}
-                    disabled={loginLoading || !loginEmail}
-                  >
-                    {loginLoading ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4 mr-2" />
-                    )}
-                    发送验证码
-                  </Button>
-                ) : (
-                  <>
-                    <div>
-                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                        验证码
-                      </label>
-                      <Input
-                        type="text"
-                        placeholder="输入6位验证码"
-                        value={loginCode}
-                        onChange={(e) => setLoginCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="mt-1 text-center text-lg tracking-widest font-mono"
-                        maxLength={6}
-                        onKeyDown={(e) => e.key === 'Enter' && handleCodeLogin()}
-                      />
-                    </div>
-                    
-                    {/* 开发环境显示验证码 */}
-                    {devCode && (
-                      <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                        <div className="text-xs text-amber-600 dark:text-amber-400">
-                          开发环境验证码：<span className="font-mono font-bold">{devCode}</span>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {loginError && (
-                      <div className="flex items-center gap-2 text-sm text-red-500">
-                        <AlertCircle className="w-4 h-4" />
-                        {loginError}
-                      </div>
-                    )}
-                    
-                    <Button
-                      className="w-full bg-orange-500 hover:bg-orange-600"
-                      onClick={handleCodeLogin}
-                      disabled={loginLoading || loginCode.length !== 6}
-                    >
-                      {loginLoading ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                      )}
-                      验证并登录
-                    </Button>
-                    
-                    <div className="flex justify-between text-sm">
-                      <button
-                        type="button"
-                        className="text-slate-500 hover:text-orange-500"
-                        onClick={() => { setCodeSent(false); setDevCode(''); }}
-                      >
-                        返回修改邮箱
-                      </button>
-                      <button
-                        type="button"
-                        className="text-slate-500 hover:text-orange-500"
-                        onClick={() => sendCode(loginEmail, 'login')}
-                        disabled={codeCooldown > 0}
-                      >
-                        {codeCooldown > 0 ? `${codeCooldown}秒后重发` : '重新发送'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            </>
-          )}
+          {/* 登录按钮 */}
+          <Button
+            onClick={handleEmailLogin}
+            disabled={loading || !email || code.length < 6}
+            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+          >
+            {loading ? '登录中...' : '登录 / 注册'}
+          </Button>
 
-          {/* 设置密码表单（验证码登录后） */}
-          {loginStep === 'set-password' && (
-            <>
-              <div className="text-center mb-4">
-                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-2" />
-                <div className="text-lg font-medium">登录成功！</div>
-                <div className="text-sm text-slate-500">
-                  为提升账号安全，建议设置密码
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    设置密码
-                  </label>
-                  <div className="relative mt-1">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="至少6个字符"
-                      value={registerPassword}
-                      onChange={(e) => setRegisterPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    确认密码
-                  </label>
-                  <div className="relative mt-1">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="再次输入密码"
-                      value={registerConfirmPassword}
-                      onChange={(e) => setRegisterConfirmPassword(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                
-                {loginError && (
-                  <div className="flex items-center gap-2 text-sm text-red-500">
-                    <AlertCircle className="w-4 h-4" />
-                    {loginError}
-                  </div>
-                )}
-                
-                <Button
-                  className="w-full bg-orange-500 hover:bg-orange-600"
-                  onClick={handleSetPassword}
-                  disabled={loginLoading}
-                >
-                  {loginLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                  )}
-                  设置密码并完成
-                </Button>
-                
-                <Button
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => refresh?.()}
-                >
-                  跳过，稍后设置
-                </Button>
-              </div>
-            </>
-          )}
-          
-          <WechatPromo />
-        </CardContent>
-      </Card>
+          <button
+            onClick={() => setLoginType(null)}
+            className="w-full text-sm text-slate-500 hover:text-slate-700 text-center"
+          >
+            返回选择其他登录方式
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
