@@ -10,7 +10,8 @@ import {
 import UtilityHeader from './UtilityHeader';
 import { UtilityCard, FormField, PrimaryButton, ActionButton } from './UtilityComponents';
 import LoginButton from './LoginButton';
-import { ResumeTemplateSelector, ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
+import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
+import { EnhancedTemplateSelector } from './ui/template-selector';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
 import ModelSelector, { MODEL_OPTIONS } from './ui/model-selector';
 
@@ -521,24 +522,12 @@ export default function ResumeOptimizer() {
                 <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                   {/* 顶部工具栏 */}
                   <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
-                    {/* 模板选择 */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-500">模板：</span>
-                      <div className="flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
-                        {(Object.entries(templates) as [ResumeTemplateType, typeof templates.classic][]).map(([key, template]) => (
-                          <button
-                            key={key}
-                            onClick={() => setSelectedTemplate(key)}
-                            className={`px-3 py-1 text-xs rounded-md transition-all ${
-                              selectedTemplate === key
-                                ? 'bg-orange-500 text-white font-medium'
-                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
-                            }`}
-                          >
-                            {template.name}
-                          </button>
-                        ))}
-                      </div>
+                    {/* 当前模板 */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-slate-500">当前模板：</span>
+                      <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-sm font-medium rounded-lg">
+                        {templates[selectedTemplate].name}
+                      </span>
                     </div>
                     {/* 返回修改 + 下载按钮 */}
                     <div className="flex items-center gap-2">
@@ -722,7 +711,7 @@ export default function ResumeOptimizer() {
 
               {/* 模板选择 */}
               <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-                <ResumeTemplateSelector
+                <EnhancedTemplateSelector
                   selectedTemplate={selectedTemplate}
                   onSelect={setSelectedTemplate}
                 />

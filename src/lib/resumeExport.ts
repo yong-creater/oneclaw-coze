@@ -200,7 +200,8 @@ export function parseResumeFromAI(content: string): ResumeData {
   // 提取技能
   const skillMatch = content.match(/技能[：:]\s*([^\n]+)/);
   if (skillMatch) {
-    data.skills = skillMatch[1].split(/[,，、|]/).map(s => s.trim()).filter(Boolean);
+    const skillItems = skillMatch[1].split(/[,，、|]/).map(s => s.trim()).filter(Boolean);
+    data.skills = [{ category: '技能', items: skillItems }];
   }
 
   // 提取证书
@@ -282,13 +283,9 @@ export function generateSampleResumeData(): ResumeData {
       },
     ],
     skills: [
-      'React/Vue/Angular',
-      'TypeScript/JavaScript',
-      'Node.js/NestJS',
-      'Webpack/Vite',
-      'CSS/Sass/Tailwind',
-      'Git/GitHub',
-      'Docker/K8s',
+      { category: '前端框架', items: ['React', 'Vue', 'Angular'] },
+      { category: '语言', items: ['TypeScript', 'JavaScript', 'Node.js'] },
+      { category: '工具', items: ['Webpack', 'Vite', 'Docker'] },
     ],
     certifications: [
       'AWS Certified Developer',
