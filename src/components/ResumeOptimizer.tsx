@@ -11,7 +11,6 @@ import UtilityHeader from './UtilityHeader';
 import { UtilityCard, FormField, PrimaryButton, ActionButton } from './UtilityComponents';
 import LoginButton from './LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
-import { EnhancedTemplateSelector } from './ui/template-selector';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
 import ModelSelector, { MODEL_OPTIONS } from './ui/model-selector';
 
@@ -510,6 +509,26 @@ export default function ResumeOptimizer() {
         ) : (
           /* 结果区域 */
           <div className="space-y-4">
+            {/* 模板选择栏 - 紧凑横向排列 */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 mr-2">简历风格：</span>
+                {(Object.entries(templates) as [ResumeTemplateType, typeof templates.classic][]).map(([key, template]) => (
+                  <button
+                    key={key}
+                    onClick={() => setSelectedTemplate(key)}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
+                      selectedTemplate === key
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white font-medium shadow-md'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
+                  >
+                    {template.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             {/* 简历预览 + 辅助信息 */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               {/* 左侧 - 简历预览（占3/4宽度） */}
@@ -703,14 +722,6 @@ export default function ResumeOptimizer() {
                 >
                   <X className="w-5 h-5" />
                 </button>
-              </div>
-
-              {/* 模板选择 */}
-              <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900">
-                <EnhancedTemplateSelector
-                  selectedTemplate={selectedTemplate}
-                  onSelect={setSelectedTemplate}
-                />
               </div>
 
               {/* 简历内容区 */}
