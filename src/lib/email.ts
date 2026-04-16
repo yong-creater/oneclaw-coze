@@ -103,14 +103,14 @@ export async function sendVerificationEmail(
   to: string, 
   code: string, 
   type: 'register' | 'login' = 'register'
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; configured: boolean; error?: string }> {
   const transporter = createTransporter();
   const template = getVerificationEmailTemplate(code);
 
-  // 如果没有配置 SMTP，记录日志并返回成功（开发环境）
+  // 如果没有配置 SMTP
   if (!transporter) {
-    console.log(`[Email] 开发环境模拟发送验证码到 ${to}: ${code}`);
-    return { success: true };
+    console.log(`[Email] SMTP未配置，模拟发送验证码到 ${to}: ${code}`);
+    return { success: true, configured: false };
   }
 
   try {
@@ -121,11 +121,11 @@ export async function sendVerificationEmail(
       html: template.html,
     });
 
-    console.log(`[Email] 验证码已发送至 ${to}`);
-    return { success: true };
+    console.log(`[Email] 验证码已真实发送至 ${to}`);
+    return { success: true, configured: true };
   } catch (error: any) {
     console.error('[Email] 发送验证码失败:', error.message);
-    return { success: false, error: '邮件发送失败' };
+    return { success: false, configured: true, error: '邮件发送失败' };
   }
 }
 
