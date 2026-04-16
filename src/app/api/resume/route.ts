@@ -40,27 +40,45 @@ const SYSTEM_PROMPT = `你是拥有12年一线大厂+中大型企业招聘经验
 输出要求
 直接输出优化后的完整简历，无需额外解析、无需备注、无需提问，内容专业简洁，匹配度拉满，全程保真。`;
 
+// 支持的模型列表
+const SUPPORTED_MODELS = [
+  'doubao-seed-2-0-pro-260215',
+  'doubao-seed-2-0-lite-260215',
+  'doubao-seed-1-8-251228',
+  'deepseek-r1-250528',
+  'deepseek-v3-2-251201',
+  'kimi-k2-5-260127',
+  'glm-5-0-260211',
+  'glm-4-7-251222',
+  'qwen-3-5-plus-260215',
+];
+
 export async function POST(request: NextRequest) {
   try {
-    const { resume, jd, systemPrompt } = await request.json();
+    const { resume, jd, model } = await request.json();
 
     if (!resume || !jd) {
       return NextResponse.json({ error: '请提供简历和JD内容' }, { status: 400 });
     }
+
+    // 验证模型参数
+    const selectedModel = model && SUPPORTED_MODELS.includes(model) 
+      ? model 
+      : 'doubao-seed-1-8-251228';
 
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
     const config = new Config();
     const client = new LLMClient(config, customHeaders);
 
     const messages = [
-      { role: 'system' as const, content: systemPrompt || SYSTEM_PROMPT },
+      { role: 'system' as const, content: SYSTEM_PROMPT },
       { role: 'user' as const, content: `请根据以下简历和JD进行优化：\n\n【简历原文】\n${resume}\n\n【目标岗位JD】\n${jd}` },
     ];
 
     try {
       // 使用 invoke 方法（非流式）
       const response = await client.invoke(messages, {
-        model: 'doubao-seed-1-8-251228',
+        model: selectedModel,
         temperature: 0.7,
       });
 
@@ -75,10 +93,15 @@ export async function POST(request: NextRequest) {
         matchScore = parseInt(scoreMatch[1], 10);
       }
 
+      // 解析已使用的模型
+      const modelName = getModelDisplayName(selectedModel);
+
       return NextResponse.json({ 
         success: true, 
         data: response.content,
         matchScore,
+        model: modelName,
+        modelId: selectedModel,
       });
     } catch (llmError: any) {
       console.error('Resume optimization error:', llmError);
@@ -89,4 +112,19 @@ export async function POST(request: NextRequest) {
     console.error('Resume API error:', error);
     return NextResponse.json({ error: error.message || '简历优化失败' }, { status: 500 });
   }
+}
+
+function getModelDisplayName(modelId: string): string {
+  const names: Record<string, string> = {
+    'doubao-seed-2-0-pro-260215': '豆包 Pro',
+    'doubao-seed-2-0-lite-260215': '豆包 Lite',
+    'doubao-seed-1-8-251228': '豆包标准版',
+    'deepseek-r1-250528': 'DeepSeek R1',
+    'deepseek-v3-2-251201': 'DeepSeek V3',
+    'kimi-k2-5-260127': 'Kimi K2',
+    'glm-5-0-260211': 'GLM-5',
+    'glm-4-7-251222': 'GLM-4.7',
+    'qwen-3-5-plus-260215': '通义 Qwen3.5',
+  };
+  return names[modelId] || '豆包';
 }

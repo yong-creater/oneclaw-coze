@@ -12,6 +12,7 @@ import { UtilityCard, FormField, PrimaryButton, ActionButton } from './UtilityCo
 import LoginButton from './LoginButton';
 import { ResumeTemplateSelector, ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
+import ModelSelector, { MODEL_OPTIONS } from './ui/model-selector';
 
 export default function ResumeOptimizer() {
   // 简历输入状态
@@ -31,6 +32,8 @@ export default function ResumeOptimizer() {
   const [result, setResult] = useState<any>(null);
   const [matchScore, setMatchScore] = useState(0);
   const [showExample, setShowExample] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[3].id); // 默认 DeepSeek R1
+  const [usedModel, setUsedModel] = useState('');
   
   // PDF导出相关状态
   const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplateType>('modern');
@@ -121,6 +124,7 @@ export default function ResumeOptimizer() {
     setOptimizeError('');
     setMatchScore(0);
     setShowExample(false);
+    setUsedModel('');
   };
 
   // 示例简历 - 真实丰富的案例
@@ -248,6 +252,7 @@ export default function ResumeOptimizer() {
         body: JSON.stringify({
           resume: resumeText,
           jd: jdText,
+          model: selectedModel,
         }),
       });
 
@@ -259,7 +264,7 @@ export default function ResumeOptimizer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tool_type: 'resume',
-          input_data: { resume_length: resumeText.length, jd_length: jdText.length },
+          input_data: { resume_length: resumeText.length, jd_length: jdText.length, model: selectedModel },
           output_data: data.success ? { result_length: data.data?.length || 0 } : null,
           status: data.success ? 'success' : 'failed',
           error_message: data.error || null,
@@ -269,6 +274,7 @@ export default function ResumeOptimizer() {
       if (data.success) {
         setResult(data.data);
         setMatchScore(data.matchScore || 85);
+        setUsedModel(data.model || '');
       } else {
         setOptimizeError(data.error || '优化失败，请重试');
       }
@@ -369,6 +375,11 @@ export default function ResumeOptimizer() {
                 STAR简历深度优化
               </h1>
               <p className="text-slate-500">上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位要求</p>
+            </div>
+            
+            {/* 模型选择区域 */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-5">
+              <ModelSelector value={selectedModel} onChange={setSelectedModel} />
             </div>
             
             {/* 输入卡片区 */}
@@ -570,6 +581,18 @@ export default function ResumeOptimizer() {
               
               {/* 右侧 - 辅助信息（精简展示，占1/4宽度） */}
               <div className="space-y-4">
+                {/* 优化模型 */}
+                {usedModel && (
+                  <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 rounded-2xl p-4 shadow-sm border border-orange-200 dark:border-orange-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="w-4 h-4 text-orange-500" />
+                      <h4 className="font-medium text-slate-700 dark:text-slate-300 text-sm">优化模型</h4>
+                    </div>
+                    <p className="text-lg font-bold text-orange-600 dark:text-orange-400">{usedModel}</p>
+                    <p className="text-xs text-slate-500 mt-1">本次优化使用的AI模型</p>
+                  </div>
+                )}
+                
                 {/* 匹配度 */}
                 <div className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
                   <div className="flex items-center justify-between mb-3">
