@@ -30,7 +30,6 @@ export interface ResumeData {
     startDate?: string;
     endDate?: string;
     description: string;
-    achievements?: string[];
   }>;
   projects?: Array<{
     name: string;
@@ -45,137 +44,152 @@ export interface ResumeData {
     items: string[];
   }>;
   certifications?: string[];
-  languages?: string[];
 }
 
 export type ResumeTemplateType = 
   | 'classic' | 'modern' | 'minimal' | 'executive' 
   | 'creative' | 'tech' | 'elegant' | 'startup';
 
-// A4尺寸
+// A4基础尺寸
 const A4: React.CSSProperties = {
   width: '210mm',
   minHeight: '297mm',
-  padding: '12mm 14mm',
   background: '#ffffff',
-  fontSize: '9pt',
-  lineHeight: '1.45',
-  boxSizing: 'border-box',
+  fontSize: '9.5pt',
+  lineHeight: '1.5',
 };
 
-// ========== 模板1: 经典商务 (Prestige) ==========
+// ========== 模板1: 经典商务 (Classic) - 双栏布局 ==========
 export const ClassicTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"Times New Roman", Georgia, serif', color: '#1a1a2e', background: '#fff' }}>
-    {/* 顶部装饰条 */}
-    <div style={{ height: '4px', background: 'linear-gradient(90deg, #1a1a2e 0%, #4a4a6a 50%, #1a1a2e 100%)', marginBottom: '12px', borderRadius: '2px' }} />
-    
-    {/* 头部 */}
-    <div style={{ textAlign: 'center', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid #e5e5e5' }}>
-      <h1 style={{ fontSize: '22pt', fontWeight: 700, margin: '0 0 6px', letterSpacing: '4px', textTransform: 'uppercase', color: '#1a1a2e' }}>
-        {data.name || 'Zhang Wei'}
+  <div ref={ref} style={{ ...A4, fontFamily: '"Microsoft YaHei", "PingFang SC", sans-serif', color: '#333333', display: 'flex' }}>
+    {/* 左侧边栏 */}
+    <div style={{ width: '72mm', background: 'linear-gradient(180deg, #1a365d 0%, #2d4a7c 100%)', padding: '10mm 6mm', color: '#fff' }}>
+      {/* 头像占位 */}
+      <div style={{ width: '28mm', height: '28mm', borderRadius: '50%', background: 'rgba(255,255,255,0.15)', margin: '0 auto 6mm', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24pt' }}>
+        {(data.name || 'Z').charAt(0)}
+      </div>
+      
+      {/* 姓名 */}
+      <h1 style={{ fontSize: '16pt', fontWeight: 700, textAlign: 'center', margin: '0 0 2mm', letterSpacing: '2px' }}>
+        {data.name || '张三'}
       </h1>
       {data.objective && (
-        <p style={{ fontSize: '10pt', color: '#666', margin: '0 0 8px', fontStyle: 'italic', letterSpacing: '1px' }}>{data.objective}</p>
+        <p style={{ fontSize: '8pt', textAlign: 'center', color: 'rgba(255,255,255,0.8)', margin: '0 0 6mm', paddingBottom: '4mm', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+          {data.objective}
+        </p>
       )}
-      <div style={{ fontSize: '8.5pt', color: '#888', display: 'flex', justifyContent: 'center', gap: '16px' }}>
-        {data.contact?.phone && <span>{data.contact.phone}</span>}
-        {data.contact?.email && <span>{data.contact.email}</span>}
-        {data.contact?.location && <span>{data.contact.location}</span>}
+
+      {/* 联系方式 */}
+      <div style={{ marginBottom: '6mm' }}>
+        <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: '0 0 3mm', paddingBottom: '2mm', borderBottom: '1px solid rgba(255,255,255,0.2)', color: '#63b3ed' }}>
+          联系方式
+        </h2>
+        <div style={{ fontSize: '7.5pt', lineHeight: '1.8' }}>
+          {data.contact?.phone && <div>📱 {data.contact.phone}</div>}
+          {data.contact?.email && <div>✉ {data.contact.email}</div>}
+          {data.contact?.location && <div>⌖ {data.contact.location}</div>}
+        </div>
       </div>
-    </div>
 
-    {/* 个人简介 */}
-    {data.summary && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a1a2e', marginBottom: '8px', paddingBottom: '4px', borderBottom: '2px solid #1a1a2e', display: 'inline-block', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          Professional Summary
-        </h2>
-        <p style={{ margin: '6px 0 0', fontSize: '9pt', color: '#444', lineHeight: '1.6' }}>{data.summary}</p>
-      </section>
-    )}
-
-    {/* 教育背景 */}
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a1a2e', marginBottom: '8px', paddingBottom: '4px', borderBottom: '2px solid #1a1a2e', display: 'inline-block', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          Education
-        </h2>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ marginBottom: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#1a1a2e' }}>{edu.school}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#888' }}>{edu.startDate} — {edu.endDate}</span>
-            </div>
-            <div style={{ fontSize: '8.5pt', color: '#555' }}>
-              {edu.degree} · {edu.major}
-              {edu.gpa && <span style={{ marginLeft: '8px' }}>GPA: {edu.gpa}</span>}
-              {edu.honors && <span style={{ marginLeft: '8px', color: '#8b6914' }}>◆ {edu.honors}</span>}
-            </div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {/* 工作经历 */}
-    {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a1a2e', marginBottom: '8px', paddingBottom: '4px', borderBottom: '2px solid #1a1a2e', display: 'inline-block', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          Professional Experience
-        </h2>
-        {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#1a1a2e' }}>{exp.company}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#888' }}>{exp.startDate} — {exp.endDate}</span>
-            </div>
-            <div style={{ fontSize: '8.5pt', color: '#666', fontStyle: 'italic', marginBottom: '4px' }}>{exp.position}</div>
-            <div style={{ fontSize: '8.5pt', color: '#444', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {/* 项目 */}
-    {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a1a2e', marginBottom: '8px', paddingBottom: '4px', borderBottom: '2px solid #1a1a2e', display: 'inline-block', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          Projects
-        </h2>
-        {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#1a1a2e' }}>{proj.name}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#888' }}>{proj.startDate} — {proj.endDate}</span>
-            </div>
-            {proj.tech && <div style={{ fontSize: '8pt', color: '#888', marginBottom: '2px' }}>{proj.tech.join(' · ')}</div>}
-            <div style={{ fontSize: '8.5pt', color: '#444', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {/* 技能与证书 */}
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      {/* 技能 */}
       {data.skills && data.skills.length > 0 && (
-        <section>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a1a2e', marginBottom: '8px', paddingBottom: '4px', borderBottom: '2px solid #1a1a2e', display: 'inline-block', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Skills
+        <div style={{ marginBottom: '6mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: '0 0 3mm', paddingBottom: '2mm', borderBottom: '1px solid rgba(255,255,255,0.2)', color: '#63b3ed' }}>
+            专业技能
           </h2>
           {data.skills.map((skill, i) => (
-            <div key={i} style={{ marginBottom: '4px', fontSize: '8.5pt' }}>
-              <strong style={{ color: '#1a1a2e' }}>{skill.category}:</strong>
-              <span style={{ color: '#555' }}> {skill.items.join(', ')}</span>
+            <div key={i} style={{ marginBottom: '3mm' }}>
+              <div style={{ fontSize: '8pt', fontWeight: 500, marginBottom: '1mm', color: '#90cdf4' }}>{skill.category}</div>
+              <div style={{ fontSize: '7.5pt', color: 'rgba(255,255,255,0.85)', lineHeight: '1.6' }}>
+                {skill.items.join(' / ')}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 证书 */}
+      {data.certifications && data.certifications.length > 0 && (
+        <div>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: '0 0 3mm', paddingBottom: '2mm', borderBottom: '1px solid rgba(255,255,255,0.2)', color: '#63b3ed' }}>
+            证书资质
+          </h2>
+          <div style={{ fontSize: '7.5pt', color: 'rgba(255,255,255,0.85)', lineHeight: '1.7' }}>
+            {data.certifications.map((cert, i) => (
+              <div key={i}>◆ {cert}</div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* 右侧主内容 */}
+    <div style={{ flex: 1, padding: '10mm 8mm' }}>
+      {/* 个人简介 */}
+      {data.summary && (
+        <section style={{ marginBottom: '6mm' }}>
+          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a365d', margin: '0 0 3mm', paddingBottom: '2mm', borderBottom: '2px solid #1a365d' }}>
+            个人简介
+          </h2>
+          <p style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.7', margin: 0 }}>{data.summary}</p>
+        </section>
+      )}
+
+      {/* 工作经历 */}
+      {data.experience && data.experience.length > 0 && (
+        <section style={{ marginBottom: '6mm' }}>
+          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a365d', margin: '0 0 4mm', paddingBottom: '2mm', borderBottom: '2px solid #1a365d' }}>
+            工作经历
+          </h2>
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ marginBottom: '5mm' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '10pt', color: '#2d3748' }}>{exp.company}</strong>
+                <span style={{ fontSize: '8pt', color: '#718096' }}>{exp.startDate} - {exp.endDate}</span>
+              </div>
+              <div style={{ fontSize: '8.5pt', color: '#4a5568', marginBottom: '2mm', fontStyle: 'italic' }}>{exp.position}</div>
+              <div style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
             </div>
           ))}
         </section>
       )}
-      {data.certifications && data.certifications.length > 0 && (
-        <section>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a1a2e', marginBottom: '8px', paddingBottom: '4px', borderBottom: '2px solid #1a1a2e', display: 'inline-block', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Certifications
+
+      {/* 项目经验 */}
+      {data.projects && data.projects.length > 0 && (
+        <section style={{ marginBottom: '6mm' }}>
+          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a365d', margin: '0 0 4mm', paddingBottom: '2mm', borderBottom: '2px solid #1a365d' }}>
+            项目经验
           </h2>
-          {data.certifications.map((cert, i) => (
-            <div key={i} style={{ fontSize: '8.5pt', color: '#555', marginBottom: '3px' }}>◆ {cert}</div>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ marginBottom: '4mm' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#2d3748' }}>{proj.name}</strong>
+                <span style={{ fontSize: '8pt', color: '#718096' }}>{proj.startDate} - {proj.endDate}</span>
+              </div>
+              {proj.tech && <div style={{ fontSize: '7.5pt', color: '#63b3ed', marginBottom: '1mm' }}>{proj.tech.join(' / ')}</div>}
+              <div style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* 教育背景 */}
+      {data.education && data.education.length > 0 && (
+        <section>
+          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#1a365d', margin: '0 0 4mm', paddingBottom: '2mm', borderBottom: '2px solid #1a365d' }}>
+            教育背景
+          </h2>
+          {data.education.map((edu, i) => (
+            <div key={i} style={{ marginBottom: '3mm' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#2d3748' }}>{edu.school}</strong>
+                <span style={{ fontSize: '8pt', color: '#718096' }}>{edu.startDate} - {edu.endDate}</span>
+              </div>
+              <div style={{ fontSize: '8.5pt', color: '#4a5568' }}>
+                {edu.degree} · {edu.major}
+                {edu.gpa && <span style={{ marginLeft: '4mm' }}>GPA: {edu.gpa}</span>}
+              </div>
+            </div>
           ))}
         </section>
       )}
@@ -184,117 +198,136 @@ export const ClassicTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(
 ));
 ClassicTemplate.displayName = 'ClassicTemplate';
 
-// ========== 模板2: 现代简约 (Modern) ==========
+// ========== 模板2: 现代简约 (Modern) - 清新蓝 ==========
 export const ModernTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"SF Pro Display", "-apple-system", BlinkMacSystemFont, sans-serif', color: '#1e293b', background: '#fafbfc' }}>
-    {/* 左侧彩色边栏 */}
-    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '6mm', background: 'linear-gradient(180deg, #3b82f6 0%, #06b6d4 100%)' }} />
-    
-    {/* 头部 */}
-    <div style={{ display: 'flex', marginBottom: '14px', paddingLeft: '10px' }}>
-      <div style={{ flex: 1 }}>
-        <h1 style={{ fontSize: '24pt', fontWeight: 700, margin: '0 0 6px', color: '#0f172a', letterSpacing: '-0.5px' }}>
-          {data.name || 'Zhang Wei'}
-        </h1>
-        {data.objective && (
-          <p style={{ fontSize: '10pt', color: '#64748b', margin: '0 0 10px', fontWeight: 500 }}>{data.objective}</p>
-        )}
-        <div style={{ display: 'flex', gap: '14px', fontSize: '8.5pt', color: '#64748b' }}>
-          {data.contact?.phone && <span>☎ {data.contact.phone}</span>}
-          {data.contact?.email && <span>✉ {data.contact.email}</span>}
-          {data.contact?.location && <span>⌖ {data.contact.location}</span>}
+  <div ref={ref} style={{ ...A4, fontFamily: '"SF Pro Display", "-apple-system", "PingFang SC", sans-serif', color: '#1a202c', background: '#f7fafc' }}>
+    {/* 顶部头部 */}
+    <div style={{ background: 'linear-gradient(135deg, #3182ce 0%, #2c5282 100%)', padding: '8mm 10mm', color: '#fff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6mm' }}>
+        <div style={{ width: '22mm', height: '22mm', borderRadius: '4mm', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20pt', fontWeight: 700 }}>
+          {(data.name || 'Z').charAt(0)}
         </div>
+        <div>
+          <h1 style={{ fontSize: '18pt', fontWeight: 700, margin: 0, letterSpacing: '1px' }}>{data.name || '张三'}</h1>
+          {data.objective && <p style={{ fontSize: '9pt', margin: '2mm 0 0', opacity: 0.9 }}>{data.objective}</p>}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '8mm', fontSize: '8pt', marginTop: '4mm', opacity: 0.9 }}>
+        {data.contact?.phone && <span>📱 {data.contact.phone}</span>}
+        {data.contact?.email && <span>✉ {data.contact.email}</span>}
+        {data.contact?.location && <span>⌖ {data.contact.location}</span>}
       </div>
     </div>
 
-    {data.summary && (
-      <section style={{ marginBottom: '12px', paddingLeft: '10px' }}>
-        <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#3b82f6', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '2px' }}>
-          — About
-        </h2>
-        <p style={{ margin: 0, fontSize: '9pt', color: '#475569', lineHeight: '1.6' }}>{data.summary}</p>
-      </section>
-    )}
-
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '12px', paddingLeft: '10px' }}>
-        <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#3b82f6', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '2px' }}>
-          — Education
-        </h2>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ marginBottom: '6px', paddingLeft: '8px', borderLeft: '2px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong style={{ fontSize: '9pt', color: '#1e293b' }}>{edu.school}</strong>
-              <span style={{ fontSize: '8pt', color: '#94a3b8' }}>{edu.startDate} — {edu.endDate}</span>
-            </div>
-            <div style={{ fontSize: '8.5pt', color: '#64748b' }}>
-              {edu.degree} · {edu.major}
-              {edu.gpa && <span style={{ marginLeft: '8px' }}>GPA {edu.gpa}</span>}
-            </div>
+    {/* 内容区 */}
+    <div style={{ padding: '6mm 10mm' }}>
+      {/* 个人简介 */}
+      {data.summary && (
+        <section style={{ marginBottom: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+            <div style={{ width: '3mm', height: '3mm', background: '#3182ce', borderRadius: '50%' }} />
+            <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#2d3748', margin: 0 }}>关于我</h2>
           </div>
-        ))}
-      </section>
-    )}
+          <p style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.7', margin: 0, paddingLeft: '5mm' }}>{data.summary}</p>
+        </section>
+      )}
 
-    {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '12px', paddingLeft: '10px' }}>
-        <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#3b82f6', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '2px' }}>
-          — Experience
-        </h2>
-        {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '10px', paddingLeft: '8px', borderLeft: '2px solid #cbd5e1' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9pt', color: '#1e293b' }}>{exp.company}</strong>
-              <span style={{ fontSize: '8pt', color: '#94a3b8' }}>{exp.startDate} — {exp.endDate}</span>
-            </div>
-            <div style={{ fontSize: '8.5pt', color: '#64748b', marginBottom: '4px' }}>{exp.position}</div>
-            <div style={{ fontSize: '8.5pt', color: '#475569', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
+      {/* 工作经历 */}
+      {data.experience && data.experience.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+            <div style={{ width: '3mm', height: '3mm', background: '#3182ce', borderRadius: '50%' }} />
+            <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#2d3748', margin: 0 }}>工作经历</h2>
           </div>
-        ))}
-      </section>
-    )}
-
-    {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '12px', paddingLeft: '10px' }}>
-        <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#3b82f6', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '2px' }}>
-          — Projects
-        </h2>
-        {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '8px', paddingLeft: '8px', borderLeft: '2px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9pt', color: '#1e293b' }}>{proj.name}</strong>
-              <span style={{ fontSize: '8pt', color: '#94a3b8' }}>{proj.startDate} — {proj.endDate}</span>
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ marginBottom: '4mm', paddingLeft: '5mm', borderLeft: '2px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#2d3748' }}>{exp.company}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#a0aec0' }}>{exp.startDate} - {exp.endDate}</span>
+              </div>
+              <div style={{ fontSize: '8pt', color: '#3182ce', marginBottom: '2mm' }}>{exp.position}</div>
+              <div style={{ fontSize: '8pt', color: '#4a5568', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
             </div>
-            {proj.tech && <div style={{ fontSize: '8pt', color: '#06b6d4', marginBottom: '2px' }}>{proj.tech.join(' · ')}</div>}
-            <div style={{ fontSize: '8.5pt', color: '#475569', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
+          ))}
+        </section>
+      )}
 
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', paddingLeft: '10px' }}>
-      {data.skills && data.skills.length > 0 && (
-        <section>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#3b82f6', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '2px' }}>
-            — Skills
-          </h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-            {data.skills.flatMap(s => s.items).map((skill, i) => (
-              <span key={i} style={{ fontSize: '8pt', padding: '2px 8px', background: '#f1f5f9', borderRadius: '12px', color: '#64748b' }}>
-                {skill}
+      {/* 项目经验 */}
+      {data.projects && data.projects.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+            <div style={{ width: '3mm', height: '3mm', background: '#3182ce', borderRadius: '50%' }} />
+            <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#2d3748', margin: 0 }}>项目经验</h2>
+          </div>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ marginBottom: '4mm', paddingLeft: '5mm', borderLeft: '2px solid #e2e8f0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#2d3748' }}>{proj.name}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#a0aec0' }}>{proj.startDate} - {proj.endDate}</span>
+              </div>
+              {proj.tech && <div style={{ fontSize: '7.5pt', color: '#38a169', marginBottom: '1mm' }}>{proj.tech.join(' · ')}</div>}
+              <div style={{ fontSize: '8pt', color: '#4a5568', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* 教育与技能 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6mm' }}>
+        {/* 教育背景 */}
+        {data.education && data.education.length > 0 && (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+              <div style={{ width: '3mm', height: '3mm', background: '#3182ce', borderRadius: '50%' }} />
+              <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#2d3748', margin: 0 }}>教育背景</h2>
+            </div>
+            {data.education.map((edu, i) => (
+              <div key={i} style={{ marginBottom: '3mm' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <strong style={{ fontSize: '8.5pt', color: '#2d3748' }}>{edu.school}</strong>
+                  <span style={{ fontSize: '7.5pt', color: '#a0aec0' }}>{edu.endDate}</span>
+                </div>
+                <div style={{ fontSize: '7.5pt', color: '#4a5568' }}>{edu.degree} · {edu.major}</div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {/* 技能 */}
+        {data.skills && data.skills.length > 0 && (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+              <div style={{ width: '3mm', height: '3mm', background: '#3182ce', borderRadius: '50%' }} />
+              <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#2d3748', margin: 0 }}>专业技能</h2>
+            </div>
+            {data.skills.map((skill, i) => (
+              <div key={i} style={{ marginBottom: '2mm' }}>
+                <div style={{ fontSize: '7.5pt', fontWeight: 500, color: '#2d3748', marginBottom: '1mm' }}>{skill.category}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5mm' }}>
+                  {skill.items.map((item, j) => (
+                    <span key={j} style={{ fontSize: '6.5pt', padding: '1mm 2mm', background: '#edf2f7', borderRadius: '1mm', color: '#4a5568' }}>{item}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+      </div>
+
+      {/* 证书 */}
+      {data.certifications && data.certifications.length > 0 && (
+        <section style={{ marginTop: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+            <div style={{ width: '3mm', height: '3mm', background: '#3182ce', borderRadius: '50%' }} />
+            <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#2d3748', margin: 0 }}>证书资质</h2>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3mm', paddingLeft: '5mm' }}>
+            {data.certifications.map((cert, i) => (
+              <span key={i} style={{ fontSize: '7.5pt', padding: '1.5mm 3mm', background: 'linear-gradient(135deg, #3182ce 0%, #2c5282 100%)', borderRadius: '2mm', color: '#fff' }}>
+                {cert}
               </span>
             ))}
           </div>
-        </section>
-      )}
-      {data.certifications && data.certifications.length > 0 && (
-        <section>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#3b82f6', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '2px' }}>
-            — Certifications
-          </h2>
-          {data.certifications.map((cert, i) => (
-            <div key={i} style={{ fontSize: '8pt', color: '#475569', marginBottom: '2px' }}>◆ {cert}</div>
-          ))}
         </section>
       )}
     </div>
@@ -304,93 +337,94 @@ ModernTemplate.displayName = 'ModernTemplate';
 
 // ========== 模板3: 极简英文 (Minimal) ==========
 export const MinimalTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', color: '#000', background: '#fff', padding: '18mm 20mm' }}>
+  <div ref={ref} style={{ ...A4, fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', color: '#222', background: '#fff', padding: '12mm 14mm' }}>
     {/* 头部 */}
-    <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-      <h1 style={{ fontSize: '28pt', fontWeight: 300, margin: '0 0 10px', letterSpacing: '8px', textTransform: 'uppercase', color: '#000' }}>
+    <div style={{ textAlign: 'center', marginBottom: '10mm' }}>
+      <h1 style={{ fontSize: '28pt', fontWeight: 200, margin: '0 0 3mm', letterSpacing: '6px', textTransform: 'uppercase', color: '#111' }}>
         {data.name || 'Zhang Wei'}
       </h1>
       {data.objective && (
-        <p style={{ fontSize: '9.5pt', color: '#666', margin: '0 0 12px', letterSpacing: '2px' }}>{data.objective}</p>
+        <p style={{ fontSize: '10pt', color: '#666', margin: '0 0 4mm', letterSpacing: '1px' }}>{data.objective}</p>
       )}
-      <div style={{ fontSize: '8.5pt', color: '#999', letterSpacing: '0.5px' }}>
+      <div style={{ fontSize: '9pt', color: '#999' }}>
         {data.contact?.phone} · {data.contact?.email} · {data.contact?.location}
       </div>
     </div>
 
-    {/* 细线分隔 */}
-    <div style={{ height: '1px', background: '#e0e0e0', margin: '0 auto 20px', width: '40%' }} />
+    {/* 分隔线 */}
+    <div style={{ height: '1px', background: '#e5e5e5', margin: '0 auto 8mm', width: '30%' }} />
 
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
-          Education
+    {data.summary && (
+      <section style={{ marginBottom: '8mm' }}>
+        <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '4mm', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
+          Profile
         </h2>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <div>
-              <strong style={{ fontWeight: 500, fontSize: '10pt' }}>{edu.school}</strong>
-              <div style={{ color: '#666', fontSize: '9pt' }}>{edu.degree}, {edu.major}</div>
-            </div>
-            <span style={{ color: '#999', fontSize: '9pt' }}>{edu.startDate} — {edu.endDate}</span>
-          </div>
-        ))}
+        <p style={{ fontSize: '10pt', textAlign: 'center', color: '#444', lineHeight: '1.8', margin: 0 }}>{data.summary}</p>
       </section>
     )}
 
     {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
+      <section style={{ marginBottom: '8mm' }}>
+        <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '5mm', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
           Experience
         </h2>
         {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontWeight: 500, fontSize: '10pt' }}>{exp.company}</strong>
+          <div key={i} style={{ marginBottom: '6mm' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+              <strong style={{ fontWeight: 600, fontSize: '11pt', color: '#111' }}>{exp.company}</strong>
               <span style={{ color: '#999', fontSize: '9pt' }}>{exp.startDate} — {exp.endDate}</span>
             </div>
-            <div style={{ fontSize: '9pt', color: '#666', marginBottom: '4px' }}>{exp.position}</div>
-            <div style={{ fontSize: '9pt', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
+            <div style={{ fontSize: '9pt', color: '#666', marginBottom: '2mm' }}>{exp.position}</div>
+            <div style={{ fontSize: '9.5pt', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
           </div>
         ))}
       </section>
     )}
 
     {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
+      <section style={{ marginBottom: '8mm' }}>
+        <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '5mm', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
           Projects
         </h2>
         {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontWeight: 500, fontSize: '10pt' }}>{proj.name}</strong>
+          <div key={i} style={{ marginBottom: '5mm' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+              <strong style={{ fontWeight: 600, fontSize: '11pt', color: '#111' }}>{proj.name}</strong>
               <span style={{ color: '#999', fontSize: '9pt' }}>{proj.startDate} — {proj.endDate}</span>
             </div>
-            {proj.tech && <div style={{ fontSize: '8.5pt', color: '#999', marginBottom: '2px' }}>{proj.tech.join(' / ')}</div>}
-            <div style={{ fontSize: '9pt', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
+            {proj.tech && <div style={{ fontSize: '8.5pt', color: '#999', marginBottom: '2mm' }}>{proj.tech.join(' / ')}</div>}
+            <div style={{ fontSize: '9.5pt', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
           </div>
         ))}
       </section>
     )}
 
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-      {data.skills && data.skills.length > 0 && (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10mm' }}>
+      {data.education && data.education.length > 0 && (
         <section>
-          <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
-            Skills
+          <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '4mm', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
+            Education
           </h2>
-          <p style={{ fontSize: '9pt', textAlign: 'center', lineHeight: '1.8', color: '#333' }}>
-            {data.skills.map(s => `${s.category}: ${s.items.join(', ')}`).join(' · ')}
-          </p>
+          {data.education.map((edu, i) => (
+            <div key={i} style={{ marginBottom: '4mm', textAlign: 'center' }}>
+              <div style={{ fontWeight: 600, fontSize: '10pt' }}>{edu.school}</div>
+              <div style={{ fontSize: '9pt', color: '#666' }}>{edu.degree}, {edu.major}</div>
+              <div style={{ fontSize: '8pt', color: '#999' }}>{edu.startDate} — {edu.endDate}</div>
+            </div>
+          ))}
         </section>
       )}
-      {data.certifications && data.certifications.length > 0 && (
+
+      {data.skills && data.skills.length > 0 && (
         <section>
-          <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
-            Certifications
+          <h2 style={{ fontSize: '8pt', fontWeight: 400, color: '#999', marginBottom: '4mm', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
+            Skills
           </h2>
-          <p style={{ fontSize: '9pt', textAlign: 'center', color: '#333' }}>{data.certifications.join(' · ')}</p>
+          {data.skills.map((skill, i) => (
+            <div key={i} style={{ fontSize: '9pt', marginBottom: '2mm', textAlign: 'center' }}>
+              <span style={{ color: '#111' }}>{skill.category}:</span> <span style={{ color: '#666' }}>{skill.items.join(', ')}</span>
+            </div>
+          ))}
         </section>
       )}
     </div>
@@ -398,125 +432,121 @@ export const MinimalTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(
 ));
 MinimalTemplate.displayName = 'MinimalTemplate';
 
-// ========== 模板4: 商务精英 (Executive) ==========
+// ========== 模板4: 商务精英 (Executive) - 高端深色 ==========
 export const ExecutiveTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"Microsoft YaHei", "PingFang SC", sans-serif', color: '#1a202c', background: '#fff' }}>
-    {/* 深色头部 */}
-    <div style={{ 
-      background: 'linear-gradient(135deg, #1e3a5f 0%, #0f2744 50%, #1e3a5f 100%)',
-      color: '#fff',
-      margin: '-12mm -14mm 14px -14mm',
-      padding: '16mm 14mm 14mm',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* 装饰圆形 */}
-      <div style={{ position: 'absolute', top: '-20px', right: '-20px', width: '100px', height: '100px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-      <div style={{ position: 'absolute', bottom: '-30px', left: '20%', width: '120px', height: '120px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)' }} />
+  <div ref={ref} style={{ ...A4, fontFamily: '"Microsoft YaHei", "PingFang SC", sans-serif', color: '#e2e8f0', background: '#1a202c', display: 'flex' }}>
+    {/* 左侧深色栏 */}
+    <div style={{ width: '65mm', background: 'linear-gradient(180deg, #0d1117 0%, #161b22 100%)', padding: '8mm 6mm' }}>
+      {/* 头像 */}
+      <div style={{ width: '24mm', height: '24mm', borderRadius: '50%', background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)', margin: '0 auto 5mm', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22pt', fontWeight: 700, color: '#1a202c' }}>
+        {(data.name || 'Z').charAt(0)}
+      </div>
       
-      <h1 style={{ fontSize: '26pt', fontWeight: 700, margin: '0 0 6px', letterSpacing: '4px', position: 'relative' }}>
+      <h1 style={{ fontSize: '14pt', fontWeight: 700, textAlign: 'center', margin: '0 0 2mm', letterSpacing: '1px', color: '#fff' }}>
         {data.name || '张三'}
       </h1>
       {data.objective && (
-        <p style={{ fontSize: '10.5pt', color: '#a0b4c8', margin: '0 0 12px', letterSpacing: '1px' }}>{data.objective}</p>
+        <p style={{ fontSize: '7.5pt', textAlign: 'center', color: '#fbbf24', margin: '0 0 5mm' }}>{data.objective}</p>
       )}
-      <div style={{ display: 'flex', gap: '20px', fontSize: '9pt', color: '#c9d6e3', position: 'relative' }}>
-        {data.contact?.phone && <span>{data.contact.phone}</span>}
-        {data.contact?.email && <span>{data.contact.email}</span>}
-        {data.contact?.location && <span>{data.contact.location}</span>}
+
+      {/* 联系方式 */}
+      <div style={{ marginBottom: '5mm' }}>
+        <h2 style={{ fontSize: '8pt', fontWeight: 600, color: '#fbbf24', marginBottom: '2mm', letterSpacing: '1px' }}>CONTACT</h2>
+        <div style={{ fontSize: '7pt', lineHeight: '1.9', color: '#8b949e' }}>
+          {data.contact?.phone && <div>{data.contact.phone}</div>}
+          {data.contact?.email && <div>{data.contact.email}</div>}
+          {data.contact?.location && <div>{data.contact.location}</div>}
+        </div>
       </div>
+
+      {/* 技能 */}
+      {data.skills && data.skills.length > 0 && (
+        <div style={{ marginBottom: '5mm' }}>
+          <h2 style={{ fontSize: '8pt', fontWeight: 600, color: '#fbbf24', marginBottom: '2mm', letterSpacing: '1px' }}>SKILLS</h2>
+          {data.skills.map((skill, i) => (
+            <div key={i} style={{ marginBottom: '2mm' }}>
+              <div style={{ fontSize: '7.5pt', fontWeight: 500, color: '#58a6ff', marginBottom: '1mm' }}>{skill.category}</div>
+              <div style={{ fontSize: '7pt', color: '#8b949e', lineHeight: '1.6' }}>{skill.items.join(' · ')}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 证书 */}
+      {data.certifications && data.certifications.length > 0 && (
+        <div>
+          <h2 style={{ fontSize: '8pt', fontWeight: 600, color: '#fbbf24', marginBottom: '2mm', letterSpacing: '1px' }}>CERTIFICATIONS</h2>
+          <div style={{ fontSize: '7pt', color: '#8b949e', lineHeight: '1.8' }}>
+            {data.certifications.map((cert, i) => <div key={i}>◆ {cert}</div>)}
+          </div>
+        </div>
+      )}
     </div>
 
-    {data.summary && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ width: '3px', height: '14px', background: '#c9a227', borderRadius: '2px' }} />
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#1e3a5f' }}>个人简介</h2>
-        </div>
-        <p style={{ margin: 0, fontSize: '9pt', color: '#4a5568', lineHeight: '1.65', paddingLeft: '11px' }}>{data.summary}</p>
-      </section>
-    )}
+    {/* 右侧内容 */}
+    <div style={{ flex: 1, padding: '8mm 8mm', background: '#0d1117' }}>
+      {/* 个人简介 */}
+      {data.summary && (
+        <section style={{ marginBottom: '6mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fbbf24', marginBottom: '3mm', paddingBottom: '2mm', borderBottom: '1px solid #30363d' }}>
+            ABOUT ME
+          </h2>
+          <p style={{ fontSize: '8pt', color: '#c9d1d9', lineHeight: '1.7', margin: 0 }}>{data.summary}</p>
+        </section>
+      )}
 
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ width: '3px', height: '14px', background: '#c9a227', borderRadius: '2px' }} />
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#1e3a5f' }}>教育背景</h2>
-        </div>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', paddingLeft: '11px' }}>
-            <div>
-              <strong style={{ fontSize: '9.5pt', color: '#1a202c' }}>{edu.school}</strong>
-              <span style={{ color: '#718096', marginLeft: '10px', fontSize: '9pt' }}>{edu.degree} · {edu.major}</span>
-              {edu.honors && <span style={{ color: '#c9a227', fontSize: '8.5pt', marginLeft: '8px' }}>◆ {edu.honors}</span>}
-            </div>
-            <span style={{ color: '#a0aec0', fontSize: '8.5pt' }}>{edu.startDate} — {edu.endDate}</span>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ width: '3px', height: '14px', background: '#c9a227', borderRadius: '2px' }} />
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#1e3a5f' }}>工作经历</h2>
-        </div>
-        {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '10px', paddingLeft: '11px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#1a202c' }}>{exp.company}</strong>
-              <span style={{ color: '#a0aec0', fontSize: '8.5pt' }}>{exp.startDate} — {exp.endDate}</span>
-            </div>
-            <div style={{ fontSize: '9pt', color: '#c9a227', marginBottom: '4px', fontWeight: 500 }}>{exp.position}</div>
-            <div style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <div style={{ width: '3px', height: '14px', background: '#c9a227', borderRadius: '2px' }} />
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#1e3a5f' }}>项目经验</h2>
-        </div>
-        {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '8px', paddingLeft: '11px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#1a202c' }}>{proj.name}</strong>
-              <span style={{ color: '#a0aec0', fontSize: '8.5pt' }}>{proj.startDate} — {proj.endDate}</span>
-            </div>
-            {proj.tech && <div style={{ fontSize: '8pt', color: '#c9a227', marginBottom: '2px' }}>{proj.tech.join(' / ')}</div>}
-            <div style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-      {data.skills && data.skills.length > 0 && (
-        <section>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <div style={{ width: '3px', height: '14px', background: '#c9a227', borderRadius: '2px' }} />
-            <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#1e3a5f' }}>技能特长</h2>
-          </div>
-          {data.skills.map((skill, i) => (
-            <div key={i} style={{ marginBottom: '4px', fontSize: '8.5pt', paddingLeft: '11px' }}>
-              <strong style={{ color: '#1a202c' }}>{skill.category}:</strong>
-              <span style={{ color: '#718096' }}> {skill.items.join('、')}</span>
+      {/* 工作经历 */}
+      {data.experience && data.experience.length > 0 && (
+        <section style={{ marginBottom: '6mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fbbf24', marginBottom: '4mm', paddingBottom: '2mm', borderBottom: '1px solid #30363d' }}>
+            EXPERIENCE
+          </h2>
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ marginBottom: '5mm' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#58a6ff' }}>{exp.company}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#8b949e' }}>{exp.startDate} - {exp.endDate}</span>
+              </div>
+              <div style={{ fontSize: '8pt', color: '#fbbf24', marginBottom: '2mm' }}>{exp.position}</div>
+              <div style={{ fontSize: '7.5pt', color: '#c9d1d9', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
             </div>
           ))}
         </section>
       )}
-      {data.certifications && data.certifications.length > 0 && (
+
+      {/* 项目 */}
+      {data.projects && data.projects.length > 0 && (
+        <section style={{ marginBottom: '6mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fbbf24', marginBottom: '4mm', paddingBottom: '2mm', borderBottom: '1px solid #30363d' }}>
+            PROJECTS
+          </h2>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ marginBottom: '4mm' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9pt', color: '#58a6ff' }}>{proj.name}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#8b949e' }}>{proj.startDate} - {proj.endDate}</span>
+              </div>
+              {proj.tech && <div style={{ fontSize: '7pt', color: '#f0883e', marginBottom: '1mm' }}>{proj.tech.join(' / ')}</div>}
+              <div style={{ fontSize: '7.5pt', color: '#c9d1d9', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* 教育 */}
+      {data.education && data.education.length > 0 && (
         <section>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <div style={{ width: '3px', height: '14px', background: '#c9a227', borderRadius: '2px' }} />
-            <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#1e3a5f' }}>证书资质</h2>
-          </div>
-          {data.certifications.map((cert, i) => (
-            <div key={i} style={{ fontSize: '8.5pt', color: '#4a5568', marginBottom: '3px', paddingLeft: '11px' }}>◆ {cert}</div>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fbbf24', marginBottom: '4mm', paddingBottom: '2mm', borderBottom: '1px solid #30363d' }}>
+            EDUCATION
+          </h2>
+          {data.education.map((edu, i) => (
+            <div key={i} style={{ marginBottom: '3mm' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <strong style={{ fontSize: '9pt', color: '#58a6ff' }}>{edu.school}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#8b949e' }}>{edu.startDate} - {edu.endDate}</span>
+              </div>
+              <div style={{ fontSize: '7.5pt', color: '#c9d1d9' }}>{edu.degree} · {edu.major}</div>
+            </div>
           ))}
         </section>
       )}
@@ -527,486 +557,428 @@ ExecutiveTemplate.displayName = 'ExecutiveTemplate';
 
 // ========== 模板5: 创意活力 (Creative) ==========
 export const CreativeTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"PingFang SC", "Microsoft YaHei", sans-serif', color: '#2d3748', background: '#fff' }}>
+  <div ref={ref} style={{ ...A4, fontFamily: '"PingFang SC", "Microsoft YaHei", sans-serif', color: '#1a1a1a', background: '#fafafa' }}>
     {/* 渐变头部 */}
-    <div style={{ 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-      margin: '-12mm -14mm 14px',
-      padding: '14mm 14mm',
-      position: 'relative',
-    }}>
+    <div style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '8mm 10mm', color: '#fff', position: 'relative', overflow: 'hidden' }}>
       {/* 装饰 */}
-      <div style={{ position: 'absolute', top: '6mm', right: '10mm', fontSize: '24pt', color: 'rgba(255,255,255,0.2)' }}>✦</div>
-      <div style={{ position: 'absolute', bottom: '4mm', left: '10mm', width: '30mm', height: '30mm', borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }} />
+      <div style={{ position: 'absolute', top: '-10mm', right: '-10mm', width: '50mm', height: '50mm', borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+      <div style={{ position: 'absolute', bottom: '-15mm', left: '20%', width: '80mm', height: '80mm', borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
       
-      <h1 style={{ fontSize: '24pt', fontWeight: 700, margin: '0 0 6px', color: '#fff', letterSpacing: '2px' }}>
-        {data.name || '张三'}
-      </h1>
-      {data.objective && (
-        <p style={{ fontSize: '10pt', color: 'rgba(255,255,255,0.9)', margin: '0 0 10px', fontWeight: 300 }}>{data.objective}</p>
-      )}
-      <div style={{ display: 'flex', gap: '14px', fontSize: '8.5pt', color: 'rgba(255,255,255,0.85)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6mm', position: 'relative' }}>
+        <div style={{ width: '20mm', height: '20mm', borderRadius: '4mm', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18pt', fontWeight: 700 }}>
+          {(data.name || 'Z').charAt(0)}
+        </div>
+        <div>
+          <h1 style={{ fontSize: '18pt', fontWeight: 700, margin: 0, letterSpacing: '1px' }}>{data.name || '张三'}</h1>
+          {data.objective && <p style={{ fontSize: '9pt', margin: '2mm 0 0', opacity: 0.9 }}>{data.objective}</p>}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '6mm', fontSize: '8pt', marginTop: '4mm', opacity: 0.9 }}>
         {data.contact?.phone && <span>📱 {data.contact.phone}</span>}
         {data.contact?.email && <span>✉ {data.contact.email}</span>}
         {data.contact?.location && <span>📍 {data.contact.location}</span>}
       </div>
     </div>
 
-    {data.summary && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', paddingBottom: '4px', borderBottom: '2px dashed #e2e8f0' }}>
-          <span style={{ fontSize: '12pt' }}>💫</span>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#667eea' }}>关于我</h2>
-        </div>
-        <p style={{ margin: 0, fontSize: '9pt', color: '#4a5568', lineHeight: '1.65', paddingLeft: '18px' }}>{data.summary}</p>
-      </section>
-    )}
+    {/* 内容 */}
+    <div style={{ padding: '6mm 10mm' }}>
+      {data.summary && (
+        <section style={{ marginBottom: '5mm', background: '#fff', padding: '4mm 5mm', borderRadius: '3mm', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#667eea', margin: '0 0 2mm' }}>💫 关于我</h2>
+          <p style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.7', margin: 0 }}>{data.summary}</p>
+        </section>
+      )}
 
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', paddingBottom: '4px', borderBottom: '2px dashed #e2e8f0' }}>
-          <span style={{ fontSize: '12pt' }}>🎓</span>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#667eea' }}>教育背景</h2>
-        </div>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ marginBottom: '6px', paddingLeft: '18px', borderLeft: '3px solid #f093fb' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#2d3748' }}>{edu.school}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#a0aec0' }}>{edu.startDate} — {edu.endDate}</span>
+      {data.experience && data.experience.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#667eea', marginBottom: '3mm' }}>💼 工作经历</h2>
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ background: '#fff', padding: '4mm 5mm', borderRadius: '3mm', marginBottom: '3mm', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', borderLeft: '3px solid #764ba2' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#1a1a1a' }}>{exp.company}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#a0aec0' }}>{exp.startDate} - {exp.endDate}</span>
+              </div>
+              <div style={{ fontSize: '8pt', color: '#764ba2', marginBottom: '2mm' }}>{exp.position}</div>
+              <div style={{ fontSize: '8pt', color: '#4a5568', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
             </div>
-            <div style={{ fontSize: '8.5pt', color: '#718096' }}>
-              {edu.degree} · {edu.major}
-              {edu.honors && <span style={{ color: '#764ba2' }}> · {edu.honors}</span>}
-            </div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', paddingBottom: '4px', borderBottom: '2px dashed #e2e8f0' }}>
-          <span style={{ fontSize: '12pt' }}>💼</span>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#667eea' }}>工作经历</h2>
-        </div>
-        {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '10px', paddingLeft: '18px', borderLeft: '3px solid #764ba2' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#2d3748' }}>{exp.company}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#a0aec0' }}>{exp.startDate} — {exp.endDate}</span>
-            </div>
-            <div style={{ fontSize: '8.5pt', color: '#764ba2', marginBottom: '4px', fontWeight: 500 }}>{exp.position}</div>
-            <div style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', paddingBottom: '4px', borderBottom: '2px dashed #e2e8f0' }}>
-          <span style={{ fontSize: '12pt' }}>🚀</span>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#667eea' }}>项目经验</h2>
-        </div>
-        {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '8px', paddingLeft: '18px', borderLeft: '3px solid #f093fb' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#2d3748' }}>{proj.name}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#a0aec0' }}>{proj.startDate} — {proj.endDate}</span>
-            </div>
-            {proj.tech && <div style={{ fontSize: '8pt', color: '#764ba2', marginBottom: '2px' }}>{proj.tech.join(' · ')}</div>}
-            <div style={{ fontSize: '8.5pt', color: '#4a5568', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.skills && data.skills.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', paddingBottom: '4px', borderBottom: '2px dashed #e2e8f0' }}>
-          <span style={{ fontSize: '12pt' }}>⚡</span>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#667eea' }}>技能特长</h2>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', paddingLeft: '18px' }}>
-          {data.skills.flatMap(s => s.items).map((skill, i) => (
-            <span key={i} style={{ 
-              fontSize: '8pt', 
-              padding: '3px 10px', 
-              background: 'linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%)',
-              borderRadius: '14px', 
-              color: '#667eea',
-              border: '1px solid rgba(102,126,234,0.2)'
-            }}>
-              {skill}
-            </span>
           ))}
-        </div>
-      </section>
-    )}
+        </section>
+      )}
 
-    {data.certifications && data.certifications.length > 0 && (
-      <section>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px', paddingBottom: '4px', borderBottom: '2px dashed #e2e8f0' }}>
-          <span style={{ fontSize: '12pt' }}>🏆</span>
-          <h2 style={{ fontSize: '10pt', fontWeight: 600, margin: 0, color: '#667eea' }}>证书资质</h2>
-        </div>
-        <p style={{ fontSize: '8.5pt', color: '#4a5568', margin: 0, paddingLeft: '18px' }}>{data.certifications.join(' · ')}</p>
-      </section>
-    )}
+      {data.projects && data.projects.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <h2 style={{ fontSize: '10pt', fontWeight: 600, color: '#667eea', marginBottom: '3mm' }}>🚀 项目经验</h2>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ background: '#fff', padding: '4mm 5mm', borderRadius: '3mm', marginBottom: '3mm', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', borderLeft: '3px solid #f093fb' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#1a1a1a' }}>{proj.name}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#a0aec0' }}>{proj.startDate} - {proj.endDate}</span>
+              </div>
+              {proj.tech && <div style={{ fontSize: '7.5pt', color: '#764ba2', marginBottom: '1mm' }}>{proj.tech.join(' · ')}</div>}
+              <div style={{ fontSize: '8pt', color: '#4a5568', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4mm' }}>
+        {data.education && data.education.length > 0 && (
+          <section style={{ background: '#fff', padding: '4mm', borderRadius: '3mm', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#667eea', marginBottom: '3mm' }}>🎓 教育背景</h2>
+            {data.education.map((edu, i) => (
+              <div key={i} style={{ marginBottom: '2mm' }}>
+                <div style={{ fontSize: '8.5pt', fontWeight: 500 }}>{edu.school}</div>
+                <div style={{ fontSize: '7.5pt', color: '#718096' }}>{edu.degree} · {edu.major}</div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {data.skills && data.skills.length > 0 && (
+          <section style={{ background: '#fff', padding: '4mm', borderRadius: '3mm', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#667eea', marginBottom: '3mm' }}>⚡ 技能特长</h2>
+            {data.skills.map((skill, i) => (
+              <div key={i} style={{ marginBottom: '2mm' }}>
+                <div style={{ fontSize: '7.5pt', fontWeight: 500, color: '#4a5568', marginBottom: '1mm' }}>{skill.category}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5mm' }}>
+                  {skill.items.map((item, j) => (
+                    <span key={j} style={{ fontSize: '6.5pt', padding: '1mm 2mm', background: 'linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%)', borderRadius: '2mm', color: '#667eea' }}>{item}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+      </div>
+    </div>
   </div>
 ));
 CreativeTemplate.displayName = 'CreativeTemplate';
 
 // ========== 模板6: 科技未来 (Tech) ==========
 export const TechTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"SF Mono", "Fira Code", "Consolas", monospace', color: '#00ff88', background: '#0a0a0f' }}>
+  <div ref={ref} style={{ ...A4, fontFamily: '"SF Mono", "Fira Code", "Consolas", monospace', color: '#00ff88', background: '#0d1117' }}>
     {/* 头部 */}
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid #00ff8820' }}>
-      <div style={{
-        width: '50px', height: '50px',
-        borderRadius: '10px',
-        background: 'linear-gradient(135deg, #00ff88 0%, #00d4ff 100%)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: '22pt', color: '#0a0a0f', fontWeight: 700
-      }}>
-        {data.name?.charAt(0) || 'Z'}
+    <div style={{ padding: '8mm', borderBottom: '1px solid #30363d' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '5mm' }}>
+        <div style={{ width: '18mm', height: '18mm', borderRadius: '3mm', background: 'linear-gradient(135deg, #00ff88 0%, #00d4ff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16pt', fontWeight: 700, color: '#0d1117' }}>
+          {(data.name || 'Z').charAt(0)}
+        </div>
+        <div>
+          <h1 style={{ fontSize: '16pt', fontWeight: 700, margin: 0, color: '#fff' }}>{data.name || 'Zhang Wei'}</h1>
+          <p style={{ fontSize: '8pt', color: '#00ff88', margin: '1mm 0 0' }}>{data.objective || 'Software Engineer'}</p>
+        </div>
       </div>
-      <div>
-        <h1 style={{ fontSize: '22pt', fontWeight: 700, margin: 0, color: '#ffffff', letterSpacing: '-0.5px' }}>
-          {data.name || 'Zhang Wei'}
-        </h1>
-        <p style={{ fontSize: '9pt', color: '#00ff88', margin: '3px 0 0' }}>{data.objective || 'Software Engineer'}</p>
+      <div style={{ display: 'flex', gap: '6mm', fontSize: '7.5pt', color: '#8b949e', marginTop: '3mm' }}>
+        {data.contact?.phone && <span>{data.contact.phone}</span>}
+        {data.contact?.email && <span>{data.contact.email}</span>}
+        {data.contact?.location && <span>{data.contact.location}</span>}
       </div>
     </div>
 
-    <div style={{ display: 'flex', gap: '14px', fontSize: '8.5pt', color: '#666', marginBottom: '12px' }}>
-      {data.contact?.phone && <span>{data.contact.phone}</span>}
-      {data.contact?.email && <span>{data.contact.email}</span>}
-      {data.contact?.location && <span>{data.contact.location}</span>}
-    </div>
-
-    {data.summary && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-          <span style={{ color: '#00ff88' }}>//</span>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: 0, color: '#ffffff', textTransform: 'uppercase' }}>About</h2>
-        </div>
-        <p style={{ margin: 0, fontSize: '8.5pt', color: '#888', lineHeight: '1.6' }}>{data.summary}</p>
-      </section>
-    )}
-
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <span style={{ color: '#00ff88' }}>//</span>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: 0, color: '#ffffff', textTransform: 'uppercase' }}>Education</h2>
-        </div>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ marginBottom: '6px', paddingLeft: '12px', borderLeft: '2px solid #00ff8840' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <strong style={{ color: '#00ff88', fontSize: '9pt' }}>{edu.school}</strong>
-              <span style={{ color: '#555', fontSize: '8pt' }}>{edu.startDate} — {edu.endDate}</span>
-            </div>
-            <div style={{ color: '#888', fontSize: '8.5pt' }}>{edu.degree} · {edu.major}</div>
+    {/* 内容 */}
+    <div style={{ padding: '6mm 8mm' }}>
+      {data.summary && (
+        <section style={{ marginBottom: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '2mm' }}>
+            <span style={{ color: '#ff7b72' }}>//</span>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fff', margin: 0 }}>about_me</h2>
           </div>
-        ))}
-      </section>
-    )}
+          <p style={{ fontSize: '8pt', color: '#8b949e', lineHeight: '1.7', margin: 0, paddingLeft: '4mm' }}>{data.summary}</p>
+        </section>
+      )}
 
-    {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <span style={{ color: '#00ff88' }}>//</span>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: 0, color: '#ffffff', textTransform: 'uppercase' }}>Experience</h2>
-        </div>
-        {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '10px', paddingLeft: '12px', borderLeft: '2px solid #00d4ff40' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ color: '#00d4ff', fontSize: '9pt' }}>{exp.company}</strong>
-              <span style={{ color: '#555', fontSize: '8pt' }}>{exp.startDate} — {exp.endDate}</span>
-            </div>
-            <div style={{ color: '#00ff88', fontSize: '8.5pt', marginBottom: '4px' }}>{exp.position}</div>
-            <div style={{ color: '#888', fontSize: '8.5pt', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
+      {data.experience && data.experience.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+            <span style={{ color: '#ff7b72' }}>//</span>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fff', margin: 0 }}>work_experience</h2>
           </div>
-        ))}
-      </section>
-    )}
-
-    {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <span style={{ color: '#00ff88' }}>//</span>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: 0, color: '#ffffff', textTransform: 'uppercase' }}>Projects</h2>
-        </div>
-        {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '8px', paddingLeft: '12px', borderLeft: '2px solid #ff00ff40' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ color: '#ff00ff', fontSize: '9pt' }}>{proj.name}</strong>
-              <span style={{ color: '#555', fontSize: '8pt' }}>{proj.startDate} — {proj.endDate}</span>
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ marginBottom: '4mm', paddingLeft: '4mm', borderLeft: '2px solid #30363d' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ color: '#79c0ff', fontSize: '9pt' }}>{exp.company}</strong>
+                <span style={{ color: '#484f58', fontSize: '7.5pt' }}>{exp.startDate} - {exp.endDate}</span>
+              </div>
+              <div style={{ color: '#00ff88', fontSize: '7.5pt', marginBottom: '2mm' }}>{exp.position}</div>
+              <div style={{ color: '#8b949e', fontSize: '7.5pt', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
             </div>
-            {proj.tech && <div style={{ color: '#ff00ff', fontSize: '8pt', marginBottom: '2px', opacity: 0.7 }}>[{proj.tech.join(', ')}]</div>}
-            <div style={{ color: '#888', fontSize: '8.5pt', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.skills && data.skills.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-          <span style={{ color: '#00ff88' }}>//</span>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: 0, color: '#ffffff', textTransform: 'uppercase' }}>Skills</h2>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-          {data.skills.flatMap(s => s.items).map((skill, i) => (
-            <span key={i} style={{ 
-              fontSize: '8pt', 
-              padding: '2px 8px', 
-              background: '#00ff8815',
-              border: '1px solid #00ff8830',
-              borderRadius: '4px', 
-              color: '#00ff88'
-            }}>
-              {skill}
-            </span>
           ))}
-        </div>
-      </section>
-    )}
+        </section>
+      )}
 
-    {data.certifications && data.certifications.length > 0 && (
-      <section>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-          <span style={{ color: '#00ff88' }}>//</span>
-          <h2 style={{ fontSize: '9pt', fontWeight: 600, margin: 0, color: '#ffffff', textTransform: 'uppercase' }}>Certs</h2>
-        </div>
-        <p style={{ fontSize: '8.5pt', color: '#888', margin: 0 }}>{data.certifications.join(' | ')}</p>
-      </section>
-    )}
+      {data.projects && data.projects.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '3mm' }}>
+            <span style={{ color: '#ff7b72' }}>//</span>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fff', margin: 0 }}>projects</h2>
+          </div>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ marginBottom: '4mm', paddingLeft: '4mm', borderLeft: '2px solid #30363d' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ color: '#d2a8ff', fontSize: '9pt' }}>{proj.name}</strong>
+                <span style={{ color: '#484f58', fontSize: '7.5pt' }}>{proj.startDate} - {proj.endDate}</span>
+              </div>
+              {proj.tech && <div style={{ color: '#79c0ff', fontSize: '7pt', marginBottom: '1mm' }}>[{proj.tech.join(', ')}]</div>}
+              <div style={{ color: '#8b949e', fontSize: '7.5pt', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5mm' }}>
+        {data.education && data.education.length > 0 && (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '2mm' }}>
+              <span style={{ color: '#ff7b72' }}>//</span>
+              <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fff', margin: 0 }}>education</h2>
+            </div>
+            {data.education.map((edu, i) => (
+              <div key={i} style={{ marginBottom: '2mm', paddingLeft: '4mm', borderLeft: '2px solid #30363d' }}>
+                <div style={{ color: '#79c0ff', fontSize: '8pt' }}>{edu.school}</div>
+                <div style={{ color: '#8b949e', fontSize: '7.5pt' }}>{edu.degree} · {edu.major}</div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {data.skills && data.skills.length > 0 && (
+          <section>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '2mm' }}>
+              <span style={{ color: '#ff7b72' }}>//</span>
+              <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fff', margin: 0 }}>skills</h2>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2mm', paddingLeft: '4mm' }}>
+              {data.skills.flatMap(s => s.items).map((skill, i) => (
+                <span key={i} style={{ fontSize: '6.5pt', padding: '1mm 2mm', background: '#161b22', border: '1px solid #30363d', borderRadius: '1mm', color: '#00ff88' }}>{skill}</span>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {data.certifications && data.certifications.length > 0 && (
+        <section style={{ marginTop: '5mm' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '2mm', marginBottom: '2mm' }}>
+            <span style={{ color: '#ff7b72' }}>//</span>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#fff', margin: 0 }}>certifications</h2>
+          </div>
+          <div style={{ paddingLeft: '4mm', fontSize: '7.5pt', color: '#8b949e' }}>
+            {data.certifications.join(' | ')}
+          </div>
+        </section>
+      )}
+    </div>
   </div>
 ));
 TechTemplate.displayName = 'TechTemplate';
 
 // ========== 模板7: 优雅复古 (Elegant) ==========
 export const ElegantTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif', color: '#3d3d3d', background: '#fefcf8' }}>
-    {/* 装饰边框 */}
-    <div style={{ position: 'absolute', top: '8mm', left: '8mm', right: '8mm', bottom: '8mm', border: '1px solid #d4c4a8', pointerEvents: 'none' }} />
+  <div ref={ref} style={{ ...A4, fontFamily: '"Georgia", "Times New Roman", serif', color: '#3d3d3d', background: '#fdfcf9', display: 'flex' }}>
+    {/* 左侧装饰栏 */}
+    <div style={{ width: '8mm', background: 'linear-gradient(180deg, #8b7355 0%, #a08060 100%)' }} />
 
-    {/* 头部 */}
-    <div style={{ textAlign: 'center', marginBottom: '16px', paddingBottom: '14px', borderBottom: '2px solid #8b7355' }}>
-      <h1 style={{ fontSize: '26pt', fontWeight: 400, margin: '0 0 8px', color: '#2d2d2d', fontStyle: 'italic', letterSpacing: '4px' }}>
-        {data.name || 'Zhang Wei'}
-      </h1>
-      {data.objective && (
-        <p style={{ fontSize: '9.5pt', color: '#6b6b6b', margin: '0 0 10px', fontStyle: 'italic', letterSpacing: '1px' }}>{data.objective}</p>
+    {/* 主内容 */}
+    <div style={{ flex: 1, padding: '10mm 12mm' }}>
+      {/* 头部 */}
+      <div style={{ textAlign: 'center', marginBottom: '8mm', paddingBottom: '6mm', borderBottom: '1px solid #d4c4a8' }}>
+        <h1 style={{ fontSize: '22pt', fontWeight: 400, fontStyle: 'italic', margin: '0 0 3mm', color: '#2d2d2d', letterSpacing: '2px' }}>
+          {data.name || 'Zhang Wei'}
+        </h1>
+        {data.objective && (
+          <p style={{ fontSize: '10pt', color: '#8b7355', margin: '0 0 4mm', fontStyle: 'italic', letterSpacing: '1px' }}>{data.objective}</p>
+        )}
+        <div style={{ fontSize: '8.5pt', color: '#8b7355' }}>
+          {data.contact?.phone} ◆ {data.contact?.email} ◆ {data.contact?.location}
+        </div>
+      </div>
+
+      {data.summary && (
+        <section style={{ marginBottom: '8mm', textAlign: 'center' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 400, color: '#8b7355', marginBottom: '4mm', textTransform: 'uppercase', letterSpacing: '3px' }}>
+            Profile
+          </h2>
+          <p style={{ fontSize: '9.5pt', fontStyle: 'italic', color: '#5a5a5a', lineHeight: '1.8', margin: 0 }}>{data.summary}</p>
+        </section>
       )}
-      <div style={{ fontSize: '8.5pt', color: '#8b7355', display: 'flex', justifyContent: 'center', gap: '16px' }}>
-        {data.contact?.phone} ◆ {data.contact?.email} ◆ {data.contact?.location}
+
+      {data.experience && data.experience.length > 0 && (
+        <section style={{ marginBottom: '8mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 400, color: '#8b7355', marginBottom: '5mm', paddingBottom: '2mm', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
+            Experience
+          </h2>
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ marginBottom: '6mm', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '4mm', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '10pt', fontStyle: 'italic', color: '#2d2d2d' }}>{exp.company}</strong>
+                <span style={{ fontSize: '9pt', color: '#8b7355' }}>{exp.startDate} — {exp.endDate}</span>
+              </div>
+              <div style={{ fontSize: '8.5pt', color: '#8b7355', fontStyle: 'italic', marginBottom: '2mm' }}>{exp.position}</div>
+              <div style={{ fontSize: '9pt', color: '#5a5a5a', lineHeight: '1.7', textAlign: 'justify' }}>{exp.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {data.projects && data.projects.length > 0 && (
+        <section style={{ marginBottom: '8mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 400, color: '#8b7355', marginBottom: '5mm', paddingBottom: '2mm', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '3px', textAlign: 'center' }}>
+            Projects
+          </h2>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ marginBottom: '5mm', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '4mm', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '10pt', fontStyle: 'italic', color: '#2d2d2d' }}>{proj.name}</strong>
+                <span style={{ fontSize: '9pt', color: '#8b7355' }}>{proj.startDate} — {proj.endDate}</span>
+              </div>
+              {proj.tech && <div style={{ fontSize: '8pt', color: '#8b7355', marginBottom: '2mm' }}>{proj.tech.join(' / ')}</div>}
+              <div style={{ fontSize: '9pt', color: '#5a5a5a', lineHeight: '1.7', textAlign: 'justify' }}>{proj.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8mm' }}>
+        {data.education && data.education.length > 0 && (
+          <section style={{ textAlign: 'center' }}>
+            <h2 style={{ fontSize: '9pt', fontWeight: 400, color: '#8b7355', marginBottom: '4mm', paddingBottom: '2mm', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '3px' }}>
+              Education
+            </h2>
+            {data.education.map((edu, i) => (
+              <div key={i} style={{ marginBottom: '3mm' }}>
+                <div style={{ fontSize: '9.5pt', fontStyle: 'italic' }}>{edu.school}</div>
+                <div style={{ fontSize: '8.5pt', color: '#8b7355' }}>{edu.degree}, {edu.major}</div>
+                <div style={{ fontSize: '8pt', color: '#999' }}>{edu.startDate} — {edu.endDate}</div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {data.skills && data.skills.length > 0 && (
+          <section style={{ textAlign: 'center' }}>
+            <h2 style={{ fontSize: '9pt', fontWeight: 400, color: '#8b7355', marginBottom: '4mm', paddingBottom: '2mm', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '3px' }}>
+              Skills
+            </h2>
+            {data.skills.map((skill, i) => (
+              <div key={i} style={{ marginBottom: '2mm', fontSize: '8.5pt' }}>
+                <span style={{ color: '#2d2d2d' }}>{skill.category}:</span> <span style={{ color: '#8b7355' }}>{skill.items.join(', ')}</span>
+              </div>
+            ))}
+          </section>
+        )}
       </div>
     </div>
-
-    {data.summary && (
-      <section style={{ marginBottom: '14px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 400, color: '#8b7355', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '4px', textAlign: 'center' }}>
-          Profile
-        </h2>
-        <p style={{ margin: 0, fontSize: '9pt', color: '#5a5a5a', lineHeight: '1.8', textAlign: 'center', fontStyle: 'italic' }}>{data.summary}</p>
-      </section>
-    )}
-
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '14px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 400, color: '#8b7355', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '4px', textAlign: 'center' }}>
-          Education
-        </h2>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ marginBottom: '8px', textAlign: 'center' }}>
-            <strong style={{ fontSize: '10pt', color: '#3d3d3d' }}>{edu.school}</strong>
-            <div style={{ fontSize: '9pt', color: '#6b6b6b', fontStyle: 'italic' }}>
-              {edu.degree}, {edu.major} ◆ {edu.startDate} — {edu.endDate}
-            </div>
-            {edu.honors && <div style={{ fontSize: '8.5pt', color: '#8b7355' }}>{edu.honors}</div>}
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '14px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 400, color: '#8b7355', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '4px', textAlign: 'center' }}>
-          Experience
-        </h2>
-        {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '10pt', color: '#3d3d3d', fontStyle: 'italic' }}>{exp.company}</strong>
-              <span style={{ color: '#8b7355', fontSize: '9pt', fontStyle: 'italic' }}>{exp.startDate} — {exp.endDate}</span>
-            </div>
-            <div style={{ fontSize: '9pt', color: '#6b6b6b', marginBottom: '4px', textAlign: 'center', fontStyle: 'italic' }}>{exp.position}</div>
-            <div style={{ fontSize: '9pt', color: '#5a5a5a', lineHeight: '1.65', whiteSpace: 'pre-wrap', textAlign: 'justify' }}>{exp.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '14px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 400, color: '#8b7355', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '4px', textAlign: 'center' }}>
-          Projects
-        </h2>
-        {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#3d3d3d', fontStyle: 'italic' }}>{proj.name}</strong>
-              <span style={{ color: '#8b7355', fontSize: '9pt', fontStyle: 'italic' }}>{proj.startDate} — {proj.endDate}</span>
-            </div>
-            {proj.tech && <div style={{ fontSize: '8.5pt', color: '#8b7355' }}>{proj.tech.join(' / ')}</div>}
-            <div style={{ fontSize: '9pt', color: '#5a5a5a', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.skills && data.skills.length > 0 && (
-      <section style={{ marginBottom: '14px' }}>
-        <h2 style={{ fontSize: '10pt', fontWeight: 400, color: '#8b7355', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '4px', textAlign: 'center' }}>
-          Skills
-        </h2>
-        <p style={{ fontSize: '9pt', color: '#5a5a5a', textAlign: 'center', lineHeight: '1.8', fontStyle: 'italic' }}>
-          {data.skills.map(s => `${s.category}: ${s.items.join(', ')}`).join(' · ')}
-        </p>
-      </section>
-    )}
-
-    {data.certifications && data.certifications.length > 0 && (
-      <section>
-        <h2 style={{ fontSize: '10pt', fontWeight: 400, color: '#8b7355', marginBottom: '10px', paddingBottom: '6px', borderBottom: '1px solid #d4c4a8', textTransform: 'uppercase', letterSpacing: '4px', textAlign: 'center' }}>
-          Certifications
-        </h2>
-        <p style={{ fontSize: '9pt', color: '#5a5a5a', textAlign: 'center', fontStyle: 'italic' }}>
-          {data.certifications.join(' · ')}
-        </p>
-      </section>
-    )}
   </div>
 ));
 ElegantTemplate.displayName = 'ElegantTemplate';
 
 // ========== 模板8: 创业风格 (Startup) ==========
 export const StartupTemplate = forwardRef<HTMLDivElement, { data: ResumeData }>(({ data }, ref) => (
-  <div ref={ref} style={{ ...A4, fontFamily: '"Inter", "-apple-system", "BlinkMacSystemFont", sans-serif', color: '#111827', background: '#fff' }}>
-    {/* 头部 */}
-    <div style={{ display: 'flex', gap: '3px', marginBottom: '14px', minHeight: '60px' }}>
-      <div style={{ width: '5px', background: '#f97316', borderRadius: '3px', marginRight: '10px' }} />
-      <div style={{ flex: 1 }}>
-        <h1 style={{ fontSize: '24pt', fontWeight: 800, margin: '0 0 4px', color: '#111827', letterSpacing: '-1px' }}>
-          {data.name || '张三'}
-        </h1>
-        {data.objective && (
-          <p style={{ fontSize: '9.5pt', color: '#6b7280', margin: '0 0 8px' }}>{data.objective}</p>
-        )}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', fontSize: '8.5pt', color: '#9ca3af' }}>
-          {data.contact?.phone && <span>{data.contact.phone}</span>}
-          {data.contact?.email && <span>{data.contact.email}</span>}
-          {data.contact?.location && <span>{data.contact.location}</span>}
+  <div ref={ref} style={{ ...A4, fontFamily: '"Inter", "-apple-system", "PingFang SC", sans-serif', color: '#111827', background: '#fff' }}>
+    {/* 头部 - 橙色渐变 */}
+    <div style={{ background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)', padding: '8mm 10mm', color: '#fff', position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <h1 style={{ fontSize: '20pt', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>{data.name || '张三'}</h1>
+          {data.objective && <p style={{ fontSize: '9pt', margin: '2mm 0 0', opacity: 0.9 }}>{data.objective}</p>}
+        </div>
+        <div style={{ textAlign: 'right', fontSize: '8pt', opacity: 0.9 }}>
+          <div>{data.contact?.phone}</div>
+          <div>{data.contact?.email}</div>
+          <div>{data.contact?.location}</div>
         </div>
       </div>
-      <div style={{ width: '5px', background: '#3b82f6', borderRadius: '3px' }} />
     </div>
 
-    {data.summary && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '8.5pt', fontWeight: 600, color: '#f97316', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          ✦ Summary
-        </h2>
-        <p style={{ margin: 0, fontSize: '9pt', color: '#374151', lineHeight: '1.6' }}>{data.summary}</p>
-      </section>
-    )}
+    {/* 蓝色细条 */}
+    <div style={{ height: '3px', background: 'linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%)' }} />
 
-    {data.education && data.education.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '8.5pt', fontWeight: 600, color: '#f97316', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          ✦ Education
-        </h2>
-        {data.education.map((edu, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-            <div>
-              <strong style={{ fontSize: '9.5pt', color: '#111827' }}>{edu.school}</strong>
-              <span style={{ color: '#6b7280', marginLeft: '8px', fontSize: '9pt' }}>{edu.degree} · {edu.major}</span>
+    {/* 内容 */}
+    <div style={{ padding: '6mm 10mm' }}>
+      {data.summary && (
+        <section style={{ marginBottom: '5mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#f97316', marginBottom: '3mm', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            ✦ Summary
+          </h2>
+          <p style={{ fontSize: '8.5pt', color: '#374151', lineHeight: '1.7', margin: 0 }}>{data.summary}</p>
+        </section>
+      )}
+
+      {data.experience && data.experience.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#f97316', marginBottom: '3mm', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            ✦ Experience
+          </h2>
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ marginBottom: '4mm', paddingLeft: '4mm', borderLeft: '3px solid #fed7aa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#111827' }}>{exp.company}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#9ca3af' }}>{exp.startDate} - {exp.endDate}</span>
+              </div>
+              <div style={{ fontSize: '8pt', color: '#3b82f6', marginBottom: '2mm' }}>{exp.position}</div>
+              <div style={{ fontSize: '8pt', color: '#374151', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
             </div>
-            <span style={{ fontSize: '8.5pt', color: '#9ca3af', whiteSpace: 'nowrap' }}>{edu.startDate} — {edu.endDate}</span>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.experience && data.experience.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '8.5pt', fontWeight: 600, color: '#f97316', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          ✦ Experience
-        </h2>
-        {data.experience.map((exp, i) => (
-          <div key={i} style={{ marginBottom: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#111827' }}>{exp.company}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#9ca3af' }}>{exp.startDate} — {exp.endDate}</span>
-            </div>
-            <div style={{ fontSize: '9pt', color: '#3b82f6', marginBottom: '4px', fontWeight: 500 }}>{exp.position}</div>
-            <div style={{ fontSize: '8.5pt', color: '#374151', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{exp.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.projects && data.projects.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '8.5pt', fontWeight: 600, color: '#f97316', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          ✦ Projects
-        </h2>
-        {data.projects.map((proj, i) => (
-          <div key={i} style={{ marginBottom: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2px' }}>
-              <strong style={{ fontSize: '9.5pt', color: '#111827' }}>{proj.name}</strong>
-              <span style={{ fontSize: '8.5pt', color: '#9ca3af' }}>{proj.startDate} — {proj.endDate}</span>
-            </div>
-            {proj.tech && <div style={{ fontSize: '8pt', color: '#3b82f6', marginBottom: '2px' }}>{proj.tech.join(' · ')}</div>}
-            <div style={{ fontSize: '8.5pt', color: '#374151', lineHeight: '1.55', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
-          </div>
-        ))}
-      </section>
-    )}
-
-    {data.skills && data.skills.length > 0 && (
-      <section style={{ marginBottom: '12px' }}>
-        <h2 style={{ fontSize: '8.5pt', fontWeight: 600, color: '#f97316', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          ✦ Skills
-        </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-          {data.skills.flatMap(s => s.items).map((skill, i) => (
-            <span key={i} style={{ 
-              fontSize: '8pt', 
-              padding: '3px 10px', 
-              background: '#fff7ed', 
-              borderRadius: '4px', 
-              color: '#ea580c',
-              border: '1px solid #fed7aa'
-            }}>
-              {skill}
-            </span>
           ))}
-        </div>
-      </section>
-    )}
+        </section>
+      )}
 
-    {data.certifications && data.certifications.length > 0 && (
-      <section>
-        <h2 style={{ fontSize: '8.5pt', fontWeight: 600, color: '#f97316', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}>
-          ✦ Certifications
-        </h2>
-        <p style={{ fontSize: '8.5pt', color: '#374151', margin: 0 }}>{data.certifications.join(' · ')}</p>
-      </section>
-    )}
+      {data.projects && data.projects.length > 0 && (
+        <section style={{ marginBottom: '5mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#f97316', marginBottom: '3mm', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            ✦ Projects
+          </h2>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ marginBottom: '4mm', paddingLeft: '4mm', borderLeft: '3px solid #bfdbfe' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1mm' }}>
+                <strong style={{ fontSize: '9.5pt', color: '#111827' }}>{proj.name}</strong>
+                <span style={{ fontSize: '7.5pt', color: '#9ca3af' }}>{proj.startDate} - {proj.endDate}</span>
+              </div>
+              {proj.tech && <div style={{ fontSize: '7.5pt', color: '#3b82f6', marginBottom: '1mm' }}>{proj.tech.join(' · ')}</div>}
+              <div style={{ fontSize: '8pt', color: '#374151', lineHeight: '1.65', whiteSpace: 'pre-wrap' }}>{proj.description}</div>
+            </div>
+          ))}
+        </section>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5mm' }}>
+        {data.education && data.education.length > 0 && (
+          <section>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#f97316', marginBottom: '3mm', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              ✦ Education
+            </h2>
+            {data.education.map((edu, i) => (
+              <div key={i} style={{ marginBottom: '3mm' }}>
+                <div style={{ fontSize: '9pt', fontWeight: 500 }}>{edu.school}</div>
+                <div style={{ fontSize: '8pt', color: '#6b7280' }}>{edu.degree} · {edu.major}</div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {data.skills && data.skills.length > 0 && (
+          <section>
+            <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#f97316', marginBottom: '3mm', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              ✦ Skills
+            </h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2mm' }}>
+              {data.skills.flatMap(s => s.items).map((skill, i) => (
+                <span key={i} style={{ fontSize: '7pt', padding: '1.5mm 3mm', background: '#fff7ed', borderRadius: '2mm', color: '#ea580c', border: '1px solid #fed7aa' }}>{skill}</span>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {data.certifications && data.certifications.length > 0 && (
+        <section style={{ marginTop: '5mm' }}>
+          <h2 style={{ fontSize: '9pt', fontWeight: 600, color: '#f97316', marginBottom: '3mm', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            ✦ Certifications
+          </h2>
+          <div style={{ fontSize: '8pt', color: '#374151' }}>{data.certifications.join(' · ')}</div>
+        </section>
+      )}
+    </div>
   </div>
 ));
 StartupTemplate.displayName = 'StartupTemplate';
@@ -1018,14 +990,14 @@ export const templates: Record<ResumeTemplateType, {
   component: React.ComponentType<any>;
   tags: string[];
 }> = {
-  classic: { name: '经典商务', description: '传统稳重，彰显专业', component: ClassicTemplate, tags: ['传统', '专业'] },
-  modern: { name: '现代简约', description: '清新活力，适合互联网', component: ModernTemplate, tags: ['现代', '活力'] },
-  minimal: { name: '极简英文', description: '简洁国际，适合外企', component: MinimalTemplate, tags: ['极简', '国际'] },
-  executive: { name: '商务精英', description: '深蓝金色，高端大气', component: ExecutiveTemplate, tags: ['精英', '高端'] },
+  classic: { name: '经典商务', description: '蓝色双栏布局，专业稳重', component: ClassicTemplate, tags: ['双栏', '专业'] },
+  modern: { name: '现代简约', description: '清新蓝白，层次分明', component: ModernTemplate, tags: ['清新', '活力'] },
+  minimal: { name: '极简英文', description: '大量留白，国际风格', component: MinimalTemplate, tags: ['极简', '国际'] },
+  executive: { name: '商务精英', description: '深色科技风，高端大气', component: ExecutiveTemplate, tags: ['深色', '高端'] },
   creative: { name: '创意活力', description: '紫粉渐变，活泼多彩', component: CreativeTemplate, tags: ['创意', '多彩'] },
-  tech: { name: '科技未来', description: '赛博朋克，技术感强', component: TechTemplate, tags: ['程序员', '科技'] },
-  elegant: { name: '优雅复古', description: '羊皮纸风格，典雅大气', component: ElegantTemplate, tags: ['优雅', '复古'] },
-  startup: { name: '创业风格', description: '橙蓝双色，简洁有力', component: StartupTemplate, tags: ['创业', '简洁'] },
+  tech: { name: '科技未来', description: '终端代码风，技术感强', component: TechTemplate, tags: ['程序员', '代码'] },
+  elegant: { name: '优雅复古', description: '羊皮纸风格，典雅大气', component: ElegantTemplate, tags: ['优雅', '经典'] },
+  startup: { name: '创业风格', description: '橙蓝双色，简洁有力', component: StartupTemplate, tags: ['创业', '活力'] },
 };
 
 export function ResumePreview({ template, data }: { template: ResumeTemplateType; data: ResumeData }) {
