@@ -82,6 +82,22 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      // 其他工具图标域名
+      {
+        protocol: 'https',
+        hostname: 'otter.ai',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'aka.doubaocdn.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.baidu.com',
+        pathname: '/**',
+      },
     ],
   },
 };
