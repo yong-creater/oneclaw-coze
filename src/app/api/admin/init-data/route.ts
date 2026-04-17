@@ -59,7 +59,7 @@ const TAGS = [
 // GET: 获取当前数据状态
 export async function GET() {
   try {
-    let data: any = {
+    let data: Record<string, unknown> = {
       categories: [],
       sub_categories: [],
       tags: [],
@@ -140,7 +140,7 @@ export async function POST() {
 
       // 获取一级分类ID映射
       const catResult = await pool.query('SELECT id, slug FROM categories');
-      const categoryMap = new Map(catResult.rows.map((c: any) => [c.slug, c.id]));
+      const categoryMap = new Map(catResult.rows.map((c: { slug: string; id: number }) => [c.slug, c.id]));
 
       // 插入二级分类
       for (const sub of SUB_CATEGORIES) {

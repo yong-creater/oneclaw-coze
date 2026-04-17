@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { dev_url, use_local_file } = body;
 
-    let data: any;
+    let data: { tools?: unknown[]; categories?: unknown[]; tags?: unknown[]; prompts?: unknown[]; tutorials?: unknown[] };
 
     // 支持从本地文件导入
     if (use_local_file) {
@@ -84,19 +84,19 @@ export async function POST(request: NextRequest) {
     await client.from('tags').delete().neq('id', 0);
 
     // 批量导入分类
-    if (data.categories?.length > 0) {
-      console.log('[Import] 导入分类:', data.categories.length);
+    if (data.categories?.length && data.categories.length > 0) {
+      console.log('[Import] 导入分类:', data.categories?.length);
       const { error } = await client.from('categories').insert(data.categories);
       if (error) console.error('[Import] 分类导入错误:', error.message);
-      else results.categories.inserted = data.categories.length;
+      else results.categories.inserted = data.categories?.length || 0;
     }
 
     // 批量导入标签
-    if (data.tags?.length > 0) {
-      console.log('[Import] 导入标签:', data.tags.length);
+    if (data.tags?.length && data.tags.length > 0) {
+      console.log('[Import] 导入标签:', data.tags?.length);
       const { error } = await client.from('tags').insert(data.tags);
       if (error) console.error('[Import] 标签导入错误:', error.message);
-      else results.tags.inserted = data.tags.length;
+      else results.tags.inserted = data.tags?.length || 0;
     }
 
     // 批量导入工具（分批处理，每批50条）
@@ -121,19 +121,19 @@ export async function POST(request: NextRequest) {
     }
 
     // 批量导入提示词
-    if (data.prompts?.length > 0) {
-      console.log('[Import] 导入提示词:', data.prompts.length);
+    if (data.prompts?.length && data.prompts.length > 0) {
+      console.log('[Import] 导入提示词:', data.prompts?.length);
       const { error } = await client.from('prompts').insert(data.prompts);
       if (error) console.error('[Import] 提示词导入错误:', error.message);
-      else results.prompts.inserted = data.prompts.length;
+      else results.prompts.inserted = data.prompts?.length || 0;
     }
 
     // 批量导入教程
-    if (data.tutorials?.length > 0) {
-      console.log('[Import] 导入教程:', data.tutorials.length);
+    if (data.tutorials?.length && data.tutorials.length > 0) {
+      console.log('[Import] 导入教程:', data.tutorials?.length);
       const { error } = await client.from('tutorials').insert(data.tutorials);
       if (error) console.error('[Import] 教程导入错误:', error.message);
-      else results.tutorials.inserted = data.tutorials.length;
+      else results.tutorials.inserted = data.tutorials?.length || 0;
     }
 
     // 验证最终数量

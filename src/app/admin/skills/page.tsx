@@ -613,7 +613,7 @@ export default function AdminSkillsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>确认删除</DialogTitle>
-            <DialogDescription>确定要删除分类 "{deleteDialog.name}" 吗？此操作会同时删除该分类下的所有技能。</DialogDescription>
+            <DialogDescription>确定要删除分类 &ldquo;{deleteDialog.name}&rdquo; 吗？此操作会同时删除该分类下的所有技能。</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteDialog({ open: false })}>取消</Button>

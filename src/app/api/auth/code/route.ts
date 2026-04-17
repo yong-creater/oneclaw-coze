@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       expiresIn: CODE_EXPIRY / 1000
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('发送验证码失败:', error);
     return NextResponse.json({
       success: false,

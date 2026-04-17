@@ -102,12 +102,13 @@ async function checkUrls(urls: { type: string; url: string }[]): Promise<{ type:
         healthy: response.ok || response.status === 403, // 403可能是防爬，不算失效
         status: response.status
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : '连接失败';
       results.push({
         type,
         url,
         healthy: false,
-        error: error.message || '连接失败'
+        error: errMsg
       });
     }
   }

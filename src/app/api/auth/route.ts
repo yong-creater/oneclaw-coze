@@ -215,11 +215,13 @@ export async function POST(request: NextRequest) {
       const supabase = getSupabaseClient();
       
       // 查找或创建用户
-      let { data: user, error } = await supabase
+      const { data: existingUser, error } = await supabase
         .from('users')
         .select('*')
         .eq('email', email.toLowerCase())
         .single();
+      
+      let currentUser = existingUser;
       
       if (error && error.code === 'PGRST116') {
         // 用户不存在，创建新用户
@@ -246,7 +248,7 @@ export async function POST(request: NextRequest) {
           );
         }
         
-        user = newUser;
+        currentUser = newUser;
       } else if (error) {
         console.error('查询用户失败:', error);
         return NextResponse.json(
@@ -256,18 +258,18 @@ export async function POST(request: NextRequest) {
       }
       
       // 生成 token
-      const token = await generateUserToken(user);
-      await createUserSession(user.user_id, token);
+      const token = await generateUserToken(currentUser);
+      await createUserSession(currentUser?.user_id, token);
       
       const response = NextResponse.json({
         success: true,
         user: {
-          user_id: user.user_id,
-          nickname: user.nickname,
-          email: user.email,
-          avatar_url: user.avatar_url
+          user_id: currentUser?.user_id,
+          nickname: currentUser?.nickname,
+          email: currentUser?.email,
+          avatar_url: currentUser?.avatar_url
         },
-        isNewUser: !user.password_hash
+        isNewUser: !currentUser?.password_hash
       });
       
       response.cookies.set('user_token', token, {

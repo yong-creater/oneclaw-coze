@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const position = searchParams.get('position');
 
     const now = new Date().toISOString();
-    let data: any[] = [];
+    let data: Record<string, unknown>[] = [];
 
     if (isVolcenginePgMode()) {
       try {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
           FROM advertisements
           WHERE is_active = true AND starts_at <= $1 AND ends_at >= $2
         `;
-        const params: any[] = [now, now];
+        const params: (string | boolean)[] = [now, now];
 
         if (position) {
           sql += ` AND position = $3`;

@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
     console.log('Total slugs found:', allSlugs.size);
 
     // 批量获取技能详情
-    const skillsToImport: any[] = [];
+    const skillsToImport: Record<string, unknown>[] = [];
     const slugList = Array.from(allSlugs);
 
     for (const slug of slugList) {
@@ -206,7 +206,7 @@ export async function POST(request: NextRequest) {
     await supabase.from('skills').delete().neq('id', 0);
 
     // 导入分类
-    const categoryResults: any[] = [];
+    const categoryResults: Record<string, unknown>[] = [];
     let catIndex = 0;
     for (const cat of Object.values(SKILL_CATEGORIES)) {
       const { data, error } = await supabase
