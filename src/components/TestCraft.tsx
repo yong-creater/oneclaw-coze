@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
-  FlaskConical, Sparkles, Upload, Link as LinkIcon,
+  Sparkles, Link as LinkIcon,
   FileText, GitBranch, Zap, ChevronRight, ChevronDown,
   Trash2, Plus, X, Download, Loader2, Check, AlertCircle,
-  Eye, Edit2, Library, Hourglass, LayoutList, Network, BookOpen,
-  Paperclip, FileCheck, FileX, ChevronDown as ChevronDownIcon,
-  Merge
+  Edit2, Library, Hourglass, LayoutList, Network, BookOpen,
+  Paperclip, FileCheck, ChevronDown as ChevronDownIcon,
+  Merge, ZoomIn, ZoomOut, Maximize2, ArrowLeft
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import JSZip from 'jszip';
 import {
   Select,
   SelectContent,
@@ -32,6 +33,7 @@ interface TestCase {
   given?: string;
   when?: string;
   then?: string;
+  verified?: boolean;
 }
 
 interface RequirementNode {
@@ -53,6 +55,15 @@ interface ParsedContent {
   content: string;
 }
 
+// 思维导图节点位置
+interface NodePosition {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 // ==================== 常量 ====================
 const MODULES = [
   { value: '星链', label: '星链' },
@@ -63,40 +74,57 @@ const MODULES = [
 const AI_MODELS = [
   { value: 'doubao-seed-2-0-pro-260215', label: '豆包 Seed 2.0 Pro（推荐）' },
   { value: 'doubao-seed-2-0-lite-260215', label: '豆包 Seed 2.0 Lite' },
-  { value: 'doubao-pro-4k-240815', label: '豆包 Pro 4K' },
-  { value: 'doubao-lite-4k-240815', label: '豆包 Lite 4K' },
   { value: 'deepseek-chat', label: 'DeepSeek V3.2' },
   { value: 'deepseek-v3', label: 'DeepSeek V3' },
-  { value: 'glm-4-7', label: 'GLM-4.7' },
-  { value: 'glm-4', label: 'GLM-4' },
 ];
+
+// 思维导图布局常量
+const MINDMAP_CONFIG = {
+  GAP_X: 80,
+  GAP_Y: 24,
+  PADDING: 60,
+  ROOT_HEIGHT: 56,
+  REQ_HEIGHT: 52,
+  TC_HEIGHT: 44,
+  MIN_WIDTH: 150,
+  MAX_WIDTH: 300,
+};
 
 // ==================== 工具函数 ====================
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
+// 获取节点宽度
+const getNodeWidth = (title: string, type: string): number => {
+  const baseWidth = title.length * 12 + (type === 'root' ? 40 : type === 'requirement' ? 100 : 80);
+  return Math.min(Math.max(baseWidth, MINDMAP_CONFIG.MIN_WIDTH), MINDMAP_CONFIG.MAX_WIDTH);
+};
+
+// 获取节点高度
+const getNodeHeight = (type: string): number => {
+  if (type === 'root') return MINDMAP_CONFIG.ROOT_HEIGHT;
+  if (type === 'requirement') return MINDMAP_CONFIG.REQ_HEIGHT;
+  return MINDMAP_CONFIG.TC_HEIGHT;
+};
+
 // 获取优先级颜色
 const getPriorityColor = (priority: string) => {
-  if (priority === 'P0' || priority === '高') {
-    return 'bg-red-500 text-white';
-  }
-  if (priority === 'P1' || priority === '中') {
-    return 'bg-amber-500 text-white';
-  }
-  if (priority === 'P2' || priority === '低') {
-    return 'bg-gray-400 text-white';
-  }
+  if (priority === 'P0' || priority === '高') return 'bg-red-500 text-white';
+  if (priority === 'P1' || priority === '中') return 'bg-amber-500 text-white';
   return 'bg-gray-400 text-white';
 };
 
-// 获取优先级Badge样式
-const getPriorityBadge = (priority: string) => {
-  if (priority === 'P0' || priority === '高') {
-    return 'bg-red-100 text-red-700 border-red-200';
-  }
-  if (priority === 'P1' || priority === '中') {
-    return 'bg-amber-100 text-amber-700 border-amber-200';
-  }
-  return 'bg-gray-100 text-gray-600 border-gray-200';
+// 获取优先级边框颜色
+const getPriorityBorderColor = (priority: string) => {
+  if (priority === 'P0' || priority === '高') return 'border-red-400';
+  if (priority === 'P1' || priority === '中') return 'border-amber-400';
+  return 'border-gray-300';
+};
+
+// 获取优先级背景
+const getPriorityBg = (priority: string) => {
+  if (priority === 'P0' || priority === '高') return 'bg-red-50';
+  if (priority === 'P1' || priority === '中') return 'bg-amber-50';
+  return 'bg-gray-50';
 };
 
 const countTestCases = (node: RequirementNode): number => {
@@ -119,6 +147,115 @@ const getAllTestCases = (node: RequirementNode): TestCase[] => {
   return cases;
 };
 
+// ==================== XMind导出函数 ====================
+const generateXMind = (mindmap: RequirementNode): Blob => {
+  const zip = new JSZip();
+  
+  // mimetype 文件
+  zip.file('mimetype', 'application/vnd.xmind.workbook');
+  
+  // content.json - 思维导图内容
+  const contentJson = generateContentJson(mindmap);
+  zip.file('content.json', JSON.stringify(contentJson, null, 2));
+  
+  // metadata.json
+  const metadata = {
+    "xmind-version": "2.0",
+    "creator": {
+      "name": "TestCraft",
+      "version": "1.0"
+    },
+    "created": new Date().toISOString(),
+    "modified": new Date().toISOString()
+  };
+  zip.file('metadata.json', JSON.stringify(metadata, null, 2));
+  
+  // preferences.json
+  const preferences = {
+    "version": "1.0"
+  };
+  zip.file('preferences.json', JSON.stringify(preferences, null, 2));
+  
+  // styles.xml
+  const styles = generateStyles();
+  zip.file('styles.xml', styles);
+  
+  // markes.json
+  const marks = {
+    "legend": [
+      { "key": "priority-p0", "caption": "P0", "color": "#ef4444" },
+      { "key": "priority-p1", "caption": "P1", "color": "#f59e0b" },
+      { "key": "priority-p2", "caption": "P2", "color": "#6b7280" }
+    ]
+  };
+  zip.file('marks.json', JSON.stringify(marks, null, 2));
+  
+  return zip.generateAsync({ type: 'blob' }) as unknown as Blob;
+};
+
+const generateContentJson = (mindmap: RequirementNode): Record<string, unknown> => {
+  const rootTopic = {
+    id: mindmap.id,
+    title: mindmap.title,
+    children: {
+      'attached': mindmap.children
+        .filter((c): c is RequirementNode => c.type === 'requirement')
+        .map((req, reqIdx) => ({
+          id: req.id,
+          title: req.title,
+          children: {
+            'attached': req.children
+              .filter((c): c is TestCase => c.type === 'testcase')
+              .map((tc, tcIdx) => ({
+                id: tc.id,
+                title: `[${tc.priority}] ${tc.title}`,
+                notes: {
+                  'plain-content': tc.given || tc.when || tc.then 
+                    ? `【前置条件 Given】\n${tc.given || '无'}\n\n【操作步骤 When】\n${tc.when || '无'}\n\n【预期结果 Then】\n${tc.then || '无'}`
+                    : '无'
+                }
+              }))
+          }
+        }))
+    }
+  };
+  
+  return {
+    'first-node-id': mindmap.id,
+    'nodes': {
+      [mindmap.id]: rootTopic
+    }
+  };
+};
+
+const generateStyles = (): string => {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<styles xmlns="urn:xmind:xhtml:styles">
+  <style id="root" type="topics">
+    <fill-background>true</fill-background>
+    <color>#7c3aed</color>
+    <font-size>18</font-size>
+    <font-weight>bold</font-weight>
+  </style>
+  <style id="main-topic" type="topics">
+    <fill-background>true</fill-background>
+    <color>#3b82f6</color>
+    <font-size>14</font-size>
+    <font-weight>bold</font-weight>
+  </style>
+  <style id="sub-topic" type="topics">
+    <fill-background>false</fill-background>
+    <color>#6b7280</color>
+    <font-size>12</font-size>
+  </style>
+  <style id="line" type="lines">
+    <color>#d1d5db</color>
+    <width>2</width>
+    <style>bezier</style>
+  </style>
+</styles>`;
+};
+
 // ==================== 主组件 ====================
 export default function TestCraft() {
   // 状态
@@ -132,6 +269,7 @@ export default function TestCraft() {
   const [mindmap, setMindmap] = useState<RequirementNode | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [selectedCase, setSelectedCase] = useState<TestCase | null>(null);
+  const [selectedRequirement, setSelectedRequirement] = useState<RequirementNode | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
@@ -140,17 +278,22 @@ export default function TestCraft() {
   const [viewMode, setViewMode] = useState<'tree' | 'mindmap'>('tree');
   const [showKnowledgeSearch, setShowKnowledgeSearch] = useState(false);
   const [knowledgeSearchQuery, setKnowledgeSearchQuery] = useState('');
-  const [knowledgeSearchResults, setKnowledgeSearchResults] = useState<any[]>([]);
+  const [knowledgeSearchResults, setKnowledgeSearchResults] = useState<Record<string, unknown>[]>([]);
   const [selectedKnowledgeCases, setSelectedKnowledgeCases] = useState<Set<string>>(new Set());
   const [knowledgeSearchLoading, setKnowledgeSearchLoading] = useState(false);
   const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const [clearingData, setClearingData] = useState(false);
-  const [deletingNodeId, setDeletingNodeId] = useState<string | null>(null);
-  const [deletingNodeTitle, setDeletingNodeTitle] = useState('');
-  const [deletingNodeType, setDeletingNodeType] = useState<'requirement' | 'testcase'>('testcase');
+  
+  // 思维导图状态
+  const [scale, setScale] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [detailsPanelOpen, setDetailsPanelOpen] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   // 从localStorage恢复状态
   useEffect(() => {
@@ -161,15 +304,15 @@ export default function TestCraft() {
       if (savedMindmap) {
         try {
           setMindmap(JSON.parse(savedMindmap));
-        } catch (e) {
-          console.error('Failed to parse mindmap:', e);
+        } catch {
+          console.error('Failed to parse mindmap');
         }
       }
       if (savedExpanded) {
         try {
           setExpanded(new Set(JSON.parse(savedExpanded)));
-        } catch (e) {
-          console.error('Failed to parse expanded:', e);
+        } catch {
+          console.error('Failed to parse expanded');
         }
       }
     }
@@ -245,20 +388,13 @@ export default function TestCraft() {
       setMindmap(root);
       
       const newExpanded = new Set<string>();
-      const setAllExpanded = (node: RequirementNode) => {
-        newExpanded.add(node.id);
-        node.children.forEach(child => {
-          if ('type' in child && child.type === 'requirement') {
-            setAllExpanded(child as RequirementNode);
-          }
-        });
-      };
-      setAllExpanded(root);
+      newExpanded.add(root.id);
+      root.children.forEach(child => newExpanded.add(child.id));
       setExpanded(newExpanded);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('分析失败:', error);
-      alert(error.message || '分析失败，请重试');
+      alert(error instanceof Error ? error.message : '分析失败，请重试');
     } finally {
       setAnalyzing(false);
     }
@@ -295,7 +431,7 @@ export default function TestCraft() {
     return requirements.slice(0, 10);
   };
 
-  // 生成测试用例
+  // 生成测试用例（流式）
   const handleGenerate = async (reqId: string) => {
     if (!mindmap) return;
     
@@ -329,40 +465,56 @@ export default function TestCraft() {
         }),
       });
 
-      const responseReader = response.body?.getReader();
-      if (!responseReader) throw new Error('无法读取响应');
+      if (!response.ok) {
+        throw new Error('生成请求失败');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('无法读取响应流');
 
       let fullContent = '';
       
       while (true) {
-        const { done, value } = await responseReader.read();
+        const { done, value } = await reader.read();
         if (done) break;
         const text = new TextDecoder().decode(value);
         fullContent += text;
       }
 
-      const testCases = parseTestCases(fullContent);
+      // 尝试解析JSON响应
+      let testCases: Omit<TestCase, 'id'>[] = [];
+      try {
+        const jsonData = JSON.parse(fullContent);
+        if (jsonData.cases) {
+          testCases = jsonData.cases;
+        } else if (jsonData.content || jsonData.rawContent) {
+          testCases = parseTestCases(jsonData.content || jsonData.rawContent);
+        }
+      } catch {
+        testCases = parseTestCases(fullContent);
+      }
       
-      await fetch('/api/admin/utilities', {
+      // 记录使用统计
+      fetch('/api/admin/utilities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tool_type: 'testcraft',
-          input_data: { requirement: reqNode.title, module, ai_model: aiModel },
+          input_data: { requirement: reqNode.title, module, aiModel },
           output_data: { test_cases_count: testCases.length },
           status: 'success',
         }),
-      }).catch(console.error);
+      }).catch(() => {});
       
       const updateMindmap = (node: RequirementNode): RequirementNode => {
         if (node.id === reqId) {
           return {
             ...node,
-            children: testCases.map((tc, idx) => ({
+            children: testCases.map((tc) => ({
               id: generateId(),
               type: 'testcase' as const,
               title: tc.title,
-              priority: tc.priority,
+              priority: tc.priority || 'P1',
               given: tc.given,
               when: tc.when,
               then: tc.then,
@@ -382,9 +534,9 @@ export default function TestCraft() {
 
       setMindmap(prev => prev ? updateMindmap(prev) : null);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('生成失败:', error);
-      alert(error.message || '生成失败，请重试');
+      alert(error instanceof Error ? error.message : '生成失败，请重试');
     } finally {
       setGeneratingId(null);
     }
@@ -407,7 +559,7 @@ export default function TestCraft() {
     
     for (const req of reqsWithoutCases) {
       await handleGenerate(req.id);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
     setGenerating(false);
@@ -460,6 +612,27 @@ export default function TestCraft() {
       else next.add(id);
       return next;
     });
+  };
+
+  // 展开所有
+  const expandAll = () => {
+    if (!mindmap) return;
+    const allIds = new Set<string>();
+    const collectIds = (node: RequirementNode | TestCase) => {
+      allIds.add(node.id);
+      if ('children' in node) node.children.forEach(collectIds);
+    };
+    mindmap.children.forEach(collectIds);
+    setExpanded(allIds);
+  };
+
+  // 折叠所有
+  const collapseAll = () => {
+    if (!mindmap) return;
+    const rootIds = new Set<string>();
+    rootIds.add(mindmap.id);
+    mindmap.children.forEach(child => rootIds.add(child.id));
+    setExpanded(rootIds);
   };
 
   // 添加需求点
@@ -542,28 +715,16 @@ export default function TestCraft() {
   };
 
   // 删除节点
-  const handleDeleteNode = (parentId: string, nodeId: string, nodeTitle: string, nodeType: 'requirement' | 'testcase') => {
-    setDeletingNodeId(nodeId);
-    setDeletingNodeTitle(nodeTitle);
-    setDeletingNodeType(nodeType);
-    // 直接删除，不显示确认框
-    confirmDelete();
-  };
-
-  const confirmDelete = () => {
-    if (!mindmap || !deletingNodeId) return;
+  const handleDeleteNode = (parentId: string, nodeId: string) => {
+    if (!mindmap) return;
     
     const updateParent = (node: RequirementNode): RequirementNode => {
-      if (node.id === deletingNodeId) {
-        return { ...node, children: [] }; // 清空子节点即删除
-      }
       return {
         ...node,
         children: node.children.filter(child => {
-          if (child.id === deletingNodeId) return false;
+          if (child.id === nodeId) return false;
           if ('type' in child && child.type === 'requirement') {
-            const updated = updateParent(child as RequirementNode);
-            return updated.children.length > 0 || updated.id !== deletingNodeId;
+            return true;
           }
           return true;
         }).map(child => {
@@ -575,15 +736,67 @@ export default function TestCraft() {
       };
     };
     
-    setMindmap(updateParent(mindmap));
-    if (selectedCase?.id === deletingNodeId) {
-      setSelectedCase(null);
+    // 如果是删除需求点，同时删除子节点
+    const nodeToDelete = findNodeById(mindmap, nodeId);
+    if (nodeToDelete?.type === 'requirement') {
+      setMindmap(prev => {
+        if (!prev) return null;
+        return removeNodeAndChildren(prev, nodeId);
+      });
+    } else {
+      // 只删除测试用例
+      setMindmap(prev => {
+        if (!prev) return null;
+        return removeTestCase(prev, nodeId);
+      });
     }
-    setDeletingNodeId(null);
+    
+    if (selectedCase?.id === nodeId) setSelectedCase(null);
+    if (selectedRequirement?.id === nodeId) {
+      setSelectedRequirement(null);
+      setDetailsPanelOpen(false);
+    }
   };
 
-  const cancelDelete = () => {
-    setDeletingNodeId(null);
+  const findNodeById = (node: RequirementNode, id: string): RequirementNode | TestCase | null => {
+    if (node.id === id) return node;
+    for (const child of node.children) {
+      if (child.id === id) return child;
+      if ('type' in child && child.type === 'requirement') {
+        const found = findNodeById(child as RequirementNode, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const removeNodeAndChildren = (node: RequirementNode, nodeId: string): RequirementNode => {
+    return {
+      ...node,
+      children: node.children
+        .filter(child => child.id !== nodeId)
+        .map(child => {
+          if ('type' in child && child.type === 'requirement') {
+            return removeNodeAndChildren(child as RequirementNode, nodeId);
+          }
+          return child;
+        }),
+    };
+  };
+
+  const removeTestCase = (node: RequirementNode, tcId: string): RequirementNode => {
+    return {
+      ...node,
+      children: node.children.map(child => {
+        if (child.type === 'requirement') {
+          return {
+            ...child,
+            children: child.children.filter(c => c.id !== tcId),
+          };
+        }
+        return child;
+      }),
+    };
   };
 
   // 文件上传
@@ -607,7 +820,7 @@ export default function TestCraft() {
         setParsedContent(prev => prev.map(p => 
           p.id === tempId ? { ...p, content: text.substring(0, 5000) } : p
         ));
-      } catch (error) {
+      } catch {
         setParsedContent(prev => prev.filter(p => p.id !== tempId));
       }
     }
@@ -652,9 +865,9 @@ export default function TestCraft() {
       } else {
         throw new Error(data.error || '抓取失败');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setParsedContent(prev => prev.filter(p => p.id !== tempId));
-      alert(error.message || '链接抓取失败');
+      alert(error instanceof Error ? error.message : '链接抓取失败');
     } finally {
       setIsFetchingUrl(false);
       setLinkInput('');
@@ -685,6 +898,8 @@ export default function TestCraft() {
     setMindmap(null);
     setExpanded(new Set());
     setSelectedCase(null);
+    setSelectedRequirement(null);
+    setDetailsPanelOpen(false);
     setClearingData(false);
     
     localStorage.removeItem('testcraft-mindmap');
@@ -692,8 +907,8 @@ export default function TestCraft() {
   };
 
   // 导出功能
-  const downloadFile = (content: string, filename: string, type: string) => {
-    const blob = new Blob([content], { type });
+  const downloadFile = (content: string | Blob, filename: string, type?: string) => {
+    const blob = content instanceof Blob ? content : new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -716,7 +931,7 @@ export default function TestCraft() {
       ...cases.map(tc => {
         const req = mindmap.children.find(c => 
           'type' in c && c.type === 'requirement' && 
-          (c as RequirementNode).children.some((cc: any) => cc.id === tc.id)
+          (c as RequirementNode).children.some((cc) => cc.id === tc.id)
         );
         return [
           req ? (req as RequirementNode).title : '',
@@ -761,10 +976,115 @@ export default function TestCraft() {
     setExportDropdownOpen(false);
   };
 
-  const exportXMind = () => {
+  const exportXMind = async () => {
     if (!mindmap) return;
-    alert('XMind导出功能开发中...');
-    setExportDropdownOpen(false);
+    const cases = getAllTestCases(mindmap);
+    if (cases.length === 0) {
+      alert('没有可导出的测试用例');
+      return;
+    }
+    
+    try {
+      const zip = new JSZip();
+      
+      // mimetype
+      zip.file('mimetype', 'application/vnd.xmind.workbook');
+      
+      // content.json
+      const rootTopic = {
+        id: mindmap.id,
+        title: mindmap.title,
+        children: {
+          'attached': mindmap.children
+            .filter((c): c is RequirementNode => c.type === 'requirement')
+            .map((req) => ({
+              id: req.id,
+              title: `[${req.priority || '中'}] ${req.title}`,
+              children: {
+                'attached': req.children
+                  .filter((c): c is TestCase => c.type === 'testcase')
+                  .map((tc) => ({
+                    id: tc.id,
+                    title: `[${tc.priority}] ${tc.title}`,
+                    notes: {
+                      'plain-content': `【前置条件 Given】\n${tc.given || '无'}\n\n【操作步骤 When】\n${tc.when || '无'}\n\n【预期结果 Then】\n${tc.then || '无'}`
+                    }
+                  }))
+              }
+            }))
+        }
+      };
+      
+      const nodesMap: Record<string, unknown> = {};
+      const collectNodes = (node: RequirementNode | TestCase) => {
+        nodesMap[node.id] = {
+          id: node.id,
+          title: node.title,
+          children: 'children' in node && node.children.length > 0 ? {
+            'attached': node.children
+              .filter((c): c is RequirementNode | TestCase => c.type === 'testcase' || c.type === 'requirement')
+              .map(c => ({ id: c.id }))
+          } : undefined
+        };
+        if ('children' in node) node.children.forEach(collectNodes);
+      };
+      mindmap.children.forEach(collectNodes);
+      
+      const contentJson = {
+        'first-node-id': mindmap.id,
+        'nodes': nodesMap
+      };
+      
+      zip.file('content.json', JSON.stringify(contentJson, null, 2));
+      
+      // metadata.json
+      zip.file('metadata.json', JSON.stringify({
+        "xmind-version": "2.0",
+        "creator": { "name": "TestCraft", "version": "1.0" },
+        "created": new Date().toISOString(),
+        "modified": new Date().toISOString()
+      }, null, 2));
+      
+      // preferences.json
+      zip.file('preferences.json', JSON.stringify({ "version": "1.0" }, null, 2));
+      
+      // styles.xml
+      zip.file('styles.xml', `<?xml version="1.0" encoding="UTF-8"?>
+<styles xmlns="urn:xmind:xhtml:styles">
+  <style id="root" type="topics">
+    <fill-background>true</fill-background>
+    <color>#7c3aed</color>
+    <font-size>18</font-size>
+    <font-weight>bold</font-weight>
+  </style>
+  <style id="main-topic" type="topics">
+    <fill-background>true</fill-background>
+    <color>#3b82f6</color>
+    <font-size>14</font-size>
+    <font-weight>bold</font-weight>
+  </style>
+  <style id="sub-topic" type="topics">
+    <fill-background>false</fill-background>
+    <color>#6b7280</color>
+    <font-size>12</font-size>
+  </style>
+</styles>`);
+      
+      // marks.json
+      zip.file('marks.json', JSON.stringify({
+        "legend": [
+          { "key": "p0", "caption": "P0", "color": "#ef4444" },
+          { "key": "p1", "caption": "P1", "color": "#f59e0b" },
+          { "key": "p2", "caption": "P2", "color": "#6b7280" }
+        ]
+      }, null, 2));
+      
+      const blob = await zip.generateAsync({ type: 'blob' });
+      downloadFile(blob, `testcases_${new Date().toISOString().split('T')[0]}.xmind`);
+    } catch (error) {
+      console.error('XMind export error:', error);
+      alert('导出失败，请重试');
+    }
   };
 
   // 知识库搜索
@@ -772,13 +1092,12 @@ export default function TestCraft() {
     if (!knowledgeSearchQuery.trim()) return;
     setKnowledgeSearchLoading(true);
     
-    // 模拟搜索结果
     setTimeout(() => {
       const mockResults = [
         { id: 'case-001', title: '用户登录功能测试', content: '前提：用户已注册账号\n操作：输入正确的用户名和密码点击登录\n预期：成功登录并跳转到首页' },
         { id: 'case-002', title: '用户登出功能测试', content: '前提：用户已登录\n操作：点击退出登录按钮\n预期：成功退出并跳转到登录页' },
         { id: 'case-003', title: '密码修改功能测试', content: '前提：用户已登录\n操作：进入设置-修改密码，输入原密码和新密码\n预期：密码修改成功，下次登录需使用新密码' },
-      ].filter(r => r.title.includes(knowledgeSearchQuery));
+      ].filter((r: { title: string }) => r.title.includes(knowledgeSearchQuery));
       
       setKnowledgeSearchResults(mockResults);
       setKnowledgeSearchLoading(false);
@@ -798,13 +1117,14 @@ export default function TestCraft() {
     if (selectedKnowledgeCases.size === 0 || !mindmap) return;
     
     const selectedCases = knowledgeSearchResults
-      .filter(r => selectedKnowledgeCases.has(r.id))
-      .map(r => {
-        const lines = r.content.split('\n');
+      .filter((r: Record<string, unknown>) => selectedKnowledgeCases.has(r.id as string))
+      .map((r: Record<string, unknown>) => {
+        const content = r.content as string;
+        const lines = content.split('\n');
         return {
           id: generateId(),
           type: 'testcase' as const,
-          title: r.title,
+          title: r.title as string,
           priority: 'P1' as const,
           given: lines.find((l: string) => l.startsWith('前提：'))?.replace('前提：', '') || '',
           when: lines.find((l: string) => l.startsWith('操作：'))?.replace('操作：', '') || '',
@@ -831,6 +1151,250 @@ export default function TestCraft() {
     setSelectedKnowledgeCases(new Set());
   };
 
+  // 思维导图交互
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    setScale(prev => Math.min(Math.max(prev * delta, 0.3), 2));
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === canvasRef.current) {
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isPanning) {
+      setPanOffset({
+        x: e.clientX - panStart.x,
+        y: e.clientY - panStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+  };
+
+  const resetView = () => {
+    setScale(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  // 计算思维导图节点位置
+  const calculateNodePositions = useMemo(() => {
+    if (!mindmap) return { positions: new Map(), totalWidth: 0, totalHeight: 0 };
+    
+    const positions = new Map<string, NodePosition>();
+    const { GAP_X, GAP_Y, PADDING, ROOT_HEIGHT, REQ_HEIGHT, TC_HEIGHT } = MINDMAP_CONFIG;
+    
+    let currentY = PADDING;
+    let maxX = 0;
+    
+    // 根节点位置
+    const rootWidth = getNodeWidth(mindmap.title, 'root');
+    positions.set(mindmap.id, {
+      id: mindmap.id,
+      x: PADDING,
+      y: PADDING,
+      width: rootWidth,
+      height: ROOT_HEIGHT,
+    });
+    
+    // 需求点和测试用例位置
+    const requirementNodes = mindmap.children.filter((c): c is RequirementNode => c.type === 'requirement');
+    
+    // 计算每列的垂直偏移
+    let colY = PADDING;
+    let colMaxHeight = 0;
+    
+    // 根节点高度
+    const rootNodeHeight = Math.max(
+      ...requirementNodes.map(req => {
+        const reqHeight = REQ_HEIGHT;
+        const tcCount = req.children.filter((c): c is TestCase => c.type === 'testcase').length;
+        const tcTotalHeight = tcCount * TC_HEIGHT + (tcCount > 0 ? (tcCount - 1) * GAP_Y : 0);
+        return reqHeight + GAP_Y + tcTotalHeight;
+      })
+    );
+    
+    // 根节点居中
+    positions.get(mindmap.id)!.y = PADDING + (colMaxHeight - ROOT_HEIGHT) / 2;
+    
+    // 第一列：需求点
+    let reqX = PADDING + rootWidth + GAP_X;
+    let reqY = PADDING;
+    
+    for (const req of requirementNodes) {
+      const reqWidth = getNodeWidth(req.title, 'requirement');
+      const tcNodes = req.children.filter((c): c is TestCase => c.type === 'testcase');
+      
+      positions.set(req.id, {
+        id: req.id,
+        x: reqX,
+        y: reqY,
+        width: reqWidth,
+        height: REQ_HEIGHT,
+      });
+      
+      // 测试用例位置
+      let tcX = reqX + reqWidth + GAP_X;
+      let tcY = reqY;
+      
+      for (const tc of tcNodes) {
+        const tcWidth = getNodeWidth(tc.title, 'testcase');
+        positions.set(tc.id, {
+          id: tc.id,
+          x: tcX,
+          y: tcY,
+          width: tcWidth,
+          height: TC_HEIGHT,
+        });
+        tcY += TC_HEIGHT + GAP_Y;
+      }
+      
+      reqY += REQ_HEIGHT + GAP_Y + Math.max(tcNodes.length * (TC_HEIGHT + GAP_Y), GAP_Y);
+      maxX = Math.max(maxX, tcX + (tcNodes.length > 0 ? tcNodes[tcNodes.length - 1].title.length * 12 + 100 : 0));
+    }
+    
+    const totalWidth = maxX + PADDING;
+    const totalHeight = reqY + PADDING;
+    
+    return { positions, totalWidth, totalHeight };
+  }, [mindmap]);
+
+  // 渲染思维导图节点
+  const renderMindMapNode = (node: RequirementNode | TestCase, position: NodePosition, isRoot: boolean = false) => {
+    const isSelected = (selectedCase?.id === node.id) || (selectedRequirement?.id === node.id);
+    const isReq = node.type === 'requirement';
+    const isTC = node.type === 'testcase';
+    const isExpanded = expanded.has(node.id);
+    
+    const handleClick = () => {
+      if (isRoot) {
+        // 点击根节点切换视图
+        setViewMode('tree');
+      } else if (isReq) {
+        toggleExpand(node.id);
+        setSelectedRequirement(node as RequirementNode);
+        setDetailsPanelOpen(true);
+      } else if (isTC) {
+        setSelectedCase(node as TestCase);
+        setDetailsPanelOpen(true);
+      }
+    };
+    
+    return (
+      <g key={node.id} transform={`translate(${position.x}, ${position.y})`}>
+        {/* 连接线 */}
+        {!isRoot && mindmap && (
+          <path
+            d={`M 0 ${position.height / 2} L ${-MINDMAP_CONFIG.GAP_X / 2} ${position.height / 2} Q ${-MINDMAP_CONFIG.GAP_X / 2} ${position.height / 2} ${-MINDMAP_CONFIG.GAP_X / 2 + 10} ${position.height / 2}`}
+            fill="none"
+            stroke="#d1d5db"
+            strokeWidth="2"
+          />
+        )}
+        
+        {/* 节点背景 */}
+        <rect
+          x="0"
+          y="0"
+          width={position.width}
+          height={position.height}
+          rx={isRoot ? 12 : 8}
+          fill={isRoot ? '#7c3aed' : isReq ? '#3b82f6' : '#f9fafb'}
+          stroke={isSelected ? '#f97316' : isRoot ? '#6d28d9' : isReq ? '#2563eb' : getPriorityBorderColor(node.priority || 'P1')}
+          strokeWidth={isSelected ? 2 : 1}
+          className="cursor-pointer transition-all"
+          onClick={handleClick}
+        />
+        
+        {/* 优先级标签 */}
+        {!isRoot && (
+          <>
+            {isReq ? (
+              // 需求点：文字标签
+              <rect
+                x={position.width - 40}
+                y={8}
+                width={32}
+                height={18}
+                rx={4}
+                fill={getPriorityColor(node.priority || '中')}
+              />
+            ) : (
+              // 测试用例：圆形徽章
+              <circle
+                cx={position.width - 16}
+                cy={position.height / 2}
+                r={10}
+                fill={getPriorityColor(node.priority || 'P1')}
+              />
+            )}
+          </>
+        )}
+        
+        {/* 标题 */}
+        <text
+          x={isRoot ? position.width / 2 : 12}
+          y={position.height / 2}
+          dominantBaseline="middle"
+          textAnchor={isRoot ? 'middle' : 'start'}
+          fill={isRoot ? '#ffffff' : isReq ? '#1e40af' : '#374151'}
+          fontSize={isRoot ? 14 : 12}
+          fontWeight={isRoot ? 'bold' : 'normal'}
+          className="select-none pointer-events-none"
+        >
+          {node.title.length > (isRoot ? 20 : 25) 
+            ? node.title.substring(0, isRoot ? 20 : 25) + '...' 
+            : node.title}
+        </text>
+        
+        {/* 优先级文字 */}
+        {!isRoot && (
+          <text
+            x={isReq ? position.width - 34 : position.width - 16}
+            y={isReq ? 17 : position.height / 2}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill="#ffffff"
+            fontSize={isReq ? 10 : 9}
+            fontWeight="bold"
+            className="select-none pointer-events-none"
+          >
+            {node.priority || 'P1'}
+          </text>
+        )}
+        
+        {/* 展开/折叠图标 */}
+        {isReq && node.children.length > 0 && (
+          <>
+            <circle
+              cx={position.width - 70}
+              cy={position.height / 2}
+              r={10}
+              fill="#e5e7eb"
+            />
+            <text
+              x={position.width - 70}
+              y={position.height / 2}
+              dominantBaseline="middle"
+              textAnchor="middle"
+              fill="#6b7280"
+              fontSize={12}
+              className="select-none pointer-events-none"
+            >
+              {isExpanded ? '−' : '+'}
+            </text>
+          </>
+        )}
+      </g>
+    );
+  };
+
   // 计算统计
   const reqCount = mindmap?.children.length || 0;
   const caseCount = mindmap ? countTestCases(mindmap) : 0;
@@ -851,15 +1415,23 @@ export default function TestCraft() {
       <div key={node.id} className="mb-2 group">
         <div 
           className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all cursor-pointer ${
-            isTestCase ? 'hover:bg-gray-100' : ''
-          } ${selectedCase?.id === node.id && isTestCase ? 'bg-violet-50 border border-violet-200' : ''}`}
+            isTestCase ? 'hover:bg-slate-100 dark:hover:bg-slate-800' : ''
+          } ${isSelected || (isTestCase && selectedCase?.id === node.id) ? 'bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800' : ''}`}
           style={{ paddingLeft: `${level * 20 + 12}px` }}
-          onClick={() => isTestCase && setSelectedCase(currentTestCase)}
+          onClick={() => {
+            if (isTestCase) {
+              setSelectedCase(currentTestCase);
+              setDetailsPanelOpen(true);
+            } else if (isRequirement) {
+              setSelectedRequirement(currentReq);
+              setDetailsPanelOpen(true);
+            }
+          }}
         >
           {/* 展开/折叠按钮 */}
           {hasChildren ? (
             <button onClick={(e) => { e.stopPropagation(); toggleExpand(node.id); }}>
-              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
             </button>
           ) : (
             <div className="w-5" />
@@ -868,11 +1440,11 @@ export default function TestCraft() {
           {/* 图标 */}
           {isRoot && <Sparkles className="w-4 h-4 text-violet-600" />}
           {isRequirement && <GitBranch className="w-4 h-4 text-blue-500" />}
-          {isTestCase && <FileText className="w-4 h-4 text-gray-400" />}
+          {isTestCase && <FileText className="w-4 h-4 text-slate-400" />}
 
           {/* 序号 */}
           {(isRequirement || isTestCase) && (
-            <span className="text-xs font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded min-w-[28px] text-center">
+            <span className="text-xs font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded min-w-[28px] text-center">
               {isTestCase ? testCaseIndex : requirementIndex}
             </span>
           )}
@@ -885,13 +1457,13 @@ export default function TestCraft() {
               onChange={(e) => setEditingNodeTitle(e.target.value)}
               onBlur={handleSaveEdit}
               onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
-              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded outline-none"
+              className="flex-1 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded outline-none bg-white dark:bg-slate-800"
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
             <span 
-              className={`flex-1 text-sm ${isRoot ? 'font-semibold text-gray-900' : isRequirement ? 'font-medium text-gray-700' : 'text-gray-600'}`}
+              className={`flex-1 text-sm ${isRoot ? 'font-semibold text-slate-900 dark:text-slate-100' : isRequirement ? 'font-medium text-slate-700 dark:text-slate-200' : 'text-slate-600 dark:text-slate-300'}`}
               onDoubleClick={() => startEdit(node.id, node.title)}
             >
               {node.title}
@@ -907,37 +1479,30 @@ export default function TestCraft() {
 
           {/* 操作按钮 */}
           {!isRoot && (
-            <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               {isRequirement && (
                 <>
-                  <button title="从知识库添加" onClick={(e) => { e.stopPropagation(); setShowKnowledgeSearch(true); }}>
-                    <Library className="w-3 h-3" />
+                  <button title="从知识库添加" onClick={(e) => { e.stopPropagation(); setShowKnowledgeSearch(true); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
+                    <Library className="w-3 h-3 text-slate-500" />
                   </button>
-                  <button title="生成用例" onClick={(e) => { e.stopPropagation(); handleGenerate(node.id); }}>
-                    {isGeneratingThis ? <Loader2 className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                  <button title="生成用例" onClick={(e) => { e.stopPropagation(); handleGenerate(node.id); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
+                    {isGeneratingThis ? <Loader2 className="w-3 h-3 animate-spin text-violet-600" /> : <Zap className="w-3 h-3 text-amber-500" />}
                   </button>
-                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }}>
-                    <Edit2 className="w-3 h-3" />
+                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
+                    <Edit2 className="w-3 h-3 text-slate-500" />
                   </button>
-                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode(mindmap?.id || '', node.id, node.title, 'requirement'); }}>
-                    <Trash2 className="w-3 h-3" />
+                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode(mindmap?.id || '', node.id); }} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded">
+                    <Trash2 className="w-3 h-3 text-red-500" />
                   </button>
                 </>
               )}
               {isTestCase && (
                 <>
-                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }}>
-                    <Edit2 className="w-3 h-3" />
+                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
+                    <Edit2 className="w-3 h-3 text-slate-500" />
                   </button>
-                  <button title="删除" onClick={(e) => { 
-                    e.stopPropagation(); 
-                    const parentReq = mindmap?.children.find(c => 
-                      'type' in c && c.type === 'requirement' && 
-                      (c as RequirementNode).children.some(cc => cc.id === node.id)
-                    );
-                    handleDeleteNode(parentReq?.id || '', node.id, node.title, 'testcase'); 
-                  }}>
-                    <Trash2 className="w-3 h-3" />
+                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode('', node.id); }} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded">
+                    <Trash2 className="w-3 h-3 text-red-500" />
                   </button>
                 </>
               )}
@@ -950,10 +1515,10 @@ export default function TestCraft() {
           <div className="mt-1">
             {currentReq.children.map((child, idx) => {
               if (child.type === 'testcase') {
-                const tcIdx = currentReq.children.filter((c: any) => c.type === 'testcase').indexOf(child) + 1;
+                const tcIdx = currentReq.children.filter((c: unknown) => (c as { type?: string }).type === 'testcase').indexOf(child) + 1;
                 return renderTreeNode(child, level + 1, tcIdx, 0);
               }
-              const reqIdx = currentReq.children.filter((c: any) => c.type === 'requirement').indexOf(child) + 1;
+              const reqIdx = currentReq.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
               return renderTreeNode(child, level + 1, 0, reqIdx);
             })}
           </div>
@@ -962,100 +1527,177 @@ export default function TestCraft() {
     );
   };
 
-  // 渲染用例详情
-  const renderTestCaseDetail = () => {
-    if (!selectedCase) return null;
+  // 渲染详情面板
+  const renderDetailPanel = () => {
+    if (!detailsPanelOpen) return null;
     
-    const formatContent = (text?: string) => {
-      if (!text || text === '未提供前置条件') {
-        return <span className="text-gray-400 italic">{text || '未提供'}</span>;
-      }
-      return text;
-    };
-
+    const isRequirementDetail = selectedRequirement && !selectedCase;
+    const isCaseDetail = selectedCase;
+    
     return (
-      <div className="space-y-5 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
-        {/* 场景标题 */}
-        <div className="space-y-2 shrink-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <Badge variant="secondary" className="bg-orange-100 text-orange-700 px-3 py-1">
-              测试场景
-            </Badge>
-            <span className={`text-xs px-1.5 py-0.5 rounded ${getPriorityColor(selectedCase.priority)}`}>
-              {selectedCase.priority}
-            </span>
-          </div>
-          <h3 className="font-semibold text-gray-900 leading-relaxed pr-2">
-            {selectedCase.title}
-          </h3>
-        </div>
+      <div className="xl:w-[480px] shrink-0">
+        <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden lg:sticky lg:top-28">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-700">
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                {isCaseDetail ? '用例详情' : '需求点详情'}
+              </span>
+              <button 
+                onClick={() => {
+                  setDetailsPanelOpen(false);
+                  setSelectedCase(null);
+                  setSelectedRequirement(null);
+                }}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+              >
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+            
+            {isCaseDetail && selectedCase && (
+              <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
+                {/* 场景标题 */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-3 py-1">
+                      测试用例
+                    </Badge>
+                    <span className={`text-xs px-2 py-0.5 rounded ${getPriorityColor(selectedCase.priority)}`}>
+                      {selectedCase.priority}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 leading-relaxed">
+                    {selectedCase.title}
+                  </h3>
+                </div>
 
-        {/* 分割线 */}
-        <div className="border-t border-gray-100 shrink-0" />
+                {/* Given - 前置条件 */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-3 py-1 shrink-0">前置条件</Badge>
+                    <span className="text-xs text-slate-400">Given</span>
+                  </div>
+                  <div className="bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl px-4 py-3 border border-emerald-100 dark:border-emerald-900/50">
+                    <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
+                      {selectedCase.given || <span className="text-slate-400 italic">未提供</span>}
+                    </pre>
+                  </div>
+                </div>
 
-        {/* Given - 前置条件 */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-emerald-100 text-emerald-700 px-3 py-1 shrink-0">前置条件</Badge>
-            <span className="text-xs text-gray-400">Given</span>
-          </div>
-          <div className="bg-emerald-50/70 rounded-xl px-4 py-3">
-            <pre className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words font-sans">
-              {formatContent(selectedCase.given)}
-            </pre>
-          </div>
-        </div>
+                {/* When - 操作步骤 */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-3 py-1 shrink-0">操作步骤</Badge>
+                    <span className="text-xs text-slate-400">When</span>
+                  </div>
+                  <div className="bg-amber-50/70 dark:bg-amber-950/30 rounded-xl px-4 py-3 border border-amber-100 dark:border-amber-900/50">
+                    <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
+                      {selectedCase.when || <span className="text-slate-400 italic">未提供</span>}
+                    </pre>
+                  </div>
+                </div>
 
-        {/* When - 操作步骤 */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-amber-100 text-amber-700 px-3 py-1 shrink-0">操作步骤</Badge>
-            <span className="text-xs text-gray-400">When</span>
-          </div>
-          <div className="bg-amber-50/70 rounded-xl px-4 py-3">
-            <pre className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words font-sans">
-              {formatContent(selectedCase.when)}
-            </pre>
-          </div>
-        </div>
+                {/* Then - 预期结果 */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 px-3 py-1 shrink-0">预期结果</Badge>
+                    <span className="text-xs text-slate-400">Then</span>
+                  </div>
+                  <div className="bg-rose-50/70 dark:bg-rose-950/30 rounded-xl px-4 py-3 border border-rose-100 dark:border-rose-900/50">
+                    <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
+                      {selectedCase.then || <span className="text-slate-400 italic">未提供</span>}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {isRequirementDetail && selectedRequirement && (
+              <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
+                {/* 需求点标题 */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1">
+                      需求点
+                    </Badge>
+                    <span className={`text-xs px-2 py-0.5 rounded ${getPriorityColor(selectedRequirement.priority || '中')}`}>
+                      {selectedRequirement.priority || '中'}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 leading-relaxed">
+                    {selectedRequirement.title}
+                  </h3>
+                </div>
 
-        {/* Then - 预期结果 */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Badge className="bg-rose-100 text-rose-700 px-3 py-1 shrink-0">预期结果</Badge>
-            <span className="text-xs text-gray-400">Then</span>
-          </div>
-          <div className="bg-rose-50/70 rounded-xl px-4 py-3">
-            <pre className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words font-sans">
-              {formatContent(selectedCase.then)}
-            </pre>
-          </div>
-        </div>
+                {/* 描述 */}
+                {selectedRequirement.description && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="px-3 py-1">描述</Badge>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-700">
+                      <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
+                        {selectedRequirement.description}
+                      </pre>
+                    </div>
+                  </div>
+                )}
 
-        {/* 执行要点提示 */}
-        <div className="bg-violet-50/50 rounded-xl px-4 py-3 border border-violet-100 shrink-0">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-violet-600">ℹ️</span>
-            <span className="text-xs font-medium text-violet-700">执行要点</span>
-          </div>
-          <ul className="text-xs text-violet-600/80 space-y-1 pl-6 list-disc">
-            <li>按 Given 准备好测试数据和环境</li>
-            <li>严格按 When 步骤执行操作</li>
-            <li>逐项验证 Then 中的预期结果</li>
-          </ul>
-        </div>
+                {/* 子用例统计 */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="px-3 py-1">关联测试用例</Badge>
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500" />
+                        <span className="text-slate-600 dark:text-slate-400">
+                          P0: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P0').length}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-500" />
+                        <span className="text-slate-600 dark:text-slate-400">
+                          P1: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P1').length}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-gray-400" />
+                        <span className="text-slate-600 dark:text-slate-400">
+                          P2: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P2').length}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {!isCaseDetail && !isRequirementDetail && (
+              <div className="flex flex-col items-center justify-center min-h-[200px] text-center">
+                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
+                  <FileText className="w-6 h-6 text-slate-300 dark:text-slate-500" />
+                </div>
+                <p className="text-sm text-slate-400">选择一个需求点或测试用例查看详情</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
   };
 
+  const isSelected = selectedCase?.id !== undefined || selectedRequirement?.id !== undefined;
+
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
       <BackToHome />
       
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/80">
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
         <div className="px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             {/* 左侧 Logo */}
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -1063,17 +1705,15 @@ export default function TestCraft() {
                                 flex items-center justify-center shadow-lg shadow-purple-500/20">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <div className="absolute -inset-1 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-500 
-                                rounded-2xl blur opacity-30 -z-10" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900 tracking-tight">TestCraft</h1>
-                <p className="text-xs text-gray-500">AI 生成测试用例</p>
+                <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">TestCraft</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">AI 生成测试用例</p>
               </div>
             </div>
 
             {/* 右侧按钮组 */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               {/* 拆分需求按钮 */}
               <Button 
                 className="h-10 px-4 bg-gradient-to-r from-violet-600 to-purple-600 
@@ -1103,11 +1743,11 @@ export default function TestCraft() {
                 <div className="hidden md:flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-violet-500" />
-                    <span>{reqCount} 需求点</span>
+                    <span className="text-slate-600 dark:text-slate-400">{reqCount} 需求点</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span>{caseCount} 测试用例</span>
+                    <span className="text-slate-600 dark:text-slate-400">{caseCount} 测试用例</span>
                   </div>
                 </div>
               )}
@@ -1117,7 +1757,7 @@ export default function TestCraft() {
                 <div className="relative">
                   <Button 
                     variant="outline"
-                    className="h-10 px-4 gap-2 bg-gray-900 hover:bg-gray-800 text-white rounded-xl border-0"
+                    className="h-10 px-4 gap-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl border-0 dark:bg-slate-800"
                     onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
                   >
                     <Download className="w-4 h-4" />
@@ -1128,23 +1768,26 @@ export default function TestCraft() {
                   {exportDropdownOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setExportDropdownOpen(false)} />
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50">
+                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50">
                         <button 
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
                           onClick={exportXMind}
                         >
+                          <Network className="w-4 h-4 text-violet-600" />
                           导出为 XMind
                         </button>
                         <button 
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
                           onClick={exportExcel}
                         >
+                          <FileCheck className="w-4 h-4 text-emerald-600" />
                           导出为 Excel
                         </button>
                         <button 
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
                           onClick={exportCSV}
                         >
+                          <FileText className="w-4 h-4 text-blue-600" />
                           导出为 CSV
                         </button>
                       </div>
@@ -1157,9 +1800,9 @@ export default function TestCraft() {
               {mindmap && (
                 <Button 
                   variant="outline" 
-                  className="h-10 px-4 gap-2 border-gray-200 rounded-xl 
-                             text-gray-600 hover:text-red-600 
-                             hover:border-red-200 hover:bg-red-50"
+                  className="h-10 px-4 gap-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                             text-slate-600 dark:text-slate-400 hover:text-red-600 
+                             hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-900/20"
                   onClick={() => setClearingData(true)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -1171,38 +1814,38 @@ export default function TestCraft() {
         </div>
       </header>
 
-      {/* 主内容区 - Flex布局 */}
-      <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1600px] mx-auto">
-        {/* 左侧表单区域 - 固定宽度380px */}
-        <div className="w-full lg:w-[380px] shrink-0">
-          <Card className="bg-white border border-gray-200/80 rounded-2xl 
-                           shadow-sm shadow-gray-200/50 overflow-hidden 
+      {/* 主内容区 */}
+      <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1800px] mx-auto">
+        {/* 左侧表单区域 */}
+        <div className="w-full lg:w-[400px] shrink-0">
+          <Card className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl 
+                           shadow-sm overflow-hidden 
                            lg:sticky lg:top-28">
-            <CardContent className="p-4 md:p-6 space-y-6">
+            <CardContent className="p-4 md:p-6 space-y-5">
               {/* 需求标题 */}
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                   需求标题
                 </label>
                 <Input 
                   type="text"
                   placeholder="输入需求标题"
-                  className="h-11 bg-gray-50/50 border-gray-200 rounded-xl 
-                             focus:bg-white transition-colors 
-                             text-lg font-medium text-gray-900"
+                  className="h-11 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl 
+                             focus:bg-white dark:focus:bg-slate-800 transition-colors 
+                             text-base font-medium"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </div>
 
               {/* 所属模块 & AI 模型 */}
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                     所属模块
                   </label>
                   <Select value={module} onValueChange={setModule}>
-                    <SelectTrigger className="h-11 bg-gray-50/50 border-gray-200 rounded-xl">
+                    <SelectTrigger className="h-11 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1214,11 +1857,11 @@ export default function TestCraft() {
                 </div>
                 
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                     AI 模型
                   </label>
                   <Select value={aiModel} onValueChange={setAiModel}>
-                    <SelectTrigger className="h-11 bg-gray-50/50 border-gray-200 rounded-xl">
+                    <SelectTrigger className="h-11 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1232,13 +1875,13 @@ export default function TestCraft() {
 
               {/* 需求描述 */}
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                   需求描述
                 </label>
                 <textarea
                   placeholder="详细描述你的需求，或上传文件/粘贴链接自动解析..."
-                  className="min-h-[120px] w-full px-4 py-3 bg-gray-50/50 border-gray-200 rounded-xl 
-                             focus:bg-white resize-none transition-colors text-sm"
+                  className="min-h-[120px] w-full px-4 py-3 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl 
+                             focus:bg-white dark:focus:bg-slate-800 resize-none transition-colors text-sm"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
@@ -1246,42 +1889,42 @@ export default function TestCraft() {
 
               {/* 已解析内容预览区 */}
               {parsedContent.length > 0 && (
-                <div className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 
-                                border border-violet-100 rounded-xl">
+                <div className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 
+                                border border-violet-100 dark:border-violet-900/50 rounded-xl">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-violet-600" />
-                      <label className="text-xs font-medium text-violet-700 uppercase tracking-wider">
+                      <label className="text-xs font-medium text-violet-700 dark:text-violet-400 uppercase tracking-wider">
                         已解析内容
                       </label>
-                      <Badge variant="secondary" className="rounded-full bg-violet-100 text-violet-700 text-xs">
+                      <Badge variant="secondary" className="rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300 text-xs">
                         {parsedContent.length} 个来源
                       </Badge>
                     </div>
-                    <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-violet-600 
-                                                       hover:text-violet-700 hover:bg-violet-100"
+                    <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-violet-600 dark:text-violet-400 
+                                                       hover:text-violet-700 dark:hover:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30"
                       onClick={handleMergeToDescription}>
                       <Merge className="w-3 h-3" />
-                      合并到需求描述
+                      合并
                     </Button>
                   </div>
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                  <div className="space-y-3 max-h-[250px] overflow-y-auto">
                     {parsedContent.map((p) => (
-                      <div key={p.id} className="bg-white/60 rounded-lg p-3 border border-violet-100/50">
+                      <div key={p.id} className="bg-white/60 dark:bg-slate-900/50 rounded-lg p-3 border border-violet-100/50 dark:border-violet-900/30">
                         <div className="flex items-center gap-2 mb-2">
                           {p.source === 'file' ? (
                             <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
                           ) : (
                             <LinkIcon className="w-3.5 h-3.5 text-blue-600" />
                           )}
-                          <span className="text-sm font-medium text-gray-700 truncate flex-1">{p.name}</span>
-                          <span className="text-xs text-gray-400">{p.content.length} 字</span>
-                          <button onClick={() => removeParsedContent(p.id)}>
-                            <X className="w-3 h-3 text-gray-400 hover:text-red-500" />
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate flex-1">{p.name}</span>
+                          <span className="text-xs text-slate-400">{p.content.length} 字</span>
+                          <button onClick={() => removeParsedContent(p.id)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                            <X className="w-3 h-3 text-slate-400 hover:text-red-500" />
                           </button>
                         </div>
-                        <p className="text-xs text-gray-600 line-clamp-4 whitespace-pre-wrap">
-                          {p.content.slice(0, 500)}{p.content.length > 500 && '...'}
+                        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-4 whitespace-pre-wrap">
+                          {p.content.slice(0, 300)}{p.content.length > 300 && '...'}
                         </p>
                       </div>
                     ))}
@@ -1291,39 +1934,39 @@ export default function TestCraft() {
 
               {/* 上传文件 */}
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                   上传文件
                 </label>
                 <input 
                   ref={fileInputRef} 
                   type="file" 
                   className="hidden" 
-                  accept=".pdf,.doc,.docx,.html,.htm,.txt,.md,image/*" 
+                  accept=".pdf,.doc,.docx,.html,.htm,.txt,.md" 
                   onChange={handleFileSelect}
                   multiple
                 />
-                <Button variant="outline" className="gap-2 border-gray-200 rounded-xl h-10 px-4 
-                                                   bg-gray-50/30 hover:bg-gray-100 w-full justify-start"
+                <Button variant="outline" className="gap-2 border-slate-200 dark:border-slate-700 rounded-xl h-10 px-4 
+                                                   bg-slate-50/30 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700 w-full justify-start"
                   onClick={() => fileInputRef.current?.click()}>
-                  <Paperclip className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">添加文件（PDF/Word/HTML）</span>
+                  <Paperclip className="w-4 h-4 text-slate-400" />
+                  <span className="text-sm text-slate-600 dark:text-slate-400">添加文件（PDF/Word/HTML）</span>
                 </Button>
               </div>
 
               {/* 粘贴链接 */}
               <div>
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">
+                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                   粘贴链接
                 </label>
                 <div className="flex gap-2">
                   <Input 
-                    placeholder="输入需求文档链接地址..."
-                    className="h-10 bg-gray-50/50 border-gray-200 rounded-xl focus:bg-white flex-1"
+                    placeholder="输入需求文档链接..."
+                    className="h-10 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-800 flex-1"
                     value={linkInput}
                     onChange={(e) => setLinkInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleFetchUrl()}
                   />
-                  <Button variant="outline" className="h-10 px-4 rounded-xl border-gray-200 hover:bg-gray-100"
+                  <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
                     onClick={handleFetchUrl} disabled={!linkInput.trim() || isFetchingUrl}>
                     {isFetchingUrl ? <Loader2 className="w-4 h-4 animate-spin" /> : '抓取'}
                   </Button>
@@ -1336,26 +1979,25 @@ export default function TestCraft() {
         {/* 右侧内容区域 */}
         <div className="flex-1 min-w-0">
           {analyzing ? (
-            /* 加载状态 */
-            <div className="flex flex-col items-center justify-center min-h-[500px]">
+            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
               <Loader2 className="w-8 h-8 animate-spin text-violet-600 mb-3" />
-              <p className="text-gray-500">正在分析需求...</p>
+              <p className="text-slate-500 dark:text-slate-400">正在分析需求...</p>
             </div>
           ) : mindmap ? (
             <div className="flex flex-col xl:flex-row gap-6">
               {/* 左侧：需求点列表 / 思维导图 */}
               <div className="flex-1 min-w-0">
-                <Card className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden">
-                  <div className="p-4 border-b border-gray-100">
-                    <div className="flex items-center justify-between">
+                <Card className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden">
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
                       {/* 视图切换 */}
-                      <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl">
+                      <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
                         <button
                           onClick={() => setViewMode('tree')}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                             viewMode === 'tree'
-                              ? 'bg-white text-violet-700 shadow-sm'
-                              : 'text-gray-500 hover:text-gray-700'
+                              ? 'bg-white dark:bg-slate-700 text-violet-700 dark:text-violet-400 shadow-sm'
+                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                           }`}
                         >
                           <LayoutList className="w-4 h-4" />
@@ -1365,8 +2007,8 @@ export default function TestCraft() {
                           onClick={() => setViewMode('mindmap')}
                           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                             viewMode === 'mindmap'
-                              ? 'bg-white text-violet-700 shadow-sm'
-                              : 'text-gray-500 hover:text-gray-700'
+                              ? 'bg-white dark:bg-slate-700 text-violet-700 dark:text-violet-400 shadow-sm'
+                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                           }`}
                         >
                           <Network className="w-4 h-4" />
@@ -1374,31 +2016,159 @@ export default function TestCraft() {
                         </button>
                       </div>
                       
-                      <Button size="sm" variant="ghost" className="gap-1 text-violet-600" onClick={addRequirement}>
-                        <Plus className="w-4 h-4" />
-                        添加需求点
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {viewMode === 'tree' && (
+                          <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={expandAll}>
+                              <ChevronDown className="w-3 h-3" />
+                              展开
+                            </Button>
+                            <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={collapseAll}>
+                              <ChevronRight className="w-3 h-3" />
+                              折叠
+                            </Button>
+                          </div>
+                        )}
+                        {viewMode === 'mindmap' && (
+                          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                            <button onClick={() => setScale(prev => Math.min(prev * 1.2, 2))} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded">
+                              <ZoomIn className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            </button>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 w-12 text-center">{Math.round(scale * 100)}%</span>
+                            <button onClick={() => setScale(prev => Math.max(prev * 0.8, 0.5))} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded">
+                              <ZoomOut className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            </button>
+                            <button onClick={resetView} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded ml-1">
+                              <Maximize2 className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                            </button>
+                          </div>
+                        )}
+                        <Button size="sm" variant="ghost" className="gap-1 text-violet-600 dark:text-violet-400 h-8" onClick={addRequirement}>
+                          <Plus className="w-4 h-4" />
+                          添加需求点
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   
-                  <CardContent className="p-4 max-h-[600px] overflow-y-auto">
+                  <CardContent className="p-4 max-h-[600px] overflow-auto">
                     {viewMode === 'tree' ? (
                       <div className="space-y-1">
                         {mindmap.children.map((child, idx) => {
                           if (child.type === 'requirement') {
-                            const reqIdx = mindmap.children.filter((c: any) => c.type === 'requirement').indexOf(child) + 1;
+                            const reqIdx = mindmap.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
                             return renderTreeNode(child, 0, 0, reqIdx);
                           }
                           return null;
                         })}
                       </div>
                     ) : (
-                      /* 思维导图视图 - 简化版 */
-                      <div className="flex items-center justify-center min-h-[400px] text-gray-400">
-                        <div className="text-center">
-                          <Network className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                          <p>思维导图视图开发中...</p>
-                          <p className="text-xs mt-1">敬请期待</p>
+                      /* 思维导图视图 */
+                      <div 
+                        ref={canvasRef}
+                        className="relative overflow-hidden cursor-grab active:cursor-grabbing min-h-[500px]"
+                        onWheel={handleWheel}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                      >
+                        <div 
+                          className="inline-block"
+                          style={{
+                            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
+                            transformOrigin: '0 0',
+                          }}
+                        >
+                          <svg
+                            width={Math.max(calculateNodePositions.totalWidth, 800)}
+                            height={Math.max(calculateNodePositions.totalHeight, 500)}
+                            className="overflow-visible"
+                          >
+                            <defs>
+                              <marker
+                                id="arrowhead"
+                                markerWidth="10"
+                                markerHeight="7"
+                                refX="9"
+                                refY="3.5"
+                                orient="auto"
+                              >
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#d1d5db" />
+                              </marker>
+                            </defs>
+                            
+                            {/* 连接线 */}
+                            {mindmap && calculateNodePositions.positions.get(mindmap.id) && Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
+                              if (id === mindmap.id) return null;
+                              const parentReq = mindmap.children.find(c => 
+                                c.type === 'requirement' && 
+                                (c as RequirementNode).children.some(cc => cc.id === id)
+                              );
+                              if (!parentReq) return null;
+                              const parentPos = calculateNodePositions.positions.get(parentReq.id);
+                              if (!parentPos) return null;
+                              
+                              return (
+                                <path
+                                  key={`line-${id}`}
+                                  d={`M ${parentPos.x + parentPos.width} ${parentPos.y + parentPos.height / 2} 
+                                     C ${parentPos.x + parentPos.width + MINDMAP_CONFIG.GAP_X / 2} ${parentPos.y + parentPos.height / 2},
+                                       ${pos.x - MINDMAP_CONFIG.GAP_X / 2} ${pos.y + pos.height / 2},
+                                       ${pos.x} ${pos.y + pos.height / 2}`}
+                                  fill="none"
+                                  stroke="#cbd5e1"
+                                  strokeWidth="2"
+                                />
+                              );
+                            })}
+                            
+                            {/* 根节点连接线 */}
+                            {mindmap && calculateNodePositions.positions.get(mindmap.id) && mindmap.children.map((req) => {
+                              const reqPos = calculateNodePositions.positions.get(req.id);
+                              const rootPos = calculateNodePositions.positions.get(mindmap.id);
+                              if (!reqPos || !rootPos) return null;
+                              
+                              return (
+                                <path
+                                  key={`root-line-${req.id}`}
+                                  d={`M ${rootPos.x + rootPos.width} ${rootPos.y + rootPos.height / 2} 
+                                     C ${rootPos.x + rootPos.width + MINDMAP_CONFIG.GAP_X / 2} ${rootPos.y + rootPos.height / 2},
+                                       ${reqPos.x - MINDMAP_CONFIG.GAP_X / 2} ${reqPos.y + reqPos.height / 2},
+                                       ${reqPos.x} ${reqPos.y + reqPos.height / 2}`}
+                                  fill="none"
+                                  stroke="#a78bfa"
+                                  strokeWidth="2"
+                                />
+                              );
+                            })}
+                            
+                            {/* 节点 */}
+                            {calculateNodePositions.positions.get(mindmap.id) && renderMindMapNode(mindmap, calculateNodePositions.positions.get(mindmap.id)!, true)}
+                            {Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
+                              const node = findNodeById(mindmap, id);
+                              if (!node || node.type === 'root') return null;
+                              return renderMindMapNode(node, pos);
+                            })}
+                          </svg>
+                        </div>
+                        
+                        {/* 图例 */}
+                        <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200 dark:border-slate-700">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-3 h-3 rounded bg-violet-600" />
+                              <span className="text-slate-600 dark:text-slate-400">需求</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-3 h-3 rounded bg-blue-500" />
+                              <span className="text-slate-600 dark:text-slate-400">需求点</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-600" />
+                              <span className="text-slate-600 dark:text-slate-400">测试用例</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1406,40 +2176,16 @@ export default function TestCraft() {
                 </Card>
               </div>
               
-              {/* 右侧：用例详情 */}
-              <div className="xl:w-[520px] shrink-0">
-                <Card className="bg-white border border-gray-200/80 rounded-2xl overflow-hidden lg:sticky lg:top-28">
-                  <CardContent className="p-4">
-                    {selectedCase ? (
-                      <>
-                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
-                          <span className="text-sm font-medium text-gray-700">用例详情</span>
-                          <button onClick={() => setSelectedCase(null)}>
-                            <X className="w-4 h-4 text-gray-500" />
-                          </button>
-                        </div>
-                        {renderTestCaseDetail()}
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center min-h-[300px] text-center">
-                        <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                          <FileText className="w-6 h-6 text-gray-300" />
-                        </div>
-                        <p className="text-sm text-gray-400">点击左侧用例查看详情</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
+              {/* 右侧：详情面板 */}
+              {isSelected && renderDetailPanel()}
             </div>
           ) : (
-            /* 空状态 */
-            <div className="flex flex-col items-center justify-center min-h-[500px] text-center">
-              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-                <Hourglass className="w-8 h-8 text-gray-400" />
+            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center p-8">
+              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6">
+                <Hourglass className="w-8 h-8 text-slate-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">待输入需求</h3>
-              <p className="text-gray-400">左侧填写需求后自动展示</p>
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">待输入需求</h3>
+              <p className="text-slate-500 dark:text-slate-400">左侧填写需求后自动展示</p>
             </div>
           )}
         </div>
@@ -1447,34 +2193,34 @@ export default function TestCraft() {
 
       {/* 知识库搜索弹窗 */}
       {showKnowledgeSearch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-2xl mx-4 shadow-2xl max-h-[80vh] flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Library className="w-5 h-5 text-blue-600" />
+                <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Library className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">从知识库添加用例</h3>
-                  <p className="text-xs text-gray-500">搜索并选择已有的测试用例</p>
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">从知识库添加用例</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">搜索并选择已有的测试用例</p>
                 </div>
               </div>
-              <button onClick={() => setShowKnowledgeSearch(false)} className="w-8 h-8 rounded-full hover:bg-gray-100">
-                <X className="w-5 h-5 text-gray-500" />
+              <button onClick={() => setShowKnowledgeSearch(false)} className="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                <X className="w-5 h-5 text-slate-500" />
               </button>
             </div>
 
-            <div className="p-4 border-b border-gray-100">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex gap-2">
                 <div className="flex-1 relative">
-                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input
                     type="text"
                     placeholder="输入关键词搜索测试用例..."
                     value={knowledgeSearchQuery}
                     onChange={(e) => setKnowledgeSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleKnowledgeSearch()}
-                    className="pl-10 h-10"
+                    className="pl-10 h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                   />
                 </div>
                 <Button onClick={handleKnowledgeSearch} disabled={!knowledgeSearchQuery.trim() || knowledgeSearchLoading}
@@ -1487,30 +2233,30 @@ export default function TestCraft() {
             <div className="flex-1 overflow-y-auto p-4">
               {knowledgeSearchResults.length > 0 ? (
                 <div className="space-y-2">
-                  <div className="text-sm text-gray-500 mb-3">
-                    找到 {knowledgeSearchResults.length} 个相关用例：
+                  <div className="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                    找到 {knowledgeSearchResults.length} 个相关用例
                   </div>
                   {knowledgeSearchResults.map((result) => (
                     <div 
-                      key={result.id}
+                      key={result.id as string}
                       className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                        selectedKnowledgeCases.has(result.id) 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                        selectedKnowledgeCases.has(result.id as string) 
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' 
+                          : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
-                      onClick={() => toggleKnowledgeCaseSelection(result.id)}
+                      onClick={() => toggleKnowledgeCaseSelection(result.id as string)}
                     >
                       <div className="flex items-start gap-3">
-                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${
-                          selectedKnowledgeCases.has(result.id) 
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 ${
+                          selectedKnowledgeCases.has(result.id as string) 
                             ? 'border-blue-500 bg-blue-500' 
-                            : 'border-gray-300'
+                            : 'border-slate-300 dark:border-slate-600'
                         }`}>
-                          {selectedKnowledgeCases.has(result.id) && <Check className="w-3 h-3 text-white" />}
+                          {selectedKnowledgeCases.has(result.id as string) && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 text-sm">{result.title}</div>
-                          <div className="text-xs text-gray-500 mt-1 line-clamp-2 whitespace-pre-wrap">{result.content}</div>
+                          <div className="font-medium text-slate-900 dark:text-slate-100 text-sm">{result.title as string}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 whitespace-pre-wrap">{result.content as string}</div>
                         </div>
                       </div>
                     </div>
@@ -1518,19 +2264,19 @@ export default function TestCraft() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <BookOpen className="w-12 h-12 text-gray-300 mb-3" />
-                  <p className="text-gray-500">输入关键词搜索知识库</p>
-                  <p className="text-xs text-gray-400 mt-1">输入测试用例相关的关键词进行搜索</p>
+                  <BookOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+                  <p className="text-slate-500 dark:text-slate-400">输入关键词搜索知识库</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">输入测试用例相关的关键词进行搜索</p>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
-              <div className="text-sm text-gray-500">
-                已选择 <span className="font-semibold text-blue-600">{selectedKnowledgeCases.size}</span> 个用例
+            <div className="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 rounded-b-2xl">
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                已选择 <span className="font-semibold text-blue-600 dark:text-blue-400">{selectedKnowledgeCases.size}</span> 个用例
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" className="h-10 rounded-xl" onClick={() => setShowKnowledgeSearch(false)}>
+                <Button variant="outline" className="h-10 rounded-xl border-slate-200 dark:border-slate-700" onClick={() => setShowKnowledgeSearch(false)}>
                   取消
                 </Button>
                 <Button className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700" 
@@ -1546,34 +2292,34 @@ export default function TestCraft() {
 
       {/* 清除确认对话框 */}
       {clearingData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">清除所有数据</h3>
-                <p className="text-sm text-gray-500">不可逆操作</p>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">清除所有数据</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">不可逆操作</p>
               </div>
             </div>
-            <p className="text-gray-600 mb-6">确定要清除所有数据吗？此操作将删除：</p>
-            <ul className="text-sm text-gray-600 mb-6 space-y-1">
+            <p className="text-slate-600 dark:text-slate-300 mb-6">确定要清除所有数据吗？此操作将删除：</p>
+            <ul className="text-sm text-slate-600 dark:text-slate-400 mb-6 space-y-1">
               <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                 所有需求点和测试用例
               </li>
               <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                 左侧输入的表单内容
               </li>
               <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
                 页面缓存数据
               </li>
             </ul>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex-1 h-10 rounded-xl" onClick={() => setClearingData(false)}>
+              <Button variant="outline" className="flex-1 h-10 rounded-xl border-slate-200 dark:border-slate-700" onClick={() => setClearingData(false)}>
                 取消
               </Button>
               <Button className="flex-1 h-10 rounded-xl bg-amber-600 hover:bg-amber-700 text-white" onClick={confirmClearAllData}>
