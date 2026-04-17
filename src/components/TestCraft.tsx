@@ -1830,8 +1830,8 @@ export default function TestCraft() {
                 <Input 
                   type="text"
                   placeholder="输入需求标题"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
-                             hover:border-orange-400 dark:hover:border-orange-500 focus:outline-none focus:border-orange-500 transition-colors 
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                             hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
                              text-sm text-slate-800 dark:text-slate-200"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -1847,8 +1847,8 @@ export default function TestCraft() {
                   <Input 
                     type="text"
                     placeholder="输入模块名称"
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
-                               hover:border-orange-400 dark:hover:border-orange-500 focus:outline-none focus:border-orange-500 transition-colors 
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                               hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
                                text-sm text-slate-800 dark:text-slate-200"
                     value={module}
                     onChange={(e) => setModule(e.target.value)}
@@ -1964,7 +1964,7 @@ export default function TestCraft() {
                   <Input 
                     placeholder="输入需求文档链接..."
                     className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
-                               hover:border-orange-400 dark:hover:border-orange-500 focus:outline-none focus:border-orange-500 transition-colors 
+                               hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
                                text-sm text-slate-800 dark:text-slate-200 h-auto"
                     value={linkInput}
                     onChange={(e) => setLinkInput(e.target.value)}

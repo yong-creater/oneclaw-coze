@@ -329,21 +329,32 @@ interface Tool {
 |------|----------|------|
 | 默认 | `border-2 border-slate-200 dark:border-slate-700` | 灰色边框 |
 | Hover | `hover:border-orange-400 dark:hover:border-orange-500` | 橙色边框 |
-| Focus | `focus:outline-none focus:border-orange-500` | 橙色边框（无 ring） |
+| Focus | `border-orange-500` | 橙色边框（无 ring） |
+
+### ⚠️ Input 组件全局样式修复 (必须执行)
+
+shadcn/ui 的 Input 组件有默认的 focus 样式，会覆盖自定义样式。**必须修改 `src/components/ui/input.tsx`**：
+
+```tsx
+// ❌ 错误：默认的 focus 样式会覆盖自定义样式
+"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+
+// ✅ 正确：使用橙色边框作为默认 focus 样式
+"focus-visible:border-orange-500"
+```
 
 ### ✅ 正确的实现方式
 
 ```tsx
-// Input 输入框
+// Input 输入框（无需额外 focus 类，组件已有默认样式）
 <Input 
   className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
              border-2 border-slate-200 dark:border-slate-700 rounded-xl 
              hover:border-orange-400 dark:hover:border-orange-500 
-             focus:outline-none focus:border-orange-500 
              transition-colors text-sm"
 />
 
-// Textarea 文本框
+// Textarea 文本框（需要手动添加 focus 样式）
 <textarea
   className="w-full px-4 py-3 bg-white dark:bg-slate-800 
              border-2 border-slate-200 dark:border-slate-700 rounded-xl 
@@ -352,7 +363,7 @@ interface Tool {
              transition-colors text-sm resize-none"
 />
 
-// Select 选择器
+// Select 选择器（需要手动添加 focus 样式）
 <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
                          border-2 border-slate-200 dark:border-slate-700 rounded-xl 
                          hover:border-orange-400 dark:hover:border-orange-500 
@@ -386,11 +397,11 @@ className="... border border-slate-200 ..."
 
 ### 规范要点
 
-1. **边框宽度**：统一使用 `border-2`（2px）
-2. **Hover 状态**：必须使用 `hover:border-orange-400`（橙色边框）
-3. **Focus 状态**：必须使用 `focus:outline-none` + `focus:border-orange-500`（无 ring）
-4. **颜色一致性**：Hover 和 Focus 必须使用相同的橙色系
-5. **禁止 ring**：Focus 时禁止使用 `focus:ring-*`，会导致双层边框效果
+1. **Input 组件**：已内置 `focus-visible:border-orange-500`，只需添加 hover 样式
+2. **Textarea/Select**：需要手动添加 `focus:outline-none focus:border-orange-500`
+3. **边框宽度**：统一使用 `border-2`
+4. **Hover 颜色**：`hover:border-orange-400`
+5. **禁止 ring**：Focus 时禁止使用 `focus:ring-*`
 
 ---
 
