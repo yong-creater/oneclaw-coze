@@ -1830,9 +1830,9 @@ export default function TestCraft() {
                 <Input 
                   type="text"
                   placeholder="输入需求标题"
-                  className="h-11 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl 
-                             focus:bg-white dark:focus:bg-slate-800 transition-colors 
-                             text-base font-medium"
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
+                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                             text-sm text-slate-800 dark:text-slate-200"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
@@ -1845,7 +1845,9 @@ export default function TestCraft() {
                     所属模块
                   </label>
                   <Select value={module} onValueChange={setModule}>
-                    <SelectTrigger className="h-11 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl">
+                    <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
+                                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                                             text-sm text-slate-800 dark:text-slate-200 h-auto">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1861,7 +1863,9 @@ export default function TestCraft() {
                     AI 模型
                   </label>
                   <Select value={aiModel} onValueChange={setAiModel}>
-                    <SelectTrigger className="h-11 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl">
+                    <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
+                                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                                             text-sm text-slate-800 dark:text-slate-200 h-auto">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1880,8 +1884,9 @@ export default function TestCraft() {
                 </label>
                 <textarea
                   placeholder="详细描述你的需求，或上传文件/粘贴链接自动解析..."
-                  className="min-h-[120px] w-full px-4 py-3 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl 
-                             focus:bg-white dark:focus:bg-slate-800 resize-none transition-colors text-sm"
+                  className="min-h-[120px] w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl 
+                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none transition-colors text-sm
+                             text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
@@ -1961,12 +1966,14 @@ export default function TestCraft() {
                 <div className="flex gap-2">
                   <Input 
                     placeholder="输入需求文档链接..."
-                    className="h-10 bg-slate-50/50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-800 flex-1"
+                    className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl 
+                               hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                               text-sm text-slate-800 dark:text-slate-200 h-auto"
                     value={linkInput}
                     onChange={(e) => setLinkInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleFetchUrl()}
                   />
-                  <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  <Button variant="outline" className="h-auto px-4 py-2.5 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-300"
                     onClick={handleFetchUrl} disabled={!linkInput.trim() || isFetchingUrl}>
                     {isFetchingUrl ? <Loader2 className="w-4 h-4 animate-spin" /> : '抓取'}
                   </Button>
