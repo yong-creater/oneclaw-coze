@@ -321,6 +321,77 @@ interface Tool {
 </Card>
 ```
 
+## 1.7 表单输入框交互规范 (CRITICAL)
+
+**必须遵循的交互状态规范**：
+
+| 状态 | 边框颜色 | 说明 |
+|------|----------|------|
+| 默认 | `border-2 border-slate-200 dark:border-slate-700` | 灰色边框 |
+| Hover | `hover:border-orange-400 dark:hover:border-orange-500` | 橙色边框 |
+| Focus | `focus:outline-none focus:border-orange-500` | 橙色边框（无 ring） |
+
+### ✅ 正确的实现方式
+
+```tsx
+// Input 输入框
+<Input 
+  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
+             border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+             hover:border-orange-400 dark:hover:border-orange-500 
+             focus:outline-none focus:border-orange-500 
+             transition-colors text-sm"
+/>
+
+// Textarea 文本框
+<textarea
+  className="w-full px-4 py-3 bg-white dark:bg-slate-800 
+             border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+             hover:border-orange-400 dark:hover:border-orange-500 
+             focus:outline-none focus:border-orange-500 
+             transition-colors text-sm resize-none"
+/>
+
+// Select 选择器
+<SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
+                         border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                         hover:border-orange-400 dark:hover:border-orange-500 
+                         focus:outline-none focus:border-orange-500 
+                         transition-colors">
+  <SelectValue />
+</SelectTrigger>
+
+// 按钮
+<Button variant="outline" className="border-2 border-slate-200 dark:border-slate-700 
+                                    hover:border-orange-400">
+  按钮文字
+</Button>
+```
+
+### ❌ 禁止的错误写法
+
+```tsx
+// 错误1: hover 时使用灰色边框（与 focus 状态不一致）
+className="... hover:border-slate-300 ..."
+
+// 错误2: focus 使用 ring（导致双层边框）
+className="... focus:ring-2 focus:ring-orange-500 ..."
+
+// 错误3: hover 和 focus 颜色不一致
+className="... hover:border-slate-300 focus:border-orange-500 ..."
+
+// 错误4: 使用 border-1（应该是 border-2）
+className="... border border-slate-200 ..."
+```
+
+### 规范要点
+
+1. **边框宽度**：统一使用 `border-2`（2px）
+2. **Hover 状态**：必须使用 `hover:border-orange-400`（橙色边框）
+3. **Focus 状态**：必须使用 `focus:outline-none` + `focus:border-orange-500`（无 ring）
+4. **颜色一致性**：Hover 和 Focus 必须使用相同的橙色系
+5. **禁止 ring**：Focus 时禁止使用 `focus:ring-*`，会导致双层边框效果
+
 ---
 
 # 二、后台管理系统规范
