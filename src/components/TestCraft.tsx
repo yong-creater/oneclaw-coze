@@ -1830,8 +1830,8 @@ export default function TestCraft() {
                 <Input 
                   type="text"
                   placeholder="输入需求标题"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
-                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
+                             hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:border-orange-500 transition-colors 
                              text-sm text-slate-800 dark:text-slate-200"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -1847,8 +1847,8 @@ export default function TestCraft() {
                   <Input 
                     type="text"
                     placeholder="输入模块名称"
-                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
-                               hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
+                               hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:border-orange-500 transition-colors 
                                text-sm text-slate-800 dark:text-slate-200"
                     value={module}
                     onChange={(e) => setModule(e.target.value)}
@@ -1860,8 +1860,8 @@ export default function TestCraft() {
                     AI 模型
                   </label>
                   <Select value={aiModel} onValueChange={setAiModel}>
-                    <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
-                                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                    <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
+                                             hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:border-orange-500 transition-colors 
                                              text-sm text-slate-800 dark:text-slate-200 h-auto">
                       <SelectValue />
                     </SelectTrigger>
@@ -1881,8 +1881,8 @@ export default function TestCraft() {
                 </label>
                 <textarea
                   placeholder="详细描述你的需求，或上传文件/粘贴链接自动解析..."
-                  className="min-h-[120px] w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl 
-                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none transition-colors text-sm
+                  className="min-h-[120px] w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                             hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:border-orange-500 resize-none transition-colors text-sm
                              text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -1963,14 +1963,14 @@ export default function TestCraft() {
                 <div className="flex gap-2">
                   <Input 
                     placeholder="输入需求文档链接..."
-                    className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl 
-                               hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                    className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                               hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:border-orange-500 transition-colors 
                                text-sm text-slate-800 dark:text-slate-200 h-auto"
                     value={linkInput}
                     onChange={(e) => setLinkInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleFetchUrl()}
                   />
-                  <Button variant="outline" className="h-auto px-4 py-2.5 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:border-orange-300"
+                  <Button variant="outline" className="h-auto px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-orange-300"
                     onClick={handleFetchUrl} disabled={!linkInput.trim() || isFetchingUrl}>
                     {isFetchingUrl ? <Loader2 className="w-4 h-4 animate-spin" /> : '抓取'}
                   </Button>
