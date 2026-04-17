@@ -1844,18 +1844,15 @@ export default function TestCraft() {
                   <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                     所属模块
                   </label>
-                  <Select value={module} onValueChange={setModule}>
-                    <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
-                                             hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
-                                             text-sm text-slate-800 dark:text-slate-200 h-auto">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {MODULES.map(m => (
-                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Input 
+                    type="text"
+                    placeholder="输入模块名称"
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
+                               hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors 
+                               text-sm text-slate-800 dark:text-slate-200"
+                    value={module}
+                    onChange={(e) => setModule(e.target.value)}
+                  />
                 </div>
                 
                 <div>
