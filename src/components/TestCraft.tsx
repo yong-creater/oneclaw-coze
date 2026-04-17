@@ -260,7 +260,7 @@ const generateStyles = (): string => {
 export default function TestCraft() {
   // 状态
   const [title, setTitle] = useState('');
-  const [module, setModule] = useState('星链');
+  const [module, setModule] = useState('');
   const [aiModel, setAiModel] = useState('doubao-seed-2-0-pro-260215');
   const [description, setDescription] = useState('');
   const [parsedContent, setParsedContent] = useState<ParsedContent[]>([]);
@@ -893,7 +893,7 @@ export default function TestCraft() {
   const confirmClearAllData = () => {
     setTitle('');
     setDescription('');
-    setModule('星链');
+    setModule('');
     setParsedContent([]);
     setMindmap(null);
     setExpanded(new Set());
