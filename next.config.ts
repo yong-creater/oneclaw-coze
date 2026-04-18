@@ -5,17 +5,12 @@ const nextConfig: NextConfig = {
   /* config options here */
   allowedDevOrigins: ['*.dev.coze.site'],
   
-  // 百度验证文件必须返回纯文本
-  async headers() {
+  // 百度验证文件必须返回纯文本 - 使用rewrites
+  async rewrites() {
     return [
       {
         source: '/baidu_verify_codeva-Guh6a5UTE1.html',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'text/plain; charset=utf-8',
-          },
-        ],
+        destination: '/api/baidu-verify',
       },
     ];
   },
