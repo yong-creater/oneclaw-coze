@@ -4,6 +4,21 @@ const nextConfig: NextConfig = {
   // outputFileTracingRoot: path.resolve(__dirname, '../../'), // Uncomment and add 'import path from "path"' if needed
   /* config options here */
   allowedDevOrigins: ['*.dev.coze.site'],
+  
+  // 百度验证文件必须返回纯文本
+  async headers() {
+    return [
+      {
+        source: '/baidu_verify_codeva-Guh6a5UTE1.html',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/plain; charset=utf-8',
+          },
+        ],
+      },
+    ];
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
