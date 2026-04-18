@@ -198,12 +198,15 @@ export default function RootLayout({
 }>) {
   const isDev = process.env.COZE_PROJECT_ENV === 'DEV';
   const baiduAnalyticsId = process.env.NEXT_PUBLIC_BAIDU_ANALYTICS_ID || '';
+  const baiduSiteVerification = process.env.NEXT_PUBLIC_BAIDU_SITE_VERIFICATION || '';
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head suppressHydrationWarning>
-        {/* 百度站长验证 - 请替换为您自己的验证码 */}
-        <meta name="baidu-site-verification" content="codeva-oneclaw-verify" />
+        {/* 百度站长验证 - 从环境变量 NEXT_PUBLIC_BAIDU_SITE_VERIFICATION 读取 */}
+        {baiduSiteVerification && (
+          <meta name="baidu-site-verification" content={baiduSiteVerification} />
+        )}
         
         {/* 360搜索收录 */}
         <meta name="360-site-verification" content="360-site-verification-code" />
