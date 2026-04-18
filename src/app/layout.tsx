@@ -242,21 +242,23 @@ export default function RootLayout({
         />
         
         {/* 百度统计 - 使用 afterInteractive 策略避免 hydration mismatch */}
-        <Script
-          id="baidu-analytics"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
+        {baiduAnalyticsId && (
+          <Script
+            id="baidu-analytics"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
               var _hmt = _hmt || [];
               (function() {
                 var hm = document.createElement('script');
-                hm.src = 'https://hm.baidu.com/hm.js?f43feef2e8e09bcc3bca6c5f485ac461';
+                hm.src = 'https://hm.baidu.com/hm.js?${baiduAnalyticsId}';
                 var s = document.getElementsByTagName('script')[0];
                 s.parentNode.insertBefore(hm, s);
               })();
             `,
-          }}
-        />
+            }}
+          />
+        )}
         
 	        {/* Google Analytics */}
         {process.env.NEXT_PUBLIC_GA_ID && (
