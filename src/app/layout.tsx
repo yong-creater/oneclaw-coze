@@ -96,7 +96,7 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   alternates: {
-    canonical: siteUrl,
+    canonical: siteUrl.includes('www') ? siteUrl : siteUrl.replace('://', '://www.'),
   },
   category: 'technology',
   classification: 'AI Tools Directory',
