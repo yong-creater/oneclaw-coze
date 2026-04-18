@@ -203,10 +203,8 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head suppressHydrationWarning>
-        {/* 百度站长验证 - 从环境变量 NEXT_PUBLIC_BAIDU_SITE_VERIFICATION 读取 */}
-        {baiduSiteVerification && (
-          <meta name="baidu-site-verification" content={baiduSiteVerification} />
-        )}
+        {/* 百度站长验证 - 硬编码确保生效 */}
+        <meta name="baidu-site-verification" content="codeva-Guh6a5UTE1" />
         
         {/* 360搜索收录 */}
         <meta name="360-site-verification" content="360-site-verification-code" />
