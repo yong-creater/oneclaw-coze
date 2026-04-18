@@ -167,6 +167,8 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         const data = await res.json();
         if (data.success && data.data) {
           setTool(data.data);
+          // 推送页面到百度搜索
+          pushToBaidu();
         } else {
           setError(true);
         }
@@ -179,6 +181,21 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
     }
     loadTool();
   }, [id]);
+
+  // 推送到百度搜索
+  const pushToBaidu = async () => {
+    try {
+      const siteUrl = window.location.origin;
+      await fetch('/api/seo/baidu-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls: [window.location.href] }),
+      });
+    } catch (err) {
+      // 静默失败，不影响用户体验
+      console.log('[百度推送] 静默失败');
+    }
+  };
 
   // 加载评分和评论
   useEffect(() => {
