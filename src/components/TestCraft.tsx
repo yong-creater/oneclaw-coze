@@ -7,7 +7,7 @@ import {
   Trash2, Plus, X, Download, Loader2, Check, AlertCircle,
   Edit2, Library, Hourglass, LayoutList, Network, BookOpen,
   Paperclip, FileCheck, ChevronDown as ChevronDownIcon,
-  Merge, ZoomIn, ZoomOut, Maximize2, ArrowLeft
+  Merge, ZoomIn, ZoomOut, Maximize2, ArrowLeft, Search, Filter
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
@@ -327,6 +327,7 @@ const generateStyles = (): string => {
 // ==================== 主组件 ====================
 export default function TestCraft() {
   // 状态
+  const [activeTab, setActiveTab] = useState<'input' | 'manage'>('input');
   const [title, setTitle] = useState('');
   const [module, setModule] = useState('');
   const [aiModel, setAiModel] = useState('doubao-seed-2-0-pro-260215');
@@ -358,6 +359,10 @@ export default function TestCraft() {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [detailsPanelOpen, setDetailsPanelOpen] = useState(false);
+  
+  // 用例筛选状态
+  const [searchQuery, setSearchQuery] = useState('');
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const linkInputRef = useRef<HTMLInputElement>(null);
@@ -1373,8 +1378,8 @@ export default function TestCraft() {
           width={position.width}
           height={position.height}
           rx={isRoot ? 12 : 8}
-          fill={isRoot ? '#7c3aed' : isReq ? '#3b82f6' : '#f9fafb'}
-          stroke={isSelected ? '#f97316' : isRoot ? '#6d28d9' : isReq ? '#2563eb' : getPriorityBorderColor(node.priority || 'P1')}
+          fill={isRoot ? '#ea580c' : isReq ? '#f97316' : '#f9fafb'}
+          stroke={isSelected ? '#f97316' : isRoot ? '#c2410c' : isReq ? '#ea580c' : getPriorityBorderColor(node.priority || 'P1')}
           strokeWidth={isSelected ? 2 : 1}
           className="cursor-pointer transition-all"
           onClick={handleClick}
@@ -1411,7 +1416,7 @@ export default function TestCraft() {
           y={position.height / 2}
           dominantBaseline="middle"
           textAnchor={isRoot ? 'middle' : 'start'}
-          fill={isRoot ? '#ffffff' : isReq ? '#1e40af' : '#374151'}
+          fill={isRoot ? '#ffffff' : isReq ? '#c2410c' : '#374151'}
           fontSize={isRoot ? 14 : 12}
           fontWeight={isRoot ? 'bold' : 'normal'}
           className="select-none pointer-events-none"
@@ -1763,30 +1768,54 @@ export default function TestCraft() {
       <BackToHome />
       
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800">
-        <div className="px-4 py-4">
+      <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+        <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             {/* 左侧 Logo */}
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-500 
-                                flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 
+                                flex items-center justify-center shadow-lg shadow-orange-500/20">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">TestCraft</h1>
+                <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-100 tracking-tight">TestCraft</h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400">AI 生成测试用例</p>
               </div>
+            </div>
+
+            {/* Tab 切换 */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+              <button
+                onClick={() => setActiveTab('input')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'input'
+                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                需求输入
+              </button>
+              <button
+                onClick={() => setActiveTab('manage')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'manage'
+                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                用例管理
+              </button>
             </div>
 
             {/* 右侧按钮组 */}
             <div className="flex items-center gap-3 flex-wrap">
               {/* 拆分需求按钮 */}
               <Button 
-                className="h-10 px-4 bg-gradient-to-r from-violet-600 to-purple-600 
-                           hover:from-violet-700 hover:to-purple-700 text-white rounded-xl 
-                           gap-2 shadow-lg shadow-purple-500/25"
+                className="h-10 px-4 bg-gradient-to-r from-orange-500 to-amber-500 
+                           hover:from-orange-600 hover:to-amber-600 text-white rounded-xl 
+                           gap-2 shadow-lg shadow-orange-500/25"
                 onClick={handleAnalyze}
                 disabled={analyzing || !title.trim() || !description.trim()}
               >
@@ -1802,7 +1831,7 @@ export default function TestCraft() {
                   disabled={generating}
                 >
                   {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                  <span>生成测试用例</span>
+                  <span>生成用例</span>
                 </Button>
               )}
               
@@ -1810,7 +1839,7 @@ export default function TestCraft() {
               {mindmap && (
                 <div className="hidden md:flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-violet-500" />
+                    <span className="w-2 h-2 rounded-full bg-orange-500" />
                     <span className="text-slate-600 dark:text-slate-400">{reqCount} 需求点</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1883,379 +1912,605 @@ export default function TestCraft() {
       </header>
 
       {/* 主内容区 */}
-      <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1800px] mx-auto">
-        {/* 左侧表单区域 */}
-        <div className="w-full lg:w-[400px] shrink-0">
-          <Card className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl 
-                           shadow-sm overflow-hidden 
-                           lg:sticky lg:top-28">
-            <CardContent className="p-4 md:p-6 space-y-5">
-              {/* 需求标题 */}
-              <div>
-                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
-                  需求标题
-                </label>
-                <Input 
-                  type="text"
-                  placeholder="输入需求标题"
-                  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
-                             hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
-                             text-sm text-slate-800 dark:text-slate-200"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-              </div>
-
-              {/* 所属模块 & AI 模型 */}
-              <div className="grid grid-cols-2 gap-4">
+      {activeTab === 'input' ? (
+        /* ========== 需求输入 Tab ========== */
+        <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1800px] mx-auto">
+          {/* 左侧表单区域 */}
+          <div className="w-full lg:w-[400px] shrink-0">
+            <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl 
+                             shadow-sm overflow-hidden 
+                             lg:sticky lg:top-28">
+              <CardContent className="p-4 md:p-6 space-y-5">
+                {/* 需求标题 */}
                 <div>
                   <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
-                    所属模块
+                    需求标题
                   </label>
                   <Input 
                     type="text"
-                    placeholder="输入模块名称"
+                    placeholder="输入需求标题"
                     className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
                                hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
                                text-sm text-slate-800 dark:text-slate-200"
-                    value={module}
-                    onChange={(e) => setModule(e.target.value)}
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
-                
-                <div>
-                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
-                    AI 模型
-                  </label>
-                  <ModelSelector
-                    groups={AI_MODEL_GROUPS}
-                    value={aiModel}
-                    onChange={setAiModel}
-                    triggerClassName="w-full"
-                  />
-                </div>
-              </div>
 
-              {/* 需求描述 */}
-              <div>
-                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
-                  需求描述
-                </label>
-                <textarea
-                  placeholder="详细描述你的需求，或上传文件/粘贴链接自动解析..."
-                  className="min-h-[120px] w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
-                             hover:border-orange-400 dark:hover:border-orange-500 focus:outline-none focus:border-orange-500 resize-none transition-colors text-sm
-                             text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-
-              {/* 已解析内容预览区 */}
-              {parsedContent.length > 0 && (
-                <div className="p-4 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 
-                                border border-violet-100 dark:border-violet-900/50 rounded-xl">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-violet-600" />
-                      <label className="text-xs font-medium text-violet-700 dark:text-violet-400 uppercase tracking-wider">
-                        已解析内容
-                      </label>
-                      <Badge variant="secondary" className="rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300 text-xs">
-                        {parsedContent.length} 个来源
-                      </Badge>
-                    </div>
-                    <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-violet-600 dark:text-violet-400 
-                                                       hover:text-violet-700 dark:hover:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-900/30"
-                      onClick={handleMergeToDescription}>
-                      <Merge className="w-3 h-3" />
-                      合并
-                    </Button>
-                  </div>
-                  <div className="space-y-3 max-h-[250px] overflow-y-auto">
-                    {parsedContent.map((p) => (
-                      <div key={p.id} className="bg-white/60 dark:bg-slate-900/50 rounded-lg p-3 border border-violet-100/50 dark:border-violet-900/30">
-                        <div className="flex items-center gap-2 mb-2">
-                          {p.source === 'file' ? (
-                            <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-                          ) : (
-                            <LinkIcon className="w-3.5 h-3.5 text-blue-600" />
-                          )}
-                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate flex-1">{p.name}</span>
-                          <span className="text-xs text-slate-400">{p.content.length} 字</span>
-                          <button onClick={() => removeParsedContent(p.id)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
-                            <X className="w-3 h-3 text-slate-400 hover:text-red-500" />
-                          </button>
-                        </div>
-                        <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-4 whitespace-pre-wrap">
-                          {p.content.slice(0, 300)}{p.content.length > 300 && '...'}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 上传文件 */}
-              <div>
-                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
-                  上传文件
-                </label>
-                <input 
-                  ref={fileInputRef} 
-                  type="file" 
-                  className="hidden" 
-                  accept=".pdf,.doc,.docx,.html,.htm,.txt,.md" 
-                  onChange={handleFileSelect}
-                  multiple
-                />
-                <Button variant="outline" className="gap-2 border-slate-200 dark:border-slate-700 rounded-xl h-10 px-4 
-                                                   bg-slate-50/30 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700 w-full justify-start"
-                  onClick={() => fileInputRef.current?.click()}>
-                  <Paperclip className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm text-slate-600 dark:text-slate-400">添加文件（PDF/Word/HTML）</span>
-                </Button>
-              </div>
-
-              {/* 粘贴链接 */}
-              <div>
-                <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
-                  粘贴链接
-                </label>
-                <div className="flex gap-2">
-                  <Input 
-                    placeholder="输入需求文档链接..."
-                    className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
-                               hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
-                               text-sm text-slate-800 dark:text-slate-200 h-auto"
-                    value={linkInput}
-                    onChange={(e) => setLinkInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleFetchUrl()}
-                  />
-                  <Button variant="outline" className="h-auto px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-orange-400"
-                    onClick={handleFetchUrl} disabled={!linkInput.trim() || isFetchingUrl}>
-                    {isFetchingUrl ? <Loader2 className="w-4 h-4 animate-spin" /> : '抓取'}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 右侧内容区域 */}
-        <div className="flex-1 min-w-0">
-          {analyzing ? (
-            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-              <Loader2 className="w-8 h-8 animate-spin text-violet-600 mb-3" />
-              <p className="text-slate-500 dark:text-slate-400">正在分析需求...</p>
-            </div>
-          ) : mindmap ? (
-            <div className="flex flex-col xl:flex-row gap-6">
-              {/* 左侧：需求点列表 / 思维导图 */}
-              <div className="flex-1 min-w-0">
-                <Card className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden">
-                  <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center justify-between flex-wrap gap-3">
-                      {/* 视图切换 */}
-                      <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                        <button
-                          onClick={() => setViewMode('tree')}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                            viewMode === 'tree'
-                              ? 'bg-white dark:bg-slate-700 text-violet-700 dark:text-violet-400 shadow-sm'
-                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                          }`}
-                        >
-                          <LayoutList className="w-4 h-4" />
-                          列表视图
-                        </button>
-                        <button
-                          onClick={() => setViewMode('mindmap')}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                            viewMode === 'mindmap'
-                              ? 'bg-white dark:bg-slate-700 text-violet-700 dark:text-violet-400 shadow-sm'
-                              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                          }`}
-                        >
-                          <Network className="w-4 h-4" />
-                          思维导图
-                        </button>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {viewMode === 'tree' && (
-                          <div className="flex items-center gap-1">
-                            <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={expandAll}>
-                              <ChevronDown className="w-3 h-3" />
-                              展开
-                            </Button>
-                            <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={collapseAll}>
-                              <ChevronRight className="w-3 h-3" />
-                              折叠
-                            </Button>
-                          </div>
-                        )}
-                        {viewMode === 'mindmap' && (
-                          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
-                            <button onClick={() => setScale(prev => Math.min(prev * 1.2, 2))} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded">
-                              <ZoomIn className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                            </button>
-                            <span className="text-xs text-slate-500 dark:text-slate-400 w-12 text-center">{Math.round(scale * 100)}%</span>
-                            <button onClick={() => setScale(prev => Math.max(prev * 0.8, 0.5))} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded">
-                              <ZoomOut className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                            </button>
-                            <button onClick={resetView} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded ml-1">
-                              <Maximize2 className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                            </button>
-                          </div>
-                        )}
-                        <Button size="sm" variant="ghost" className="gap-1 text-violet-600 dark:text-violet-400 h-8" onClick={addRequirement}>
-                          <Plus className="w-4 h-4" />
-                          添加需求点
-                        </Button>
-                      </div>
-                    </div>
+                {/* 所属模块 & AI 模型 */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
+                      所属模块
+                    </label>
+                    <Input 
+                      type="text"
+                      placeholder="输入模块名称"
+                      className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                                 hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
+                                 text-sm text-slate-800 dark:text-slate-200"
+                      value={module}
+                      onChange={(e) => setModule(e.target.value)}
+                    />
                   </div>
                   
-                  <CardContent className="p-4 max-h-[600px] overflow-auto">
-                    {viewMode === 'tree' ? (
-                      <div className="space-y-1">
-                        {mindmap.children.map((child, idx) => {
-                          if (child.type === 'requirement') {
-                            const reqIdx = mindmap.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
-                            return renderTreeNode(child, 0, 0, reqIdx);
-                          }
-                          return null;
-                        })}
+                  <div>
+                    <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
+                      AI 模型
+                    </label>
+                    <ModelSelector
+                      groups={AI_MODEL_GROUPS}
+                      value={aiModel}
+                      onChange={setAiModel}
+                      triggerClassName="w-full"
+                    />
+                  </div>
+                </div>
+
+                {/* 需求描述 */}
+                <div>
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
+                    需求描述
+                  </label>
+                  <textarea
+                    placeholder="详细描述你的需求，或上传文件/粘贴链接自动解析..."
+                    className="min-h-[120px] w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                               hover:border-orange-400 dark:hover:border-orange-500 focus:outline-none focus:border-orange-500 resize-none transition-colors text-sm
+                               text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+
+                {/* 已解析内容预览区 */}
+                {parsedContent.length > 0 && (
+                  <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 
+                                  border border-orange-100 dark:border-orange-900/50 rounded-xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-orange-600" />
+                        <label className="text-xs font-medium text-orange-700 dark:text-orange-400 uppercase tracking-wider">
+                          已解析内容
+                        </label>
+                        <Badge variant="secondary" className="rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300 text-xs">
+                          {parsedContent.length} 个来源
+                        </Badge>
                       </div>
-                    ) : (
-                      /* 思维导图视图 */
-                      <div 
-                        ref={canvasRef}
-                        className="relative overflow-hidden cursor-grab active:cursor-grabbing min-h-[500px]"
-                        onWheel={handleWheel}
-                        onMouseDown={handleMouseDown}
-                        onMouseMove={handleMouseMove}
-                        onMouseUp={handleMouseUp}
-                        onMouseLeave={handleMouseUp}
-                      >
-                        <div 
-                          className="inline-block"
-                          style={{
-                            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
-                            transformOrigin: '0 0',
-                          }}
-                        >
-                          <svg
-                            width={Math.max(calculateNodePositions.totalWidth, 800)}
-                            height={Math.max(calculateNodePositions.totalHeight, 500)}
-                            className="overflow-visible"
+                      <Button size="sm" variant="ghost" className="h-7 text-xs gap-1 text-orange-600 dark:text-orange-400 
+                                                         hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-900/30"
+                        onClick={handleMergeToDescription}>
+                        <Merge className="w-3 h-3" />
+                        合并
+                      </Button>
+                    </div>
+                    <div className="space-y-3 max-h-[250px] overflow-y-auto">
+                      {parsedContent.map((p) => (
+                        <div key={p.id} className="bg-white/60 dark:bg-slate-900/50 rounded-lg p-3 border border-orange-100/50 dark:border-orange-900/30">
+                          <div className="flex items-center gap-2 mb-2">
+                            {p.source === 'file' ? (
+                              <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <LinkIcon className="w-3.5 h-3.5 text-blue-600" />
+                            )}
+                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate flex-1">{p.name}</span>
+                            <span className="text-xs text-slate-400">{p.content.length} 字</span>
+                            <button onClick={() => removeParsedContent(p.id)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded">
+                              <X className="w-3 h-3 text-slate-400 hover:text-red-500" />
+                            </button>
+                          </div>
+                          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-4 whitespace-pre-wrap">
+                            {p.content.slice(0, 300)}{p.content.length > 300 && '...'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 上传文件 */}
+                <div>
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
+                    上传文件
+                  </label>
+                  <input 
+                    ref={fileInputRef} 
+                    type="file" 
+                    className="hidden" 
+                    accept=".pdf,.doc,.docx,.html,.htm,.txt,.md" 
+                    onChange={handleFileSelect}
+                    multiple
+                  />
+                  <Button variant="outline" className="gap-2 border-slate-200 dark:border-slate-700 rounded-xl h-10 px-4 
+                                                     bg-slate-50/30 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700 w-full justify-start"
+                    onClick={() => fileInputRef.current?.click()}>
+                    <Paperclip className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm text-slate-600 dark:text-slate-400">添加文件（PDF/Word/HTML）</span>
+                  </Button>
+                </div>
+
+                {/* 粘贴链接 */}
+                <div>
+                  <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
+                    粘贴链接
+                  </label>
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="输入需求文档链接..."
+                      className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                                 hover:border-orange-400 dark:hover:border-orange-500 transition-colors 
+                                 text-sm text-slate-800 dark:text-slate-200 h-auto"
+                      value={linkInput}
+                      onChange={(e) => setLinkInput(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleFetchUrl()}
+                    />
+                    <Button variant="outline" className="h-auto px-4 py-2.5 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-orange-400"
+                      onClick={handleFetchUrl} disabled={!linkInput.trim() || isFetchingUrl}>
+                      {isFetchingUrl ? <Loader2 className="w-4 h-4 animate-spin" /> : '抓取'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* 右侧预览区域 */}
+          <div className="flex-1 min-w-0">
+            {analyzing ? (
+              <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <Loader2 className="w-8 h-8 animate-spin text-orange-600 mb-3" />
+                <p className="text-slate-500 dark:text-slate-400">正在分析需求...</p>
+              </div>
+            ) : mindmap ? (
+              <div className="flex flex-col xl:flex-row gap-6">
+                {/* 左侧：需求点列表 / 思维导图 */}
+                <div className="flex-1 min-w-0">
+                  <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                    <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center justify-between flex-wrap gap-3">
+                        {/* 视图切换 */}
+                        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                          <button
+                            onClick={() => setViewMode('tree')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                              viewMode === 'tree'
+                                ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                            }`}
                           >
-                            <defs>
-                              <marker
-                                id="arrowhead"
-                                markerWidth="10"
-                                markerHeight="7"
-                                refX="9"
-                                refY="3.5"
-                                orient="auto"
-                              >
-                                <polygon points="0 0, 10 3.5, 0 7" fill="#d1d5db" />
-                              </marker>
-                            </defs>
-                            
-                            {/* 连接线 */}
-                            {mindmap && calculateNodePositions.positions.get(mindmap.id) && Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
-                              if (id === mindmap.id) return null;
-                              const parentReq = mindmap.children.find(c => 
-                                c.type === 'requirement' && 
-                                (c as RequirementNode).children.some(cc => cc.id === id)
-                              );
-                              if (!parentReq) return null;
-                              const parentPos = calculateNodePositions.positions.get(parentReq.id);
-                              if (!parentPos) return null;
-                              
-                              return (
-                                <path
-                                  key={`line-${id}`}
-                                  d={`M ${parentPos.x + parentPos.width} ${parentPos.y + parentPos.height / 2} 
-                                     C ${parentPos.x + parentPos.width + MINDMAP_CONFIG.GAP_X / 2} ${parentPos.y + parentPos.height / 2},
-                                       ${pos.x - MINDMAP_CONFIG.GAP_X / 2} ${pos.y + pos.height / 2},
-                                       ${pos.x} ${pos.y + pos.height / 2}`}
-                                  fill="none"
-                                  stroke="#cbd5e1"
-                                  strokeWidth="2"
-                                />
-                              );
-                            })}
-                            
-                            {/* 根节点连接线 */}
-                            {mindmap && calculateNodePositions.positions.get(mindmap.id) && mindmap.children.map((req) => {
-                              const reqPos = calculateNodePositions.positions.get(req.id);
-                              const rootPos = calculateNodePositions.positions.get(mindmap.id);
-                              if (!reqPos || !rootPos) return null;
-                              
-                              return (
-                                <path
-                                  key={`root-line-${req.id}`}
-                                  d={`M ${rootPos.x + rootPos.width} ${rootPos.y + rootPos.height / 2} 
-                                     C ${rootPos.x + rootPos.width + MINDMAP_CONFIG.GAP_X / 2} ${rootPos.y + rootPos.height / 2},
-                                       ${reqPos.x - MINDMAP_CONFIG.GAP_X / 2} ${reqPos.y + reqPos.height / 2},
-                                       ${reqPos.x} ${reqPos.y + reqPos.height / 2}`}
-                                  fill="none"
-                                  stroke="#a78bfa"
-                                  strokeWidth="2"
-                                />
-                              );
-                            })}
-                            
-                            {/* 节点 */}
-                            {calculateNodePositions.positions.get(mindmap.id) && renderMindMapNode(mindmap, calculateNodePositions.positions.get(mindmap.id)!, true)}
-                            {Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
-                              const node = findNodeById(mindmap, id);
-                              if (!node || node.type === 'root') return null;
-                              return renderMindMapNode(node, pos);
-                            })}
-                          </svg>
+                            <LayoutList className="w-4 h-4" />
+                            列表视图
+                          </button>
+                          <button
+                            onClick={() => setViewMode('mindmap')}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                              viewMode === 'mindmap'
+                                ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
+                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            <Network className="w-4 h-4" />
+                            思维导图
+                          </button>
                         </div>
                         
-                        {/* 图例 */}
-                        <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200 dark:border-slate-700">
-                          <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded bg-violet-600" />
-                              <span className="text-slate-600 dark:text-slate-400">需求</span>
+                        <div className="flex items-center gap-2">
+                          {viewMode === 'tree' && (
+                            <div className="flex items-center gap-1">
+                              <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={expandAll}>
+                                <ChevronDown className="w-3 h-3" />
+                                展开
+                              </Button>
+                              <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={collapseAll}>
+                                <ChevronRight className="w-3 h-3" />
+                                折叠
+                              </Button>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded bg-blue-500" />
-                              <span className="text-slate-600 dark:text-slate-400">需求点</span>
+                          )}
+                          {viewMode === 'mindmap' && (
+                            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+                              <button onClick={() => setScale(prev => Math.min(prev * 1.2, 2))} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded">
+                                <ZoomIn className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                              </button>
+                              <span className="text-xs text-slate-500 dark:text-slate-400 w-12 text-center">{Math.round(scale * 100)}%</span>
+                              <button onClick={() => setScale(prev => Math.max(prev * 0.8, 0.5))} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded">
+                                <ZoomOut className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                              </button>
+                              <button onClick={resetView} className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded ml-1">
+                                <Maximize2 className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                              </button>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-600" />
-                              <span className="text-slate-600 dark:text-slate-400">测试用例</span>
+                          )}
+                          <Button size="sm" variant="ghost" className="gap-1 text-orange-600 dark:text-orange-400 h-8" onClick={addRequirement}>
+                            <Plus className="w-4 h-4" />
+                            添加需求点
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <CardContent className="p-4 max-h-[600px] overflow-auto">
+                      {viewMode === 'tree' ? (
+                        <div className="space-y-1">
+                          {mindmap.children.map((child, idx) => {
+                            if (child.type === 'requirement') {
+                              const reqIdx = mindmap.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
+                              return renderTreeNode(child, 0, 0, reqIdx);
+                            }
+                            return null;
+                          })}
+                        </div>
+                      ) : (
+                        /* 思维导图视图 */
+                        <div 
+                          ref={canvasRef}
+                          className="relative overflow-hidden cursor-grab active:cursor-grabbing min-h-[500px]"
+                          onWheel={handleWheel}
+                          onMouseDown={handleMouseDown}
+                          onMouseMove={handleMouseMove}
+                          onMouseUp={handleMouseUp}
+                          onMouseLeave={handleMouseUp}
+                        >
+                          <div 
+                            className="inline-block"
+                            style={{
+                              transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
+                              transformOrigin: '0 0',
+                            }}
+                          >
+                            <svg
+                              width={Math.max(calculateNodePositions.totalWidth, 800)}
+                              height={Math.max(calculateNodePositions.totalHeight, 500)}
+                              className="overflow-visible"
+                            >
+                              <defs>
+                                <marker
+                                  id="arrowhead"
+                                  markerWidth="10"
+                                  markerHeight="7"
+                                  refX="9"
+                                  refY="3.5"
+                                  orient="auto"
+                                >
+                                  <polygon points="0 0, 10 3.5, 0 7" fill="#d1d5db" />
+                                </marker>
+                              </defs>
+                              
+                              {/* 连接线 */}
+                              {mindmap && calculateNodePositions.positions.get(mindmap.id) && Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
+                                if (id === mindmap.id) return null;
+                                const parentReq = mindmap.children.find(c => 
+                                  c.type === 'requirement' && 
+                                  (c as RequirementNode).children.some(cc => cc.id === id)
+                                );
+                                if (!parentReq) return null;
+                                const parentPos = calculateNodePositions.positions.get(parentReq.id);
+                                if (!parentPos) return null;
+                                
+                                return (
+                                  <path
+                                    key={`line-${id}`}
+                                    d={`M ${parentPos.x + parentPos.width} ${parentPos.y + parentPos.height / 2} 
+                                       C ${parentPos.x + parentPos.width + MINDMAP_CONFIG.GAP_X / 2} ${parentPos.y + parentPos.height / 2},
+                                         ${pos.x - MINDMAP_CONFIG.GAP_X / 2} ${pos.y + pos.height / 2},
+                                         ${pos.x} ${pos.y + pos.height / 2}`}
+                                    fill="none"
+                                    stroke="#cbd5e1"
+                                    strokeWidth="2"
+                                  />
+                                );
+                              })}
+                              
+                              {/* 根节点连接线 */}
+                              {mindmap && calculateNodePositions.positions.get(mindmap.id) && mindmap.children.map((req) => {
+                                const reqPos = calculateNodePositions.positions.get(req.id);
+                                const rootPos = calculateNodePositions.positions.get(mindmap.id);
+                                if (!reqPos || !rootPos) return null;
+                                
+                                return (
+                                  <path
+                                    key={`root-line-${req.id}`}
+                                    d={`M ${rootPos.x + rootPos.width} ${rootPos.y + rootPos.height / 2} 
+                                       C ${rootPos.x + rootPos.width + MINDMAP_CONFIG.GAP_X / 2} ${rootPos.y + rootPos.height / 2},
+                                         ${reqPos.x - MINDMAP_CONFIG.GAP_X / 2} ${reqPos.y + reqPos.height / 2},
+                                         ${reqPos.x} ${reqPos.y + reqPos.height / 2}`}
+                                    fill="none"
+                                    stroke="#fb923c"
+                                    strokeWidth="2"
+                                  />
+                                );
+                              })}
+                              
+                              {/* 节点 */}
+                              {calculateNodePositions.positions.get(mindmap.id) && renderMindMapNode(mindmap, calculateNodePositions.positions.get(mindmap.id)!, true)}
+                              {Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
+                                const node = findNodeById(mindmap, id);
+                                if (!node || node.type === 'root') return null;
+                                return renderMindMapNode(node, pos);
+                              })}
+                            </svg>
+                          </div>
+                          
+                          {/* 图例 */}
+                          <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center gap-4">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-3 h-3 rounded bg-orange-600" />
+                                <span className="text-slate-600 dark:text-slate-400">需求</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-3 h-3 rounded bg-blue-500" />
+                                <span className="text-slate-600 dark:text-slate-400">需求点</span>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-600" />
+                                <span className="text-slate-600 dark:text-slate-400">测试用例</span>
+                              </div>
                             </div>
                           </div>
                         </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {/* 右侧：详情面板 */}
+                {isSelected && renderDetailPanel()}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center p-8">
+                  <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6">
+                    <Hourglass className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">待输入需求</h3>
+                  <p className="text-slate-500 dark:text-slate-400">左侧填写需求后自动展示</p>
+                </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* ========== 用例管理 Tab ========== */
+        <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1800px] mx-auto">
+          {/* 左侧：用例列表 */}
+          <div className="flex-1 min-w-0">
+            <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+              <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  {/* 搜索和筛选 */}
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="relative flex-1 max-w-md">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <Input
+                        placeholder="搜索用例..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl"
+                      />
+                    </div>
+                    <select
+                      value={priorityFilter}
+                      onChange={(e) => setPriorityFilter(e.target.value)}
+                      className="h-10 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
+                    >
+                      <option value="all">全部优先级</option>
+                      <option value="P0">P0</option>
+                      <option value="P1">P1</option>
+                      <option value="P2">P2</option>
+                    </select>
+                  </div>
+
+                  {/* 视图切换 */}
+                  <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <button
+                      onClick={() => setViewMode('tree')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        viewMode === 'tree'
+                          ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <LayoutList className="w-4 h-4" />
+                      列表视图
+                    </button>
+                    <button
+                      onClick={() => setViewMode('mindmap')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                        viewMode === 'mindmap'
+                          ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
+                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      <Network className="w-4 h-4" />
+                      思维导图
+                    </button>
+                  </div>
+
+                  {/* 操作按钮 */}
+                  <div className="flex items-center gap-2">
+                    {viewMode === 'tree' && (
+                      <div className="flex items-center gap-1">
+                        <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={expandAll}>
+                          <ChevronDown className="w-3 h-3" />
+                          展开
+                        </Button>
+                        <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={collapseAll}>
+                          <ChevronRight className="w-3 h-3" />
+                          折叠
+                        </Button>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                    <Button size="sm" variant="ghost" className="gap-1 text-orange-600 dark:text-orange-400 h-8" onClick={addRequirement}>
+                      <Plus className="w-4 h-4" />
+                      添加需求点
+                    </Button>
+                  </div>
+                </div>
               </div>
               
-              {/* 右侧：详情面板 */}
-              {isSelected && renderDetailPanel()}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 text-center p-8">
-              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6">
-                <Hourglass className="w-8 h-8 text-slate-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">待输入需求</h3>
-              <p className="text-slate-500 dark:text-slate-400">左侧填写需求后自动展示</p>
-            </div>
-          )}
+              <CardContent className="p-4 max-h-[600px] overflow-auto">
+                {!mindmap ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Library className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+                    <p className="text-slate-500 dark:text-slate-400">暂无用例数据</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">请先在「需求输入」中添加需求</p>
+                  </div>
+                ) : viewMode === 'tree' ? (
+                  <div className="space-y-1">
+                    {mindmap.children.map((child, idx) => {
+                      if (child.type === 'requirement') {
+                        const reqIdx = mindmap.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
+                        return renderTreeNode(child, 0, 0, reqIdx);
+                      }
+                      return null;
+                    })}
+                  </div>
+                ) : (
+                  <div 
+                    ref={canvasRef}
+                    className="relative overflow-hidden cursor-grab active:cursor-grabbing min-h-[500px]"
+                    onWheel={handleWheel}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                  >
+                    <div 
+                      className="inline-block"
+                      style={{
+                        transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
+                        transformOrigin: '0 0',
+                      }}
+                    >
+                      <svg
+                        width={Math.max(calculateNodePositions.totalWidth, 800)}
+                        height={Math.max(calculateNodePositions.totalHeight, 500)}
+                        className="overflow-visible"
+                      >
+                        <defs>
+                          <marker
+                            id="arrowhead2"
+                            markerWidth="10"
+                            markerHeight="7"
+                            refX="9"
+                            refY="3.5"
+                            orient="auto"
+                          >
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#d1d5db" />
+                          </marker>
+                        </defs>
+                        
+                        {/* 连接线 */}
+                        {mindmap && calculateNodePositions.positions.get(mindmap.id) && Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
+                          if (id === mindmap.id) return null;
+                          const parentReq = mindmap.children.find(c => 
+                            c.type === 'requirement' && 
+                            (c as RequirementNode).children.some(cc => cc.id === id)
+                          );
+                          if (!parentReq) return null;
+                          const parentPos = calculateNodePositions.positions.get(parentReq.id);
+                          if (!parentPos) return null;
+                          
+                          return (
+                            <path
+                              key={`line2-${id}`}
+                              d={`M ${parentPos.x + parentPos.width} ${parentPos.y + parentPos.height / 2} 
+                                 C ${parentPos.x + parentPos.width + MINDMAP_CONFIG.GAP_X / 2} ${parentPos.y + parentPos.height / 2},
+                                   ${pos.x - MINDMAP_CONFIG.GAP_X / 2} ${pos.y + pos.height / 2},
+                                   ${pos.x} ${pos.y + pos.height / 2}`}
+                              fill="none"
+                              stroke="#cbd5e1"
+                              strokeWidth="2"
+                            />
+                          );
+                        })}
+                        
+                        {/* 根节点连接线 */}
+                        {mindmap && calculateNodePositions.positions.get(mindmap.id) && mindmap.children.map((req) => {
+                          const reqPos = calculateNodePositions.positions.get(req.id);
+                          const rootPos = calculateNodePositions.positions.get(mindmap.id);
+                          if (!reqPos || !rootPos) return null;
+                          
+                          return (
+                            <path
+                              key={`root2-${req.id}`}
+                              d={`M ${rootPos.x + rootPos.width} ${rootPos.y + rootPos.height / 2} 
+                                 C ${rootPos.x + rootPos.width + MINDMAP_CONFIG.GAP_X / 2} ${rootPos.y + rootPos.height / 2},
+                                   ${reqPos.x - MINDMAP_CONFIG.GAP_X / 2} ${reqPos.y + reqPos.height / 2},
+                                   ${reqPos.x} ${reqPos.y + reqPos.height / 2}`}
+                              fill="none"
+                              stroke="#fb923c"
+                              strokeWidth="2"
+                            />
+                          );
+                        })}
+                        
+                        {/* 节点 */}
+                        {calculateNodePositions.positions.get(mindmap.id) && renderMindMapNode(mindmap, calculateNodePositions.positions.get(mindmap.id)!, true)}
+                        {Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
+                          const node = findNodeById(mindmap, id);
+                          if (!node || node.type === 'root') return null;
+                          return renderMindMapNode(node, pos);
+                        })}
+                      </svg>
+                    </div>
+                    
+                    {/* 图例 */}
+                    <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-3 h-3 rounded bg-orange-600" />
+                          <span className="text-slate-600 dark:text-slate-400">需求</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-3 h-3 rounded bg-blue-500" />
+                          <span className="text-slate-600 dark:text-slate-400">需求点</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-600" />
+                          <span className="text-slate-600 dark:text-slate-400">测试用例</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* 右侧：详情面板 */}
+          <div className="w-full lg:w-[400px] shrink-0">
+            {isSelected ? renderDetailPanel() : (
+              <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden lg:sticky lg:top-28">
+                <CardContent className="flex flex-col items-center justify-center min-h-[400px] text-center">
+                  <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                    <FileText className="w-6 h-6 text-slate-300 dark:text-slate-500" />
+                  </div>
+                  <p className="text-sm text-slate-400">选择一个需求点或测试用例查看详情</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 知识库搜索弹窗 */}
       {showKnowledgeSearch && (
