@@ -358,6 +358,7 @@ export default function TestCraft() {
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [detailsPanelOpen, setDetailsPanelOpen] = useState(false);
+  const [detailsExpanded, setDetailsExpanded] = useState(true);
   
   // 用例筛选状态
   const [searchQuery, setSearchQuery] = useState('');
@@ -1842,163 +1843,202 @@ export default function TestCraft() {
     );
   };;
 
-  // 渲染详情面板
+  // 渲染详情面板 - 可伸缩折叠样式
   const renderDetailPanel = () => {
     if (!detailsPanelOpen) return null;
     
     const isRequirementDetail = selectedRequirement && !selectedCase;
     const isCaseDetail = selectedCase;
+    const itemTitle = isCaseDetail ? selectedCase?.title : isRequirementDetail ? selectedRequirement?.title : '';
+    const itemIndex = mindmap?.children.findIndex(c => c.id === (selectedRequirement?.id || selectedCase?.id)) ?? -1;
     
     return (
       <div className="xl:w-[400px] shrink-0">
-        <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-lg">
-          <CardContent className="p-0">
-            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700">
-              <span className="text-base font-semibold text-slate-800 dark:text-slate-100">
-                用例详情
+        {/* 可伸缩折叠面板 */}
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-lg">
+          {/* 标题栏 - 可点击展开/收起 */}
+          <div 
+            className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            onClick={() => setDetailsExpanded(!detailsExpanded)}
+          >
+            {/* 展开/收起箭头 */}
+            <button 
+              onClick={(e) => { e.stopPropagation(); setDetailsExpanded(!detailsExpanded); }}
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+            >
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${detailsExpanded ? '' : '-rotate-90'}`} />
+            </button>
+
+            {/* 编号 */}
+            {itemIndex >= 0 && (
+              <span className="w-6 h-6 flex items-center justify-center bg-slate-100 dark:bg-slate-700 text-slate-500 text-xs font-medium rounded">
+                {itemIndex + 1}
               </span>
-              <button 
-                onClick={() => {
-                  setDetailsPanelOpen(false);
-                  setSelectedCase(null);
-                  setSelectedRequirement(null);
-                }}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-              >
-                <X className="w-4 h-4 text-slate-500" />
-              </button>
-            </div>
-            
-            {isCaseDetail && selectedCase && (
-              <div className="space-y-4 p-4 max-h-[calc(100vh-400px)] overflow-y-auto">
-                {/* 场景标题 */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-3 py-1 font-medium">
-                      测试场景
-                    </Badge>
-                    <Badge variant="outline" className={`text-xs px-2 py-0.5 ${selectedCase.priority === 'P0' ? 'border-red-300 text-red-600' : selectedCase.priority === 'P1' ? 'border-amber-300 text-amber-600' : 'border-slate-300 text-slate-500'}`}>
-                      {selectedCase.priority}
-                    </Badge>
-                  </div>
-                  <h3 className="font-medium text-slate-900 dark:text-slate-100 leading-relaxed text-sm">
-                    {selectedCase.title}
-                  </h3>
-                </div>
-
-                {/* Given - 前置条件 */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-3 py-1 shrink-0 font-medium">前置条件</Badge>
-                    <span className="text-xs text-slate-400 font-mono">Given</span>
-                  </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-xl px-4 py-3 border border-emerald-100 dark:border-emerald-900/30">
-                    <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
-                      {selectedCase.given || <span className="text-slate-400 italic">未提供</span>}
-                    </pre>
-                  </div>
-                </div>
-
-                {/* When - 操作步骤 */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-3 py-1 shrink-0 font-medium">操作步骤</Badge>
-                    <span className="text-xs text-slate-400 font-mono">When</span>
-                  </div>
-                  <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl px-4 py-3 border border-amber-100 dark:border-amber-900/30">
-                    <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
-                      {selectedCase.when || <span className="text-slate-400 italic">未提供</span>}
-                    </pre>
-                  </div>
-                </div>
-
-                {/* Then - 预期结果 */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 px-3 py-1 shrink-0 font-medium">预期结果</Badge>
-                    <span className="text-xs text-slate-400 font-mono">Then</span>
-                  </div>
-                  <div className="bg-pink-50 dark:bg-pink-950/20 rounded-xl px-4 py-3 border border-pink-100 dark:border-pink-900/30">
-                    <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
-                      {selectedCase.then || <span className="text-slate-400 italic">未提供</span>}
-                    </pre>
-                  </div>
-                </div>
-              </div>
             )}
-            
-            {isRequirementDetail && selectedRequirement && (
-              <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
-                {/* 需求点标题 */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1">
-                      需求点
-                    </Badge>
-                    <span className={`text-xs px-2 py-0.5 rounded ${getPriorityColor(selectedRequirement.priority || '中')}`}>
-                      {selectedRequirement.priority || '中'}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 leading-relaxed">
-                    {selectedRequirement.title}
-                  </h3>
-                </div>
 
-                {/* 描述 */}
-                {selectedRequirement.description && (
+            {/* 标题 */}
+            <span className="flex-1 text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+              {itemTitle || '详情'}
+            </span>
+
+            {/* 优先级 */}
+            {selectedCase?.priority && (
+              <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                selectedCase.priority === 'P0' ? 'bg-red-500 text-white' :
+                selectedCase.priority === 'P1' ? 'bg-amber-500 text-white' :
+                'bg-slate-400 text-white'
+              }`}>
+                {selectedCase.priority}
+              </span>
+            )}
+            {isRequirementDetail && selectedRequirement?.priority && (
+              <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                selectedRequirement.priority === 'P0' || selectedRequirement.priority === '高' ? 'bg-red-500 text-white' :
+                selectedRequirement.priority === 'P1' || selectedRequirement.priority === '中' ? 'bg-amber-500 text-white' :
+                'bg-slate-400 text-white'
+              }`}>
+                {selectedRequirement.priority === 'P0' || selectedRequirement.priority === '高' ? '高' :
+                 selectedRequirement.priority === 'P1' || selectedRequirement.priority === '中' ? '中' : '低'}
+              </span>
+            )}
+
+            {/* 关闭按钮 */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setDetailsPanelOpen(false);
+                setSelectedCase(null);
+                setSelectedRequirement(null);
+              }}
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
+            >
+              <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
+            </button>
+          </div>
+
+          {/* 内容区域 - 可展开/收起 */}
+          {detailsExpanded && (
+            <div className="border-t border-slate-100 dark:border-slate-700">
+              {isCaseDetail && selectedCase && (
+                <div className="space-y-4 p-4 max-h-[calc(100vh-400px)] overflow-y-auto">
+                  {/* 场景标题 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-3 py-1 font-medium">
+                        测试场景
+                      </Badge>
+                    </div>
+                    <h3 className="font-medium text-slate-900 dark:text-slate-100 leading-relaxed text-sm">
+                      {selectedCase.title}
+                    </h3>
+                  </div>
+
+                  {/* Given - 前置条件 */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="px-3 py-1">描述</Badge>
+                      <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-3 py-1 shrink-0 font-medium">前置条件</Badge>
+                      <span className="text-xs text-slate-400 font-mono">Given</span>
                     </div>
-                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-700">
+                    <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-xl px-4 py-3 border border-emerald-100 dark:border-emerald-900/30">
                       <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
-                        {selectedRequirement.description}
+                        {selectedCase.given || <span className="text-slate-400 italic">未提供</span>}
                       </pre>
                     </div>
                   </div>
-                )}
 
-                {/* 子用例统计 */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="px-3 py-1">关联测试用例</Badge>
+                  {/* When - 操作步骤 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-3 py-1 shrink-0 font-medium">操作步骤</Badge>
+                      <span className="text-xs text-slate-400 font-mono">When</span>
+                    </div>
+                    <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl px-4 py-3 border border-amber-100 dark:border-amber-900/30">
+                      <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
+                        {selectedCase.when || <span className="text-slate-400 italic">未提供</span>}
+                      </pre>
+                    </div>
                   </div>
-                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-4 text-sm">
+
+                  {/* Then - 预期结果 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge className="bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 px-3 py-1 shrink-0 font-medium">预期结果</Badge>
+                      <span className="text-xs text-slate-400 font-mono">Then</span>
+                    </div>
+                    <div className="bg-pink-50 dark:bg-pink-950/20 rounded-xl px-4 py-3 border border-pink-100 dark:border-pink-900/30">
+                      <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
+                        {selectedCase.then || <span className="text-slate-400 italic">未提供</span>}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {isRequirementDetail && selectedRequirement && (
+                <div className="space-y-4 p-4 max-h-[calc(100vh-400px)] overflow-y-auto">
+                  {/* 需求点标题 */}
+                  <div className="space-y-2">
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1">
+                      需求点
+                    </Badge>
+                    <h3 className="font-semibold text-slate-900 dark:text-slate-100 leading-relaxed">
+                      {selectedRequirement.title}
+                    </h3>
+                  </div>
+
+                  {/* 描述 */}
+                  {selectedRequirement.description && (
+                    <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-red-500" />
-                        <span className="text-slate-600 dark:text-slate-400">
-                          P0: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P0').length}
-                        </span>
+                        <Badge variant="outline" className="px-3 py-1">描述</Badge>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-amber-500" />
-                        <span className="text-slate-600 dark:text-slate-400">
-                          P1: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P1').length}
-                        </span>
+                      <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-700">
+                        <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
+                          {selectedRequirement.description}
+                        </pre>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-gray-400" />
-                        <span className="text-slate-600 dark:text-slate-400">
-                          P2: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P2').length}
-                        </span>
+                    </div>
+                  )}
+
+                  {/* 子用例统计 */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="px-3 py-1">关联测试用例</Badge>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl px-4 py-3 border border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-red-500" />
+                          <span className="text-slate-600 dark:text-slate-400">
+                            P0: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P0').length}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-amber-500" />
+                          <span className="text-slate-600 dark:text-slate-400">
+                            P1: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P1').length}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-gray-400" />
+                          <span className="text-slate-600 dark:text-slate-400">
+                            P2: {selectedRequirement.children.filter((c): c is TestCase => c.type === 'testcase' && c.priority === 'P2').length}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-            
-            {!isCaseDetail && !isRequirementDetail && (
-              <div className="flex flex-col items-center justify-center min-h-[200px] text-center">
-                <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-slate-300 dark:text-slate-500" />
+              )}
+              
+              {!isCaseDetail && !isRequirementDetail && (
+                <div className="flex flex-col items-center justify-center min-h-[100px] text-center p-4">
+                  <p className="text-sm text-slate-400">选择一个需求点或测试用例查看详情</p>
                 </div>
-                <p className="text-sm text-slate-400">选择一个需求点或测试用例查看详情</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
