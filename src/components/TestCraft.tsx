@@ -1788,9 +1788,9 @@ export default function TestCraft() {
             <div className="flex items-center gap-3 flex-wrap">
               {/* 拆分需求按钮 */}
               <Button 
-                className="h-10 px-4 bg-gradient-to-r from-orange-500 to-amber-500 
-                           hover:from-orange-600 hover:to-amber-600 text-white rounded-xl 
-                           gap-2 shadow-lg shadow-orange-500/25"
+                className="h-10 px-4 bg-gradient-to-r from-purple-600 to-violet-600 
+                           hover:from-purple-700 hover:to-violet-700 text-white rounded-xl 
+                           gap-2 shadow-lg shadow-purple-500/25"
                 onClick={handleAnalyze}
                 disabled={analyzing || !title.trim() || !description.trim()}
               >
@@ -1801,12 +1801,12 @@ export default function TestCraft() {
               {/* 生成测试用例按钮 */}
               {mindmap && reqCount > 0 && (
                 <Button 
-                  className="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-2"
+                  className="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl gap-2 shadow-md"
                   onClick={handleBatchGenerate}
                   disabled={generating}
                 >
                   {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                  <span>生成用例</span>
+                  <span>生成测试用例</span>
                 </Button>
               )}
               
