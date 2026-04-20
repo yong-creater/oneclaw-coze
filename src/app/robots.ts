@@ -1,14 +1,19 @@
 import { MetadataRoute } from 'next';
 
-// 提取域名，移除协议前缀
-const getDomain = () => {
-  const raw = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'oneclaw.shop';
-  return raw.replace(/^https?:\/\//, '');
+// 获取完整URL（带协议）- 强制使用 www
+const getFullUrl = () => {
+  let domain = process.env.COZE_PROJECT_DOMAIN_DEFAULT || 'www.oneclaw.shop';
+  // 移除协议前缀
+  domain = domain.replace(/^https?:\/\//, '');
+  // 强制添加 www 前缀（如果没有）
+  if (!domain.startsWith('www.')) {
+    domain = 'www.' + domain;
+  }
+  return `https://${domain}`;
 };
 
 export default function robots(): MetadataRoute.Robots {
-  const domain = getDomain();
-  const baseUrl = domain;
+  const baseUrl = getFullUrl();
   
   return {
     rules: [
