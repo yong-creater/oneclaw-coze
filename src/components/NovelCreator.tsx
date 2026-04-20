@@ -25,76 +25,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ModelSelector } from '@/components/ModelSelector';
 
-// 简化版模型选择器 - 两列列表
-function ModelGroupSelect({ 
-  value, 
-  onChange 
-}: { 
-  value: string; 
-  onChange: (v: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  
-  const selectedModel = AI_MODELS.find(m => m.value === value);
-  
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between hover:border-orange-300 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-      >
-        <span className="text-sm text-slate-800 dark:text-slate-200">
-          {selectedModel?.label || '选择模型'}
-        </span>
-        <ChevronDown className="w-4 h-4 text-slate-400" />
-      </button>
-      
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Sparkles className="w-5 h-5 text-orange-500" />
-              选择模型
-            </DialogTitle>
-          </DialogHeader>
-          
-          {/* 模型列表 - 两列 */}
-          <div className="grid grid-cols-2 gap-2 overflow-y-auto flex-1">
-            {AI_MODELS.map(model => (
-              <button
-                key={model.value}
-                type="button"
-                onClick={() => {
-                  onChange(model.value);
-                  setOpen(false);
-                }}
-                className={`px-4 py-3 rounded-lg text-left transition-all text-sm ${
-                  model.value === value
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
-                    : 'bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600'
-                }`}
-              >
-                <div className="font-medium flex items-center gap-2">
-                  {model.label}
-                  {model.region === '付费' && (
-                    <span className="text-xs px-1.5 py-0.5 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded">
-                      付费
-                    </span>
-                  )}
-                </div>
-                <div className={`text-xs mt-0.5 ${model.value === value ? 'text-white/80' : 'text-slate-500'}`}>
-                  {model.provider}
-                </div>
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+// 已删除简化版 ModelGroupSelect，统一使用 ModelSelector 组件
 
 // ==================== 类型定义 ====================
 interface StoryContent {
@@ -919,7 +852,7 @@ export default function NovelCreator() {
                         AI模型
                         <span className="text-xs text-slate-400 ml-1">(按厂商分组选择)</span>
                       </label>
-                      <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
+                      <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                     </div>
                     
                     <div>
@@ -1112,7 +1045,7 @@ export default function NovelCreator() {
                       <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                       AI模型
                     </label>
-                    <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
+                    <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                   </div>
                   
                   <div>
@@ -1253,7 +1186,7 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
+                  <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                 </div>
                 
                 <div>
@@ -1402,7 +1335,7 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelGroupSelect value={selectedModel} onChange={setSelectedModel} />
+                  <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">

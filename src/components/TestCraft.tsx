@@ -11,20 +11,12 @@ import {
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import BackToHome from '@/components/BackToHome';
+import { ModelSelector } from '@/components/ModelSelector';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import BackToHome from '@/components/BackToHome';
 
 // ==================== 类型定义 ====================
 interface TestCase {
@@ -73,16 +65,16 @@ const MODULES = [
   { value: '工作手机', label: '工作手机' },
 ];
 
-// AI 模型分组（与 NovelCreator 保持一致）
+// AI 模型分组（统一组件 ModelSelector 使用）
 const AI_MODEL_GROUPS = [
   {
     provider: '豆包',
     icon: '🦞',
     models: [
+      { value: 'doubao-seed-1-8-251228', label: 'Seed 1.8', region: '免费' },
       { value: 'doubao-seed-2-0-pro-260215', label: 'Seed 2.0 Pro', region: '免费' },
       { value: 'doubao-seed-2-0-lite-260215', label: 'Seed 2.0 Lite', region: '免费' },
       { value: 'doubao-seed-2-0-mini-260215', label: 'Seed 2.0 Mini', region: '免费' },
-      { value: 'doubao-seed-1-8-251228', label: 'Seed 1.8', region: '免费' },
     ]
   },
   {
@@ -98,6 +90,7 @@ const AI_MODEL_GROUPS = [
     icon: '🌙',
     models: [
       { value: 'kimi-k2-5-260127', label: 'K2.5', region: '免费' },
+      { value: 'kimi-k2-250905', label: 'K2', region: '免费' },
     ]
   },
   {
@@ -131,6 +124,7 @@ const AI_MODEL_GROUPS = [
     models: [
       { value: 'claude-3-5-sonnet', label: 'Claude 3.5 Sonnet', region: '付费' },
       { value: 'claude-3-5-haiku', label: 'Claude 3.5 Haiku', region: '付费' },
+      { value: 'claude-sonnet-4', label: 'Claude Sonnet 4', region: '付费' },
     ]
   },
   {
@@ -1933,40 +1927,12 @@ export default function TestCraft() {
                   <label className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2 block">
                     AI 模型
                   </label>
-                  <Select value={aiModel} onValueChange={setAiModel}>
-                    <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
-                                             hover:border-orange-400 dark:hover:border-orange-500 focus:outline-none focus:border-orange-500 transition-colors 
-                                             text-sm text-slate-800 dark:text-slate-200 h-auto">
-                      <div className="flex items-center gap-2">
-                        <SelectValue />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {AI_MODEL_GROUPS.map(group => (
-                        <SelectGroup key={group.provider}>
-                          <SelectLabel className="flex items-center gap-1.5">
-                            <span>{group.icon}</span>
-                            <span>{group.provider}</span>
-                            {group.provider.includes('4sAPI') && (
-                              <Badge variant="outline" className="ml-1 text-[10px] px-1 py-0 bg-amber-50 text-amber-600 border-amber-200">
-                                付费
-                              </Badge>
-                            )}
-                          </SelectLabel>
-                          {group.models.map(m => (
-                            <SelectItem key={m.value} value={m.value} className="pl-8">
-                              <div className="flex items-center justify-between w-full">
-                                <span>{m.label}</span>
-                                <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0 bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400">
-                                  {m.region}
-                                </Badge>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <ModelSelector
+                    groups={AI_MODEL_GROUPS}
+                    value={aiModel}
+                    onChange={setAiModel}
+                    triggerClassName="w-full"
+                  />
                 </div>
               </div>
 
