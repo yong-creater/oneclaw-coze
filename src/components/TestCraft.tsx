@@ -1344,9 +1344,50 @@ export default function TestCraft() {
     const isTC = node.type === 'testcase';
     const isExpanded = expanded.has(node.id);
     
+    // 节点颜色配置 - 匹配图例
+    // 橙色 = 需求（根节点）
+    // 蓝色 = 需求点
+    // 灰色 = 测试用例
+    const getNodeColors = () => {
+      if (isRoot) {
+        return {
+          bg: '#f97316',  // 橙色
+          bgHover: '#ea580c',
+          text: '#ffffff',
+          border: '#c2410c',
+        };
+      }
+      if (isReq) {
+        return {
+          bg: '#3b82f6',  // 蓝色
+          bgHover: '#2563eb',
+          text: '#ffffff',
+          border: '#1d4ed8',
+        };
+      }
+      // 测试用例 - 灰色
+      return {
+        bg: '#94a3b8',  // 灰色
+        bgHover: '#64748b',
+        text: '#ffffff',
+        border: '#64748b',
+      };
+    };
+    
+    const colors = getNodeColors();
+    
+    // 优先级文字
+    const getPriorityText = () => {
+      switch (node.priority) {
+        case 'P0': return '高';
+        case 'P1': return '中';
+        case 'P2': return '低';
+        default: return '';
+      }
+    };
+    
     const handleClick = () => {
       if (isRoot) {
-        // 点击根节点切换视图
         setViewMode('tree');
       } else if (isReq) {
         toggleExpand(node.id);
@@ -1360,112 +1401,88 @@ export default function TestCraft() {
     
     return (
       <g key={node.id} transform={`translate(${position.x}, ${position.y})`}>
-        {/* 连接线 */}
-        {!isRoot && mindmap && (
-          <path
-            d={`M 0 ${position.height / 2} L ${-MINDMAP_CONFIG.GAP_X / 2} ${position.height / 2} Q ${-MINDMAP_CONFIG.GAP_X / 2} ${position.height / 2} ${-MINDMAP_CONFIG.GAP_X / 2 + 10} ${position.height / 2}`}
-            fill="none"
-            stroke="#d1d5db"
-            strokeWidth="2"
-          />
-        )}
-        
-        {/* 节点背景 */}
+        {/* 节点背景 - 圆角卡片样式 */}
         <rect
           x="0"
           y="0"
           width={position.width}
           height={position.height}
-          rx={isRoot ? 12 : 8}
-          fill={isRoot ? '#ea580c' : isReq ? '#f97316' : '#f9fafb'}
-          stroke={isSelected ? '#f97316' : isRoot ? '#c2410c' : isReq ? '#ea580c' : getPriorityBorderColor(node.priority || 'P1')}
-          strokeWidth={isSelected ? 2 : 1}
-          className="cursor-pointer transition-all"
+          rx={isRoot ? 10 : 8}
+          ry={isRoot ? 10 : 8}
+          fill={colors.bg}
+          stroke={isSelected ? '#8b5cf6' : 'transparent'}
+          strokeWidth={isSelected ? 3 : 0}
+          className="cursor-pointer transition-all hover:brightness-110"
           onClick={handleClick}
+          filter="drop-shadow(0 2px 4px rgba(0,0,0,0.1))"
         />
         
-        {/* 优先级标签 */}
-        {!isRoot && (
-          <>
-            {isReq ? (
-              // 需求点：文字标签
-              <rect
-                x={position.width - 40}
-                y={8}
-                width={32}
-                height={18}
-                rx={4}
-                fill={getPriorityColor(node.priority || '中')}
-              />
-            ) : (
-              // 测试用例：圆形徽章
-              <circle
-                cx={position.width - 16}
-                cy={position.height / 2}
-                r={10}
-                fill={getPriorityColor(node.priority || 'P1')}
-              />
-            )}
-          </>
-        )}
-        
-        {/* 标题 */}
+        {/* 节点标题 */}
         <text
-          x={isRoot ? position.width / 2 : 12}
+          x={isRoot ? position.width / 2 : 10}
           y={position.height / 2}
           dominantBaseline="middle"
           textAnchor={isRoot ? 'middle' : 'start'}
-          fill={isRoot ? '#ffffff' : isReq ? '#c2410c' : '#374151'}
-          fontSize={isRoot ? 14 : 12}
-          fontWeight={isRoot ? 'bold' : 'normal'}
+          fill={colors.text}
+          fontSize={isRoot ? 13 : 12}
+          fontWeight={isRoot ? '600' : '500'}
           className="select-none pointer-events-none"
         >
-          {node.title.length > (isRoot ? 20 : 25) 
-            ? node.title.substring(0, isRoot ? 20 : 25) + '...' 
+          {node.title.length > (isRoot ? 18 : 22) 
+            ? node.title.substring(0, isRoot ? 18 : 22) + '...' 
             : node.title}
         </text>
         
-        {/* 优先级文字 */}
-        {!isRoot && (
-          <text
-            x={isReq ? position.width - 34 : position.width - 16}
-            y={isReq ? 17 : position.height / 2}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fill="#ffffff"
-            fontSize={isReq ? 10 : 9}
-            fontWeight="bold"
-            className="select-none pointer-events-none"
-          >
-            {node.priority || 'P1'}
-          </text>
-        )}
-        
-        {/* 展开/折叠图标 */}
-        {isReq && node.children.length > 0 && (
-          <>
-            <circle
-              cx={position.width - 70}
-              cy={position.height / 2}
-              r={10}
-              fill="#e5e7eb"
+        {/* 优先级标签（需求点和测试用例显示） */}
+        {isReq && (
+          <g transform={`translate(${position.width - 30}, 5)`}>
+            <rect
+              x="0"
+              y="0"
+              width={24}
+              height={16}
+              rx={3}
+              fill="rgba(0,0,0,0.2)"
             />
             <text
-              x={position.width - 70}
-              y={position.height / 2}
+              x={12}
+              y={8}
               dominantBaseline="middle"
               textAnchor="middle"
-              fill="#6b7280"
-              fontSize={12}
+              fill="#ffffff"
+              fontSize={9}
+              fontWeight="bold"
               className="select-none pointer-events-none"
             >
-              {isExpanded ? '−' : '+'}
+              {getPriorityText()}
             </text>
-          </>
+          </g>
+        )}
+        
+        {/* 测试用例 - 圆形图标 */}
+        {isTC && (
+          <circle
+            cx={position.width - 12}
+            cy={position.height / 2}
+            r={6}
+            fill="rgba(255,255,255,0.3)"
+          />
+        )}
+        
+        {/* 需求点 - 勾选图标 */}
+        {isReq && (
+          <g transform={`translate(${position.width - 24}, ${position.height - 16})`}>
+            <circle
+              cx={6}
+              cy={6}
+              r={5}
+              fill="rgba(255,255,255,0.3)"
+            />
+          </g>
         )}
       </g>
     );
-  };
+  };;
 
   // 计算统计
   const reqCount = mindmap?.children.length || 0;
@@ -2230,7 +2247,7 @@ export default function TestCraft() {
                                          ${pos.x - MINDMAP_CONFIG.GAP_X / 2} ${pos.y + pos.height / 2},
                                          ${pos.x} ${pos.y + pos.height / 2}`}
                                     fill="none"
-                                    stroke="#cbd5e1"
+                                    stroke="#f97316"
                                     strokeWidth="2"
                                   />
                                 );
