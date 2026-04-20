@@ -14,7 +14,9 @@ import JSZip from 'jszip';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -71,12 +73,84 @@ const MODULES = [
   { value: '工作手机', label: '工作手机' },
 ];
 
-const AI_MODELS = [
-  { value: 'doubao-seed-2-0-pro-260215', label: '豆包 Seed 2.0 Pro（推荐）' },
-  { value: 'doubao-seed-2-0-lite-260215', label: '豆包 Seed 2.0 Lite' },
-  { value: 'deepseek-chat', label: 'DeepSeek V3.2' },
-  { value: 'deepseek-v3', label: 'DeepSeek V3' },
+// AI 模型分组（与 NovelCreator 保持一致）
+const AI_MODEL_GROUPS = [
+  {
+    provider: '豆包',
+    icon: '🦞',
+    models: [
+      { value: 'doubao-seed-2-0-pro-260215', label: 'Seed 2.0 Pro', region: '免费' },
+      { value: 'doubao-seed-2-0-lite-260215', label: 'Seed 2.0 Lite', region: '免费' },
+      { value: 'doubao-seed-2-0-mini-260215', label: 'Seed 2.0 Mini', region: '免费' },
+      { value: 'doubao-seed-1-8-251228', label: 'Seed 1.8', region: '免费' },
+    ]
+  },
+  {
+    provider: 'DeepSeek',
+    icon: '🔮',
+    models: [
+      { value: 'deepseek-v3-2-251201', label: 'V3', region: '免费' },
+      { value: 'deepseek-r1-250528', label: 'R1 (推理)', region: '免费' },
+    ]
+  },
+  {
+    provider: 'Kimi',
+    icon: '🌙',
+    models: [
+      { value: 'kimi-k2-5-260127', label: 'K2.5', region: '免费' },
+    ]
+  },
+  {
+    provider: 'GLM',
+    icon: '📊',
+    models: [
+      { value: 'glm-5-0-260211', label: 'GLM-5', region: '免费' },
+      { value: 'glm-4-7-251222', label: 'GLM-4.7', region: '免费' },
+    ]
+  },
+  {
+    provider: 'Qwen',
+    icon: '🏔️',
+    models: [
+      { value: 'qwen-3-5-plus-260215', label: 'Qwen 3.5 Plus', region: '免费' },
+    ]
+  },
+  // 4sAPI 付费模型
+  {
+    provider: 'GPT (4sAPI)',
+    icon: '🤖',
+    models: [
+      { value: 'gpt-4o', label: 'GPT-4o', region: '付费' },
+      { value: 'gpt-4o-mini', label: 'GPT-4o Mini', region: '付费' },
+      { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', region: '付费' },
+    ]
+  },
+  {
+    provider: 'Claude (4sAPI)',
+    icon: '🧠',
+    models: [
+      { value: 'claude-3-5-sonnet', label: 'Claude 3.5 Sonnet', region: '付费' },
+      { value: 'claude-3-5-haiku', label: 'Claude 3.5 Haiku', region: '付费' },
+    ]
+  },
+  {
+    provider: 'Gemini (4sAPI)',
+    icon: '✨',
+    models: [
+      { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', region: '付费' },
+      { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', region: '付费' },
+    ]
+  },
 ];
+
+// 扁平化的模型列表
+const AI_MODELS = AI_MODEL_GROUPS.flatMap(group => 
+  group.models.map(m => ({
+    ...m,
+    provider: group.provider,
+    providerIcon: group.icon
+  }))
+);
 
 // 思维导图布局常量
 const MINDMAP_CONFIG = {
@@ -1863,11 +1937,33 @@ export default function TestCraft() {
                     <SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-left flex items-center justify-between 
                                              hover:border-orange-400 dark:hover:border-orange-500 focus:outline-none focus:border-orange-500 transition-colors 
                                              text-sm text-slate-800 dark:text-slate-200 h-auto">
-                      <SelectValue />
+                      <div className="flex items-center gap-2">
+                        <SelectValue />
+                      </div>
                     </SelectTrigger>
                     <SelectContent>
-                      {AI_MODELS.map(m => (
-                        <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                      {AI_MODEL_GROUPS.map(group => (
+                        <SelectGroup key={group.provider}>
+                          <SelectLabel className="flex items-center gap-1.5">
+                            <span>{group.icon}</span>
+                            <span>{group.provider}</span>
+                            {group.provider.includes('4sAPI') && (
+                              <Badge variant="outline" className="ml-1 text-[10px] px-1 py-0 bg-amber-50 text-amber-600 border-amber-200">
+                                付费
+                              </Badge>
+                            )}
+                          </SelectLabel>
+                          {group.models.map(m => (
+                            <SelectItem key={m.value} value={m.value} className="pl-8">
+                              <div className="flex items-center justify-between w-full">
+                                <span>{m.label}</span>
+                                <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0 bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                                  {m.region}
+                                </Badge>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       ))}
                     </SelectContent>
                   </Select>
