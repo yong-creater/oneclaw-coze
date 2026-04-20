@@ -1607,12 +1607,12 @@ export default function TestCraft() {
     const isCaseDetail = selectedCase;
     
     return (
-      <div className="xl:w-[480px] shrink-0">
-        <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden lg:sticky lg:top-28">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-700">
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                {isCaseDetail ? '用例详情' : '需求点详情'}
+      <div className="xl:w-[400px] shrink-0">
+        <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-lg">
+          <CardContent className="p-0">
+            <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700">
+              <span className="text-base font-semibold text-slate-800 dark:text-slate-100">
+                用例详情
               </span>
               <button 
                 onClick={() => {
@@ -1620,25 +1620,25 @@ export default function TestCraft() {
                   setSelectedCase(null);
                   setSelectedRequirement(null);
                 }}
-                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4 text-slate-500" />
               </button>
             </div>
             
             {isCaseDetail && selectedCase && (
-              <div className="space-y-4 max-h-[calc(100vh-400px)] overflow-y-auto pr-2">
+              <div className="space-y-4 p-4 max-h-[calc(100vh-400px)] overflow-y-auto">
                 {/* 场景标题 */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-3 py-1">
-                      测试用例
+                    <Badge className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-3 py-1 font-medium">
+                      测试场景
                     </Badge>
-                    <span className={`text-xs px-2 py-0.5 rounded ${getPriorityColor(selectedCase.priority)}`}>
+                    <Badge variant="outline" className={`text-xs px-2 py-0.5 ${selectedCase.priority === 'P0' ? 'border-red-300 text-red-600' : selectedCase.priority === 'P1' ? 'border-amber-300 text-amber-600' : 'border-slate-300 text-slate-500'}`}>
                       {selectedCase.priority}
-                    </span>
+                    </Badge>
                   </div>
-                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 leading-relaxed">
+                  <h3 className="font-medium text-slate-900 dark:text-slate-100 leading-relaxed text-sm">
                     {selectedCase.title}
                   </h3>
                 </div>
@@ -1646,10 +1646,10 @@ export default function TestCraft() {
                 {/* Given - 前置条件 */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-3 py-1 shrink-0">前置条件</Badge>
-                    <span className="text-xs text-slate-400">Given</span>
+                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 px-3 py-1 shrink-0 font-medium">前置条件</Badge>
+                    <span className="text-xs text-slate-400 font-mono">Given</span>
                   </div>
-                  <div className="bg-emerald-50/70 dark:bg-emerald-950/30 rounded-xl px-4 py-3 border border-emerald-100 dark:border-emerald-900/50">
+                  <div className="bg-emerald-50 dark:bg-emerald-950/20 rounded-xl px-4 py-3 border border-emerald-100 dark:border-emerald-900/30">
                     <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
                       {selectedCase.given || <span className="text-slate-400 italic">未提供</span>}
                     </pre>
@@ -1659,10 +1659,10 @@ export default function TestCraft() {
                 {/* When - 操作步骤 */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-3 py-1 shrink-0">操作步骤</Badge>
-                    <span className="text-xs text-slate-400">When</span>
+                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 px-3 py-1 shrink-0 font-medium">操作步骤</Badge>
+                    <span className="text-xs text-slate-400 font-mono">When</span>
                   </div>
-                  <div className="bg-amber-50/70 dark:bg-amber-950/30 rounded-xl px-4 py-3 border border-amber-100 dark:border-amber-900/50">
+                  <div className="bg-amber-50 dark:bg-amber-950/20 rounded-xl px-4 py-3 border border-amber-100 dark:border-amber-900/30">
                     <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
                       {selectedCase.when || <span className="text-slate-400 italic">未提供</span>}
                     </pre>
@@ -1672,10 +1672,10 @@ export default function TestCraft() {
                 {/* Then - 预期结果 */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 px-3 py-1 shrink-0">预期结果</Badge>
-                    <span className="text-xs text-slate-400">Then</span>
+                    <Badge className="bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400 px-3 py-1 shrink-0 font-medium">预期结果</Badge>
+                    <span className="text-xs text-slate-400 font-mono">Then</span>
                   </div>
-                  <div className="bg-rose-50/70 dark:bg-rose-950/30 rounded-xl px-4 py-3 border border-rose-100 dark:border-rose-900/50">
+                  <div className="bg-pink-50 dark:bg-pink-950/20 rounded-xl px-4 py-3 border border-pink-100 dark:border-pink-900/30">
                     <pre className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words font-sans">
                       {selectedCase.then || <span className="text-slate-400 italic">未提供</span>}
                     </pre>
@@ -2066,8 +2066,8 @@ export default function TestCraft() {
                             onClick={() => setViewMode('tree')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                               viewMode === 'tree'
-                                ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                ? 'bg-white dark:bg-slate-700 text-purple-600 border border-purple-300 dark:border-purple-600 shadow-sm'
+                                : 'bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                             }`}
                           >
                             <LayoutList className="w-4 h-4" />
@@ -2077,8 +2077,8 @@ export default function TestCraft() {
                             onClick={() => setViewMode('mindmap')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                               viewMode === 'mindmap'
-                                ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
-                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                ? 'bg-white dark:bg-slate-700 text-purple-600 border border-purple-300 dark:border-purple-600 shadow-sm'
+                                : 'bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                             }`}
                           >
                             <Network className="w-4 h-4" />
@@ -2113,9 +2113,9 @@ export default function TestCraft() {
                               </button>
                             </div>
                           )}
-                          <Button size="sm" variant="ghost" className="gap-1 text-orange-600 dark:text-orange-400 h-8" onClick={addRequirement}>
+                          <Button size="sm" variant="outline" className="gap-1 h-8 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800" onClick={addRequirement}>
                             <Plus className="w-4 h-4" />
-                            添加需求点
+                            新增需求点
                           </Button>
                         </div>
                       </div>
