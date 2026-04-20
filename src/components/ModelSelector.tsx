@@ -111,25 +111,25 @@ export function ModelSelector({ groups, value, onChange, triggerClassName = '' }
                    border-2 border-slate-200 dark:border-slate-700 rounded-xl
                    hover:border-orange-400 dark:hover:border-orange-500 
                    focus:outline-none focus:border-orange-500 transition-colors
-                   ${triggerClassName}`}
+                   min-w-0 ${triggerClassName}`}
       >
-        <div className="flex items-center gap-2 flex-1">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* 显示图标 */}
           {selectedModel && (
-            <span className="text-base">
+            <span className="text-base flex-shrink-0">
               {groups.find(g => g.models.some(m => m.value === selectedModel.value))?.icon || '🤖'}
             </span>
           )}
-          <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+          <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
             {selectedModel?.label || '选择模型'}
           </span>
         </div>
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* 弹窗 */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-80 bg-white dark:bg-slate-800 
+        <div className="absolute top-full left-0 mt-2 w-96 bg-white dark:bg-slate-800 
                       border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50
                       overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* 搜索框 */}
