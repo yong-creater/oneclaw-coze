@@ -1545,7 +1545,129 @@ export default function TestCraft() {
   const reqCount = mindmap?.children.length || 0;
   const caseCount = mindmap ? countTestCases(mindmap) : 0;
 
-  // 渲染树节点
+  // 渲染需求点大组（带折叠）
+  const renderRequirementGroup = (req: RequirementNode, reqIndex: number) => {
+    const isExpanded = expanded.has(req.id);
+    const testCases = req.children.filter(c => c.type === 'testcase') as TestCase[];
+    
+    // 优先级样式
+    const getPriorityBadge = (priority?: string) => {
+      if (!priority) return null;
+      const p = priority.toLowerCase();
+      if (p === 'p0' || priority === '高') {
+        return <span className="px-2 py-0.5 text-xs font-medium rounded bg-red-500 text-white">高</span>;
+      }
+      if (p === 'p1' || priority === '中') {
+        return <span className="px-2 py-0.5 text-xs font-medium rounded bg-amber-500 text-white">中</span>;
+      }
+      return <span className="px-2 py-0.5 text-xs font-medium rounded bg-slate-400 text-white">低</span>;
+    };
+
+    return (
+      <div key={req.id} className="mb-4">
+        {/* 需求点卡片 */}
+        <div 
+          className={`flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:border-orange-300 dark:hover:border-orange-600 transition-colors ${
+            selectedRequirement?.id === req.id ? 'ring-2 ring-orange-500 ring-offset-2 border-orange-300 dark:border-orange-600' : ''
+          }`}
+          onClick={() => {
+            setSelectedRequirement(req);
+            setDetailsPanelOpen(true);
+          }}
+        >
+          {/* 展开/折叠按钮 */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); toggleExpand(req.id); }} 
+            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors text-slate-500"
+          >
+            <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+          </button>
+
+          {/* 编号 */}
+          <span className="w-6 h-6 flex items-center justify-center bg-slate-100 dark:bg-slate-700 text-slate-500 text-xs font-medium rounded">
+            {reqIndex}
+          </span>
+
+          {/* 标题 */}
+          <span className="flex-1 text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+            {req.title}
+          </span>
+
+          {/* 优先级 */}
+          {req.priority && (
+            <div className="shrink-0">
+              {getPriorityBadge(req.priority)}
+            </div>
+          )}
+
+          {/* 操作按钮 */}
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button title="展开所有" onClick={(e) => { e.stopPropagation(); }} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-slate-600">
+              <Maximize2 className="w-3.5 h-3.5" />
+            </button>
+            <button title="新增用例" onClick={(e) => { e.stopPropagation(); handleGenerate(req.id); }} className="p-1.5 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded text-slate-400 hover:text-orange-600">
+              {generatingId === req.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+            </button>
+            <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(req.id, req.title); }} className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-slate-600">
+              <Edit2 className="w-3.5 h-3.5" />
+            </button>
+            <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode(mindmap?.id || '', req.id); }} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-slate-400 hover:text-red-600">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 测试用例子项 */}
+        {isExpanded && testCases.length > 0 && (
+          <div className="mt-2 ml-6 space-y-2">
+            {testCases.map((tc, tcIndex) => (
+              <div 
+                key={tc.id}
+                className={`flex items-center gap-3 px-4 py-2.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-lg cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 transition-colors ${
+                  selectedCase?.id === tc.id ? 'ring-2 ring-orange-500 ring-offset-1 border-orange-200 dark:border-orange-700' : ''
+                }`}
+                onClick={() => {
+                  setSelectedCase(tc);
+                  setDetailsPanelOpen(true);
+                }}
+              >
+                {/* 编号 */}
+                <span className="w-5 h-5 flex items-center justify-center bg-slate-200 dark:bg-slate-700 text-slate-500 text-xs font-medium rounded">
+                  {tcIndex + 1}
+                </span>
+
+                {/* 标题 */}
+                <span className="flex-1 text-sm text-slate-600 dark:text-slate-300 truncate">
+                  {tc.title}
+                </span>
+
+                {/* 优先级 */}
+                <span className={`px-1.5 py-0.5 text-xs font-medium rounded ${
+                  tc.priority === 'P0' ? 'bg-red-500 text-white' :
+                  tc.priority === 'P1' ? 'bg-amber-500 text-white' :
+                  'bg-slate-400 text-white'
+                }`}>
+                  {tc.priority}
+                </span>
+
+                {/* 操作按钮 */}
+                <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(tc.id, tc.title); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-slate-600">
+                    <Edit2 className="w-3 h-3" />
+                  </button>
+                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode('', tc.id); }} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-slate-400 hover:text-red-600">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // 渲染树节点（保留用于其他视图模式）
   const renderTreeNode = (node: RequirementNode | TestCase, level: number = 0, testCaseIndex: number = 0, requirementIndex: number = 0) => {
     const isExpanded = expanded.has(node.id);
     const hasChildren = 'children' in node && node.children.length > 0;
@@ -2248,7 +2370,7 @@ export default function TestCraft() {
                           {mindmap.children.map((child, idx) => {
                             if (child.type === 'requirement') {
                               const reqIdx = mindmap.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
-                              return renderTreeNode(child, 0, 0, reqIdx);
+                              return renderRequirementGroup(child as RequirementNode, reqIdx);
                             }
                             return null;
                           })}
