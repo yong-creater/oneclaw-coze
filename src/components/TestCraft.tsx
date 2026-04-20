@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
-  Sparkles, Link as LinkIcon,
+  Sparkles, Link as LinkIcon, CheckCircle,
   FileText, GitBranch, Zap, ChevronRight, ChevronDown,
-  Trash2, Plus, X, Download, Loader2, Check, AlertCircle,
+  Trash2, Plus, X, Download, Loader2, Check, AlertCircle, Circle,
   Edit2, Library, Hourglass, LayoutList, Network, BookOpen,
   Paperclip, FileCheck, ChevronDown as ChevronDownIcon,
   Merge, ZoomIn, ZoomOut, Maximize2, ArrowLeft, Search, Filter
@@ -1482,14 +1482,58 @@ export default function TestCraft() {
     const isGeneratingThis = generatingId === node.id;
     const currentTestCase = node as TestCase;
     const currentReq = node as RequirementNode;
+    
+    // 节点类型样式配置
+    const getNodeStyles = () => {
+      if (isRoot) {
+        return {
+          bg: 'bg-gradient-to-r from-violet-600 to-purple-600',
+          text: 'text-white',
+          icon: <Sparkles className="w-4 h-4" />,
+        };
+      }
+      if (isRequirement) {
+        return {
+          bg: 'bg-emerald-500',
+          text: 'text-white',
+          icon: <CheckCircle className="w-4 h-4" />,
+        };
+      }
+      if (isTestCase) {
+        // 正常用例为橙色，灰色用例表示特殊场景
+        const isNormal = node.priority !== 'P2';
+        return {
+          bg: isNormal ? 'bg-amber-500' : 'bg-slate-400',
+          text: 'text-white',
+          icon: isNormal ? <AlertCircle className="w-4 h-4" /> : <Circle className="w-4 h-4" />,
+        };
+      }
+      return {
+        bg: 'bg-slate-200 dark:bg-slate-700',
+        text: 'text-slate-700 dark:text-slate-200',
+        icon: <FileText className="w-4 h-4" />,
+      };
+    };
+    
+    const styles = getNodeStyles();
+    const isSelectedNode = isSelected || (isTestCase && selectedCase?.id === node.id);
 
     return (
-      <div key={node.id} className="mb-2 group">
+      <div key={node.id} className="mb-2 group relative">
+        {/* 连接线 */}
+        {level > 0 && (
+          <div 
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-0.5 bg-purple-400"
+            style={{ left: `${(level - 1) * 20 + 8}px` }}
+          />
+        )}
+        
+        {/* 节点卡片 */}
         <div 
-          className={`flex items-center gap-2 py-2 px-3 rounded-lg transition-all cursor-pointer ${
-            isTestCase ? 'hover:bg-slate-100 dark:hover:bg-slate-800' : ''
-          } ${isSelected || (isTestCase && selectedCase?.id === node.id) ? 'bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800' : ''}`}
-          style={{ paddingLeft: `${level * 20 + 12}px` }}
+          className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md ${
+            styles.bg
+          } ${styles.text} ${isSelectedNode ? 'ring-2 ring-purple-500 ring-offset-2' : ''}`}
+          style={{ marginLeft: `${level * 20}px` }}
           onClick={() => {
             if (isTestCase) {
               setSelectedCase(currentTestCase);
@@ -1502,24 +1546,18 @@ export default function TestCraft() {
         >
           {/* 展开/折叠按钮 */}
           {hasChildren ? (
-            <button onClick={(e) => { e.stopPropagation(); toggleExpand(node.id); }}>
-              {isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />}
+            <button 
+              onClick={(e) => { e.stopPropagation(); toggleExpand(node.id); }} 
+              className="p-0.5 hover:bg-white/20 rounded transition-colors"
+            >
+              {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
           ) : (
             <div className="w-5" />
           )}
 
           {/* 图标 */}
-          {isRoot && <Sparkles className="w-4 h-4 text-violet-600" />}
-          {isRequirement && <GitBranch className="w-4 h-4 text-blue-500" />}
-          {isTestCase && <FileText className="w-4 h-4 text-slate-400" />}
-
-          {/* 序号 */}
-          {(isRequirement || isTestCase) && (
-            <span className="text-xs font-mono text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded min-w-[28px] text-center">
-              {isTestCase ? testCaseIndex : requirementIndex}
-            </span>
-          )}
+          {styles.icon}
 
           {/* 标题 */}
           {isEditing ? (
@@ -1529,52 +1567,52 @@ export default function TestCraft() {
               onChange={(e) => setEditingNodeTitle(e.target.value)}
               onBlur={handleSaveEdit}
               onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit()}
-              className="flex-1 px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded outline-none bg-white dark:bg-slate-800"
+              className="flex-1 px-2 py-1 text-sm border-0 rounded outline-none bg-white/90 text-slate-800"
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
             <span 
-              className={`flex-1 text-sm ${isRoot ? 'font-semibold text-slate-900 dark:text-slate-100' : isRequirement ? 'font-medium text-slate-700 dark:text-slate-200' : 'text-slate-600 dark:text-slate-300'}`}
+              className="flex-1 text-sm font-medium truncate"
               onDoubleClick={() => startEdit(node.id, node.title)}
             >
               {node.title}
             </span>
           )}
 
-          {/* 优先级标签 */}
-          {!isRoot && (
-            <span className={`text-xs px-1.5 py-0.5 rounded ${getPriorityColor(node.priority || 'P1')}`}>
-              {node.priority || 'P1'}
+          {/* 数量标签（需求点显示子节点数量） */}
+          {isRequirement && hasChildren && (
+            <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+              {currentReq.children.length}
             </span>
           )}
 
           {/* 操作按钮 */}
           {!isRoot && (
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               {isRequirement && (
                 <>
-                  <button title="从知识库添加" onClick={(e) => { e.stopPropagation(); setShowKnowledgeSearch(true); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
-                    <Library className="w-3 h-3 text-slate-500" />
+                  <button title="从知识库添加" onClick={(e) => { e.stopPropagation(); setShowKnowledgeSearch(true); }} className="p-1 hover:bg-white/20 rounded">
+                    <Library className="w-3.5 h-3.5" />
                   </button>
-                  <button title="生成用例" onClick={(e) => { e.stopPropagation(); handleGenerate(node.id); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
-                    {isGeneratingThis ? <Loader2 className="w-3 h-3 animate-spin text-violet-600" /> : <Zap className="w-3 h-3 text-amber-500" />}
+                  <button title="生成用例" onClick={(e) => { e.stopPropagation(); handleGenerate(node.id); }} className="p-1 hover:bg-white/20 rounded">
+                    {isGeneratingThis ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
                   </button>
-                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
-                    <Edit2 className="w-3 h-3 text-slate-500" />
+                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-white/20 rounded">
+                    <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode(mindmap?.id || '', node.id); }} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded">
-                    <Trash2 className="w-3 h-3 text-red-500" />
+                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode(mindmap?.id || '', node.id); }} className="p-1 hover:bg-white/20 rounded">
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </>
               )}
               {isTestCase && (
                 <>
-                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded">
-                    <Edit2 className="w-3 h-3 text-slate-500" />
+                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-white/20 rounded">
+                    <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode('', node.id); }} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded">
-                    <Trash2 className="w-3 h-3 text-red-500" />
+                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode('', node.id); }} className="p-1 hover:bg-white/20 rounded">
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </>
               )}
@@ -1584,20 +1622,25 @@ export default function TestCraft() {
 
         {/* 子节点 */}
         {isExpanded && hasChildren && (
-          <div className="mt-1">
-            {currentReq.children.map((child, idx) => {
+          <div className="mt-1 relative">
+            {/* 子节点连接线 */}
+            <div 
+              className="absolute top-0 bottom-0 w-0.5 bg-purple-300 dark:bg-purple-700"
+              style={{ marginLeft: `${level * 20 + 16}px` }}
+            />
+            {currentReq.children.map((child) => {
               if (child.type === 'testcase') {
-                const tcIdx = currentReq.children.filter((c: unknown) => (c as { type?: string }).type === 'testcase').indexOf(child) + 1;
+                const tcIdx = currentReq.children.filter((c) => c.type === 'testcase').indexOf(child) + 1;
                 return renderTreeNode(child, level + 1, tcIdx, 0);
               }
-              const reqIdx = currentReq.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
+              const reqIdx = currentReq.children.filter((c) => c.type === 'requirement').indexOf(child) + 1;
               return renderTreeNode(child, level + 1, 0, reqIdx);
             })}
           </div>
         )}
       </div>
     );
-  };
+  };;
 
   // 渲染详情面板
   const renderDetailPanel = () => {
