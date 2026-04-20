@@ -327,7 +327,6 @@ const generateStyles = (): string => {
 // ==================== 主组件 ====================
 export default function TestCraft() {
   // 状态
-  const [activeTab, setActiveTab] = useState<'input' | 'manage'>('input');
   const [title, setTitle] = useState('');
   const [module, setModule] = useState('');
   const [aiModel, setAiModel] = useState('doubao-seed-2-0-pro-260215');
@@ -1785,30 +1784,6 @@ export default function TestCraft() {
               </div>
             </div>
 
-            {/* Tab 切换 */}
-            <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-              <button
-                onClick={() => setActiveTab('input')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'input'
-                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                需求输入
-              </button>
-              <button
-                onClick={() => setActiveTab('manage')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === 'manage'
-                    ? 'bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                用例管理
-              </button>
-            </div>
-
             {/* 右侧按钮组 */}
             <div className="flex items-center gap-3 flex-wrap">
               {/* 拆分需求按钮 */}
@@ -1912,9 +1887,7 @@ export default function TestCraft() {
       </header>
 
       {/* 主内容区 */}
-      {activeTab === 'input' ? (
-        /* ========== 需求输入 Tab ========== */
-        <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1800px] mx-auto">
+      <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1800px] mx-auto">
           {/* 左侧表单区域 */}
           <div className="w-full lg:w-[400px] shrink-0">
             <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl 
@@ -2287,230 +2260,6 @@ export default function TestCraft() {
             )}
           </div>
         </div>
-      ) : (
-        /* ========== 用例管理 Tab ========== */
-        <div className="flex flex-col lg:flex-row gap-6 p-4 lg:p-6 max-w-[1800px] mx-auto">
-          {/* 左侧：用例列表 */}
-          <div className="flex-1 min-w-0">
-            <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
-              <div className="p-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                  {/* 搜索和筛选 */}
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="relative flex-1 max-w-md">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <Input
-                        placeholder="搜索用例..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10 h-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl"
-                      />
-                    </div>
-                    <select
-                      value={priorityFilter}
-                      onChange={(e) => setPriorityFilter(e.target.value)}
-                      className="h-10 px-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm"
-                    >
-                      <option value="all">全部优先级</option>
-                      <option value="P0">P0</option>
-                      <option value="P1">P1</option>
-                      <option value="P2">P2</option>
-                    </select>
-                  </div>
-
-                  {/* 视图切换 */}
-                  <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                    <button
-                      onClick={() => setViewMode('tree')}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                        viewMode === 'tree'
-                          ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <LayoutList className="w-4 h-4" />
-                      列表视图
-                    </button>
-                    <button
-                      onClick={() => setViewMode('mindmap')}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                        viewMode === 'mindmap'
-                          ? 'bg-white dark:bg-slate-700 text-orange-700 dark:text-orange-400 shadow-sm'
-                          : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                      }`}
-                    >
-                      <Network className="w-4 h-4" />
-                      思维导图
-                    </button>
-                  </div>
-
-                  {/* 操作按钮 */}
-                  <div className="flex items-center gap-2">
-                    {viewMode === 'tree' && (
-                      <div className="flex items-center gap-1">
-                        <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={expandAll}>
-                          <ChevronDown className="w-3 h-3" />
-                          展开
-                        </Button>
-                        <Button size="sm" variant="ghost" className="gap-1 text-slate-600 dark:text-slate-400 h-8" onClick={collapseAll}>
-                          <ChevronRight className="w-3 h-3" />
-                          折叠
-                        </Button>
-                      </div>
-                    )}
-                    <Button size="sm" variant="ghost" className="gap-1 text-orange-600 dark:text-orange-400 h-8" onClick={addRequirement}>
-                      <Plus className="w-4 h-4" />
-                      添加需求点
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              <CardContent className="p-4 max-h-[600px] overflow-auto">
-                {!mindmap ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Library className="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
-                    <p className="text-slate-500 dark:text-slate-400">暂无用例数据</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">请先在「需求输入」中添加需求</p>
-                  </div>
-                ) : viewMode === 'tree' ? (
-                  <div className="space-y-1">
-                    {mindmap.children.map((child, idx) => {
-                      if (child.type === 'requirement') {
-                        const reqIdx = mindmap.children.filter((c: unknown) => (c as { type?: string }).type === 'requirement').indexOf(child) + 1;
-                        return renderTreeNode(child, 0, 0, reqIdx);
-                      }
-                      return null;
-                    })}
-                  </div>
-                ) : (
-                  <div 
-                    ref={canvasRef}
-                    className="relative overflow-hidden cursor-grab active:cursor-grabbing min-h-[500px]"
-                    onWheel={handleWheel}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                  >
-                    <div 
-                      className="inline-block"
-                      style={{
-                        transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${scale})`,
-                        transformOrigin: '0 0',
-                      }}
-                    >
-                      <svg
-                        width={Math.max(calculateNodePositions.totalWidth, 800)}
-                        height={Math.max(calculateNodePositions.totalHeight, 500)}
-                        className="overflow-visible"
-                      >
-                        <defs>
-                          <marker
-                            id="arrowhead2"
-                            markerWidth="10"
-                            markerHeight="7"
-                            refX="9"
-                            refY="3.5"
-                            orient="auto"
-                          >
-                            <polygon points="0 0, 10 3.5, 0 7" fill="#d1d5db" />
-                          </marker>
-                        </defs>
-                        
-                        {/* 连接线 */}
-                        {mindmap && calculateNodePositions.positions.get(mindmap.id) && Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
-                          if (id === mindmap.id) return null;
-                          const parentReq = mindmap.children.find(c => 
-                            c.type === 'requirement' && 
-                            (c as RequirementNode).children.some(cc => cc.id === id)
-                          );
-                          if (!parentReq) return null;
-                          const parentPos = calculateNodePositions.positions.get(parentReq.id);
-                          if (!parentPos) return null;
-                          
-                          return (
-                            <path
-                              key={`line2-${id}`}
-                              d={`M ${parentPos.x + parentPos.width} ${parentPos.y + parentPos.height / 2} 
-                                 C ${parentPos.x + parentPos.width + MINDMAP_CONFIG.GAP_X / 2} ${parentPos.y + parentPos.height / 2},
-                                   ${pos.x - MINDMAP_CONFIG.GAP_X / 2} ${pos.y + pos.height / 2},
-                                   ${pos.x} ${pos.y + pos.height / 2}`}
-                              fill="none"
-                              stroke="#cbd5e1"
-                              strokeWidth="2"
-                            />
-                          );
-                        })}
-                        
-                        {/* 根节点连接线 */}
-                        {mindmap && calculateNodePositions.positions.get(mindmap.id) && mindmap.children.map((req) => {
-                          const reqPos = calculateNodePositions.positions.get(req.id);
-                          const rootPos = calculateNodePositions.positions.get(mindmap.id);
-                          if (!reqPos || !rootPos) return null;
-                          
-                          return (
-                            <path
-                              key={`root2-${req.id}`}
-                              d={`M ${rootPos.x + rootPos.width} ${rootPos.y + rootPos.height / 2} 
-                                 C ${rootPos.x + rootPos.width + MINDMAP_CONFIG.GAP_X / 2} ${rootPos.y + rootPos.height / 2},
-                                   ${reqPos.x - MINDMAP_CONFIG.GAP_X / 2} ${reqPos.y + reqPos.height / 2},
-                                   ${reqPos.x} ${reqPos.y + reqPos.height / 2}`}
-                              fill="none"
-                              stroke="#fb923c"
-                              strokeWidth="2"
-                            />
-                          );
-                        })}
-                        
-                        {/* 节点 */}
-                        {calculateNodePositions.positions.get(mindmap.id) && renderMindMapNode(mindmap, calculateNodePositions.positions.get(mindmap.id)!, true)}
-                        {Array.from(calculateNodePositions.positions.entries()).map(([id, pos]: [string, NodePosition]) => {
-                          const node = findNodeById(mindmap, id);
-                          if (!node || node.type === 'root') return null;
-                          return renderMindMapNode(node, pos);
-                        })}
-                      </svg>
-                    </div>
-                    
-                    {/* 图例 */}
-                    <div className="absolute bottom-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur rounded-lg px-3 py-2 text-xs shadow-sm border border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-orange-600" />
-                          <span className="text-slate-600 dark:text-slate-400">需求</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-blue-500" />
-                          <span className="text-slate-600 dark:text-slate-400">需求点</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-600" />
-                          <span className="text-slate-600 dark:text-slate-400">测试用例</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* 右侧：详情面板 */}
-          <div className="w-full lg:w-[400px] shrink-0">
-            {isSelected ? renderDetailPanel() : (
-              <Card className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden lg:sticky lg:top-28">
-                <CardContent className="flex flex-col items-center justify-center min-h-[400px] text-center">
-                  <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
-                    <FileText className="w-6 h-6 text-slate-300 dark:text-slate-500" />
-                  </div>
-                  <p className="text-sm text-slate-400">选择一个需求点或测试用例查看详情</p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* 知识库搜索弹窗 */}
       {showKnowledgeSearch && (
