@@ -129,7 +129,7 @@ export function ModelSelector({ groups, value, onChange, triggerClassName = '' }
 
       {/* 弹窗 */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-96 bg-white dark:bg-slate-800 
+        <div className="absolute top-full left-0 mt-2 w-[480px] max-w-[calc(100vw-32px)] bg-white dark:bg-slate-800 
                       border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50
                       overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* 搜索框 */}
@@ -153,7 +153,7 @@ export function ModelSelector({ groups, value, onChange, triggerClassName = '' }
 
           {/* 标签页 */}
           {!searchQuery && (
-            <div className="flex overflow-x-auto scrollbar-hide border-b border-slate-100 dark:border-slate-700">
+            <div className="flex overflow-x-auto border-b border-slate-100 dark:border-slate-700 scrollbar-thin">
               {groups.map(group => (
                 <button
                   key={group.provider}
