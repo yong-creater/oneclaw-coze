@@ -1557,34 +1557,38 @@ export default function TestCraft() {
     const currentTestCase = node as TestCase;
     const currentReq = node as RequirementNode;
     
-    // 节点类型样式配置
+    // 节点类型样式配置（与网站风格一致的橙色主题）
     const getNodeStyles = () => {
       if (isRoot) {
         return {
           bg: 'bg-gradient-to-r from-violet-600 to-purple-600',
           text: 'text-white',
+          border: 'border-transparent',
           icon: <Sparkles className="w-4 h-4" />,
         };
       }
       if (isRequirement) {
+        // 需求点：白底橙色边框 + 橙色文字（与网站风格一致）
         return {
-          bg: 'bg-emerald-500',
-          text: 'text-white',
-          icon: <CheckCircle className="w-4 h-4" />,
+          bg: 'bg-white dark:bg-slate-800',
+          text: 'text-orange-600 dark:text-orange-400',
+          border: 'border-orange-300 dark:border-orange-700',
+          icon: <CheckCircle className="w-4 h-4 text-orange-500" />,
         };
       }
       if (isTestCase) {
-        // 正常用例为橙色，灰色用例表示特殊场景
-        const isNormal = node.priority !== 'P2';
+        // 测试用例：白底灰色边框 + 灰色文字
         return {
-          bg: isNormal ? 'bg-amber-500' : 'bg-slate-400',
-          text: 'text-white',
-          icon: isNormal ? <AlertCircle className="w-4 h-4" /> : <Circle className="w-4 h-4" />,
+          bg: 'bg-white dark:bg-slate-800',
+          text: 'text-slate-600 dark:text-slate-400',
+          border: 'border-slate-200 dark:border-slate-700',
+          icon: <AlertCircle className="w-4 h-4 text-slate-400" />,
         };
       }
       return {
-        bg: 'bg-slate-200 dark:bg-slate-700',
+        bg: 'bg-slate-100 dark:bg-slate-700',
         text: 'text-slate-700 dark:text-slate-200',
+        border: 'border-slate-200 dark:border-slate-700',
         icon: <FileText className="w-4 h-4" />,
       };
     };
@@ -1597,16 +1601,16 @@ export default function TestCraft() {
         {/* 连接线 */}
         {level > 0 && (
           <div 
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-0.5 bg-purple-400"
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-0.5 bg-purple-300 dark:bg-purple-600"
             style={{ left: `${(level - 1) * 20 + 8}px` }}
           />
         )}
         
-        {/* 节点卡片 */}
+        {/* 节点卡片 - 白底卡片样式 */}
         <div 
-          className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md ${
+          className={`relative flex items-center gap-2 px-3 py-2 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-md border-2 ${
             styles.bg
-          } ${styles.text} ${isSelectedNode ? 'ring-2 ring-purple-500 ring-offset-2' : ''}`}
+          } ${styles.text} ${styles.border} ${isSelectedNode ? 'ring-2 ring-orange-500 ring-offset-2' : ''}`}
           style={{ marginLeft: `${level * 20}px` }}
           onClick={() => {
             if (isTestCase) {
@@ -1622,7 +1626,7 @@ export default function TestCraft() {
           {hasChildren ? (
             <button 
               onClick={(e) => { e.stopPropagation(); toggleExpand(node.id); }} 
-              className="p-0.5 hover:bg-white/20 rounded transition-colors"
+              className="p-0.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors text-slate-500"
             >
               {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
             </button>
@@ -1656,7 +1660,7 @@ export default function TestCraft() {
 
           {/* 数量标签（需求点显示子节点数量） */}
           {isRequirement && hasChildren && (
-            <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
+            <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 rounded-full font-medium">
               {currentReq.children.length}
             </span>
           )}
@@ -1666,26 +1670,26 @@ export default function TestCraft() {
             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
               {isRequirement && (
                 <>
-                  <button title="从知识库添加" onClick={(e) => { e.stopPropagation(); setShowKnowledgeSearch(true); }} className="p-1 hover:bg-white/20 rounded">
+                  <button title="从知识库添加" onClick={(e) => { e.stopPropagation(); setShowKnowledgeSearch(true); }} className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded text-slate-500 hover:text-orange-600">
                     <Library className="w-3.5 h-3.5" />
                   </button>
-                  <button title="生成用例" onClick={(e) => { e.stopPropagation(); handleGenerate(node.id); }} className="p-1 hover:bg-white/20 rounded">
+                  <button title="生成用例" onClick={(e) => { e.stopPropagation(); handleGenerate(node.id); }} className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded text-slate-500 hover:text-orange-600">
                     {isGeneratingThis ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
                   </button>
-                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-white/20 rounded">
+                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded text-slate-500 hover:text-orange-600">
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode(mindmap?.id || '', node.id); }} className="p-1 hover:bg-white/20 rounded">
+                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode(mindmap?.id || '', node.id); }} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-slate-500 hover:text-red-600">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </>
               )}
               {isTestCase && (
                 <>
-                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-white/20 rounded">
+                  <button title="编辑" onClick={(e) => { e.stopPropagation(); startEdit(node.id, node.title); }} className="p-1 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded text-slate-500 hover:text-orange-600">
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
-                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode('', node.id); }} className="p-1 hover:bg-white/20 rounded">
+                  <button title="删除" onClick={(e) => { e.stopPropagation(); handleDeleteNode('', node.id); }} className="p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded text-slate-500 hover:text-red-600">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </>
