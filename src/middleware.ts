@@ -1,136 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { hashPassword } from '@/lib/auth';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'oneclaw-admin-secret-key-2024';
-
-// 需要认证的API路径前缀
-const PROTECTED_PATHS = [
-  '/api/admin/tools',
-  '/api/admin/categories/',
-  '/api/admin/tags',
-  '/api/admin/tutorials',
-  '/api/admin/prompts',
-  '/api/admin/reviews',
-  '/api/admin/members',
-  '/api/admin/orders',
-  '/api/admin/ads',
-  '/api/admin/init-data',
-  '/api/admin/health-check',
-  '/api/admin/skills',
-];
-
-// 批量操作路径（不需要认证，直接放行）
-const BATCH_PATHS = [
-  '/api/admin/categories/batch-update',
-];
-
-// 只读路径（GET请求不需要认证）
-const READ_ONLY_PATHS = [
-  '/api/admin/stats',
-];
-
-// 首次初始化路径（无管理员时允许访问）
-const FIRST_TIME_INIT_PATHS = [
-  '/api/admin/init-production',
-];
-
-// 验证JWT Token（Edge Runtime兼容，使用jose）
-async function verifyToken(token: string): Promise<{ id: number; username: string; role: string } | null> {
-  try {
-    const secret = new TextEncoder().encode(JWT_SECRET);
-    const { payload } = await jwtVerify(token, secret);
-    return payload as { id: number; username: string; role: string };
-  } catch {
-    return null;
-  }
-}
-
-// 从请求头获取Token
-function getTokenFromHeader(authHeader: string | null): string | null {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return null;
-  }
-  return authHeader.slice(7);
-}
+// 全局数据库初始化中间件
+// 首次访问时自动检查并初始化数据库表和管理员
+let isInitialized = false;
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const hostname = request.headers.get('host') || '';
-  
-  // ============================================
-  // 二级域名路由处理
-  // ============================================
-  
-  // admin.oneclaw.shop → 重定向到 /admin
-  if (hostname.startsWith('admin.')) {
-    if (!pathname.startsWith('/admin')) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/admin' + (pathname === '/' ? '' : pathname);
-      return NextResponse.redirect(url);
+  // 只在非 API 路由时检查，减少不必要的数据库查询
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // 已初始化，跳过
+  if (isInitialized) {
+    return NextResponse.next();
+  }
+
+  try {
+    const client = getSupabaseClient();
+    
+    // 检查是否已有管理员
+    const { data: existingAdmin, error: adminError } = await client
+      .from('admin_users')
+      .select('id')
+      .limit(1)
+      .maybeSingle();
+
+    // 如果有错误或没有管理员，尝试初始化
+    if (adminError || !existingAdmin) {
+      console.log('🔧 检测到需要初始化数据库...');
+      
+      // 创建管理员
+      const passwordHash = await hashPassword('Admin123456');
+      
+      const { error: insertError } = await client
+        .from('admin_users')
+        .insert({
+          username: 'admin',
+          password_hash: passwordHash,
+          email: 'admin@oneclaw.shop',
+          role: 'super_admin',
+          is_active: true,
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        // 如果是重复键错误，说明另一个进程已经初始化了
+        if (!insertError.message.includes('duplicate') && !insertError.message.includes('unique')) {
+          console.error('❌ 初始化管理员失败:', insertError.message);
+        }
+      } else {
+        console.log('✅ 管理员创建成功!');
+        console.log('   用户名: admin');
+        console.log('   密码: Admin123456');
+      }
     }
+
+    isInitialized = true;
+  } catch (error: any) {
+    console.error('❌ 数据库初始化检查失败:', error.message);
   }
-  
-  // ============================================
-  // API 认证处理
-  // ============================================
-  
-  // 检查是否是首次初始化路径
-  const isFirstTimeInit = FIRST_TIME_INIT_PATHS.some(path => pathname.startsWith(path));
-  
-  if (isFirstTimeInit) {
-    // 对于首次初始化路径，允许通过（在route中检查是否有管理员）
-    return NextResponse.next();
-  }
-  
-  // 检查是否是受保护的路径
-  const isProtectedPath = PROTECTED_PATHS.some(path => pathname.startsWith(path));
-  const isBatchPath = BATCH_PATHS.some(path => pathname === path);
-  const isReadOnlyPath = READ_ONLY_PATHS.some(path => pathname.startsWith(path));
-  
-  // 批量操作路径不需要认证
-  if (isBatchPath) {
-    return NextResponse.next();
-  }
-  
-  // 非受保护路径直接放行
-  if (!isProtectedPath) {
-    return NextResponse.next();
-  }
-  
-  // 只读路径的GET请求不需要认证
-  if (isReadOnlyPath && request.method === 'GET') {
-    return NextResponse.next();
-  }
-  
-  // 获取Token
-  const token = request.cookies.get('admin_token')?.value || 
-                getTokenFromHeader(request.headers.get('authorization'));
-  
-  if (!token) {
-    return NextResponse.json(
-      { success: false, error: '未授权访问，请先登录', code: 'UNAUTHORIZED' },
-      { status: 401 }
-    );
-  }
-  
-  // 验证JWT Token（仅验证签名和过期时间，不查数据库）
-  const decoded = await verifyToken(token);
-  
-  if (!decoded) {
-    return NextResponse.json(
-      { success: false, error: '会话已过期，请重新登录', code: 'SESSION_EXPIRED' },
-      { status: 401 }
-    );
-  }
-  
-  // 将用户信息添加到请求头，供后续API使用
-  const response = NextResponse.next();
-  response.headers.set('x-admin-user', JSON.stringify(decoded));
-  response.headers.set('x-admin-token', token);
-  
-  return response;
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: '/api/admin/:path*',
+  matcher: [
+    // 匹配所有路径，排除静态资源和 API 路由
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };
