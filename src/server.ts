@@ -6,8 +6,8 @@ const dev = process.env.COZE_PROJECT_ENV !== 'PROD';
 const hostname = process.env.HOSTNAME || 'localhost';
 const port = parseInt(process.env.PORT || '5000', 10);
 
-// Create Next.js app
-const app = next({ dev, hostname, port });
+// Create Next.js app (禁用 Turbopack 以兼容 react-dom 19)
+const app = next({ dev, hostname, port, turbopack: false });
 const handle = app.getRequestHandler();
 
 app.prepare().then(() => {
