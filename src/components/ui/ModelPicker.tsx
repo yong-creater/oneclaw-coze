@@ -46,12 +46,22 @@ interface ModelPickerProps {
   triggerClassName?: string;
 }
 
+// 默认模型配置（当API未返回时使用）
+const DEFAULT_MODEL_CONFIG = {
+  id: 'doubao-seed-1-8-251228',
+  name: 'Seed 1.8',
+  provider: '豆包',
+  icon: 'Bot',
+  color: 'bg-emerald-500',
+  description: '多模态优化',
+};
+
 export default function ModelPicker({ value, onChange, triggerClassName = '' }: ModelPickerProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [groups, setGroups] = useState<ModelGroup[]>([]);
   const [options, setOptions] = useState<ModelOption[]>([]);
-  const [defaultModel, setDefaultModel] = useState('deepseek-r1-250528');
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // 获取模型列表
   const fetchModels = useCallback(async () => {
@@ -65,16 +75,21 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
       if (result.success) {
         setGroups(result.data.groups || []);
         setOptions(result.data.options || []);
-        setDefaultModel(result.data.defaultModel || 'deepseek-r1-250528');
       }
     } catch (error) {
       console.error('获取模型列表失败:', error);
     } finally {
       setLoading(false);
+      setIsInitialized(true);
     }
   }, [groups.length]);
 
-  // 打开弹窗时获取模型
+  // 组件挂载时获取模型列表
+  useEffect(() => {
+    fetchModels();
+  }, [fetchModels]);
+
+  // 打开弹窗时再次获取（确保数据最新）
   useEffect(() => {
     if (open) {
       fetchModels();
@@ -82,7 +97,10 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
   }, [open, fetchModels]);
 
   // 获取当前选中的模型
-  const selectedModel = options.find(m => m.id === value) || options[0];
+  const selectedModel = options.find(m => m.id === value) || 
+                        options[0] || 
+                        (value ? { ...DEFAULT_MODEL_CONFIG, id: value } : DEFAULT_MODEL_CONFIG);
+  
   const selectedConfig = selectedModel ? {
     icon: selectedModel.icon,
     color: selectedModel.color,
@@ -100,7 +118,7 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
                    hover:border-slate-300 dark:hover:border-slate-600 
                    focus:outline-none focus:border-orange-500 transition-colors ${triggerClassName}`}
       >
-        {loading ? (
+        {loading && !selectedModel ? (
           <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
         ) : (
           <div className={`w-5 h-5 ${selectedConfig.color} rounded flex items-center justify-center`}>
@@ -108,10 +126,10 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
           </div>
         )}
         <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
-          {selectedModel?.name || '加载中...'}
+          {selectedModel?.name || 'Seed 1.8'}
         </span>
         <span className="text-xs text-slate-500">
-          {selectedModel?.provider || ''}
+          {selectedModel?.provider || '豆包'}
         </span>
         <ChevronDown className="w-4 h-4 text-slate-400" />
       </button>
