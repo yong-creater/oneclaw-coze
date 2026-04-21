@@ -83,7 +83,11 @@ export default function WorkspacePage() {
       const res = await fetch(`/api/favorites?page=${page}&limit=10`, { headers });
       const data = await res.json();
       if (data.success) {
-        setFavorites(data.data);
+        // 过滤掉 tools 为空或无效的数据
+        const validFavorites = (data.data || []).filter((fav: any) => 
+          fav.tools && typeof fav.tools === 'object' && fav.tools.id
+        );
+        setFavorites(validFavorites);
         setFavoritesPagination(data.pagination);
       }
     } catch (error) {
@@ -104,7 +108,11 @@ export default function WorkspacePage() {
       const res = await fetch(`/api/history?page=${page}&limit=10`, { headers });
       const data = await res.json();
       if (data.success) {
-        setHistory(data.data);
+        // 过滤掉 tools 为空或无效的数据
+        const validHistory = (data.data || []).filter((item: any) => 
+          item.tools && typeof item.tools === 'object' && item.tools.id
+        );
+        setHistory(validHistory);
         setHistoryPagination(data.pagination);
       }
     } catch (error) {
@@ -125,7 +133,11 @@ export default function WorkspacePage() {
       const res = await fetch(`/api/user-ratings?page=${page}&limit=10`, { headers });
       const data = await res.json();
       if (data.success) {
-        setRatings(data.data);
+        // 过滤掉 tools 为空或无效的数据
+        const validRatings = (data.data || []).filter((item: any) => 
+          item.tools && typeof item.tools === 'object' && item.tools.id
+        );
+        setRatings(validRatings);
         setRatingsPagination(data.pagination);
       }
     } catch (error) {
