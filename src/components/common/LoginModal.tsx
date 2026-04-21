@@ -51,7 +51,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
         } else {
           setSuccess('验证码已发送，请查收邮件');
         }
-        setCountdown(60);
+        setCountdown(600); // 10分钟
       } else {
         setError(data.error || '发送失败');
       }
