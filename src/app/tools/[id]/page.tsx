@@ -299,7 +299,10 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   };
 
   const submitRating = async () => {
-    if (!userId || !tool) return;
+    if (!userId || !tool) {
+      alert('请先登录');
+      return;
+    }
     if (Object.values(newRating).some(v => v === 0)) {
       alert('请完成所有评分项');
       return;
@@ -315,16 +318,22 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       if (data.success) {
         await fetchRatingsAndReviews();
         alert('评分成功！');
+      } else {
+        alert(data.error || '评分失败，请重试');
       }
     } catch (err) {
       console.error('提交评分失败:', err);
+      alert('提交失败，请重试');
     } finally {
       setSubmitting(false);
     }
   };
 
   const submitReview = async () => {
-    if (!userId || !tool) return;
+    if (!userId || !tool) {
+      alert('请先登录');
+      return;
+    }
     if (newReview.length < 10 || newReview.length > 500) {
       alert('评论长度需在10-500字之间');
       return;
@@ -340,10 +349,13 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       if (data.success) {
         setNewReview('');
         await fetchRatingsAndReviews();
-        alert(data.message);
+        alert(data.message || '评论成功！');
+      } else {
+        alert(data.error || '评论失败，请重试');
       }
     } catch (err) {
       console.error('提交评论失败:', err);
+      alert('提交失败，请重试');
     } finally {
       setSubmitting(false);
     }
