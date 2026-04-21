@@ -8,39 +8,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { 
+  UNIFIED_MODEL_OPTIONS, 
+  DEFAULT_MODEL_ID,
+  getProviderConfig 
+} from '@/lib/models';
 
-// 模型配置
-export interface ModelOption {
-  id: string;
-  name: string;
-  provider: string;
-  icon?: string;
-  description?: string;
-  recommended?: boolean;
-  isPaid?: boolean;
-}
-
-// 默认模型列表
-export const MODEL_OPTIONS: ModelOption[] = [
-  { id: 'doubao-seed-2-0-pro-260215', name: 'Seed 2.0 Pro', provider: '豆包', description: '旗舰全能' },
-  { id: 'doubao-seed-1-8-251228', name: 'Seed 1.8', provider: '豆包', description: '多模态优化' },
-  { id: 'deepseek-r1-250528', name: 'R1', provider: 'DeepSeek', description: '深度推理', recommended: true },
-  { id: 'deepseek-v3-2-251201', name: 'V3', provider: 'DeepSeek', description: '平衡推理' },
-  { id: 'kimi-k2-5-260127', name: 'K2.5', provider: 'Kimi', description: 'Agent能力' },
-  { id: 'kimi-k2-250905', name: 'K2', provider: 'Kimi', description: '长文本' },
-  { id: 'glm-5-0-260211', name: 'GLM-5', provider: 'GLM', description: '旗舰基座' },
-  { id: 'qwen-3-5-plus-260215', name: 'Qwen 3.5 Plus', provider: 'Qwen', description: '混合架构' },
-];
-
-// 品牌配置
-const PROVIDER_CONFIG: Record<string, { icon: string; color: string }> = {
-  '豆包': { icon: '🦜', color: 'bg-emerald-500' },
-  'DeepSeek': { icon: '🔮', color: 'bg-violet-500' },
-  'Kimi': { icon: '🌙', color: 'bg-amber-500' },
-  'GLM': { icon: '📊', color: 'bg-blue-500' },
-  'Qwen': { icon: '🏔️', color: 'bg-orange-500' },
-};
-
+// 模型选择器组件
 interface ModelSelectorProps {
   value: string;
   onChange: (modelId: string) => void;
@@ -48,9 +22,9 @@ interface ModelSelectorProps {
 
 export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
   const [open, setOpen] = useState(false);
-  const selectedModel = MODEL_OPTIONS.find(m => m.id === value) || MODEL_OPTIONS[0];
+  const selectedModel = UNIFIED_MODEL_OPTIONS.find(m => m.id === value) || UNIFIED_MODEL_OPTIONS[0];
   
-  const providerConfig = PROVIDER_CONFIG[selectedModel.provider] || { icon: '🤖', color: 'bg-slate-500' };
+  const providerConfig = getProviderConfig(selectedModel.provider);
 
   return (
     <div>
@@ -93,8 +67,8 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
 
           {/* 模型列表 */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-            {MODEL_OPTIONS.map(model => {
-              const config = PROVIDER_CONFIG[model.provider] || { icon: '🤖', color: 'bg-slate-500' };
+            {UNIFIED_MODEL_OPTIONS.map(model => {
+              const config = getProviderConfig(model.provider);
               const isSelected = model.id === value;
               
               return (
@@ -127,9 +101,14 @@ export default function ModelSelector({ value, onChange }: ModelSelectorProps) {
                           推荐
                         </span>
                       )}
+                      {model.isPaid && !isSelected && (
+                        <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded">
+                          付费
+                        </span>
+                      )}
                     </div>
                     <div className="text-xs text-slate-400 mt-0.5">
-                      {model.description}
+                      {model.provider} · {model.description}
                     </div>
                   </div>
                   

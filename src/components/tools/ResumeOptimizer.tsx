@@ -12,7 +12,8 @@ import { UtilityCard, FormField, PrimaryButton, ActionButton } from '../common/U
 import LoginButton from '../common/LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
-import ModelSelector, { MODEL_OPTIONS } from '../ui/model-selector';
+import ModelSelector from '../ui/model-selector';
+import { UNIFIED_MODEL_OPTIONS, DEFAULT_MODEL_ID } from '@/lib/models';
 
 export default function ResumeOptimizer() {
   // 简历输入状态
@@ -32,7 +33,7 @@ export default function ResumeOptimizer() {
   const [result, setResult] = useState<any>(null);
   const [matchScore, setMatchScore] = useState(0);
   const [showExample, setShowExample] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[3].id); // 默认 DeepSeek R1
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID); // 默认 DeepSeek R1
   const [usedModel, setUsedModel] = useState('');
   
   // PDF导出相关状态

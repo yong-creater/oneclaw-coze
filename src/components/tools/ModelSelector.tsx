@@ -8,8 +8,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { 
+  UNIFIED_MODEL_GROUPS, 
+  DEFAULT_MODEL_ID,
+  getProviderConfig 
+} from '@/lib/models';
 
-// 模型分组接口
+// 模型分组接口（兼容旧接口）
 export interface ModelGroup {
   provider: string;
   icon: string;
@@ -24,33 +29,30 @@ export interface Model {
   recommended?: boolean;
 }
 
-// 品牌配置
-const PROVIDER_CONFIG: Record<string, { color: string }> = {
-  '豆包': { color: 'bg-emerald-500' },
-  'DeepSeek': { color: 'bg-violet-500' },
-  'Kimi': { color: 'bg-amber-500' },
-  'GLM': { color: 'bg-blue-500' },
-  'Qwen': { color: 'bg-orange-500' },
-  'GPT (4sAPI)': { color: 'bg-green-500' },
-  'Claude (4sAPI)': { color: 'bg-amber-600' },
-  'Gemini (4sAPI)': { color: 'bg-blue-400' },
-};
-
 // 模型选择器组件 - 简洁分组列表形式
 interface ModelSelectorProps {
-  groups: ModelGroup[];
+  groups?: ModelGroup[];
   value: string;
   onChange: (model: string) => void;
   triggerClassName?: string;
 }
 
+// 兼容模式：如果没有传入groups，使用统一的模型分组
+const useGroups = (groups?: ModelGroup[]) => {
+  if (groups && groups.length > 0) {
+    return groups;
+  }
+  return UNIFIED_MODEL_GROUPS;
+};
+
 export function ModelSelector({ groups, value, onChange, triggerClassName = '' }: ModelSelectorProps) {
   const [open, setOpen] = useState(false);
+  const modelGroups = useGroups(groups);
   
   // 找到当前选中的模型
   let selectedModel: Model | null = null;
   let selectedProvider = '';
-  for (const group of groups) {
+  for (const group of modelGroups) {
     const found = group.models.find(m => m.value === value);
     if (found) {
       selectedModel = found;
@@ -59,7 +61,7 @@ export function ModelSelector({ groups, value, onChange, triggerClassName = '' }
     }
   }
   
-  const providerConfig = PROVIDER_CONFIG[selectedProvider] || { color: 'bg-slate-500' };
+  const providerConfig = getProviderConfig(selectedProvider);
 
   return (
     <div>
@@ -74,7 +76,7 @@ export function ModelSelector({ groups, value, onChange, triggerClassName = '' }
       >
         {/* 品牌图标 */}
         <div className={`w-5 h-5 ${providerConfig.color} rounded flex items-center justify-center text-white text-xs font-bold`}>
-          {selectedProvider.charAt(0)}
+          {providerConfig.icon}
         </div>
         
         {/* 模型名称 */}
@@ -102,8 +104,8 @@ export function ModelSelector({ groups, value, onChange, triggerClassName = '' }
 
           {/* 模型列表 - 按提供商分组 */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
-            {groups.map(group => {
-              const config = PROVIDER_CONFIG[group.provider] || { color: 'bg-slate-500' };
+            {modelGroups.map(group => {
+              const config = getProviderConfig(group.provider);
               const isPaid = group.provider.includes('4sAPI');
               
               return (
@@ -111,7 +113,7 @@ export function ModelSelector({ groups, value, onChange, triggerClassName = '' }
                   {/* 分组标题 */}
                   <div className="flex items-center gap-2 px-1 mb-1">
                     <div className={`w-5 h-5 ${config.color} rounded flex items-center justify-center text-white text-xs`}>
-                      {group.icon}
+                      {config.icon}
                     </div>
                     <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">
                       {group.provider}

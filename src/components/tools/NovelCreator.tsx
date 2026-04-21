@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { ModelSelector } from '@/components/tools/ModelSelector';
+import { UNIFIED_MODEL_GROUPS, UNIFIED_MODEL_OPTIONS, DEFAULT_MODEL_ID } from '@/lib/models';
 
 // 已删除简化版 ModelGroupSelect，统一使用 ModelSelector 组件
 
@@ -114,84 +115,6 @@ const SCRIPT_STYLES = [
   { value: '逆袭', label: '逆袭' },
 ];
 
-// AI模型分组选项
-const AI_MODEL_GROUPS = [
-  {
-    provider: '豆包',
-    icon: '🦜',
-    models: [
-      { value: 'doubao-seed-1-8-251228', label: 'Seed 1.8', region: '免费' },
-      { value: 'doubao-seed-2-0-pro-260215', label: 'Seed 2.0 Pro', region: '免费' },
-      { value: 'doubao-seed-2-0-lite-260215', label: 'Seed 2.0 Lite', region: '免费' },
-    ]
-  },
-  {
-    provider: 'DeepSeek',
-    icon: '🔮',
-    models: [
-      { value: 'deepseek-v3-2-251201', label: 'V3', region: '免费' },
-      { value: 'deepseek-r1-250528', label: 'R1 (推理)', region: '免费' },
-    ]
-  },
-  {
-    provider: 'Kimi',
-    icon: '🌙',
-    models: [
-      { value: 'kimi-k2-5-260127', label: 'K2.5', region: '免费' },
-      { value: 'kimi-k2-250905', label: 'K2', region: '免费' },
-    ]
-  },
-  {
-    provider: 'GLM',
-    icon: '📊',
-    models: [
-      { value: 'glm-5-0-260211', label: 'GLM-5', region: '免费' },
-    ]
-  },
-  {
-    provider: 'Qwen',
-    icon: '🏔️',
-    models: [
-      { value: 'qwen-3-5-plus-260215', label: 'Qwen 3.5 Plus', region: '免费' },
-    ]
-  },
-  // 4sAPI 付费模型
-  {
-    provider: 'GPT (4sAPI)',
-    icon: '🤖',
-    models: [
-      { value: 'gpt-4o', label: 'GPT-4o', region: '付费' },
-      { value: 'gpt-4o-mini', label: 'GPT-4o Mini', region: '付费' },
-      { value: 'gpt-4-turbo', label: 'GPT-4 Turbo', region: '付费' },
-    ]
-  },
-  {
-    provider: 'Claude (4sAPI)',
-    icon: '🧠',
-    models: [
-      { value: 'claude-3-5-sonnet', label: 'Claude 3.5 Sonnet', region: '付费' },
-      { value: 'claude-3-5-haiku', label: 'Claude 3.5 Haiku', region: '付费' },
-      { value: 'claude-sonnet-4', label: 'Claude Sonnet 4', region: '付费' },
-    ]
-  },
-  {
-    provider: 'Gemini (4sAPI)',
-    icon: '✨',
-    models: [
-      { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash', region: '付费' },
-      { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', region: '付费' },
-    ]
-  },
-];
-
-// 扁平化的模型列表（用于默认选中和快速查找）
-const AI_MODELS = AI_MODEL_GROUPS.flatMap(group => 
-  group.models.map(m => ({
-    ...m,
-    provider: group.provider
-  }))
-);
-
 // ==================== 工具函数 ====================
 const generateId = () => Math.random().toString(36).substring(2, 11);
 
@@ -219,7 +142,7 @@ export default function NovelCreator() {
   const [polishing, setPolishing] = useState(false);
   const [polishedContent, setPolishedContent] = useState<StoryContent | null>(null);
   const [showExample, setShowExample] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('doubao-seed-1-8-251228');
+  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -852,7 +775,7 @@ export default function NovelCreator() {
                         AI模型
                         <span className="text-xs text-slate-400 ml-1">(按厂商分组选择)</span>
                       </label>
-                      <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                      <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                     </div>
                     
                     <div>
@@ -955,7 +878,7 @@ export default function NovelCreator() {
                           洗稿完成
                         </h2>
                         <Badge variant="outline" className="text-xs">
-                          {AI_MODELS.find(m => m.value === selectedModel)?.label || '豆包'}
+                          {UNIFIED_MODEL_OPTIONS.find(m => m.id === selectedModel)?.name || '豆包'}
                         </Badge>
                       </div>
                       <div className="flex gap-2">
@@ -1045,7 +968,7 @@ export default function NovelCreator() {
                       <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                       AI模型
                     </label>
-                    <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                    <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                   </div>
                   
                   <div>
@@ -1186,7 +1109,7 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                  <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                 </div>
                 
                 <div>
@@ -1335,7 +1258,7 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelSelector groups={AI_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                  <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">
