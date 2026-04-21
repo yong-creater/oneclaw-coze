@@ -75,13 +75,39 @@ export function getTokenFromHeader(authHeader: string | null): string | null {
 export async function authenticateAdmin(username: string, password: string): Promise<{ user: AdminUser; token: string } | null> {
   const client = getSupabaseClient();
   
-  const { data: user, error } = await client
-    .from('admin_users')
-    .select('id, username, password_hash, email, role, is_active, must_change_password')
-    .eq('username', username)
-    .single();
+  let user: any;
+  let error: any;
+  
+  try {
+    const result = await client
+      .from('admin_users')
+      .select('id, username, password_hash, email, role, is_active, must_change_password')
+      .eq('username', username)
+      .single();
+    
+    user = result.data;
+    error = result.error;
+  } catch (e: any) {
+    // 表可能不存在，尝试创建管理员
+    console.error('[Auth] 查询管理员失败，尝试初始化:', e.message);
+    
+    // 尝试初始化管理员
+    await initializeAdminUser(client);
+    
+    // 重新查询
+    const result = await client
+      .from('admin_users')
+      .select('id, username, password_hash, email, role, is_active, must_change_password')
+      .eq('username', username)
+      .single();
+    
+    user = result.data;
+    error = result.error;
+  }
   
   if (error || !user) {
+    // 如果还是没有用户，说明表确实不存在
+    console.error('[Auth] 管理员不存在或查询失败:', error?.message);
     return null;
   }
   
@@ -205,5 +231,37 @@ export async function verifyAdminToken(request: NextRequest): Promise<{ success:
   } catch (error) {
     console.error('验证管理员 Token 失败:', error);
     return { success: false, error: '验证失败' };
+  }
+}
+
+// 初始化管理员用户
+async function initializeAdminUser(client: any): Promise<boolean> {
+  try {
+    console.log('[Auth] 尝试初始化管理员...');
+    
+    const passwordHash = await hashPassword('Admin123456');
+    
+    const { error } = await client
+      .from('admin_users')
+      .insert({
+        username: 'admin',
+        password_hash: passwordHash,
+        email: 'admin@oneclaw.shop',
+        role: 'super_admin',
+        is_active: true,
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('[Auth] 初始化管理员失败:', error.message);
+      return false;
+    }
+    
+    console.log('[Auth] 管理员初始化成功!');
+    return true;
+  } catch (e: any) {
+    console.error('[Auth] 初始化管理员异常:', e.message);
+    return false;
   }
 }

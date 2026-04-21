@@ -36,12 +36,6 @@ export async function storeCode(email: string, code: string, type: 'register' | 
   }
 }
 
-  if (error) {
-    console.error('存储验证码失败:', error);
-    throw new Error('存储验证码失败');
-  }
-}
-
 // 验证验证码
 export async function verifyCode(
   email: string,
