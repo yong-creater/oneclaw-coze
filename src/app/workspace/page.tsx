@@ -187,17 +187,18 @@ export default function WorkspacePage() {
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img
-              src={tool.logo}
-              alt={tool.name}
+              src={tool.logo || ''}
+              alt={tool.name || '工具'}
               className="w-10 h-10 object-contain"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
+                const name = tool.name || '?';
+                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${name[0]}</text></svg>`;
               }}
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{tool.highlight}</p>
+            <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name || '未知工具'}</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{tool.highlight || ''}</p>
           </div>
           {extra}
         </div>
@@ -395,6 +396,7 @@ export default function WorkspacePage() {
               ) : favorites.length > 0 ? (
                 <>
                   {favorites.map((fav) => (
+                    fav.tools && (
                     <ToolCard
                       key={fav.id}
                       tool={fav.tools}
@@ -416,6 +418,7 @@ export default function WorkspacePage() {
                         </div>
                       }
                     />
+                    )
                   ))}
                   
                   {favoritesPagination.total_pages > 1 && (
@@ -478,6 +481,7 @@ export default function WorkspacePage() {
                   </div>
                   
                   {history.map((item) => (
+                    item.tools && (
                     <ToolCard
                       key={item.id}
                       tool={item.tools}
@@ -489,6 +493,7 @@ export default function WorkspacePage() {
                         </Link>
                       }
                     />
+                    )
                   ))}
                   
                   {historyPagination.total_pages > 1 && (
@@ -539,22 +544,24 @@ export default function WorkspacePage() {
               ) : ratings.length > 0 ? (
                 <>
                   {ratings.map((item) => (
+                    item.tools && (
                     <Card key={item.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
                             <img
-                              src={item.tools.logo}
-                              alt={item.tools.name}
+                              src={item.tools?.logo || ''}
+                              alt={item.tools?.name || '工具'}
                               className="w-10 h-10 object-contain"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${item.tools.name[0]}</text></svg>`;
+                                const name = item.tools?.name || '?';
+                                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${name[0]}</text></svg>`;
                               }}
                             />
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between">
-                              <h3 className="font-medium text-slate-800 dark:text-slate-100">{item.tools.name}</h3>
+                              <h3 className="font-medium text-slate-800 dark:text-slate-100">{item.tools?.name || '未知工具'}</h3>
                               <Link href={`/?tool=${item.tool_id}`} target="_blank">
                                 <Button variant="ghost" size="sm">
                                   <ExternalLink className="w-4 h-4" />
@@ -576,6 +583,7 @@ export default function WorkspacePage() {
                         </div>
                       </CardContent>
                     </Card>
+                    )
                   ))}
                   
                   {ratingsPagination.total_pages > 1 && (
