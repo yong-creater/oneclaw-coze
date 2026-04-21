@@ -31,14 +31,14 @@ interface Favorite {
   id: number;
   tool_id: number;
   created_at: string;
-  tools: ToolInfo;
+  tools?: ToolInfo;
 }
 
 interface HistoryItem {
   id: number;
   tool_id: number;
   viewed_at: string;
-  tools: ToolInfo;
+  tools?: ToolInfo;
 }
 
 interface RatingItem {
@@ -50,7 +50,7 @@ interface RatingItem {
   stability_score: number;
   overall_score: string;
   created_at: string;
-  tools: ToolInfo;
+  tools?: ToolInfo;
 }
 
 export default function WorkspacePage() {
@@ -181,30 +181,33 @@ export default function WorkspacePage() {
   };
 
   // 工具卡片
-  const ToolCard = ({ tool, extra }: { tool: ToolInfo; extra?: React.ReactNode }) => (
-    <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-            <img
-              src={tool.logo || ''}
-              alt={tool.name || '工具'}
-              className="w-10 h-10 object-contain"
-              onError={(e) => {
-                const name = tool.name || '?';
-                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${name[0]}</text></svg>`;
-              }}
-            />
+  const ToolCard = ({ tool, extra }: { tool?: ToolInfo; extra?: React.ReactNode }) => {
+    if (!tool) return null;
+    return (
+      <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img
+                src={tool.logo || ''}
+                alt={tool.name || '工具'}
+                className="w-10 h-10 object-contain"
+                onError={(e) => {
+                  const name = tool.name || '?';
+                  (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${name[0]}</text></svg>`;
+                }}
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name || '未知工具'}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{tool.highlight || ''}</p>
+            </div>
+            {extra}
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name || '未知工具'}</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{tool.highlight || ''}</p>
-          </div>
-          {extra}
-        </div>
-      </CardContent>
-    </Card>
-  );
+        </CardContent>
+      </Card>
+    );
+  };
 
   // 加载中
   if (authLoading) {
