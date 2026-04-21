@@ -4,7 +4,7 @@ import { isVolcenginePgMode } from '@/lib/db';
 // 获取数据看板统计
 export async function GET(request: NextRequest) {
   try {
-    let stats = {
+    const stats = {
       total_tools: 0,
       total_views: 0,
       total_clicks: 0,
