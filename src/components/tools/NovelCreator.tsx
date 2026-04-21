@@ -25,8 +25,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ModelSelector } from '@/components/tools/ModelSelector';
-import { UNIFIED_MODEL_GROUPS, UNIFIED_MODEL_OPTIONS, DEFAULT_MODEL_ID } from '@/lib/models';
+import ModelPicker from '@/components/ui/ModelPicker';
+import { DEFAULT_MODEL_ID, getModelById } from '@/lib/models';
 
 // 已删除简化版 ModelGroupSelect，统一使用 ModelSelector 组件
 
@@ -775,7 +775,7 @@ export default function NovelCreator() {
                         AI模型
                         <span className="text-xs text-slate-400 ml-1">(按厂商分组选择)</span>
                       </label>
-                      <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                      <ModelPicker value={selectedModel} onChange={setSelectedModel} />
                     </div>
                     
                     <div>
@@ -878,7 +878,7 @@ export default function NovelCreator() {
                           洗稿完成
                         </h2>
                         <Badge variant="outline" className="text-xs">
-                          {UNIFIED_MODEL_OPTIONS.find(m => m.id === selectedModel)?.name || '豆包'}
+                          {getModelById(selectedModel)?.name || '豆包'}
                         </Badge>
                       </div>
                       <div className="flex gap-2">
@@ -968,7 +968,7 @@ export default function NovelCreator() {
                       <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                       AI模型
                     </label>
-                    <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                    <ModelPicker value={selectedModel} onChange={setSelectedModel} />
                   </div>
                   
                   <div>
@@ -1109,7 +1109,7 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                  <ModelPicker value={selectedModel} onChange={setSelectedModel} />
                 </div>
                 
                 <div>
@@ -1258,7 +1258,7 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelSelector groups={UNIFIED_MODEL_GROUPS} value={selectedModel} onChange={setSelectedModel} />
+                  <ModelPicker value={selectedModel} onChange={setSelectedModel} />
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">
