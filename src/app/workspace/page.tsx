@@ -77,11 +77,13 @@ export default function WorkspacePage() {
     setFavoritesLoading(true);
     try {
       const userId = localStorage.getItem('oneclaw_user_id');
+      console.log('[收藏] userId:', userId);
       const headers: HeadersInit = {};
       if (userId) headers['x-user-id'] = userId;
       
       const res = await fetch(`/api/favorites?page=${page}&limit=10`, { headers });
       const data = await res.json();
+      console.log('[收藏] API返回:', data);
       if (data.success) {
         // 过滤掉 tools 为空或无效的数据
         const validFavorites = (data.data || []).filter((fav: any) => 
@@ -102,11 +104,13 @@ export default function WorkspacePage() {
     setHistoryLoading(true);
     try {
       const userId = localStorage.getItem('oneclaw_user_id');
+      console.log('[历史] userId:', userId);
       const headers: HeadersInit = {};
       if (userId) headers['x-user-id'] = userId;
       
       const res = await fetch(`/api/history?page=${page}&limit=10`, { headers });
       const data = await res.json();
+      console.log('[历史] API返回:', data);
       if (data.success) {
         // 过滤掉 tools 为空或无效的数据
         const validHistory = (data.data || []).filter((item: any) => 
@@ -127,11 +131,13 @@ export default function WorkspacePage() {
     setRatingsLoading(true);
     try {
       const userId = localStorage.getItem('oneclaw_user_id');
+      console.log('[评分] userId:', userId);
       const headers: HeadersInit = {};
       if (userId) headers['x-user-id'] = userId;
       
       const res = await fetch(`/api/user-ratings?page=${page}&limit=10`, { headers });
       const data = await res.json();
+      console.log('[评分] API返回:', data);
       if (data.success) {
         // 过滤掉 tools 为空或无效的数据
         const validRatings = (data.data || []).filter((item: any) => 
