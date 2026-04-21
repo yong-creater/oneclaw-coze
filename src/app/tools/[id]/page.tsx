@@ -229,7 +229,9 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   const checkFavorite = async () => {
     if (!userId || !tool) return;
     try {
-      const res = await fetch(`/api/favorites?user_id=${userId}&tool_id=${tool.id}`);
+      const headers: HeadersInit = {};
+      headers['x-user-id'] = userId;
+      const res = await fetch(`/api/favorites?tool_id=${tool.id}`, { headers });
       const data = await res.json();
       if (data.success) setIsFavorited(data.is_favorited);
     } catch (err) {
@@ -255,14 +257,20 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
   const toggleFavorite = async () => {
     if (!userId || !tool) return;
     try {
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      headers['x-user-id'] = userId;
+      
       if (isFavorited) {
-        await fetch(`/api/favorites?user_id=${userId}&tool_id=${tool.id}`, { method: 'DELETE' });
+        await fetch(`/api/favorites?tool_id=${tool.id}`, { 
+          method: 'DELETE',
+          headers
+        });
         setIsFavorited(false);
       } else {
         await fetch('/api/favorites', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: userId, tool_id: tool.id })
+          headers,
+          body: JSON.stringify({ tool_id: tool.id })
         });
         setIsFavorited(true);
       }

@@ -76,7 +76,11 @@ export default function WorkspacePage() {
   const fetchFavorites = async (page: number) => {
     setFavoritesLoading(true);
     try {
-      const res = await fetch(`/api/favorites?page=${page}&limit=10`);
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/favorites?page=${page}&limit=10`, { headers });
       const data = await res.json();
       if (data.success) {
         setFavorites(data.data);
@@ -93,7 +97,11 @@ export default function WorkspacePage() {
   const fetchHistory = async (page: number) => {
     setHistoryLoading(true);
     try {
-      const res = await fetch(`/api/history?page=${page}&limit=10`);
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/history?page=${page}&limit=10`, { headers });
       const data = await res.json();
       if (data.success) {
         setHistory(data.data);
@@ -110,7 +118,11 @@ export default function WorkspacePage() {
   const fetchRatings = async (page: number) => {
     setRatingsLoading(true);
     try {
-      const res = await fetch(`/api/user-ratings?page=${page}&limit=10`);
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/user-ratings?page=${page}&limit=10`, { headers });
       const data = await res.json();
       if (data.success) {
         setRatings(data.data);
@@ -135,8 +147,13 @@ export default function WorkspacePage() {
   // 取消收藏
   const removeFavorite = async (toolId: number) => {
     try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (userId) headers['x-user-id'] = userId;
+      
       await fetch(`/api/favorites?tool_id=${toolId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       });
       fetchFavorites(1);
     } catch (error) {
@@ -148,8 +165,13 @@ export default function WorkspacePage() {
   const clearHistory = async () => {
     if (!confirm('确定要清除所有浏览历史吗？')) return;
     try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (userId) headers['x-user-id'] = userId;
+      
       await fetch('/api/history', {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers
       });
       setHistory([]);
       setHistoryPagination({ page: 1, total: 0, total_pages: 0 });
