@@ -7,7 +7,7 @@ export const CODE_EXPIRY = 10 * 60; // 10分钟
 // 存储验证码到数据库
 export async function storeCode(email: string, code: string, type: 'register' | 'login') {
   const supabase = getSupabaseClient();
-  const normalizedEmail = email.toLowerCase();
+  const normalizedEmail = email.toLowerCase().trim();
   const key = `${type}:${normalizedEmail}`;
   const expiresAt = new Date(Date.now() + CODE_EXPIRY * 1000).toISOString();
 
@@ -30,6 +30,13 @@ export async function storeCode(email: string, code: string, type: 'register' | 
     });
 
   if (error) {
+    console.error('[storeCode] 存储验证码失败:', error);
+  } else {
+    console.log(`[storeCode] 验证码已存储: key=${key}, code=${code}`);
+  }
+}
+
+  if (error) {
     console.error('存储验证码失败:', error);
     throw new Error('存储验证码失败');
   }
@@ -42,8 +49,10 @@ export async function verifyCode(
   type: 'register' | 'login'
 ): Promise<{ valid: boolean; error?: string }> {
   const supabase = getSupabaseClient();
-  const normalizedEmail = email.toLowerCase();
+  const normalizedEmail = email.toLowerCase().trim();
   const key = `${type}:${normalizedEmail}`;
+
+  console.log(`[verifyCode] 查询验证码: key=${key}, code=${code}`);
 
   // 查询验证码
   const { data, error } = await supabase
