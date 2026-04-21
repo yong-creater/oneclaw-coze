@@ -242,5 +242,12 @@ export function isValidEmail(email: string): boolean {
 }
 
 export function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // 使用 crypto.randomInt 生成加密安全的随机数
+  const array = new Uint8Array(6);
+  crypto.getRandomValues(array);
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += (array[i] % 10).toString();
+  }
+  return code;
 }

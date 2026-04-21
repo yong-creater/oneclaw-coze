@@ -3,7 +3,11 @@ import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'oneclaw-admin-secret-key-2024';
+// JWT Secret 配置检查
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.warn('⚠️ JWT_SECRET not configured, using development secret. Set JWT_SECRET in production!');
+}
 const TOKEN_EXPIRES_IN = '24h';
 
 export interface AdminUser {

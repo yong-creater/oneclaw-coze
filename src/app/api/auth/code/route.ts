@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sendVerificationEmail, generateCode, isValidEmail } from '@/lib/email';
 import { storeCode, getCodeStatus, CODE_EXPIRY } from '@/lib/verify-code-db';
 
+// 简单的内存频率限制（生产环境建议使用 Redis）
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1分钟内
+const RATE_LIMIT_MAX = 5; // 最多5次
+
+function checkRateLimit(email: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const record = rateLimitMap.get(email);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(email, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
+  }
+  
+  if (record.count >= RATE_LIMIT_MAX) {
+    return { allowed: false, remaining: 0 };
+  }
+  
+  record.count++;
+  return { allowed: true, remaining: RATE_LIMIT_MAX - record.count };
+}
+
 // 发送验证码
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +43,15 @@ export async function POST(request: NextRequest) {
         success: false,
         error: '无效的验证类型'
       }, { status: 400 });
+    }
+
+    // 频率限制检查
+    const rateLimit = checkRateLimit(email);
+    if (!rateLimit.allowed) {
+      return NextResponse.json({
+        success: false,
+        error: '请求过于频繁，请稍后再试'
+      }, { status: 429 });
     }
 
     // 生成验证码
