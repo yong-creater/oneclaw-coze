@@ -1,349 +1,201 @@
 import { NextResponse } from 'next/server';
 
-// 4sapi 配置
-const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
-const API4S_KEY = ENABLE_4SAPI ? (process.env.API4S_KEY || process.env.NEXT_PUBLIC_API2D_KEY || '') : '';
-const API_BASE_URL = process.env.API4S_URL || process.env.NEXT_PUBLIC_API2D_URL || 'https://4sapi.com';
+// 从环境变量获取4sAPI配置
+const API4S_URL = process.env.API4S_URL || '';
+const API4S_KEY = process.env.API4S_KEY || '';
 
-// 国内模型供应商（不走4sapi，用Coze免费）
-const DOMESTIC_PROVIDERS = ['doubao', 'deepseek', 'kimi', 'glm', 'qwen', 'minimax', 'ali', 'baidu', 'tencent', 'huawei', '字节', ' moonshot'];
-
-// Coze 免费模型
-const COZE_FREE_MODELS = [
-  { id: 'doubao-seed-2-0-pro-260215', name: '豆包 Seed Pro', category: '对话', recommend: '旗舰全能', provider: 'Coze', providerLogo: '🦞' },
-  { id: 'doubao-seed-2-0-lite-260215', name: '豆包 Seed Lite', category: '对话', recommend: '均衡性价比', provider: 'Coze', providerLogo: '🦞' },
-  { id: 'doubao-seed-2-0-mini-260215', name: '豆包 Seed Mini', category: '对话', recommend: '轻量快速', provider: 'Coze', providerLogo: '🦞' },
-  { id: 'doubao-seed-1-8-251228', name: '豆包 Seed 1.8', category: '对话', recommend: '多模态Agent', provider: 'Coze', providerLogo: '🦞' },
-  { id: 'doubao-seed-1-6-251015', name: '豆包 Seed 1.6', category: '对话', recommend: '能力多面手', provider: 'Coze', providerLogo: '🦞' },
-  { id: 'doubao-seed-1-6-vision-250815', name: '豆包 Seed Vision', category: '视觉', recommend: '视觉理解SOTA', provider: 'Coze', providerLogo: '🦞' },
-  { id: 'doubao-seed-1-6-thinking-250715', name: '豆包 Seed Thinking', category: '推理', recommend: '深度思考', provider: 'Coze', providerLogo: '🦞' },
-  { id: 'deepseek-v3-2-251201', name: 'DeepSeek V3', category: '对话', recommend: '平衡推理', provider: 'Coze', providerLogo: '🔵' },
-  { id: 'deepseek-r1-250528', name: 'DeepSeek R1', category: '推理', recommend: '671B满血推理', provider: 'Coze', providerLogo: '🔵' },
-  { id: 'kimi-k2-5-260127', name: 'Kimi K2.5', category: '对话', recommend: 'Kimi最智能', provider: 'Coze', providerLogo: '🌙' },
-  { id: 'kimi-k2-250905', name: 'Kimi K2', category: '对话', recommend: '万亿参数开源', provider: 'Coze', providerLogo: '🌙' },
-  { id: 'glm-5-0-260211', name: 'GLM-5', category: '对话', recommend: '智谱旗舰', provider: 'Coze', providerLogo: '📊' },
-  { id: 'glm-4-7-251222', name: 'GLM-4.7', category: '对话', recommend: '编程推理强', provider: 'Coze', providerLogo: '📊' },
-  { id: 'qwen-3-5-plus-260215', name: 'Qwen 3.5 Plus', category: '对话', recommend: '混合注意力', provider: 'Coze', providerLogo: '🏢' },
-  { id: 'minimax-m2-5-260212', name: 'MiniMax M2.5', category: '对话', recommend: '编码Agent SOTA', provider: 'Coze', providerLogo: '⚡' },
-  { id: 'minimax-m2-7-260318', name: 'MiniMax M2.7', category: '对话', recommend: '复杂Agent', provider: 'Coze', providerLogo: '⚡' },
-];
-
-// 模型供应商映射（原始owner值）
-const OWNER_MAP: Record<string, { name: string; logo: string }> = {
-  'openai': { name: 'OpenAI', logo: '🤖' },
-  'anthropic': { name: 'Anthropic', logo: '🧠' },
-  'google': { name: 'Google', logo: '🔴' },
-  'vertex-ai': { name: 'Google', logo: '🔴' },
-  'xai': { name: 'xAI', logo: '💀' },
-  'moonshot': { name: 'Moonshot', logo: '🌙' },
-  'deepseek': { name: 'DeepSeek', logo: '🔵' },
-  'ali': { name: '阿里云', logo: '🏢' },
-  'codex': { name: 'OpenAI Codex', logo: '🤖' },
-  'mistral': { name: 'Mistral', logo: '🌫️' },
-  'stability': { name: 'Stability', logo: '⚡' },
-  'meta': { name: 'Meta', logo: '🦾' },
-  'cohere': { name: 'Cohere', logo: '🌊' },
-  'perplexity': { name: 'Perplexity', logo: '🔍' },
-  'custom': { name: '其他', logo: '📦' },
-  // 添加更多厂商匹配
-  'openai-gpt': { name: 'OpenAI', logo: '🤖' },
-  'azure': { name: 'Azure', logo: '☁️' },
-  'aws': { name: 'AWS', logo: '📦' },
-  'together': { name: 'TogetherAI', logo: '🎯' },
-  'anyscale': { name: 'Anyscale', logo: '⚡' },
-  'replicate': { name: 'Replicate', logo: '🔄' },
-  'fireworks': { name: 'Fireworks', logo: '🎆' },
-  'novita': { name: 'NovitaAI', logo: '✨' },
-  'hyperbolic': { name: 'Hyperbolic', logo: '📈' },
-  'cerebras': { name: 'Cerebras', logo: '🧮' },
-  'groq': { name: 'Groq', logo: '⚡' },
-  'lepton': { name: 'Lepton', logo: '🔵' },
-  'inference': { name: 'Inference', logo: '🔮' },
-  'nebius': { name: 'Nebius', logo: '🌐' },
-  'sambanova': { name: 'SambaNova', logo: '💠' },
-  'nvidia': { name: 'NVIDIA', logo: '🟢' },
-  'featherless': { name: 'Featherless', logo: '🪶' },
-  'abacus': { name: 'AbacusAI', logo: '🔢' },
-  'deepinfra': { name: 'DeepInfra', logo: '🏗️' },
-  'togetherai': { name: 'TogetherAI', logo: '🎯' },
-  'workers-ai': { name: 'Cloudflare', logo: '☁️' },
-  'github': { name: 'GitHub', logo: '🐙' },
-  'coze': { name: 'Coze', logo: '🦞' },
-  'bytedance': { name: '字节跳动', logo: '🎵' },
-  'tencent': { name: '腾讯', logo: '🐧' },
-  'baidu': { name: '百度', logo: '🔍' },
-  'minimax': { name: 'MiniMax', logo: '⚡' },
-  'zhipuai': { name: '智谱AI', logo: '📊' },
-  'stepfuny': { name: '阶跃星辰', logo: '🌟' },
-  'baichuan': { name: '百川', logo: '💫' },
-  'qwen': { name: '通义千问', logo: '🏢' },
-  'ERNIE': { name: '百度文心', logo: '🐉' },
-  'yi': { name: '零一万物', logo: '💡' },
-  'spark': { name: '讯飞星火', logo: '🔥' },
-  'doubao': { name: '豆包', logo: '🦞' },
-  'hunyuan': { name: '腾讯混元', logo: '🐧' },
-  'abab': { name: 'MiniMax', logo: '⚡' },
+// 品牌配置
+const PROVIDER_CONFIG: Record<string, { icon: string; color: string; provider: string }> = {
+  '豆包': { icon: 'Bot', color: 'bg-emerald-500', provider: '豆包' },
+  'DeepSeek': { icon: 'Zap', color: 'bg-violet-500', provider: 'DeepSeek' },
+  'Kimi': { icon: 'Moon', color: 'bg-amber-500', provider: 'Kimi' },
+  'GLM': { icon: 'BarChart3', color: 'bg-blue-500', provider: 'GLM' },
+  'Qwen': { icon: 'Mountain', color: 'bg-orange-500', provider: 'Qwen' },
+  'GPT': { icon: 'Cpu', color: 'bg-green-500', provider: 'GPT (4sAPI)' },
+  'Claude': { icon: 'Brain', color: 'bg-amber-600', provider: 'Claude (4sAPI)' },
+  'Gemini': { icon: 'Sparkles', color: 'bg-blue-400', provider: 'Gemini (4sAPI)' },
 };
 
-// 模型名关键字映射厂商（兜底匹配）- 优先级从高到低
-const MODEL_KEYWORD_PROVIDER: Array<{ keywords: string[]; name: string; logo: string }> = [
-  // Google 系列 (包括 veo, gemini, gemma, imagen)
-  { keywords: ['veo', 'gemini', 'gemma-', 'imagen'], name: 'Google', logo: '🔴' },
-  
-  // xAI 系列 (grok)
-  { keywords: ['grok'], name: 'xAI', logo: '💀' },
-  
-  // Stability 系列 (flux)
-  { keywords: ['flux', 'stable-diffusion', 'sdxl'], name: 'Stability', logo: '⚡' },
-  
-  // Anthropic / Claude 系列
-  { keywords: ['claude'], name: 'Anthropic', logo: '🧠' },
-  
-  // OpenAI 系列 (包括 o1, o3, o4, gpt, dall-e, whisper, codex, computer-use)
-  { keywords: ['gpt-', 'o1', 'o2', 'o3', 'o4', 'dall-e', 'davinci', 'babbage', 'curie', 'ada', 'whisper', 'tts-', 'codex', 'computer-use', 'chatgpt'], name: 'OpenAI', logo: '🤖' },
-  
-  // 通义千问
-  { keywords: ['qwen', 'tongyi', 'qwq'], name: '通义千问', logo: '🏢' },
-  
-  // Kimi / Moonshot
-  { keywords: ['kimi', 'moonshot'], name: 'Kimi', logo: '🌙' },
-  
-  // 智谱AI
-  { keywords: ['glm', 'chatglm', 'zhipu'], name: '智谱AI', logo: '📊' },
-  
-  // Mistral 系列
-  { keywords: ['mistral', 'mixtral', 'codestral', 'pixtral'], name: 'Mistral', logo: '🌫️' },
-  
-  // Meta 系列
-  { keywords: ['llama', 'meta-llama', 'llava'], name: 'Meta', logo: '🦾' },
-  
-  // Cohere 系列
-  { keywords: ['cohere', 'c4ai'], name: 'Cohere', logo: '🌊' },
-  
-  // DeepSeek 系列
-  { keywords: ['deepseek', 'ds-'], name: 'DeepSeek', logo: '🔵' },
-  
-  // 百川
-  { keywords: ['baichuan'], name: '百川', logo: '💫' },
-  
-  // MiniMax
-  { keywords: ['minimax', 'abab'], name: 'MiniMax', logo: '⚡' },
-  
-  // 其他热门厂商
-  { keywords: ['perplexity', 'pplx'], name: 'Perplexity', logo: '🔍' },
-  { keywords: ['nvidia', 'nemotron', 'nv-'], name: 'NVIDIA', logo: '🟢' },
-  { keywords: ['cerebras', 'cbr-'], name: 'Cerebras', logo: '🧮' },
-  { keywords: ['groq'], name: 'Groq', logo: '⚡' },
-  { keywords: ['lepton'], name: 'Lepton', logo: '🔵' },
-  { keywords: ['nebius'], name: 'Nebius', logo: '🌐' },
-  { keywords: ['fireworks', 'fw-'], name: 'Fireworks', logo: '🎆' },
-  { keywords: ['togetherai', 'together-'], name: 'TogetherAI', logo: '🎯' },
-  { keywords: ['cloudflare', 'workers-ai', '@cf/'], name: 'Cloudflare', logo: '☁️' },
-  { keywords: ['github-copilot'], name: 'GitHub', logo: '🐙' },
-  { keywords: ['azure'], name: 'Azure', logo: '☁️' },
-  { keywords: ['aws', 'amazon', 'bedrock'], name: 'AWS', logo: '📦' },
-  { keywords: ['replicate', 'replicate/'], name: 'Replicate', logo: '🔄' },
-  { keywords: ['novita'], name: 'NovitaAI', logo: '✨' },
-  { keywords: ['hyperbolic'], name: 'Hyperbolic', logo: '📈' },
-  { keywords: ['sambanova', 'samba-'], name: 'SambaNova', logo: '💠' },
-  { keywords: ['abacusai', 'abacus-'], name: 'AbacusAI', logo: '🔢' },
-  { keywords: ['stepfuny', 'step-'], name: '阶跃星辰', logo: '🌟' },
-  { keywords: ['01-ai', '01ai'], name: '零一万物', logo: '💡' },
-  { keywords: ['spark', 'xingguang'], name: '讯飞星火', logo: '🔥' },
-  { keywords: ['ernie', 'ernie-bot', 'eb-'], name: '百度文心', logo: '🐉' },
-  { keywords: ['hunyuan'], name: '腾讯混元', logo: '🐧' },
-  { keywords: ['doubao', '豆包'], name: '豆包', logo: '🦞' },
-  
-  // 功能分类
-  { keywords: ['embedding', 'embed-', 'text-embedding', 'e5-', 'bge-', 'jina-embed'], name: '向量模型', logo: '📐' },
-  { keywords: ['codex', 'coder', 'starcoder', 'codellama'], name: '代码模型', logo: '💻' },
-  { keywords: ['vision', 'vl-', 'qwen-vl', 'internlm'], name: '视觉模型', logo: '👁️' },
-  { keywords: ['audio', 'speech', 'bark', 'fish-speech'], name: 'AI音频', logo: '🎧' },
-  { keywords: ['video-', 'video/', 'sora', 'runway', 'pika'], name: 'AI视频', logo: '🎬' },
-  { keywords: ['dall-e', 'midjourney', 'gen-3', 'gen-3a'], name: 'AI绘画', logo: '🎨' },
+// 免费模型列表（Coze SDK支持的模型）
+const FREE_MODELS: Array<{ id: string; name: string; provider: string; description?: string; recommended?: boolean }> = [
+  { id: 'doubao-seed-2-0-pro-260215', name: 'Seed 2.0 Pro', provider: '豆包', description: '旗舰全能' },
+  { id: 'doubao-seed-2-0-lite-260215', name: 'Seed 2.0 Lite', provider: '豆包', description: '轻量快速' },
+  { id: 'doubao-seed-1-8-251228', name: 'Seed 1.8', provider: '豆包', description: '多模态优化' },
+  { id: 'deepseek-r1-250528', name: 'R1 (推理)', provider: 'DeepSeek', description: '深度推理', recommended: true },
+  { id: 'deepseek-v3-2-251201', name: 'V3', provider: 'DeepSeek', description: '平衡推理' },
+  { id: 'glm-5-0-260211', name: 'GLM-5', provider: 'GLM', description: '旗舰基座' },
+  { id: 'qwen-3-5-plus-260215', name: 'Qwen 3.5 Plus', provider: 'Qwen', description: '混合架构' },
 ];
 
-// 模型分类规则
-const CATEGORY_RULES: Array<{ keywords: string[]; category: string }> = [
-  { keywords: ['gpt-4o', 'gpt-4-turbo', 'gpt-4', 'gpt-3.5'], category: '对话' },
-  { keywords: ['claude'], category: '对话' },
-  { keywords: ['gemini'], category: '对话' },
-  { keywords: ['kimi', 'moonshot'], category: '对话' },
-  { keywords: ['grok'], category: '对话' },
-  { keywords: ['qwen', 'yi-', 'baichuan'], category: '对话' },
-  { keywords: ['o1', 'o3', 'o4', 'reasoning'], category: '推理' },
-  { keywords: ['dall-e', 'flux', 'stable-diffusion', 'imagen', 'midjourney'], category: '图像' },
-  { keywords: ['whisper', 'tts', 'speech'], category: '音频' },
-  { keywords: ['veo', 'video', 'sora'], category: '视频' },
-  { keywords: ['embedding', 'vector'], category: '向量' },
-  { keywords: ['codex', 'coder', 'code'], category: '代码' },
-  { keywords: ['vision'], category: '视觉' },
-  { keywords: ['llama'], category: '对话' },
-];
+// 从4sAPI获取模型列表
+async function fetchModelsFrom4sAPI(): Promise<Array<{ id: string; name: string; provider: string; description?: string }>> {
+  if (!API4S_URL || !API4S_KEY) {
+    console.log('4sAPI 未配置，跳过');
+    return [];
+  }
 
-// 推荐说明
-const RECOMMEND_MAP: Record<string, string> = {
-  'gpt-4o': 'GPT-4o 旗舰',
-  'gpt-4o-mini': '快速响应',
-  'claude-3-5-sonnet': 'Claude 写作',
-  'gemini-2-5-pro': 'Gemini 旗舰',
-  'gemini-2-5-flash': '极速免费',
-  'kimi-k2': 'Kimi 最新',
-  'grok-4': 'Grok 旗舰',
-  'deepseek-v3': 'DeepSeek 旗舰',
-  'o1': 'o1 推理',
-  'o3': 'o3 最新推理',
-};
+  try {
+    const response = await fetch(`${API4S_URL}/models`, {
+      headers: {
+        'Authorization': `Bearer ${API4S_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
-// 获取模型分类
-function getModelCategory(modelId: string): string {
-  const lowerId = modelId.toLowerCase();
-  for (const rule of CATEGORY_RULES) {
-    for (const keyword of rule.keywords) {
-      if (lowerId.includes(keyword)) {
-        return rule.category;
+    if (!response.ok) {
+      console.error('4sAPI 请求失败:', response.status);
+      return [];
+    }
+
+    const data = await response.json();
+    
+    // 解析4sAPI返回的模型列表
+    // 通常返回格式: { data: [{ id: "gpt-4o", object: "model" }, ...] }
+    const models = data.data || [];
+    
+    // 分类模型
+    const paidModels: Array<{ id: string; name: string; provider: string; description?: string }> = [];
+    
+    models.forEach((model: { id?: string; object?: string }) => {
+      const modelId = model.id || '';
+      if (modelId.includes('gpt-4') || modelId.includes('o1') || modelId.includes('o3')) {
+        paidModels.push({
+          id: modelId,
+          name: modelId.replace(/^(gpt-|o[13]-)/i, 'GPT-').replace(/-/g, ' '),
+          provider: 'GPT (4sAPI)',
+          description: '付费模型',
+        });
+      } else if (modelId.includes('claude')) {
+        paidModels.push({
+          id: modelId,
+          name: modelId.replace(/^(claude-)/i, 'Claude '),
+          provider: 'Claude (4sAPI)',
+          description: '付费模型',
+        });
+      } else if (modelId.includes('gemini')) {
+        paidModels.push({
+          id: modelId,
+          name: modelId.replace(/^(gemini-)/i, 'Gemini ').replace(/-/g, ' '),
+          provider: 'Gemini (4sAPI)',
+          description: '付费模型',
+        });
       }
-    }
+    });
+
+    return paidModels;
+  } catch (error) {
+    console.error('获取4sAPI模型失败:', error);
+    return [];
   }
-  return '对话';
 }
 
-// 获取供应商信息（优先按owner，其次按模型名关键字）
-function getProviderInfo(modelId: string, owner: string): { name: string; logo: string } {
-  const lowerOwner = owner.toLowerCase();
-  
-  // 先按owner映射
-  for (const [key, value] of Object.entries(OWNER_MAP)) {
-    if (lowerOwner.includes(key)) {
-      // 如果是custom，则按模型名关键字进一步识别
-      if (key === 'custom') {
-        const lowerId = modelId.toLowerCase();
-        for (const rule of MODEL_KEYWORD_PROVIDER) {
-          for (const keyword of rule.keywords) {
-            if (lowerId.includes(keyword)) {
-              return { name: rule.name, logo: rule.logo };
-            }
-          }
-        }
+// 构建分组数据
+function buildGroups(freeModels: typeof FREE_MODELS, paidModels: Array<{ id: string; name: string; provider: string; description?: string }>) {
+  const groups: Array<{
+    provider: string;
+    icon: string;
+    color: string;
+    models: Array<{ value: string; label: string; region: string; recommended?: boolean }>;
+  }> = [];
+
+  // 按提供商分组免费模型
+  const freeByProvider = new Map<string, typeof FREE_MODELS>();
+  freeModels.forEach(m => {
+    if (!freeByProvider.has(m.provider)) {
+      freeByProvider.set(m.provider, []);
+    }
+    freeByProvider.get(m.provider)!.push(m);
+  });
+
+  freeByProvider.forEach((models, provider) => {
+    const config = PROVIDER_CONFIG[provider] || { icon: 'Bot', color: 'bg-slate-500', provider };
+    groups.push({
+      provider: config.provider,
+      icon: config.icon,
+      color: config.color,
+      models: models.map(m => ({
+        value: m.id,
+        label: m.name,
+        region: '免费',
+        recommended: m.recommended,
+      })),
+    });
+  });
+
+  // 按提供商分组付费模型
+  if (paidModels.length > 0) {
+    const paidByProvider = new Map<string, typeof paidModels>();
+    paidModels.forEach(m => {
+      const provider = m.provider;
+      if (!paidByProvider.has(provider)) {
+        paidByProvider.set(provider, []);
       }
-      return value;
-    }
-  }
-  
-  // 如果owner没匹配，按模型名关键字识别
-  const lowerId = modelId.toLowerCase();
-  for (const rule of MODEL_KEYWORD_PROVIDER) {
-    for (const keyword of rule.keywords) {
-      if (lowerId.includes(keyword)) {
-        return { name: rule.name, logo: rule.logo };
-      }
-    }
-  }
-  
-  return { name: '其他', logo: '📦' };
-}
+      paidByProvider.get(provider)!.push(m);
+    });
 
-// 获取推荐说明
-function getRecommend(modelId: string): string {
-  const lowerId = modelId.toLowerCase();
-  for (const [key, value] of Object.entries(RECOMMEND_MAP)) {
-    if (lowerId.includes(key)) {
-      return value;
-    }
+    paidByProvider.forEach((models, provider) => {
+      const config = PROVIDER_CONFIG[provider] || { icon: 'Cpu', color: 'bg-slate-500', provider };
+      groups.push({
+        provider: config.provider,
+        icon: config.icon,
+        color: config.color,
+        models: models.map(m => ({
+          value: m.id,
+          label: m.name,
+          region: '付费',
+        })),
+      });
+    });
   }
-  return getModelCategory(modelId);
-}
 
-// 格式化模型名称
-function formatModelName(modelId: string): string {
-  return modelId
-    .split(/[-_]/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
-// 判断是否为国内模型（用Coze免费）
-function isDomesticModel(modelId: string, owner: string): boolean {
-  const lowerId = modelId.toLowerCase();
-  const lowerOwner = owner.toLowerCase();
-  
-  for (const keyword of DOMESTIC_PROVIDERS) {
-    if (lowerId.includes(keyword.toLowerCase()) || lowerOwner.includes(keyword.toLowerCase())) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// 判断是否为4sapi付费模型
-function is4sapiModel(owner: string): boolean {
-  const lowerOwner = owner.toLowerCase();
-  // custom 也算，因为可能是三方模型
-  return !lowerOwner.includes('doubao') && !lowerOwner.includes('deepseek') && 
-         !lowerOwner.includes('kimi') && !lowerOwner.includes('glm') && 
-         !lowerOwner.includes('qwen') && !lowerOwner.includes('minimax');
+  return groups;
 }
 
 export async function GET() {
   try {
-    const models: any[] = [];
-    
-    // 1. 添加 Coze 免费模型
-    models.push(...COZE_FREE_MODELS.map(m => ({
-      ...m,
-      isFree: true,
-      source: 'Coze 免费',
-    })));
-    
-    // 2. 从 4sapi 获取付费模型（仅当启用4sapi时）
-    if (ENABLE_4SAPI && API4S_KEY) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/v1/models`, {
-          headers: {
-            'Authorization': `Bearer ${API4S_KEY}`,
-          },
-          next: { revalidate: 3600 }
-        });
+    // 并行获取免费模型和付费模型
+    const [paidModels] = await Promise.all([
+      fetchModelsFrom4sAPI(),
+    ]);
 
-        if (response.ok) {
-          const data = await response.json();
-          const rawModels = data.data || [];
+    // 构建分组数据
+    const groups = buildGroups(FREE_MODELS, paidModels);
 
-          rawModels.forEach((m: any) => {
-            // 跳过国内模型（走Coze免费）
-            if (isDomesticModel(m.id, m.owned_by)) return;
-            
-            const provider = getProviderInfo(m.id, m.owned_by);
-            
-            models.push({
-              id: m.id,
-              name: formatModelName(m.id),
-              provider: provider.name,
-              providerLogo: provider.logo,
-              category: getModelCategory(m.id),
-              recommend: getRecommend(m.id),
-              isFree: false,
-              source: '4sapi 付费',
-            });
-          });
-        }
-      } catch (e) {
-        console.error('Failed to fetch 4sapi models:', e);
-      }
-    }
+    // 构建扁平列表
+    const options = [
+      ...FREE_MODELS.map(m => ({
+        id: m.id,
+        name: m.name,
+        provider: m.provider,
+        icon: PROVIDER_CONFIG[m.provider]?.icon || 'Bot',
+        color: PROVIDER_CONFIG[m.provider]?.color || 'bg-slate-500',
+        description: m.description,
+        recommended: m.recommended,
+        isPaid: false,
+      })),
+      ...paidModels.map(m => ({
+        id: m.id,
+        name: m.name,
+        provider: m.provider,
+        icon: PROVIDER_CONFIG[m.provider]?.icon || 'Cpu',
+        color: PROVIDER_CONFIG[m.provider]?.color || 'bg-slate-500',
+        description: m.description,
+        isPaid: true,
+      })),
+    ];
 
     return NextResponse.json({
       success: true,
-      total: models.length,
-      freeCount: models.filter(m => m.isFree).length,
-      paidCount: models.filter(m => !m.isFree).length,
-      models,
+      data: {
+        options,
+        groups,
+        defaultModel: 'deepseek-r1-250528',
+      },
     });
-
-  } catch (error: any) {
-    console.error('Models API error:', error);
+  } catch (error) {
+    console.error('获取模型列表失败:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch models' },
+      { success: false, error: '获取模型列表失败' },
       { status: 500 }
     );
   }

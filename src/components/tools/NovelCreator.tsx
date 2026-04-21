@@ -26,7 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import ModelPicker from '@/components/ui/ModelPicker';
-import { DEFAULT_MODEL_ID, getModelById } from '@/lib/models';
+import { DEFAULT_MODEL_ID } from '@/lib/models';
 
 // 已删除简化版 ModelGroupSelect，统一使用 ModelSelector 组件
 
@@ -878,7 +878,10 @@ export default function NovelCreator() {
                           洗稿完成
                         </h2>
                         <Badge variant="outline" className="text-xs">
-                          {getModelById(selectedModel)?.name || '豆包'}
+                          {selectedModel.includes('deepseek') ? 'DeepSeek ' + (selectedModel.includes('r1') ? 'R1' : 'V3') : 
+                            selectedModel.includes('doubao') ? '豆包 Seed' : 
+                            selectedModel.includes('glm') ? 'GLM-5' : 
+                            selectedModel.includes('qwen') ? 'Qwen' : '豆包'}
                         </Badge>
                       </div>
                       <div className="flex gap-2">
