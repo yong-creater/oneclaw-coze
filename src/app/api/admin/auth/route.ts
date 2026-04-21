@@ -51,10 +51,11 @@ export async function POST(request: NextRequest) {
 
     console.log('[Auth API] Cookie set for user:', username);
     return response;
-  } catch (error) {
-    console.error('登录失败:', error);
+  } catch (error: any) {
+    console.error('登录失败:', error?.message || error?.code || error);
+    console.error('登录错误堆栈:', error?.stack);
     return NextResponse.json(
-      { success: false, error: '服务器错误' },
+      { success: false, error: '服务器错误: ' + (error?.message || '未知错误') },
       { status: 500 }
     );
   }

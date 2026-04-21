@@ -26,8 +26,10 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   
   // 尝试bcrypt比较
   try {
-    return await bcrypt.compare(password, hash);
-  } catch {
+    const result = await bcrypt.compare(password, hash);
+    return result;
+  } catch (e: any) {
+    console.error('[verifyPassword] bcrypt compare error:', e.message);
     return false;
   }
 }
@@ -112,11 +114,15 @@ export async function authenticateAdmin(username: string, password: string): Pro
   }
   
   if (!user.is_active) {
+    console.log('[Auth] User is not active:', username);
     return null;
   }
   
+  console.log('[Auth] Verifying password for:', username, 'hash:', user.password_hash.substring(0, 20) + '...');
   const isValid = await verifyPassword(password, user.password_hash);
+  console.log('[Auth] Password verification result:', isValid);
   if (!isValid) {
+    console.log('[Auth] Password invalid for user:', username);
     return null;
   }
   
