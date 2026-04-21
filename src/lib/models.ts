@@ -46,9 +46,9 @@ export const UNIFIED_MODEL_OPTIONS: ModelOption[] = [
   // DeepSeek
   { id: 'deepseek-v3-2-251201', name: 'V3', provider: 'DeepSeek', icon: 'Zap', description: '平衡推理', isPaid: false },
   { id: 'deepseek-r1-250528', name: 'R1 (推理)', provider: 'DeepSeek', icon: 'Zap', description: '深度推理', recommended: true, isPaid: false },
-  // Kimi
-  { id: 'kimi-k2-250905', name: 'K2', provider: 'Kimi', icon: 'Moon', description: '长文本', isPaid: false },
-  { id: 'kimi-k2-5-260127', name: 'K2.5', provider: 'Kimi', icon: 'Moon', description: 'Agent能力', isPaid: false },
+  // Kimi - 已停运，暂时移除
+  // { id: 'kimi-k2-250905', name: 'K2', provider: 'Kimi', icon: 'Moon', description: '长文本', isPaid: false },
+  // { id: 'kimi-k2-5-260127', name: 'K2.5', provider: 'Kimi', icon: 'Moon', description: 'Agent能力', isPaid: false },
   // GLM
   { id: 'glm-5-0-260211', name: 'GLM-5', provider: 'GLM', icon: 'BarChart3', description: '旗舰基座', isPaid: false },
   // Qwen
@@ -85,14 +85,15 @@ export const UNIFIED_MODEL_GROUPS: ModelGroup[] = [
       { value: 'deepseek-r1-250528', label: 'R1 (推理)', region: '免费', recommended: true },
     ]
   },
-  {
-    provider: 'Kimi',
-    icon: 'Moon',
-    models: [
-      { value: 'kimi-k2-5-260127', label: 'K2.5', region: '免费' },
-      { value: 'kimi-k2-250905', label: 'K2', region: '免费' },
-    ]
-  },
+  // Kimi 已停运，暂时移除
+  // {
+  //   provider: 'Kimi',
+  //   icon: 'Moon',
+  //   models: [
+  //     { value: 'kimi-k2-5-260127', label: 'K2.5', region: '免费' },
+  //     { value: 'kimi-k2-250905', label: 'K2', region: '免费' },
+  //   ]
+  // },
   {
     provider: 'GLM',
     icon: 'BarChart3',

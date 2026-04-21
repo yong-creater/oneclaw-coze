@@ -6,7 +6,7 @@ const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
 const API4S_KEY = process.env.API4S_KEY || '';
 const API4S_URL = process.env.API4S_URL || 'https://4sapi.com';
 
-// Coze SDK 免费模型列表
+// Coze SDK 免费模型列表（与 models.ts 保持一致）
 const FREE_MODELS = [
   // 豆包系列
   'doubao-seed-2-0-pro-260215',
@@ -20,25 +20,31 @@ const FREE_MODELS = [
   'doubao-pro-32k-240815',
   'doubao-lite-4k-240815',
   'doubao-lite-32k-240815',
-  // 智谱AI (GLM)
+  // 智谱AI (GLM) - 新版GLM
+  'glm-5-0-260211',
   'glm-4',
   'glm-4-flash',
   'glm-4-plus',
   'glm-4v',
   'glm-3-turbo',
   'characterglm',
-  // 通义千问
+  // 通义千问 - 新版Qwen
+  'qwen-3-5-plus-260215',
   'qwen-turbo',
   'qwen-plus',
   'qwen-max',
   'qwen2-72b-instruct',
   'qwen2-7b-instruct',
   'qwen-coder-turbo',
-  // Kimi
+  // Kimi - 新版Kimi
+  'kimi-k2-250905',
+  'kimi-k2-5-260127',
   'moonshot-v1-8k',
   'moonshot-v1-32k',
   'moonshot-v1-128k',
-  // DeepSeek
+  // DeepSeek - 新版DeepSeek
+  'deepseek-r1-250528',
+  'deepseek-v3-2-251201',
   'deepseek-chat',
   'deepseek-coder',
   // 百川
