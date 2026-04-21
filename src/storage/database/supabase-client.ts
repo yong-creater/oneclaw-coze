@@ -1,7 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { execSync } from 'child_process';
 
+// Edge Runtime 检测
+const isEdgeRuntime = typeof window === 'undefined' && !process.env.NODE_ENV;
+
+// 延迟加载 child_process（仅 Node.js 环境）
 let envLoaded = false;
+let loadEnvFn: (() => void) | null = null;
 
 interface SupabaseCredentials {
   url: string;
@@ -9,12 +13,25 @@ interface SupabaseCredentials {
 }
 
 function loadEnv(): void {
-  if (envLoaded || (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY)) {
+  if (envLoaded) return;
+  
+  // 已有环境变量，跳过
+  if (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY) {
+    envLoaded = true;
     return;
   }
 
-  try {
-    const pythonCode = `
+  // Edge Runtime 跳过
+  if (isEdgeRuntime) {
+    return;
+  }
+
+  // Node.js 环境延迟加载
+  if (!loadEnvFn) {
+    try {
+      const { execSync } = require('child_process');
+      
+      const pythonCode = `
 import os
 import sys
 try:
@@ -27,34 +44,36 @@ try:
 except Exception as e:
     print(f"# Error: {e}", file=sys.stderr)
 `;
+      
+      const output = execSync(`python3 -c '${pythonCode.replace(/'/g, "'\"'\"'")}'`, {
+        encoding: 'utf-8',
+        timeout: 10000,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
 
-    const output = execSync(`python3 -c '${pythonCode.replace(/'/g, "'\"'\"'")}'`, {
-      encoding: 'utf-8',
-      timeout: 10000,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-
-    const lines = output.trim().split('\n');
-    for (const line of lines) {
-      if (line.startsWith('#')) continue;
-      const eqIndex = line.indexOf('=');
-      if (eqIndex > 0) {
-        const key = line.substring(0, eqIndex);
-        let value = line.substring(eqIndex + 1);
-        if ((value.startsWith("'") && value.endsWith("'")) ||
-            (value.startsWith('"') && value.endsWith('"'))) {
-          value = value.slice(1, -1);
-        }
-        if (!process.env[key]) {
-          process.env[key] = value;
+      const lines = output.trim().split('\n');
+      for (const line of lines) {
+        if (line.startsWith('#')) continue;
+        const eqIndex = line.indexOf('=');
+        if (eqIndex > 0) {
+          const key = line.substring(0, eqIndex);
+          let value = line.substring(eqIndex + 1);
+          if ((value.startsWith("'") && value.endsWith("'")) ||
+              (value.startsWith('"') && value.endsWith('"'))) {
+            value = value.slice(1, -1);
+          }
+          if (!process.env[key]) {
+            process.env[key] = value;
+          }
         }
       }
+    } catch {
+      // Silently fail
     }
-
-    envLoaded = true;
-  } catch {
-    // Silently fail
   }
+  
+  loadEnvFn?.();
+  envLoaded = true;
 }
 
 function getSupabaseCredentials(): SupabaseCredentials {
