@@ -83,7 +83,9 @@ export async function getPgPool() {
   
   const config: any = {};
   
-  if (process.env.DATABASE_URL) {
+  if (process.env.PGDATABASE_URL) {
+    config.connectionString = process.env.PGDATABASE_URL;
+  } else if (process.env.DATABASE_URL) {
     config.connectionString = process.env.DATABASE_URL;
   } else {
     config.host = process.env.PGHOST;

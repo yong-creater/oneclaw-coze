@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isVolcenginePgMode } from '@/lib/db';
 import { requireAuth, getOptionalUserId } from '@/lib/user-middleware';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 获取用户浏览历史
 export async function GET(request: NextRequest) {
@@ -16,53 +16,35 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
 
-    let history: any[] = [];
-    let total = 0;
+    const supabase = getSupabaseClient();
 
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
-
-      const [listResult, countResult] = await Promise.all([
-        pool.query(`
-          SELECT h.*, t.id as "tools.id", t.name as "tools.name", t.logo as "tools.logo",
-                 t.producer as "tools.producer", t.highlight as "tools.highlight",
-                 t.free_type as "tools.free_type", t.feature_tags as "tools.feature_tags",
-                 c.name as "tools.categories.name"
-          FROM user_history h
-          LEFT JOIN tools t ON h.tool_id = t.id
-          LEFT JOIN categories c ON t.category_id = c.id
-          WHERE h.user_id = $1
-          ORDER BY h.viewed_at DESC
-          LIMIT $2 OFFSET $3
-        `, [userId, limit, offset]),
-        pool.query(`SELECT COUNT(*) as total FROM user_history WHERE user_id = $1`, [userId])
-      ]);
-
-      history = listResult.rows;
-      total = parseInt(countResult.rows[0]?.total || '0');
-    } else {
-      const { query } = await import('@/lib/db');
-      const result = await query('user_history', {
-        select: '*, tools(id, name, logo, producer, highlight, free_type, feature_tags, categories(name))',
-        eq: { user_id: userId },
-        order: { column: 'viewed_at', ascending: false },
-        limit,
-        offset,
-        count: true,
-      });
-      history = result.data || [];
-      total = result.count || 0;
-    }
+    const { data: history, count } = await supabase
+      .from('user_history')
+      .select(`
+        *,
+        tools (
+          id,
+          name,
+          logo,
+          producer,
+          highlight,
+          free_type,
+          feature_tags,
+          categories (name)
+        )
+      `, { count: 'exact' })
+      .eq('user_id', userId)
+      .order('viewed_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     return NextResponse.json({
       success: true,
-      data: history,
+      data: history || [],
       pagination: {
         page,
         limit,
-        total,
-        total_pages: Math.ceil(total / limit)
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit)
       }
     });
   } catch (error) {
@@ -87,25 +69,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '缺少工具ID' }, { status: 400 });
     }
 
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
+    const supabase = getSupabaseClient();
 
-      const existing = await pool.query(`
-        SELECT id FROM user_history WHERE user_id = $1 AND tool_id = $2
-      `, [currentUserId, tool_id]);
+    // 检查是否已有记录
+    const { data: existing } = await supabase
+      .from('user_history')
+      .select('id')
+      .eq('user_id', currentUserId)
+      .eq('tool_id', tool_id)
+      .single();
 
-      if (existing.rows[0]) {
-        await pool.query(`
-          UPDATE user_history SET viewed_at = NOW() WHERE id = $1
-        `, [existing.rows[0].id]);
-      } else {
-        await pool.query(`
-          INSERT INTO user_history (user_id, tool_id, viewed_at) VALUES ($1, $2, NOW())
-        `, [currentUserId, tool_id]);
-      }
+    if (existing) {
+      // 更新浏览时间
+      await supabase
+        .from('user_history')
+        .update({ viewed_at: new Date().toISOString() })
+        .eq('id', existing.id);
     } else {
-      // Supabase 模式
+      // 创建新记录
+      await supabase
+        .from('user_history')
+        .insert({ user_id: currentUserId, tool_id, viewed_at: new Date().toISOString() });
     }
 
     return NextResponse.json({ success: true });
@@ -124,15 +108,13 @@ export async function DELETE(request: NextRequest) {
     }
     const { userId } = authResult;
 
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
-      await pool.query(`DELETE FROM user_history WHERE user_id = $1`, [userId]);
-    } else {
-      // Supabase 模式
-    }
+    const supabase = getSupabaseClient();
+    await supabase
+      .from('user_history')
+      .delete()
+      .eq('user_id', userId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, message: '浏览历史已清除' });
   } catch (error) {
     console.error('清除浏览历史失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
