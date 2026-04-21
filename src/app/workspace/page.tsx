@@ -243,11 +243,11 @@ export default function WorkspacePage() {
                 ) : (
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
                     <span className="text-white text-xs font-medium">
-                      {(user.nickname || 'U')[0].toUpperCase()}
+                      {(user.email?.[0] || user.nickname?.[0] || 'U').toUpperCase()}
                     </span>
                   </div>
                 )}
-                <span>{user.nickname || '用户'}</span>
+                <span>{user.email || user.nickname || '用户'}</span>
               </div>
             </div>
           </div>
