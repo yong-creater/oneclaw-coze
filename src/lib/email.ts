@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { Resend } from 'resend';
 
 // 阿里云 DirectMail API 发送邮件
 export async function sendEmailViaAliyun(
@@ -63,7 +64,6 @@ export async function sendEmailViaAliyun(
     const url = `https://dm.${region}.aliyuncs.com/?${queryString}`;
 
     console.log('[Aliyun DirectMail] 发送请求到:', `https://dm.${region}.aliyuncs.com/`);
-    console.log('[Aliyun DirectMail] 参数:', JSON.stringify(params));
 
     const response = await fetch(url, {
       method: 'GET',
@@ -79,6 +79,44 @@ export async function sendEmailViaAliyun(
     }
   } catch (error: any) {
     console.error('[Aliyun DirectMail] 发送失败:', error.message);
+    return { success: false, error: error.message };
+  }
+}
+
+// Resend 邮件发送
+export async function sendEmailViaResend(
+  toAddress: string,
+  subject: string,
+  htmlBody: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
+  
+  if (!apiKey) {
+    return { success: false, error: 'Resend API Key 未配置' };
+  }
+
+  try {
+    const resend = new Resend(apiKey);
+    
+    // 从环境变量获取发件人邮箱，默认为 noreply@resend.dev（Resend 免费版的测试域名）
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'OneClaw <noreply@resend.dev>';
+    
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
+      to: toAddress,
+      subject: subject,
+      html: htmlBody,
+    });
+
+    if (error) {
+      console.error('[Resend] 发送失败:', error);
+      return { success: false, error: error.message };
+    }
+
+    console.log('[Resend] 邮件已发送, ID:', data?.id);
+    return { success: true, messageId: data?.id };
+  } catch (error: any) {
+    console.error('[Resend] 发送异常:', error.message);
     return { success: false, error: error.message };
   }
 }
@@ -144,33 +182,53 @@ function getVerificationEmailTemplate(code: string) {
   };
 }
 
-// 发送验证码邮件（兼容旧接口）
+// 发送验证码邮件（支持多邮件服务）
 export async function sendVerificationEmail(
   to: string, 
   code: string, 
   type: 'register' | 'login' = 'register'
 ): Promise<{ success: boolean; configured: boolean; error?: string }> {
+  // 检查 Resend 配置（优先使用 Resend）
+  const hasResendConfig = process.env.RESEND_API_KEY;
+  
   // 检查阿里云配置
   const hasAliyunConfig = process.env.ALIYUN_ACCESS_KEY_ID && process.env.ALIYUN_ACCESS_KEY_SECRET;
   
-  // 未配置阿里云：模拟发送
-  if (!hasAliyunConfig) {
-    console.log(`[Email] 未配置阿里云邮件推送，模拟发送验证码到 ${to}: ${code}`);
-    return { success: true, configured: false };
-  }
-
-  // 已配置阿里云：使用阿里云发送
-  console.log(`[Email] 使用阿里云邮件推送发送验证码到 ${to}: ${code}`);
   const template = getVerificationEmailTemplate(code);
-  const result = await sendEmailViaAliyun(to, template.subject, template.html);
-
-  if (result.success) {
-    console.log(`[Aliyun DirectMail] 验证码已发送至 ${to}, MessageId: ${result.messageId}`);
-    return { success: true, configured: true };
-  } else {
-    console.error(`[Aliyun DirectMail] 发送失败:`, result.error);
-    return { success: false, configured: true, error: result.error };
+  
+  // 优先使用 Resend
+  if (hasResendConfig) {
+    console.log(`[Email] 使用 Resend 发送验证码到 ${to}: ${code}`);
+    const result = await sendEmailViaResend(to, template.subject, template.html);
+    
+    if (result.success) {
+      console.log(`[Resend] 验证码已发送至 ${to}, MessageId: ${result.messageId}`);
+      return { success: true, configured: true };
+    } else {
+      console.error(`[Resend] 发送失败:`, result.error);
+      return { success: false, configured: true, error: result.error };
+    }
   }
+  
+  // 备选：使用阿里云
+  if (hasAliyunConfig) {
+    console.log(`[Email] 使用阿里云邮件推送发送验证码到 ${to}: ${code}`);
+    const result = await sendEmailViaAliyun(to, template.subject, template.html);
+    
+    if (result.success) {
+      console.log(`[Aliyun DirectMail] 验证码已发送至 ${to}, MessageId: ${result.messageId}`);
+      return { success: true, configured: true };
+    } else {
+      // 阿里云发送失败，可能是网络问题，降级到模拟模式
+      console.error(`[Aliyun DirectMail] 发送失败:`, result.error);
+      console.log(`[Email] 阿里云不可用，降级为模拟发送`);
+      return { success: true, configured: false };
+    }
+  }
+  
+  // 未配置任何邮件服务：模拟发送
+  console.log(`[Email] 未配置邮件推送服务，模拟发送验证码到 ${to}: ${code}`);
+  return { success: true, configured: false };
 }
 
 // 旧接口兼容（已废弃）

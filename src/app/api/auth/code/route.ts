@@ -32,19 +32,28 @@ export async function POST(request: NextRequest) {
     // 发送邮件
     const emailResult = await sendVerificationEmail(email, code, type);
 
+    // 只有在邮件发送成功时才返回成功
+    if (!emailResult.success) {
+      console.error('[验证码] 邮件发送失败:', emailResult.error);
+      return NextResponse.json({
+        success: false,
+        error: emailResult.error || '邮件发送失败，请稍后重试'
+      }, { status: 500 });
+    }
+
     const isDev = process.env.NODE_ENV !== 'production';
     
-    // 只有在开发环境且SMTP未配置时，才返回devCode方便测试
+    // 只有在开发环境且邮件服务未配置时，才返回devCode方便测试
     const showDevCode = isDev && !emailResult.configured;
     
-    if (!emailResult.success && showDevCode) {
-      console.log(`[验证码] SMTP未配置，返回模拟验证码用于测试: ${code}`);
+    if (showDevCode) {
+      console.log(`[验证码] 邮件服务未配置，返回模拟验证码用于测试: ${code}`);
     }
 
     return NextResponse.json({
       success: true,
-      message: emailResult.success ? '验证码已发送，请查收邮件' : '验证码已发送',
-      // 只有在SMTP未配置时才返回devCode
+      message: emailResult.configured ? '验证码已发送，请查收邮件' : '验证码已生成',
+      // 只有在邮件服务未配置时才返回devCode
       ...(showDevCode && { devCode: code }),
       expiresIn: CODE_EXPIRY / 1000
     });
