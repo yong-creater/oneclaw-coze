@@ -108,6 +108,17 @@ const nextConfig: NextConfig = {
         hostname: '**.baidu.com',
         pathname: '/**',
       },
+      // 其他常用工具域名
+      {
+        protocol: 'https',
+        hostname: '**.ai',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.com',
+        pathname: '/favicon.ico',
+      },
     ],
   },
 };

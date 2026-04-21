@@ -1,87 +1,4 @@
-import crypto from 'crypto';
 import { Resend } from 'resend';
-
-// 阿里云 DirectMail API 发送邮件
-export async function sendEmailViaAliyun(
-  toAddress: string,
-  subject: string,
-  htmlBody: string
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  const accessKeyId = process.env.ALIYUN_ACCESS_KEY_ID;
-  const accessKeySecret = process.env.ALIYUN_ACCESS_KEY_SECRET;
-  const region = process.env.ALIYUN_DIRECT_MAIL_REGION || 'cn-hangzhou';
-  const accountName = process.env.ALIYUN_MAIL_FROM;
-
-  if (!accessKeyId || !accessKeySecret || !accountName) {
-    return { success: false, error: '阿里云邮件推送配置不完整' };
-  }
-
-  try {
-    const timestamp = new Date().toISOString().replace(/\.\d{3}Z$/, '.000Z');
-    
-    // 构建请求参数（按字母顺序排序）
-    const params: Record<string, string> = {
-      AccessKeyId: accessKeyId,
-      AccountName: accountName,
-      Action: 'SingleSendMail',
-      AddressType: '1',
-      Format: 'JSON',
-      HtmlBody: htmlBody,
-      RegionId: region,
-      ReplyToAddress: 'false',
-      SignatureMethod: 'HMAC-SHA1',
-      SignatureNonce: Date.now().toString(),
-      SignatureVersion: '1.0',
-      Subject: subject,
-      Timestamp: timestamp,
-      ToAddress: toAddress,
-      Version: '2015-11-23',
-    };
-
-    // 1. 构造规范化查询字符串
-    const sortedKeys = Object.keys(params).sort();
-    const canonicalizedQueryString = sortedKeys
-      .map(key => `${percentEncode(key)}=${percentEncode(params[key])}`)
-      .join('&');
-
-    // 2. 构造待签名字符串
-    const stringToSign = `GET&${percentEncode('/')}&${percentEncode(canonicalizedQueryString)}`;
-
-    // 3. 计算签名
-    const signature = crypto
-      .createHmac('sha1', `${accessKeySecret}&`)
-      .update(stringToSign)
-      .digest('base64');
-
-    // 4. 添加签名到参数
-    params.Signature = signature;
-
-    // 5. 构造最终 URL
-    const queryString = sortedKeys
-      .map(key => `${percentEncode(key)}=${percentEncode(params[key])}`)
-      .join('&');
-    
-    const url = `https://dm.${region}.aliyuncs.com/?${queryString}`;
-
-    console.log('[Aliyun DirectMail] 发送请求到:', `https://dm.${region}.aliyuncs.com/`);
-
-    const response = await fetch(url, {
-      method: 'GET',
-    });
-
-    const result = await response.json();
-    console.log('[Aliyun DirectMail] 响应:', JSON.stringify(result));
-
-    if (response.ok && result.Code === 'OK') {
-      return { success: true, messageId: result.MessageId };
-    } else {
-      return { success: false, error: result.Message || result.Code || `HTTP ${response.status}` };
-    }
-  } catch (error: any) {
-    console.error('[Aliyun DirectMail] 发送失败:', error.message);
-    return { success: false, error: error.message };
-  }
-}
 
 // Resend 邮件发送
 export async function sendEmailViaResend(
@@ -120,18 +37,6 @@ export async function sendEmailViaResend(
     return { success: false, error: error.message };
   }
 }
-
-// URL 编码（RFC 3986）
-function percentEncode(str: string): string {
-  return encodeURIComponent(str)
-    .replace(/\+/g, '%20')
-    .replace(/\*/g, '%2A')
-    .replace(/~/g, '%7E')
-    .replace(/%/g, '%25');
-}
-
-// 螃蟹图标 Base64（压缩后）
-const CRAB_ICON_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAA7EAAAOxAGVKw4bAAANQklEQVR4nO2dW5LjOAxDd2b3/P+/u45HkZJEUqRAiqQ+nyJVJAgQIE9XddT//PxC/v39/f0N/H5+AX9/g7/f4dcH+PU+fv0K/vwM/vwK/vwC/vwC/vwK/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC/vwC';
 
 // 验证码邮件模板
 function getVerificationEmailTemplate(code: string) {
@@ -187,21 +92,17 @@ function getVerificationEmailTemplate(code: string) {
   };
 }
 
-// 发送验证码邮件（支持多邮件服务）
+// 发送验证码邮件（使用 Resend）
 export async function sendVerificationEmail(
   to: string, 
   code: string, 
   type: 'register' | 'login' = 'register'
 ): Promise<{ success: boolean; configured: boolean; error?: string }> {
-  // 检查 Resend 配置（优先使用 Resend）
+  // 检查 Resend 配置
   const hasResendConfig = process.env.RESEND_API_KEY;
-  
-  // 检查阿里云配置
-  const hasAliyunConfig = process.env.ALIYUN_ACCESS_KEY_ID && process.env.ALIYUN_ACCESS_KEY_SECRET;
   
   const template = getVerificationEmailTemplate(code);
   
-  // 优先使用 Resend
   if (hasResendConfig) {
     console.log(`[Email] 使用 Resend 发送验证码到 ${to}: ${code}`);
     const result = await sendEmailViaResend(to, template.subject, template.html);
@@ -215,44 +116,17 @@ export async function sendVerificationEmail(
     }
   }
   
-  // 备选：使用阿里云
-  if (hasAliyunConfig) {
-    console.log(`[Email] 使用阿里云邮件推送发送验证码到 ${to}: ${code}`);
-    const result = await sendEmailViaAliyun(to, template.subject, template.html);
-    
-    if (result.success) {
-      console.log(`[Aliyun DirectMail] 验证码已发送至 ${to}, MessageId: ${result.messageId}`);
-      return { success: true, configured: true };
-    } else {
-      // 阿里云发送失败，可能是网络问题，降级到模拟模式
-      console.error(`[Aliyun DirectMail] 发送失败:`, result.error);
-      console.log(`[Email] 阿里云不可用，降级为模拟发送`);
-      return { success: true, configured: false };
-    }
-  }
-  
-  // 未配置任何邮件服务：模拟发送
-  console.log(`[Email] 未配置邮件推送服务，模拟发送验证码到 ${to}: ${code}`);
+  // 未配置邮件服务：模拟发送
+  console.log(`[Email] 未配置 Resend，模拟发送验证码到 ${to}: ${code}`);
   return { success: true, configured: false };
 }
 
-// 旧接口兼容（已废弃）
-export function createTransporter() {
-  // 返回 null 表示使用阿里云 DirectMail
-  return null;
-}
-
+// 邮箱格式验证
 export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// 生成验证码
 export function generateCode(): string {
-  // 使用 crypto.randomInt 生成加密安全的随机数
-  const array = new Uint8Array(6);
-  crypto.getRandomValues(array);
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += (array[i] % 10).toString();
-  }
-  return code;
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
