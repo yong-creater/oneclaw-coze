@@ -17,16 +17,34 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
     const supabase = getSupabaseClient();
 
-    const { data: reviews, count } = await supabase
+    // 先获取评论
+    const { data: reviews, count, error } = await supabase
       .from('user_reviews')
-      .select(`
-        *,
-        users (user_id, nickname, avatar_url)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('tool_id', toolId)
       .eq('status', 'approved')
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('获取评论失败:', error);
+      return NextResponse.json({ success: false, error: '获取评论失败' });
+    }
+
+    // 分别获取用户信息
+    const userIds = [...new Set((reviews || []).map((r: any) => r.user_id))];
+    let usersMap: Record<string, any> = {};
+
+    if (userIds.length > 0) {
+      const { data: users } = await supabase
+        .from('users')
+        .select('user_id, nickname, avatar_url')
+        .in('user_id', userIds);
+
+      (users || []).forEach((u: any) => {
+        usersMap[u.user_id] = u;
+      });
+    }
 
     // 如果有评论，获取对应的评分数据
     const reviewIds = (reviews || []).map((r: any) => r.id);
@@ -43,15 +61,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 合并评论和评分数据
-    const mergedReviews = (reviews || []).map((review: any) => ({
+    // 最终合并评论、用户和评分数据
+    const finalReviews = (reviews || []).map((review: any) => ({
       ...review,
+      users: usersMap[review.user_id],
       rating: ratingsMap[review.id]
     }));
 
     return NextResponse.json({
       success: true,
-      data: mergedReviews,
+      data: finalReviews,
       pagination: {
         page,
         limit,
