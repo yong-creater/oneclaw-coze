@@ -317,19 +317,8 @@ export async function POST(request: NextRequest) {
         
         return NextResponse.json({ 
           success: false, 
-          error: '数据库表未创建。请在 Supabase Dashboard → SQL Editor 中执行以下 SQL 创建表：\n\n' + 
-            '```sql\n' +
-            'CREATE TABLE admin_users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, email TEXT, role TEXT DEFAULT \\'admin\\', is_active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            'CREATE TABLE users (id SERIAL PRIMARY KEY, user_id TEXT UNIQUE NOT NULL, email TEXT UNIQUE, nickname TEXT, avatar_url TEXT, phone TEXT, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            'CREATE TABLE categories (id SERIAL PRIMARY KEY, name TEXT NOT NULL, slug TEXT UNIQUE, icon TEXT, description TEXT, sort_order INTEGER DEFAULT 0, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            'CREATE TABLE tags (id SERIAL PRIMARY KEY, name TEXT NOT NULL, type TEXT, color TEXT, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            'CREATE TABLE tools (id SERIAL PRIMARY KEY, name TEXT NOT NULL, slug TEXT UNIQUE, logo TEXT, producer TEXT, highlight TEXT, description TEXT, category_id INTEGER, free_type TEXT, free_quota_desc TEXT, official_url TEXT, promotion_url TEXT, is_official BOOLEAN DEFAULT false, is_featured BOOLEAN DEFAULT false, is_active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            'CREATE TABLE verification_codes (id SERIAL PRIMARY KEY, email_key TEXT UNIQUE NOT NULL, email TEXT NOT NULL, code TEXT NOT NULL, type TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, used BOOLEAN DEFAULT false, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            'CREATE TABLE admin_sessions (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES admin_users(id), token TEXT UNIQUE NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            'CREATE TABLE user_sessions (id SERIAL PRIMARY KEY, user_id TEXT REFERENCES users(user_id), token TEXT UNIQUE NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());\n' +
-            '```\n\n或者联系平台支持启用 Supabase 数据库自动建表功能。',
+          error: '数据库表未创建。请在 Supabase Dashboard → SQL Editor 中执行建表 SQL，或联系平台支持。',
           code: 'TABLE_NOT_EXIST',
-          sql: 'CREATE TABLE admin_users (id SERIAL PRIMARY KEY, username TEXT UNIQUE NOT NULL, password_hash TEXT NOT NULL, email TEXT, role TEXT DEFAULT \'admin\', is_active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW());CREATE TABLE users (id SERIAL PRIMARY KEY, user_id TEXT UNIQUE NOT NULL, email TEXT UNIQUE, nickname TEXT, avatar_url TEXT, phone TEXT, created_at TIMESTAMPTZ DEFAULT NOW());CREATE TABLE categories (id SERIAL PRIMARY KEY, name TEXT NOT NULL, slug TEXT UNIQUE, icon TEXT, description TEXT, sort_order INTEGER DEFAULT 0, created_at TIMESTAMPTZ DEFAULT NOW());CREATE TABLE tags (id SERIAL PRIMARY KEY, name TEXT NOT NULL, type TEXT, color TEXT, created_at TIMESTAMPTZ DEFAULT NOW());CREATE TABLE tools (id SERIAL PRIMARY KEY, name TEXT NOT NULL, slug TEXT UNIQUE, logo TEXT, producer TEXT, highlight TEXT, description TEXT, category_id INTEGER, free_type TEXT, free_quota_desc TEXT, official_url TEXT, promotion_url TEXT, is_official BOOLEAN DEFAULT false, is_featured BOOLEAN DEFAULT false, is_active BOOLEAN DEFAULT true, created_at TIMESTAMPTZ DEFAULT NOW());CREATE TABLE verification_codes (id SERIAL PRIMARY KEY, email_key TEXT UNIQUE NOT NULL, email TEXT NOT NULL, code TEXT NOT NULL, type TEXT NOT NULL, expires_at TIMESTAMPTZ NOT NULL, used BOOLEAN DEFAULT false, created_at TIMESTAMPTZ DEFAULT NOW());CREATE TABLE admin_sessions (id SERIAL PRIMARY KEY, user_id INTEGER REFERENCES admin_users(id), token TEXT UNIQUE NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());CREATE TABLE user_sessions (id SERIAL PRIMARY KEY, user_id TEXT REFERENCES users(user_id), token TEXT UNIQUE NOT NULL, expires_at TIMESTAMPTZ NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW());',
         }, { status: 500 });
       }
       
