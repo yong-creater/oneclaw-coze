@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { ResumeData, ResumeTemplateType, templates } from '@/components/ResumeTemplates';
+import { ResumeData, ResumeTemplateType, templates } from '@/components/tools/ResumeTemplates';
 
 /**
  * 将简历DOM转换为PDF并下载

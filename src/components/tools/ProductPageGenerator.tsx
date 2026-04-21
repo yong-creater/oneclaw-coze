@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import UtilityHeader from '../common/UtilityHeader';
 import { PrimaryButton, ActionButton } from '../common/UtilityComponents';
-import LoginButton from '@/components/LoginButton';
+import LoginButton from '@/components/common/LoginButton';
 import {
   Select,
   SelectContent,

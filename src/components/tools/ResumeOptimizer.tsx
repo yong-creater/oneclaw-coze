@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import UtilityHeader from '../common/UtilityHeader';
 import { UtilityCard, FormField, PrimaryButton, ActionButton } from '../common/UtilityComponents';
-import LoginButton from './LoginButton';
+import LoginButton from '../common/LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
 import ModelSelector, { MODEL_OPTIONS } from '../ui/model-selector';

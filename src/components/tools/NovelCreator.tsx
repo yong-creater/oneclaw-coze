@@ -8,7 +8,7 @@ import {
   AlertCircle, Plus, Trash2, Eye, Edit3, Save,
   Settings2, Star, BookOpen, MessageSquare, RefreshCw
 } from 'lucide-react';
-import LoginButton from '@/components/LoginButton';
+import LoginButton from '@/components/common/LoginButton';
 import UtilityHeader from '../common/UtilityHeader';
 import JSZip from 'jszip';
 import {

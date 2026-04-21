@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Check, Eye } from 'lucide-react';
-import { ResumeTemplateType, templates, ResumeData, generateSampleResumeData } from '../ResumeTemplates';
+import { ResumeTemplateType, templates, ResumeData, generateSampleResumeData } from '../tools/ResumeTemplates';
 
 interface TemplateCardProps {
   templateKey: ResumeTemplateType;

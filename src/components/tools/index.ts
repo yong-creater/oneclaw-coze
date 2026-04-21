@@ -1,7 +1,9 @@
 // 工具组件
-export { NovelCreator } from './NovelCreator';
-export { ProductPageGenerator } from './ProductPageGenerator';
-export { ResumeOptimizer } from './ResumeOptimizer';
-export { ResumeTemplates } from './ResumeTemplates';
-export { ModelSelector } from './ModelSelector';
+export { default as NovelCreator } from './NovelCreator';
+export { default as ProductPageGenerator } from './ProductPageGenerator';
+export { default as ResumeOptimizer } from './ResumeOptimizer';
+export { default as ModelSelector } from './ModelSelector';
 export { ImageUploader } from './ImageUploader';
+export { ClassicTemplate, ModernTemplate, MinimalTemplate, ExecutiveTemplate, CreativeTemplate, TechTemplate, ElegantTemplate, StartupTemplate, templates, ResumePreview, ResumeTemplateSelector } from './ResumeTemplates';
+export type { ResumeData, ResumeTemplateType } from './ResumeTemplates';
+export { generateSampleResumeData } from './ResumeTemplates';
