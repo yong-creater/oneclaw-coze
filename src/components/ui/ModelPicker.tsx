@@ -12,10 +12,11 @@ import {
   UNIFIED_MODEL_GROUPS, 
   UNIFIED_MODEL_OPTIONS, 
   DEFAULT_MODEL_ID,
-  getModelById 
+  getModelById,
+  getProviderConfig
 } from '@/lib/models';
 
-// 模型选择器组件 - 统一样式（无图标 + 分组）
+// 模型选择器组件 - 统一样式（有图标，无免费标签）
 interface ModelPickerProps {
   value: string;
   onChange: (modelId: string) => void;
@@ -25,6 +26,7 @@ interface ModelPickerProps {
 export default function ModelPicker({ value, onChange, triggerClassName = '' }: ModelPickerProps) {
   const [open, setOpen] = useState(false);
   const selectedModel = getModelById(value) || UNIFIED_MODEL_OPTIONS[0];
+  const providerConfig = getProviderConfig(selectedModel.provider);
 
   return (
     <div>
@@ -37,6 +39,11 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
                    hover:border-slate-300 dark:hover:border-slate-600 
                    focus:outline-none focus:border-orange-500 transition-colors ${triggerClassName}`}
       >
+        {/* 品牌图标 */}
+        <div className={`w-5 h-5 ${providerConfig.color} rounded flex items-center justify-center text-white text-xs`}>
+          {providerConfig.icon}
+        </div>
+        
         {/* 模型名称 */}
         <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
           {selectedModel.name}
@@ -60,16 +67,20 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
             </DialogTitle>
           </DialogHeader>
 
-          {/* 模型列表 - 按提供商分组，无图标 */}
+          {/* 模型列表 - 按提供商分组，有图标 */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
             {UNIFIED_MODEL_GROUPS.map(group => {
+              const config = getProviderConfig(group.provider);
               const isPaid = group.provider.includes('4sAPI');
               
               return (
                 <div key={group.provider} className="space-y-1">
                   {/* 分组标题 */}
                   <div className="flex items-center gap-2 px-1 mb-2">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    <div className={`w-6 h-6 ${config.color} rounded-lg flex items-center justify-center text-white text-sm`}>
+                      {config.icon}
+                    </div>
+                    <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                       {group.provider}
                     </span>
                     {isPaid && (
@@ -91,36 +102,29 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
                           onChange(model.value);
                           setOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-all ${
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
                           isSelected
                             ? 'bg-slate-100 dark:bg-slate-700'
                             : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                         }`}
                       >
-                        {/* 模型名称和推荐标签 */}
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm ${isSelected ? 'text-slate-900 dark:text-slate-100 font-medium' : 'text-slate-700 dark:text-slate-300'}`}>
-                            {model.label}
-                          </span>
-                          {model.recommended && !isSelected && (
-                            <span className="text-[10px] px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded">
-                              推荐
+                        {/* 模型名称 */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm ${isSelected ? 'text-slate-900 dark:text-slate-100 font-medium' : 'text-slate-700 dark:text-slate-300'}`}>
+                              {model.label}
                             </span>
-                          )}
+                            {model.recommended && !isSelected && (
+                              <span className="text-[10px] px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded">
+                                推荐
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        
-                        {/* 区域/价格标签 */}
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          isPaid 
-                            ? 'bg-amber-100 text-amber-700' 
-                            : 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400'
-                        }`}>
-                          {model.region}
-                        </span>
                         
                         {/* 选中标识 */}
                         {isSelected && (
-                          <Check className="w-4 h-4 text-orange-500 flex-shrink-0 ml-2" />
+                          <Check className="w-4 h-4 text-orange-500 flex-shrink-0" />
                         )}
                       </button>
                     );
@@ -136,4 +140,4 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
 }
 
 // 导出索引
-export { UNIFIED_MODEL_GROUPS, UNIFIED_MODEL_OPTIONS, DEFAULT_MODEL_ID } from '@/lib/models';
+export { UNIFIED_MODEL_GROUPS, UNIFIED_MODEL_OPTIONS, DEFAULT_MODEL_ID, getModelById, getProviderConfig } from '@/lib/models';
