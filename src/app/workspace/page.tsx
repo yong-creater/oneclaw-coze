@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Heart, History, Star, Trash2, ExternalLink, Video, User,
-  ChevronLeft, ChevronRight, Loader2
+  ChevronLeft, ChevronRight, Loader2, Home
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import LoginModal from '@/components/common/LoginModal';
 import { useUser } from '@/contexts/UserContext';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // 类型定义
 interface ToolInfo {
@@ -54,6 +55,7 @@ interface RatingItem {
 
 export default function WorkspacePage() {
   const { user, authenticated, loading: authLoading, setShowLoginModal } = useUser();
+  const router = useRouter();
   
   // 收藏
   const [favorites, setFavorites] = useState<Favorite[]>([]);
@@ -226,15 +228,26 @@ export default function WorkspacePage() {
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
-              <AnimatedLobster size={36} />
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                  OneClaw
-                </h1>
-                <p className="text-xs text-slate-500 dark:text-slate-400">我的工作台</p>
-              </div>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <AnimatedLobster size={36} />
+                <div>
+                  <h1 className="text-lg font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                    OneClaw
+                  </h1>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">我的工作台</p>
+                </div>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => router.push('/')}
+                className="gap-2 border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500"
+              >
+                <Home className="w-4 h-4" />
+                返回首页
+              </Button>
+            </div>
             
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
