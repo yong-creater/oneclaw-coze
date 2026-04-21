@@ -7,7 +7,8 @@ export const CODE_EXPIRY = 10 * 60; // 10分钟
 // 存储验证码到数据库
 export async function storeCode(email: string, code: string, type: 'register' | 'login') {
   const supabase = getSupabaseClient();
-  const key = `${type}:${email}`;
+  const normalizedEmail = email.toLowerCase();
+  const key = `${type}:${normalizedEmail}`;
   const expiresAt = new Date(Date.now() + CODE_EXPIRY * 1000).toISOString();
 
   // 删除旧的验证码
@@ -21,7 +22,7 @@ export async function storeCode(email: string, code: string, type: 'register' | 
     .from('verification_codes')
     .insert({
       email_key: key,
-      email: email.toLowerCase(),
+      email: normalizedEmail,
       code,
       type,
       expires_at: expiresAt,
@@ -41,7 +42,8 @@ export async function verifyCode(
   type: 'register' | 'login'
 ): Promise<{ valid: boolean; error?: string }> {
   const supabase = getSupabaseClient();
-  const key = `${type}:${email}`;
+  const normalizedEmail = email.toLowerCase();
+  const key = `${type}:${normalizedEmail}`;
 
   // 查询验证码
   const { data, error } = await supabase
