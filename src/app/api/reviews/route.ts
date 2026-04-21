@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isVolcenginePgMode } from '@/lib/db';
 import { requireAuth } from '@/lib/user-middleware';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 获取评论列表
 export async function GET(request: NextRequest) {
@@ -15,68 +15,48 @@ export async function GET(request: NextRequest) {
     }
 
     const offset = (page - 1) * limit;
-    let reviews: any[] = [];
-    let total = 0;
+    const supabase = getSupabaseClient();
 
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
-
-      const [listResult, countResult] = await Promise.all([
-        pool.query(`
-          SELECT * FROM user_reviews
-          WHERE tool_id = $1 AND status = 'approved'
-          ORDER BY created_at DESC
-          LIMIT $2 OFFSET $3
-        `, [toolId, limit, offset]),
-        pool.query(`SELECT COUNT(*) as total FROM user_reviews WHERE tool_id = $1 AND status = 'approved'`, [toolId])
-      ]);
-
-      reviews = listResult.rows;
-      total = parseInt(countResult.rows[0]?.total || '0');
-    } else {
-      const { query } = await import('@/lib/db');
-      const result = await query('user_reviews', {
-        eq: { tool_id: toolId, status: 'approved' },
-        order: { column: 'created_at', ascending: false },
-        limit,
-        offset,
-        count: true,
-      });
-      reviews = result.data || [];
-      total = result.count || 0;
-    }
+    const { data: reviews, count } = await supabase
+      .from('user_reviews')
+      .select(`
+        *,
+        users (user_id, nickname, avatar_url)
+      `, { count: 'exact' })
+      .eq('tool_id', toolId)
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     // 如果有评论，获取对应的评分数据
-    let reviewsWithRatings = reviews;
-    if (reviews.length > 0) {
-      const userIds = reviews.map(r => r.user_id);
+    const reviewIds = (reviews || []).map((r: any) => r.id);
+    let ratingsMap: Record<number, any> = {};
 
-      if (isVolcenginePgMode()) {
-        const { getPgPool } = await import('@/lib/db');
-        const pool = await getPgPool();
-        const ratingsResult = await pool.query(`
-          SELECT user_id, effect_score, usability_score, quota_score, stability_score, overall_score
-          FROM user_ratings
-          WHERE tool_id = $1 AND user_id = ANY($2)
-        `, [toolId, userIds]);
+    if (reviewIds.length > 0) {
+      const { data: ratings } = await supabase
+        .from('user_ratings')
+        .select('*')
+        .in('review_id', reviewIds);
 
-        const ratingsMap = new Map(ratingsResult.rows.map((r: any) => [r.user_id, r]));
-        reviewsWithRatings = reviews.map(review => ({
-          ...review,
-          user_rating: ratingsMap.get(review.user_id) || null
-        }));
-      }
+      (ratings || []).forEach((r: any) => {
+        ratingsMap[r.review_id] = r;
+      });
     }
+
+    // 合并评论和评分数据
+    const mergedReviews = (reviews || []).map((review: any) => ({
+      ...review,
+      rating: ratingsMap[review.id]
+    }));
 
     return NextResponse.json({
       success: true,
-      data: reviewsWithRatings,
+      data: mergedReviews,
       pagination: {
         page,
         limit,
-        total,
-        total_pages: Math.ceil(total / limit)
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit)
       }
     });
   } catch (error) {
@@ -85,7 +65,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// 创建评论
+// 提交评论
 export async function POST(request: NextRequest) {
   try {
     const authResult = await requireAuth(request);
@@ -94,29 +74,59 @@ export async function POST(request: NextRequest) {
     }
     const { userId } = authResult;
 
-    const body = await request.json();
-    const { tool_id, rating, content } = body;
+    const { tool_id, content, rating } = await request.json();
 
     if (!tool_id || !content) {
-      return NextResponse.json({ success: false, error: '缺少必填参数' }, { status: 400 });
+      return NextResponse.json({ success: false, error: '缺少必要参数' }, { status: 400 });
     }
 
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
-
-      const result = await pool.query(`
-        INSERT INTO user_reviews (user_id, tool_id, rating, content, status, created_at)
-        VALUES ($1, $2, $3, $4, 'pending', NOW())
-        RETURNING *
-      `, [userId, tool_id, rating || 0, content]);
-
-      return NextResponse.json({ success: true, data: result.rows[0] });
+    if (content.length < 10 || content.length > 500) {
+      return NextResponse.json({ success: false, error: '评论长度需在10-500字之间' }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, data: { id: Date.now() } });
+    const supabase = getSupabaseClient();
+
+    // 插入评论
+    const { data: review, error: reviewError } = await supabase
+      .from('user_reviews')
+      .insert({
+        user_id: userId,
+        tool_id,
+        content,
+        likes: 0,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (reviewError) {
+      console.error('提交评论失败:', reviewError);
+      return NextResponse.json({ success: false, error: '提交评论失败' });
+    }
+
+    // 如果有评分，也插入评分
+    if (rating) {
+      await supabase
+        .from('user_ratings')
+        .insert({
+          user_id: userId,
+          tool_id,
+          review_id: review.id,
+          effect_score: rating.effect_score || 0,
+          usability_score: rating.usability_score || 0,
+          quota_score: rating.quota_score || 0,
+          stability_score: rating.stability_score || 0,
+          created_at: new Date().toISOString()
+        });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: '评论已提交，等待审核'
+    });
   } catch (error) {
-    console.error('创建评论失败:', error);
+    console.error('提交评论失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

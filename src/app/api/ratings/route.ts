@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isVolcenginePgMode } from '@/lib/db';
-import { requireAuth, getOptionalUserId } from '@/lib/user-middleware';
+import { requireAuth } from '@/lib/user-middleware';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 获取工具评分统计
 export async function GET(request: NextRequest) {
@@ -12,102 +12,57 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: '缺少tool_id参数' }, { status: 400 });
     }
 
-    const currentUserId = await getOptionalUserId(request);
-    let data: any = {
-      count: 0,
-      avg_effect: 0,
-      avg_usability: 0,
-      avg_quota: 0,
-      avg_stability: 0,
-      avg_overall: 0,
-      user_rating: null
-    };
+    const supabase = getSupabaseClient();
 
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
+    // 获取该工具的所有评分
+    const { data: ratings, error } = await supabase
+      .from('user_ratings')
+      .select('effect_score, usability_score, quota_score, stability_score')
+      .eq('tool_id', toolId);
 
-      const result = await pool.query(`
-        SELECT 
-          AVG(effect_score) as avg_effect,
-          AVG(usability_score) as avg_usability,
-          AVG(quota_score) as avg_quota,
-          AVG(stability_score) as avg_stability,
-          AVG((effect_score + usability_score + quota_score + stability_score) / 4.0) as avg_overall,
-          COUNT(*) as count
-        FROM user_ratings
-        WHERE tool_id = $1
-      `, [toolId]);
-
-      if (result.rows[0] && result.rows[0].count > 0) {
-        data = {
-          count: parseInt(result.rows[0].count),
-          avg_effect: Math.round(parseFloat(result.rows[0].avg_effect) * 10) / 10,
-          avg_usability: Math.round(parseFloat(result.rows[0].avg_usability) * 10) / 10,
-          avg_quota: Math.round(parseFloat(result.rows[0].avg_quota) * 10) / 10,
-          avg_stability: Math.round(parseFloat(result.rows[0].avg_stability) * 10) / 10,
-          avg_overall: Math.round(parseFloat(result.rows[0].avg_overall) * 10) / 10,
-          user_rating: null
-        };
-      }
-
-      // 获取用户评分（如果已登录）
-      if (currentUserId) {
-        const userResult = await pool.query(`
-          SELECT * FROM user_ratings
-          WHERE tool_id = $1 AND user_id = $2
-        `, [toolId, currentUserId]);
-        if (userResult.rows[0]) {
-          data.user_rating = userResult.rows[0];
-        }
-      }
-    } else {
-      // Supabase 模式（备用）
-      const { query } = await import('@/lib/db');
-      const result = await query('user_ratings', {
-        select: 'effect_score, usability_score, quota_score, stability_score',
-        eq: { tool_id: toolId },
-      });
-
-      if (result.data && result.data.length > 0) {
-        const ratings = result.data;
-        const count = ratings.length;
-        const avg_effect = ratings.reduce((sum: number, r: any) => sum + r.effect_score, 0) / count;
-        const avg_usability = ratings.reduce((sum: number, r: any) => sum + r.usability_score, 0) / count;
-        const avg_quota = ratings.reduce((sum: number, r: any) => sum + r.quota_score, 0) / count;
-        const avg_stability = ratings.reduce((sum: number, r: any) => sum + r.stability_score, 0) / count;
-        const avg_overall = (avg_effect + avg_usability + avg_quota + avg_stability) / 4;
-
-        data = {
-          count,
-          avg_effect: Math.round(avg_effect * 10) / 10,
-          avg_usability: Math.round(avg_usability * 10) / 10,
-          avg_quota: Math.round(avg_quota * 10) / 10,
-          avg_stability: Math.round(avg_stability * 10) / 10,
-          avg_overall: Math.round(avg_overall * 10) / 10,
-          user_rating: null
-        };
-      }
-
-      if (currentUserId) {
-        const { query: q2 } = await import('@/lib/db');
-        const userResult = await q2('user_ratings', {
-          eq: { tool_id: toolId, user_id: currentUserId },
-        });
-        if (userResult.data?.[0]) {
-          data.user_rating = userResult.data[0];
-        }
-      }
+    if (error) {
+      console.error('获取评分失败:', error);
+      return NextResponse.json({ success: false, error: '获取评分失败' });
     }
 
-    return NextResponse.json({ success: true, data });
+    // 计算平均值
+    const count = ratings?.length || 0;
+    if (count === 0) {
+      return NextResponse.json({
+        success: true,
+        data: {
+          count: 0,
+          average: { effect: 0, usability: 0, quota: 0, stability: 0, overall: 0 }
+        }
+      });
+    }
+
+    const avgEffect = ratings!.reduce((sum, r) => sum + r.effect_score, 0) / count;
+    const avgUsability = ratings!.reduce((sum, r) => sum + r.usability_score, 0) / count;
+    const avgQuota = ratings!.reduce((sum, r) => sum + r.quota_score, 0) / count;
+    const avgStability = ratings!.reduce((sum, r) => sum + r.stability_score, 0) / count;
+    const avgOverall = (avgEffect + avgUsability + avgQuota + avgStability) / 4;
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        count,
+        average: {
+          effect: Math.round(avgEffect * 10) / 10,
+          usability: Math.round(avgUsability * 10) / 10,
+          quota: Math.round(avgQuota * 10) / 10,
+          stability: Math.round(avgStability * 10) / 10,
+          overall: Math.round(avgOverall * 10) / 10
+        }
+      }
+    });
   } catch (error) {
     console.error('获取评分失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }
 
-// 创建或更新评分
+// 提交评分
 export async function POST(request: NextRequest) {
   try {
     const authResult = await requireAuth(request);
@@ -120,63 +75,67 @@ export async function POST(request: NextRequest) {
     const { tool_id, effect_score, usability_score, quota_score, stability_score } = body;
 
     if (!tool_id) {
-      return NextResponse.json({ success: false, error: '缺少工具ID' }, { status: 400 });
+      return NextResponse.json({ success: false, error: '缺少tool_id参数' }, { status: 400 });
     }
 
-    const scores = [effect_score, usability_score, quota_score, stability_score];
-    if (scores.some(s => s === undefined || s === null)) {
-      return NextResponse.json({ success: false, error: '请填写完整评分' }, { status: 400 });
-    }
-    if (scores.some(s => s < 1 || s > 5)) {
-      return NextResponse.json({ success: false, error: '评分必须在1-5之间' }, { status: 400 });
+    // 检查必填评分
+    if (!effect_score || !usability_score || !quota_score || !stability_score) {
+      return NextResponse.json({ success: false, error: '请完成所有评分项' }, { status: 400 });
     }
 
-    let data;
+    const supabase = getSupabaseClient();
 
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
+    // 检查是否已评分
+    const { data: existing } = await supabase
+      .from('user_ratings')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('tool_id', tool_id)
+      .single();
 
-      // 检查是否已评分
-      const existing = await pool.query(`
-        SELECT id FROM user_ratings WHERE user_id = $1 AND tool_id = $2
-      `, [userId, tool_id]);
+    if (existing) {
+      // 更新评分
+      const { error: updateError } = await supabase
+        .from('user_ratings')
+        .update({
+          effect_score,
+          usability_score,
+          quota_score,
+          stability_score,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id);
 
-      if (existing.rows[0]) {
-        // 更新
-        const result = await pool.query(`
-          UPDATE user_ratings 
-          SET effect_score = $1, usability_score = $2, quota_score = $3, stability_score = $4, updated_at = NOW()
-          WHERE id = $5
-          RETURNING *
-        `, [effect_score, usability_score, quota_score, stability_score, existing.rows[0].id]);
-        data = result.rows[0];
-      } else {
-        // 创建
-        const result = await pool.query(`
-          INSERT INTO user_ratings (user_id, tool_id, effect_score, usability_score, quota_score, stability_score, created_at, updated_at)
-          VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
-          RETURNING *
-        `, [userId, tool_id, effect_score, usability_score, quota_score, stability_score]);
-        data = result.rows[0];
+      if (updateError) {
+        console.error('更新评分失败:', updateError);
+        return NextResponse.json({ success: false, error: '更新评分失败' });
       }
-    } else {
-      // Supabase 模式（备用）
-      const { query } = await import('@/lib/db');
-      const existing = await query('user_ratings', {
-        eq: { user_id: userId, tool_id },
+
+      return NextResponse.json({ success: true, message: '评分已更新' });
+    }
+
+    // 新增评分
+    const overallScore = ((effect_score + usability_score + quota_score + stability_score) / 4).toFixed(1);
+    const { error: insertError } = await supabase
+      .from('user_ratings')
+      .insert({
+        user_id: userId,
+        tool_id,
+        effect_score,
+        usability_score,
+        quota_score,
+        stability_score,
+        overall_score: overallScore,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
 
-      if (existing.data?.[0]) {
-        const { query: q2 } = await import('@/lib/db');
-        // 简单处理，更新逻辑需要适配
-        data = existing.data[0];
-      } else {
-        data = { id: Date.now() };
-      }
+    if (insertError) {
+      console.error('提交评分失败:', insertError);
+      return NextResponse.json({ success: false, error: '提交评分失败' });
     }
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, message: '评分成功' });
   } catch (error) {
     console.error('提交评分失败:', error);
     return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
