@@ -68,12 +68,12 @@ export default function UserButton() {
         ) : (
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
             <span className="text-white text-xs font-medium">
-              {(user.email?.[0] || user.nickname?.[0] || 'U').toUpperCase()}
+              {(user.nickname?.[0] || user.email?.[0] || 'U').toUpperCase()}
             </span>
           </div>
         )}
         <span className="hidden sm:inline text-sm text-slate-700 dark:text-slate-300 max-w-[120px] truncate">
-          {user.email || user.nickname || '用户'}
+          {user.nickname || user.email || '用户'}
         </span>
         <ChevronDown className="w-3 h-3 text-slate-400" />
       </button>

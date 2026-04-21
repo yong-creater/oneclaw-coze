@@ -7,6 +7,7 @@ interface User {
   nickname?: string;
   email?: string;
   avatar_url?: string;
+  openid?: string;
 }
 
 interface UserContextType {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -256,11 +256,11 @@ export default function WorkspacePage() {
                 ) : (
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
                     <span className="text-white text-xs font-medium">
-                      {(user.email?.[0] || user.nickname?.[0] || 'U').toUpperCase()}
+                      {(user.nickname?.[0] || user.email?.[0] || 'U').toUpperCase()}
                     </span>
                   </div>
                 )}
-                <span>{user.email || user.nickname || '用户'}</span>
+                <span>{user.nickname || user.email || '用户'}</span>
               </div>
             </div>
           </div>
@@ -269,7 +269,11 @@ export default function WorkspacePage() {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <Tabs defaultValue="favorites" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="profile" className="gap-2">
+              <User className="w-4 h-4" />
+              个人资料
+            </TabsTrigger>
             <TabsTrigger value="favorites" className="gap-2">
               <Heart className="w-4 h-4" />
               我的收藏
@@ -298,6 +302,66 @@ export default function WorkspacePage() {
               )}
             </TabsTrigger>
           </TabsList>
+
+          {/* 个人资料 */}
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">个人资料</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                    <span className="text-white text-2xl font-medium">
+                      {(user?.nickname?.[0] || user?.email?.[0] || 'U').toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-lg font-medium">{user?.nickname || '未设置昵称'}</p>
+                    <p className="text-sm text-slate-500">{user?.email || '未绑定邮箱'}</p>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-4 mt-4">
+                  <h4 className="text-sm font-medium mb-3">账号信息</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">用户ID</span>
+                      <span className="font-mono text-xs">{user?.user_id || '-'}</span>
+                    </div>
+                    {user?.openid && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">微信</span>
+                        <span className="text-green-600">已绑定</span>
+                      </div>
+                    )}
+                    {user?.email && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">邮箱</span>
+                        <span className="text-green-600">已绑定</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {!user?.email && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      提示：您使用的是微信登录，建议绑定邮箱以便通过邮箱找回密码。
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2 border-amber-300 hover:border-amber-400"
+                      onClick={() => {/* TODO: 绑定邮箱功能 */}}
+                    >
+                      绑定邮箱
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* 收藏 */}
           <TabsContent value="favorites">
