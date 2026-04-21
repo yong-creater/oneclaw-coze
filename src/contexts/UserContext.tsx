@@ -40,8 +40,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
       
       if (data.success && data.authenticated) {
         setUser(data.data);
+        // 同时更新 localStorage
+        if (typeof window !== 'undefined' && data.data?.user_id) {
+          localStorage.setItem('oneclaw_user_id', data.data.user_id);
+        }
       } else {
         setUser(null);
+        // 清除 localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('oneclaw_user_id');
+        }
       }
     } catch (err) {
       setUser(null);
