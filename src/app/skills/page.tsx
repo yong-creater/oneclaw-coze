@@ -6,8 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search, Sparkles, ArrowRight } from 'lucide-react';
-import BackToHome from '@/components/BackToHome';
-import AnimatedLobster from '@/components/AnimatedLobster';
+import BackToHome from '@/components/common/BackToHome';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
 
 export const metadata: Metadata = {
   title: 'AI技能库',

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import BackToHome from '@/components/BackToHome';
-import WechatPromo from '@/components/WechatPromo';
+import BackToHome from '@/components/common/BackToHome';
+import WechatPromo from '@/components/common/WechatPromo';
 import { Copy, Check } from 'lucide-react';
 import { toast } from 'sonner';
 

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inspector } from 'react-dev-inspector';
 import Script from 'next/script';
-import { Providers } from '@/components/Providers';
+import { Providers } from '@/components/common/Providers';
 import './globals.css';
 
 // 提取域名，移除协议前缀

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { 
   Search, ChevronRight, ArrowLeft, Copy, FileText, ChevronLeft
 } from 'lucide-react';
-import { AnimatedLobster } from '@/components/AnimatedLobster';
+import { AnimatedLobster } from '@/components/common/AnimatedLobster';
 
 interface Prompt {
   id: number;

@@ -14,13 +14,13 @@ import {
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
   FileText, Globe, TrendingUp
 } from 'lucide-react';
-import AnimatedLobster from '@/components/AnimatedLobster';
-import { SkeletonGrid } from '@/components/LobsterSkeleton';
-import SponsorBadge, { isSponsorActive } from '@/components/SponsorBadge';
-import AdBanner, { HomeBanner, HomeInlineAd } from '@/components/AdBanner';
-import LoginButton from '@/components/LoginButton';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
+import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
+import SponsorBadge, { isSponsorActive } from '@/components/common/SponsorBadge';
+import AdBanner, { HomeBanner, HomeInlineAd } from '@/components/common/AdBanner';
+import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
-import NovelCreator from '@/components/NovelCreator';
+import NovelCreator from '@/components/tools/NovelCreator';
 
 // ==================== 类型定义 ====================
 interface Category {

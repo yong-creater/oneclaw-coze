@@ -3,9 +3,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Eye, User, Calendar } from 'lucide-react';
-import TutorialLikeButton from '@/components/TutorialLikeButton';
-import BackToHome from '@/components/BackToHome';
-import WechatPromo from '@/components/WechatPromo';
+import TutorialLikeButton from '@/components/common/TutorialLikeButton';
+import BackToHome from '@/components/common/BackToHome';
+import WechatPromo from '@/components/common/WechatPromo';
 
 interface Tutorial {
   id: number;

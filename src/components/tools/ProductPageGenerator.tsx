@@ -7,8 +7,8 @@ import {
   ChevronDown, ChevronUp, Eye, Trash2, Star, Package,
   Shield, Palette, FileText, Zap, RefreshCw, X
 } from 'lucide-react';
-import UtilityHeader from './UtilityHeader';
-import { PrimaryButton, ActionButton } from './UtilityComponents';
+import UtilityHeader from '../common/UtilityHeader';
+import { PrimaryButton, ActionButton } from '../common/UtilityComponents';
 import LoginButton from '@/components/LoginButton';
 import {
   Select,

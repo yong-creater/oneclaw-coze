@@ -9,8 +9,8 @@ import {
   Heart, History, Star, Trash2, ExternalLink, Video, User,
   ChevronLeft, ChevronRight, Loader2
 } from 'lucide-react';
-import AnimatedLobster from '@/components/AnimatedLobster';
-import LoginModal from '@/components/LoginModal';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
+import LoginModal from '@/components/common/LoginModal';
 import { useUser } from '@/contexts/UserContext';
 import Link from 'next/link';
 

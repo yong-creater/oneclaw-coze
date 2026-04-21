@@ -9,7 +9,7 @@ import {
   Settings2, Star, BookOpen, MessageSquare, RefreshCw
 } from 'lucide-react';
 import LoginButton from '@/components/LoginButton';
-import UtilityHeader from './UtilityHeader';
+import UtilityHeader from '../common/UtilityHeader';
 import JSZip from 'jszip';
 import {
   Select,
@@ -25,7 +25,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { ModelSelector } from '@/components/ModelSelector';
+import { ModelSelector } from '@/components/tools/ModelSelector';
 
 // 已删除简化版 ModelGroupSelect，统一使用 ModelSelector 组件
 

@@ -7,7 +7,7 @@ import {
   Video, TrendingUp, Users, Star, Eye, MessageSquare, Heart,
   BarChart3, PieChart, Activity
 } from 'lucide-react';
-import AnimatedLobster from '@/components/AnimatedLobster';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
 import Link from 'next/link';
 
 // 类型定义

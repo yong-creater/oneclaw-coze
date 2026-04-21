@@ -20,10 +20,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import BackButton from '@/components/BackButton';
-import BackToHome from '@/components/BackToHome';
-import { ToolDetailAd } from '@/components/AdBanner';
-import WechatPromo from '@/components/WechatPromo';
+import BackButton from '@/components/common/BackButton';
+import BackToHome from '@/components/common/BackToHome';
+import { ToolDetailAd } from '@/components/common/AdBanner';
+import WechatPromo from '@/components/common/WechatPromo';
 
 // ==================== 类型定义 ====================
 interface Tool {

@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, BookOpen, List, Clock, CheckCircle, Download, Heart, ExternalLink, FileText, Code, Zap, Star, Shield } from 'lucide-react';
-import BackButton from '@/components/BackButton';
-import BackToHome from '@/components/BackToHome';
-import WechatPromo from '@/components/WechatPromo';
-import LobsterLoading from '@/components/LobsterLoading';
+import BackButton from '@/components/common/BackButton';
+import BackToHome from '@/components/common/BackToHome';
+import WechatPromo from '@/components/common/WechatPromo';
+import LobsterLoading from '@/components/common/LobsterLoading';
 
 // 获取技能详情
 async function getSkill(slug: string) {

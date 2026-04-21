@@ -1,4 +1,4 @@
-import LobsterLoading from '@/components/LobsterLoading';
+import LobsterLoading from '@/components/common/LobsterLoading';
 
 export default function GlobalLoading() {
   return (

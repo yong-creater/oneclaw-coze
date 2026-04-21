@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ImageUploader } from '@/components/ImageUploader';
+import { ImageUploader } from '@/components/tools/ImageUploader';
 import { toast } from 'sonner';
 
 const CATEGORIES = [

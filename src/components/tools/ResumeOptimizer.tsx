@@ -7,12 +7,12 @@ import {
   Lightbulb, Star, TrendingUp, BookOpen, FileDown,
   Eye, Palette, X, ChevronDown
 } from 'lucide-react';
-import UtilityHeader from './UtilityHeader';
-import { UtilityCard, FormField, PrimaryButton, ActionButton } from './UtilityComponents';
+import UtilityHeader from '../common/UtilityHeader';
+import { UtilityCard, FormField, PrimaryButton, ActionButton } from '../common/UtilityComponents';
 import LoginButton from './LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
-import ModelSelector, { MODEL_OPTIONS } from './ui/model-selector';
+import ModelSelector, { MODEL_OPTIONS } from '../ui/model-selector';
 
 export default function ResumeOptimizer() {
   // 简历输入状态

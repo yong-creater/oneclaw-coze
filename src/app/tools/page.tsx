@@ -5,8 +5,8 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search, Filter, Star, ExternalLink } from 'lucide-react';
-import BackToHome from '@/components/BackToHome';
-import AnimatedLobster from '@/components/AnimatedLobster';
+import BackToHome from '@/components/common/BackToHome';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
 
 export const metadata: Metadata = {
   title: 'AI工具库',

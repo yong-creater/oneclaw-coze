@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   BookOpen, Eye, ThumbsUp, Search, ChevronLeft, ChevronRight, ArrowLeft
 } from 'lucide-react';
-import AnimatedLobster from '@/components/AnimatedLobster';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
 import Link from 'next/link';
 
 // 类型定义

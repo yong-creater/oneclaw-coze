@@ -1,7 +1,7 @@
 'use client';
 
 import { UserProvider, useUser } from '@/contexts/UserContext';
-import LoginModal from '@/components/LoginModal';
+import LoginModal from '@/components/common/LoginModal';
 
 function UserAuthWrapper({ children }: { children: React.ReactNode }) {
   const { showLoginModal, setShowLoginModal } = useUser();

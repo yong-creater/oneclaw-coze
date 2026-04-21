@@ -1,7 +1,7 @@
 'use client';
 
-import ProductPageGenerator from '@/components/ProductPageGenerator';
-import BackToHome from '@/components/BackToHome';
+import ProductPageGenerator from '@/components/tools/ProductPageGenerator';
+import BackToHome from '@/components/common/BackToHome';
 
 export default function ProductPage() {
   return (
