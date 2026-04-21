@@ -3,11 +3,11 @@ import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// JWT Secret 配置检查
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.warn('⚠️ JWT_SECRET not configured, using development secret. Set JWT_SECRET in production!');
-}
+// JWT Secret 配置 - 生产环境必须设置
+const JWT_SECRET_CONFIG = process.env.JWT_SECRET;
+const JWT_SECRET = JWT_SECRET_CONFIG && JWT_SECRET_CONFIG.length > 0 
+  ? JWT_SECRET_CONFIG 
+  : 'oneclaw-dev-secret-fallback-2024';
 const TOKEN_EXPIRES_IN = '24h';
 
 export interface AdminUser {
