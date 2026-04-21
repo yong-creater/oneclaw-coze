@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
         toolStats: {
           resume: { total: 0, success: 0, failed: 0 },
           novel: { total: 0, success: 0, failed: 0 },
-          product_page: { total: 0, success: 0, failed: 0 },
-          testcraft: { total: 0, success: 0, failed: 0 }
+          product_page: { total: 0, success: 0, failed: 0 }
         },
         trend: [],
         recentLogs: []
@@ -57,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     // 各工具统计
     const toolStats: Record<string, { total: number; success: number; failed: number }> = {};
-    const toolTypes = ['resume', 'novel', 'product_page', 'testcraft'];
+    const toolTypes = ['resume', 'novel', 'product_page'];
 
     for (const type of toolTypes) {
       const typeData = allData?.filter(d => d.tool_type === type) || [];

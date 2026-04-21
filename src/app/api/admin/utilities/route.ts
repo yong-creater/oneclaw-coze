@@ -64,15 +64,14 @@ export async function GET(request: NextRequest) {
       stats: {
         resume: { total: 0, success: 0, failed: 0 },
         novel: { total: 0, success: 0, failed: 0 },
-        product_page: { total: 0, success: 0, failed: 0 },
-        testcraft: { total: 0, success: 0, failed: 0 }
+        product_page: { total: 0, success: 0, failed: 0 }
       }
     });
   }
 
   try {
     const searchParams = request.nextUrl.searchParams;
-    const tool_type = searchParams.get('tool_type');  // resume, novel, product_page, testcraft, all
+    const tool_type = searchParams.get('tool_type');  // resume, novel, product_page, all
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const status = searchParams.get('status');
@@ -125,7 +124,7 @@ export async function GET(request: NextRequest) {
 
     // 计算各工具的使用统计
     const toolStats: Record<string, { total: number; success: number; failed: number }> = {};
-    const toolTypes = ['resume', 'novel', 'product_page', 'testcraft'];
+    const toolTypes = ['resume', 'novel', 'product_page'];
 
     for (const type of toolTypes) {
       const typeData = statsData?.filter(d => d.tool_type === type) || [];

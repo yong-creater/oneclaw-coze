@@ -44,7 +44,6 @@ interface ToolStats {
   resume: { total: number; success: number; failed: number };
   novel: { total: number; success: number; failed: number };
   product_page: { total: number; success: number; failed: number };
-  testcraft: { total: number; success: number; failed: number };
 }
 
 interface UsageLog {
@@ -63,7 +62,6 @@ const TOOL_INFO: Record<string, { name: string; icon: typeof FileText; color: st
   resume: { name: '简历优化', icon: FileText, color: 'text-blue-500' },
   novel: { name: '小说创作', icon: BookOpen, color: 'text-purple-500' },
   product_page: { name: '出海详情页', icon: ShoppingBag, color: 'text-green-500' },
-  testcraft: { name: 'AI测试用例', icon: TestTube2, color: 'text-orange-500' },
 };
 
 export default function UtilitiesPage() {
@@ -173,11 +171,11 @@ export default function UtilitiesPage() {
 
   // 计算总计
   const totalUsage = stats ? 
-    stats.resume.total + stats.novel.total + stats.product_page.total + stats.testcraft.total : 0;
+    stats.resume.total + stats.novel.total + stats.product_page.total : 0;
   const totalSuccess = stats ?
-    stats.resume.success + stats.novel.success + stats.product_page.success + stats.testcraft.success : 0;
+    stats.resume.success + stats.novel.success + stats.product_page.success : 0;
   const totalFailed = stats ?
-    stats.resume.failed + stats.novel.failed + stats.product_page.failed + stats.testcraft.failed : 0;
+    stats.resume.failed + stats.novel.failed + stats.product_page.failed : 0;
 
   return (
     <div className="space-y-6">
@@ -305,7 +303,6 @@ export default function UtilitiesPage() {
                   <SelectItem value="resume">简历优化</SelectItem>
                   <SelectItem value="novel">小说创作</SelectItem>
                   <SelectItem value="product_page">出海详情页</SelectItem>
-                  <SelectItem value="testcraft">AI测试用例</SelectItem>
                 </SelectContent>
               </Select>
 

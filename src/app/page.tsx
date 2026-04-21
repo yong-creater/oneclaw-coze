@@ -12,7 +12,7 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  FileText, FlaskConical, Globe, TrendingUp
+  FileText, Globe, TrendingUp
 } from 'lucide-react';
 import AnimatedLobster from '@/components/AnimatedLobster';
 import { SkeletonGrid } from '@/components/LobsterSkeleton';
@@ -187,7 +187,6 @@ function UtilityToolsPage() {
             const urls: Record<string, string> = {
               resume: '/resume',
               novel: '/novel',
-              testcraft: '/testcraft',
               productpage: '/productpage',
             };
             return urls[key] || '/';
@@ -367,57 +366,6 @@ function UtilityToolsPage() {
             </div>
           </div>
 
-          {/* 10分钟生成200+用例，漏测率降低60% */}
-          <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/cases/testcraft')}>
-            <img 
-              src="/case-testing.jpg" 
-              alt="测试用例案例"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-            <div className="absolute inset-0 flex flex-col justify-end p-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg">
-                  <FlaskConical className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white text-lg">10分钟生成200+用例，漏测率降低60%</h3>
-                  <p className="text-white/60 text-sm">大厂QA工程师 · 用例覆盖率 95%</p>
-                </div>
-              </div>
-              
-              {/* 案例详情 */}
-              <div className="space-y-3 mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-violet-500 rounded text-white text-xs font-medium">功能测试</span>
-                    <span className="text-white/80 text-sm">测试工程师张工 · 某大厂</span>
-                  </div>
-                  <p className="text-white/70 text-xs leading-relaxed">
-                    输入PRD文档后，AI自动分析业务流程，10分钟生成200+测试用例，覆盖正常、边界、异常场景，漏测率大幅降低。
-                  </p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 bg-fuchsia-500 rounded text-white text-xs font-medium">接口测试</span>
-                    <span className="text-white/80 text-sm">全栈开发小李 · 自测覆盖率 85%</span>
-                  </div>
-                  <p className="text-white/70 text-xs leading-relaxed">
-                    使用接口描述自动生成测试用例，开发自测覆盖率从40%提升至85%，上线后bug减少70%，交付周期缩短50%。
-                  </p>
-                </div>
-              </div>
-              
-              <button 
-                onClick={(e) => { e.stopPropagation(); router.push('/cases/testcraft'); }}
-                className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 text-white text-sm font-medium rounded-xl transition-all shadow-lg"
-              >
-                <span>查看测试案例</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
           {/* 3C配件日出千单，转化率提升180% */}
           <div className="group relative overflow-hidden rounded-2xl h-[400px] cursor-pointer" onClick={() => router.push('/cases/product-page')}>
             <img 
@@ -507,19 +455,6 @@ const UTILITY_TOOLS = [
       { title: '小说改编', desc: '番茄小说爆款文改编为漫画脚本' },
       { title: 'IP孵化', desc: '原创故事快速生成多形式内容' },
       { title: '短剧创作', desc: '小说改短剧，批量产出推文素材' },
-    ]
-  },
-  { 
-    key: 'testcraft', 
-    name: 'AI测试用例', 
-    icon: FlaskConical,
-    description: 'AI智能生成测试用例，支持BDD格式、批量导出',
-    color: 'from-violet-500 to-fuchsia-500',
-    tags: ['BDD格式', '批量导出', '一键生成'],
-    useCases: [
-      { title: '功能测试', desc: '快速生成边界条件和异常场景' },
-      { title: '接口测试', desc: '自动化生成API测试用例' },
-      { title: '回归测试', desc: '历史用例批量复用，效率翻倍' },
     ]
   },
   { 
