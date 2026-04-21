@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Check, Sparkles } from 'lucide-react';
+import { ChevronDown, Check, Sparkles, Bot, Zap, Moon, BarChart3, Mountain, Cpu, Brain } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -13,10 +13,22 @@ import {
   UNIFIED_MODEL_OPTIONS, 
   DEFAULT_MODEL_ID,
   getModelById,
-  getProviderConfig
+  MODEL_PROVIDER_CONFIG
 } from '@/lib/models';
 
-// 模型选择器组件 - 统一样式（有图标，无免费标签）
+// 图标映射
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Bot': Bot,
+  'Zap': Zap,
+  'Moon': Moon,
+  'BarChart3': BarChart3,
+  'Mountain': Mountain,
+  'Cpu': Cpu,
+  'Brain': Brain,
+  'Sparkles': Sparkles,
+};
+
+// 模型选择器组件 - 统一样式（Lucide图标，无免费标签）
 interface ModelPickerProps {
   value: string;
   onChange: (modelId: string) => void;
@@ -26,7 +38,8 @@ interface ModelPickerProps {
 export default function ModelPicker({ value, onChange, triggerClassName = '' }: ModelPickerProps) {
   const [open, setOpen] = useState(false);
   const selectedModel = getModelById(value) || UNIFIED_MODEL_OPTIONS[0];
-  const providerConfig = getProviderConfig(selectedModel.provider);
+  const selectedConfig = MODEL_PROVIDER_CONFIG[selectedModel.provider] || { icon: 'Bot', color: 'bg-slate-500' };
+  const SelectedIcon = ICON_MAP[selectedConfig.icon] || Bot;
 
   return (
     <div>
@@ -40,8 +53,8 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
                    focus:outline-none focus:border-orange-500 transition-colors ${triggerClassName}`}
       >
         {/* 品牌图标 */}
-        <div className={`w-5 h-5 ${providerConfig.color} rounded flex items-center justify-center text-white text-xs`}>
-          {providerConfig.icon}
+        <div className={`w-5 h-5 ${selectedConfig.color} rounded flex items-center justify-center`}>
+          <SelectedIcon className="w-3 h-3 text-white" />
         </div>
         
         {/* 模型名称 */}
@@ -67,18 +80,19 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
             </DialogTitle>
           </DialogHeader>
 
-          {/* 模型列表 - 按提供商分组，有图标 */}
+          {/* 模型列表 - 按提供商分组，Lucide图标 */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
             {UNIFIED_MODEL_GROUPS.map(group => {
-              const config = getProviderConfig(group.provider);
+              const config = MODEL_PROVIDER_CONFIG[group.provider] || { icon: 'Bot', color: 'bg-slate-500' };
+              const IconComponent = ICON_MAP[config.icon] || Bot;
               const isPaid = group.provider.includes('4sAPI');
               
               return (
                 <div key={group.provider} className="space-y-1">
                   {/* 分组标题 */}
                   <div className="flex items-center gap-2 px-1 mb-2">
-                    <div className={`w-6 h-6 ${config.color} rounded-lg flex items-center justify-center text-white text-sm`}>
-                      {config.icon}
+                    <div className={`w-6 h-6 ${config.color} rounded-lg flex items-center justify-center`}>
+                      <IconComponent className="w-3.5 h-3.5 text-white" />
                     </div>
                     <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                       {group.provider}
@@ -140,4 +154,4 @@ export default function ModelPicker({ value, onChange, triggerClassName = '' }: 
 }
 
 // 导出索引
-export { UNIFIED_MODEL_GROUPS, UNIFIED_MODEL_OPTIONS, DEFAULT_MODEL_ID, getModelById, getProviderConfig } from '@/lib/models';
+export { UNIFIED_MODEL_GROUPS, UNIFIED_MODEL_OPTIONS, DEFAULT_MODEL_ID, getModelById, MODEL_PROVIDER_CONFIG } from '@/lib/models';
