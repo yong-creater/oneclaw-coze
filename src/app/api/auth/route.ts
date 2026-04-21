@@ -222,6 +222,7 @@ export async function POST(request: NextRequest) {
         .single();
       
       let currentUser = existingUser;
+      let userJustCreated = false;
       
       if (error && error.code === 'PGRST116') {
         // 用户不存在，创建新用户
@@ -249,6 +250,7 @@ export async function POST(request: NextRequest) {
         }
         
         currentUser = newUser;
+        userJustCreated = true;
       } else if (error) {
         console.error('查询用户失败:', error);
         return NextResponse.json(
@@ -257,30 +259,48 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      // 生成 token
-      const token = await generateUserToken(currentUser);
-      await createUserSession(currentUser?.user_id, token);
-      
-      const response = NextResponse.json({
-        success: true,
-        user: {
-          user_id: currentUser?.user_id,
-          nickname: currentUser?.nickname,
-          email: currentUser?.email,
-          avatar_url: currentUser?.avatar_url
-        },
-        isNewUser: !currentUser?.password_hash
-      });
-      
-      response.cookies.set('user_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/'
-      });
-      
-      return response;
+      // 生成 token 并创建会话
+      try {
+        const token = await generateUserToken(currentUser);
+        await createUserSession(currentUser?.user_id, token);
+        
+        const response = NextResponse.json({
+          success: true,
+          user: {
+            user_id: currentUser?.user_id,
+            nickname: currentUser?.nickname,
+            email: currentUser?.email,
+            avatar_url: currentUser?.avatar_url
+          },
+          isNewUser: !currentUser?.password_hash
+        });
+        
+        response.cookies.set('user_token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 30 * 24 * 60 * 60,
+          path: '/'
+        });
+        
+        return response;
+      } catch (sessionError) {
+        console.error('创建会话失败:', sessionError);
+        
+        // 回滚：删除刚创建的用户
+        if (userJustCreated && currentUser?.user_id) {
+          console.log(`回滚：删除刚创建的用户 ${currentUser.user_id}`);
+          await supabase
+            .from('users')
+            .delete()
+            .eq('user_id', currentUser.user_id);
+        }
+        
+        return NextResponse.json(
+          { success: false, error: '登录失败，请重试' },
+          { status: 500 }
+        );
+      }
     }
     
     // ========================================
