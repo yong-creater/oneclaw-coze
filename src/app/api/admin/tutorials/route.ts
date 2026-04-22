@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAdminAuth } from '@/lib/auth';
 
 // 获取教程列表（后台）或单个教程详情
 export async function GET(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
@@ -75,6 +82,12 @@ export async function GET(request: NextRequest) {
 
 // 创建教程
 export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const body = await request.json();

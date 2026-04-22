@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdminAuth } from '@/lib/auth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -10,6 +11,12 @@ const supabase = isConfigured ? createClient(supabaseUrl, supabaseKey) : null;
 
 // 获取实用工具统计
 export async function GET(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   // 如果未配置Supabase，返回空数据
   if (!isConfigured || !supabase) {
     return NextResponse.json({

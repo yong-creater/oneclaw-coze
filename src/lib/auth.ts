@@ -271,3 +271,17 @@ async function initializeAdminUser(client: any): Promise<boolean> {
     return false;
   }
 }
+
+// 简化版管理员权限验证（用于 API 路由）
+export async function requireAdminAuth(request: NextRequest): Promise<{ user?: AdminUser; error?: string }> {
+  try {
+    const result = await verifyAdminToken(request);
+    if (!result.success || !result.user) {
+      return { error: result.error || '未授权' };
+    }
+    return { user: result.user };
+  } catch (error) {
+    console.error('[Auth] 权限验证异常:', error);
+    return { error: '验证失败' };
+  }
+}

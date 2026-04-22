@@ -9,21 +9,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { secret_key, new_password, environment } = body;
 
-    // 根据环境选择密钥（必须显式指定 environment 参数）
-    const devKey = process.env.ADMIN_RESET_KEY_DEV || 'oneclaw-dev-reset-2024';
-    const prodKey = process.env.ADMIN_RESET_KEY || 'oneclaw-reset-2024';
+    // 根据环境选择密钥（必须设置环境变量）
+    const devKey = process.env.ADMIN_RESET_KEY_DEV;
+    const prodKey = process.env.ADMIN_RESET_KEY;
+    
+    // 如果没有配置密钥，拒绝请求
+    if (!devKey || !prodKey) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '未配置 ADMIN_RESET_KEY_DEV 或 ADMIN_RESET_KEY 环境变量' 
+      }, { status: 500 });
+    }
     
     // 显式通过 environment 参数区分环境（避免依赖 host 判断）
     const isDev = environment === 'dev';
     const isProd = environment === 'prod';
     
-    // 如果显式指定了环境，使用对应密钥
-    if (isDev) {
-      // 开发环境
-    } else if (isProd) {
-      // 生产环境
-    } else {
-      // 没有显式指定环境，拒绝请求，避免误操作
+    if (!isDev && !isProd) {
       return NextResponse.json({ 
         success: false, 
         error: '必须显式指定 environment 参数（dev 或 prod）' 

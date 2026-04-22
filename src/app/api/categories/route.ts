@@ -1,38 +1,29 @@
 import { NextResponse } from 'next/server';
-import { isVolcenginePgMode } from '@/lib/db';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 获取分类列表（分类数据变化少，可以长时间缓存）
+// 获取分类列表
 export async function GET() {
   try {
-    let data;
-
-    if (isVolcenginePgMode()) {
-      // 火山引擎 PostgreSQL 模式
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
-      
-      const result = await pool.query(`
-        SELECT * FROM categories ORDER BY sort_order
-      `);
-      data = result.rows;
-    } else {
-      // Supabase 模式（备用）
-      const { query } = await import('@/lib/db');
-      const result = await query('categories', {
-        order: { column: 'sort_order', ascending: true },
-      });
-      data = result.data;
+    const supabase = getSupabaseClient();
+    
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('sort_order', { ascending: true });
+    
+    if (error) {
+      console.error('获取分类失败:', error);
+      return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 });
     }
     
     return NextResponse.json({
       success: true,
       data
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=3600' }
     });
   } catch (error) {
     console.error('获取分类失败:', error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error instanceof Error ? error.message : '获取失败' 
-    }, { status: 500 });
+    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

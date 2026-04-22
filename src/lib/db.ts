@@ -1,24 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import { execSync } from 'child_process';
-import pg from 'pg';
 
-const { Pool } = pg;
-
-let envLoaded = false;
-let pgPool: InstanceType<typeof Pool> | null = null;
+// 单例 Supabase 客户端
+let supabaseClient: ReturnType<typeof createClient> | null = null;
 
 function loadEnv(): void {
-  if (envLoaded) return;
-  
   // 如果已经有环境变量，直接使用
   if (process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY) {
-    envLoaded = true;
-    return;
-  }
-
-  // 如果有 DATABASE_URL 或 PGHOST（火山引擎 PostgreSQL），也认为已加载
-  if (process.env.DATABASE_URL || process.env.PGHOST) {
-    envLoaded = true;
     return;
   }
 
@@ -59,138 +47,29 @@ except Exception as e:
         }
       }
     }
-
-    envLoaded = true;
   } catch {
     // Silently fail
   }
 }
 
-function isVolcenginePgMode(): boolean {
+export function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+
   loadEnv();
-  return !!(process.env.DATABASE_URL || (process.env.PGHOST && process.env.PGPASSWORD));
-}
 
-function isSupabaseMode(): boolean {
-  loadEnv();
-  return !!(process.env.COZE_SUPABASE_URL && process.env.COZE_SUPABASE_ANON_KEY);
-}
+  const url = process.env.COZE_SUPABASE_URL;
+  const key = process.env.COZE_SUPABASE_ANON_KEY;
 
-export async function getPgPool() {
-  if (pgPool) return pgPool;
-  
-  loadEnv();
-  
-  const config: any = {};
-  
-  if (process.env.PGDATABASE_URL) {
-    config.connectionString = process.env.PGDATABASE_URL;
-  } else if (process.env.DATABASE_URL) {
-    config.connectionString = process.env.DATABASE_URL;
-  } else {
-    config.host = process.env.PGHOST;
-    config.port = parseInt(process.env.PGPORT || '5432');
-    config.user = process.env.PGUSER || 'postgres';
-    config.password = process.env.PGPASSWORD;
-    config.database = process.env.PGDATABASE || 'postgres';
+  if (!url || !key) {
+    throw new Error('缺少 Supabase 配置: COZE_SUPABASE_URL 或 COZE_SUPABASE_ANON_KEY');
   }
-  
-  pgPool = new Pool(config);
-  return pgPool;
-}
 
-// 数据库查询接口
-export async function query(table: string, options?: {
-  select?: string;
-  where?: Record<string, any>;
-  eq?: Record<string, any>;
-  order?: { column: string; ascending?: boolean };
-  limit?: number;
-  offset?: number;
-  count?: boolean;
-}) {
-  if (isVolcenginePgMode()) {
-    const pool = await getPgPool();
-    
-    let sql = `SELECT ${options?.select || '*'} FROM ${table}`;
-    const params: any[] = [];
-    let paramIndex = 1;
-    
-    // 处理 where 条件
-    if (options?.where) {
-      const conditions: string[] = [];
-      for (const [key, value] of Object.entries(options.where)) {
-        conditions.push(`${key} = $${paramIndex}`);
-        params.push(value);
-        paramIndex++;
-      }
-      if (conditions.length > 0) {
-        sql += ' WHERE ' + conditions.join(' AND ');
-      }
+  supabaseClient = createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
     }
-    
-    // 处理 eq 条件
-    if (options?.eq) {
-      const conditions: string[] = [];
-      for (const [key, value] of Object.entries(options.eq)) {
-        conditions.push(`${key} = $${paramIndex}`);
-        params.push(value);
-        paramIndex++;
-      }
-      if (conditions.length > 0) {
-        sql += sql.includes('WHERE') ? ' AND ' + conditions.join(' AND ') : ' WHERE ' + conditions.join(' AND ');
-      }
-    }
-    
-    // 排序
-    if (options?.order) {
-      sql += ` ORDER BY ${options.order.column} ${options.order.ascending ? 'ASC' : 'DESC'}`;
-    }
-    
-    // 限制数量
-    if (options?.limit) {
-      sql += ` LIMIT ${options.limit}`;
-    }
-    
-    // 偏移量
-    if (options?.offset !== undefined) {
-      sql += ` OFFSET ${options.offset}`;
-    }
-    
-    const result = await pool.query(sql, params);
-    return { data: result.rows, error: null, count: result.rows.length };
-  }
-  
-  if (isSupabaseMode()) {
-    const client = createClient(
-      process.env.COZE_SUPABASE_URL!,
-      process.env.COZE_SUPABASE_ANON_KEY!
-    );
-    
-    let q = client.from(table).select(options?.select || '*', { count: options?.count ? 'exact' : undefined });
-    
-    if (options?.eq) {
-      for (const [key, value] of Object.entries(options.eq)) {
-        q = q.eq(key, value);
-      }
-    }
-    
-    if (options?.order) {
-      q = q.order(options.order.column, { ascending: options.order.ascending ?? true });
-    }
-    
-    if (options?.limit) {
-      q = q.limit(options.limit);
-    }
-    
-    if (options?.offset !== undefined) {
-      q = q.range(options.offset, options.offset + (options.limit || 100) - 1);
-    }
-    
-    return await q;
-  }
-  
-  return { data: null, error: { message: '未配置数据库' } };
-}
+  });
 
-export { loadEnv, isVolcenginePgMode, isSupabaseMode };
+  return supabaseClient;
+}

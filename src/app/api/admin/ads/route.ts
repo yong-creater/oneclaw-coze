@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAdminAuth } from '@/lib/auth';
 
 // GET - 获取广告列表
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const client = getSupabaseClient();
     
@@ -25,6 +32,12 @@ export async function GET() {
 
 // POST - 创建广告
 export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const body = await request.json();

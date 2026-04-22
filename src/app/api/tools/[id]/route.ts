@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isVolcenginePgMode } from '@/lib/db';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 获取单个工具详情
 export async function GET(
@@ -14,41 +14,25 @@ export async function GET(
       return NextResponse.json({ success: false, error: '无效的工具ID' }, { status: 400 });
     }
 
-    let tool;
+    const supabase = getSupabaseClient();
+    
+    const { data: tool, error } = await supabase
+      .from('tools')
+      .select('*, categories(name, slug)')
+      .eq('id', toolId)
+      .eq('is_active', true)
+      .single();
 
-    if (isVolcenginePgMode()) {
-      // 火山引擎 PostgreSQL 模式
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
-      
-      const result = await pool.query(`
-        SELECT t.*, c.name as category_name, c.slug as category_slug
-        FROM tools t
-        LEFT JOIN categories c ON t.category_id = c.id
-        WHERE t.id = $1 AND t.is_active = true
-      `, [toolId]);
-      
-      tool = result.rows[0];
-    } else {
-      // Supabase 模式（备用）
-      const { query } = await import('@/lib/db');
-      const result = await query('tools', {
-        select: '*, categories(name, slug)',
-        eq: { id: toolId, is_active: true },
-      });
-      tool = result.data?.[0];
-    }
-
-    if (!tool) {
+    if (error || !tool) {
       return NextResponse.json({ success: false, error: '工具不存在' }, { status: 404 });
     }
 
     // 异步增加浏览量（不阻塞响应）
-    if (isVolcenginePgMode()) {
-      const { getPgPool } = await import('@/lib/db');
-      const pool = await getPgPool();
-      pool.query('UPDATE tools SET view_count = view_count + 1 WHERE id = $1', [toolId]).catch(() => {});
-    }
+    supabase
+      .from('tools')
+      .update({ view_count: (tool.view_count || 0) + 1 })
+      .eq('id', toolId)
+      .then(() => {}, () => {});
 
     return NextResponse.json({
       success: true,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAdminAuth } from '@/lib/auth';
 
 // 分类名称到slug的映射
 const CATEGORY_SLUG_MAP: Record<string, string> = {
@@ -25,6 +26,12 @@ const CATEGORY_SLUG_MAP: Record<string, string> = {
 
 // 批量导入工具
 export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const body = await request.json();

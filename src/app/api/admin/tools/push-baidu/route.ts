@@ -1,7 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/auth';
 
 // 批量推送所有工具页面到百度
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const apiUrl = process.env.BAIDU_PUSH_API_URL;
 

@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAdminAuth } from '@/lib/auth';
 
-// 清理脏数据
+// 清理脏数据（需要管理员权限）
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json().catch(() => ({}));
-    
-    if (body.secret !== 'oneclaw-clean-2024') {
-      return NextResponse.json({ success: false, error: '密钥无效' }, { status: 403 });
+    // 检查管理员权限
+    const authResult = await requireAdminAuth(request);
+    if (authResult instanceof NextResponse) {
+      return authResult;
     }
 
     const client = getSupabaseClient();

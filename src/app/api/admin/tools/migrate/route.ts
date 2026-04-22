@@ -1,8 +1,15 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAdminAuth } from '@/lib/auth';
 
 // 从现有数据迁移工具
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     // 注意：此接口不再自动导入工具数据
     // 请通过 /api/admin/init-data 初始化基础数据

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { validateSession } from '@/lib/auth';
+import { requireAdminAuth } from '@/lib/auth';
 
 // 工具数据类型定义
 interface ToolData {
@@ -302,6 +302,12 @@ const TUTORIALS = [
 // 一键初始化
 export async function POST(request: NextRequest) {
   try {
+    // 权限验证
+    const auth = await requireAdminAuth(request);
+    if (auth.error) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    }
+    
     const client = getSupabaseClient();
     
     // 0. 检查数据库连接是否正常
@@ -335,25 +341,13 @@ export async function POST(request: NextRequest) {
       .select('id')
       .maybeSingle();
     
-    // 如果已有管理员，需要认证
-    if (existingAdmin) {
-      const token = request.cookies.get('admin_token')?.value;
-      if (!token) {
-        return NextResponse.json({ 
-          success: false, 
-          error: '未授权访问，请先登录',
-          code: 'UNAUTHORIZED'
-        }, { status: 401 });
-      }
-
-      const admin = await validateSession(token);
-      if (!admin) {
-        return NextResponse.json({ 
-          success: false, 
-          error: '登录已过期，请重新登录',
-          code: 'SESSION_EXPIRED'
-        }, { status: 401 });
-      }
+    // 如果已有管理员，需要认证（已在函数开头通过 requireAdminAuth 验证）
+    if (existingAdmin && !request.cookies.get('admin_token')?.value) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '未授权访问，请先登录',
+        code: 'UNAUTHORIZED'
+      }, { status: 401 });
     }
     
     const results = {
