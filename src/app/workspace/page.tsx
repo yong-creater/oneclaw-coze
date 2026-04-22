@@ -81,7 +81,7 @@ export default function WorkspacePage() {
       const headers: HeadersInit = {};
       if (userId) headers['x-user-id'] = userId;
       
-      const res = await fetch(`/api/favorites?page=${page}&limit=10`, { headers });
+      const res = await fetch(`/api/favorites?user_id=${userId}&page=${page}&limit=10`, { headers });
       const data = await res.json();
       console.log('[收藏] API返回:', data);
       if (data.success) {
@@ -108,7 +108,7 @@ export default function WorkspacePage() {
       const headers: HeadersInit = {};
       if (userId) headers['x-user-id'] = userId;
       
-      const res = await fetch(`/api/history?page=${page}&limit=10`, { headers });
+      const res = await fetch(`/api/history?user_id=${userId}&page=${page}&limit=10`, { headers });
       const data = await res.json();
       console.log('[历史] API返回:', data);
       if (data.success) {
@@ -135,7 +135,7 @@ export default function WorkspacePage() {
       const headers: HeadersInit = {};
       if (userId) headers['x-user-id'] = userId;
       
-      const res = await fetch(`/api/user-ratings?page=${page}&limit=10`, { headers });
+      const res = await fetch(`/api/user-ratings?user_id=${userId}&page=${page}&limit=10`, { headers });
       const data = await res.json();
       console.log('[评分] API返回:', data);
       if (data.success) {
