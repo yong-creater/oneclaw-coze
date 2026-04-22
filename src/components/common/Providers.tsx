@@ -2,6 +2,7 @@
 
 import { UserProvider, useUser } from '@/contexts/UserContext';
 import LoginModal from '@/components/common/LoginModal';
+import { SWRConfig } from 'swr';
 
 function UserAuthWrapper({ children }: { children: React.ReactNode }) {
   const { showLoginModal, setShowLoginModal, login } = useUser();
@@ -20,8 +21,17 @@ function UserAuthWrapper({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <UserProvider>
-      <UserAuthWrapper>{children}</UserAuthWrapper>
-    </UserProvider>
+    <SWRConfig 
+      value={{
+        revalidateOnFocus: false,
+        revalidateOnReconnect: true,
+        errorRetryCount: 3,
+        errorRetryInterval: 5000,
+      }}
+    >
+      <UserProvider>
+        <UserAuthWrapper>{children}</UserAuthWrapper>
+      </UserProvider>
+    </SWRConfig>
   );
 }

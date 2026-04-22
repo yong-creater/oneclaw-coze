@@ -21,6 +21,7 @@ import AdBanner, { HomeBanner, HomeInlineAd } from '@/components/common/AdBanner
 import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
 import NovelCreator from '@/components/tools/NovelCreator';
+import { ToolLogo } from '@/components/common/ToolLogo';
 
 // ==================== 类型定义 ====================
 interface Category {
@@ -105,61 +106,6 @@ interface Skill {
   is_active: boolean;
   view_count: number;
   skill_categories: { id: number; name: string; slug: string; color: string } | null;
-}
-
-// ==================== 工具Logo组件 ====================
-interface ToolLogoProps {
-  src?: string | null;
-  name: string;
-  url?: string;
-  size?: number;
-  className?: string;
-}
-
-// 工具Logo组件 - 带字母占位符
-function ToolLogo({ src, name, url, size = 40, className = '' }: ToolLogoProps) {
-  const fallbackSrc = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(url || 'https://example.com')}&sz=64`;
-  const letter = name.charAt(0).toUpperCase();
-  const colors = ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#06B6D4', '#F97316'];
-  const colorIndex = letter.charCodeAt(0) % colors.length;
-  const bgColor = colors[colorIndex];
-  
-  return (
-    <div 
-      className={`relative rounded-lg overflow-hidden flex-shrink-0 ${className}`}
-      style={{ width: size, height: size }}
-    >
-      <img
-        src={src || fallbackSrc}
-        alt={name}
-        className="w-full h-full object-contain bg-slate-100 dark:bg-slate-700"
-        loading="lazy"
-        onError={(e) => {
-          const target = e.target as HTMLImageElement;
-          if (target.src !== fallbackSrc) {
-            target.src = fallbackSrc;
-          } else {
-            // 如果Google Favicon也失败，显示字母
-            target.style.display = 'none';
-          }
-        }}
-        onLoad={(e) => {
-          const target = e.target as HTMLImageElement;
-          // 检查图片是否有效（不是空白图片）
-          if (target.naturalWidth === 0) {
-            target.style.display = 'none';
-          }
-        }}
-      />
-      {/* 备用字母图标 */}
-      <div 
-        className="absolute inset-0 flex items-center justify-center font-bold text-white text-sm sm:text-base"
-        style={{ backgroundColor: bgColor }}
-      >
-        {letter}
-      </div>
-    </div>
-  );
 }
 
 // ==================== 精选工具页面 ====================
