@@ -24,6 +24,7 @@ import BackButton from '@/components/common/BackButton';
 import BackToHome from '@/components/common/BackToHome';
 import { ToolDetailAd } from '@/components/common/AdBanner';
 import WechatPromo from '@/components/common/WechatPromo';
+import CaseStudyFloatCard from '@/components/common/CaseStudyFloatCard';
 
 // ==================== 类型定义 ====================
 interface Tool {
@@ -917,6 +918,14 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </footer>
+
+      {/* 案例悬浮卡片 */}
+      {tool && (
+        <CaseStudyFloatCard 
+          toolSlug={tool.categories?.slug || ''}
+          toolName={tool.name}
+        />
+      )}
     </div>
   );
 }
