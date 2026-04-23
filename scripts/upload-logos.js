@@ -1,50 +1,32 @@
 /**
- * 使用 coze-coding-dev-sdk 上传 logo 图片
+ * 上传工具logo - 使用工具官网favicon
  */
 
 const fs = require('fs');
-const https = require('https');
+const { createClient } = require('@supabase/supabase-js');
 const { S3Storage } = require('coze-coding-dev-sdk');
 
-// 初始化存储
+// 初始化
+const supabaseUrl = process.env.COZE_SUPABASE_URL;
+const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 const storage = new S3Storage({
   endpointUrl: process.env.COZE_BUCKET_ENDPOINT_URL,
-  accessKey: "",
-  secretKey: "",
   bucketName: process.env.COZE_BUCKET_NAME || 'bucket_1774521900703',
   region: "cn-beijing",
 });
-
-// 使用 Google Favicon API 获取图片
-function getGoogleFaviconUrl(domain) {
-  return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
-}
-
-// 从 URL 下载图片
-function downloadImage(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-    }, (res) => {
-      if (res.statusCode === 301 || res.statusCode === 302) {
-        return downloadImage(res.headers.location).then(resolve).catch(reject);
-      }
-      if (res.statusCode !== 200) {
-        return reject(new Error(`HTTP ${res.statusCode}`));
-      }
-      
-      const chunks = [];
-      res.on('data', chunk => chunks.push(chunk));
-      res.on('end', () => resolve(Buffer.concat(chunks)));
-    }).on('error', reject);
-  });
-}
 
 // 提取域名
 function extractDomain(url) {
   try {
     const urlObj = new URL(url);
-    return urlObj.hostname.replace('www.', '');
+    let host = urlObj.hostname;
+    // 移除www前缀
+    if (host.startsWith('www.')) {
+      host = host.substring(4);
+    }
+    return host;
   } catch {
     return null;
   }
@@ -52,95 +34,117 @@ function extractDomain(url) {
 
 // 清理名称
 function cleanName(name) {
-  return (name || 'unknown')
+  return (name || 'tool')
     .replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_')
     .substring(0, 20);
 }
 
-// 主函数
+// 下载图片（使用curl）
+function downloadWithCurl(url, outputPath) {
+  return new Promise((resolve, reject) => {
+    const { exec } = require('child_process');
+    exec(`curl -s --max-time 15 -L "${url}" -o "${outputPath}"`, (error, stdout, stderr) => {
+      if (error) {
+        reject(new Error(error.message));
+      } else {
+        // 检查文件是否存在且大小合理
+        if (fs.existsSync(outputPath)) {
+          const stats = fs.statSync(outputPath);
+          if (stats.size > 500) {
+            resolve(stats.size);
+          } else {
+            reject(new Error('File too small'));
+          }
+        } else {
+          reject(new Error('File not created'));
+        }
+      }
+    });
+  });
+}
+
 async function main() {
-  console.log('🚀 开始获取并上传 logo...\n');
-  
-  // 读取工具数据
-  const tools = JSON.parse(fs.readFileSync('/tmp/tools_data.json', 'utf8'));
+  console.log('🚀 开始获取并上传logo...\n');
+
+  // 获取所有工具
+  const { data: tools, error } = await supabase
+    .from('tools')
+    .select('id, name, official_url')
+    .limit(100); // 先处理100个
+
+  if (error) {
+    console.log(`❌ 获取工具失败: ${error.message}`);
+    return;
+  }
+
   console.log(`📊 共 ${tools.length} 个工具\n`);
-  
-  const uploaded = [];
-  const failed = [];
-  const skipped = [];
-  
+
+  let success = 0;
+  let failed = 0;
+
   for (let i = 0; i < tools.length; i++) {
     const tool = tools[i];
     
-    if (!tool.url) {
-      skipped.push(tool.id);
-      process.stdout.write(`[${i + 1}/${tools.length}] 无URL... ⊘\n`);
+    if (!tool.official_url) {
+      failed++;
       continue;
     }
-    
-    const displayName = (tool.name || 'unknown').substring(0, 25);
-    process.stdout.write(`[${i + 1}/${tools.length}] ${displayName}...`);
+
+    const domain = extractDomain(tool.official_url);
+    if (!domain) {
+      failed++;
+      continue;
+    }
+
+    process.stdout.write(`[${i + 1}/${tools.length}] ${tool.name?.substring(0, 20)}...`);
+
+    const tempPath = `/tmp/logo_${tool.id}.ico`;
     
     try {
-      const domain = extractDomain(tool.url);
-      if (!domain) {
-        skipped.push(tool.id);
-        console.log(` ⊘ (无效URL)`);
-        continue;
-      }
-      
-      // 使用 Google Favicon API
-      const faviconUrl = getGoogleFaviconUrl(domain);
-      const imageBuffer = await downloadImage(faviconUrl);
-      
-      // 检查图片大小（Google默认图标很小）
-      if (imageBuffer.length < 1000) {
-        failed.push(tool.id);
-        console.log(` ✗ (图标太小)`);
-        continue;
-      }
+      // 尝试下载favicon
+      const faviconUrl = `https://${tool.official_url.includes('www.') ? '' : 'www.'}${domain}/favicon.ico`;
+      await downloadWithCurl(faviconUrl, tempPath);
       
       // 上传到存储
       const fileName = `logos/${cleanName(tool.name)}_${tool.id}.png`;
       const key = await storage.uploadFile({
-        fileContent: imageBuffer,
+        fileContent: fs.readFileSync(tempPath),
         fileName: fileName,
-        contentType: 'image/png',
+        contentType: 'image/x-icon',
       });
       
-      // 生成签名 URL
+      // 生成永久URL
       const logoUrl = await storage.generatePresignedUrl({
         key: key,
-        expireTime: 86400 * 365, // 1年
+        expireTime: 86400 * 365,
       });
       
-      tool.logo = logoUrl;
-      uploaded.push(tool.id);
+      // 更新数据库
+      await supabase
+        .from('tools')
+        .update({ logo: logoUrl })
+        .eq('id', tool.id);
+      
+      success++;
       console.log(` ✓`);
       
     } catch (err) {
-      failed.push(tool.id);
-      console.log(` ✗ ${err.message.substring(0, 30)}`);
+      failed++;
+      console.log(` ✗`);
     }
-    
-    // 延迟避免过快请求
-    await new Promise(r => setTimeout(r, 50));
+
+    // 清理临时文件
+    if (fs.existsSync(tempPath)) {
+      fs.unlinkSync(tempPath);
+    }
+
+    // 延迟
+    await new Promise(r => setTimeout(r, 100));
   }
-  
+
   console.log(`\n\n📊 完成！`);
-  console.log(`✓ 成功: ${uploaded.length}`);
-  console.log(`✗ 失败: ${failed.length}`);
-  console.log(`⊘ 跳过: ${skipped.length}`);
-  
-  // 保存更新后的数据
-  fs.writeFileSync('/tmp/tools_data_with_logos.json', JSON.stringify(tools, null, 2));
-  console.log('\n✓ 数据已保存到 /tmp/tools_data_with_logos.json');
-  
-  // 显示示例
-  console.log('\n📋 示例 (带logo):');
-  tools.filter(t => t.logo && t.logo.startsWith('http')).slice(0, 5).forEach(t => {
-    console.log(`  ${t.name}: ${t.logo.substring(0, 80)}...`);
-  });
+  console.log(`✅ 成功: ${success}`);
+  console.log(`❌ 失败: ${failed}`);
 }
 
 main().catch(console.error);
