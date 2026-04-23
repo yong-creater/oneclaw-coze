@@ -1,28 +1,24 @@
-# OneClaw (钳爪) - 全品类AI工具导航站
+# OneClaw (钳爪) - 实用AI工具导航站
 
 ## 项目概述
 
-**OneClaw** - 精选AI工具导航站，聚焦实用工具，降低使用难度。
+**OneClaw** - 精选实用AI工具导航站，让AI真正提升效率。
 
 - **域名**: oneclaw.shop
 - **联系邮箱**: 1017760688@qq.com
-- **品牌元素**: 龙虾 🦞，红橙渐变配色
+- **品牌元素**: 龙虾，橙红渐变配色
 
 ## 核心功能
 
 ### 前台功能
-1. **精选工具** (`/tools`) - AI工具列表、搜索、筛选
+1. **实用工具** (`/utilities`) - 实用AI工具入口
 2. **简历优化** (`/resume`) - AI智能优化简历
-3. **用户工作台** (`/workspace`) - 收藏管理、浏览历史
+3. **关于我们** (`/about`) - 关于OneClaw
 
 ### 后台管理
-1. **工具管理** - 工具列表、添加/编辑、批量导入
-2. **分类管理** - 一级/二级分类CRUD
-3. **标签管理** - 标签分类展示、CRUD
-4. **评论审核** - 待审核评论管理
-5. **广告管理** - 广告位管理
-6. **会员管理** - 会员列表查看
-7. **用户管理** - 用户列表查看
+1. **广告管理** - 广告位管理
+2. **用户管理** - 用户列表查看
+3. **微信配置** - 公众号配置
 
 ## 技术栈
 
@@ -41,12 +37,12 @@
 ├── scripts/                # 构建与启动脚本
 ├── src/
 │   ├── app/                # 页面路由与布局
-│   │   ├── page.tsx        # 前台首页
+│   │   ├── page.tsx        # 首页（实用工具入口）
 │   │   ├── layout.tsx      # 根布局
 │   │   ├── globals.css     # 全局样式
-│   │   ├── tools/          # 工具详情页
+│   │   ├── utilities/       # 实用工具页面
 │   │   ├── resume/         # 简历优化页
-│   │   ├── workspace/      # 用户工作台
+│   │   ├── about/          # 关于我们
 │   │   ├── admin/          # 后台管理系统
 │   │   └── api/            # API路由
 │   ├── components/
@@ -64,50 +60,26 @@
 
 | 表名 | 说明 |
 |------|------|
-| `categories` | 一级分类 |
-| `tools` | 工具库 |
-| `tags` | 标签 |
-| `user_favorites` | 用户收藏 |
-| `user_ratings` | 用户评分 |
-| `reviews` | 用户评论 |
-| `ads` | 广告位 |
+| `users` | 用户 |
+| `members` | 会员 |
+| `orders` | 订单 |
+| `prompts` | 提示词 |
+| `advertisements` | 广告位 |
 | `admin_users` | 管理员用户 |
+| `wechat_config` | 微信配置 |
 
 ## API接口
 
 ### 前台API
-- `GET /api/tools` - 获取工具列表
-- `GET /api/tools/[id]` - 获取工具详情
-- `GET /api/categories` - 获取分类列表
-- `GET /api/tags` - 获取标签列表
-- `POST /api/ratings` - 提交评分
-- `POST /api/reviews` - 提交评论
-- `GET/POST/DELETE /api/favorites` - 收藏管理
-- `GET/POST/DELETE /api/history` - 浏览历史
 - `GET /api/ads` - 获取广告
 - `POST /api/resume` - 简历优化
+- `POST /api/auth` - 认证
+- `POST /api/auth/code` - 发送验证码
 
 ### 后台API
-- `GET/POST /api/admin/tools` - 工具CRUD
-- `POST /api/admin/tools/import` - 批量导入
-- `GET/POST /api/admin/categories` - 分类CRUD
-- `GET/POST /api/admin/tags` - 标签CRUD
-- `GET/POST /api/admin/reviews` - 评论管理
 - `GET/POST /api/admin/ads` - 广告管理
+- `POST /api/admin/auth` - 管理员认证
 - `POST /api/admin/init-data` - 初始化数据
-
-## UI 设计规范
-
-### 前台规范
-- 首页宽度: `max-w-7xl`
-- 详情页宽度: `max-w-4xl mx-auto`
-- 卡片: `hover:shadow-lg hover:border-orange-300`
-- 输入框: `border-2 border-slate-200 rounded-xl hover:border-orange-400 focus:border-orange-500`
-
-### 后台规范
-- 布局: 基于 `admin/layout.tsx` 侧边栏
-- 禁止: 独立 header/footer、`min-h-screen`
-- 页面根元素: `<div className="space-y-6">`
 
 ## 组件说明
 
@@ -118,12 +90,10 @@
 
 ### 通用组件 (`/components/common`)
 - `AnimatedLobster` - 龙虾动画Logo
-- `ToolLogo` - 工具Logo组件
 - `BackToHome` - 返回首页
 - `LoginButton` - 登录按钮
 - `LoginModal` - 登录弹窗
 - `WechatPromo` - 公众号推广
-- `SkeletonGrid` - 加载骨架屏
 - `UtilityHeader` - 工具页头部
 - `UtilityComponents` - 工具页通用组件
 

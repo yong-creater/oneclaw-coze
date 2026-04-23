@@ -1,5 +1,5 @@
 // 数据文件索引
 
-// 工具数据
-export { aiTools, categories } from './tools';
-export type { ToolItem } from './tools';
+// 实用工具
+export { utilities, utilityCategories } from './utilities';
+export type { Utility } from './utilities';

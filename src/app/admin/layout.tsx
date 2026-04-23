@@ -15,18 +15,8 @@ import { Button } from '@/components/ui/button';
 
 const navigation = [
   { name: '仪表盘', href: '/admin' },
-  { name: 'AI应用管理', href: '/admin/tools' },
-  { name: '分类管理', href: '/admin/categories' },
-  { name: '标签管理', href: '/admin/tags' },
-  { name: '提示词管理', href: '/admin/prompts' },
-  { name: '技能管理', href: '/admin/skills' },
-  { name: '教程管理', href: '/admin/tutorials' },
-  { name: '精选工具', href: '/admin/utilities' },
-  { name: '评论审核', href: '/admin/reviews' },
-  { name: '会员管理', href: '/admin/members' },
-  { name: '用户管理', href: '/admin/users' },
-  { name: '订单管理', href: '/admin/orders' },
   { name: '广告管理', href: '/admin/ads' },
+  { name: '用户管理', href: '/admin/users' },
   { name: '微信配置', href: '/admin/wechat' },
 ];
 
