@@ -199,6 +199,7 @@ export default function RootLayout({
   const isDev = process.env.COZE_PROJECT_ENV === 'DEV';
   const baiduAnalyticsId = process.env.NEXT_PUBLIC_BAIDU_ANALYTICS_ID || '';
   const baiduSiteVerification = process.env.NEXT_PUBLIC_BAIDU_SITE_VERIFICATION || '';
+  const googleAdSenseId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID || '';
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
@@ -304,6 +305,16 @@ export default function RootLayout({
       <body className="antialiased" suppressHydrationWarning>
         {isDev && <Inspector />}
         <Providers>{children}</Providers>
+
+        {/* Google AdSense */}
+        {googleAdSenseId && (
+          <Script
+            id="google-adsense"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${googleAdSenseId}`}
+            strategy="afterInteractive"
+            crossOrigin="anonymous"
+          />
+        )}
       </body>
     </html>
   );

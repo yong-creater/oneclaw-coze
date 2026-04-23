@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { X, ExternalLink, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { GoogleAdSense } from '@/components/ads/GoogleAdSense';
 
 // 广告位类型
 type AdPosition = 
@@ -93,10 +94,16 @@ export function HomeBanner({
     window.open(ad.link_url, '_blank');
   }, []);
 
-  if (loading || closed || ads.length === 0) return null;
+  // Google AdSense fallback
+  const googleAdSenseId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID;
+  const showGoogleAd = loading || ads.length === 0;
 
-  const currentAd = ads[currentIndex];
-  if (!currentAd) return null;
+  if (loading || closed) return null;
+
+  // 如果有直接广告，显示直接广告
+  if (ads.length > 0) {
+    const currentAd = ads[currentIndex];
+    if (!currentAd) return null;
 
   return (
     <div className={`relative ${className}`}>
@@ -178,7 +185,21 @@ export function HomeInlineAd({
     window.open(ad.link_url, '_blank');
   }, []);
 
-  if (loading || ads.length === 0) return null;
+  if (loading || ads.length === 0) {
+    // 如果有 Google AdSense ID，显示 AdSense 广告
+    if (googleAdSenseId) {
+      return (
+        <div className={className}>
+          <GoogleAdSense
+            slot="YOUR_INLINE_SLOT"
+            format="auto"
+            style={{ display: 'block', minHeight: '90px', borderRadius: '8px' }}
+          />
+        </div>
+      );
+    }
+    return null;
+  }
 
   const ad = ads[0]; // 只显示一个
 
