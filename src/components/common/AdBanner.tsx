@@ -23,6 +23,7 @@ interface AdBannerProps {
   className?: string;
 }
 
+// AdBanner 主组件
 export function AdBanner({ position, className = '' }: AdBannerProps) {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,6 +145,60 @@ export function HomeInlineAd({ className = '' }: HomeInlineAdProps) {
                 {ad.title}
               </span>
               <ExternalLink className="w-4 h-4 text-emerald-500 ml-auto" />
+            </div>
+          </CardContent>
+        </Card>
+      </a>
+    </div>
+  );
+}
+
+// 默认导出
+export default AdBanner;
+
+interface ToolDetailAdProps {
+  className?: string;
+}
+
+export function ToolDetailAd({ className = '' }: ToolDetailAdProps) {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAds();
+  }, []);
+
+  const fetchAds = async () => {
+    try {
+      const res = await fetch(`/api/ads?position=tool_detail&t=${Date.now()}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        setAds(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch tool detail ads:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || ads.length === 0) return null;
+
+  const ad = ads[0];
+
+  return (
+    <div className={className}>
+      <a href={ad.link_url} target="_blank" rel="noopener noreferrer">
+        <Card className="overflow-hidden hover:shadow-md transition-shadow bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-purple-200 dark:border-purple-800">
+          <CardContent className="p-3">
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">
+                广告
+              </Badge>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200 line-clamp-1">
+                {ad.title}
+              </span>
+              <ExternalLink className="w-4 h-4 text-purple-500 ml-auto flex-shrink-0" />
             </div>
           </CardContent>
         </Card>

@@ -476,7 +476,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* 广告位 */}
       <div className="max-w-4xl mx-auto px-4 py-4">
-        <ToolDetailAd toolId={tool.id} />
+        <ToolDetailAd />
       </div>
 
       <main className="max-w-4xl mx-auto px-4 pt-8 pb-8">
