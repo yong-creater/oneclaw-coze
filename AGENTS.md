@@ -6,14 +6,22 @@
 
 - **域名**: oneclaw.shop
 - **联系邮箱**: 1017760688@qq.com
-- **品牌元素**: 龙虾，橙红渐变配色
+
+## 设计风格
+
+采用简洁干净的国际化设计风格，参考国外优秀工具网站：
+- **配色**: 纯黑白灰 + 单一强调色
+- **排版**: 大量留白，清晰层次
+- **元素**: 扁平化，极简边框
+- **交互**: 微妙的hover效果
 
 ## 核心功能
 
 ### 前台功能
-1. **实用工具** (`/utilities`) - 实用AI工具入口
-2. **简历优化** (`/resume`) - AI智能优化简历
-3. **关于我们** (`/about`) - 关于OneClaw
+1. **首页** (`/`) - 实用工具入口
+2. **工具页** (`/utilities`) - 工具列表
+3. **简历优化** (`/resume`) - AI智能优化简历
+4. **关于** (`/about`) - 关于OneClaw
 
 ### 后台管理
 1. **广告管理** - 广告位管理
@@ -33,86 +41,60 @@
 ## 目录结构
 
 ```
-├── public/                 # 静态资源
-├── scripts/                # 构建与启动脚本
 ├── src/
-│   ├── app/                # 页面路由与布局
-│   │   ├── page.tsx        # 首页（实用工具入口）
+│   ├── app/
+│   │   ├── page.tsx        # 首页
 │   │   ├── layout.tsx      # 根布局
-│   │   ├── globals.css     # 全局样式
-│   │   ├── utilities/       # 实用工具页面
+│   │   ├── utilities/       # 工具页
 │   │   ├── resume/         # 简历优化页
-│   │   ├── about/          # 关于我们
-│   │   ├── admin/          # 后台管理系统
+│   │   ├── about/          # 关于页
+│   │   ├── admin/          # 后台管理
 │   │   └── api/            # API路由
 │   ├── components/
-│   │   ├── ui/             # Shadcn UI 组件库
-│   │   ├── tools/          # 工具组件 (ResumeOptimizer等)
-│   │   ├── common/         # 通用组件
-│   │   └── ads/            # 广告组件
-│   ├── data/               # 静态数据
+│   │   ├── ui/             # Shadcn UI 组件
+│   │   ├── tools/          # 工具组件
+│   │   └── common/         # 通用组件
 │   └── lib/                # 工具库
-├── next.config.ts          # Next.js 配置
-└── package.json            # 项目依赖管理
 ```
 
-## 数据库表
+## 设计规范
 
-| 表名 | 说明 |
-|------|------|
-| `users` | 用户 |
-| `members` | 会员 |
-| `orders` | 订单 |
-| `prompts` | 提示词 |
-| `advertisements` | 广告位 |
-| `admin_users` | 管理员用户 |
-| `wechat_config` | 微信配置 |
+### 颜色系统
+```css
+/* 亮色模式 */
+--background: #ffffff
+--foreground: #1a1a1a
+--muted-foreground: #666666
+--border: #e5e5e5
+--accent: #f5f5f5
 
-## API接口
+/* 暗色模式 */
+--background: #0a0a0a
+--foreground: #fafafa
+--muted-foreground: #a3a3a3
+--border: #262626
+--accent: #1f1f1f
+```
 
-### 前台API
-- `GET /api/ads` - 获取广告
-- `POST /api/resume` - 简历优化
-- `POST /api/auth` - 认证
-- `POST /api/auth/code` - 发送验证码
+### 页面宽度
+- 内容区: `max-w-5xl mx-auto px-6`
 
-### 后台API
-- `GET/POST /api/admin/ads` - 广告管理
-- `POST /api/admin/auth` - 管理员认证
-- `POST /api/admin/init-data` - 初始化数据
-
-## 组件说明
-
-### 工具组件 (`/components/tools`)
-- `ResumeOptimizer` - 简历优化组件
-- `ResumeTemplates` - 简历模板
-- `ImageUploader` - 图片上传
-
-### 通用组件 (`/components/common`)
-- `AnimatedLobster` - 龙虾动画Logo
-- `BackToHome` - 返回首页
-- `LoginButton` - 登录按钮
-- `LoginModal` - 登录弹窗
-- `WechatPromo` - 公众号推广
-- `UtilityHeader` - 工具页头部
-- `UtilityComponents` - 工具页通用组件
+### 组件规范
+- 卡片: 简洁边框，无阴影或轻微阴影
+- 按钮: 扁平化，hover状态变化
+- 禁止: 渐变背景、花哨动画
 
 ## 开发命令
 
 ```bash
-# 开发
-pnpm dev
-
-# 构建
-pnpm build
-
-# 生产环境
-pnpm start
+pnpm dev     # 开发
+pnpm build   # 构建
+pnpm start   # 生产
 ```
 
 ## 注意事项
 
-1. **禁止硬编码颜色**: 使用 Tailwind 语义化变量
-2. **Hydration 错误预防**: 动态数据需用 `useEffect`
-3. **组件导入规范**: 前台组件与后台组件分离
-4. **API 调用规范**: 使用 Supabase SDK，每次检查 `{ data, error }`
+1. **禁止渐变色**: 使用纯色或透明度变化
+2. **简洁优先**: 宁可少元素，不要多余装饰
+3. **留白**: 充足的padding和margin
+4. **组件复用**: 优先使用shadcn/ui组件

@@ -3,15 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  Menu,
-  X,
-  ExternalLink,
-  LogOut,
-  Loader2,
-  Settings
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Menu, X, LogOut, Loader2 } from 'lucide-react';
 
 const navigation = [
   { name: '仪表盘', href: '/admin' },
@@ -33,7 +25,6 @@ export default function AdminLayout({
 
   // 检查登录状态
   useEffect(() => {
-    // 登录页面和修改密码页面不需要检查
     if (pathname === '/admin/login' || pathname === '/admin/change-password') {
       setChecking(false);
       return;
@@ -47,7 +38,6 @@ export default function AdminLayout({
         if (data.success && data.authenticated && data.data) {
           setUser(data.data);
           
-          // 检查是否需要修改密码
           if (data.data.must_change_password) {
             router.push('/admin/change-password');
             return;
@@ -83,14 +73,14 @@ export default function AdminLayout({
   // 检查中显示加载
   if (checking) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen flex">
       {/* 移动端侧边栏遮罩 */}
       {sidebarOpen && (
         <div 
@@ -101,29 +91,26 @@ export default function AdminLayout({
 
       {/* 侧边栏 */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-800 
-        border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-200
+        fixed top-0 left-0 z-50 h-full w-56 bg-[var(--card)] border-r border-[var(--border)] 
+        transform transition-transform duration-200
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4">
+        <div className="flex items-center justify-between h-14 px-4 border-b border-[var(--border)]">
           <Link href="/admin" className="flex items-center gap-2">
-            <img src="/oneclaw-logo.png" alt="OneClaw" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-              OneClaw
-            </span>
-            <span className="text-sm text-slate-500">管理后台</span>
+            <span className="text-base font-semibold">OneClaw</span>
+            <span className="text-xs text-[var(--muted-foreground)]">Admin</span>
           </Link>
           <button 
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="lg:hidden p-1 rounded hover:bg-[var(--accent)]"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* 导航菜单 */}
-        <nav className="p-4 space-y-1">
+        <nav className="p-3 space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href || 
               (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -133,11 +120,10 @@ export default function AdminLayout({
                 key={item.name}
                 href={item.href}
                 className={`
-                  flex items-center px-3 py-2 rounded-lg text-sm font-medium
-                  transition-colors duration-200
+                  flex items-center px-3 py-2 rounded-md text-sm
                   ${isActive 
-                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' 
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                    ? 'bg-[var(--foreground)] text-[var(--background)]' 
+                    : 'text-[var(--muted-foreground)] hover:bg-[var(--accent)]'
                   }
                 `}
               >
@@ -147,55 +133,38 @@ export default function AdminLayout({
           })}
         </nav>
 
-        {/* 返回前台 */}
-        <div className="absolute bottom-4 left-4 right-4">
+        {/* 底部 */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-[var(--border)]">
           <Link
             href="/"
-            target="_blank"
-            className="flex items-center justify-center px-3 py-2 rounded-lg 
-              text-sm font-medium text-slate-600 hover:bg-slate-100 
-              dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+            className="flex items-center px-3 py-2 rounded-md text-sm text-[var(--muted-foreground)] hover:bg-[var(--accent)] mb-2"
           >
-            <ExternalLink className="w-4 h-4 mr-2" />
             返回前台
           </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center px-3 py-2 rounded-md text-sm text-[var(--muted-foreground)] hover:bg-[var(--accent)]"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            退出登录
+          </button>
         </div>
       </aside>
 
-      {/* 主内容区 */}
-      <div className="lg:pl-64">
-        {/* 顶部栏 */}
-        <header className="sticky top-0 z-30 h-16 bg-white dark:bg-slate-800 shadow-sm">
-          <div className="flex items-center justify-between h-full px-4">
-            <button 
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <h1 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-              {navigation.find(n => n.href === pathname || (n.href !== '/admin' && pathname.startsWith(n.href)))?.name || '管理后台'}
-            </h1>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-500">{user?.username || '管理员'}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="text-slate-600 hover:text-red-600 dark:text-slate-300"
-              >
-                <LogOut className="w-4 h-4 mr-1" />
-                退出
-              </Button>
-            </div>
-          </div>
-        </header>
+      {/* 移动端菜单按钮 */}
+      <button 
+        onClick={() => setSidebarOpen(true)}
+        className="fixed bottom-4 left-4 z-30 lg:hidden p-2 bg-[var(--foreground)] text-[var(--background)] rounded-lg shadow-lg"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
 
-        {/* 页面内容 */}
-        <main className="p-6">
+      {/* 主内容 */}
+      <main className="flex-1 lg:ml-56">
+        <div className="p-6">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
