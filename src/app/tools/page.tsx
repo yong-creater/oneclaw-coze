@@ -127,7 +127,7 @@ export default function ToolsPage() {
                 : 'bg-[var(--secondary)] text-[var(--muted-foreground)] hover:bg-[var(--accent)]'
             }`}
           >
-            全部
+            全部应用
           </button>
           {categories.map((cat) => (
             <button

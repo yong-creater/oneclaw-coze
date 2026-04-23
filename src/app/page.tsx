@@ -80,7 +80,7 @@ export default function HomePage() {
           </Link>
           <nav className="flex items-center gap-6 text-sm">
             <Link href="/tools" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-              精选工具
+              AI应用
             </Link>
             <Link href="/resume" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
               简历优化
@@ -143,7 +143,7 @@ export default function HomePage() {
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold mb-1">精选工具</h3>
+                    <h3 className="font-semibold mb-1">AI应用</h3>
                     <p className="text-sm text-[var(--muted-foreground)]">浏览所有AI工具</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-[var(--muted-foreground)] group-hover:translate-x-1 transition-transform" />
@@ -189,7 +189,7 @@ export default function HomePage() {
       <section className="px-6 pb-16">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold">精选工具</h2>
+            <h2 className="text-xl font-semibold">精选AI应用</h2>
             <Link href="/tools">
               <Button variant="ghost" size="sm" className="text-[var(--muted-foreground)]">
                 查看全部 <ArrowRight className="w-4 h-4 ml-1" />
