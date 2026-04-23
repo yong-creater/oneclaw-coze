@@ -9,10 +9,10 @@ importers:
   .:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.958.0
+        specifier: ^3.1033.0
         version: 3.1033.0
       '@aws-sdk/lib-storage':
-        specifier: ^3.958.0
+        specifier: ^3.1033.0
         version: 3.1033.0(@aws-sdk/client-s3@3.1033.0)
       '@dnd-kit/core':
         specifier: ^6.3.1
@@ -123,7 +123,7 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       coze-coding-dev-sdk:
-        specifier: ^0.7.17
+        specifier: ^0.7.20
         version: 0.7.20(openai@6.34.0(ws@8.20.0)(zod@4.3.6))(ws@8.20.0)
       date-fns:
         specifier: ^4.1.0

@@ -10,7 +10,7 @@ import AnimatedLobster from '@/components/common/AnimatedLobster';
 
 export const metadata: Metadata = {
   title: 'AI工具库',
-  description: '精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作等全品类',
+  description: '822款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作等全品类',
 };
 
 interface Props {
