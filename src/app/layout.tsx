@@ -306,7 +306,7 @@ export default function RootLayout({
         {isDev && <Inspector />}
         <Providers>{children}</Providers>
 
-        {/* Google AdSense */}
+        {/* Google AdSense (暂时禁用，待配置好 ID 后启用)
         {googleAdSenseId && (
           <Script
             id="google-adsense"
@@ -315,6 +315,7 @@ export default function RootLayout({
             crossOrigin="anonymous"
           />
         )}
+        */}
       </body>
     </html>
   );

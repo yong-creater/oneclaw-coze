@@ -2,8 +2,6 @@
 
 import { useEffect } from 'react';
 
-// Google AdSense 配置
-// 请将下面的 'YOUR_PUBLISHER_ID' 替换为你从 Google AdSense 获取的实际 ID
 const GOOGLE_ADSENSE_ID = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID || '';
 
 interface GoogleAdSenseProps {
@@ -22,8 +20,8 @@ export function GoogleAdSense({
       try {
         // @ts-ignore
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (err) {
-        console.error('AdSense error:', err);
+      } catch {
+        // 忽略广告加载错误
       }
     }
   }, [slot]);
@@ -41,19 +39,4 @@ export function GoogleAdSense({
       data-ad-format={format}
     />
   );
-}
-
-// 在 layout.tsx 的 <head> 中调用此函数来加载广告脚本
-export function GoogleAdSenseScript() {
-  useEffect(() => {
-    if (GOOGLE_ADSENSE_ID && typeof window !== 'undefined') {
-      const script = document.createElement('script');
-      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${GOOGLE_ADSENSE_ID}`;
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
-  }, []);
-
-  return null;
 }
