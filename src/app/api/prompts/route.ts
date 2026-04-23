@@ -1,59 +1,64 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+// 获取Prompt列表
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const { searchParams } = new URL(request.url);
+    const toolId = searchParams.get('tool_id');
     const category = searchParams.get('category');
-    const featured = searchParams.get('featured');
     const search = searchParams.get('search');
-    const sort = searchParams.get('sort') || 'popular';
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '12');
+    const offset = (page - 1) * limit;
 
+    const supabase = getSupabaseClient();
+    
     let query = supabase
       .from('prompts')
-      .select('*')
-      .limit(limit);
-
+      .select('*', { count: 'exact' })
+      .eq('status', 'published');
+    
+    // 工具筛选
+    if (toolId) {
+      query = query.eq('tool_id', parseInt(toolId));
+    }
+    
+    // 分类筛选
     if (category) {
       query = query.eq('category', category);
     }
-
-    if (featured === 'true') {
-      query = query.eq('is_featured', true);
-    }
-
+    
+    // 搜索
     if (search) {
       query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
     }
-
-    // 排序
-    if (sort === 'popular') {
-      query = query.order('usage_count', { ascending: false });
-    } else if (sort === 'likes') {
-      query = query.order('likes_count', { ascending: false });
-    } else {
-      query = query.order('created_at', { ascending: false });
+    
+    query = query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    const { data, count, error } = await query;
+    
+    if (error) {
+      console.error('获取Prompt列表失败:', error);
+      return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 });
     }
-
-    const { data, error } = await query;
-
-    if (error) throw error;
-
+    
     return NextResponse.json({
       success: true,
-      data: data || []
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit)
+      }
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=60' }
     });
   } catch (error) {
-    console.error('Failed to fetch prompts:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch prompts' },
-      { status: 500 }
-    );
+    console.error('获取Prompt列表失败:', error);
+    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

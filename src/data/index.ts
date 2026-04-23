@@ -1,5 +1,11 @@
 // 数据文件索引
+export * from './caseStudies';
+export * from './prompts-types';
 
-// 实用工具
-export { utilities, utilityCategories } from './utilities';
-export type { Utility } from './utilities';
+// 工具数据
+export { aiTools, categories } from './tools';
+export type { ToolItem } from './tools';
+
+// 技能数据
+export { aiSkills } from './skills';
+export type { SkillItem, SkillCategory, SkillExample } from './skills';

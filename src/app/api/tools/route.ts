@@ -1,71 +1,80 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+// 获取前台工具列表
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const category = searchParams.get('category');
-    const featured = searchParams.get('featured');
+    
+    // 分页参数
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = (page - 1) * limit;
+    
+    // 筛选参数
+    const category_slug = searchParams.get('category');
+    const free_types = searchParams.get('free_types')?.split(',').filter(Boolean) || [];
+    const feature_tags = searchParams.get('features')?.split(',').filter(Boolean) || [];
     const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit') || '50');
-
+    
+    const supabase = getSupabaseClient();
+    
+    // 构建基础查询
     let query = supabase
       .from('tools')
-      .select(`
-        id, name, logo, producer, highlight, category_id,
-        free_type, is_featured, feature_tags, official_url,
-        promotion_url, view_count
-      `)
-      .eq('is_active', true)
-      .order('is_featured', { ascending: false })
-      .order('view_count', { ascending: false })
-      .limit(limit);
-
-    if (category) {
-      query = query.eq('category_id', parseInt(category));
+      .select('*, categories(name, slug)', { count: 'exact' })
+      .eq('is_active', true);
+    
+    // 分类筛选
+    if (category_slug && category_slug !== 'all') {
+      query = query.eq('categories.slug', category_slug);
     }
-
-    if (featured === 'true') {
-      query = query.eq('is_featured', true);
+    
+    // 免费类型筛选
+    if (free_types.length > 0) {
+      query = query.in('free_type', free_types);
     }
-
+    
+    // 搜索
     if (search) {
-      query = query.or(`name.ilike.%${search}%,highlight.ilike.%${search}%`);
+      query = query.or(`name.ilike.%${search}%,producer.ilike.%${search}%,highlight.ilike.%${search}%`);
     }
-
-    const { data: tools, error } = await query;
-
-    if (error) throw error;
-
-    // 获取分类信息
-    const { data: categories } = await supabase
-      .from('categories')
-      .select('id, name, slug')
-      .order('sort_order');
-
-    // 关联分类
-    const toolsWithCategory = tools?.map(tool => {
-      const cat = categories?.find(c => c.id === tool.category_id);
-      return {
-        ...tool,
-        category: cat
-      };
-    });
-
+    
+    // 排序和分页
+    query = query
+      .order('is_featured', { ascending: false })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    const { data, count, error } = await query;
+    
+    if (error) {
+      console.error('获取工具列表失败:', error);
+      return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 });
+    }
+    
+    // 添加缓存头
+    const cacheControl = search || free_types.length || feature_tags.length
+      ? 'public, max-age=30, stale-while-revalidate=60'
+      : 'public, max-age=60, stale-while-revalidate=300';
+    
     return NextResponse.json({
       success: true,
-      data: toolsWithCategory || []
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit),
+      }
+    }, {
+      headers: { 'Cache-Control': cacheControl }
     });
   } catch (error) {
-    console.error('Failed to fetch tools:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch tools' },
-      { status: 500 }
-    );
+    console.error('获取工具列表失败:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: '服务器错误' 
+    }, { status: 500 });
   }
 }

@@ -6,4 +6,5 @@ export * from './tools';
 export * from './common';
 
 // 页面特定组件
+export * from './sbti';
 export * from './ads';

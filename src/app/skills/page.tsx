@@ -1,177 +1,210 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Search, Copy, Check, Loader2 } from 'lucide-react';
+import Image from 'next/image';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, Sparkles, ArrowRight } from 'lucide-react';
+import BackToHome from '@/components/common/BackToHome';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
 
-interface Skill {
-  id: number;
-  title: string;
-  description: string;
-  prompt: string;
-  tags: string[];
-  usage_count: number;
-  category?: { name: string; slug: string };
+export const metadata: Metadata = {
+  title: 'AI技能库',
+  description: '探索实用的AI技能，从写作到编程，全方位提升你的AI使用效率',
+};
+
+async function getSkills() {
+  const supabase = getSupabaseClient();
+  
+  const { data: skills, error } = await supabase
+    .from('skills')
+    .select(`
+      *,
+      skill_categories (
+        id,
+        name,
+        slug,
+        icon,
+        color
+      )
+    `)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error('获取技能失败:', error);
+    return [];
+  }
+
+  return skills || [];
 }
 
-export default function SkillsPage() {
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+async function getCategories() {
+  const supabase = getSupabaseClient();
+  
+  const { data: categories, error } = await supabase
+    .from('skill_categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
 
-  useEffect(() => {
-    fetchSkills();
-  }, []);
+  if (error) {
+    console.error('获取分类失败:', error);
+    return [];
+  }
 
-  const fetchSkills = async () => {
-    try {
-      const res = await fetch('/api/skills');
-      const data = await res.json();
-      if (data.success) {
-        setSkills(data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch skills:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  return categories || [];
+}
 
-  const handleCopy = async (id: number, prompt: string) => {
-    await navigator.clipboard.writeText(prompt);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  const filteredSkills = skills.filter(skill =>
-    !searchQuery ||
-    skill.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    skill.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+export default async function SkillsPage() {
+  const [skills, categories] = await Promise.all([
+    getSkills(),
+    getCategories()
+  ]);
 
   // 按分类分组
-  const groupedSkills = filteredSkills.reduce((acc, skill) => {
-    const catName = skill.category?.name || '其他';
-    if (!acc[catName]) acc[catName] = [];
-    acc[catName].push(skill);
+  const groupedSkills = skills.reduce((acc, skill) => {
+    const categoryId = skill.category_id;
+    if (!acc[categoryId]) {
+      acc[categoryId] = {
+        category: skill.skill_categories,
+        skills: []
+      };
+    }
+    acc[categoryId].skills.push(skill);
     return acc;
-  }, {} as Record<string, Skill[]>);
+  }, {} as Record<number, { category: any; skills: any[] }>);
+
+  const groupedSkillsList = Object.values(groupedSkills) as { category: any; skills: any[] }[];
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/50 via-white to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
       {/* Header */}
-      <header className="border-b border-[var(--border)] sticky top-0 bg-[var(--background)]/95 backdrop-blur-sm z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <Link href="/" className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm">返回</span>
+      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <BackToHome />
+            <Link href="/" className="text-white/80 hover:text-white text-sm flex items-center gap-1">
+              <span>返回首页</span>
             </Link>
-            <span className="text-xl font-semibold tracking-tight">OneClaw</span>
           </div>
           
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
-            <Input
-              type="text"
-              placeholder="搜索技能..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-10 bg-[var(--secondary)] border-0 rounded-lg"
-            />
+          <div className="text-center py-8">
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-4">
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm">实用AI技能集合</span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">AI技能库</h1>
+            <p className="text-white/90 text-lg max-w-2xl mx-auto">
+              探索来自 SkillHub 的实用AI技能，覆盖写作、编程、数据分析等多个领域
+            </p>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Main */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold mb-2">AI技能</h1>
-          <p className="text-[var(--muted-foreground)]">精选AI提示词和技能，提升工作效率</p>
-        </div>
-
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-[var(--muted-foreground)]" />
+      {/* Skills Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {groupedSkillsList.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-10 h-10 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-600 dark:text-slate-300 mb-2">暂无技能数据</h2>
+            <p className="text-slate-500">技能数据正在同步中，请稍后再试</p>
           </div>
         ) : (
-          <Tabs defaultValue={Object.keys(groupedSkills)[0] || 'all'} className="w-full">
-            <TabsList className="mb-6 flex flex-wrap h-auto">
-              <TabsTrigger value="all">全部</TabsTrigger>
-              {Object.keys(groupedSkills).map(cat => (
-                <TabsTrigger key={cat} value={cat}>{cat}</TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value="all">
-              <div className="grid gap-4 md:grid-cols-2">
-                {filteredSkills.map(skill => (
-                  <Card key={skill.id} className="hover:border-[var(--foreground)] transition-colors">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg">{skill.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-[var(--muted-foreground)] mb-4 line-clamp-2">
-                        {skill.description || '暂无描述'}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-wrap gap-1">
-                          {skill.tags?.slice(0, 3).map((tag, i) => (
-                            <span key={i} className="text-xs px-2 py-0.5 rounded bg-[var(--secondary)]">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        <Button size="sm" variant="outline" onClick={() => handleCopy(skill.id, skill.prompt)}>
-                          {copiedId === skill.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            {Object.entries(groupedSkills).map(([cat, catSkills]) => (
-              <TabsContent key={cat} value={cat}>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {catSkills.map(skill => (
-                    <Card key={skill.id} className="hover:border-[var(--foreground)] transition-colors">
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-lg">{skill.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-[var(--muted-foreground)] mb-4 line-clamp-2">
-                          {skill.description || '暂无描述'}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-[var(--muted-foreground)]">
-                            使用 {skill.usage_count || 0} 次
-                          </span>
-                          <Button size="sm" variant="outline" onClick={() => handleCopy(skill.id, skill.prompt)}>
-                            {copiedId === skill.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
+          <div className="space-y-10">
+            {groupedSkillsList.map(({ category, skills: categorySkills }) => (
+              <section key={category.id}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div 
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+                    style={{ backgroundColor: `${category.color}20` }}
+                  >
+                    {category.icon || '🔧'}
+                  </div>
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                    {category.name}
+                  </h2>
+                  <Badge variant="secondary" className="ml-auto">
+                    {categorySkills.length} 个技能
+                  </Badge>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {categorySkills.map((skill) => (
+                    <Link 
+                      key={skill.id}
+                      href={`/skills/${skill.slug}`}
+                      className="group"
+                    >
+                      <Card className="h-full hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-700 transition-all duration-200">
+                        <CardContent className="p-5">
+                          <div className="flex items-start gap-4">
+                            {skill.logo ? (
+                              <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700">
+                                <Image
+                                  src={skill.logo}
+                                  alt={skill.name}
+                                  width={48}
+                                  height={48}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                {skill.name.charAt(0)}
+                              </div>
+                            )}
+                            
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors truncate">
+                                {skill.name}
+                              </h3>
+                              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
+                                {skill.description || '暂无描述'}
+                              </p>
+                              
+                              <div className="flex items-center gap-2 mt-3">
+                                {skill.official_url && (
+                                  <Badge variant="outline" className="text-xs">
+                                    官方链接
+                                  </Badge>
+                                )}
+                                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition-colors ml-auto" />
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
                   ))}
                 </div>
-              </TabsContent>
+              </section>
             ))}
-          </Tabs>
+          </div>
         )}
-      </main>
+      </div>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)] mt-12">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="text-sm text-[var(--muted-foreground)]">
-            © 2024 OneClaw
+      <footer className="border-t bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                <AnimatedLobster size={20} />
+              </div>
+              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+              <span className="text-xs text-slate-400 ml-2">AI技能库</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">
+                关于OneClaw
+              </Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
           </div>
         </div>
       </footer>

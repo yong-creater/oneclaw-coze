@@ -1,29 +1,29 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+// 获取分类列表
 export async function GET() {
   try {
+    const supabase = getSupabaseClient();
+    
     const { data, error } = await supabase
       .from('categories')
       .select('*')
-      .order('sort_order');
-
-    if (error) throw error;
-
+      .order('sort_order', { ascending: true });
+    
+    if (error) {
+      console.error('获取分类失败:', error);
+      return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 });
+    }
+    
     return NextResponse.json({
       success: true,
-      data: data || []
+      data
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=3600' }
     });
   } catch (error) {
-    console.error('Failed to fetch categories:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch categories' },
-      { status: 500 }
-    );
+    console.error('获取分类失败:', error);
+    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

@@ -1,11 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+// 获取单个工具详情
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,42 +10,41 @@ export async function GET(
     const { id } = await params;
     const toolId = parseInt(id);
 
-    // 获取工具详情
+    if (isNaN(toolId)) {
+      return NextResponse.json({ success: false, error: '无效的工具ID' }, { status: 400 });
+    }
+
+    const supabase = getSupabaseClient();
+    
     const { data: tool, error } = await supabase
       .from('tools')
-      .select('*')
+      .select('*, categories(name, slug)')
       .eq('id', toolId)
+      .eq('is_active', true)
       .single();
 
     if (error || !tool) {
-      return NextResponse.json(
-        { success: false, error: 'Tool not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: '工具不存在' }, { status: 404 });
     }
 
-    // 增加浏览次数
-    await supabase
+    // 异步增加浏览量（不阻塞响应）
+    supabase
       .from('tools')
       .update({ view_count: (tool.view_count || 0) + 1 })
-      .eq('id', toolId);
-
-    // 获取分类信息
-    const { data: category } = await supabase
-      .from('categories')
-      .select('id, name, slug')
-      .eq('id', tool.category_id)
-      .single();
+      .eq('id', toolId)
+      .then(() => {}, () => {});
 
     return NextResponse.json({
       success: true,
-      data: { ...tool, category }
+      data: {
+        ...tool,
+        view_count: (tool.view_count || 0) + 1
+      }
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=30, stale-while-revalidate=60' }
     });
   } catch (error) {
-    console.error('Failed to fetch tool:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch tool' },
-      { status: 500 }
-    );
+    console.error('获取工具详情失败:', error);
+    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

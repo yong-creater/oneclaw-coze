@@ -1,63 +1,71 @@
-import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
+// 获取技能列表
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
+    const { searchParams } = new URL(request.url);
+    
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '24');
     const category = searchParams.get('category');
     const featured = searchParams.get('featured');
     const search = searchParams.get('search');
-    const limit = parseInt(searchParams.get('limit') || '50');
-
+    
+    const offset = (page - 1) * limit;
+    const supabase = getSupabaseClient();
+    
+    // 构建基础查询
     let query = supabase
       .from('skills')
-      .select('*')
-      .order('is_featured', { ascending: false })
-      .order('usage_count', { ascending: false })
-      .limit(limit);
-
-    if (category) {
-      query = query.eq('category_id', parseInt(category));
+      .select('*, skill_categories(id, name, slug, color)', { count: 'exact' })
+      .eq('is_active', true);
+    
+    // 分类筛选
+    if (category && category !== 'all') {
+      const categoryId = parseInt(category);
+      if (!isNaN(categoryId)) {
+        query = query.eq('category_id', categoryId);
+      }
     }
-
+    
+    // 精选筛选
     if (featured === 'true') {
       query = query.eq('is_featured', true);
     }
-
+    
+    // 搜索
     if (search) {
-      query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
     }
-
-    const { data: skills, error } = await query;
-
-    if (error) throw error;
-
-    // 获取分类信息
-    const { data: categories } = await supabase
-      .from('skill_categories')
-      .select('id, name, slug')
-      .order('sort_order');
-
-    // 关联分类
-    const skillsWithCategory = skills?.map(skill => {
-      const cat = categories?.find(c => c.id === skill.category_id);
-      return { ...skill, category: cat };
-    });
-
+    
+    // 排序和分页
+    query = query
+      .order('is_featured', { ascending: false })
+      .order('view_count', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    const { data, count, error } = await query;
+    
+    if (error) {
+      console.error('获取技能列表失败:', error);
+      return NextResponse.json({ success: false, error: '获取失败' }, { status: 500 });
+    }
+    
     return NextResponse.json({
       success: true,
-      data: skillsWithCategory || []
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit)
+      }
+    }, {
+      headers: { 'Cache-Control': 'public, max-age=60' }
     });
   } catch (error) {
-    console.error('Failed to fetch skills:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch skills' },
-      { status: 500 }
-    );
+    console.error('获取技能列表失败:', error);
+    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
   }
 }

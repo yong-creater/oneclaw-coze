@@ -1,248 +1,232 @@
-'use client';
-
-import { useState, useEffect } from 'react';
+import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Search, ExternalLink, Star, Grid, List } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search, Filter, Star, ExternalLink } from 'lucide-react';
+import BackToHome from '@/components/common/BackToHome';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
 
-interface Tool {
-  id: number;
-  name: string;
-  logo: string;
-  highlight: string;
-  producer: string;
-  category_id: number;
-  free_type: string;
-  is_featured: boolean;
-  feature_tags: string[];
-  official_url: string;
-  category?: { name: string; slug: string };
-}
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-const FREE_TYPE_COLORS: Record<string, string> = {
-  '完全免费': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-  '免费额度': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  '限时免费': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  '付费工具': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+export const metadata: Metadata = {
+  title: 'AI工具库',
+  description: '822款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作等全品类',
 };
 
-export default function ToolsPage() {
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+interface Props {
+  searchParams: Promise<{ category?: string; search?: string }>;
+}
 
-  useEffect(() => {
-    fetchData();
-  }, [selectedCategory]);
+async function getTools(category?: string, search?: string) {
+  const supabase = getSupabaseClient();
+  
+  let query = supabase
+    .from('tools')
+    .select(`
+      *,
+      categories (
+        id,
+        name,
+        slug
+      )
+    `)
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(200);
 
-  const fetchData = async () => {
-    try {
-      const [toolsRes, catsRes] = await Promise.all([
-        fetch(`/api/tools${selectedCategory ? `?category=${selectedCategory}` : ''}`),
-        fetch('/api/categories'),
-      ]);
-      const toolsData = await toolsRes.json();
-      const catsData = await catsRes.json();
-      if (toolsData.success) setTools(toolsData.data);
-      if (catsData.success) setCategories(catsData.data);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (category && category !== 'all') {
+    query = query.eq('categories.slug', category);
+  }
 
-  const filteredTools = tools.filter((tool) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      tool.name.toLowerCase().includes(query) ||
-      tool.highlight?.toLowerCase().includes(query) ||
-      tool.producer?.toLowerCase().includes(query)
-    );
-  });
+  if (search) {
+    query = query.ilike('name', `%${search}%`);
+  }
+
+  const { data: tools, error } = await query;
+
+  if (error) {
+    console.error('获取工具失败:', error);
+    return [];
+  }
+
+  return tools || [];
+}
+
+async function getCategories() {
+  const supabase = getSupabaseClient();
+  
+  const { data: categories, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('获取分类失败:', error);
+    return [];
+  }
+
+  return categories || [];
+}
+
+export default async function ToolsPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const [tools, categories] = await Promise.all([
+    getTools(params.category, params.search),
+    getCategories()
+  ]);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/50 via-white to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
       {/* Header */}
-      <header className="border-b border-[var(--border)] sticky top-0 bg-[var(--background)]/95 backdrop-blur-sm z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <Link href="/" className="flex items-center gap-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm">返回</span>
+      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <BackToHome />
+            <Link href="/" className="text-white/80 hover:text-white text-sm flex items-center gap-1">
+              <span>返回首页</span>
             </Link>
-            <span className="text-xl font-semibold tracking-tight">OneClaw</span>
           </div>
           
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
-              <Input
-                type="text"
-                placeholder="搜索工具..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 bg-[var(--secondary)] border-0 rounded-lg"
-              />
-            </div>
-            
-            <div className="flex items-center gap-1 bg-[var(--secondary)] rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm' : ''}`}
-              >
-                <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded ${viewMode === 'list' ? 'bg-white shadow-sm' : ''}`}
-              >
-                <List className="w-4 h-4" />
-              </button>
-            </div>
+          <div className="text-center py-8">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">AI工具库</h1>
+            <p className="text-white/90 text-lg max-w-2xl mx-auto">
+              精选{tools.length}款优质AI工具，覆盖视频生成、数字人、AI绘画等多个领域
+            </p>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Main */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Categories */}
+      {/* Tools Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* 分类筛选 */}
         <div className="flex flex-wrap gap-2 mb-8">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`px-4 py-2 rounded-full text-sm transition-colors ${
-              selectedCategory === null
-                ? 'bg-[var(--foreground)] text-[var(--background)]'
-                : 'bg-[var(--secondary)] text-[var(--muted-foreground)] hover:bg-[var(--accent)]'
+          <Link 
+            href="/tools"
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              !params.category || params.category === 'all'
+                ? 'bg-orange-500 text-white'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
             }`}
           >
-            全部应用
-          </button>
+            全部
+          </Link>
           {categories.map((cat) => (
-            <button
+            <Link
               key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-4 py-2 rounded-full text-sm transition-colors ${
-                selectedCategory === cat.id
-                  ? 'bg-[var(--foreground)] text-[var(--background)]'
-                  : 'bg-[var(--secondary)] text-[var(--muted-foreground)] hover:bg-[var(--accent)]'
+              href={`/tools?category=${cat.slug}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                params.category === cat.slug
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               {cat.name}
-            </button>
+            </Link>
           ))}
         </div>
 
-        {/* Results Count */}
-        <div className="mb-6 text-sm text-[var(--muted-foreground)]">
-          共 {filteredTools.length} 个工具
-        </div>
-
-        {/* Tools Grid */}
-        {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[...Array(12)].map((_, i) => (
-              <div key={i} className="border border-[var(--border)] rounded-xl p-4 animate-pulse">
-                <div className="w-12 h-12 bg-[var(--secondary)] rounded-lg mb-3" />
-                <div className="h-4 bg-[var(--secondary)] rounded w-3/4 mb-2" />
-                <div className="h-3 bg-[var(--secondary)] rounded w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : filteredTools.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-[var(--muted-foreground)]">没有找到相关工具</p>
-          </div>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {filteredTools.map((tool) => (
-              <Link key={tool.id} href={`/tools/${tool.id}`}>
-                <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer h-full">
-                  <div className="flex items-start gap-3 mb-3">
-                    <div className="w-12 h-12 bg-[var(--secondary)] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {tool.logo ? (
-                        <img src={tool.logo} alt={tool.name} className="w-8 h-8 object-contain" />
-                      ) : (
-                        <span className="text-lg font-semibold">{tool.name[0]}</span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm truncate">{tool.name}</h3>
-                      {tool.is_featured && (
-                        <div className="flex items-center gap-1 text-amber-500 mt-0.5">
-                          <Star className="w-3 h-3 fill-current" />
-                          <span className="text-xs">精选</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <p className="text-xs text-[var(--muted-foreground)] line-clamp-2 mb-3">
-                    {tool.highlight || '暂无描述'}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className={`text-xs px-2 py-0.5 rounded ${FREE_TYPE_COLORS[tool.free_type] || 'bg-[var(--secondary)]'}`}>
-                      {tool.free_type}
-                    </span>
-                    <ExternalLink className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
-                  </div>
-                </div>
-              </Link>
-            ))}
+        {/* 工具列表 */}
+        {tools.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-10 h-10 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-600 dark:text-slate-300 mb-2">暂无匹配工具</h2>
+            <p className="text-slate-500">试试其他分类或关键词</p>
+            <Link 
+              href="/tools"
+              className="inline-flex items-center gap-2 mt-4 text-orange-500 hover:text-orange-600"
+            >
+              查看全部工具
+            </Link>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredTools.map((tool) => (
-              <Link key={tool.id} href={`/tools/${tool.id}`}>
-                <div className="group flex items-center gap-4 border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer">
-                  <div className="w-12 h-12 bg-[var(--secondary)] rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                    {tool.logo ? (
-                      <img src={tool.logo} alt={tool.name} className="w-8 h-8 object-contain" />
-                    ) : (
-                      <span className="text-lg font-semibold">{tool.name[0]}</span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium">{tool.name}</h3>
-                      {tool.is_featured && (
-                        <div className="flex items-center gap-1 text-amber-500">
-                          <Star className="w-3 h-3 fill-current" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {tools.map((tool) => (
+              <Link 
+                key={tool.id}
+                href={`/tools/${tool.id}`}
+                className="group"
+              >
+                <Card className="h-full hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-700 transition-all duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      {tool.logo ? (
+                        <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700">
+                          <Image
+                            src={tool.logo}
+                            alt={tool.name}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                          {tool.name.charAt(0)}
                         </div>
                       )}
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors truncate">
+                            {tool.name}
+                          </h3>
+                          {tool.is_featured && (
+                            <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                          {tool.highlight || tool.producer}
+                        </p>
+                        
+                        <div className="flex items-center gap-2 mt-3">
+                          {tool.categories && (
+                            <Badge variant="outline" className="text-xs">
+                              {tool.categories.name}
+                            </Badge>
+                          )}
+                          <Badge 
+                            variant={tool.free_type === '完全免费' ? 'default' : 'secondary'}
+                            className={`text-xs ${
+                              tool.free_type === '完全免费' 
+                                ? 'bg-green-500 text-white border-green-500' 
+                                : ''
+                            }`}
+                          >
+                            {tool.free_type}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-sm text-[var(--muted-foreground)] truncate">
-                      {tool.highlight || '暂无描述'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs px-2 py-1 rounded ${FREE_TYPE_COLORS[tool.free_type] || 'bg-[var(--secondary)]'}`}>
-                      {tool.free_type}
-                    </span>
-                    <ExternalLink className="w-4 h-4 text-[var(--muted-foreground)]" />
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               </Link>
             ))}
           </div>
         )}
-      </main>
+      </div>
 
       {/* Footer */}
-      <footer className="border-t border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <div className="text-sm text-[var(--muted-foreground)]">
-            © 2024 OneClaw
+      <footer className="border-t bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                <AnimatedLobster size={20} />
+              </div>
+              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+              <span className="text-xs text-slate-400 ml-2">AI工具库</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">
+                关于OneClaw
+              </Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
           </div>
         </div>
       </footer>
