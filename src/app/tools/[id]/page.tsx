@@ -22,9 +22,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import BackButton from '@/components/common/BackButton';
 import BackToHome from '@/components/common/BackToHome';
-import { ToolDetailAd } from '@/components/common/AdBanner';
-import WechatPromo from '@/components/common/WechatPromo';
-import CaseStudyFloatCard from '@/components/common/CaseStudyFloatCard';
 
 // ==================== 类型定义 ====================
 interface Tool {
@@ -474,11 +471,6 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      {/* 广告位 */}
-      <div className="max-w-4xl mx-auto px-4 py-4">
-        <ToolDetailAd toolId={tool.id} />
-      </div>
-
       <main className="max-w-4xl mx-auto px-4 pt-8 pb-8">
         {/* 1. 核心功能 - 最重要 */}
         <section className="mb-8">
@@ -883,9 +875,6 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200">
-        {/* 公众号推广 */}
-        <WechatPromo />
-        
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
@@ -901,14 +890,6 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </footer>
-
-      {/* 案例悬浮卡片 */}
-      {tool && (
-        <CaseStudyFloatCard 
-          toolSlug={tool.categories?.slug || ''}
-          toolName={tool.name}
-        />
-      )}
     </div>
   );
 }
