@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FileText, Sparkles, Search, ArrowRight, ExternalLink, Star, Zap } from 'lucide-react';
+import { FileText, Sparkles, BookOpen, Lightbulb, Star, ArrowRight, Search, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -17,11 +17,26 @@ interface Tool {
   category?: { name: string; slug: string };
 }
 
-interface Category {
+interface Skill {
   id: number;
-  name: string;
+  title: string;
+  description: string;
+  category?: { name: string };
+}
+
+interface Tutorial {
+  id: number;
+  title: string;
   slug: string;
-  icon: string;
+  summary: string;
+  view_count: number;
+}
+
+interface Prompt {
+  id: number;
+  title: string;
+  description: string;
+  usage_count: number;
 }
 
 const FREE_TYPE_COLORS: Record<string, string> = {
@@ -33,10 +48,11 @@ const FREE_TYPE_COLORS: Record<string, string> = {
 
 export default function HomePage() {
   const [tools, setTools] = useState<Tool[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -44,28 +60,28 @@ export default function HomePage() {
 
   const fetchData = async () => {
     try {
-      const [toolsRes, catsRes] = await Promise.all([
-        fetch('/api/tools?featured=true&limit=12'),
-        fetch('/api/categories'),
+      const [toolsRes, skillsRes, tutorialsRes, promptsRes] = await Promise.all([
+        fetch('/api/tools?featured=true&limit=8'),
+        fetch('/api/skills?featured=true&limit=4'),
+        fetch('/api/tutorials?featured=true&limit=4'),
+        fetch('/api/prompts?featured=true&limit=6'),
       ]);
-      const toolsData = await toolsRes.json();
-      const catsData = await catsRes.json();
+      const [toolsData, skillsData, tutorialsData, promptsData] = await Promise.all([
+        toolsRes.json(),
+        skillsRes.json(),
+        tutorialsRes.json(),
+        promptsRes.json(),
+      ]);
       if (toolsData.success) setTools(toolsData.data);
-      if (catsData.success) setCategories(catsData.data);
+      if (skillsData.success) setSkills(skillsData.data);
+      if (tutorialsData.success) setTutorials(tutorialsData.data);
+      if (promptsData.success) setPrompts(promptsData.data);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
       setLoading(false);
     }
   };
-
-  const filteredTools = tools.filter((tool) => {
-    const matchesSearch = !searchQuery || 
-      tool.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tool.highlight?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || tool.category_id === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
@@ -81,6 +97,18 @@ export default function HomePage() {
           <nav className="flex items-center gap-6 text-sm">
             <Link href="/tools" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
               AI应用
+            </Link>
+            <Link href="/skills" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+              技能
+            </Link>
+            <Link href="/tutorials" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+              教程
+            </Link>
+            <Link href="/prompts" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+              提示词
+            </Link>
+            <Link href="/cases" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
+              案例
             </Link>
             <Link href="/resume" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
               简历优化
@@ -100,7 +128,7 @@ export default function HomePage() {
               发现最好的 AI 工具
             </h1>
             <p className="text-lg text-[var(--muted-foreground)] mb-8">
-              精选热门AI工具，帮你找到最合适的效率工具
+              精选AI应用、技能、教程和提示词，帮你找到最合适的效率工具
             </p>
             
             {/* Search */}
@@ -108,7 +136,7 @@ export default function HomePage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted-foreground)]" />
               <Input
                 type="text"
-                placeholder="搜索AI工具..."
+                placeholder="搜索AI工具、技能、教程..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-11 bg-[var(--secondary)] border-0 rounded-lg"
@@ -118,75 +146,64 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quick Access Cards */}
+      {/* Quick Access */}
       <section className="px-6 pb-12">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/resume">
-              <div className="group border border-[var(--border)] rounded-xl p-6 hover:border-[var(--foreground)] transition-all cursor-pointer bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
-                    <FileText className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-1">简历优化</h3>
-                    <p className="text-sm text-[var(--muted-foreground)]">AI智能优化简历，提升面试机会</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-[var(--muted-foreground)] group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </Link>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <Link href="/tools">
-              <div className="group border border-[var(--border)] rounded-xl p-6 hover:border-[var(--foreground)] transition-all cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[var(--secondary)] rounded-xl flex items-center justify-center">
-                    <Sparkles className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-1">AI应用</h3>
-                    <p className="text-sm text-[var(--muted-foreground)]">浏览所有AI工具</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-[var(--muted-foreground)] group-hover:translate-x-1 transition-transform" />
+              <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer text-center">
+                <div className="w-10 h-10 bg-[var(--secondary)] rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Sparkles className="w-5 h-5" />
                 </div>
+                <span className="text-sm font-medium">AI应用</span>
               </div>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="px-6 mb-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                selectedCategory === null
-                  ? 'bg-[var(--foreground)] text-[var(--background)]'
-                  : 'bg-[var(--secondary)] text-[var(--muted-foreground)] hover:bg-[var(--accent)]'
-              }`}
-            >
-              全部
-            </button>
-            {categories.slice(0, 6).map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                  selectedCategory === cat.id
-                    ? 'bg-[var(--foreground)] text-[var(--background)]'
-                    : 'bg-[var(--secondary)] text-[var(--muted-foreground)] hover:bg-[var(--accent)]'
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
+            <Link href="/skills">
+              <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer text-center">
+                <div className="w-10 h-10 bg-[var(--secondary)] rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Lightbulb className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">技能</span>
+              </div>
+            </Link>
+            <Link href="/tutorials">
+              <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer text-center">
+                <div className="w-10 h-10 bg-[var(--secondary)] rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <BookOpen className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">教程</span>
+              </div>
+            </Link>
+            <Link href="/prompts">
+              <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer text-center">
+                <div className="w-10 h-10 bg-[var(--secondary)] rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">提示词</span>
+              </div>
+            </Link>
+            <Link href="/cases">
+              <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer text-center">
+                <div className="w-10 h-10 bg-[var(--secondary)] rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <Star className="w-5 h-5" />
+                </div>
+                <span className="text-sm font-medium">案例</span>
+              </div>
+            </Link>
+            <Link href="/resume">
+              <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer text-center bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/20 dark:to-orange-950/20">
+                <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-sm font-medium">简历优化</span>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Featured Tools */}
-      <section className="px-6 pb-16">
+      <section className="px-6 pb-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold">精选AI应用</h2>
@@ -198,7 +215,7 @@ export default function HomePage() {
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="border border-[var(--border)] rounded-xl p-4 animate-pulse">
                   <div className="w-12 h-12 bg-[var(--secondary)] rounded-lg mb-3" />
@@ -208,8 +225,8 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredTools.slice(0, 8).map((tool) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {tools.slice(0, 8).map((tool) => (
                 <Link key={tool.id} href={`/tools/${tool.id}`}>
                   <div className="group border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer h-full">
                     <div className="flex items-start gap-3 mb-3">
@@ -233,17 +250,102 @@ export default function HomePage() {
                     <p className="text-xs text-[var(--muted-foreground)] line-clamp-2 mb-3">
                       {tool.highlight || '暂无描述'}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-0.5 rounded ${FREE_TYPE_COLORS[tool.free_type] || 'bg-[var(--secondary)]'}`}>
-                        {tool.free_type}
-                      </span>
-                      <ExternalLink className="w-3.5 h-3.5 text-[var(--muted-foreground)]" />
-                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded ${FREE_TYPE_COLORS[tool.free_type] || 'bg-[var(--secondary)]'}`}>
+                      {tool.free_type}
+                    </span>
                   </div>
                 </Link>
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Featured Skills */}
+      <section className="px-6 pb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold">精选技能</h2>
+            <Link href="/skills">
+              <Button variant="ghost" size="sm" className="text-[var(--muted-foreground)]">
+                查看全部 <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {skills.slice(0, 4).map((skill) => (
+              <Link key={skill.id} href="/skills">
+                <div className="border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer h-full">
+                  <div className="w-8 h-8 bg-[var(--secondary)] rounded-lg flex items-center justify-center mb-3">
+                    <Lightbulb className="w-4 h-4" />
+                  </div>
+                  <h3 className="font-medium text-sm mb-1">{skill.title}</h3>
+                  <p className="text-xs text-[var(--muted-foreground)] line-clamp-2">
+                    {skill.description || '暂无描述'}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Tutorials */}
+      <section className="px-6 pb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold">最新教程</h2>
+            <Link href="/tutorials">
+              <Button variant="ghost" size="sm" className="text-[var(--muted-foreground)]">
+                查看全部 <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {tutorials.slice(0, 4).map((tutorial) => (
+              <Link key={tutorial.id} href={`/tutorials/${tutorial.slug}`}>
+                <div className="border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer h-full">
+                  <div className="w-full aspect-video bg-[var(--secondary)] rounded-lg mb-3" />
+                  <h3 className="font-medium text-sm line-clamp-2">{tutorial.title}</h3>
+                  <p className="text-xs text-[var(--muted-foreground)] mt-1">
+                    浏览 {tutorial.view_count || 0} 次
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Prompts */}
+      <section className="px-6 pb-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold">热门提示词</h2>
+            <Link href="/prompts">
+              <Button variant="ghost" size="sm" className="text-[var(--muted-foreground)]">
+                查看全部 <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {prompts.slice(0, 6).map((prompt) => (
+              <Link key={prompt.id} href="/prompts">
+                <div className="border border-[var(--border)] rounded-xl p-4 hover:border-[var(--foreground)] transition-all cursor-pointer h-full">
+                  <h3 className="font-medium text-sm mb-1">{prompt.title}</h3>
+                  <p className="text-xs text-[var(--muted-foreground)] line-clamp-2 mb-2">
+                    {prompt.description || '暂无描述'}
+                  </p>
+                  <span className="text-xs text-[var(--muted-foreground)]">
+                    使用 {prompt.usage_count || 0} 次
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -255,7 +357,7 @@ export default function HomePage() {
               <span>© 2024 OneClaw</span>
               <span className="hidden md:inline">·</span>
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--foreground)]">
-                京ICP备XXXXXXXX号
+                京ICP备XXXXXXXX号-1
               </a>
             </div>
             <div className="flex items-center gap-4">

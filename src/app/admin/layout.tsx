@@ -7,6 +7,11 @@ import { Menu, X, LogOut, Loader2 } from 'lucide-react';
 
 const navigation = [
   { name: '仪表盘', href: '/admin' },
+  { name: 'AI应用', href: '/admin/tools' },
+  { name: '技能管理', href: '/admin/skills' },
+  { name: '教程管理', href: '/admin/tutorials' },
+  { name: '提示词管理', href: '/admin/prompts' },
+  { name: '案例管理', href: '/admin/cases' },
   { name: '广告管理', href: '/admin/ads' },
   { name: '用户管理', href: '/admin/users' },
   { name: '微信配置', href: '/admin/wechat' },

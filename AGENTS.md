@@ -11,16 +11,26 @@
 ## 核心功能
 
 ### 前台功能
-1. **首页** (`/`) - 精选工具 + 简历优化入口
-2. **精选工具** (`/tools`) - AI工具列表、搜索、筛选
+1. **首页** (`/`) - AI应用、技能、教程、提示词、案例入口
+2. **AI应用** (`/tools`) - AI工具列表、搜索、筛选
 3. **工具详情** (`/tools/[id]`) - 工具详细信息
-4. **简历优化** (`/resume`) - AI智能优化简历
-5. **关于** (`/about`) - 关于OneClaw、备案信息
+4. **技能** (`/skills`) - AI技能和提示词库
+5. **教程** (`/tutorials`) - AI工具使用教程
+6. **提示词** (`/prompts`) - AI提示词库
+7. **案例** (`/cases`) - AI应用案例
+8. **简历优化** (`/resume`) - AI智能优化简历
+9. **关于** (`/about`) - 关于OneClaw、备案信息
 
 ### 后台管理
-1. **广告管理** - 广告位管理
-2. **用户管理** - 用户列表查看
-3. **微信配置** - 公众号配置
+1. **仪表盘** - 数据统计概览
+2. **AI应用管理** - 工具列表CRUD
+3. **技能管理** - 技能/提示词CRUD
+4. **教程管理** - 教程内容CRUD
+5. **提示词管理** - 提示词CRUD
+6. **案例管理** - 案例内容CRUD
+7. **广告管理** - 广告位管理
+8. **用户管理** - 用户列表查看
+9. **微信配置** - 公众号配置
 
 ## 技术栈
 
@@ -41,15 +51,19 @@
 │   │   ├── layout.tsx         # 根布局
 │   │   ├── globals.css        # 全局样式
 │   │   ├── tools/             # 工具列表页
-│   │   ├── tools/[id]/        # 工具详情页
+│   │   ├── tools/[id]/       # 工具详情页
+│   │   ├── skills/            # 技能页面
+│   │   ├── tutorials/         # 教程页面
+│   │   ├── prompts/           # 提示词页面
+│   │   ├── cases/             # 案例页面
 │   │   ├── resume/            # 简历优化页
 │   │   ├── about/             # 关于页面
 │   │   ├── admin/             # 后台管理
 │   │   └── api/               # API路由
 │   ├── components/
 │   │   ├── ui/                # Shadcn UI 组件
-│   │   └── common/             # 通用组件
-│   └── lib/                    # 工具库
+│   │   └── common/            # 通用组件
+│   └── lib/                   # 工具库
 ```
 
 ## 数据库表
@@ -58,12 +72,16 @@
 |------|------|
 | `categories` | 工具分类 |
 | `tools` | AI工具库 |
+| `skill_categories` | 技能分类 |
+| `skills` | AI技能 |
+| `tutorials` | 教程 |
+| `prompts` | 提示词 |
+| `cases` | 案例 |
 | `user_favorites` | 用户收藏 |
 | `user_ratings` | 用户评分 |
 | `users` | 用户 |
 | `members` | 会员 |
 | `orders` | 订单 |
-| `prompts` | 提示词 |
 | `advertisements` | 广告位 |
 | `admin_users` | 管理员用户 |
 | `wechat_config` | 微信配置 |
@@ -74,6 +92,10 @@
 - `GET /api/tools` - 获取工具列表
 - `GET /api/tools/[id]` - 获取工具详情
 - `GET /api/categories` - 获取分类列表
+- `GET /api/skills` - 获取技能列表
+- `GET /api/tutorials` - 获取教程列表
+- `GET /api/prompts` - 获取提示词列表
+- `GET /api/cases` - 获取案例列表
 - `POST /api/ratings` - 提交评分
 - `POST /api/favorites` - 添加收藏
 - `GET /api/ads` - 获取广告
@@ -82,6 +104,10 @@
 - `POST /api/auth/code` - 发送验证码
 
 ### 后台API
+- `GET/POST /api/admin/tools` - 工具CRUD
+- `GET/POST /api/admin/skills` - 技能CRUD
+- `GET/POST /api/admin/tutorials` - 教程CRUD
+- `GET/POST /api/admin/prompts` - 提示词CRUD
 - `GET/POST /api/admin/ads` - 广告管理
 - `POST /api/admin/auth` - 管理员认证
 - `POST /api/admin/init-data` - 初始化数据
