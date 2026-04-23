@@ -23,11 +23,11 @@ const siteUrl = `https://${domain}`;
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'OneClaw - 全品类AI工具导航 | 精选822款优质AI工具',
+    default: 'OneClaw - 全品类AI工具导航 | 精选101款优质AI工具',
     template: '%s | OneClaw AI工具导航',
   },
   description:
-    'OneClaw(钳爪)是全品类AI工具导航站，精选822款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程、AI音频、AI办公等14大分类。提供工具对比、评分评价、教程资源，助您快速找到最适合的AI工具。',
+    'OneClaw(钳爪)是全品类AI工具导航站，精选101款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程、AI音频、AI办公等14大分类。提供工具对比、评分评价、教程资源，助您快速找到最适合的AI工具。',
   keywords: [
     'AI工具导航',
     'AI工具推荐',
@@ -73,9 +73,9 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: 'OneClaw - 全品类AI工具导航 | 精选822款优质AI工具',
+    title: 'OneClaw - 全品类AI工具导航 | 精选101款优质AI工具',
     description:
-      '精选822款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类。提供工具对比、评分评价、教程资源。',
+      '精选101款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类。提供工具对比、评分评价、教程资源。',
     siteName: 'OneClaw',
     locale: 'zh_CN',
     type: 'website',
@@ -92,7 +92,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'OneClaw - 全品类AI工具导航',
     description:
-      '精选822款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类。',
+      '精选101款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类。',
     images: ['/og-image.png'],
   },
   alternates: {
@@ -117,7 +117,7 @@ const jsonLd = {
   '@type': 'WebSite',
   name: 'OneClaw',
   alternateName: '钳爪AI工具导航',
-  description: '全品类AI工具导航站，精选822款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类',
+  description: '全品类AI工具导航站，精选101款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程等14大分类',
   url: siteUrl,
   inLanguage: 'zh-CN',
   potentialAction: {
@@ -151,7 +151,7 @@ const itemListJsonLd = {
   '@type': 'ItemList',
   name: 'AI工具推荐 - OneClaw精选',
   description: '精选热门AI工具，涵盖视频生成、数字人、AI绘画、AI写作等',
-  numberOfItems: 822,
+  numberOfItems: 101,
   itemListElement: [
     {
       '@type': 'ListItem',
