@@ -15,13 +15,15 @@ import {
   FolderTree,
   Tags,
   Users,
-  Settings
+  Settings,
+  FileText
 } from 'lucide-react';
 
 // 简化的导航菜单
 const navigation = [
   { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
   { name: '工具管理', href: '/admin/tools', icon: Grid3X3 },
+  { name: '模板管理', href: '/admin/templates', icon: FileText },
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
   { name: '标签管理', href: '/admin/tags', icon: Tags },
   { name: '用户管理', href: '/admin/users', icon: Users },
