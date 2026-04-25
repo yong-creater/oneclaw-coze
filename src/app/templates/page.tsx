@@ -91,7 +91,7 @@ export default function TemplatesPage() {
       <Sidebar />
 
       {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 统一顶部 */}
         <Header title="设计模板" subtitle={`共 ${TEMPLATES.length} 个模板`} badge="1.1元开通会员" showRightArea={false} />
 
@@ -271,7 +271,7 @@ export default function TemplatesPage() {
       </main>
 
       {/* 底部 - 响应侧边栏折叠状态 */}
-      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         <Footer />
       </div>
 

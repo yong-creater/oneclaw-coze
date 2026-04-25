@@ -125,7 +125,7 @@ export default function ToolsPage() {
       <Sidebar />
 
       {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 统一顶部 */}
         <Header title="AI工具箱" subtitle={`共 ${TOOLS_CONFIG.length} 个工具`} showRightArea={false} />
 
@@ -215,7 +215,7 @@ export default function ToolsPage() {
       </main>
 
       {/* 底部 - 响应侧边栏折叠状态 */}
-      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         <Footer />
       </div>
     </div>

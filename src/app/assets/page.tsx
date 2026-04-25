@@ -122,7 +122,7 @@ export default function AssetsPage() {
       <Sidebar />
 
       {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 统一顶部 */}
         <Header 
           title="资产库" 
@@ -420,7 +420,7 @@ export default function AssetsPage() {
       {toast && <Toast message={toast.message} onClose={() => setToast(null)} icon={toast.icon} />}
 
       {/* 底部 - 响应侧边栏折叠状态 */}
-      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         <Footer />
       </div>
     </div>

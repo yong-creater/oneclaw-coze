@@ -77,7 +77,7 @@ export default function MorePage() {
       <Sidebar />
 
       {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 统一顶部 */}
         <Header title="更多" subtitle="设置与服务" showRightArea={false} />
 
@@ -345,7 +345,7 @@ export default function MorePage() {
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* 底部 - 响应侧边栏折叠状态 */}
-      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         <Footer />
       </div>
     </div>

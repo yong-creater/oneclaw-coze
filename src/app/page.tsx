@@ -8,8 +8,7 @@ import {
   Wand2, ScanFace, Shirt, MoreHorizontal,
   Bell, User, ArrowRight, Zap, Star, TrendingUp
 } from 'lucide-react';
-import { Sidebar } from '@/components/common/Sidebar';
-import Footer from '@/components/common/Footer';
+import { Sidebar, Footer, useSidebar } from '@/components/common';
 
 // AI Agent 入口
 const AI_AGENTS = [
@@ -69,6 +68,8 @@ const GRID_FUNCTIONS = [
 export default function HomePage() {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const { collapsed } = useSidebar();
 
   const handleSend = () => {
     if (!inputValue.trim()) return;
@@ -88,7 +89,7 @@ export default function HomePage() {
       <Sidebar />
 
       {/* 主内容区 */}
-      <main className="flex-1 ml-56">
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 页面内容 */}
         <div className="p-8 max-w-6xl mx-auto">
           {/* 欢迎区域 */}
@@ -264,7 +265,8 @@ export default function HomePage() {
       </main>
 
       {/* 底部 */}
-      <div className="ml-56">
+      {/* 底部 - 响应侧边栏折叠状态 */}
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         <Footer />
       </div>
     </div>

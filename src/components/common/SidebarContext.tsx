@@ -35,5 +35,5 @@ export function useSidebar() {
 // 侧边栏宽度常量
 export const SIDEBAR_EXPANDED_WIDTH = 268; // w-[268px]
 export const SIDEBAR_COLLAPSED_WIDTH = 72; // w-[72px]
-export const SIDEBAR_EXPANDED_ML = 'ml-56'; // 14rem = 224px
-export const SIDEBAR_COLLAPSED_ML = 'ml-[72px]';
+export const SIDEBAR_EXPANDED_ML = 'ml-[268px]'; // 展开状态：ml-[268px]
+export const SIDEBAR_COLLAPSED_ML = 'ml-[72px]'; // 折叠状态：ml-[72px]

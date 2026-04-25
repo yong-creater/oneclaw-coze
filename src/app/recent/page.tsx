@@ -116,7 +116,7 @@ export default function RecentPage() {
       <Sidebar />
 
       {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 统一顶部 */}
         <Header title="最近打开" subtitle={`共 ${items.length} 个项目`} showRightArea={false} />
 
@@ -319,7 +319,7 @@ export default function RecentPage() {
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* 底部 - 响应侧边栏折叠状态 */}
-      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         <Footer />
       </div>
     </div>
