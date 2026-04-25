@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // 模拟模板数据存储
-let templates = [
+const templates = [
   { id: 1, name: '小红书爆款封面', category: 'social', style: 'vibrant', useCount: 12580, isActive: true, createdAt: '2024-01-15' },
   { id: 2, name: '抖音视频封面', category: 'video', style: 'vibrant', useCount: 8932, isActive: true, createdAt: '2024-01-14' },
   { id: 3, name: '电商主图模板', category: 'ecommerce', style: 'minimal', useCount: 15620, isActive: true, createdAt: '2024-01-13' },

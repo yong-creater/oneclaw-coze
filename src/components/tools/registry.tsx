@@ -33,7 +33,7 @@ export interface ToolConfig {
 }
 
 // 工具注册表（运行时加载）
-let TOOL_REGISTRY: Record<string, ToolConfig> = {};
+const TOOL_REGISTRY: Record<string, ToolConfig> = {};
 
 /**
  * 注册工具

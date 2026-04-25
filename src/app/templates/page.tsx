@@ -124,7 +124,7 @@ export default function TemplatesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
       {/* 左侧统一侧边栏 */}
-      <Sidebar searchPlaceholder="搜索模板..." />
+      <Sidebar />
 
       {/* 主内容区 */}
       <main className="flex-1 ml-56">

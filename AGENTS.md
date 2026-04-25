@@ -868,6 +868,137 @@ test.describe('工具页面', () => {
 });
 ```
 
+### 公共组件规范
+
+#### 组件导出结构
+
+```typescript
+// src/components/common/index.ts
+// 通用组件统一导出
+
+// 默认导出组件
+export { default as BackButton } from './BackButton';
+export { default as BackToHome } from './BackToHome';
+export { default as LoginButton } from './LoginButton';
+export { default as LoginModal } from './LoginModal';
+export { default as WechatPromo } from './WechatPromo';
+export { default as UserButton } from './UserButton';
+export { default as Sidebar } from './Sidebar';
+export { default as Header } from './Header';
+export { default as Footer } from './Footer';
+export { default as SkeletonGrid } from './LobsterSkeleton';
+
+// 命名导出组件
+export { AnimatedLobster } from './AnimatedLobster';
+export { LobsterLoading } from './LobsterLoading';
+export { ToolCardSkeleton, SkillCardSkeleton, PromptCardSkeleton } from './LobsterSkeleton';
+export { ErrorBoundary, withApiError, LazyLoad } from './ErrorBoundary';
+export { Providers } from './Providers';
+```
+
+#### 布局结构规范
+
+所有前台页面必须遵循以下布局结构：
+
+```tsx
+export default function Page() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
+      {/* 1. 左侧统一侧边栏 - 固定定位 */}
+      <Sidebar />
+
+      {/* 2. 主内容区 - 使用 ml-56 偏移 */}
+      <main className="flex-1 ml-56">
+        {/* 3. 统一顶部栏 */}
+        <Header title="页面标题" showRightArea={false} />
+
+        {/* 4. 页面内容 */}
+        <div className="p-8">
+          {/* ... */}
+        </div>
+      </main>
+
+      {/* 5. 底部 Footer - 需要 ml-56 包裹 */}
+      <div className="ml-56">
+        <Footer />
+      </div>
+    </div>
+  );
+}
+```
+
+**关键规范**：
+- `ml-56`：主内容区和 Footer 必须使用此偏移量，与侧边栏宽度 (268px) 对齐
+- `showRightArea={false}`：Header 默认显示登录/会员按钮，在使用 Sidebar 底部的统一按钮时需关闭
+- Footer 必须包裹在 `ml-56` 容器内，确保对齐
+
+#### Sidebar 组件规范
+
+```tsx
+// 使用示例
+<Sidebar 
+  showUserArea={true}  // 是否显示底部登录/会员区域
+  className=""         // 自定义样式
+/>
+```
+
+**功能特性**：
+- 可折叠侧边栏（展开 268px，折叠 72px）
+- Logo 区域：点击跳转首页，折叠时 hover 显示展开按钮
+- 导航菜单：主要菜单（首页、工具、模板）、次要菜单（最近打开、资产库）、底部菜单（更多）
+- 用户区域：登录按钮 + 开通会员按钮
+
+#### Header 组件规范
+
+```tsx
+// 使用示例
+<Header 
+  title="页面标题"
+  subtitle="副标题描述"
+  badge="徽章文字"           // 可选会员徽章
+  showRightArea={false}       // 是否显示右侧区域（默认 true）
+  rightContent={null}         // 自定义右侧内容
+/>
+```
+
+**规范**：
+- 当页面使用 Sidebar 底部的统一登录/会员按钮时，需设置 `showRightArea={false}`
+- `badge` 属性用于显示会员徽章（如 "1.1元开通会员"）
+
+#### 页面模板
+
+```tsx
+// src/app/example/page.tsx
+
+'use client';
+
+import { Sidebar, Header, Footer } from '@/components/common';
+
+export default function ExamplePage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
+      {/* 左侧统一侧边栏 */}
+      <Sidebar />
+
+      {/* 主内容区 */}
+      <main className="flex-1 ml-56">
+        {/* 统一顶部 */}
+        <Header title="示例页面" subtitle="页面描述" showRightArea={false} />
+
+        <div className="p-8">
+          {/* 页面内容 */}
+        </div>
+      </main>
+
+      {/* 底部 - 全宽 */}
+      <div className="ml-56">
+        <Footer />
+      </div>
+    </div>
+  );
+}
+```
+
 ---
 
 ## 附录

@@ -121,7 +121,7 @@ export default function ToolsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
       {/* 左侧统一导航 */}
-      <Sidebar searchPlaceholder="搜索工具..." />
+      <Sidebar />
 
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
