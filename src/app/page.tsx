@@ -916,25 +916,22 @@ export default function MainPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100 flex">
-      {/* 左侧固定导航栏 - 玻璃态效果 */}
-      <aside className="w-64 bg-white/80 backdrop-blur-xl border-r border-white/20 shadow-xl shadow-slate-200/50 flex flex-col h-screen fixed left-0 top-0 z-20">
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* 左侧固定导航栏 - 简洁白色 */}
+      <aside className="w-60 bg-white border-r border-slate-200 flex flex-col h-screen fixed left-0 top-0 z-20 shadow-sm">
         {/* Logo区域 */}
-        <div className="p-5 border-b border-slate-100/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 via-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30">
-              <AnimatedLobster size={20} />
+        <div className="p-4 border-b border-slate-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
+              <AnimatedLobster size={18} />
             </div>
-            <div>
-              <span className="font-bold text-lg text-slate-800">OneClaw</span>
-              <p className="text-[10px] text-slate-400 -mt-0.5">AI图片创作平台</p>
-            </div>
+            <span className="font-bold text-sm text-slate-800">OneClaw</span>
           </div>
         </div>
 
-        {/* 主导航 - 高级渐变效果 */}
-        <nav className="flex-1 p-3">
-          <div className="space-y-1">
+        {/* 主导航 */}
+        <nav className="flex-1 p-2">
+          <div className="space-y-0.5">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.key;
@@ -942,56 +939,25 @@ export default function MainPage() {
                 <button
                   key={item.key}
                   onClick={() => setActiveTab(item.key)}
-                  className={`group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
                     isActive
-                      ? 'text-white'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-orange-50 text-orange-600 font-medium'
+                      : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  {/* 选中/悬停背景 */}
-                  <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 shadow-lg shadow-orange-500/30'
-                      : 'bg-slate-100/80 opacity-0 group-hover:opacity-100'
-                  }`} />
-                  
-                  {/* 图标容器 */}
-                  <div className={`relative z-10 w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 ${
-                    isActive
-                      ? 'bg-white/20 text-white'
-                      : 'bg-slate-200/60 text-slate-500 group-hover:bg-orange-100 group-hover:text-orange-600'
-                  }`}>
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  
-                  {/* 文字 */}
-                  <span className="relative z-10">{item.label}</span>
-                  
-                  {/* 选中指示器 */}
-                  {isActive && (
-                    <div className="absolute right-3 w-2 h-2 rounded-full bg-white/80 shadow-sm" />
-                  )}
+                  <Icon className="w-5 h-5" />
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </div>
         </nav>
 
-        {/* 底部 - 用户区域 */}
-        <div className="p-3 border-t border-slate-100/50">
-          {/* VIP升级卡片 */}
-          <div className="mb-3 p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-orange-100/50">
-            <div className="flex items-center gap-2 mb-1">
-              <Crown className="w-4 h-4 text-amber-500" />
-              <span className="text-xs font-semibold text-amber-700">升级会员</span>
-            </div>
-            <p className="text-[10px] text-slate-500 leading-relaxed">解锁全部高级功能</p>
-          </div>
-          
-          {/* 登录按钮 */}
+        {/* 底部登录入口 */}
+        <div className="p-3 border-t border-slate-100">
           <button
             onClick={() => router.push('/login')}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:from-orange-600 hover:to-amber-600 transition-all duration-300"
+            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors"
           >
             <LogIn className="w-4 h-4" />
             <span>登录 / 注册</span>
