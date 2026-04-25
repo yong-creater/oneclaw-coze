@@ -135,6 +135,10 @@ function UtilityToolsPage() {
               resume: '/resume',
               novel: '/novel',
               productpage: '/productpage',
+              'avatar-emoji': '/avatar-emoji',
+              'resume-photo': '/resume-photo',
+              'local-poster': '/local-poster',
+              'kids-creative': '/kids-creative',
             };
             return urls[key] || '/';
           };
