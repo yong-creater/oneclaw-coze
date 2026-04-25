@@ -1,14 +1,41 @@
-// AI修图模块
-export { RetouchIndex, RetouchAuto, RetouchManual, RetouchFilter } from './RetouchTools';
+/**
+ * 工具模块导出
+ * 
+ * 统一导出所有工具相关的类型、组件、工具函数
+ */
 
-// AI生成模块
-export { GenerateIndex, Text2Img, Img2Img } from './GenerateTools';
+// 类型导出
+export type {
+  ToolConfig,
+  ToolCategory,
+  ToolDifficulty,
+  ToolQuota,
+  ToolSetting,
+  ToolResult,
+  PermissionContext,
+  QuotaInfo,
+  ValidationResult
+} from './registry';
 
-// 电商商品图模块
-export { EcommerceIndex, ProductRetouch, WhiteBg, SceneGen, BatchProcess } from './EcommerceTools';
+// 组件导出
+export { ToolLoadingPlaceholder } from './registry';
 
-// 自媒体图片模块
-export { SocialIndex, CoverGen, LayoutTool } from './SocialTools';
+// 函数导出
+export {
+  TOOL_REGISTRY,
+  getAllTools,
+  getToolConfig,
+  getToolsByCategory,
+  searchTools,
+  getRelatedTools,
+  canUseTool,
+  getQuotaInfo,
+  getToolStats,
+  validateToolInput
+} from './registry';
 
-// 资产库
-export { AssetsContent } from './AssetsContent';
+// 分类导出
+export { TOOL_CATEGORIES } from './config';
+
+// 配置导出
+export { TOOLS_CONFIG } from './config';
