@@ -211,12 +211,64 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 // 精选工具列表
 const UTILITY_TOOLS = [
+  {
+    key: 'avatar-emoji',
+    name: '头像表情包',
+    icon: Sparkles,
+    description: 'AI表情包/头像一键生成，支持多种风格定制',
+    color: 'from-yellow-500 to-orange-500',
+    tags: ['头像生成', '表情包', '个性定制'],
+    useCases: [
+      { title: '头像定制', desc: '真人照片转动漫/插画头像' },
+      { title: '表情包', desc: '批量生成系列表情包' },
+      { title: '节日专属', desc: '节日主题头像一键生成' },
+    ]
+  },
+  {
+    key: 'resume-photo',
+    name: '形象照生成',
+    icon: UserCircle,
+    description: 'AI简历形象照/职业形象照生成，商务感十足',
+    color: 'from-blue-500 to-cyan-500',
+    tags: ['形象照', '职业照', '商务形象'],
+    useCases: [
+      { title: '简历照片', desc: '专业商务形象照' },
+      { title: '职业头像', desc: 'LinkedIn/脉脉头像' },
+      { title: '团队合影', desc: '公司团队统一形象照' },
+    ]
+  },
+  {
+    key: 'local-poster',
+    name: '门店营销海报',
+    icon: MapPin,
+    description: '本地生活/实体店营销海报一键生成，高级感满满',
+    color: 'from-red-500 to-pink-500',
+    tags: ['营销海报', '门店物料', '节日促销'],
+    useCases: [
+      { title: '餐饮海报', desc: '餐厅菜单/促销海报' },
+      { title: '零售物料', desc: '超市/便利店促销物料' },
+      { title: '节日特供', desc: '春节/中秋等节日海报' },
+    ]
+  },
+  {
+    key: 'kids-creative',
+    name: '儿童创意工坊',
+    icon: Palette,
+    description: 'AI儿童手抄报/手账/涂色绘本一键生成，亲子必备',
+    color: 'from-cyan-500 to-teal-500',
+    tags: ['手抄报', '涂色绘本', '儿童手工'],
+    useCases: [
+      { title: '手抄报', desc: '节日/主题手抄报模板' },
+      { title: '涂色绘本', desc: '儿童涂色绘本素材' },
+      { title: '手账素材', desc: '亲子手账贴纸/素材' },
+    ]
+  },
   { 
     key: 'resume', 
     name: 'STAR简历优化', 
     icon: FileText,
     description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
-    color: 'from-blue-500 to-cyan-500',
+    color: 'from-indigo-500 to-blue-500',
     tags: ['PDF上传', 'JD精准匹配', '量化成果'],
     useCases: [
       { title: '校招求职', desc: '应届生简历优化，突出项目经验' },
