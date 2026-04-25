@@ -15,7 +15,6 @@ import {
   ShoppingBag, Star
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
-import Footer from '@/components/common/Footer';
 
 // ==================== 类型定义 ====================
 type MainTab = 'home' | 'tools' | 'templates' | 'recent' | 'projects' | 'assets' | 'more';
