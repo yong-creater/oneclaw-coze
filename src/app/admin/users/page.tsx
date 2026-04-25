@@ -11,15 +11,12 @@ import { Switch } from '@/components/ui/switch';
 
 interface User {
   id: number;
+  user_id?: string;
+  openid?: string;
   nickname: string;
-  phone: string;
+  phone?: string;
   email?: string;
   avatar_url?: string;
-  is_vip: boolean;
-  vip_expire?: string;
-  is_active: boolean;
-  is_banned: boolean;
-  credits: number;
   created_at: string;
   last_login_at?: string;
 }
@@ -181,21 +178,10 @@ export default function UsersAdminPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium text-slate-900 truncate">{user.nickname || '未设置昵称'}</h3>
-                        {user.is_vip && (
+                        {user.email && (
                           <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-full">
                             <Crown className="w-3 h-3" />
-                            VIP
-                          </div>
-                        )}
-                        {user.is_banned && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-600 text-xs font-medium rounded-full">
-                            <Ban className="w-3 h-3" />
-                            已封禁
-                          </div>
-                        )}
-                        {!user.is_active && (
-                          <div className="px-2 py-0.5 bg-slate-100 text-slate-500 text-xs font-medium rounded-full">
-                            已禁用
+                            已绑定
                           </div>
                         )}
                       </div>
@@ -210,17 +196,9 @@ export default function UsersAdminPage() {
                     </div>
 
                     <div className="hidden md:flex items-center gap-6 text-right">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{user.credits || 0}</p>
-                        <p className="text-xs text-slate-400">积分</p>
+                      <div className="text-xs text-slate-500">
+                        {user.user_id ? `ID: ${user.user_id.slice(0, 8)}...` : '-'}
                       </div>
-                      {user.is_vip ? (
-                        <div className="text-xs text-amber-500">
-                          VIP 至 {user.vip_expire ? new Date(user.vip_expire).toLocaleDateString() : '永久'}
-                        </div>
-                      ) : (
-                        <div className="text-xs text-slate-400">普通用户</div>
-                      )}
                     </div>
 
                     <Button 
@@ -286,10 +264,9 @@ export default function UsersAdminPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900">{selectedUser.nickname || '未设置昵称'}</h3>
                   <p className="text-sm text-slate-500">{selectedUser.phone || selectedUser.email || '未绑定'}</p>
-                  {selectedUser.is_vip && (
-                    <div className="flex items-center gap-1 mt-1 px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-full w-fit">
-                      <Crown className="w-3 h-3" />
-                      VIP 会员
+                  {selectedUser.user_id && (
+                    <div className="flex items-center gap-1 mt-1 px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-full w-fit">
+                      ID: {selectedUser.user_id.slice(0, 12)}...
                     </div>
                   )}
                 </div>
@@ -298,15 +275,15 @@ export default function UsersAdminPage() {
               {/* 用户统计 */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-slate-900">{userStats?.total_uses || 0}</p>
+                  <p className="text-xl font-bold text-slate-900">{userStats?.total_uses || '-'}</p>
                   <p className="text-xs text-slate-500">使用次数</p>
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-slate-900">{userStats?.total_favorites || 0}</p>
+                  <p className="text-xl font-bold text-slate-900">{userStats?.total_favorites || '-'}</p>
                   <p className="text-xs text-slate-500">收藏数</p>
                 </div>
                 <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-slate-900">{selectedUser.credits || 0}</p>
+                  <p className="text-xl font-bold text-slate-900">-</p>
                   <p className="text-xs text-slate-500">积分</p>
                 </div>
               </div>

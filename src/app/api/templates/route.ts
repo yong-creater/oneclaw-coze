@@ -1,95 +1,110 @@
-import { NextRequest, NextResponse } from 'next/server';
+/**
+ * 模板列表 API
+ * 
+ * 前台获取模板列表接口
+ */
 
-// 模拟模板数据
-const templates = [
-  { id: 1, name: '小红书爆款封面', category: 'social', style: 'vibrant', useCount: 12580, isActive: true, createdAt: '2024-01-15' },
-  { id: 2, name: '抖音视频封面', category: 'video', style: 'vibrant', useCount: 8932, isActive: true, createdAt: '2024-01-14' },
-  { id: 3, name: '电商主图模板', category: 'ecommerce', style: 'minimal', useCount: 15620, isActive: true, createdAt: '2024-01-13' },
-  { id: 4, name: '节日促销海报', category: 'poster', style: 'vibrant', useCount: 23450, isActive: true, createdAt: '2024-01-12' },
-  { id: 5, name: '企业PPT模板', category: 'document', style: 'luxury', useCount: 6780, isActive: true, createdAt: '2024-01-11' },
-  { id: 6, name: '品牌LOGO设计', category: 'logo', style: 'minimal', useCount: 4560, isActive: true, createdAt: '2024-01-10' },
-  { id: 7, name: '朋友圈九宫格', category: 'social', style: 'cute', useCount: 9870, isActive: true, createdAt: '2024-01-09' },
-  { id: 8, name: '商品详情页', category: 'ecommerce', style: 'minimal', useCount: 11230, isActive: true, createdAt: '2024-01-08' },
-  { id: 9, name: 'B站视频封面', category: 'video', style: 'tech', useCount: 7650, isActive: true, createdAt: '2024-01-07' },
-  { id: 10, name: '餐饮菜单设计', category: 'poster', style: 'cute', useCount: 5430, isActive: true, createdAt: '2024-01-06' },
-  { id: 11, name: '简历模板套装', category: 'document', style: 'minimal', useCount: 18900, isActive: true, createdAt: '2024-01-05' },
-  { id: 12, name: 'ins风配图', category: 'social', style: 'cute', useCount: 6540, isActive: true, createdAt: '2024-01-04' },
-];
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // GET 获取模板列表
 export async function GET(request: NextRequest) {
-  const searchParams = request.nextUrl.searchParams;
-  const category = searchParams.get('category') || 'all';
-  const style = searchParams.get('style') || 'all';
-  const search = searchParams.get('search') || '';
-  const page = parseInt(searchParams.get('page') || '1');
-  const pageSize = parseInt(searchParams.get('pageSize') || '12');
-
-  const filtered = templates.filter(t => {
-    const matchCategory = category === 'all' || t.category === category;
-    const matchStyle = style === 'all' || t.style === style;
-    const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase());
-    return matchCategory && matchStyle && matchSearch;
-  });
-
-  const total = filtered.length;
-  const totalPages = Math.ceil(total / pageSize);
-  const startIndex = (page - 1) * pageSize;
-  const paginatedTemplates = filtered.slice(startIndex, startIndex + pageSize);
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      templates: paginatedTemplates,
-      pagination: {
-        page,
-        pageSize,
-        total,
-        totalPages,
-      },
-      stats: {
-        total: templates.length,
-        active: templates.filter(t => t.isActive).length,
-        totalUses: templates.reduce((sum, t) => sum + t.useCount, 0),
-      },
-    },
-  });
-}
-
-// POST 创建模板
-export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { name, category, style, thumbnail, tags } = body;
+    const client = getSupabaseClient();
+    const searchParams = request.nextUrl.searchParams;
+    
+    // 分页参数
+    const page = parseInt(searchParams.get('page') || '1');
+    const pageSize = parseInt(searchParams.get('pageSize') || '50');
+    const offset = (page - 1) * pageSize;
+    
+    // 筛选参数
+    const category = searchParams.get('category') || 'all';
+    const style = searchParams.get('style') || 'all';
+    const search = searchParams.get('search') || '';
 
-    if (!name || !category) {
-      return NextResponse.json(
-        { success: false, error: '缺少必填字段' },
-        { status: 400 }
-      );
+    // 构建查询（只获取激活的模板）
+    let query = client
+      .from('templates')
+      .select('*', { count: 'exact' })
+      .eq('is_active', true);
+
+    // 应用筛选
+    if (category !== 'all') {
+      query = query.eq('category', category);
+    }
+    if (style !== 'all') {
+      query = query.eq('style', style);
+    }
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
     }
 
-    const newTemplate = {
-      id: Math.max(...templates.map(t => t.id)) + 1,
-      name,
-      category,
-      style: style || 'minimal',
-      useCount: 0,
-      isActive: true,
-      createdAt: new Date().toISOString().split('T')[0],
-    };
+    // 应用排序和分页
+    query = query
+      .order('is_featured', { ascending: false })
+      .order('usage_count', { ascending: false })
+      .range(offset, offset + pageSize - 1);
 
-    templates.push(newTemplate);
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error('数据库查询失败:', error);
+      // 如果数据库查询失败，返回空数据
+      return NextResponse.json({
+        success: true,
+        data: {
+          templates: [],
+          pagination: { page, pageSize, total: 0, totalPages: 0 },
+          stats: { total: 0, active: 0, totalUses: 0 },
+          categories: [],
+        },
+      });
+    }
+
+    // 获取分类统计
+    const { data: allTemplates } = await client
+      .from('templates')
+      .select('category')
+      .eq('is_active', true);
+
+    const categoryStats: Record<string, number> = {};
+    allTemplates?.forEach((t: any) => {
+      categoryStats[t.category] = (categoryStats[t.category] || 0) + 1;
+    });
+
+    const categories = Object.entries(categoryStats).map(([slug, count]) => ({
+      slug,
+      name: slug,
+      count,
+    }));
+
+    // 计算统计数据
+    const totalUses = data?.reduce((sum: number, t: any) => sum + (t.usage_count || 0), 0) || 0;
 
     return NextResponse.json({
       success: true,
-      data: newTemplate,
-      message: '模板创建成功',
+      data: {
+        templates: data || [],
+        pagination: {
+          page,
+          pageSize,
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / pageSize),
+        },
+        stats: {
+          total: count || 0,
+          active: data?.filter((t: any) => t.is_active).length || 0,
+          totalUses,
+        },
+        categories,
+      },
     });
-  } catch {
-    return NextResponse.json(
-      { success: false, error: '请求格式错误' },
-      { status: 400 }
-    );
+  } catch (error) {
+    console.error('获取模板列表失败:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : '获取失败'
+    }, { status: 500 });
   }
 }

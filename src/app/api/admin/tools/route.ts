@@ -3,14 +3,13 @@
  * 
  * 注意：工具是代码内置的，不能增删
  * 此 API 用于：
- * - 获取工具列表及统计
- * - 更新工具配置（价格、启用状态、推荐）
+ * - 获取工具列表及统计（公开接口）
+ * - 更新工具配置（需要管理员权限）
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 
-// 模拟数据库中的工具使用记录（实际应从数据库查询）
+// 模拟数据库中的工具使用记录
 const mockUsageData: Record<string, { totalUsage: number; todayUsage: number; uniqueUsers: number }> = {
   'remove-bg': { totalUsage: 125000, todayUsage: 342, uniqueUsers: 8900 },
   'enhance': { totalUsage: 450000, todayUsage: 1234, uniqueUsers: 23400 },
@@ -26,7 +25,7 @@ const mockUsageData: Record<string, { totalUsage: number; todayUsage: number; un
   'batch-process': { totalUsage: 56000, todayUsage: 45, uniqueUsers: 3400 },
 };
 
-// 工具配置（应与 src/config/tools.ts 保持同步）
+// 工具配置（与 src/config/tools.ts 保持同步）
 const toolConfigs = [
   { id: 'remove-bg', name: '智能抠图', category: '图片处理', icon: '✂️', color: 'from-blue-100 to-cyan-100' },
   { id: 'enhance', name: '图片变清晰', category: '图片处理', icon: '🔍', color: 'from-amber-100 to-orange-100' },
@@ -58,84 +57,83 @@ const defaultRuntimeConfigs: Record<string, { enabled: boolean; credits: number;
   'batch-process': { enabled: true, credits: 20, featured: false },
 };
 
-// 服务器端存储（实际应使用数据库）
+// 服务器端存储
 let runtimeConfigs = { ...defaultRuntimeConfigs };
 
 // 验证管理员身份
-async function verifyAdmin(): Promise<boolean> {
-  const cookieStore = await cookies();
-  const adminToken = cookieStore.get('admin_token');
-  return adminToken?.value === 'oneclaw-admin-secret-token';
+async function verifyAdmin(request: NextRequest): Promise<boolean> {
+  const adminToken = request.cookies.get('admin_token')?.value;
+  return adminToken === 'oneclaw-admin-secret-token';
 }
 
-// GET: 获取工具列表及统计
+// GET: 获取工具列表及统计（公开接口）
 export async function GET(request: NextRequest) {
-  // 验证管理员身份
-  if (!await verifyAdmin()) {
-    return NextResponse.json({ error: '未授权访问' }, { status: 401 });
-  }
+  try {
+    // 获取查询参数
+    const { searchParams } = new URL(request.url);
+    const toolId = searchParams.get('id');
 
-  // 获取查询参数
-  const { searchParams } = new URL(request.url);
-  const toolId = searchParams.get('id');
+    // 如果指定了工具 ID，返回单个工具详情
+    if (toolId) {
+      const config = toolConfigs.find(t => t.id === toolId);
+      if (!config) {
+        return NextResponse.json({ error: '工具不存在' }, { status: 404 });
+      }
 
-  // 如果指定了工具 ID，返回单个工具详情
-  if (toolId) {
-    const config = toolConfigs.find(t => t.id === toolId);
-    if (!config) {
-      return NextResponse.json({ error: '工具不存在' }, { status: 404 });
+      const usage = mockUsageData[toolId] || { totalUsage: 0, todayUsage: 0, uniqueUsers: 0 };
+      const runtime = runtimeConfigs[toolId] || defaultRuntimeConfigs[toolId];
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          ...config,
+          ...usage,
+          ...runtime,
+        },
+      });
     }
 
-    const usage = mockUsageData[toolId] || { totalUsage: 0, todayUsage: 0, uniqueUsers: 0 };
-    const runtime = runtimeConfigs[toolId] || defaultRuntimeConfigs[toolId];
+    // 返回所有工具
+    const tools = toolConfigs.map(tool => {
+      const usage = mockUsageData[tool.id] || { totalUsage: 0, todayUsage: 0, uniqueUsers: 0 };
+      const runtime = runtimeConfigs[tool.id] || defaultRuntimeConfigs[tool.id];
+      return {
+        ...tool,
+        ...usage,
+        ...runtime,
+      };
+    });
+
+    // 计算总计
+    const totalStats = {
+      totalUsage: Object.values(mockUsageData).reduce((sum, u) => sum + u.totalUsage, 0),
+      todayUsage: Object.values(mockUsageData).reduce((sum, u) => sum + u.todayUsage, 0),
+      uniqueUsers: Object.values(mockUsageData).reduce((sum, u) => sum + u.uniqueUsers, 0),
+      enabledCount: Object.values(runtimeConfigs).filter(c => c.enabled).length,
+      totalCount: toolConfigs.length,
+    };
 
     return NextResponse.json({
       success: true,
       data: {
-        ...config,
-        ...usage,
-        ...runtime,
+        tools,
+        stats: totalStats,
       },
     });
+  } catch (error) {
+    console.error('获取工具列表失败:', error);
+    return NextResponse.json({ error: '获取失败' }, { status: 500 });
   }
-
-  // 返回所有工具
-  const tools = toolConfigs.map(tool => {
-    const usage = mockUsageData[tool.id] || { totalUsage: 0, todayUsage: 0, uniqueUsers: 0 };
-    const runtime = runtimeConfigs[tool.id] || defaultRuntimeConfigs[tool.id];
-    return {
-      ...tool,
-      ...usage,
-      ...runtime,
-    };
-  });
-
-  // 计算总计
-  const totalStats = {
-    totalUsage: Object.values(mockUsageData).reduce((sum, u) => sum + u.totalUsage, 0),
-    todayUsage: Object.values(mockUsageData).reduce((sum, u) => sum + u.todayUsage, 0),
-    uniqueUsers: Object.values(mockUsageData).reduce((sum, u) => sum + u.uniqueUsers, 0),
-    enabledCount: Object.values(runtimeConfigs).filter(c => c.enabled).length,
-    totalCount: toolConfigs.length,
-  };
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      tools,
-      stats: totalStats,
-    },
-  });
 }
 
-// PUT: 更新工具配置
+// PUT: 更新工具配置（需要管理员权限）
 export async function PUT(request: NextRequest) {
-  // 验证管理员身份
-  if (!await verifyAdmin()) {
-    return NextResponse.json({ error: '未授权访问' }, { status: 401 });
-  }
-
   try {
+    // 验证管理员身份
+    if (!await verifyAdmin(request)) {
+      return NextResponse.json({ error: '未授权访问，请先登录' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { toolId, enabled, credits, featured } = body;
 
@@ -167,19 +165,20 @@ export async function PUT(request: NextRequest) {
       message: '配置已更新',
       data: updates,
     });
-  } catch {
-    return NextResponse.json({ error: '请求格式错误' }, { status: 400 });
+  } catch (error) {
+    console.error('更新工具配置失败:', error);
+    return NextResponse.json({ error: '更新失败' }, { status: 500 });
   }
 }
 
-// PATCH: 批量更新工具配置
+// PATCH: 批量更新工具配置（需要管理员权限）
 export async function PATCH(request: NextRequest) {
-  // 验证管理员身份
-  if (!await verifyAdmin()) {
-    return NextResponse.json({ error: '未授权访问' }, { status: 401 });
-  }
-
   try {
+    // 验证管理员身份
+    if (!await verifyAdmin(request)) {
+      return NextResponse.json({ error: '未授权访问，请先登录' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { updates } = body;
 
@@ -215,7 +214,8 @@ export async function PATCH(request: NextRequest) {
       message: '批量更新完成',
       data: results,
     });
-  } catch {
-    return NextResponse.json({ error: '请求格式错误' }, { status: 400 });
+  } catch (error) {
+    console.error('批量更新工具配置失败:', error);
+    return NextResponse.json({ error: '更新失败' }, { status: 500 });
   }
 }

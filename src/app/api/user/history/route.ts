@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { getToolById, OUR_TOOLS } from '@/config/tools';
+import { getToolCards, TOOL_CONFIGS } from '@/config/tools';
 
 // 获取用户历史记录
 export async function GET(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     // 如果没有 user_id，返回所有工具作为"最近"（未登录用户）
     if (!userId) {
       // 返回最近添加的工具（模拟最近使用）
-      const recentTools = OUR_TOOLS.slice(0, limit);
+      const recentTools = getToolCards().slice(0, limit);
       return NextResponse.json({
         success: true,
         data: recentTools.map(tool => ({
