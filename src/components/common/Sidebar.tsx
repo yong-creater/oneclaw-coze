@@ -43,7 +43,7 @@ const BOTTOM_NAV_ITEMS: NavItem[] = [
 ];
 
 export function Sidebar({ 
-  showSearch = true, 
+  showSearch = false, 
   searchPlaceholder = '搜索模板、功能...',
   showUserArea = true,
   showCollapseButton = true,
