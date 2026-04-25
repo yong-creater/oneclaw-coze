@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Sidebar from '@/components/common/Sidebar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,41 +9,32 @@ import { Input } from '@/components/ui/input';
 import SponsorBadge from '@/components/common/SponsorBadge';
 import { cn } from '@/lib/utils';
 import {
-  Search, ChevronRight, Star, TrendingUp, Unlock, Zap,
+  Search, Star, ExternalLink,
   Video, Users, Play, Image as ImageIcon, MessageSquare,
   Mic, FileText, Code2, Music, Briefcase, Globe, GraduationCap,
-  Grid3X3
+  ChevronRight, Filter, TrendingUp, Grid3X3, List
 } from 'lucide-react';
 
 const CATEGORIES = [
-  { id: 'all', name: '全部', icon: Grid3X3, count: 238 },
-  { id: '视频生成', name: '视频生成', icon: Video, count: 119 },
-  { id: '数字人', name: '数字人', icon: Users, count: 31 },
-  { id: '视频编辑', name: '视频编辑', icon: Play, count: 29 },
-  { id: 'AI绘画', name: 'AI绘画', icon: ImageIcon, count: 9 },
-  { id: 'AI聊天', name: 'AI聊天', icon: MessageSquare, count: 8 },
-  { id: 'AI配音', name: 'AI配音', icon: Mic, count: 8 },
-  { id: 'AI写作', name: 'AI写作', icon: FileText, count: 7 },
-  { id: 'AI编程', name: 'AI编程', icon: Code2, count: 5 },
-  { id: 'AI音频', name: 'AI音频', icon: Music, count: 4 },
-  { id: 'AI办公', name: 'AI办公', icon: Briefcase, count: 4 },
-  { id: 'AI搜索', name: 'AI搜索', icon: Globe, count: 3 },
-  { id: 'AI营销', name: 'AI营销', icon: TrendingUp, count: 3 },
-  { id: 'AI学习', name: 'AI学习', icon: GraduationCap, count: 3 },
+  { id: 'all', name: '全部', icon: Grid3X3 },
+  { id: '视频生成', name: '视频生成', icon: Video },
+  { id: '数字人', name: '数字人', icon: Users },
+  { id: '视频编辑', name: '视频编辑', icon: Play },
+  { id: 'AI绘画', name: 'AI绘画', icon: ImageIcon },
+  { id: 'AI聊天', name: 'AI聊天', icon: MessageSquare },
+  { id: 'AI配音', name: 'AI配音', icon: Mic },
+  { id: 'AI写作', name: 'AI写作', icon: FileText },
+  { id: 'AI编程', name: 'AI编程', icon: Code2 },
+  { id: 'AI音频', name: 'AI音频', icon: Music },
+  { id: 'AI办公', name: 'AI办公', icon: Briefcase },
+  { id: 'AI搜索', name: 'AI搜索', icon: Globe },
 ];
 
-const TABS = [
-  { key: 'featured', label: '精选推荐', icon: Star },
-  { key: 'hot', label: '热门工具', icon: TrendingUp },
-  { key: 'free', label: '免费工具', icon: Unlock },
-  { key: 'new', label: '新上榜', icon: Zap },
-];
-
-const FREE_TYPES: Record<string, { label: string; color: string }> = {
-  '完全免费': { label: '免费', color: 'text-emerald-600 dark:text-emerald-400' },
-  '免费额度': { label: '免费额度', color: 'text-blue-600 dark:text-blue-400' },
-  '限时免费': { label: '限时免费', color: 'text-amber-600 dark:text-amber-400' },
-  '付费工具': { label: '付费', color: 'text-slate-500' },
+const FREE_TYPES: Record<string, { label: string; color: string; bg: string }> = {
+  '完全免费': { label: '免费', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/30' },
+  '免费额度': { label: '额度', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/30' },
+  '限时免费': { label: '限免', color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/30' },
+  '付费工具': { label: '付费', color: 'text-slate-500', bg: 'bg-slate-100 dark:bg-slate-800' },
 };
 
 interface Tool {
@@ -52,12 +42,10 @@ interface Tool {
   name: string;
   logo: string;
   highlight: string;
-  category_id: number;
   free_type: string;
   is_featured: boolean;
   sponsor_type: string | null;
-  sponsor_expires_at: string | null;
-  categories?: { name: string; slug: string };
+  categories?: { name: string };
 }
 
 export default function AIToolsPage() {
@@ -65,32 +53,19 @@ export default function AIToolsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [activeTab, setActiveTab] = useState('featured');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    // 获取用户ID
-    const token = document.cookie.split('; ').find(row => row.startsWith('user_token='))?.split('=')[1];
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUserId(payload.sub || payload.user_id);
-      } catch {}
-    }
-  }, []);
 
   useEffect(() => {
     fetchTools();
-  }, [selectedCategory, activeTab, page, searchQuery]);
+  }, [selectedCategory, page, searchQuery]);
 
   const fetchTools = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page: String(page),
-        limit: '12',
+        limit: '20',
       });
 
       if (selectedCategory !== 'all') {
@@ -99,12 +74,6 @@ export default function AIToolsPage() {
 
       if (searchQuery) {
         params.set('search', searchQuery);
-      }
-
-      if (activeTab === 'featured') {
-        params.set('featured', 'true');
-      } else if (activeTab === 'free') {
-        params.set('free_type', '完全免费');
       }
 
       const response = await fetch(`/api/tools?${params}`);
@@ -119,14 +88,7 @@ export default function AIToolsPage() {
     }
   };
 
-  const handleToolClick = async (tool: Tool) => {
-    if (userId) {
-      fetch('/api/history', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId, tool_id: tool.id })
-      }).catch(() => {});
-    }
+  const handleToolClick = (tool: Tool) => {
     window.open(`/tools/${tool.id}`, '_blank');
   };
 
@@ -138,32 +100,33 @@ export default function AIToolsPage() {
         className="transition-all duration-300"
         style={{ marginLeft: 'var(--sidebar-width, 240px)' }}
       >
-        <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-6">
           {/* 标题 */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-foreground mb-1">
               AI工具库
             </h1>
-            <p className="text-muted-foreground">
-              精选 238+ 款优质 AI 工具
+            <p className="text-sm text-muted-foreground">
+              精选第三方AI工具，快速找到你需要的产品
             </p>
           </div>
 
           {/* 搜索框 */}
-          <div className="relative mb-6">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <div className="relative mb-5">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="搜索 AI 工具..."
+              placeholder="搜索工具名称..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12"
+              className="pl-10 h-10 text-sm"
             />
           </div>
 
-          {/* 横向分类筛选 */}
-          <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+          {/* 分类标签 */}
+          <div className="flex gap-2 overflow-x-auto pb-4 mb-5 scrollbar-hide">
             {CATEGORIES.map(cat => {
               const Icon = cat.icon;
+              const isActive = selectedCategory === cat.id;
               return (
                 <button
                   key={cat.id}
@@ -172,109 +135,84 @@ export default function AIToolsPage() {
                     setPage(1);
                   }}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all",
-                    selectedCategory === cat.id
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all",
+                    isActive
+                      ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+                      : "bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                   )}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   {cat.name}
                 </button>
               );
             })}
           </div>
 
-          {/* Tab切换 */}
-          <div className="flex gap-2 mb-6">
-            {TABS.map(tab => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => {
-                    setActiveTab(tab.key);
-                    setPage(1);
-                  }}
-                  className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                    activeTab === tab.key
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                  )}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 工具列表 */}
+          {/* 工具列表 - 紧凑列表风格 */}
           {loading ? (
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardContent className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-muted" />
-                      <div className="flex-1 space-y-2">
-                        <div className="h-5 bg-muted rounded w-1/3" />
-                        <div className="h-4 bg-muted rounded w-2/3" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+            <div className="space-y-2">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="h-16 bg-muted/50 rounded-xl animate-pulse" />
               ))}
             </div>
           ) : tools.length > 0 ? (
             <>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
                 {tools.map(tool => (
                   <Card
                     key={tool.id}
                     onClick={() => handleToolClick(tool)}
-                    className="cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                    className="cursor-pointer hover:bg-muted/50 transition-colors group py-0"
                   >
-                    <CardContent className="p-5">
-                      <div className="flex items-start gap-4">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center overflow-hidden shrink-0">
-                          <img
-                            src={tool.logo}
-                            alt={tool.name}
-                            className="w-10 h-10 object-contain"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%231E40AF" width="40" height="40" rx="8"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="600">${tool.name[0]}</text></svg>`;
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <h3 className="font-semibold text-foreground truncate">{tool.name}</h3>
-                            {tool.sponsor_type && (
-                              <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
-                            )}
-                            {tool.is_featured && !tool.sponsor_type && (
-                              <Star className="w-4 h-4 text-amber-500 fill-amber-500 shrink-0" />
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{tool.highlight}</p>
-                          <div className="flex items-center gap-2 mt-3">
-                            {tool.categories && (
-                              <Badge variant="secondary" className="text-[10px]">
-                                {tool.categories.name}
-                              </Badge>
-                            )}
-                            <span className={cn(
-                              "text-xs font-medium",
-                              FREE_TYPES[tool.free_type]?.color || 'text-slate-500'
-                            )}>
-                              {FREE_TYPES[tool.free_type]?.label || tool.free_type}
-                            </span>
-                          </div>
-                        </div>
-                        <ChevronRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-primary transition-all shrink-0" />
+                    <CardContent className="p-3 flex items-center gap-3">
+                      {/* Logo */}
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden shrink-0">
+                        <img
+                          src={tool.logo}
+                          alt={tool.name}
+                          className="w-7 h-7 object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
                       </div>
+
+                      {/* 信息 */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm text-foreground truncate group-hover:text-primary transition-colors">
+                            {tool.name}
+                          </span>
+                          {tool.is_featured && (
+                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                          )}
+                          {tool.sponsor_type && (
+                            <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate mt-0.5">
+                          {tool.highlight}
+                        </p>
+                      </div>
+
+                      {/* 标签 */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {tool.categories && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                            {tool.categories.name}
+                          </Badge>
+                        )}
+                        <span className={cn(
+                          "text-[10px] font-medium px-1.5 py-0.5 rounded",
+                          FREE_TYPES[tool.free_type]?.bg,
+                          FREE_TYPES[tool.free_type]?.color
+                        )}>
+                          {FREE_TYPES[tool.free_type]?.label || tool.free_type}
+                        </span>
+                      </div>
+
+                      {/* 箭头 */}
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
                     </CardContent>
                   </Card>
                 ))}
@@ -282,23 +220,25 @@ export default function AIToolsPage() {
 
               {/* 分页 */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-8">
+                <div className="flex items-center justify-center gap-2 mt-6">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
+                    className="text-xs"
                   >
                     上一页
                   </Button>
-                  <span className="text-sm text-muted-foreground px-4">
-                    第 {page} / {totalPages} 页
+                  <span className="text-xs text-muted-foreground px-2">
+                    {page} / {totalPages}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
+                    className="text-xs"
                   >
                     下一页
                   </Button>
@@ -306,11 +246,9 @@ export default function AIToolsPage() {
               )}
             </>
           ) : (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
-                <Search className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">未找到相关工具</p>
+            <div className="text-center py-12">
+              <Search className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">未找到相关工具</p>
             </div>
           )}
         </div>
