@@ -129,7 +129,7 @@ export default function TemplatesPage() {
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
         {/* 统一顶部 */}
-        <Header title="设计模板" subtitle={`共 ${TEMPLATES.length} 个模板`} badge="1.1元开通会员" />
+        <Header title="设计模板" subtitle={`共 ${TEMPLATES.length} 个模板`} badge="1.1元开通会员" showRightArea={false} />
 
         <div className="p-8">
           {/* 搜索和筛选 */}

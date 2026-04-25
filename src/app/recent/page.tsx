@@ -117,7 +117,7 @@ export default function RecentPage() {
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
         {/* 统一顶部 */}
-        <Header title="最近打开" subtitle={`共 ${items.length} 个项目`} />
+        <Header title="最近打开" subtitle={`共 ${items.length} 个项目`} showRightArea={false} />
 
         <div className="p-8">
           {/* 工具栏 */}

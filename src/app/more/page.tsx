@@ -78,7 +78,7 @@ export default function MorePage() {
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
         {/* 统一顶部 */}
-        <Header title="更多" subtitle="设置与服务" />
+        <Header title="更多" subtitle="设置与服务" showRightArea={false} />
 
         <div className="p-8">
           {/* 标签切换 */}

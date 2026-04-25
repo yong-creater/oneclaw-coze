@@ -126,7 +126,7 @@ export default function ToolsPage() {
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
         {/* 统一顶部 */}
-        <Header title="AI工具箱" subtitle={`共 ${TOOLS_CONFIG.length} 个工具`} />
+        <Header title="AI工具箱" subtitle={`共 ${TOOLS_CONFIG.length} 个工具`} showRightArea={false} />
 
         {/* 页面内容 */}
         <div className="p-8">
