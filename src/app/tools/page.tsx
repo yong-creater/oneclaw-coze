@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Search, Sparkles, Zap, Star, Clock } from 'lucide-react';
 import { Sidebar, Header, Footer } from '@/components/common';
 import { TOOLS_CONFIG, TOOL_CATEGORIES, ToolCategory, ToolConfig } from '@/components/tools/config';
 
@@ -68,29 +68,32 @@ export default function ToolsPage() {
       <Link
         key={tool.key}
         href={`/tools/${tool.key}`}
-        className="group bg-white rounded-2xl overflow-hidden border border-slate-100 hover:shadow-xl hover:border-orange-200 transition-all"
+        className="group bg-white rounded-2xl overflow-hidden border border-slate-200/60 hover:shadow-xl hover:shadow-orange-100/30 hover:border-orange-200 transition-all duration-300"
       >
         {/* 封面图 */}
-        <div className="relative h-36 overflow-hidden">
+        <div className="relative h-40 overflow-hidden">
           {cover ? (
             <img 
               src={cover.image} 
               alt={tool.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
           ) : (
             <div className={`w-full h-full bg-gradient-to-br ${tool.color.gradient}`} />
           )}
-          {/* 工具图标覆盖 */}
+          {/* 渐变遮罩 */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+          {/* 工具图标 */}
           <div className="absolute bottom-3 left-3">
-            <div className={`w-10 h-10 rounded-xl ${tool.color.bg} flex items-center justify-center shadow-lg backdrop-blur-sm`}>
-              <span className="text-xl">{tool.icon}</span>
+            <div className={`w-11 h-11 rounded-xl ${tool.color.bg} flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20`}>
+              <span className="text-2xl">{tool.icon}</span>
             </div>
           </div>
           {/* 标签 */}
           {tool.quota?.daily && (
             <div className="absolute top-3 right-3">
-              <span className="px-2 py-1 text-xs bg-white/90 backdrop-blur-sm rounded-full text-slate-600">
+              <span className="px-2.5 py-1 text-xs bg-white/90 backdrop-blur-sm rounded-full text-slate-600 font-medium flex items-center gap-1">
+                <Clock className="w-3 h-3" />
                 每日{tool.quota.daily}次
               </span>
             </div>
@@ -99,24 +102,25 @@ export default function ToolsPage() {
         
         {/* 文字内容 */}
         <div className="p-4">
-          <h3 className="font-semibold text-slate-800 mb-1 group-hover:text-orange-500 transition-colors">
+          <h3 className="font-semibold text-slate-800 mb-1.5 group-hover:text-orange-500 transition-colors">
             {tool.name}
           </h3>
-          <p className="text-sm text-slate-500 line-clamp-2">
+          <p className="text-sm text-slate-500 line-clamp-2 mb-3">
             {tool.description}
           </p>
           {/* 使用提示 */}
-          <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
-            <span className="text-orange-400">→</span> {tool.guide}
-          </p>
+          <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2">
+            <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+            {tool.guide}
+          </div>
         </div>
       </Link>
     );
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* 统一侧边栏 */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
+      {/* 左侧统一导航 */}
       <Sidebar searchPlaceholder="搜索工具..." />
 
       {/* 主内容区 */}
@@ -125,68 +129,86 @@ export default function ToolsPage() {
         <Header title="AI工具箱" subtitle={`共 ${TOOLS_CONFIG.length} 个工具`} />
 
         {/* 页面内容 */}
-        <div className="p-6">
+        <div className="p-8">
           {filteredTools ? (
             // 搜索结果
-            <div>
-              <h2 className="text-lg font-semibold text-slate-800 mb-4">
-                搜索结果 ({filteredTools.length})
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="animate-in fade-in duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <Search className="w-5 h-5 text-orange-500" />
+                <h2 className="text-lg font-semibold text-slate-800">
+                  搜索结果 <span className="text-orange-500">{filteredTools.length}</span> 个
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 {filteredTools.map(renderToolCard)}
               </div>
             </div>
           ) : activeCategory ? (
             // 分类视图
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <button onClick={() => setActiveCategory(null)} className="p-2 hover:bg-slate-100 rounded-lg">
+            <div className="animate-in fade-in duration-300">
+              <div className="flex items-center gap-4 mb-8">
+                <button 
+                  onClick={() => setActiveCategory(null)} 
+                  className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-orange-200 hover:bg-orange-50 transition-all"
+                >
                   <ArrowLeft className="w-5 h-5 text-slate-500" />
                 </button>
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-800">
-                    {TOOL_CATEGORIES[activeCategory as ToolCategory]?.icon} {TOOL_CATEGORIES[activeCategory as ToolCategory]?.name}
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    {TOOL_CATEGORIES[activeCategory as ToolCategory]?.description}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${TOOL_CATEGORIES[activeCategory as ToolCategory]?.color} flex items-center justify-center text-2xl shadow-lg`}>
+                    {TOOL_CATEGORIES[activeCategory as ToolCategory]?.icon}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">
+                      {TOOL_CATEGORIES[activeCategory as ToolCategory]?.name}
+                    </h2>
+                    <p className="text-sm text-slate-500">
+                      {TOOL_CATEGORIES[activeCategory as ToolCategory]?.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 {(toolsByCategory[activeCategory as ToolCategory] || []).map(renderToolCard)}
               </div>
             </div>
           ) : (
             // 全部分类
-            Object.entries(TOOL_CATEGORIES).map(([key, category]) => {
-              const categoryTools = toolsByCategory[key as ToolCategory] || [];
-              if (categoryTools.length === 0) return null;
-              
-              return (
-                <div key={key} className="mb-8">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center`}>
-                        <span className="text-xl">{category.icon}</span>
+            <div className="space-y-10">
+              {Object.entries(TOOL_CATEGORIES).map(([key, category], catIdx) => {
+                const categoryTools = toolsByCategory[key as ToolCategory] || [];
+                if (categoryTools.length === 0) return null;
+                
+                return (
+                  <div 
+                    key={key} 
+                    className="animate-in fade-in slide-in-from-bottom-4 duration-500"
+                    style={{ animationDelay: `${catIdx * 100}ms` }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-2xl shadow-lg`}>
+                          {category.icon}
+                        </div>
+                        <div>
+                          <h2 className="text-xl font-bold text-slate-800">{category.name}</h2>
+                          <p className="text-sm text-slate-500">{category.description}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-lg font-semibold text-slate-800">{category.name}</h2>
-                        <p className="text-sm text-slate-500">{category.description}</p>
-                      </div>
+                      <button 
+                        onClick={() => setActiveCategory(key)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all"
+                      >
+                        查看全部 <span className="text-orange-400">{categoryTools.length}</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => setActiveCategory(key)}
-                      className="text-sm text-orange-500 hover:text-orange-600 flex items-center gap-1"
-                    >
-                      查看全部 <ChevronRight className="w-4 h-4" />
-                    </button>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                      {categoryTools.slice(0, 4).map(renderToolCard)}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {categoryTools.slice(0, 4).map(renderToolCard)}
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
       </main>
