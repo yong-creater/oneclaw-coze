@@ -8,7 +8,9 @@ import {
   Sparkles, ImageIcon, Star, Plus, Sparkle,
   PartyPopper, Coffee, FileText, Smartphone,
   ChevronRight, Crown, Shirt, Video, Smile,
-  ChevronLeft, PanelLeftClose, PanelLeft
+  ChevronLeft, PanelLeftClose, PanelLeft,
+  Clock, FolderOpen, Database, MoreHorizontal,
+  Grid3X3, ArrowUpRight, LayoutGrid
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -17,13 +19,26 @@ import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
 
 // ==================== 类型定义 ====================
-type MainTab = 'home' | 'tools' | 'templates';
+type MainTab = 'home' | 'tools' | 'templates' | 'recent' | 'projects' | 'assets' | 'more';
 
 // ==================== 常量 ====================
-const NAV_ITEMS = [
+// 主导航（展开时显示）
+const MAIN_NAV_ITEMS = [
   { key: 'home', label: '首页', icon: Home },
-  { key: 'tools', label: '工具', icon: Wand2 },
+  { key: 'tools', label: '工具', icon: Grid3X3 },
   { key: 'templates', label: '模板', icon: LayoutDashboard },
+] as const;
+
+// 个人导航（带分割线）
+const PERSONAL_NAV_ITEMS = [
+  { key: 'recent', label: '最近打开', icon: Clock },
+  { key: 'projects', label: '项目', icon: FolderOpen },
+  { key: 'assets', label: '资产库', icon: Database },
+] as const;
+
+// 更多导航
+const MORE_NAV_ITEMS = [
+  { key: 'more', label: '更多', icon: MoreHorizontal },
 ] as const;
 
 const CATEGORIES = [
@@ -39,39 +54,70 @@ const CATEGORIES = [
 
 const TEMPLATE_CATEGORIES = ['全部', '头像', '封面', '海报', '菜单', '简历', '详情页', '营销'] as const;
 
-// ==================== 精选工具列表 ====================
-const FEATURED_TOOLS = [
+// ==================== 最新开发的7个AI生图工具 ====================
+const AI_IMAGE_TOOLS = [
   { 
     name: 'AI头像表情包', 
-    desc: '一键生成精美头像',
-    image: 'https://picsum.photos/seed/feature1/400/300',
+    desc: '上传照片，一键生成精美头像和表情包',
+    image: 'https://picsum.photos/seed/avatar1/400/300',
     color: 'bg-gradient-to-br from-pink-50 to-rose-50',
     border: 'hover:border-pink-200',
-    key: 'avatar-emoji'
+    key: 'avatar-emoji',
+    tag: '热门'
   },
   { 
     name: '形象照生成', 
-    desc: '专业简历形象照',
-    image: 'https://picsum.photos/seed/feature2/400/300',
+    desc: 'AI生成专业简历形象照',
+    image: 'https://picsum.photos/seed/photo1/400/300',
     color: 'bg-gradient-to-br from-sky-50 to-blue-50',
     border: 'hover:border-sky-200',
-    key: 'resume-photo'
+    key: 'resume-photo',
+    tag: '推荐'
   },
   { 
     name: '小红书配图', 
-    desc: '爆款封面图生成',
-    image: 'https://picsum.photos/seed/feature3/400/300',
-    color: 'bg-gradient-to-br from-amber-50 to-orange-50',
-    border: 'hover:border-amber-200',
-    key: 'xiaohongshu'
+    desc: '爆款小红书封面图一键生成',
+    image: 'https://picsum.photos/seed/xhs1/400/300',
+    color: 'bg-gradient-to-br from-pink-50 to-red-50',
+    border: 'hover:border-red-200',
+    key: 'xiaohongshu',
+    tag: '热门'
   },
   { 
-    name: '抖音封面', 
-    desc: '视频封面一键生成',
-    image: 'https://picsum.photos/seed/feature4/400/300',
-    color: 'bg-gradient-to-br from-cyan-50 to-sky-50',
-    border: 'hover:border-cyan-200',
-    key: 'douyin'
+    name: '抖音封面生成', 
+    desc: '视频封面一键生成，支持多种风格',
+    image: 'https://picsum.photos/seed/dy1/400/300',
+    color: 'bg-gradient-to-br from-purple-50 to-pink-50',
+    border: 'hover:border-purple-200',
+    key: 'douyin',
+    tag: '新版'
+  },
+  { 
+    name: '餐饮菜单设计', 
+    desc: '上传菜品图片，智能生成精美菜单',
+    image: 'https://picsum.photos/seed/menu1/400/300',
+    color: 'bg-gradient-to-br from-amber-50 to-orange-50',
+    border: 'hover:border-amber-200',
+    key: 'restaurant-menu',
+    tag: '实用'
+  },
+  { 
+    name: '节日营销海报', 
+    desc: '端午、中秋等节日海报一键生成',
+    image: 'https://picsum.photos/seed/festival1/400/300',
+    color: 'bg-gradient-to-br from-red-50 to-orange-50',
+    border: 'hover:border-red-200',
+    key: 'festival-poster',
+    tag: '限时'
+  },
+  { 
+    name: '商品详情页', 
+    desc: '电商主图和详情页设计',
+    image: 'https://picsum.photos/seed/product1/400/300',
+    color: 'bg-gradient-to-br from-emerald-50 to-teal-50',
+    border: 'hover:border-emerald-200',
+    key: 'productpage',
+    tag: '新版'
   },
 ];
 
@@ -80,11 +126,11 @@ const BASIC_TOOLS = [
   { name: 'AI头像', icon: Sparkles, color: 'bg-amber-50 hover:bg-amber-100', key: 'avatar-emoji' },
   { name: '形象照', icon: Smile, color: 'bg-sky-50 hover:bg-sky-100', key: 'resume-photo' },
   { name: '封面图', icon: FileText, color: 'bg-pink-50 hover:bg-pink-100', key: 'xiaohongshu' },
-  { name: '抖音封面', icon: Video, color: 'bg-cyan-50 hover:bg-cyan-100', key: 'douyin' },
+  { name: '抖音封面', icon: Video, color: 'bg-purple-50 hover:bg-purple-100', key: 'douyin' },
   { name: '海报生成', icon: PartyPopper, color: 'bg-red-50 hover:bg-red-100', key: 'festival-poster' },
   { name: '菜单设计', icon: Coffee, color: 'bg-amber-50 hover:bg-amber-100', key: 'restaurant-menu' },
   { name: '简历优化', icon: Shirt, color: 'bg-indigo-50 hover:bg-indigo-100', key: 'resume' },
-  { name: '商品图', icon: ImageIcon, color: 'bg-purple-50 hover:bg-purple-100', key: 'productpage' },
+  { name: '商品图', icon: ImageIcon, color: 'bg-emerald-50 hover:bg-emerald-100', key: 'productpage' },
 ];
 
 const TOOL_URLS: Record<string, string> = {
@@ -197,33 +243,47 @@ function HomePage() {
         </div>
       </div>
 
-      {/* 精选工具卡片 */}
+      {/* AI生图工具卡片 */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Sparkle className="w-5 h-5 text-orange-500" />
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white">精选工具</h2>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white">AI生图工具</h2>
           </div>
+          <button className="text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1">
+            查看全部
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {FEATURED_TOOLS.map((tool, idx) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {AI_IMAGE_TOOLS.map((tool, idx) => (
             <button
               key={idx}
               onClick={() => window.open(getToolUrl(tool.key), '_blank')}
               className="group relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 border border-slate-100 dark:border-slate-700"
             >
-              <div className="relative h-28 overflow-hidden">
+              <div className="relative h-32 overflow-hidden">
                 <img 
                   src={tool.image} 
                   alt={tool.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                {/* 标签 */}
+                {tool.tag && (
+                  <span className="absolute top-2 left-2 px-2 py-0.5 bg-white/90 dark:bg-slate-800/90 rounded-full text-xs font-medium text-slate-700 dark:text-slate-200">
+                    {tool.tag}
+                  </span>
+                )}
+                {/* 外部链接图标 */}
+                <div className="absolute top-2 right-2 w-6 h-6 bg-white/80 dark:bg-slate-800/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArrowUpRight className="w-3 h-3 text-slate-600" />
+                </div>
               </div>
               <div className="p-3">
                 <h3 className="font-semibold text-slate-800 dark:text-white text-sm mb-0.5">{tool.name}</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{tool.desc}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">{tool.desc}</p>
               </div>
             </button>
           ))}
@@ -261,107 +321,138 @@ function HomePage() {
 
 // ==================== 工具页面组件 ====================
 function ToolsPage() {
-  const [tools, setTools] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const fetchTools = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (activeCategory !== 'all') params.set('category', activeCategory);
-      if (searchQuery) params.set('search', searchQuery);
-      params.set('limit', '20');
-      
-      const res = await fetch(`/api/tools?${params}`);
-      const data = await res.json();
-      setTools(data.tools || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => { fetchTools(); }, [activeCategory]);
-
   return (
-    <div className="space-y-4">
-      {/* 搜索框 - DesignKit 风格 */}
-      <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-        <input
-          type="text"
-          placeholder="搜索AI工具..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="input-designkit pl-12"
-        />
+    <div className="space-y-6">
+      {/* 页面标题 */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">AI生图工具</h1>
+        <p className="text-sm text-slate-500">精选7款高效AI生图工具，一键生成精美设计</p>
       </div>
 
-      {/* 分类标签 - 胶囊样式 */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {CATEGORIES.map(cat => (
+      {/* 工具网格 - 展示最新开发的7个工具 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {AI_IMAGE_TOOLS.map((tool, idx) => (
           <button
-            key={cat.id}
-            onClick={() => setActiveCategory(cat.id)}
-            className={`tag-pill whitespace-nowrap ${
-              activeCategory === cat.id
-                ? 'tag-pill-active'
-                : 'tag-pill-inactive'
-            }`}
+            key={idx}
+            onClick={() => window.open(getToolUrl(tool.key), '_blank')}
+            className="group relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 border border-slate-100 dark:border-slate-700 text-left"
           >
-            {cat.name}
+            <div className="relative h-40 overflow-hidden">
+              <img 
+                src={tool.image} 
+                alt={tool.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              {/* 标签 */}
+              {tool.tag && (
+                <span className="absolute top-2 left-2 px-2 py-0.5 bg-white/90 dark:bg-slate-800/90 rounded-full text-xs font-medium text-slate-700 dark:text-slate-200">
+                  {tool.tag}
+                </span>
+              )}
+              {/* 外部链接图标 */}
+              <div className="absolute top-2 right-2 w-6 h-6 bg-white/80 dark:bg-slate-800/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <ArrowUpRight className="w-3 h-3 text-slate-600" />
+              </div>
+            </div>
+            <div className="p-4">
+              <h3 className="font-semibold text-slate-800 dark:text-white text-base mb-1">{tool.name}</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{tool.desc}</p>
+            </div>
           </button>
         ))}
       </div>
 
-      {/* 工具数量 */}
-      <p className="text-sm text-slate-500">
-        共 <span className="font-semibold text-slate-700 dark:text-slate-300">{tools.length}</span> 款工具
-      </p>
+      {/* 更多工具提示 */}
+      <div className="text-center py-8">
+        <p className="text-sm text-slate-400 mb-3">更多工具持续更新中</p>
+        <button className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+          <Sparkles className="w-4 h-4" />
+          关注更新
+        </button>
+      </div>
+    </div>
+  );
+}
 
-      {/* 工具列表 - DesignKit 卡片网格 */}
-      {loading ? (
-        <SkeletonGrid count={8} />
-      ) : tools.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {tools.map(tool => (
-            <button
-              key={tool.id}
-              onClick={() => window.open(`/tools/${tool.id}`, '_blank')}
-              className="card-designkit p-4 text-left group"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
-                  <img
-                    src={tool.logo}
-                    alt={tool.name}
-                    className="w-10 h-10 object-contain"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate text-sm">{tool.name}</h3>
-                    {isSponsorActive(tool.sponsor_type, tool.sponsor_expires_at) && (
-                      <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{tool.highlight}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-orange-500 transition-colors flex-shrink-0 mt-1" />
-              </div>
-            </button>
-          ))}
-        </div>
-      ) : (
+// ==================== 最近打开页面 ====================
+function RecentPage() {
+  const recentItems = [
+    { name: '头像表情包设计', time: '10分钟前', key: 'avatar-emoji' },
+    { name: '端午海报制作', time: '1小时前', key: 'festival-poster' },
+    { name: '小红书封面', time: '昨天', key: 'xiaohongshu' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">最近打开</h1>
+        <p className="text-sm text-slate-500">快速访问最近编辑的项目</p>
+      </div>
+
+      <div className="space-y-3">
+        {recentItems.map((item, idx) => (
+          <button
+            key={idx}
+            onClick={() => window.open(getToolUrl(item.key), '_blank')}
+            className="w-full flex items-center gap-4 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md hover:-translate-y-0.5 transition-all"
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-orange-500" />
+            </div>
+            <div className="flex-1 text-left">
+              <h3 className="font-medium text-slate-800 dark:text-white">{item.name}</h3>
+              <p className="text-xs text-slate-400">{item.time}</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-slate-300" />
+          </button>
+        ))}
+      </div>
+
+      {recentItems.length === 0 && (
         <div className="text-center py-16">
-          <Sparkles className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无匹配工具</h3>
+          <Clock className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无最近打开的内容</h3>
+          <p className="text-sm text-slate-400 mt-1">开始使用工具后会在这里显示</p>
         </div>
       )}
+    </div>
+  );
+}
+
+// ==================== 项目页面 ====================
+function ProjectsPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">我的项目</h1>
+        <p className="text-sm text-slate-500">管理你创建的所有设计项目</p>
+      </div>
+
+      <div className="text-center py-16">
+        <FolderOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+        <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无项目</h3>
+        <p className="text-sm text-slate-400 mt-1">使用工具后会在这里显示</p>
+      </div>
+    </div>
+  );
+}
+
+// ==================== 资产库页面 ====================
+function AssetsPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">资产库</h1>
+        <p className="text-sm text-slate-500">管理你的设计素材和模板</p>
+      </div>
+
+      <div className="text-center py-16">
+        <Database className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+        <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无素材</h3>
+        <p className="text-sm text-slate-400 mt-1">上传素材后会在这里显示</p>
+      </div>
     </div>
   );
 }
@@ -469,9 +560,9 @@ export default function MainPage() {
                 </div>
               </button>
               
-              {/* 导航列表 */}
-              <nav className="px-2 pb-2 space-y-1">
-                {NAV_ITEMS.map(tab => {
+              {/* 主导航列表 */}
+              <nav className="px-2 space-y-1">
+                {MAIN_NAV_ITEMS.map(tab => {
                   const Icon = tab.icon;
                   const isActive = mainTab === tab.key;
                   
@@ -494,8 +585,57 @@ export default function MainPage() {
                 })}
               </nav>
               
+              {/* 个人导航（带分割线） */}
+              <div className="mx-2 border-t border-slate-100 dark:border-slate-700 pt-2">
+                <nav className="space-y-1">
+                  {PERSONAL_NAV_ITEMS.map(tab => {
+                    const Icon = tab.icon;
+                    const isActive = mainTab === tab.key;
+                    
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setMainTab(tab.key)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
+                          isActive
+                            ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-sm'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                          {tab.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+              
+              {/* 更多导航（带分割线） */}
+              <div className="mx-2 border-t border-slate-100 dark:border-slate-700 pt-2">
+                <nav className="space-y-1 pb-2">
+                  {MORE_NAV_ITEMS.map(tab => {
+                    const Icon = tab.icon;
+                    
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setMainTab(tab.key)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200`}
+                      >
+                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                          {tab.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+              
               {/* 底部会员入口 */}
-              <div className="px-2 pb-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+              <div className="px-2 pb-2 border-t border-slate-100 dark:border-slate-700 pt-2">
                 <Link 
                   href="/membership" 
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-500 transition-colors ${
@@ -516,7 +656,7 @@ export default function MainPage() {
             {/* 移动端Tab切换 - 胶囊样式 */}
             <div className="lg:hidden mb-4">
               <div className="flex items-center gap-2 p-1 bg-white dark:bg-slate-800 rounded-xl overflow-x-auto border border-slate-100 dark:border-slate-700">
-                {NAV_ITEMS.map(tab => {
+                {MAIN_NAV_ITEMS.map(tab => {
                   const Icon = tab.icon;
                   const isActive = mainTab === tab.key;
                   
@@ -542,6 +682,9 @@ export default function MainPage() {
             {mainTab === 'home' && <HomePage />}
             {mainTab === 'tools' && <ToolsPage />}
             {mainTab === 'templates' && <TemplatesPage />}
+            {mainTab === 'recent' && <RecentPage />}
+            {mainTab === 'projects' && <ProjectsPage />}
+            {mainTab === 'assets' && <AssetsPage />}
           </main>
         </div>
       </div>
