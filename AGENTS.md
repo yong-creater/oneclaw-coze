@@ -78,6 +78,27 @@
 │   └── icons/                 # 图标资源
 ├── src/
 │   ├── app/                   # Next.js App Router
+│   │   ├── page.tsx          # 首页 (AI对话 + 快捷入口)
+│   │   ├── tools/            # 工具页面
+│   │   │   ├── page.tsx     # 工具列表页
+│   │   │   └── [key]/       # 各工具详情页
+│   │   ├── templates/        # 模板页面
+│   │   │   └── page.tsx     # 模板列表页
+│   │   ├── recent/           # 最近打开
+│   │   │   └── page.tsx     # 最近打开页
+│   │   ├── projects/        # 项目页面
+│   │   ├── assets/          # 资产库
+│   │   │   └── page.tsx     # 资产库页
+│   │   ├── admin/           # 后台管理
+│   │   ├── api/             # API Routes
+│   │   └── layout.tsx       # 根布局
+│   ├── components/
+│   │   ├── ui/              # Shadcn UI 组件
+│   │   ├── common/          # 通用组件
+│   │   │   ├── Sidebar.tsx  # 统一侧边栏
+│   │   │   └── Footer.tsx   # 底部组件
+│   │   └── tools/           # 工具组件
+│   └── lib/                  # 工具库
 │   │   ├── (frontend)/        # 前台页面组
 │   │   │   ├── page.tsx      # 首页
 │   │   │   ├── tools/         # 工具相关页面
