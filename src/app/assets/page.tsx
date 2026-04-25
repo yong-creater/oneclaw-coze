@@ -419,7 +419,9 @@ export default function AssetsPage() {
       {toast && <Toast message={toast.message} onClose={() => setToast(null)} icon={toast.icon} />}
 
       {/* 底部 - 全宽 */}
-      <Footer />
+      <div className="ml-56">
+        <Footer />
+      </div>
     </div>
   );
 }

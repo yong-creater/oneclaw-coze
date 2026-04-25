@@ -214,7 +214,9 @@ export default function ToolsPage() {
       </main>
 
       {/* 底部 - 全宽 */}
-      <Footer />
+      <div className="ml-56">
+        <Footer />
+      </div>
     </div>
   );
 }
