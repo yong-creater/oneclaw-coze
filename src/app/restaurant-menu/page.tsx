@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { 
-  ArrowLeft, Coffee, RefreshCw, Download, Check, ChevronRight, Upload, Plus, Trash2
+  ArrowLeft, Coffee, RefreshCw, Download, Check, Plus, Trash2, Sparkles, Wand2
 } from 'lucide-react';
 import Footer from '@/components/common/Footer';
 
@@ -20,34 +20,12 @@ interface MenuItem {
   price: string;
 }
 
-function Toast({ message, onClose }: { message: string; onClose: () => void }) {
-  useEffect(() => { const t = setTimeout(onClose, 2000); return () => clearTimeout(t); }, [onClose]);
-  return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
-      <div className="bg-slate-800 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2">
-        <Check className="w-4 h-4 text-green-400" />
-        <span className="text-sm">{message}</span>
-      </div>
-    </div>
-  );
-}
-
 export default function RestaurantMenuPage() {
-  const [step, setStep] = useState<'upload' | 'edit' | 'result'>('upload');
   const [menuStyle, setMenuStyle] = useState('elegant');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     { id: 1, name: '', price: '' }
   ]);
-  const [toast, setToast] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setStep('edit');
-      setToast('菜品图片已上传');
-    }
-  };
+  const [isGenerated, setIsGenerated] = useState(false);
 
   const addMenuItem = () => {
     setMenuItems([...menuItems, { id: Date.now(), name: '', price: '' }]);
@@ -65,26 +43,23 @@ export default function RestaurantMenuPage() {
 
   const handleGenerate = () => {
     const hasContent = menuItems.some(item => item.name.trim());
-    if (!hasContent) {
-      setToast('请至少添加一个菜品');
-      return;
-    }
-    setStep('result');
-    setToast('菜单生成成功！');
+    if (!hasContent) return;
+    setIsGenerated(true);
   };
 
   const handleReset = () => {
     setMenuStyle('elegant');
     setMenuItems([{ id: 1, name: '', price: '' }]);
-    setStep('upload');
+    setIsGenerated(false);
   };
 
   const style = MENU_STYLES.find(s => s.id === menuStyle);
+  const validItems = menuItems.filter(item => item.name.trim());
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-100 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-amber-50/30">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-100/50 sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-800">
             <ArrowLeft className="w-4 h-4" />返回首页
           </Link>
@@ -98,119 +73,102 @@ export default function RestaurantMenuPage() {
         </div>
       </header>
 
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-
-      <main className="max-w-4xl mx-auto px-6 py-8 pb-24">
-        <div className="flex items-center justify-center gap-4 mb-8">
-          {['上传菜品', '编辑菜单', '生成菜单'].map((label, idx) => {
-            const steps = ['upload', 'edit', 'result'];
-            const s = steps[idx];
-            const isActive = step === s;
-            const isDone = steps.indexOf(step) > idx;
-            return (
-              <div key={idx} className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${isDone ? 'bg-green-500 text-white' : isActive ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                  {isDone ? <Check className="w-4 h-4" /> : idx + 1}
-                </div>
-                <span className={`text-sm ${isActive ? 'text-slate-800 font-medium' : 'text-slate-400'}`}>{label}</span>
-                {idx < 2 && <ChevronRight className="w-4 h-4 text-slate-300 mx-2" />}
-              </div>
-            );
-          })}
+      <main className="max-w-3xl mx-auto px-6 py-8 pb-24">
+        
+        {/* 风格选择 */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mb-6">
+          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-amber-500" />
+            选择菜单风格
+          </h3>
+          <div className="grid grid-cols-4 gap-3">
+            {MENU_STYLES.map(s => (
+              <button key={s.id} onClick={() => setMenuStyle(s.id)}
+                className={`p-4 rounded-xl border-2 transition-all hover:scale-105 ${menuStyle === s.id ? 'border-amber-500 bg-amber-50 shadow-md' : 'border-slate-200 hover:border-slate-300'}`}>
+                <div className={`w-full h-10 rounded-lg bg-gradient-to-br ${s.color} mb-2`} />
+                <div className="text-sm font-medium text-slate-800">{s.name}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
-        {step === 'upload' && (
-          <div className="max-w-md mx-auto">
-            <div onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-slate-300 rounded-2xl p-12 text-center cursor-pointer hover:border-amber-400 hover:bg-amber-50/50 transition-all">
-              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFileChange} className="hidden" />
-              <div className="w-16 h-16 rounded-2xl bg-amber-100 flex items-center justify-center mx-auto mb-4">
-                <Upload className="w-8 h-8 text-amber-500" />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">上传菜品图片</h3>
-              <p className="text-sm text-slate-500 mb-4">上传菜品照片，AI自动识别生成菜单</p>
-              <p className="text-xs text-slate-400">支持 JPG、PNG 格式</p>
-            </div>
-            <div className="mt-6 text-center">
-              <button onClick={() => setStep('edit')} className="text-amber-500 hover:text-amber-600 text-sm">
-                没有图片？直接创建菜单
-              </button>
-            </div>
+        {/* 菜品列表 */}
+        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+              <Wand2 className="w-5 h-5 text-amber-500" />
+              添加菜品
+            </h3>
+            <button onClick={addMenuItem} className="flex items-center gap-1 text-sm text-amber-500 hover:text-amber-600 font-medium">
+              <Plus className="w-4 h-4" />添加
+            </button>
           </div>
-        )}
-
-        {step === 'edit' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-slate-100">
-              <h3 className="font-semibold text-slate-800 mb-4">选择菜单风格</h3>
-              <div className="grid grid-cols-4 gap-3">
-                {MENU_STYLES.map(s => (
-                  <button key={s.id} onClick={() => setMenuStyle(s.id)}
-                    className={`p-4 rounded-xl border-2 transition-all ${menuStyle === s.id ? 'border-amber-500 bg-amber-50' : 'border-slate-200 hover:border-slate-300'}`}>
-                    <div className={`w-full h-8 rounded-lg bg-gradient-to-br ${s.color} mb-2`} />
-                    <div className="text-sm font-medium text-slate-800">{s.name}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 border border-slate-100">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-800">添加菜品</h3>
-                <button onClick={addMenuItem} className="flex items-center gap-1 text-sm text-amber-500 hover:text-amber-600">
-                  <Plus className="w-4 h-4" />添加
+          <div className="space-y-3">
+            {menuItems.map((item, idx) => (
+              <div key={item.id} className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-sm text-amber-600 font-medium">{idx + 1}</span>
+                <input type="text" value={item.name} onChange={e => { updateMenuItem(item.id, 'name', e.target.value); setIsGenerated(false); }}
+                  placeholder="菜品名称" className="flex-1 px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 transition-colors" />
+                <input type="text" value={item.price} onChange={e => updateMenuItem(item.id, 'price', e.target.value)}
+                  placeholder="¥价格" className="w-28 px-4 py-2.5 border-2 border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 transition-colors" />
+                <button onClick={() => removeMenuItem(item.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 预览 */}
+        {validItems.length > 0 && (
+          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm mb-6">
+            <h3 className="font-semibold text-slate-800 mb-4">菜单预览</h3>
+            <div className={`max-w-md mx-auto p-8 bg-gradient-to-br ${style?.color} rounded-2xl shadow-inner`}>
+              <h2 className="text-2xl font-bold text-slate-800 text-center mb-6">菜单</h2>
               <div className="space-y-3">
-                {menuItems.map((item, idx) => (
-                  <div key={item.id} className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-sm text-slate-500">{idx + 1}</span>
-                    <input type="text" value={item.name} onChange={e => updateMenuItem(item.id, 'name', e.target.value)}
-                      placeholder="菜品名称" className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-amber-400" />
-                    <input type="text" value={item.price} onChange={e => updateMenuItem(item.id, 'price', e.target.value)}
-                      placeholder="价格" className="w-24 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-amber-400" />
-                    <button onClick={() => removeMenuItem(item.id)} className="p-2 text-slate-400 hover:text-red-500">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                {validItems.map((item, idx) => (
+                  <div key={idx} className="flex justify-between text-slate-700">
+                    <span>{item.name}</span>
+                    <span className="font-medium">{item.price || '¥--'}</span>
                   </div>
                 ))}
               </div>
             </div>
-
-            <div className="text-center">
-              <button onClick={handleGenerate} className="px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold">
-                生成菜单
-              </button>
-            </div>
           </div>
         )}
 
-        {step === 'result' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-slate-100">
-              <div className={`max-w-md mx-auto p-8 bg-gradient-to-br ${style?.color} rounded-2xl`}>
-                <h2 className="text-2xl font-bold text-slate-800 text-center mb-6">菜单</h2>
-                <div className="space-y-3">
-                  {menuItems.filter(item => item.name.trim()).map((item, idx) => (
-                    <div key={idx} className="flex justify-between text-slate-700">
-                      <span>{item.name}</span>
-                      <span className="font-medium">{item.price || '¥--'}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        {/* 操作按钮 */}
+        <div className="flex items-center justify-center gap-4">
+          <button onClick={handleReset}
+            className="px-6 py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-medium hover:bg-slate-50 flex items-center gap-2">
+            <RefreshCw className="w-5 h-5" />重新制作
+          </button>
+          <button onClick={handleGenerate} disabled={validItems.length === 0}
+            className={`px-8 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-lg transition-all ${
+              validItems.length > 0
+                ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 hover:shadow-xl'
+                : 'bg-slate-300 text-slate-500 cursor-not-allowed'
+            }`}>
+            <Check className="w-5 h-5" />一键生成
+          </button>
+        </div>
+
+        {/* 生成成功 */}
+        {isGenerated && (
+          <div className="mt-6 text-center animate-in fade-in slide-in-from-bottom-4">
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-green-50 text-green-600 rounded-full">
+              <Check className="w-5 h-5" />
+              <span className="font-medium">菜单已生成！</span>
             </div>
-            <div className="flex items-center justify-center gap-4">
-              <button onClick={handleReset} className="px-6 py-3 bg-white border border-slate-200 rounded-xl flex items-center gap-2">
-                <RefreshCw className="w-5 h-5" />重新制作
-              </button>
-              <button className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold flex items-center gap-2">
+            <div className="mt-4">
+              <button className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-orange-600 flex items-center gap-2 mx-auto shadow-lg">
                 <Download className="w-5 h-5" />下载菜单
               </button>
             </div>
           </div>
         )}
       </main>
+
       <Footer />
     </div>
   );
