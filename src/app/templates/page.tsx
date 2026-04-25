@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { 
-  Search, Filter, Grid3X3, List, 
+  Search, Filter, Grid3X3, List, Menu,
   Clock, Star, Download, Heart, TrendingUp,
   ChevronRight, Crown, X, Check, Sparkles
 } from 'lucide-react';
@@ -87,16 +87,26 @@ export default function TemplatesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
-      {/* 左侧统一导航 */}
+      {/* 左侧统一导航 - md 以上显示 */}
       <Sidebar />
 
-      {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
-        {/* 统一顶部 */}
-        <Header title="设计模板" subtitle={`共 ${TEMPLATES.length} 个模板`} badge="1.1元开通会员" showRightArea={false} />
+      {/* 主内容区 - 响应式布局 */}
+      <main className={`
+        flex-1 transition-all duration-300 
+        md:${collapsed ? 'ml-[72px]' : 'ml-[268px]'}
+      `}>
+        {/* 移动端顶部导航栏 */}
+        <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button className="p-2 hover:bg-slate-100 rounded-lg transition-all">
+              <Menu className="w-6 h-6 text-slate-600" />
+            </button>
+            <span className="font-bold text-lg bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">设计模板</span>
+          </div>
+        </div>
 
         {/* 页面内容 */}
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* 筛选栏 */}
           <div className="bg-white rounded-2xl border border-slate-200/60 p-4 mb-8">
             <div className="flex flex-wrap items-center gap-4">

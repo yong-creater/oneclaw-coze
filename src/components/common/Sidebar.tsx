@@ -59,7 +59,14 @@ export function Sidebar({
 
   return (
     <aside 
-      className={`bg-white/80 backdrop-blur-xl border-r border-slate-200/50 flex flex-col h-screen fixed left-0 top-0 z-30 transition-all duration-300 ${collapsed ? 'w-[72px]' : 'w-[268px]'} ${className}`}
+      className={`
+        ${collapsed ? 'w-[72px]' : 'w-[268px]'}
+        bg-white/80 backdrop-blur-xl border-r border-slate-200/50 
+        flex flex-col h-screen fixed left-0 top-0 z-30 
+        transition-all duration-300 
+        hidden md:flex
+        ${className}
+      `}
     >
       {/* Logo 区域 */}
       <div className="p-4 border-b border-slate-100/60">

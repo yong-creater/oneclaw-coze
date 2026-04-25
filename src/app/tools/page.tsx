@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Search, Sparkles, Zap, Star, Clock } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Search, Sparkles, Zap, Star, Clock, Menu } from 'lucide-react';
 import { Header, Sidebar, Footer, useSidebar } from '@/components/common';
 import { TOOLS_CONFIG, TOOL_CATEGORIES, ToolCategory, ToolConfig } from '@/components/tools/config';
 
@@ -121,16 +121,26 @@ export default function ToolsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
-      {/* 左侧统一导航 */}
+      {/* 左侧统一导航 - md 以上显示 */}
       <Sidebar />
 
-      {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
-        {/* 统一顶部 */}
-        <Header title="AI工具箱" subtitle={`共 ${TOOLS_CONFIG.length} 个工具`} showRightArea={false} />
+      {/* 主内容区 - 响应式布局 */}
+      <main className={`
+        flex-1 transition-all duration-300 
+        md:${collapsed ? 'ml-[72px]' : 'ml-[268px]'}
+      `}>
+        {/* 移动端顶部导航栏 */}
+        <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button className="p-2 hover:bg-slate-100 rounded-lg transition-all">
+              <Menu className="w-6 h-6 text-slate-600" />
+            </button>
+            <span className="font-bold text-lg bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">AI工具箱</span>
+          </div>
+        </div>
 
         {/* 页面内容 */}
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {filteredTools ? (
             // 搜索结果
             <div className="animate-in fade-in duration-300">

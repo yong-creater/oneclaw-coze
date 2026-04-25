@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Clock, Grid3X3, FileText, Star, Trash2,
   Search, Filter, MoreHorizontal, Eye, Calendar,
-  ChevronRight, Sparkles, X, FolderOpen
+  ChevronRight, Sparkles, X, FolderOpen, Menu
 } from 'lucide-react';
 import { Sidebar, Header, Footer, useSidebar } from '@/components/common';
 
@@ -112,15 +112,25 @@ export default function RecentPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
-      {/* 左侧统一侧边栏 */}
+      {/* 左侧统一导航 - md 以上显示 */}
       <Sidebar />
 
-      {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
-        {/* 统一顶部 */}
-        <Header title="最近打开" subtitle={`共 ${items.length} 个项目`} showRightArea={false} />
+      {/* 主内容区 - 响应式布局 */}
+      <main className={`
+        flex-1 transition-all duration-300 
+        md:${collapsed ? 'ml-[72px]' : 'ml-[268px]'}
+      `}>
+        {/* 移动端顶部导航栏 */}
+        <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button className="p-2 hover:bg-slate-100 rounded-lg transition-all">
+              <Menu className="w-6 h-6 text-slate-600" />
+            </button>
+            <span className="font-bold text-lg bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">最近打开</span>
+          </div>
+        </div>
 
-        <div className="p-8">
+        <div className="p-4 md:p-8">
           {/* 工具栏 */}
           <div className="flex items-center justify-between gap-4 mb-8">
             {/* 搜索框 */}

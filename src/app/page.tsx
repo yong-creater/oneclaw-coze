@@ -9,6 +9,7 @@ import {
   Bell, User, ArrowRight, Zap, Star, TrendingUp
 } from 'lucide-react';
 import { Sidebar, Footer, useSidebar } from '@/components/common';
+import { Menu } from 'lucide-react';
 
 // AI Agent 入口
 const AI_AGENTS = [
@@ -85,19 +86,32 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
-      {/* 左侧统一导航 */}
+      {/* 左侧统一导航 - md 以上显示 */}
       <Sidebar />
 
-      {/* 主内容区 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
+      {/* 主内容区 - 响应式布局 */}
+      <main className={`
+        flex-1 transition-all duration-300 
+        md:${collapsed ? 'ml-[72px]' : 'ml-[268px]'}
+      `}>
+        {/* 移动端顶部导航栏 */}
+        <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <button className="p-2 hover:bg-slate-100 rounded-lg transition-all">
+              <Menu className="w-6 h-6 text-slate-600" />
+            </button>
+            <span className="font-bold text-lg bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">OneClaw</span>
+          </div>
+        </div>
+
         {/* 页面内容 */}
-        <div className="p-8 max-w-6xl mx-auto">
+        <div className="p-4 md:p-8 max-w-6xl mx-auto">
           {/* 欢迎区域 */}
-          <div className="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent mb-2">
+          <div className="mb-8 md:mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 bg-clip-text text-transparent mb-2">
               和我聊聊，你想要什么设计~
             </h1>
-            <p className="text-slate-500">238 款 AI 工具，让创作更简单</p>
+            <p className="text-slate-500 text-sm md:text-base">238 款 AI 工具，让创作更简单</p>
           </div>
 
           {/* AI Agent 入口 */}

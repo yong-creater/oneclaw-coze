@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
-  FolderOpen, Upload, Search, Grid3X3, List,
+  FolderOpen, Upload, Search, Grid3X3, List, Menu,
   Clock, Star, Trash2, Download, Eye, MoreHorizontal,
   Image, FileText, Music, Video, Archive, X,
   ChevronRight, Sparkles, Copy, Share2, Check
@@ -118,11 +118,11 @@ export default function AssetsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
-      {/* 左侧统一侧边栏 */}
+      {/* 左侧统一导航 - md 以上显示 */}
       <Sidebar />
 
-      {/* 主内容区 - 响应侧边栏折叠状态 */}
-      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
+      {/* 主内容区 - 响应式布局 */}
+      <main className={`flex-1 transition-all duration-300 md:${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 统一顶部 */}
         <Header 
           title="资产库" 
