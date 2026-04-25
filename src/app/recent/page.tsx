@@ -164,8 +164,10 @@ export default function RecentPage() {
         </div>
       </main>
 
-      {/* 底部 */}
-      <Footer />
+      {/* 底部 - 全宽 */}
+      <div className="ml-56">
+        <Footer />
+      </div>
     </div>
   );
 }

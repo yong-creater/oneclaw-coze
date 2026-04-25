@@ -81,7 +81,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* 左侧统一导航 */}
       <Sidebar />
 
@@ -235,8 +235,10 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* 底部 */}
-      <Footer />
+      {/* 底部 - 全宽 */}
+      <div className="ml-56">
+        <Footer />
+      </div>
     </div>
   );
 }

@@ -300,8 +300,10 @@ export default function TemplatesPage() {
       {/* Toast */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-      {/* 底部 */}
-      <Footer />
+      {/* 底部 - 全宽 */}
+      <div className="ml-56">
+        <Footer />
+      </div>
     </div>
   );
 }
