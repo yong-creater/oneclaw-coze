@@ -8,12 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  Search, Wand2, Star, X,
+  Search, Wand2, Star, X, Rocket,
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
   FileText, Globe, TrendingUp, Briefcase, MapPin, Palette, Layers,
-  ShoppingCart, Shirt, Video, Smile
+  ShoppingCart, Shirt, Video, Smile, Clock, Shield, Zap
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -736,7 +736,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             {/* Logo - 防止被压缩 */}
-            <Link href="/landing" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
               <AnimatedLobster size={32} className="sm:size-9" />
               <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent whitespace-nowrap">
                 OneClaw
@@ -775,6 +775,135 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* ==================== 品牌展示区（首页精选工具Tab） ==================== */}
+        {mainTab === 'utilities' && (
+          <div className="mb-8">
+            {/* Hero Banner */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-orange-500 via-red-500 to-amber-500 rounded-2xl p-8 md:p-12 text-white mb-8">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full" />
+              <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-white/5 rounded-full" />
+              
+              <div className="relative flex flex-col lg:flex-row items-center gap-8">
+                <div className="flex-1 text-center lg:text-left">
+                  <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur rounded-full px-4 py-1 mb-4">
+                    <AnimatedLobster size={24} />
+                    <span className="font-medium">OneClaw 虾评</span>
+                  </div>
+                  <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+                    全品类AI工具导航站
+                  </h1>
+                  <p className="text-lg text-white/90 mb-6 max-w-xl">
+                    一爪搞定238款AI工具，7大自研神器让创作更简单
+                    <br />
+                    <span className="font-medium">零门槛 · 商用无忧 · 极速出图</span>
+                  </p>
+                  <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                    <Button 
+                      size="lg"
+                      onClick={() => setMainTab('utilities')}
+                      className="bg-white text-orange-600 hover:bg-white/90 shadow-lg"
+                    >
+                      <Rocket className="mr-2 w-5 h-5" />
+                      立即体验
+                    </Button>
+                    <Button 
+                      size="lg"
+                      variant="outline"
+                      className="border-2 border-white/50 text-white hover:bg-white/20"
+                    >
+                      探索全部工具
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="flex-shrink-0">
+                  <div className="relative">
+                    <div className="w-32 h-32 md:w-40 md:h-40 bg-white/20 backdrop-blur rounded-3xl flex items-center justify-center">
+                      <AnimatedLobster size={72} />
+                    </div>
+                    <div className="absolute -bottom-2 -right-2 bg-white rounded-full px-3 py-1 shadow-lg">
+                      <span className="text-sm font-bold text-orange-500">238+工具</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 快速数据统计 */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              {[
+                { label: '精选AI工具', value: '238+', color: 'from-orange-500 to-red-500' },
+                { label: '自研神器', value: '7+', color: 'from-blue-500 to-cyan-500' },
+                { label: '用户信赖', value: '10万+', color: 'from-green-500 to-emerald-500' },
+                { label: '服务可用', value: '99.9%', color: 'from-purple-500 to-pink-500' },
+              ].map((stat, i) => (
+                <div key={i} className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-700">
+                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} mb-2`}>
+                    <Star className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-slate-800 dark:text-white">{stat.value}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* 品牌特色 */}
+            <div className="grid md:grid-cols-4 gap-4 mb-8">
+              {[
+                { icon: Wand2, title: '7大AI神器', desc: '头像、形象照、海报、手抄报...' },
+                { icon: Zap, title: '零门槛使用', desc: '无需prompt，一键生成' },
+                { icon: Shield, title: '商用无忧', desc: '正版授权，合规出海' },
+                { icon: Clock, title: '极速出图', desc: '3秒出图，效率翻倍' },
+              ].map((feature, i) => (
+                <div key={i} className="bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center flex-shrink-0">
+                    <feature.icon className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-800 dark:text-white text-sm">{feature.title}</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{feature.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 精选工具入口 */}
+            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-white">7大AI神器</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">无需学习，一键生成专业级作品</p>
+                </div>
+                <Badge className="bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+                  精选推荐
+                </Badge>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
+                {UTILITY_TOOLS.map((tool) => {
+                  const Icon = tool.icon;
+                  return (
+                    <button
+                      key={tool.key}
+                      onClick={() => setMainTab('tools')}
+                      className="group flex flex-col items-center p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 hover:bg-orange-50 dark:hover:bg-orange-900/20 border border-slate-200 dark:border-slate-600 hover:border-orange-300 dark:hover:border-orange-600 transition-all"
+                    >
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
+                        <Icon className="w-6 h-6 text-white" />
+                      </div>
+                      <span className="text-xs font-medium text-slate-700 dark:text-slate-200 text-center leading-tight">
+                        {tool.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
           <div className="flex gap-6">
