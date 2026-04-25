@@ -2,13 +2,13 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { 
-  Palette, Upload, Download, Loader2, 
+  Palette, Download, Loader2, 
   Image as ImageIcon, BookOpen, Brush,
-  Pen, Scissors, Star, Heart, Smile,
+  Pen, Scissors, Star, Smile,
   Copy, Check, RefreshCw, Wand2, 
-  Baby, Pencil, Flower, Crown, Gift,
-  Sun, Moon, Rainbow, Cloud,
-  DownloadCloud, Eye, Share2
+  Crown, Gift, Rainbow, Eye, Flower,
+  Sun, Moon, Heart, Baby, Pencil,
+  CheckCircle2, DownloadCloud, Share2
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
 import UtilityHeader from '@/components/common/UtilityHeader';
@@ -570,11 +570,3 @@ export default function KidsCreativeWorkshop() {
     </div>
   );
 }
-
-// 缺少的图标
-const CheckCircle2 = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-    <polyline points="22 4 12 14.01 9 11.01" />
-  </svg>
-);

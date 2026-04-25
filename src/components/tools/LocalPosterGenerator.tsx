@@ -2,23 +2,16 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { 
-  MapPin, Upload, Download, Loader2, 
-  Image as ImageIcon, Camera, Palette,
+  MapPin, Download, Loader2, 
+  Image as ImageIcon, Palette,
   Copy, Check, RefreshCw, Wand2, Star,
-  Plus, Trash2, Type, ImagePlus, QrCode,
-  MapPinned, Phone, Mail, Clock, Percent,
-  Gift, PartyPopper, Coffee, ShoppingBag,
-  Sparkles, Crown, DownloadCloud
+  Plus, Type, ImagePlus,
+  Gift, PartyPopper, Sparkles, Store,
+  MapPinned, ShoppingBag, Coffee,
+  CheckCircle2, Percent, DownloadCloud
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
 import UtilityHeader from '@/components/common/UtilityHeader';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -549,18 +542,3 @@ export default function LocalPosterGenerator() {
     </div>
   );
 }
-
-// 缺少的图标
-const Store = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
-  </svg>
-);
-
-const CheckCircle2 = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-    <polyline points="22 4 12 14.01 9 11.01" />
-  </svg>
-);

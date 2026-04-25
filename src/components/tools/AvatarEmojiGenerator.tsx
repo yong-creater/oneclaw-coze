@@ -2,31 +2,16 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { 
-  Sparkles, Upload, Download, Loader2, 
+  Sparkles, Download, Loader2, 
   Image as ImageIcon, Palette, Smile,
-  Copy, Check, X, ChevronDown, Plus, 
-  Heart, Eye, RefreshCw, Wand2, Zap,
-  User, Shirt, Star, Sun, Moon, Sparkle,
-  Camera, Type, SmilePlus, HeartHandshake,
-  AlertCircle, CheckCircle2, Copy as CopyIcon
+  Copy, Check, Eye, RefreshCw, Wand2,
+  User, Star, Type, CheckCircle2, 
+  Upload, Heart, Sparkle, Copy as CopyIcon
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
 import UtilityHeader from '@/components/common/UtilityHeader';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { ImageUploader } from './ImageUploader';
 
 // ==================== 类型定义 ====================
@@ -62,7 +47,7 @@ const AVATAR_STYLES: AvatarStyle[] = [
   { id: 'watercolor', name: '水彩风', description: '清新水彩风格，柔和自然', prompt: 'watercolor style, soft, delicate, pastel colors', icon: <Palette className="w-4 h-4" /> },
   { id: 'sketch', name: '素描风', description: '手绘素描风格，真实细腻', prompt: 'pencil sketch style, detailed, realistic shading', icon: <Palette className="w-4 h-4" /> },
   { id: 'pixel', name: '像素风', description: '复古像素风格，游戏感强', prompt: 'pixel art style, 8-bit, retro game aesthetic', icon: <Palette className="w-4 h-4" /> },
-  { id: 'cyberpunk', name: '赛博朋克', description: '未来科技感，炫酷潮流', prompt: 'cyberpunk style, neon lights, futuristic, glowing effects', icon: <Sparkle className="w-4 h-4" /> },
+  { id: 'cyberpunk', name: '赛博朋克', description: '未来科技感，炫酷潮流', prompt: 'cyberpunk style, neon lights, futuristic, glowing effects', icon: <Star className="w-4 h-4" /> },
   { id: 'ink-wash', name: '水墨风', description: '东方水墨意境，诗意雅致', prompt: 'Chinese ink wash painting style, traditional, elegant', icon: <Palette className="w-4 h-4" /> },
 ];
 

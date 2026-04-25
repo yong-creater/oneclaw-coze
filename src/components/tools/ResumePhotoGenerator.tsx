@@ -2,22 +2,15 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { 
-  UserCircle, Upload, Download, Loader2, 
-  Image as ImageIcon, Camera, Briefcase,
-  Shirt, User, Crown, Sparkles, Mail,
+  UserCircle, Download, Loader2, 
+  Image as ImageIcon, Briefcase,
+  Shirt, User, Crown, Sparkles,
   Copy, Check, RefreshCw, Wand2, Star,
-  CheckCircle2, AlertCircle, DownloadCloud,
-  Share2, Eye
+  CheckCircle2, Eye, Camera, Upload,
+  Share2, DownloadCloud
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
 import UtilityHeader from '@/components/common/UtilityHeader';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ImageUploader } from './ImageUploader';

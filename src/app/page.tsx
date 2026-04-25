@@ -21,7 +21,6 @@ import SponsorBadge, { isSponsorActive } from '@/components/common/SponsorBadge'
 import AdBanner, { HomeBanner, HomeInlineAd } from '@/components/common/AdBanner';
 import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
-import NovelCreator from '@/components/tools/NovelCreator';
 import { ToolLogo } from '@/components/common/ToolLogo';
 
 // ==================== 类型定义 ====================
