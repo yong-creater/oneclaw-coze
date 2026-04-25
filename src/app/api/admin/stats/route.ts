@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       vipCount,
       todayUses,
       totalUses,
+      favoritesCount,
     ] = await Promise.all([
       // 工具统计
       client.from('tools').select('id', { count: 'exact', head: true }),
@@ -68,6 +69,8 @@ export async function GET(request: NextRequest) {
         .gte('created_at', todayStart.toISOString()),
       // 总使用量
       client.from('utility_usage_logs').select('id', { count: 'exact', head: true }),
+      // 收藏统计
+      client.from('user_favorites').select('id', { count: 'exact', head: true }),
     ]);
 
     // 获取总浏览量和点击量
@@ -106,6 +109,8 @@ export async function GET(request: NextRequest) {
         // 使用量
         today_uses: todayUses.count || 0,
         total_uses: totalUses.count || 0,
+        // 收藏
+        favorites_count: favoritesCount.count || 0,
       }
     });
   } catch (error) {

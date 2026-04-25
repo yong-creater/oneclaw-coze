@@ -11,21 +11,17 @@ import {
   LogOut,
   Loader2,
   LayoutDashboard,
-  Grid3X3,
   FolderTree,
-  Tags,
   Users,
   Settings,
   FileText
 } from 'lucide-react';
 
-// 简化的导航菜单
+// 后台导航菜单（工具配置通过代码管理）
 const navigation = [
   { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
-  { name: '工具管理', href: '/admin/tools', icon: Grid3X3 },
   { name: '模板管理', href: '/admin/templates', icon: FileText },
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
-  { name: '标签管理', href: '/admin/tags', icon: Tags },
   { name: '用户管理', href: '/admin/users', icon: Users },
   { name: '系统设置', href: '/admin/settings', icon: Settings },
 ];
