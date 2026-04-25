@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Clock, FileText, Image, Video, Trash2, Star, Search, X } from 'lucide-react';
-import { Sidebar } from '@/components/common/Sidebar';
-import Footer from '@/components/common/Footer';
+import { Sidebar, Header, Footer } from '@/components/common';
 
 // 最近打开的数据
 const RECENT_ITEMS = [
@@ -87,13 +86,8 @@ export default function RecentPage() {
 
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
-        {/* 顶部栏 */}
-        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-10">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold text-slate-800">最近打开</h1>
-            <span className="text-sm text-slate-400">共 {items.length} 个项目</span>
-          </div>
-        </header>
+        {/* 统一顶部 */}
+        <Header title="最近打开" subtitle={`共 ${items.length} 个项目`} showRightArea={false} />
 
         <div className="p-6">
           {/* 搜索 */}

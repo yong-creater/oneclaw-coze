@@ -7,8 +7,7 @@ import {
   Clock, Star, Download, Heart,
   ChevronRight, Crown, MoreHorizontal, X, Check
 } from 'lucide-react';
-import { Sidebar } from '@/components/common/Sidebar';
-import Footer from '@/components/common/Footer';
+import { Sidebar, Header, Footer } from '@/components/common';
 
 // 模板分类
 const CATEGORIES = [
@@ -128,19 +127,8 @@ export default function TemplatesPage() {
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
         {/* 顶部栏 */}
-        <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-10">
-          <div className="flex items-center gap-4">
-            <h1 className="text-lg font-semibold text-slate-800">设计模板</h1>
-            <span className="text-sm text-slate-400">共 {TEMPLATES.length} 个模板</span>
-          </div>
-          <Link
-            href="/membership"
-            className="px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full text-xs font-medium text-amber-600 flex items-center gap-1.5"
-          >
-            <Crown className="w-3 h-3" />
-            1.1元开通会员
-          </Link>
-        </header>
+        {/* 统一顶部 */}
+        <Header title="设计模板" subtitle={`共 ${TEMPLATES.length} 个模板`} badge="1.1元开通会员" />
 
         <div className="p-6">
           {/* 搜索和筛选 */}

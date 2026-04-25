@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Sidebar } from '@/components/common/Sidebar';
-import Footer from '@/components/common/Footer';
+import { Sidebar, Header, Footer } from '@/components/common';
 import { 
   Crown, CreditCard, Gift, FileText, Headphones, 
   MessageCircle, Star, ChevronRight, ExternalLink,
@@ -54,10 +53,8 @@ export default function MorePage() {
 
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
-        {/* 顶部栏 */}
-        <header className="h-14 bg-white border-b border-slate-100 flex items-center px-6 sticky top-0 z-10">
-          <h1 className="text-lg font-semibold text-slate-800">更多</h1>
-        </header>
+        {/* 统一顶部 */}
+        <Header title="更多" showRightArea={false} />
 
         <div className="p-6">
           <div className="max-w-2xl space-y-8">

@@ -6,6 +6,8 @@ export { default as LoginModal } from './LoginModal';
 export { default as WechatPromo } from './WechatPromo';
 export { default as UserButton } from './UserButton';
 export { default as Sidebar } from './Sidebar';
+export { default as Header } from './Header';
+export { default as Footer } from './Footer';
 export { default as SkeletonGrid } from './LobsterSkeleton';
 
 // 命名导出组件

@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
-import { Sidebar } from '@/components/common/Sidebar';
-import Footer from '@/components/common/Footer';
+import { Sidebar, Header, Footer } from '@/components/common';
 import { TOOLS_CONFIG, TOOL_CATEGORIES, ToolCategory, ToolConfig } from '@/components/tools/config';
 
 // 工具封面图配置（使用真实场景图片）
@@ -122,6 +121,9 @@ export default function ToolsPage() {
 
       {/* 主内容区 */}
       <main className="flex-1 ml-56">
+        {/* 统一顶部 */}
+        <Header title="AI工具箱" subtitle={`共 ${TOOLS_CONFIG.length} 个工具`} />
+
         {/* 页面内容 */}
         <div className="p-6">
           {filteredTools ? (
