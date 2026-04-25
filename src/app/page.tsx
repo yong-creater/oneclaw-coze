@@ -109,9 +109,62 @@ interface Skill {
   skill_categories: { id: number; name: string; slug: string; color: string } | null;
 }
 
-// ==================== 美图风格精选工具页面 ====================
+// ==================== designkit风格精选工具页面 ====================
 function UtilityToolsPage() {
-  const router = useRouter();
+  const [inputValue, setInputValue] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  
+  // 快捷Agent入口
+  const QUICK_AGENTS = [
+    { icon: '🛒', name: '头像生成Agent', desc: '上传照片生成头像', color: 'from-amber-50 to-orange-50' },
+    { icon: '👚', name: '形象照Agent', desc: '生成职业形象照', color: 'from-sky-50 to-blue-50' },
+    { icon: '📄', name: '封面图Agent', desc: '小红书抖音封面', color: 'from-pink-50 to-rose-50' },
+    { icon: '🎬', name: '海报Agent', desc: '节日营销海报', color: 'from-red-50 to-orange-50' },
+  ];
+  
+  // 特色功能卡片
+  const FEATURED_TOOLS = [
+    { 
+      name: 'AI头像表情包', 
+      desc: '一键生成精美头像',
+      image: 'https://picsum.photos/seed/feature1/600/400',
+      gradient: 'from-pink-100 to-rose-100',
+      key: 'avatar-emoji'
+    },
+    { 
+      name: '形象照生成', 
+      desc: '专业简历形象照',
+      image: 'https://picsum.photos/seed/feature2/600/400',
+      gradient: 'from-sky-100 to-blue-100',
+      key: 'resume-photo'
+    },
+    { 
+      name: '小红书配图', 
+      desc: '爆款封面图生成',
+      image: 'https://picsum.photos/seed/feature3/600/400',
+      gradient: 'from-amber-100 to-orange-100',
+      key: 'xiaohongshu'
+    },
+    { 
+      name: '抖音封面', 
+      desc: '视频封面一键生成',
+      image: 'https://picsum.photos/seed/feature4/600/400',
+      gradient: 'from-cyan-100 to-sky-100',
+      key: 'douyin'
+    },
+  ];
+  
+  // 基础工具矩阵
+  const BASIC_TOOLS = [
+    { name: '图片编辑', icon: ImageIcon, desc: '导入图片，即刻编辑', color: 'bg-slate-100' },
+    { name: '创建设计', icon: Layers, desc: '从空白画布开始', color: 'bg-slate-100' },
+    { name: 'AI头像', icon: Sparkles, desc: '智能头像生成', color: 'bg-gradient-to-br from-amber-50 to-orange-50', key: 'avatar-emoji' },
+    { name: '形象照', icon: UserCircle, desc: '专业形象照', color: 'bg-gradient-to-br from-sky-50 to-blue-50', key: 'resume-photo' },
+    { name: '封面图', icon: BookOpen, desc: '爆款封面', color: 'bg-gradient-to-br from-pink-50 to-rose-50', key: 'xiaohongshu' },
+    { name: '海报生成', icon: PartyPopper, desc: '节日海报', color: 'bg-gradient-to-br from-red-50 to-orange-50', key: 'festival-poster' },
+    { name: '菜单设计', icon: Coffee, desc: '餐饮菜单', color: 'bg-gradient-to-br from-amber-50 to-yellow-50', key: 'restaurant-menu' },
+    { name: '更多', icon: ChevronDown, desc: '更多工具', color: 'bg-slate-50' },
+  ];
 
   const getToolUrl = (key: string) => {
     const urls: Record<string, string> = {
@@ -130,130 +183,163 @@ function UtilityToolsPage() {
     return urls[key] || '/';
   };
 
+  const handleSend = () => {
+    if (!inputValue.trim()) return;
+    setIsGenerating(true);
+    // 模拟生成
+    setTimeout(() => {
+      setIsGenerating(false);
+    }, 2000);
+  };
+
   return (
     <div className="space-y-8">
-      {/* 页面标题 */}
-      <div className="text-center py-4">
-        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-400 to-amber-400 text-white px-6 py-2 rounded-full text-sm font-medium mb-4 shadow-sm">
-          <Sparkles className="w-4 h-4" />
-          <span>精选工具 · 零门槛AI生图</span>
-        </div>
-        <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-3">
-          AI智能工具箱
+      {/* 核心对话框区域 */}
+      <div className="text-center mb-8">
+        {/* 标题 */}
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-4">
+          和我聊聊，你想要什么设计
         </h1>
-        <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-          上传照片或输入文字，一键生成精美头像、菜单、封面图、海报...无需设计基础，小白也能做出专业效果
-        </p>
+        
+        {/* 快捷Agent按钮 */}
+        <div className="flex items-center justify-center gap-3 mb-6 flex-wrap">
+          {QUICK_AGENTS.map((agent, idx) => (
+            <button
+              key={idx}
+              onClick={() => setInputValue(`我想生成${agent.name.replace('Agent', '')}`)}
+              className={`flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 hover:shadow-md transition-all`}
+            >
+              <span className="text-lg">{agent.icon}</span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{agent.name}</span>
+            </button>
+          ))}
+        </div>
+        
+        {/* 对话输入框 - 核心组件 */}
+        <div className="max-w-3xl mx-auto">
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            {/* 输入框 */}
+            <textarea
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="和我聊聊，你想要什么设计..."
+              className="w-full px-6 py-5 pr-24 bg-transparent resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-base"
+              rows={2}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+            />
+            
+            {/* 辅助功能按钮 */}
+            <div className="absolute left-4 bottom-4 flex items-center gap-2">
+              <button className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                <span className="text-slate-500">+</span>
+              </button>
+              <button className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                <ImageIcon className="w-4 h-4 text-slate-500" />
+              </button>
+              <button className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                <Lightbulb className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+            
+            {/* 发送按钮 */}
+            <button
+              onClick={handleSend}
+              disabled={!inputValue.trim() || isGenerating}
+              className="absolute right-4 bottom-4 px-5 py-2 bg-slate-800 dark:bg-slate-600 text-white rounded-xl font-medium text-sm hover:bg-slate-700 dark:hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  生成中
+                </>
+              ) : (
+                <>
+                  发送
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                  </svg>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* 工具网格 - 美图风格：单图大预览 */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {UTILITY_TOOLS.map((tool, index) => {
-          const Icon = tool.icon;
-          const bgColor = tool.bgColor;
-          
-          return (
+      {/* 特色功能卡片 */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-white">精选AI能力</h2>
+          <button className="text-sm text-orange-500 hover:text-orange-600 font-medium">
+            查看全部
+          </button>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {FEATURED_TOOLS.map((tool, idx) => (
             <button
-              key={tool.key}
-              onClick={() => {
-                window.open(getToolUrl(tool.key), '_blank');
-              }}
-              className="group relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:-translate-y-1 text-left"
+              key={idx}
+              onClick={() => window.open(getToolUrl(tool.key), '_blank')}
+              className="group relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700"
             >
-              {/* 预览图区域 - 真实效果图展示 */}
-              <div className="relative h-32 overflow-hidden">
-                {/* 背景渐变 */}
-                <div className={`absolute inset-0 ${bgColor}`} />
-                
-                {/* 示例效果图 */}
-                <div className="absolute inset-0 flex items-center justify-center p-3">
-                  <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg">
-                    <img 
-                      src={tool.preview} 
-                      alt={tool.name}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    {/* 悬浮时显示遮罩 */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-slate-800/90 rounded-full px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium">
-                        <Icon className="w-3.5 h-3.5 text-orange-500" />
-                        <span>立即使用</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* 工具图标标签 */}
-                <div className="absolute top-2 left-2">
-                  <div className={`w-8 h-8 rounded-lg ${bgColor} shadow-sm flex items-center justify-center`}>
-                    <Icon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
-                  </div>
-                </div>
+              {/* 预览图 */}
+              <div className="relative h-36 overflow-hidden">
+                <img 
+                  src={tool.image} 
+                  alt={tool.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-t ${tool.gradient} opacity-60`} />
               </div>
-              
-              {/* 信息区域 */}
+              {/* 信息 */}
               <div className="p-3">
-                <h3 className="font-semibold text-slate-800 dark:text-white mb-0.5 group-hover:text-orange-500 transition-colors text-sm">
-                  {tool.name}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {tool.description}
-                </p>
+                <h3 className="font-semibold text-slate-800 dark:text-white text-sm mb-0.5">{tool.name}</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{tool.desc}</p>
               </div>
             </button>
-          );
-        })}
-        
-        {/* 敬请期待卡片 */}
-        <div className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-700/50 rounded-2xl p-4 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center min-h-[200px]">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center mb-3`}>
-            <Sparkles className="w-6 h-6 text-slate-400" />
-          </div>
-          <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-            更多工具
-          </h3>
-          <p className="text-[10px] text-slate-400">
-            敬请期待...
-          </p>
+          ))}
         </div>
       </div>
 
-      {/* 特色功能展示 */}
-      <div className="bg-gradient-to-r from-orange-50 via-rose-50 to-amber-50 dark:from-orange-900/20 dark:via-rose-900/20 dark:to-amber-900/20 rounded-3xl p-8 mt-8">
-        <div className="text-center mb-6">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">为什么选择我们？</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">简单、快速、专业</p>
+      {/* 底部工具矩阵 */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-white">基础工具</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30 flex items-center justify-center mx-auto mb-3">
-              <Camera className="w-7 h-7 text-pink-500" />
-            </div>
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-1">上传即可生成</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">无需复杂设置，上传图片或输入文字，系统自动生成专业效果</p>
-          </div>
-          <div className="text-center">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center mx-auto mb-3">
-              <Zap className="w-7 h-7 text-blue-500" />
-            </div>
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-1">秒级生成</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">AI智能算法，10秒内完成图片生成，即刻下载使用</p>
-          </div>
-          <div className="text-center">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 flex items-center justify-center mx-auto mb-3">
-              <Download className="w-7 h-7 text-emerald-500" />
-            </div>
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-1">高清无水印</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">生成高清图片，可直接商用，无任何水印限制</p>
-          </div>
+        <div className="grid grid-cols-4 lg:grid-cols-8 gap-3">
+          {BASIC_TOOLS.map((tool, idx) => {
+            const Icon = tool.icon;
+            return (
+              <button
+                key={idx}
+                onClick={() => {
+                  if (tool.name === '更多') {
+                    // 切换到AI应用tab
+                    const event = new CustomEvent('switchTab', { detail: 'tools' });
+                    window.dispatchEvent(event);
+                  } else if ('key' in tool && tool.key) {
+                    window.open(getToolUrl(tool.key), '_blank');
+                  }
+                }}
+                className="group flex flex-col items-center p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 hover:shadow-md transition-all"
+              >
+                <div className={`w-12 h-12 rounded-xl ${tool.color} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
+                  <Icon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
+                </div>
+                <span className="text-xs font-medium text-slate-700 dark:text-slate-200 text-center">{tool.name}</span>
+                <span className="text-[10px] text-slate-400 text-center mt-0.5 line-clamp-1">{tool.desc}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
-
-// 辅助组件
 const Zap = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
