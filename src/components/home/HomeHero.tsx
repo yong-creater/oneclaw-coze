@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Sparkles, Palette, FileText, ShoppingCart, TrendingUp, Settings } from 'lucide-react';
+import FeaturedTools from './FeaturedTools';
 
 const CATEGORIES = [
   {
@@ -170,6 +171,9 @@ export default function HomeHero() {
           ))}
         </div>
       </div>
+
+      {/* 精选工具板块 */}
+      <FeaturedTools />
     </div>
   );
 }
