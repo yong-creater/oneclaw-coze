@@ -736,7 +736,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             {/* Logo - 防止被压缩 */}
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+            <Link href="/landing" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
               <AnimatedLobster size={32} className="sm:size-9" />
               <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent whitespace-nowrap">
                 OneClaw
