@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Plus, Edit, Trash2, FolderTree, GripVertical } from 'lucide-react';
+import { Plus, Edit, Trash2, FolderTree, GripVertical, Check, X } from 'lucide-react';
 
 // 默认分类
 const DEFAULT_CATEGORIES = [
@@ -36,6 +35,11 @@ export default function CategoriesAdminPage() {
     setEditName('');
   };
 
+  const handleCancel = () => {
+    setEditingId(null);
+    setEditName('');
+  };
+
   const handleDelete = (id: number) => {
     if (confirm('确定要删除此分类吗？')) {
       setCategories(prev => prev.filter(c => c.id !== id));
@@ -47,67 +51,87 @@ export default function CategoriesAdminPage() {
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">分类管理</h1>
-          <p className="text-sm text-slate-500 mt-1">管理工具分类，共 {categories.length} 个分类</p>
+          <h1 className="text-2xl font-bold text-slate-900">分类管理</h1>
+          <p className="text-sm text-slate-500 mt-1">共 {categories.length} 个分类</p>
         </div>
-        <Button>
+        <Button className="bg-slate-900 hover:bg-slate-800 cursor-pointer">
           <Plus className="w-4 h-4 mr-2" />
           添加分类
         </Button>
       </div>
 
       {/* 分类列表 */}
-      <Card>
+      <Card className="bg-white border-slate-200 overflow-hidden">
         <CardContent className="p-0">
-          <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          <div className="divide-y divide-slate-100">
             {categories.map((cat) => (
               <div 
                 key={cat.id} 
-                className="flex items-center gap-4 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors"
               >
                 <GripVertical className="w-4 h-4 text-slate-300 cursor-grab" />
                 
                 <div className="flex-1 flex items-center gap-3">
                   {editingId === cat.id ? (
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="max-w-xs"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSave();
-                        if (e.key === 'Escape') setEditingId(null);
-                      }}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="max-w-xs bg-white border-slate-200"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSave();
+                          if (e.key === 'Escape') handleCancel();
+                        }}
+                      />
+                      <Button 
+                        size="sm" 
+                        onClick={handleSave}
+                        className="bg-slate-900 hover:bg-slate-800 cursor-pointer"
+                      >
+                        <Check className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={handleCancel}
+                        className="cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
                   ) : (
                     <>
                       <div className={`w-8 h-8 rounded-lg ${cat.color} flex items-center justify-center`}>
                         <FolderTree className="w-4 h-4" />
                       </div>
                       <div>
-                        <h3 className="font-medium text-slate-800 dark:text-white">{cat.name}</h3>
+                        <h3 className="font-medium text-slate-900">{cat.name}</h3>
                         <p className="text-xs text-slate-400">/ {cat.slug}</p>
                       </div>
                     </>
                   )}
                 </div>
 
-                <Badge variant="secondary">
+                <div className="px-2.5 py-1 bg-slate-100 rounded-lg text-xs text-slate-600 font-medium">
                   {cat.count} 个工具
-                </Badge>
+                </div>
 
-                <div className="flex items-center gap-2">
-                  {editingId === cat.id ? (
-                    <Button size="sm" onClick={handleSave}>保存</Button>
-                  ) : (
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(cat)}>
+                <div className="flex items-center gap-1">
+                  {editingId !== cat.id && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEdit(cat)}
+                      className="text-slate-500 hover:text-slate-900 cursor-pointer"
+                    >
                       <Edit className="w-4 h-4" />
                     </Button>
                   )}
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="text-slate-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
                     onClick={() => handleDelete(cat.id)}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -121,7 +145,7 @@ export default function CategoriesAdminPage() {
 
       {/* 空状态 */}
       {categories.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
           <FolderTree className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-slate-500">暂无分类</h3>
           <p className="text-sm text-slate-400 mt-1">点击上方按钮添加第一个分类</p>

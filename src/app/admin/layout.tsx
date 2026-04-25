@@ -43,7 +43,6 @@ export default function AdminLayout({
 
   // 检查登录状态
   useEffect(() => {
-    // 登录页面和修改密码页面不需要检查
     if (pathname === '/admin/login' || pathname === '/admin/change-password') {
       setChecking(false);
       return;
@@ -57,7 +56,6 @@ export default function AdminLayout({
         if (data.success && data.authenticated && data.data) {
           setUser(data.data);
           
-          // 检查是否需要修改密码
           if (data.data.must_change_password) {
             router.push('/admin/change-password');
             return;
@@ -93,51 +91,49 @@ export default function AdminLayout({
   // 检查中显示加载
   if (checking) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-900">
+    <div className="min-h-screen bg-[#FAFAFA]">
       {/* 移动端侧边栏遮罩 */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* 侧边栏 */}
+      {/* 侧边栏 - 简洁国际风 */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-800 
-        border-r border-slate-200/80 dark:border-slate-700/80
+        fixed top-0 left-0 z-50 h-full w-[260px] bg-white border-r border-slate-200
         transform transition-all duration-300 ease-out
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        shadow-xl shadow-slate-900/5
       `}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-5 border-b border-slate-100/80 dark:border-slate-700/50">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-slate-100">
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/25">
-              <span className="text-white text-base font-bold">🦞</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
+              <span className="text-white text-base font-bold">O</span>
             </div>
             <div>
-              <span className="text-sm font-bold text-slate-800 dark:text-white">OneClaw</span>
-              <span className="text-xs text-slate-400 block font-medium">管理后台</span>
+              <span className="text-sm font-semibold text-slate-900">OneClaw</span>
+              <span className="text-xs text-slate-400 block">Admin</span>
             </div>
           </Link>
           <button 
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5 text-slate-400" />
           </button>
         </div>
 
         {/* 导航菜单 */}
-        <nav className="p-3 space-y-1">
+        <nav className="p-3 space-y-0.5">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || 
@@ -147,12 +143,13 @@ export default function AdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => setSidebarOpen(false)}
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                   transition-all duration-200
                   ${isActive 
-                    ? 'bg-gradient-to-r from-orange-50 to-orange-50/50 text-orange-600 dark:from-orange-500/20 dark:to-orange-500/10 dark:text-orange-400 border border-orange-200/50 dark:border-orange-500/30' 
-                    : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200'
+                    ? 'bg-slate-900 text-white' 
+                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
                   }
                 `}
               >
@@ -163,16 +160,14 @@ export default function AdminLayout({
           })}
         </nav>
 
-        {/* 底部操作 */}
-        <div className="absolute bottom-4 left-4 right-4 space-y-2">
+        {/* 底部 */}
+        <div className="absolute bottom-6 left-4 right-4">
           <Link
             href="/"
             target="_blank"
             className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl 
-              text-sm font-medium text-slate-500 hover:bg-slate-50 
-              dark:text-slate-400 dark:hover:bg-slate-700/50 
-              dark:hover:text-slate-200 transition-all duration-200
-              border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
+              text-sm font-medium text-slate-500 hover:bg-slate-100 
+              hover:text-slate-900 transition-all duration-200"
           >
             <ExternalLink className="w-4 h-4" />
             <span>返回前台</span>
@@ -181,42 +176,38 @@ export default function AdminLayout({
       </aside>
 
       {/* 主内容区 */}
-      <div className="lg:pl-64">
+      <div className="lg:pl-[260px]">
         {/* 顶部栏 */}
-        <header className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50">
-          <div className="flex items-center justify-between h-full px-6">
+        <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200">
+          <div className="flex items-center justify-between h-full px-8">
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-              {navigation.find(n => n.href === pathname || (n.href !== '/admin' && pathname.startsWith(n.href)))?.name || '管理后台'}
-            </h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-slate-500 dark:text-slate-400">欢迎回来</span>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-700">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-400">欢迎回来</span>
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
                   <span className="text-white text-xs font-bold">{user?.username?.charAt(0).toUpperCase() || 'A'}</span>
                 </div>
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{user?.username || '管理员'}</span>
+                <span className="text-sm font-medium text-slate-700">{user?.username || '管理员'}</span>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
               >
-                <LogOut className="w-4 h-4 mr-1" />
-                退出
+                <LogOut className="w-4 h-4" />
               </Button>
             </div>
           </div>
         </header>
 
         {/* 内容区域 */}
-        <main className="p-6">
+        <main className="p-8">
           {children}
         </main>
       </div>

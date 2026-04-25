@@ -2,62 +2,64 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Bell, User, Crown } from 'lucide-react';
+import { Bell, Search, Menu, X } from 'lucide-react';
 
 interface HeaderProps {
-  title: string;
+  title?: string;
   subtitle?: string;
   badge?: string;
   showRightArea?: boolean;
   rightContent?: React.ReactNode;
 }
 
-export function Header({ 
-  title, 
-  subtitle, 
+export default function Header({
+  title,
+  subtitle,
   badge,
   showRightArea = true,
-  rightContent = null 
+  rightContent,
 }: HeaderProps) {
   return (
-    <header className="h-14 bg-white border-b border-slate-100 flex items-center justify-between px-6 sticky top-0 z-10">
-      <div className="flex items-center gap-3">
-        <h1 className="text-lg font-semibold text-slate-800">{title}</h1>
-        {subtitle && <span className="text-sm text-slate-400">{subtitle}</span>}
-        {badge && (
-          <Link
-            href="/membership"
-            className="px-3 py-1 bg-gradient-to-r from-amber-50 to-orange-50 rounded-full text-xs font-medium text-amber-600 flex items-center gap-1.5"
-          >
-            <Crown className="w-3 h-3" />
-            {badge}
-          </Link>
+    <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-40">
+      <div className="h-full px-6 flex items-center justify-between">
+        {/* Left - Title */}
+        <div className="flex items-center gap-4">
+          {title && (
+            <div>
+              <h1 className="text-lg font-semibold text-slate-900">{title}</h1>
+              {subtitle && (
+                <p className="text-sm text-slate-500">{subtitle}</p>
+              )}
+            </div>
+          )}
+          {badge && (
+            <span className="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-medium rounded-full shadow-sm">
+              {badge}
+            </span>
+          )}
+        </div>
+
+        {/* Right - Actions */}
+        {showRightArea && (
+          <div className="flex items-center gap-3">
+            {rightContent ? (
+              rightContent
+            ) : (
+              <>
+                {/* Search */}
+                <button className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors cursor-pointer">
+                  <Search className="w-4 h-4" />
+                </button>
+                {/* Notifications */}
+                <button className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors cursor-pointer relative">
+                  <Bell className="w-4 h-4" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full" />
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
-      
-      {showRightArea && (
-        rightContent || (
-          <div className="flex items-center gap-3">
-            <Link 
-              href="/vip"
-              className="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-xs font-medium rounded-full"
-            >
-              开通会员
-            </Link>
-            <button className="relative p-2 text-slate-400 hover:text-slate-600">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
-            </button>
-            <Link href="/login" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
-                <User className="w-4 h-4 text-orange-500" />
-              </div>
-            </Link>
-          </div>
-        )
-      )}
     </header>
   );
 }
-
-export default Header;

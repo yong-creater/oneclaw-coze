@@ -3,9 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Edit, ExternalLink, Trash2, Loader2, Eye, Star, Image } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Loader2, Star, Image, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -192,14 +191,14 @@ export default function TemplatesAdminPage() {
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">模板管理</h1>
-          <p className="text-sm text-slate-500 mt-1">管理设计模板，共 {total} 个模板</p>
+          <h1 className="text-2xl font-bold text-slate-900">模板管理</h1>
+          <p className="text-sm text-slate-500 mt-1">共 {total} 个模板</p>
         </div>
         <div className="flex items-center gap-3">
-          <Badge variant="outline">
+          <div className="px-3 py-1.5 bg-slate-100 rounded-xl text-sm text-slate-600">
             启用中 {stats.active}
-          </Badge>
-          <Button onClick={handleCreate}>
+          </div>
+          <Button onClick={handleCreate} className="bg-slate-900 hover:bg-slate-800 cursor-pointer">
             <Plus className="w-4 h-4 mr-2" />
             添加模板
           </Button>
@@ -211,14 +210,14 @@ export default function TemplatesAdminPage() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="搜索模板名称..."
+            placeholder="搜索模板..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white border-slate-200"
           />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-40 bg-white border-slate-200">
             <SelectValue placeholder="全部分类" />
           </SelectTrigger>
           <SelectContent>
@@ -239,7 +238,7 @@ export default function TemplatesAdminPage() {
           <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
         </div>
       ) : templates.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
           <Image className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-slate-500">暂无模板</h3>
           <p className="text-sm text-slate-400 mt-1">点击添加按钮创建第一个模板</p>
@@ -248,65 +247,62 @@ export default function TemplatesAdminPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {templates.map((template) => (
-              <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={template.id} className="bg-white border-slate-200 overflow-hidden hover:shadow-lg hover:border-slate-300 transition-all">
                 {/* 预览图 */}
-                <div className={`h-40 bg-gradient-to-br ${getCategoryColor(template.category)} flex items-center justify-center relative`}>
+                <div className={`h-36 bg-gradient-to-br ${getCategoryColor(template.category)} flex items-center justify-center relative`}>
                   {template.thumbnail ? (
                     <img src={template.thumbnail} alt={template.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-20 h-20 rounded-2xl bg-white/60 flex items-center justify-center">
-                      <span className="text-3xl font-bold text-slate-400">{template.name.slice(0, 2)}</span>
+                    <div className="w-16 h-16 rounded-2xl bg-white/60 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-slate-400">{template.name.slice(0, 2)}</span>
                     </div>
                   )}
                   {template.is_featured && (
-                    <Badge className="absolute top-3 left-3 bg-amber-500 text-white">
-                      <Star className="w-3 h-3 mr-1" />
+                    <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded-full">
+                      <Star className="w-3 h-3" />
                       推荐
-                    </Badge>
+                    </div>
                   )}
-                  <Badge 
-                    className={`absolute top-3 right-3 ${
-                      template.is_active ? 'bg-green-500 text-white' : 'bg-slate-400 text-white'
-                    }`}
-                  >
+                  <div className={`absolute top-3 right-3 px-2 py-1 text-xs font-medium rounded-full text-white ${
+                    template.is_active ? 'bg-green-500' : 'bg-slate-400'
+                  }`}>
                     {template.is_active ? '启用' : '禁用'}
-                  </Badge>
+                  </div>
                 </div>
                 
                 <CardContent className="p-4">
-                  <div className="mb-2">
-                    <h3 className="font-semibold text-slate-800">{template.name}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{template.description || '暂无描述'}</p>
-                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-1">{template.name}</h3>
+                  <p className="text-xs text-slate-500 line-clamp-2 mb-3">{template.description || '暂无描述'}</p>
                   
-                  <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
-                    <Badge variant="secondary" className="text-xs">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-md">
                       {CATEGORY_LABELS[template.category] || template.category}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
+                    </div>
+                    <div className="px-2 py-0.5 bg-slate-100 text-slate-600 text-xs rounded-md">
                       {STYLE_OPTIONS.find(s => s.value === template.style)?.label || template.style}
-                    </Badge>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                    <span className="flex-1 text-xs text-slate-400">
-                      使用 {template.usage_count || 0} 次
-                    </span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => setEditingTemplate(template)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                      onClick={() => handleDelete(template.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                    <span className="text-xs text-slate-400">{template.usage_count || 0} 次使用</span>
+                    <div className="flex items-center gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setEditingTemplate(template)}
+                        className="text-slate-500 hover:text-slate-900 cursor-pointer"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="text-slate-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+                        onClick={() => handleDelete(template.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -315,16 +311,17 @@ export default function TemplatesAdminPage() {
 
           {/* 分页 */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
+                className="cursor-pointer"
               >
                 上一页
               </Button>
-              <span className="text-sm text-slate-500 px-4">
+              <span className="text-sm text-slate-500">
                 第 {page} / {totalPages} 页
               </span>
               <Button
@@ -332,6 +329,7 @@ export default function TemplatesAdminPage() {
                 size="sm"
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
+                className="cursor-pointer"
               >
                 下一页
               </Button>
@@ -344,26 +342,29 @@ export default function TemplatesAdminPage() {
       <Dialog open={!!editingTemplate} onOpenChange={() => setEditingTemplate(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingTemplate?.id === 0 ? '添加模板' : '编辑模板'}</DialogTitle>
+            <DialogTitle className="text-slate-900">
+              {editingTemplate?.id === 0 ? '添加模板' : '编辑模板'}
+            </DialogTitle>
           </DialogHeader>
           {editingTemplate && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>模板名称 *</Label>
+                  <Label className="text-slate-700">模板名称 *</Label>
                   <Input 
                     value={editingTemplate.name} 
                     onChange={e => setEditingTemplate({...editingTemplate, name: e.target.value})}
                     placeholder="请输入模板名称"
+                    className="border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>分类 *</Label>
+                  <Label className="text-slate-700">分类 *</Label>
                   <Select 
                     value={editingTemplate.category} 
                     onValueChange={v => setEditingTemplate({...editingTemplate, category: v})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-200">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -380,12 +381,12 @@ export default function TemplatesAdminPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>风格</Label>
+                  <Label className="text-slate-700">风格</Label>
                   <Select 
                     value={editingTemplate.style} 
                     onValueChange={v => setEditingTemplate({...editingTemplate, style: v})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-200">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -396,22 +397,24 @@ export default function TemplatesAdminPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>缩略图URL</Label>
+                  <Label className="text-slate-700">缩略图URL</Label>
                   <Input 
                     value={editingTemplate.thumbnail || ''} 
                     onChange={e => setEditingTemplate({...editingTemplate, thumbnail: e.target.value})}
                     placeholder="https://..."
+                    className="border-slate-200"
                   />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <Label>描述</Label>
+                <Label className="text-slate-700">描述</Label>
                 <Textarea 
                   value={editingTemplate.description || ''} 
                   onChange={e => setEditingTemplate({...editingTemplate, description: e.target.value})}
                   placeholder="请输入模板描述"
                   rows={3}
+                  className="border-slate-200"
                 />
               </div>
               
@@ -421,21 +424,21 @@ export default function TemplatesAdminPage() {
                     checked={editingTemplate.is_active}
                     onCheckedChange={v => setEditingTemplate({...editingTemplate, is_active: v})}
                   />
-                  <Label>启用</Label>
+                  <Label className="text-slate-700">启用</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch 
                     checked={editingTemplate.is_featured}
                     onCheckedChange={v => setEditingTemplate({...editingTemplate, is_featured: v})}
                   />
-                  <Label>推荐</Label>
+                  <Label className="text-slate-700">推荐</Label>
                 </div>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingTemplate(null)}>取消</Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button variant="outline" onClick={() => setEditingTemplate(null)} className="cursor-pointer">取消</Button>
+            <Button onClick={handleSave} disabled={saving} className="bg-slate-900 hover:bg-slate-800 cursor-pointer">
               {saving ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>

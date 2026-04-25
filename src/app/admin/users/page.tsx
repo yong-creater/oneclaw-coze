@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Users, Crown, Calendar, MoreHorizontal, Loader2, ChevronRight, Shield, Eye, Ban, CheckCircle } from 'lucide-react';
+import { Search, Users, Crown, Calendar, Loader2, Eye, Ban, CheckCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 
 interface User {
@@ -126,14 +124,14 @@ export default function UsersAdminPage() {
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">用户管理</h1>
-          <p className="text-sm text-slate-500 mt-1">管理注册用户，共 {total} 个用户</p>
+          <h1 className="text-2xl font-bold text-slate-900">用户管理</h1>
+          <p className="text-sm text-slate-500 mt-1">共 {total} 个用户</p>
         </div>
-        <div className="flex items-center gap-4">
-          <Badge variant="outline" className="px-3 py-1">
-            <Users className="w-4 h-4 mr-1" />
-            {total} 用户
-          </Badge>
+        <div className="flex items-center gap-3">
+          <div className="px-3 py-1.5 bg-slate-100 rounded-xl text-sm text-slate-600">
+            <Users className="w-4 h-4 inline mr-1" />
+            {total}
+          </div>
         </div>
       </div>
 
@@ -142,10 +140,10 @@ export default function UsersAdminPage() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="搜索用户昵称或手机号..."
+            placeholder="搜索用户..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white border-slate-200"
           />
         </div>
       </div>
@@ -156,14 +154,14 @@ export default function UsersAdminPage() {
           <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
         </div>
       ) : users.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
           <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-slate-500">暂无用户</h3>
           <p className="text-sm text-slate-400 mt-1">还没有用户注册</p>
         </div>
       ) : (
         <>
-          <Card>
+          <Card className="bg-white border-slate-200 overflow-hidden">
             <CardContent className="p-0">
               <div className="divide-y divide-slate-100">
                 {users.map((user) => (
@@ -172,7 +170,7 @@ export default function UsersAdminPage() {
                     className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors"
                   >
                     {/* 头像 */}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center overflow-hidden flex-shrink-0">
                       {user.avatar_url ? (
                         <img src={user.avatar_url} alt={user.nickname} className="w-full h-full object-cover" />
                       ) : (
@@ -182,57 +180,57 @@ export default function UsersAdminPage() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-slate-800 truncate">{user.nickname || '未设置昵称'}</h3>
+                        <h3 className="font-medium text-slate-900 truncate">{user.nickname || '未设置昵称'}</h3>
                         {user.is_vip && (
-                          <Badge className="bg-amber-100 text-amber-600">
-                            <Crown className="w-3 h-3 mr-1" />
+                          <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-full">
+                            <Crown className="w-3 h-3" />
                             VIP
-                          </Badge>
+                          </div>
                         )}
                         {user.is_banned && (
-                          <Badge className="bg-red-100 text-red-600">
-                            <Ban className="w-3 h-3 mr-1" />
+                          <div className="flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-600 text-xs font-medium rounded-full">
+                            <Ban className="w-3 h-3" />
                             已封禁
-                          </Badge>
+                          </div>
                         )}
                         {!user.is_active && (
-                          <Badge variant="secondary">已禁用</Badge>
+                          <div className="px-2 py-0.5 bg-slate-100 text-slate-500 text-xs font-medium rounded-full">
+                            已禁用
+                          </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-slate-400 mt-0.5">
+                      <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
                         <span>{user.phone || user.email || '未绑定联系方式'}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
+                        <span className="hidden sm:inline">•</span>
+                        <span className="hidden sm:flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          注册于 {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
+                          {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
                         </span>
                       </div>
                     </div>
 
-                    <div className="text-right hidden md:block">
+                    <div className="hidden md:flex items-center gap-6 text-right">
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">{user.credits || 0}</p>
+                        <p className="text-xs text-slate-400">积分</p>
+                      </div>
                       {user.is_vip ? (
-                        <p className="text-xs text-amber-500">
-                          VIP 有效期至 {user.vip_expire ? new Date(user.vip_expire).toLocaleDateString() : '永久'}
-                        </p>
+                        <div className="text-xs text-amber-500">
+                          VIP 至 {user.vip_expire ? new Date(user.vip_expire).toLocaleDateString() : '永久'}
+                        </div>
                       ) : (
-                        <p className="text-xs text-slate-400">普通用户</p>
+                        <div className="text-xs text-slate-400">普通用户</div>
                       )}
-                      <p className="text-xs text-slate-400 mt-0.5">积分: {user.credits || 0}</p>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleViewUser(user)}
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        详情
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleViewUser(user)}
+                      className="text-slate-500 hover:text-slate-900 cursor-pointer"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -241,23 +239,25 @@ export default function UsersAdminPage() {
 
           {/* 分页 */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
+                className="cursor-pointer"
               >
                 上一页
               </Button>
-              <span className="text-sm text-slate-500 px-4">
-                第 {page} / {totalPages} 页，共 {total} 条
+              <span className="text-sm text-slate-500">
+                第 {page} / {totalPages} 页
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
+                className="cursor-pointer"
               >
                 下一页
               </Button>
@@ -268,45 +268,45 @@ export default function UsersAdminPage() {
 
       {/* 用户详情弹窗 */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>用户详情</DialogTitle>
+            <DialogTitle className="text-slate-900">用户详情</DialogTitle>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-6 py-4">
               {/* 用户基本信息 */}
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center overflow-hidden">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center overflow-hidden">
                   {selectedUser.avatar_url ? (
                     <img src={selectedUser.avatar_url} alt={selectedUser.nickname} className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-2xl font-bold text-orange-600">{selectedUser.nickname?.slice(0, 1) || 'U'}</span>
+                    <span className="text-xl font-bold text-orange-600">{selectedUser.nickname?.slice(0, 1) || 'U'}</span>
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold">{selectedUser.nickname || '未设置昵称'}</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">{selectedUser.nickname || '未设置昵称'}</h3>
                   <p className="text-sm text-slate-500">{selectedUser.phone || selectedUser.email || '未绑定'}</p>
                   {selectedUser.is_vip && (
-                    <Badge className="mt-1 bg-amber-100 text-amber-600">
-                      <Crown className="w-3 h-3 mr-1" />
+                    <div className="flex items-center gap-1 mt-1 px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-full w-fit">
+                      <Crown className="w-3 h-3" />
                       VIP 会员
-                    </Badge>
+                    </div>
                   )}
                 </div>
               </div>
 
               {/* 用户统计 */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-slate-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-slate-800">{userStats?.total_uses || 0}</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-slate-50 rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-slate-900">{userStats?.total_uses || 0}</p>
                   <p className="text-xs text-slate-500">使用次数</p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-slate-800">{userStats?.total_favorites || 0}</p>
+                <div className="bg-slate-50 rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-slate-900">{userStats?.total_favorites || 0}</p>
                   <p className="text-xs text-slate-500">收藏数</p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-4 text-center">
-                  <p className="text-2xl font-bold text-slate-800">{selectedUser.credits || 0}</p>
+                <div className="bg-slate-50 rounded-xl p-3 text-center">
+                  <p className="text-xl font-bold text-slate-900">{selectedUser.credits || 0}</p>
                   <p className="text-xs text-slate-500">积分</p>
                 </div>
               </div>
@@ -314,41 +314,35 @@ export default function UsersAdminPage() {
               {/* 账户信息 */}
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-slate-600">账户信息</h4>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="flex justify-between p-2 bg-slate-50 rounded-lg">
-                    <span className="text-slate-500">注册时间</span>
-                    <span>{selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleString() : '-'}</span>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="p-2 bg-slate-50 rounded-lg">
+                    <p className="text-xs text-slate-400 mb-1">注册时间</p>
+                    <p className="text-slate-700">{selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : '-'}</p>
                   </div>
-                  <div className="flex justify-between p-2 bg-slate-50 rounded-lg">
-                    <span className="text-slate-500">最后登录</span>
-                    <span>{selectedUser.last_login_at ? new Date(selectedUser.last_login_at).toLocaleString() : '-'}</span>
+                  <div className="p-2 bg-slate-50 rounded-lg">
+                    <p className="text-xs text-slate-400 mb-1">最后登录</p>
+                    <p className="text-slate-700">{selectedUser.last_login_at ? new Date(selectedUser.last_login_at).toLocaleDateString() : '-'}</p>
                   </div>
-                  {selectedUser.vip_expire && (
-                    <div className="flex justify-between p-2 bg-amber-50 rounded-lg col-span-2">
-                      <span className="text-slate-500">VIP 到期</span>
-                      <span className="text-amber-600">{new Date(selectedUser.vip_expire).toLocaleDateString()}</span>
-                    </div>
-                  )}
                 </div>
               </div>
 
               {/* 状态控制 */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <h4 className="text-sm font-medium text-slate-600">状态管理</h4>
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm">启用账户</span>
+                    <span className="text-sm text-slate-700">启用账户</span>
                   </div>
                   <Switch 
                     checked={selectedUser.is_active}
                     onCheckedChange={(v) => handleToggleStatus(selectedUser.id, 'is_active', v)}
                   />
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                   <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm">封禁用户</span>
+                    <Ban className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm text-slate-700">封禁用户</span>
                   </div>
                   <Switch 
                     checked={selectedUser.is_banned}
@@ -359,7 +353,7 @@ export default function UsersAdminPage() {
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedUser(null)}>关闭</Button>
+            <Button variant="outline" onClick={() => setSelectedUser(null)} className="cursor-pointer">关闭</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -2,232 +2,215 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Search, Sparkles, Zap, Star, Clock, Menu } from 'lucide-react';
-import { Header, Sidebar, Footer, useSidebar } from '@/components/common';
-import { TOOLS_CONFIG, TOOL_CATEGORIES, ToolCategory, ToolConfig } from '@/components/tools/config';
+import { 
+  Search, 
+  Filter, 
+  Grid3X3, 
+  List,
+  Star,
+  ExternalLink,
+  TrendingUp,
+  Sparkles,
+  Crown,
+  Zap
+} from 'lucide-react';
+import { Sidebar, Header, Footer, useSidebar } from '@/components/common';
 
-// 工具封面图配置（使用真实场景图片）
-const TOOL_COVERS: Record<string, { image: string; title: string }> = {
-  'remove-bg': {
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=300&fit=crop',
-    title: '智能抠图'
-  },
-  'enhance': {
-    image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=400&h=300&fit=crop',
-    title: '变清晰'
-  },
-  'resize': {
-    image: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=400&h=300&fit=crop',
-    title: '改尺寸'
-  },
-  'xiaohongshu': {
-    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=300&fit=crop',
-    title: '小红书封面'
-  },
-  'douyin': {
-    image: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=300&fit=crop',
-    title: '视频封面'
-  },
-  'festival-poster': {
-    image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=400&h=300&fit=crop',
-    title: '节日海报'
-  },
-  'productpage': {
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=300&fit=crop',
-    title: '商品主图'
-  },
-  'restaurant-menu': {
-    image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop',
-    title: '菜单设计'
-  }
-};
+// 分类
+const categories = [
+  { name: '全部', slug: 'all', count: 238 },
+  { name: '商品图', slug: 'product', count: 45 },
+  { name: '模特图', slug: 'model', count: 89 },
+  { name: '人像图', slug: 'portrait', count: 67 },
+  { name: '海报', slug: 'poster', count: 34 },
+  { name: '视频', slug: 'video', count: 28 },
+  { name: '图片编辑', slug: 'edit', count: 52 },
+  { name: '批量处理', slug: 'batch', count: 23 },
+];
+
+// 工具数据 - 我们自己的工具
+const tools = [
+  { id: 1, name: '智能抠图', desc: 'AI 一键移除背景，精准识别主体', category: '图片编辑', freeType: 'free', isFeatured: true, usage: 12500, color: 'from-blue-100 to-cyan-100' },
+  { id: 2, name: '商品主图生成', desc: '上传商品，自动生成淘宝/京东主图', category: '商品图', freeType: 'limited', isFeatured: true, usage: 8900, color: 'from-orange-100 to-amber-100' },
+  { id: 3, name: '模特试衣', desc: '服装上身效果，AI 虚拟试穿', category: '模特图', freeType: 'limited', isFeatured: true, usage: 7800, color: 'from-pink-100 to-rose-100' },
+  { id: 4, name: 'A+详情页', desc: '自动生成亚马逊 A+ 详情页面', category: '商品图', freeType: 'paid', isFeatured: false, usage: 5600, color: 'from-purple-100 to-violet-100' },
+  { id: 5, name: '证件照', desc: '一键生成各尺寸证件照', category: '人像图', freeType: 'free', isFeatured: true, usage: 23400, color: 'from-emerald-100 to-teal-100' },
+  { id: 6, name: '图片变清晰', desc: '模糊图片 AI 增强，一键高清修复', category: '图片编辑', freeType: 'free', isFeatured: true, usage: 45000, color: 'from-amber-100 to-orange-100' },
+  { id: 7, name: '海报设计', desc: '输入描述词，AI 生成创意海报', category: '海报', freeType: 'limited', isFeatured: false, usage: 8900, color: 'from-red-100 to-pink-100' },
+  { id: 8, name: '视频封面', desc: '自动截取视频精彩片段作为封面', category: '视频', freeType: 'free', isFeatured: true, usage: 34000, color: 'from-indigo-100 to-blue-100' },
+  { id: 9, name: '批量处理', desc: '一次处理多张图片，提高效率', category: '批量处理', freeType: 'paid', isFeatured: false, usage: 5600, color: 'from-slate-100 to-gray-100' },
+  { id: 10, name: '背景替换', desc: '智能识别并替换图片背景', category: '图片编辑', freeType: 'limited', isFeatured: false, usage: 4200, color: 'from-sky-100 to-cyan-100' },
+  { id: 11, name: '商品图增强', desc: '提升商品图的视觉效果', category: '商品图', freeType: 'free', isFeatured: true, usage: 12300, color: 'from-lime-100 to-green-100' },
+  { id: 12, name: 'AI 消除', desc: '去除图片中不需要的元素', category: '图片编辑', freeType: 'limited', isFeatured: true, usage: 28000, color: 'from-fuchsia-100 to-pink-100' },
+];
 
 export default function ToolsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('全部');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { collapsed } = useSidebar();
 
-  // 按分类分组工具
-  const toolsByCategory = TOOLS_CONFIG.reduce((acc, tool) => {
-    if (!acc[tool.category]) acc[tool.category] = [];
-    acc[tool.category].push(tool);
-    return acc;
-  }, {} as Record<ToolCategory, ToolConfig[]>);
+  const filteredTools = tools.filter(tool => {
+    const matchSearch = tool.name.toLowerCase().includes(search.toLowerCase()) ||
+                        tool.desc.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = activeCategory === '全部' || tool.category.includes(activeCategory) || activeCategory === '商品图' && tool.category === '商品图';
+    return matchSearch && (activeCategory === '全部' || tool.category === activeCategory);
+  });
 
-  // 过滤工具
-  const filteredTools = searchQuery 
-    ? TOOLS_CONFIG.filter(t => 
-        t.name.includes(searchQuery) || 
-        t.description.includes(searchQuery)
-      )
-    : null;
-
-  // 渲染工具卡片
-  const renderToolCard = (tool: ToolConfig) => {
-    const cover = TOOL_COVERS[tool.key];
-    return (
-      <Link
-        key={tool.key}
-        href={`/tools/${tool.key}`}
-        className="group bg-white rounded-2xl overflow-hidden border border-slate-200/60 hover:shadow-xl hover:shadow-orange-100/30 hover:border-orange-200 transition-all duration-300"
-      >
-        {/* 封面图 */}
-        <div className="relative h-40 overflow-hidden">
-          {cover ? (
-            <img 
-              src={cover.image} 
-              alt={tool.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-          ) : (
-            <div className={`w-full h-full bg-gradient-to-br ${tool.color.gradient}`} />
-          )}
-          {/* 渐变遮罩 */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-          {/* 工具图标 */}
-          <div className="absolute bottom-3 left-3">
-            <div className={`w-11 h-11 rounded-xl ${tool.color.bg} flex items-center justify-center shadow-lg backdrop-blur-sm border border-white/20`}>
-              <span className="text-2xl">{tool.icon}</span>
+  return (
+    <div className="min-h-screen bg-[#FAFAFA]">
+      <Sidebar />
+      
+      <main className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
+        <Header title="AI 工具" subtitle={`${filteredTools.length} 个工具`} />
+        
+        <div className="p-8">
+          {/* 搜索框 */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="搜索工具名称..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full h-11 pl-12 pr-4 bg-white rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
+              />
+            </div>
+            
+            {/* 视图切换 */}
+            <div className="flex items-center gap-1 bg-white rounded-xl border border-slate-200 p-1">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'grid' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                <Grid3X3 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'list' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'
+                }`}
+              >
+                <List className="w-5 h-5" />
+              </button>
             </div>
           </div>
-          {/* 标签 */}
-          {tool.quota?.daily && (
-            <div className="absolute top-3 right-3">
-              <span className="px-2.5 py-1 text-xs bg-white/90 backdrop-blur-sm rounded-full text-slate-600 font-medium flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                每日{tool.quota.daily}次
-              </span>
+
+          {/* 分类标签 */}
+          <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+            {categories.map((cat) => (
+              <button
+                key={cat.name}
+                onClick={() => setActiveCategory(cat.name)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all cursor-pointer ${
+                  activeCategory === cat.name
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {cat.name}
+                <span className="ml-1.5 text-xs opacity-60">{cat.count}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* 工具列表 */}
+          {viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredTools.map((tool, idx) => (
+                <Link
+                  key={tool.id}
+                  href={`/tools/${tool.id}`}
+                  className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:border-slate-300 transition-all duration-300 cursor-pointer animate-fade-up"
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
+                  <div className="p-5">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center`}>
+                        <Sparkles className="w-6 h-6 text-slate-600" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {tool.isFeatured && (
+                          <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-md flex items-center gap-1">
+                            <Star className="w-3 h-3" />
+                            推荐
+                          </span>
+                        )}
+                        <span className={`px-2 py-0.5 text-xs font-medium rounded-md ${
+                          tool.freeType === 'free' ? 'bg-green-100 text-green-600' :
+                          tool.freeType === 'limited' ? 'bg-blue-100 text-blue-600' :
+                          'bg-slate-100 text-slate-600'
+                        }`}>
+                          {tool.freeType === 'free' ? '免费' : tool.freeType === 'limited' ? '限免' : '付费'}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <h3 className="font-semibold text-slate-900 mb-1 group-hover:text-orange-500 transition-colors">
+                      {tool.name}
+                    </h3>
+                    <p className="text-sm text-slate-500 mb-3 line-clamp-2">{tool.desc}</p>
+                    
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                      <span className="text-xs text-slate-400">{tool.category}</span>
+                      <div className="flex items-center gap-1 text-xs text-slate-400">
+                        <TrendingUp className="w-3 h-3" />
+                        {tool.usage.toLocaleString()} 次
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredTools.map((tool, idx) => (
+                <Link
+                  key={tool.id}
+                  href={`/tools/${tool.id}`}
+                  className="group flex items-center gap-4 bg-white rounded-2xl border border-slate-200 p-4 hover:shadow-lg hover:border-slate-300 transition-all duration-300 cursor-pointer animate-fade-up"
+                  style={{ animationDelay: `${idx * 50}ms` }}
+                >
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center flex-shrink-0`}>
+                    <Sparkles className="w-6 h-6 text-slate-600" />
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-slate-900 group-hover:text-orange-500 transition-colors">{tool.name}</h3>
+                      {tool.isFeatured && (
+                        <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-md">
+                          推荐
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-500 line-clamp-1">{tool.desc}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm text-slate-400">{tool.category}</span>
+                    <span className={`px-2 py-1 text-xs font-medium rounded-md ${
+                      tool.freeType === 'free' ? 'bg-green-100 text-green-600' :
+                      tool.freeType === 'limited' ? 'bg-blue-100 text-blue-600' :
+                      'bg-slate-100 text-slate-600'
+                    }`}>
+                      {tool.freeType === 'free' ? '免费' : tool.freeType === 'limited' ? '限免' : '付费'}
+                    </span>
+                    <ExternalLink className="w-5 h-5 text-slate-400 group-hover:text-orange-500 transition-colors" />
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
         </div>
         
-        {/* 文字内容 */}
-        <div className="p-4">
-          <h3 className="font-semibold text-slate-800 mb-1.5 group-hover:text-orange-500 transition-colors">
-            {tool.name}
-          </h3>
-          <p className="text-sm text-slate-500 line-clamp-2 mb-3">
-            {tool.description}
-          </p>
-          {/* 使用提示 */}
-          <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2">
-            <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-            {tool.guide}
-          </div>
-        </div>
-      </Link>
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
-      {/* 左侧统一导航 - md 以上显示 */}
-      <Sidebar />
-
-      {/* 主内容区 - 响应式布局 */}
-      <main className={`
-        flex-1 transition-all duration-300 
-        ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}
-      `}>
-        {/* 移动端顶部导航栏 */}
-        <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3">
-          <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition-all">
-              <Menu className="w-6 h-6 text-slate-600" />
-            </button>
-            <span className="font-bold text-lg bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent">AI工具箱</span>
-          </div>
-        </div>
-
-        {/* 页面内容 */}
-        <div className="p-4 md:p-8">
-          {filteredTools ? (
-            // 搜索结果
-            <div className="animate-in fade-in duration-300">
-              <div className="flex items-center gap-3 mb-6">
-                <Search className="w-5 h-5 text-orange-500" />
-                <h2 className="text-lg font-semibold text-slate-800">
-                  搜索结果 <span className="text-orange-500">{filteredTools.length}</span> 个
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                {filteredTools.map(renderToolCard)}
-              </div>
-            </div>
-          ) : activeCategory ? (
-            // 分类视图
-            <div className="animate-in fade-in duration-300">
-              <div className="flex items-center gap-4 mb-8">
-                <button 
-                  onClick={() => setActiveCategory(null)} 
-                  className="p-2.5 bg-white rounded-xl border border-slate-200 hover:border-orange-200 hover:bg-orange-50 transition-all"
-                >
-                  <ArrowLeft className="w-5 h-5 text-slate-500" />
-                </button>
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${TOOL_CATEGORIES[activeCategory as ToolCategory]?.color} flex items-center justify-center text-2xl shadow-lg`}>
-                    {TOOL_CATEGORIES[activeCategory as ToolCategory]?.icon}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-800">
-                      {TOOL_CATEGORIES[activeCategory as ToolCategory]?.name}
-                    </h2>
-                    <p className="text-sm text-slate-500">
-                      {TOOL_CATEGORIES[activeCategory as ToolCategory]?.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                {(toolsByCategory[activeCategory as ToolCategory] || []).map(renderToolCard)}
-              </div>
-            </div>
-          ) : (
-            // 全部分类
-            <div className="space-y-10">
-              {Object.entries(TOOL_CATEGORIES).map(([key, category], catIdx) => {
-                const categoryTools = toolsByCategory[key as ToolCategory] || [];
-                if (categoryTools.length === 0) return null;
-                
-                return (
-                  <div 
-                    key={key} 
-                    className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-                    style={{ animationDelay: `${catIdx * 100}ms` }}
-                  >
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center text-2xl shadow-lg`}>
-                          {category.icon}
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold text-slate-800">{category.name}</h2>
-                          <p className="text-sm text-slate-500">{category.description}</p>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={() => setActiveCategory(key)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-orange-500 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all"
-                      >
-                        查看全部 <span className="text-orange-400">{categoryTools.length}</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                      {categoryTools.slice(0, 4).map(renderToolCard)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        <div className={`${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
+          <Footer />
         </div>
       </main>
-
-      {/* 底部 - 响应侧边栏折叠状态 */}
-      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
-        <Footer />
-      </div>
     </div>
   );
 }

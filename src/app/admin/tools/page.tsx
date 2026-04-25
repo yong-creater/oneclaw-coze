@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, Edit, ExternalLink, Grid3X3, Trash2, Loader2, MoreHorizontal, Eye, Star } from 'lucide-react';
+import { Search, Plus, Edit, Grid3X3, Trash2, Loader2, Eye, Star, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -139,24 +137,15 @@ export default function ToolsAdminPage() {
 
   const totalPages = Math.ceil(total / pageSize);
 
-  // 颜色映射
-  const colorMap: Record<string, string> = {
-    'from-pink-100 to-rose-100': 'bg-pink-100 text-pink-600',
-    'from-sky-100 to-blue-100': 'bg-sky-100 text-sky-600',
-    'from-purple-100 to-pink-100': 'bg-purple-100 text-purple-600',
-    'from-amber-100 to-orange-100': 'bg-amber-100 text-amber-600',
-    'from-emerald-100 to-teal-100': 'bg-emerald-100 text-emerald-600',
-  };
-
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">工具管理</h1>
-          <p className="text-sm text-slate-500 mt-1">管理 AI 工具，共 {total} 个工具</p>
+          <h1 className="text-2xl font-bold text-slate-900">工具管理</h1>
+          <p className="text-sm text-slate-500 mt-1">共 {total} 个工具</p>
         </div>
-        <Button>
+        <Button className="bg-slate-900 hover:bg-slate-800 cursor-pointer">
           <Plus className="w-4 h-4 mr-2" />
           添加工具
         </Button>
@@ -167,13 +156,12 @@ export default function ToolsAdminPage() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
-            placeholder="搜索工具名称、厂商或亮点..."
+            placeholder="搜索工具..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white border-slate-200"
           />
         </div>
-        <span className="text-sm text-slate-500">共 {total} 条</span>
       </div>
 
       {/* 工具列表 */}
@@ -182,7 +170,7 @@ export default function ToolsAdminPage() {
           <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
         </div>
       ) : tools.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
           <Grid3X3 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-slate-500">暂无工具</h3>
           <p className="text-sm text-slate-400 mt-1">点击添加按钮创建第一个工具</p>
@@ -191,55 +179,55 @@ export default function ToolsAdminPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {tools.map((tool) => (
-              <Card key={tool.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={tool.id} className="bg-white border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all overflow-hidden">
                 {/* 预览图 */}
-                <div className={`h-32 bg-gradient-to-br ${tool.color || 'from-slate-100 to-slate-200'} flex items-center justify-center relative`}>
-                  <div className="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center text-2xl">
+                <div className={`h-28 bg-gradient-to-br ${tool.color || 'from-slate-100 to-slate-200'} flex items-center justify-center relative`}>
+                  <div className="w-14 h-14 rounded-2xl bg-white/90 flex items-center justify-center text-2xl font-bold text-slate-700">
                     {tool.icon || tool.name.slice(0, 2)}
                   </div>
                   {tool.is_featured && (
-                    <Badge className="absolute top-3 left-3 bg-amber-500 text-white">
-                      <Star className="w-3 h-3 mr-1" />
+                    <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 bg-amber-500 text-white text-xs font-medium rounded-full">
+                      <Star className="w-3 h-3" />
                       推荐
-                    </Badge>
+                    </div>
                   )}
-                  <Badge 
-                    className={`absolute top-3 right-3 ${
-                      tool.free_type === 'free' ? 'bg-green-500 text-white' :
-                      tool.free_type === 'limited' ? 'bg-blue-500 text-white' :
-                      'bg-slate-500 text-white'
-                    }`}
-                  >
+                  <div className={`absolute top-3 right-3 px-2 py-1 text-xs font-medium rounded-full text-white ${
+                    tool.free_type === 'free' ? 'bg-green-500' :
+                    tool.free_type === 'limited' ? 'bg-blue-500' :
+                    'bg-slate-500'
+                  }`}>
                     {tool.free_type === 'free' ? '免费' : tool.free_type === 'limited' ? '限免' : '付费'}
-                  </Badge>
+                  </div>
                 </div>
                 
                 <CardContent className="p-4">
-                  <div className="mb-2">
-                    <h3 className="font-semibold text-slate-800">{tool.name}</h3>
-                    <p className="text-sm text-slate-500 mt-0.5 line-clamp-2">{tool.description}</p>
-                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-1">{tool.name}</h3>
+                  <p className="text-sm text-slate-500 line-clamp-2 mb-3">{tool.description}</p>
                   
                   <div className="flex items-center gap-2 text-xs text-slate-400 mb-3">
-                    <span>{tool.categories?.name || '未分类'}</span>
-                    <span>•</span>
-                    <span>使用 {tool.usage_count || 0} 次</span>
+                    <span className="px-2 py-0.5 bg-slate-100 rounded-md">{tool.categories?.name || '未分类'}</span>
+                    <span>{tool.usage_count || 0} 次使用</span>
                   </div>
                   
                   <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-                    <Link href={tool.tool_url || `/tools/${tool.id}`} target="_blank" className="flex-1">
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Eye className="w-4 h-4 mr-1" />
+                    <a href={tool.tool_url || '#'} target="_blank" className="flex-1">
+                      <Button variant="outline" size="sm" className="w-full bg-transparent cursor-pointer">
+                        <ExternalLink className="w-3.5 h-3.5 mr-1" />
                         访问
                       </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" onClick={() => setEditingTool(tool)}>
+                    </a>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setEditingTool(tool)}
+                      className="text-slate-500 hover:text-slate-900 cursor-pointer"
+                    >
                       <Edit className="w-4 h-4" />
                     </Button>
                     <Button 
-                      variant="outline" 
+                      variant="ghost" 
                       size="sm" 
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="text-slate-400 hover:text-red-600 hover:bg-red-50 cursor-pointer"
                       onClick={() => handleDelete(tool.id)}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -252,16 +240,17 @@ export default function ToolsAdminPage() {
 
           {/* 分页 */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-4">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
+                className="cursor-pointer"
               >
                 上一页
               </Button>
-              <span className="text-sm text-slate-500 px-4">
+              <span className="text-sm text-slate-500">
                 第 {page} / {totalPages} 页
               </span>
               <Button
@@ -269,6 +258,7 @@ export default function ToolsAdminPage() {
                 size="sm"
                 disabled={page >= totalPages}
                 onClick={() => setPage(p => p + 1)}
+                className="cursor-pointer"
               >
                 下一页
               </Button>
@@ -281,25 +271,26 @@ export default function ToolsAdminPage() {
       <Dialog open={!!editingTool} onOpenChange={() => setEditingTool(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>编辑工具</DialogTitle>
+            <DialogTitle className="text-slate-900">编辑工具</DialogTitle>
           </DialogHeader>
           {editingTool && (
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>工具名称</Label>
+                  <Label className="text-slate-700">工具名称</Label>
                   <Input 
                     value={editingTool.name} 
                     onChange={e => setEditingTool({...editingTool, name: e.target.value})}
+                    className="border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>所属分类</Label>
+                  <Label className="text-slate-700">所属分类</Label>
                   <Select 
                     value={editingTool.category_id.toString()} 
                     onValueChange={v => setEditingTool({...editingTool, category_id: parseInt(v)})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-200">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -312,39 +303,42 @@ export default function ToolsAdminPage() {
               </div>
               
               <div className="space-y-2">
-                <Label>描述</Label>
+                <Label className="text-slate-700">描述</Label>
                 <Textarea 
                   value={editingTool.description || ''} 
                   onChange={e => setEditingTool({...editingTool, description: e.target.value})}
                   rows={3}
+                  className="border-slate-200"
                 />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>厂商/来源</Label>
+                  <Label className="text-slate-700">厂商/来源</Label>
                   <Input 
                     value={editingTool.producer || ''} 
                     onChange={e => setEditingTool({...editingTool, producer: e.target.value})}
+                    className="border-slate-200"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>访问地址</Label>
+                  <Label className="text-slate-700">访问地址</Label>
                   <Input 
                     value={editingTool.tool_url || ''} 
                     onChange={e => setEditingTool({...editingTool, tool_url: e.target.value})}
+                    className="border-slate-200"
                   />
                 </div>
               </div>
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>免费类型</Label>
+                  <Label className="text-slate-700">免费类型</Label>
                   <Select 
                     value={editingTool.free_type || 'paid'} 
                     onValueChange={v => setEditingTool({...editingTool, free_type: v})}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-slate-200">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -354,28 +348,28 @@ export default function ToolsAdminPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex items-center gap-3 pt-6">
+                <div className="flex items-center gap-6 pt-6">
                   <div className="flex items-center gap-2">
                     <Switch 
                       checked={editingTool.is_featured}
                       onCheckedChange={v => setEditingTool({...editingTool, is_featured: v})}
                     />
-                    <Label>推荐</Label>
+                    <Label className="text-slate-700">推荐</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch 
                       checked={editingTool.is_active}
                       onCheckedChange={v => setEditingTool({...editingTool, is_active: v})}
                     />
-                    <Label>启用</Label>
+                    <Label className="text-slate-700">启用</Label>
                   </div>
                 </div>
               </div>
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingTool(null)}>取消</Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button variant="outline" onClick={() => setEditingTool(null)} className="cursor-pointer">取消</Button>
+            <Button onClick={handleSave} disabled={saving} className="bg-slate-900 hover:bg-slate-800 cursor-pointer">
               {saving ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>
