@@ -12,7 +12,8 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  FileText, Globe, TrendingUp
+  FileText, Globe, TrendingUp, Briefcase, MapPin, Palette, Layers,
+  ShoppingCart, Shirt, Video, Smile
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -210,9 +211,139 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 // 精选工具列表
 const UTILITY_TOOLS = [
-  { 
-    key: 'resume', 
-    name: 'STAR简历优化', 
+  {
+    key: 'ecommerce-image',
+    name: '商品场景图生成',
+    icon: ImageIcon,
+    description: '一键生成跨境电商商品主图和场景图，支持多平台尺寸规范',
+    color: 'from-orange-500 to-amber-500',
+    tags: ['商品主图', '场景图', '多尺寸'],
+    useCases: [
+      { title: '亚马逊主图', desc: '白底+场景图，符合亚马逊规范' },
+      { title: '独立站场景', desc: '真实使用场景图，提升转化率' },
+      { title: '批量生成', desc: '一次生成多规格尺寸图' },
+    ]
+  },
+  {
+    key: 'model-scene',
+    name: 'AI模特场景生成',
+    icon: UserCircle,
+    description: 'AI跨境模特换装/场景生成，一键出图无需拍摄',
+    color: 'from-pink-500 to-rose-500',
+    tags: ['模特换装', '场景生成', '无需拍摄'],
+    useCases: [
+      { title: '服装模特', desc: '多肤色多体型模特图批量生成' },
+      { title: '场景搭配', desc: '室内外场景自动匹配' },
+      { title: '多平台适配', desc: '亚马逊/TikTok/独立站一图多用' },
+    ]
+  },
+  {
+    key: 'novel-image',
+    name: '推文漫画生图',
+    icon: Feather,
+    description: '小说推文/漫画分镜一键生成，支持多种风格',
+    color: 'from-purple-500 to-violet-500',
+    tags: ['小说配图', '漫画分镜', '推文素材'],
+    useCases: [
+      { title: '小说封面', desc: '吸引眼球的爆款小说封面' },
+      { title: '漫画分镜', desc: '小说章节自动生成分镜图' },
+      { title: '推文配图', desc: '抖音/快手推文视频素材' },
+    ]
+  },
+  {
+    key: 'social-image',
+    name: '自媒体配图',
+    icon: TrendingUp,
+    description: '自媒体/短视频配图一键生成，爆款封面自动出',
+    color: 'from-green-500 to-emerald-500',
+    tags: ['封面图', '短视频素材', '爆款模板'],
+    useCases: [
+      { title: '小红书封面', desc: '爆款笔记封面批量生成' },
+      { title: '抖音封面', desc: '视频号/抖音统一风格封面' },
+      { title: '公众号配图', desc: '文章配图自动生成' },
+    ]
+  },
+  {
+    key: 'avatar-emoji',
+    name: '头像表情包',
+    icon: Sparkles,
+    description: 'AI表情包/头像一键生成，支持多种风格定制',
+    color: 'from-yellow-500 to-orange-500',
+    tags: ['头像生成', '表情包', '个性定制'],
+    useCases: [
+      { title: '头像定制', desc: '真人照片转动漫/插画头像' },
+      { title: '表情包', desc: '批量生成系列表情包' },
+      { title: '节日专属', desc: '节日主题头像一键生成' },
+    ]
+  },
+  {
+    key: 'resume-photo',
+    name: '形象照生成',
+    icon: UserCircle,
+    description: 'AI简历形象照/职业形象照生成，商务感十足',
+    color: 'from-blue-500 to-cyan-500',
+    tags: ['形象照', '职业照', '商务形象'],
+    useCases: [
+      { title: '简历照片', desc: '专业商务形象照' },
+      { title: '职业头像', desc: 'LinkedIn/脉脉头像' },
+      { title: '团队合影', desc: '公司团队统一形象照' },
+    ]
+  },
+  {
+    key: 'portfolio-image',
+    name: '汇报作品集',
+    icon: Briefcase,
+    description: 'AI职场汇报/作品集配图一键生成，professional',
+    color: 'from-slate-500 to-gray-600',
+    tags: ['职场汇报', '作品集', 'PPT素材'],
+    useCases: [
+      { title: '汇报配图', desc: '年终总结/述职报告配图' },
+      { title: '作品集', desc: '设计师/摄影师作品集' },
+      { title: 'PPT素材', desc: '商务汇报PPT素材库' },
+    ]
+  },
+  {
+    key: 'local-poster',
+    name: '门店营销海报',
+    icon: MapPin,
+    description: '本地生活/实体店营销海报一键生成，高级感满满',
+    color: 'from-red-500 to-pink-500',
+    tags: ['营销海报', '门店物料', '节日促销'],
+    useCases: [
+      { title: '餐饮海报', desc: '餐厅菜单/促销海报' },
+      { title: '零售物料', desc: '超市/便利店促销物料' },
+      { title: '节日特供', desc: '春节/中秋等节日海报' },
+    ]
+  },
+  {
+    key: 'kids-creative',
+    name: '儿童创意工坊',
+    icon: Palette,
+    description: 'AI儿童手抄报/手账/涂色绘本一键生成，亲子必备',
+    color: 'from-cyan-500 to-teal-500',
+    tags: ['手抄报', '涂色绘本', '儿童手工'],
+    useCases: [
+      { title: '手抄报', desc: '节日/主题手抄报模板' },
+      { title: '涂色绘本', desc: '儿童涂色绘本素材' },
+      { title: '手账素材', desc: '亲子手账贴纸/素材' },
+    ]
+  },
+  {
+    key: 'commercial-design',
+    name: '商用设计素材',
+    icon: Layers,
+    description: 'AI通用商用设计素材一键生成，可商用无版权',
+    color: 'from-indigo-500 to-blue-500',
+    tags: ['商用素材', '无版权', '设计模板'],
+    useCases: [
+      { title: '背景素材', desc: '电商/设计背景图库' },
+      { title: '装饰元素', desc: '图标/边框/分隔线' },
+      { title: '营销素材', desc: '促销标签/优惠券模板' },
+    ]
+  },
+  {
+    key: 'resume',
+    name: 'STAR简历优化',
     icon: FileText,
     description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
     color: 'from-blue-500 to-cyan-500',
@@ -223,9 +354,9 @@ const UTILITY_TOOLS = [
       { title: '简历升级', desc: 'STAR法则重构，让经历更有说服力' },
     ]
   },
-  { 
-    key: 'novel', 
-    name: '小说创作工坊', 
+  {
+    key: 'novel',
+    name: '小说创作工坊',
     icon: Feather,
     description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
     color: 'from-purple-500 to-pink-500',
@@ -236,9 +367,9 @@ const UTILITY_TOOLS = [
       { title: '短剧创作', desc: '小说改短剧，批量产出推文素材' },
     ]
   },
-  { 
-    key: 'productpage', 
-    name: '出海详情页', 
+  {
+    key: 'productpage',
+    name: '出海详情页',
     icon: Globe,
     description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
     color: 'from-emerald-500 to-teal-500',
