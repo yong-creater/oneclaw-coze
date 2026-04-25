@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -12,9 +12,19 @@ import {
   Shirt, Wand2, Layers, Zap, ScanFace,
   Eraser, FileText, Sofa, Play, Package,
   HelpCircle, StickyNote, Check,
-  ShoppingBag, Star
+  ShoppingBag, Star, Loader2, Send, User,
+  ArrowLeft, Mail, Lock, Eye, EyeOff,
+  Sliders, Palette, Type, Layers3, Share2,
+  LayoutTemplate, Download, Upload, Trash2, Edit3, Heart
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
+import {
+  RetouchIndex, RetouchAuto, RetouchManual, RetouchFilter,
+  GenerateIndex, Text2Img, Img2Img,
+  EcommerceIndex, ProductRetouch, WhiteBg, SceneGen, BatchProcess,
+  SocialIndex, CoverGen, LayoutTool,
+  AssetsContent
+} from '@/components/tools';
 
 // ==================== 类型定义 ====================
 type MainTab = 'home' | 'tools' | 'templates' | 'recent' | 'projects' | 'assets' | 'more';
@@ -335,7 +345,7 @@ function ToolsContent() {
   };
 
   // 工具图标映射
-  const toolIcons: Record<string, JSX.Element> = {
+  const toolIcons: Record<string, React.ReactNode> = {
     avatar: <Wand2 className="w-6 h-6" />,
     remove: <Eraser className="w-6 h-6" />,
     cutout: <ScanFace className="w-6 h-6" />,
@@ -876,140 +886,6 @@ function ProjectsContent() {
   );
 }
 
-// ==================== 资产库页面 ====================
-function AssetsContent() {
-  const [assets, setAssets] = useState([
-    { id: 1, name: '产品主图-001.jpg', size: '2.3MB', type: 'image', date: '今天' },
-    { id: 2, name: '头像素材集', size: '15张', type: 'folder', date: '昨天' },
-    { id: 3, name: '端午节元素.png', size: '890KB', type: 'image', date: '3天前' },
-    { id: 4, name: '品牌配色方案.ai', size: '1.2MB', type: 'file', date: '上周' },
-  ]);
-  const [toast, setToast] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'images' | 'templates' | 'others'>('all');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const newAssets = Array.from(files).map((file, idx) => ({
-        id: Date.now() + idx,
-        name: file.name,
-        size: `${(file.size / 1024 / 1024).toFixed(1)}MB`,
-        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
-        date: '今天',
-      }));
-      setAssets([...newAssets, ...assets]);
-      setToast(`已上传 ${files.length} 个文件`);
-    }
-  };
-
-  const handleDelete = (id: number) => {
-    setAssets(assets.filter(a => a.id !== id));
-    setToast('已删除');
-  };
-
-  const filteredAssets = assets.filter(asset => {
-    if (activeTab === 'all') return true;
-    if (activeTab === 'images') return asset.type === 'image';
-    if (activeTab === 'templates') return asset.name.includes('模板');
-    if (activeTab === 'others') return asset.type === 'file';
-    return true;
-  });
-
-  const typeIcons: Record<string, { icon: string; color: string }> = {
-    'image': { icon: '🖼️', color: 'from-sky-100 to-blue-100' },
-    'folder': { icon: '📁', color: 'from-amber-100 to-orange-100' },
-    'file': { icon: '📄', color: 'from-slate-100 to-slate-200' },
-  };
-
-  return (
-    <div className="max-w-5xl mx-auto">
-      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
-      
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">资产库</h1>
-          <p className="text-sm text-slate-500">管理你的设计素材和模板</p>
-        </div>
-        <button 
-          onClick={handleUpload}
-          className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium flex items-center gap-2 transition-colors"
-        >
-          <Plus className="w-4 h-4" />上传素材
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*,.ai,.psd,.svg,.pdf"
-          multiple
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </div>
-
-      {/* 筛选标签 */}
-      <div className="flex items-center gap-2 mb-6">
-        {(['all', 'images', 'templates', 'others'] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-xl text-sm transition-colors ${
-              activeTab === tab 
-                ? 'bg-orange-100 text-orange-600 font-medium' 
-                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-            }`}
-          >
-            {tab === 'all' ? '全部' : tab === 'images' ? '图片' : tab === 'templates' ? '模板' : '其他'}
-          </button>
-        ))}
-      </div>
-
-      {filteredAssets.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-          <Database className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-          <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无素材</h3>
-          <p className="text-sm text-slate-400 mt-1">上传素材后会在这里显示</p>
-          <button 
-            onClick={handleUpload}
-            className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition-colors"
-          >
-            上传第一个素材
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {filteredAssets.map((asset) => (
-            <div
-              key={asset.id}
-              className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all overflow-hidden"
-            >
-              <div className={`aspect-square bg-gradient-to-br ${typeIcons[asset.type]?.color || 'from-slate-100 to-slate-200'} flex items-center justify-center relative`}>
-                <span className="text-3xl">{typeIcons[asset.type]?.icon || '📄'}</span>
-                <button 
-                  onClick={() => handleDelete(asset.id)}
-                  className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="p-3">
-                <h3 className="text-xs font-medium text-slate-800 dark:text-white truncate">{asset.name}</h3>
-                <p className="text-xs text-slate-400 mt-0.5">{asset.size} · {asset.date}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ==================== 更多页面 ====================
 function MoreContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const router = useRouter();
@@ -1085,19 +961,56 @@ export default function MainPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>('home');
 
-  const navItems = [
+  // 一级菜单
+  const mainNav = [
     { key: 'home', label: '首页', icon: Home },
-    { key: 'tools', label: '工具', icon: Grid3X3 },
+    { key: 'retouch', label: 'AI修图', icon: Wand2 },
+    { key: 'generate', label: 'AI生成', icon: Sparkles },
+    { key: 'ecommerce', label: '电商图片', icon: ShoppingBag },
+    { key: 'social', label: '自媒体图片', icon: Share2 },
     { key: 'templates', label: '模板', icon: LayoutDashboard },
-    { key: 'recent', label: '最近打开', icon: Clock },
-    { key: 'projects', label: '项目', icon: FolderOpen },
     { key: 'assets', label: '资产库', icon: Database },
-    { key: 'more', label: '更多', icon: MoreHorizontal },
   ];
+
+  // 二级菜单
+  const subNav: Record<string, Array<{key: string, label: string, icon: any}>> = {
+    retouch: [
+      { key: 'retouch-auto', label: 'AI一键精修', icon: Wand2 },
+      { key: 'retouch-manual', label: '手动精细修图', icon: Sliders },
+      { key: 'retouch-filter', label: '滤镜与特效', icon: Palette },
+    ],
+    generate: [
+      { key: 'text2img', label: '文生图', icon: Type },
+      { key: 'img2img', label: '图生图', icon: ImageIcon },
+    ],
+    ecommerce: [
+      { key: 'product-retouch', label: '商品图精修', icon: Wand2 },
+      { key: 'whitebg', label: '白底图生成', icon: ScanFace },
+      { key: 'scene-gen', label: '场景图合成', icon: Layers },
+      { key: 'batch', label: '批量处理', icon: Layers3 },
+    ],
+    social: [
+      { key: 'cover-gen', label: '封面生成', icon: ImageIcon },
+      { key: 'layout', label: '图文排版', icon: LayoutTemplate },
+    ],
+  };
+
+  const [expandedMenu, setExpandedMenu] = useState<string | null>('retouch');
+
+  const handleNavClick = (key: string) => {
+    // 如果有二级菜单，展开/收起
+    if (subNav[key]) {
+      setExpandedMenu(expandedMenu === key ? null : key);
+      setActiveTab(key);
+    } else {
+      setExpandedMenu(null);
+      setActiveTab(key);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
-      {/* 左侧固定导航栏 - 简洁白色 */}
+      {/* 左侧固定导航栏 */}
       <aside className="w-60 bg-white border-r border-slate-200 flex flex-col h-screen fixed left-0 top-0 z-20 shadow-sm">
         {/* Logo区域 */}
         <div className="p-4 border-b border-slate-100">
@@ -1110,27 +1023,72 @@ export default function MainPage() {
         </div>
 
         {/* 主导航 */}
-        <nav className="flex-1 p-2">
-          <div className="space-y-0.5">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.key;
-              return (
+        <nav className="flex-1 p-2 overflow-y-auto">
+          {/* 首页 */}
+          <button
+            onClick={() => { setExpandedMenu(null); setActiveTab('home'); }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all mb-1 ${
+              activeTab === 'home' && !expandedMenu
+                ? 'bg-orange-50 text-orange-600 font-medium'
+                : 'text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            <Home className="w-5 h-5" />
+            <span>首页</span>
+          </button>
+
+          {/* 工具菜单 */}
+          {mainNav.slice(1).map((item) => {
+            const Icon = item.icon;
+            const isExpanded = expandedMenu === item.key;
+            const hasSub = subNav[item.key];
+            
+            return (
+              <div key={item.key}>
                 <button
-                  key={item.key}
-                  onClick={() => setActiveTab(item.key)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                    isActive
+                  onClick={() => handleNavClick(item.key)}
+                  className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all mb-0.5 ${
+                    expandedMenu === item.key
+                      ? 'bg-orange-50 text-orange-600 font-medium'
+                      : activeTab === item.key && !expandedMenu
                       ? 'bg-orange-50 text-orange-600 font-medium'
                       : 'text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-5 h-5" />
+                    <span>{item.label}</span>
+                  </div>
+                  {hasSub && (
+                    <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  )}
                 </button>
-              );
-            })}
-          </div>
+                
+                {/* 二级菜单 */}
+                {isExpanded && hasSub && (
+                  <div className="ml-4 mt-1 mb-2 space-y-0.5">
+                    {subNav[item.key].map((sub) => {
+                      const SubIcon = sub.icon;
+                      return (
+                        <button
+                          key={sub.key}
+                          onClick={() => setActiveTab(sub.key)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                            activeTab === sub.key
+                              ? 'bg-slate-100 text-orange-600 font-medium'
+                              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                          }`}
+                        >
+                          <SubIcon className="w-4 h-4" />
+                          <span>{sub.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         {/* 底部登录入口 */}
@@ -1146,16 +1104,36 @@ export default function MainPage() {
       </aside>
 
       {/* 右侧主内容区 */}
-      <main className="flex-1 ml-64">
+      <main className="flex-1 ml-60">
         {/* 页面内容 */}
         <div className="p-6 pb-24">
           {activeTab === 'home' && <HomeContent setActiveTab={setActiveTab} />}
-          {activeTab === 'tools' && <ToolsContent />}
+          
+          {/* AI修图模块 */}
+          {activeTab === 'retouch' && <RetouchIndex setActiveTab={setActiveTab} />}
+          {activeTab === 'retouch-auto' && <RetouchAuto setActiveTab={setActiveTab} />}
+          {activeTab === 'retouch-manual' && <RetouchManual setActiveTab={setActiveTab} />}
+          {activeTab === 'retouch-filter' && <RetouchFilter setActiveTab={setActiveTab} />}
+          
+          {/* AI生成模块 */}
+          {activeTab === 'generate' && <GenerateIndex setActiveTab={setActiveTab} />}
+          {activeTab === 'text2img' && <Text2Img setActiveTab={setActiveTab} />}
+          {activeTab === 'img2img' && <Img2Img setActiveTab={setActiveTab} />}
+          
+          {/* 电商图片模块 */}
+          {activeTab === 'ecommerce' && <EcommerceIndex setActiveTab={setActiveTab} />}
+          {activeTab === 'product-retouch' && <ProductRetouch setActiveTab={setActiveTab} />}
+          {activeTab === 'whitebg' && <WhiteBg setActiveTab={setActiveTab} />}
+          {activeTab === 'scene-gen' && <SceneGen setActiveTab={setActiveTab} />}
+          {activeTab === 'batch' && <BatchProcess setActiveTab={setActiveTab} />}
+          
+          {/* 自媒体图片模块 */}
+          {activeTab === 'social' && <SocialIndex setActiveTab={setActiveTab} />}
+          {activeTab === 'cover-gen' && <CoverGen setActiveTab={setActiveTab} />}
+          {activeTab === 'layout' && <LayoutTool setActiveTab={setActiveTab} />}
+          
           {activeTab === 'templates' && <TemplatesContent />}
-          {activeTab === 'recent' && <RecentContent />}
-          {activeTab === 'projects' && <ProjectsContent />}
-          {activeTab === 'assets' && <AssetsContent />}
-          {activeTab === 'more' && <MoreContent setActiveTab={setActiveTab} />}
+          {activeTab === 'assets' && <AssetsContent setActiveTab={setActiveTab} />}
         </div>
 
         {/* 右下角悬浮按钮 */}
