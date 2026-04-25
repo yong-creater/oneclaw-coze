@@ -334,53 +334,53 @@ function ToolsContent() {
     }
   };
 
-  // 工具封面图
-  const coverImages: Record<string, string> = {
-    avatar: '/tool-covers/ai-retouch.jpg',
-    remove: '/tool-covers/ai-cutout.jpg',
-    cutout: '/tool-covers/ai-cutout.jpg',
-    restore: '/tool-covers/ai-restore.jpg',
-    text2img: '/tool-covers/text2img.jpg',
-    img2img: '/tool-covers/img2img.jpg',
-    product: '/tool-covers/product-edit.jpg',
-    whitebg: '/tool-covers/white-bg.jpg',
-    scene: '/tool-covers/product-edit.jpg',
-    cover: '/tool-covers/social-cover.jpg',
-    wechat: '/tool-covers/social-cover.jpg',
-    resize: '/tool-covers/social-cover.jpg',
+  // 工具图标映射
+  const toolIcons: Record<string, JSX.Element> = {
+    avatar: <Wand2 className="w-6 h-6" />,
+    remove: <Eraser className="w-6 h-6" />,
+    cutout: <ScanFace className="w-6 h-6" />,
+    restore: <ImageIcon className="w-6 h-6" />,
+    text2img: <Sparkles className="w-6 h-6" />,
+    img2img: <Layers className="w-6 h-6" />,
+    product: <Wand2 className="w-6 h-6" />,
+    whitebg: <Package className="w-6 h-6" />,
+    scene: <Sofa className="w-6 h-6" />,
+    cover: <FileText className="w-6 h-6" />,
+    wechat: <ImageIcon className="w-6 h-6" />,
+    resize: <Play className="w-6 h-6" />,
   };
 
   const categories = [
     {
       title: 'AI修图',
       items: [
-        { name: 'AI一键精修', key: 'avatar', icon: 'Wand2', desc: '智能美化，一键出片' },
-        { name: 'AI智能消除', key: 'remove', icon: 'Eraser', desc: '无痕消除杂物路人' },
-        { name: 'AI抠图换背景', key: 'cutout', icon: 'ScanFace', desc: '发丝级精准抠图' },
-        { name: '老照片修复', key: 'restore', icon: 'ImageIcon', desc: '模糊破损一键复原' },
+        { name: 'AI一键精修', key: 'avatar', desc: '智能美化，一键出片' },
+        { name: 'AI智能消除', key: 'remove', desc: '无痕消除杂物路人' },
+        { name: 'AI抠图换背景', key: 'cutout', desc: '发丝级精准抠图' },
+        { name: '老照片修复', key: 'restore', desc: '模糊破损一键复原' },
       ]
     },
     {
       title: 'AI生成',
       items: [
-        { name: '文生图', key: 'text2img', icon: 'Sparkles', desc: '文字描述生成图片' },
-        { name: '图生图', key: 'img2img', icon: 'Layers', desc: '风格迁移创意转换' },
+        { name: '文生图', key: 'text2img', desc: '文字描述生成图片' },
+        { name: '图生图', key: 'img2img', desc: '风格迁移创意转换' },
       ]
     },
     {
       title: '电商图片',
       items: [
-        { name: '商品精修', key: 'product', icon: 'Wand2', desc: '电商主图一键精修' },
-        { name: '白底图', key: 'whitebg', icon: 'Package', desc: '平台标准白底图' },
-        { name: '场景合成', key: 'scene', icon: 'Sofa', desc: '商品场景图生成' },
+        { name: '商品精修', key: 'product', desc: '电商主图一键精修' },
+        { name: '白底图', key: 'whitebg', desc: '平台标准白底图' },
+        { name: '场景合成', key: 'scene', desc: '商品场景图生成' },
       ]
     },
     {
       title: '自媒体图片',
       items: [
-        { name: '小红书封面', key: 'cover', icon: 'FileText', desc: '爆款笔记封面' },
-        { name: '公众号配图', key: 'wechat', icon: 'ImageIcon', desc: '专业图文排版' },
-        { name: '尺寸适配', key: 'resize', icon: 'Play', desc: '多平台尺寸适配' },
+        { name: '小红书封面', key: 'cover', desc: '爆款笔记封面' },
+        { name: '公众号配图', key: 'wechat', desc: '专业图文排版' },
+        { name: '尺寸适配', key: 'resize', desc: '多平台尺寸适配' },
       ]
     },
   ];
@@ -402,23 +402,27 @@ function ToolsContent() {
                 onClick={() => handleToolClick(item.key)}
                 style={{ 
                   background: 'white', 
-                  borderRadius: '16px', 
+                  borderRadius: '12px', 
                   overflow: 'hidden', 
-                  border: '1px solid #f1f5f9',
+                  border: '1px solid #e2e8f0',
                   textAlign: 'left',
                   transition: 'all 0.2s',
                   cursor: 'pointer',
                   padding: 0,
                 }}
-                onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
-                onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                  e.currentTarget.style.borderColor = '#f97316';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.borderColor = '#e2e8f0';
+                }}
               >
+                {/* 图标区域 */}
                 <div style={{ 
-                  height: '120px', 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundImage: `url(${coverImages[item.key] || ''}), linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
+                  height: '100px', 
+                  background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -426,17 +430,15 @@ function ToolsContent() {
                   <div style={{
                     width: '56px',
                     height: '56px',
-                    borderRadius: '14px',
-                    background: 'rgba(255,255,255,0.95)',
+                    borderRadius: '12px',
+                    background: 'white',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                    fontSize: '24px',
-                    fontWeight: 'bold',
-                    color: '#667eea'
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    color: '#f97316'
                   }}>
-                    {item.name.slice(0, 1)}
+                    {toolIcons[item.key]}
                   </div>
                 </div>
                 <div style={{ padding: '16px' }}>
