@@ -4,13 +4,13 @@ import { useState, useCallback } from 'react';
 import { 
   BookOpen, Download, Loader2, Upload,
   Image as ImageIcon, Wand2, RefreshCw, 
-  Check, Star, Sparkles, Hash
+  Check, Star, Sparkles, Hash, ArrowLeft
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
-import UtilityHeader from '@/components/common/UtilityHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
 
 interface GeneratedImage {
   id: string;
@@ -54,46 +54,59 @@ export default function XiaohongshuGenerator() {
     setHashtags(hashtags.filter(t => t !== tag));
   };
 
-  const handleGenerate = async () => {
-    if (!title.trim()) {
-      alert('请输入笔记标题');
-      return;
-    }
-
+  const handleGenerate = useCallback(async () => {
+    if (!title.trim()) return;
+    
     setGenerating(true);
+    
+    // 模拟生成过程
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    const newImage: GeneratedImage = {
-      id: Date.now().toString(),
-      url: `https://picsum.photos/seed/${Date.now()}/600/800`,
-      style: selectedStyle,
-      timestamp: Date.now(),
-    };
+    const newImages: GeneratedImage[] = [
+      {
+        id: Date.now().toString(),
+        url: `https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=600&h=800&fit=crop&t=${Date.now()}`,
+        style: selectedStyle,
+        timestamp: Date.now()
+      }
+    ];
     
-    setGeneratedImages([newImage, ...generatedImages]);
+    setGeneratedImages(newImages);
     setGenerating(false);
-  };
+  }, [title, selectedStyle]);
 
   const handleDownload = useCallback((image: GeneratedImage) => {
     const link = document.createElement('a');
     link.href = image.url;
-    link.download = `小红书_${image.style}_${image.timestamp}.png`;
+    link.download = `xiaohongshu-${image.id}.jpg`;
     link.click();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50 dark:from-slate-900 dark:to-slate-800">
-      <UtilityHeader
-        toolIcon={<BookOpen className="w-4 h-4" />}
-        toolName="小红书配图生成"
-        toolDescription="输入标题，一键生成小红书爆款封面图和配图"
-        gradient="from-pink-500 to-rose-500"
-      />
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50">
+      {/* 工具头部 */}
+      <div className="bg-gradient-to-r from-pink-500 to-rose-500 text-white">
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <Link href="/tools" className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4">
+            <ArrowLeft className="w-4 h-4" />
+            返回工具
+          </Link>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold">小红书配图生成</h1>
+              <p className="text-white/80 text-sm">输入标题，一键生成小红书爆款封面图</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* 输入标题 */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <Star className="w-4 h-4 text-pink-500" />
             输入笔记标题
           </h3>
@@ -107,12 +120,12 @@ export default function XiaohongshuGenerator() {
 
           {/* 话题标签 */}
           <div className="mt-4">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               话题标签
             </label>
             <div className="flex gap-2 mb-2 flex-wrap">
               {hashtags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 cursor-pointer" onClick={() => handleRemoveHashtag(tag)}>
+                <Badge key={tag} variant="secondary" className="bg-pink-100 text-pink-600 cursor-pointer" onClick={() => handleRemoveHashtag(tag)}>
                   {tag} ×
                 </Badge>
               ))}
@@ -132,9 +145,9 @@ export default function XiaohongshuGenerator() {
           </div>
         </div>
 
-        {/* 风格选择 */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+        {/* 选择风格 */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-pink-500" />
             选择风格
           </h3>
@@ -143,48 +156,45 @@ export default function XiaohongshuGenerator() {
               <button
                 key={style.id}
                 onClick={() => setSelectedStyle(style.id)}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  selectedStyle === style.id
-                    ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-pink-300'
+                className={`p-3 rounded-xl border-2 transition-all ${
+                  selectedStyle === style.id 
+                    ? 'border-pink-500 bg-pink-50' 
+                    : 'border-slate-100 hover:border-pink-200'
                 }`}
               >
-                <div className="flex gap-1 mb-2 justify-center">
+                <div className="flex gap-1 mb-2">
                   {style.colors.map((color, i) => (
-                    <div key={i} className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
+                    <div
+                      key={i}
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
                   ))}
                 </div>
-                <p className={`text-xs font-medium ${
-                  selectedStyle === style.id ? 'text-pink-600' : 'text-slate-700 dark:text-slate-300'
-                }`}>
-                  {style.name}
-                </p>
+                <p className="text-xs text-slate-600">{style.name}</p>
               </button>
             ))}
           </div>
         </div>
 
-        {/* 尺寸选择 */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-          <h3 className="font-semibold text-slate-800 dark:text-white mb-4">
-            选择图片尺寸
+        {/* 选择尺寸 */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <ImageIcon className="w-4 h-4 text-pink-500" />
+            选择尺寸
           </h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="flex gap-3">
             {SIZES.map((size) => (
               <button
                 key={size.value}
                 onClick={() => setSelectedSize(size.value)}
-                className={`p-3 rounded-xl border-2 transition-all text-center ${
-                  selectedSize === size.value
-                    ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-pink-300'
+                className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                  selectedSize === size.value 
+                    ? 'border-pink-500 bg-pink-50 text-pink-600' 
+                    : 'border-slate-100 text-slate-600 hover:border-pink-200'
                 }`}
               >
-                <p className={`text-sm font-medium ${
-                  selectedSize === size.value ? 'text-pink-600' : 'text-slate-700 dark:text-slate-300'
-                }`}>
-                  {size.label}
-                </p>
+                {size.label}
               </button>
             ))}
           </div>
@@ -193,66 +203,59 @@ export default function XiaohongshuGenerator() {
         {/* 生成按钮 */}
         <Button
           onClick={handleGenerate}
-          disabled={generating || !title.trim()}
-          className="w-full h-14 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-xl text-base font-medium shadow-lg shadow-pink-500/25"
+          disabled={!title.trim() || generating}
+          className="w-full h-14 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium rounded-xl shadow-lg shadow-pink-500/30"
         >
           {generating ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              AI生成中...
+              AI 正在生成中...
             </>
           ) : (
             <>
               <Wand2 className="w-5 h-5 mr-2" />
-              一键生成爆款配图
+              一键生成封面图
             </>
           )}
         </Button>
 
         {/* 生成结果 */}
         {generatedImages.length > 0 && (
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-pink-500" />
-              生成结果
-              <Badge variant="secondary" className="ml-2">{generatedImages.length}</Badge>
+          <div className="space-y-4">
+            <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-500" />
+              生成完成
             </h3>
-            
             <div className="grid grid-cols-2 gap-4">
               {generatedImages.map((image) => (
-                <div key={image.id} className="relative bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden group">
-                  <img src={image.url} alt="生成的配图" className="w-full aspect-[3/4] object-cover" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                    <button
+                <div key={image.id} className="relative group">
+                  <img
+                    src={image.url}
+                    alt="Generated"
+                    className="w-full rounded-xl"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                    <Button
                       onClick={() => handleDownload(image)}
-                      className="p-2 bg-white rounded-full hover:bg-pink-50 transition-colors"
+                      className="bg-white text-slate-800 hover:bg-white/90"
                     >
-                      <Download className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={handleGenerate}
-                      className="p-2 bg-white rounded-full hover:bg-pink-50 transition-colors"
-                    >
-                      <RefreshCw className="w-5 h-5" />
-                    </button>
+                      <Download className="w-4 h-4 mr-2" />
+                      下载
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
+            <Button
+              onClick={handleGenerate}
+              variant="outline"
+              className="w-full border-pink-300 text-pink-500"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              重新生成
+            </Button>
           </div>
         )}
-
-        {/* 登录提示 */}
-        <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-pink-500" />
-            <div>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">登录解锁高清无水印</p>
-              <p className="text-xs text-slate-500">批量生成、商用授权</p>
-            </div>
-          </div>
-          <LoginButton />
-        </div>
       </div>
     </div>
   );

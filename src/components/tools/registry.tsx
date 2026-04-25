@@ -1,264 +1,144 @@
 /**
- * OneClaw 工具注册系统
- * 
- * 提供统一的工具注册、配置、渲染能力
- * 支持动态加载和扩展新工具
+ * 工具注册系统
+ * OneClaw - 全品类AI工具导航站
  */
 
-import React, { lazy, Suspense } from 'react';
-import { Loader2 } from 'lucide-react';
+import supabase from '@/lib/supabase';
 
-// ============================================
-// 类型定义
-// ============================================
-
+// 工具分类
 export type ToolCategory = 
-  | 'image-processing'   // 图片处理
-  | 'marketing'           // 营销图
-  | 'ai-design'           // AI设计
-  | 'video'               // 视频处理
-  | 'document'            // 文档处理
-  | 'audio'               // 音频处理
-  | 'chat';               // 对话助手
+  | 'image-processing'  // AI修图
+  | 'ai-generation'     // AI生成
+  | 'ecommerce'         // 电商图片
+  | 'social-media';     // 自媒体图片
 
-export type ToolDifficulty = 'easy' | 'medium' | 'advanced';
-
-export interface ToolQuota {
-  daily?: number;    // 每日限制
-  total?: number;    // 总限制
-  credits?: number;   // 消耗积分
-}
-
-export interface ToolSetting {
-  key: string;
-  label: string;
-  type: 'select' | 'input' | 'toggle' | 'slider';
-  options?: { value: string; label: string }[];
-  default?: string | boolean | number;
-}
-
+// 工具配置接口
 export interface ToolConfig {
-  key: string;                          // 唯一标识（URL中使用）
-  name: string;                         // 显示名称
-  shortName?: string;                   // 简短名称
-  description: string;                   // 详细描述
-  category: ToolCategory;               // 所属分类
-  icon: string;                         // Emoji 或图标名称
+  key: string;                    // 唯一标识
+  name: string;                    // 显示名称
+  description: string;            // 简短描述
+  category: ToolCategory;          // 所属分类
+  icon: string;                   // Emoji 图标
   color: {
-    gradient: string;                    // 渐变色类
-    bg: string;                         // 背景色类
+    bg: string;                    // 背景色类
+    gradient: string;              // 渐变色类
   };
-  difficulty: ToolDifficulty;           // 难度等级
-  guide: string;                        // 使用提示（一句话）
-  requiresAuth: boolean;                // 是否需要登录
-  quota?: ToolQuota;                    // 使用额度
-  settings?: ToolSetting[];             // 可配置项
-  outputFormats?: string[];             // 输出格式
-  maxFileSize?: number;                 // 最大文件大小(MB)
-  relatedTools?: string[];              // 相关工具
-  createdAt?: string;                  // 创建时间
+  guide: string;                   // 使用提示
+  requiresAuth: boolean;           // 是否需要登录
+  credits: number;                // 消耗积分
+  quota?: {                        // 免费额度
+    daily?: number;
+    total?: number;
+  };
 }
 
-export interface ToolResult {
-  success: boolean;
-  url?: string;
-  error?: string;
-  metadata?: Record<string, any>;
-}
-
-// ============================================
-// 工具注册表
-// ============================================
-
-export const TOOL_REGISTRY: Record<string, ToolConfig> = {};
-
-// ============================================
-// 工具查询函数
-// ============================================
+// 工具注册表（运行时加载）
+let TOOL_REGISTRY: Record<string, ToolConfig> = {};
 
 /**
- * 获取所有工具
+ * 注册工具
+ */
+export function registerTool(config: ToolConfig) {
+  TOOL_REGISTRY[config.key] = config;
+  return config;
+}
+
+/**
+ * 获取所有已注册工具
  */
 export function getAllTools(): ToolConfig[] {
   return Object.values(TOOL_REGISTRY);
 }
 
 /**
- * 获取工具配置
+ * 根据 key 获取工具
  */
-export function getToolConfig(key: string): ToolConfig | null {
-  return TOOL_REGISTRY[key] || null;
+export function getToolByKey(key: string): ToolConfig | null {
+  return TOOL_REGISTRY[key] ?? null;
 }
 
 /**
- * 按分类获取工具
+ * 根据分类获取工具
  */
 export function getToolsByCategory(category: ToolCategory): ToolConfig[] {
-  return getAllTools().filter(tool => tool.category === category);
+  return Object.values(TOOL_REGISTRY).filter(tool => tool.category === category);
 }
 
 /**
- * 搜索工具
+ * 从数据库获取工具列表（带封面图）
  */
-export function searchTools(query: string): ToolConfig[] {
-  const lowerQuery = query.toLowerCase();
-  return getAllTools().filter(tool => 
-    tool.name.toLowerCase().includes(lowerQuery) ||
-    tool.description.toLowerCase().includes(lowerQuery) ||
-    tool.key.toLowerCase().includes(lowerQuery)
-  );
-}
-
-/**
- * 获取相关工具
- */
-export function getRelatedTools(key: string, limit = 4): ToolConfig[] {
-  const tool = getToolConfig(key);
-  if (!tool?.relatedTools) return [];
+export async function getToolsFromDB() {
+  const client = supabase;
   
-  return tool.relatedTools
-    .slice(0, limit)
-    .map(k => getToolConfig(k))
-    .filter(Boolean) as ToolConfig[];
-}
+  const { data, error } = await supabase
+    .from('tools')
+    .select('*')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
 
-// ============================================
-// 工具权限检查
-// ============================================
-
-export interface PermissionContext {
-  isAuthenticated: boolean;
-  isMember: boolean;
-  isAdmin: boolean;
-  usedQuota?: Record<string, number>;
-}
-
-/**
- * 检查用户是否有权使用工具
- */
-export function canUseTool(key: string, context: PermissionContext): { allowed: boolean; reason?: string } {
-  const tool = getToolConfig(key);
-  if (!tool) {
-    return { allowed: false, reason: '工具不存在' };
+  if (error) {
+    console.error('Failed to fetch tools:', error);
+    return [];
   }
+
+  return data || [];
+}
+
+/**
+ * 更新工具封面图
+ */
+export async function updateToolCover(toolKey: string, coverUrl: string) {
+  const client = supabase;
   
-  // 检查登录要求
-  if (tool.requiresAuth && !context.isAuthenticated) {
+  const { data, error } = await client
+    .from('tools')
+    .update({ cover_image: coverUrl, updated_at: new Date().toISOString() })
+    .eq('key', toolKey)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Failed to update cover:', error);
+    return null;
+  }
+
+  return data;
+}
+
+/**
+ * 权限检查
+ */
+export function checkToolAccess(tool: ToolConfig, user: { role?: string } | null): {
+  allowed: boolean;
+  reason?: string;
+} {
+  // 公开工具
+  if (!tool.requiresAuth) {
+    return { allowed: true };
+  }
+
+  // 需要登录
+  if (!user) {
     return { allowed: false, reason: '请先登录' };
   }
-  
-  // 检查额度
-  if (tool.quota && context.usedQuota) {
-    const used = context.usedQuota[key] || 0;
-    if (tool.quota.daily && used >= tool.quota.daily) {
-      return { allowed: false, reason: '今日额度已用完' };
-    }
-  }
-  
+
   return { allowed: true };
 }
 
-// ============================================
-// 工具额度管理
-// ============================================
-
-export interface QuotaInfo {
-  used: number;
-  limit: number | null;
-  remaining: number | null;
-  resetAt?: string;
-}
-
 /**
- * 获取用户工具额度信息
+ * 积分检查
  */
-export function getQuotaInfo(key: string, usedToday: number): QuotaInfo {
-  const tool = getToolConfig(key);
-  const limit = tool?.quota?.daily || null;
-  
-  return {
-    used: usedToday,
-    limit,
-    remaining: limit ? Math.max(0, limit - usedToday) : null,
-    resetAt: limit ? getResetTime() : undefined
-  };
-}
-
-function getResetTime(): string {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-  return tomorrow.toISOString();
-}
-
-// ============================================
-// 工具统计
-// ============================================
-
-export interface ToolStats {
-  totalTools: number;
-  totalUsage: number;
-  categoryStats: Record<ToolCategory, number>;
-}
-
-/**
- * 获取工具统计信息
- */
-export function getToolStats(): ToolStats {
-  const tools = getAllTools();
-  
-  return {
-    totalTools: tools.length,
-    totalUsage: 0,
-    categoryStats: {
-      'image-processing': tools.filter(t => t.category === 'image-processing').length,
-      'marketing': tools.filter(t => t.category === 'marketing').length,
-      'ai-design': tools.filter(t => t.category === 'ai-design').length,
-      'video': tools.filter(t => t.category === 'video').length,
-      'document': tools.filter(t => t.category === 'document').length,
-      'audio': tools.filter(t => t.category === 'audio').length,
-      'chat': tools.filter(t => t.category === 'chat').length,
-    }
-  };
-}
-
-// ============================================
-// 工具验证
-// ============================================
-
-export interface ValidationResult {
-  valid: boolean;
-  error?: string;
-}
-
-/**
- * 验证工具输入
- */
-export function validateToolInput(key: string, data: any): ValidationResult {
-  const tool = getToolConfig(key);
-  if (!tool) {
-    return { valid: false, error: '工具不存在' };
+export function checkCredits(credits: number, userCredits: number): {
+  allowed: boolean;
+  reason?: string;
+} {
+  if (credits === 0) {
+    return { allowed: true };
   }
-  
-  if (!data || Object.keys(data).length === 0) {
-    return { valid: false, error: '请提供输入数据' };
+
+  if (userCredits < credits) {
+    return { allowed: false, reason: `需要 ${credits} 积分，当前 ${userCredits} 积分` };
   }
-  
-  return { valid: true };
-}
 
-// ============================================
-// 工具加载占位符
-// ============================================
-
-export function ToolLoadingPlaceholder() {
-  return (
-    <div className="flex items-center justify-center min-h-[400px]">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-        <p className="text-sm text-slate-500">加载中...</p>
-      </div>
-    </div>
-  );
+  return { allowed: true };
 }

@@ -2,163 +2,185 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { 
-  Home, Grid3X3, Wand2, Search, Sparkles,
-  ArrowRight, Download, Palette, Image,
-  FileText, Play, Coffee, PartyPopper, Package,
-  Plus, Check, RefreshCw, Upload
+  Home, Grid3X3, FileText, Clock, FolderOpen, 
+  MoreHorizontal, ChevronDown, Search, Bell, User,
+  Star, Sparkles, Settings, LogOut, Menu, X
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
-import Footer from '@/components/common/Footer';
-import WechatPromo from '@/components/common/WechatPromo';
 
-// 简化工具数据
-const AI_TOOLS = [
-  // 图片处理
-  { name: 'AI抠图', desc: '一键去除背景', icon: Scissors, emoji: '✂️', color: 'from-blue-100 to-cyan-200', tag: '免费', href: '/tools' },
-  { name: '变清晰', desc: '模糊图变高清', icon: Sparkles, emoji: '🔍', color: 'from-purple-100 to-violet-200', tag: '热门', href: '/tools' },
-  { name: '改尺寸', desc: '无损放大缩小', icon: Image, emoji: '📐', color: 'from-green-100 to-emerald-200', tag: '免费', href: '/tools' },
-  // 营销图
-  { name: '小红书封面', desc: '爆款封面生成', icon: FileText, emoji: '📕', color: 'from-red-100 to-orange-200', tag: '热门', href: '/tools' },
-  { name: '视频封面', desc: '抖音/视频号', icon: Play, emoji: '🎬', color: 'from-violet-100 to-purple-200', tag: '新版', href: '/tools' },
-  { name: '节日海报', desc: '节日营销海报', icon: PartyPopper, emoji: '🎊', color: 'from-rose-100 to-pink-200', tag: '限时', href: '/tools' },
-  { name: '商品主图', desc: '电商主图生成', icon: Package, emoji: '🛍️', color: 'from-teal-100 to-cyan-200', tag: '新版', href: '/tools' },
-  // AI设计
-  { name: '菜单设计', desc: '餐厅菜单生成', icon: Coffee, emoji: '🍽️', color: 'from-amber-100 to-yellow-200', tag: '实用', href: '/tools' },
+// 导航配置
+const NAV_ITEMS = [
+  { icon: Home, label: '首页', href: '/' },
+  { icon: Grid3X3, label: '工具', href: '/tools' },
+  { icon: FileText, label: '模板', href: '/templates' },
+  { icon: Clock, label: '最近打开', href: '/recent' },
+  { icon: FolderOpen, label: '项目', href: '/projects' },
+  { icon: Star, label: '资产库', href: '/assets' },
 ];
 
-function Scissors(props: any) {
-  return <span className="text-xl" {...props}>✂️</span>;
-}
-
 export default function HomePage() {
+  const pathname = usePathname();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* 头部导航 */}
-      <header className="bg-white border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg">
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* 左侧导航 */}
+      <aside className={`bg-white border-r border-slate-100 flex flex-col h-screen fixed left-0 top-0 z-30 transition-all ${sidebarCollapsed ? 'w-16' : 'w-56'}`}>
+        {/* Logo */}
+        <div className="p-4 border-b border-slate-100">
+          <Link href="/" className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg flex-shrink-0">
               <AnimatedLobster size={20} />
             </div>
-            <span className="font-bold text-lg text-slate-800">OneClaw</span>
+            {!sidebarCollapsed && (
+              <div>
+                <span className="font-bold text-slate-800">OneClaw</span>
+                <p className="text-xs text-slate-400">AI工具箱</p>
+              </div>
+            )}
           </Link>
-          
-          <nav className="flex items-center gap-6">
-            <Link href="/tools" className="text-sm text-slate-600 hover:text-orange-500 transition-colors flex items-center gap-1.5">
-              <Grid3X3 className="w-4 h-4" />
-              工具
-            </Link>
-            <Link href="/login" className="text-sm text-slate-600 hover:text-orange-500 transition-colors">
-              登录
-            </Link>
-          </nav>
         </div>
-      </header>
 
-      {/* 主内容 */}
-      <main className="max-w-6xl mx-auto px-4 py-12">
-        {/* Hero 区域 */}
-        <section className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 rounded-full text-sm text-orange-600 mb-6">
-            <Sparkles className="w-4 h-4" />
-            <span>AI 驱动的图片处理工具</span>
-          </div>
-          
-          <h1 className="text-4xl font-bold text-slate-800 mb-4">
-            一键完成图片处理
-            <span className="text-orange-500">无需设计基础</span>
-          </h1>
-          
-          <p className="text-slate-500 text-lg mb-8 max-w-xl mx-auto">
-            抠图、变清晰、改尺寸... 只需上传图片，AI自动帮你处理
-          </p>
-
-          {/* 搜索框 */}
-          <div className="max-w-xl mx-auto">
-            <div className="relative">
-              <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="搜索工具..."
-                className="w-full pl-12 pr-4 py-4 bg-white rounded-2xl border-2 border-slate-200 focus:border-orange-400 focus:outline-none transition-colors text-slate-800 shadow-sm"
-              />
-              <Link 
-                href="/tools"
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl font-medium text-sm hover:shadow-lg transition-shadow"
+        {/* 导航菜单 */}
+        <nav className="flex-1 p-3 space-y-1">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                  isActive 
+                    ? 'bg-orange-50 text-orange-600 font-medium' 
+                    : 'text-slate-600 hover:bg-slate-50'
+                }`}
               >
-                搜索
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!sidebarCollapsed && <span className="text-sm">{item.label}</span>}
+              </Link>
+            );
+          })}
+
+          {/* 更多 */}
+          <div className="pt-3 border-t border-slate-100">
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 transition-all">
+              <MoreHorizontal className="w-5 h-5 flex-shrink-0" />
+              {!sidebarCollapsed && <span className="text-sm">更多</span>}
+            </button>
+          </div>
+        </nav>
+
+        {/* 折叠按钮 */}
+        <div className="p-3 border-t border-slate-100">
+          <button 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="w-full flex items-center justify-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 hover:bg-slate-50 transition-all"
+          >
+            {sidebarCollapsed ? <Menu className="w-5 h-5" /> : <X className="w-5 h-5" />}
+          </button>
+        </div>
+      </aside>
+
+      {/* 主内容区 */}
+      <main className={`flex-1 transition-all ${sidebarCollapsed ? 'ml-16' : 'ml-56'}`}>
+        {/* 顶部栏 */}
+        <header className="bg-white border-b border-slate-100 sticky top-0 z-20">
+          <div className="h-14 px-6 flex items-center justify-between">
+            {/* 搜索 */}
+            <div className="flex-1 max-w-xl">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索模板、功能..."
+                  className="w-full pl-10 pr-4 py-2 bg-slate-50 rounded-lg border-0 text-sm focus:ring-2 focus:ring-orange-500/20 focus:bg-white transition-all"
+                />
+              </div>
+            </div>
+
+            {/* 右侧 */}
+            <div className="flex items-center gap-4">
+              {/* 会员按钮 */}
+              <Link 
+                href="/vip"
+                className="px-4 py-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-medium rounded-full hover:shadow-lg transition-shadow"
+              >
+                开通会员
+              </Link>
+
+              {/* 消息 */}
+              <button className="relative p-2 text-slate-400 hover:text-slate-600">
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              </button>
+
+              {/* 用户 */}
+              <Link href="/login" className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
+                  <User className="w-4 h-4 text-orange-500" />
+                </div>
               </Link>
             </div>
           </div>
-        </section>
+        </header>
 
-        {/* 快速入口 */}
-        <section className="mb-12">
-          <h2 className="text-lg font-semibold text-slate-800 mb-4">快速开始</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: 'AI抠图', desc: '去除背景', color: 'from-blue-400 to-cyan-500', icon: '✂️' },
-              { name: '变清晰', desc: '模糊修复', color: 'from-purple-400 to-violet-500', icon: '🔍' },
-              { name: '小红书封面', desc: '爆款封面', color: 'from-red-400 to-orange-500', icon: '📕' },
-              { name: '节日海报', desc: '节日营销', color: 'from-rose-400 to-pink-500', icon: '🎊' },
-            ].map((tool, idx) => (
-              <Link
-                key={idx}
+        {/* 页面内容 */}
+        <div className="p-6">
+          {/* 欢迎区域 */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-slate-800 mb-2">欢迎回来 👋</h1>
+            <p className="text-slate-500">今天想创作什么？</p>
+          </div>
+
+          {/* 快捷工具 */}
+          <section className="mb-8">
+            <h2 className="text-lg font-semibold text-slate-800 mb-4">快捷工具</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                { name: 'AI抠图', icon: '✂️', color: 'from-blue-400 to-cyan-500', href: '/tools/remove-bg' },
+                { name: '变清晰', icon: '🔍', color: 'from-purple-400 to-violet-500', href: '/tools/enhance' },
+                { name: '改尺寸', icon: '📐', color: 'from-green-400 to-emerald-500', href: '/tools/resize' },
+                { name: '小红书封面', icon: '📕', color: 'from-red-400 to-orange-500', href: '/tools/xiaohongshu' },
+                { name: '视频封面', icon: '🎬', color: 'from-violet-400 to-purple-500', href: '/tools/douyin' },
+                { name: '节日海报', icon: '🎊', color: 'from-rose-400 to-pink-500', href: '/tools/festival-poster' },
+              ].map((tool, idx) => (
+                <Link
+                  key={idx}
+                  href={tool.href}
+                  className="group bg-white rounded-xl p-4 border border-slate-100 hover:shadow-lg hover:border-orange-200 transition-all text-center"
+                >
+                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mx-auto mb-3 text-2xl shadow-sm group-hover:scale-110 transition-transform`}>
+                    {tool.icon}
+                  </div>
+                  <p className="text-sm font-medium text-slate-700">{tool.name}</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* 全部工具入口 */}
+          <section className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold mb-1">探索全部工具</h2>
+                <p className="text-white/80 text-sm">发现更多AI创作能力</p>
+              </div>
+              <Link 
                 href="/tools"
-                className="group bg-white rounded-2xl overflow-hidden border border-slate-100 hover:shadow-lg hover:border-orange-200 transition-all"
+                className="px-6 py-2.5 bg-white text-orange-600 font-medium rounded-xl hover:shadow-lg transition-shadow flex items-center gap-2"
               >
-                <div className={`h-24 bg-gradient-to-br ${tool.color} flex items-center justify-center`}>
-                  <span className="text-4xl">{tool.icon}</span>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-slate-800">{tool.name}</h3>
-                  <p className="text-sm text-slate-500">{tool.desc}</p>
-                </div>
+                查看全部 <Sparkles className="w-4 h-4" />
               </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* 全部工具 */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-slate-800">全部工具</h2>
-            <Link href="/tools" className="text-sm text-orange-500 hover:text-orange-600 flex items-center gap-1">
-              查看全部 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {AI_TOOLS.map((tool, idx) => (
-              <Link
-                key={idx}
-                href={tool.href}
-                className="group bg-white rounded-2xl overflow-hidden border border-slate-100 hover:shadow-lg hover:border-orange-200 transition-all text-left"
-              >
-                <div className={`h-20 bg-gradient-to-br ${tool.color} relative flex items-center justify-center`}>
-                  <span className="text-3xl">{tool.emoji}</span>
-                  <span className={`absolute top-2 right-2 px-2 py-0.5 text-xs rounded-full ${tool.tag === '免费' ? 'bg-green-100 text-green-600' : tool.tag === '热门' ? 'bg-orange-100 text-orange-600' : tool.tag === '新版' ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
-                    {tool.tag}
-                  </span>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-slate-800 group-hover:text-orange-500 transition-colors">{tool.name}</h3>
-                  <p className="text-sm text-slate-500">{tool.desc}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* 微信群推广 */}
-        <WechatPromo />
+            </div>
+          </section>
+        </div>
       </main>
-
-      <Footer />
     </div>
   );
 }

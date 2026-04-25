@@ -8,34 +8,14 @@
 export type {
   ToolConfig,
   ToolCategory,
-  ToolDifficulty,
-  ToolQuota,
-  ToolSetting,
-  ToolResult,
-  PermissionContext,
-  QuotaInfo,
-  ValidationResult
 } from './registry';
-
-// 组件导出
-export { ToolLoadingPlaceholder } from './registry';
-
-// 函数导出
-export {
-  TOOL_REGISTRY,
-  getAllTools,
-  getToolConfig,
-  getToolsByCategory,
-  searchTools,
-  getRelatedTools,
-  canUseTool,
-  getQuotaInfo,
-  getToolStats,
-  validateToolInput
-} from './registry';
-
-// 分类导出
-export { TOOL_CATEGORIES } from './config';
 
 // 配置导出
-export { TOOLS_CONFIG } from './config';
+export {
+  TOOLS_CONFIG,
+  TOOL_CATEGORIES,
+} from './config';
+
+// 组件
+export { default as ToolRenderer } from './ToolRenderer';
+export { default as XiaohongshuGenerator } from './XiaohongshuGenerator';
