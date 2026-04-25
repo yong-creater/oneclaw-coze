@@ -110,7 +110,7 @@ export default function RecentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
       {/* 左侧统一侧边栏 */}
       <Sidebar />
 
@@ -318,9 +318,7 @@ export default function RecentPage() {
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* 底部 - 全宽 */}
-      <div className="ml-56 mt-auto">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }
