@@ -2,13 +2,10 @@
 
 import { useState, useCallback } from 'react';
 import { 
-  Coffee, Download, Loader2, 
-  Image as ImageIcon, Menu, 
-  Copy, Check, RefreshCw, Wand2, Star,
-  Plus, Type, Trash2, Upload, 
-  BookOpen, Pizza, IceCream, Apple, 
-  Soup, Wine, Cookie, ChefHat,
-  FileText, Printer, DollarSign, QrCode, Palette
+  ChefHat, Download, Loader2, Upload,
+  Image as ImageIcon, Type, Wand2, 
+  RefreshCw, Check, Star, Palette,
+  FileText, Printer, Sparkles
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
 import UtilityHeader from '@/components/common/UtilityHeader';
@@ -17,162 +14,77 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 // ==================== 类型定义 ====================
-interface MenuCategory {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  items: MenuItem[];
-}
-
-interface MenuItem {
-  name: string;
-  price: string;
-  description?: string;
-}
-
-interface MenuStyle {
-  id: string;
-  name: string;
-  description: string;
-  colors: string[];
-}
+type GenerateMode = 'image' | 'text';
 
 interface GeneratedMenu {
   id: string;
   url: string;
   style: string;
-  category: string;
   timestamp: number;
 }
 
 // ==================== 常量 ====================
-const RESTAURANT_TYPES = [
-  { id: 'bubble-tea', name: '奶茶饮品', icon: <Coffee className="w-5 h-5" /> },
-  { id: 'bbq', name: '烧烤火锅', icon: <Soup className="w-5 h-5" /> },
-  { id: 'fast-food', name: '快餐小吃', icon: <Pizza className="w-5 h-5" /> },
-  { id: 'bakery', name: '烘焙甜品', icon: <Cookie className="w-5 h-5" /> },
-  { id: 'fruit', name: '水果捞', icon: <Apple className="w-5 h-5" /> },
-  { id: 'dessert', name: '冰淇淋', icon: <IceCream className="w-5 h-5" /> },
-  { id: 'coffee', name: '咖啡茶饮', icon: <Wine className="w-5 h-5" /> },
-  { id: 'noodle', name: '面馆粉店', icon: <Soup className="w-5 h-5" /> },
-];
-
-const MENU_STYLES: MenuStyle[] = [
-  { id: 'ins', name: 'Ins简约风', description: '简洁ins风，年轻时尚', colors: ['#f5f5f5', '#333333', '#ff6b6b'] },
-  { id: 'chinese', name: '国潮中国风', description: '传统中国元素，喜庆大气', colors: ['#c0392b', '#f39c12', '#2c3e50'] },
-  { id: 'vintage', name: '复古港风', description: '怀旧港式茶餐厅风格', colors: ['#d4a574', '#5d4e37', '#f5e6d3'] },
-  { id: 'minimal', name: '极简黑白', description: '高级感黑白极简', colors: ['#ffffff', '#000000', '#808080'] },
-  { id: 'fresh', name: '清新自然', description: '绿色系健康风格', colors: ['#55efc4', '#00b894', '#81ecec'] },
-  { id: 'warm', name: '温暖暖色', description: '暖色调温馨亲切', colors: ['#ffb347', '#ff6b6b', '#feca57'] },
+const MENU_STYLES = [
+  { id: 'ins', name: 'Ins简约风', colors: ['#f5f5f5', '#333333', '#ff6b6b'] },
+  { id: 'chinese', name: '国潮中国风', colors: ['#c0392b', '#f39c12', '#2c3e50'] },
+  { id: 'vintage', name: '复古港风', colors: ['#d4a574', '#5d4e37', '#f5e6d3'] },
+  { id: 'minimal', name: '极简黑白', colors: ['#ffffff', '#000000', '#808080'] },
 ];
 
 const MENU_SIZES = [
-  { value: 'a4', label: 'A4单页', ratio: '3:4', size: '210×297mm' },
-  { value: 'a5', label: 'A5折页', ratio: '3:4', size: '148×210mm' },
-  { value: 'card', label: '台卡桌卡', ratio: '1:2', size: '100×200mm' },
-  { value: 'poster', label: '海报大版', ratio: '3:4', size: 'A3' },
+  { value: 'a4', label: 'A4单页', icon: '📄' },
+  { value: 'a5', label: 'A5折页', icon: '📋' },
+  { value: 'card', label: '台卡桌卡', icon: '🪧' },
 ];
-
-const DEFAULT_CATEGORIES = ['招牌推荐', '人气热销', '新品上市', '特惠套餐', '主食', '小食', '饮品', '甜品'];
 
 // ==================== 主组件 ====================
 export default function RestaurantMenuGenerator() {
-  const [activeTab, setActiveTab] = useState<'category' | 'theme'>('category');
-  const [selectedType, setSelectedType] = useState<string>('');
-  const [selectedStyle, setSelectedStyle] = useState<string>('ins');
-  const [selectedSize, setSelectedSize] = useState<string>('a4');
-  const [storeName, setStoreName] = useState('');
-  const [storeSlogan, setStoreSlogan] = useState('');
+  const [mode, setMode] = useState<GenerateMode>('image');
   
-  // 菜品分类
-  const [categories, setCategories] = useState<MenuCategory[]>([
-    { id: '1', name: '招牌推荐', icon: <Star className="w-4 h-4" />, items: [{ name: '', price: '' }] },
-  ]);
+  // 图片模式
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   
-  const [uploadedLogo, setUploadedLogo] = useState<string | null>(null);
-  const [uploadedQrCode, setUploadedQrCode] = useState<string | null>(null);
+  // 文字模式
+  const [menuText, setMenuText] = useState('');
+  
+  // 通用设置
+  const [selectedStyle, setSelectedStyle] = useState('ins');
+  const [selectedSize, setSelectedSize] = useState('a4');
   const [generating, setGenerating] = useState(false);
   const [generatedMenus, setGeneratedMenus] = useState<GeneratedMenu[]>([]);
-  const [storePhone, setStorePhone] = useState('');
-  const [storeAddress, setStoreAddress] = useState('');
 
-  // 添加分类
-  const handleAddCategory = useCallback(() => {
-    const newCategory: MenuCategory = {
-      id: Date.now().toString(),
-      name: DEFAULT_CATEGORIES[categories.length] || `分类${categories.length + 1}`,
-      icon: <BookOpen className="w-4 h-4" />,
-      items: [{ name: '', price: '' }],
-    };
-    setCategories([...categories, newCategory]);
-  }, [categories]);
-
-  // 删除分类
-  const handleDeleteCategory = useCallback((categoryId: string) => {
-    if (categories.length <= 1) return;
-    setCategories(categories.filter(c => c.id !== categoryId));
-  }, [categories]);
-
-  // 更新分类名称
-  const handleCategoryNameChange = useCallback((categoryId: string, name: string) => {
-    setCategories(categories.map(c => c.id === categoryId ? { ...c, name } : c));
-  }, [categories]);
-
-  // 添加菜品
-  const handleAddItem = useCallback((categoryId: string) => {
-    setCategories(categories.map(c => {
-      if (c.id === categoryId) {
-        return { ...c, items: [...c.items, { name: '', price: '' }] };
-      }
-      return c;
-    }));
-  }, [categories]);
-
-  // 删除菜品
-  const handleDeleteItem = useCallback((categoryId: string, itemIndex: number) => {
-    setCategories(categories.map(c => {
-      if (c.id === categoryId && c.items.length > 1) {
-        return { ...c, items: c.items.filter((_, i) => i !== itemIndex) };
-      }
-      return c;
-    }));
-  }, [categories]);
-
-  // 更新菜品
-  const handleItemChange = useCallback((categoryId: string, itemIndex: number, field: 'name' | 'price', value: string) => {
-    setCategories(categories.map(c => {
-      if (c.id === categoryId) {
-        const newItems = [...c.items];
-        newItems[itemIndex] = { ...newItems[itemIndex], [field]: value };
-        return { ...c, items: newItems };
-      }
-      return c;
-    }));
-  }, [categories]);
+  // 上传图片
+  const handleImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setUploadedImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
 
   // 生成菜单
   const handleGenerate = async () => {
-    if (!storeName) {
-      alert('请输入店铺名称');
+    if (mode === 'image' && !uploadedImage) {
+      alert('请先上传菜单图片');
       return;
     }
-    
-    const hasItems = categories.some(c => c.items.some(item => item.name || item.price));
-    if (!hasItems) {
-      alert('请至少添加一个菜品');
+    if (mode === 'text' && !menuText.trim()) {
+      alert('请输入菜品内容');
       return;
     }
 
     setGenerating(true);
     
     // 模拟生成
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
     const newMenu: GeneratedMenu = {
       id: Date.now().toString(),
-      url: `https://picsum.photos/seed/${Date.now()}/800/1200`,
+      url: `https://picsum.photos/seed/${Date.now()}/800/1100`,
       style: selectedStyle,
-      category: selectedType,
       timestamp: Date.now(),
     };
     
@@ -188,348 +100,193 @@ export default function RestaurantMenuGenerator() {
     link.click();
   }, []);
 
-  const currentStyle = MENU_STYLES.find(s => s.id === selectedStyle);
-  const currentType = RESTAURANT_TYPES.find(t => t.id === selectedType);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800">
       <UtilityHeader
         toolIcon={<ChefHat className="w-4 h-4" />}
         toolName="餐饮菜单生成器"
-        toolDescription="餐饮门店菜单/价目表一键生成，零设计基础也能做出高级感菜单"
+        toolDescription="上传图片一键优化，或输入文字自动生成精美菜单"
         gradient="from-orange-500 to-amber-500"
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-        {/* 工具类型选择 */}
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* 模式切换 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-2 shadow-sm border border-slate-200 dark:border-slate-700">
+          <div className="flex">
+            <button
+              onClick={() => setMode('image')}
+              className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                mode === 'image'
+                  ? 'bg-orange-500 text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+              }`}
+            >
+              <ImageIcon className="w-4 h-4" />
+              图片优化
+            </button>
+            <button
+              onClick={() => setMode('text')}
+              className={`flex-1 py-3 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                mode === 'text'
+                  ? 'bg-orange-500 text-white shadow-md'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+              }`}
+            >
+              <Type className="w-4 h-4" />
+              文字生成
+            </button>
+          </div>
+        </div>
+
+        {/* 图片模式 */}
+        {mode === 'image' && (
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-orange-500" />
+              上传现有菜单图片
+            </h3>
+            <p className="text-sm text-slate-500 mb-4">
+              上传你现有的菜单图片，AI将一键优化排版和视觉效果
+            </p>
+            
+            <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 text-center hover:border-orange-400 transition-colors cursor-pointer relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              
+              {uploadedImage ? (
+                <div className="relative">
+                  <img 
+                    src={uploadedImage} 
+                    alt="上传的菜单" 
+                    className="max-h-64 mx-auto rounded-lg shadow-md" 
+                  />
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                    <Check className="w-5 h-5 text-white" />
+                  </div>
+                </div>
+              ) : (
+                <div className="py-6">
+                  <Upload className="w-12 h-12 mx-auto text-slate-400 mb-3" />
+                  <p className="text-slate-600 dark:text-slate-400 mb-1">点击上传菜单图片</p>
+                  <p className="text-xs text-slate-400">支持 JPG、PNG 格式</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 文字模式 */}
+        {mode === 'text' && (
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+            <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+              <Wand2 className="w-4 h-4 text-orange-500" />
+              输入菜品内容
+            </h3>
+            <p className="text-sm text-slate-500 mb-4">
+              输入菜品名称和价格，一键生成精美菜单
+            </p>
+            
+            <textarea
+              value={menuText}
+              onChange={(e) => setMenuText(e.target.value)}
+              placeholder={`示例格式：
+招牌奶茶 | ¥18
+珍珠奶茶 | ¥15
+椰椰芋泥 | ¥22
+
+水果茶系列
+鲜橙百香果 | ¥20
+西瓜椰椰 | ¥18`}
+              rows={10}
+              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-orange-400 focus:outline-none focus:border-orange-500 transition-colors text-sm text-slate-800 dark:text-slate-200 resize-none font-mono"
+            />
+            
+            <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
+              <Star className="w-3 h-3" />
+              <span>使用 | 分隔菜品名和价格</span>
+            </div>
+          </div>
+        )}
+
+        {/* 风格选择 */}
         <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
           <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-            <Menu className="w-4 h-4 text-orange-500" />
-            选择餐饮品类
+            <Palette className="w-4 h-4 text-orange-500" />
+            选择菜单风格
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {RESTAURANT_TYPES.map((type) => (
+          <div className="grid grid-cols-2 gap-3">
+            {MENU_STYLES.map((style) => (
               <button
-                key={type.id}
-                onClick={() => setSelectedType(type.id)}
-                className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
-                  selectedType === type.id
+                key={style.id}
+                onClick={() => setSelectedStyle(style.id)}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  selectedStyle === style.id
                     ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
                     : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
                 }`}
               >
-                <div className={`${selectedType === type.id ? 'text-orange-500' : 'text-slate-400'}`}>
-                  {type.icon}
+                <div className="flex gap-1 mb-2">
+                  {style.colors.map((color, i) => (
+                    <div key={i} className="w-5 h-5 rounded-full" style={{ backgroundColor: color }} />
+                  ))}
                 </div>
-                <span className={`text-sm font-medium ${
-                  selectedType === type.id ? 'text-orange-600 dark:text-orange-400' : 'text-slate-600 dark:text-slate-400'
+                <p className={`text-sm font-medium ${
+                  selectedStyle === style.id ? 'text-orange-600' : 'text-slate-700 dark:text-slate-300'
                 }`}>
-                  {type.name}
-                </span>
+                  {style.name}
+                </p>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Tab切换 */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-          <div className="flex border-b border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setActiveTab('category')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
-                activeTab === 'category'
-                  ? 'text-orange-500 border-b-2 border-orange-500 bg-orange-50/50 dark:bg-orange-900/10'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Type className="w-4 h-4 inline mr-2" />
-              手动输入菜品
-            </button>
-            <button
-              onClick={() => setActiveTab('theme')}
-              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
-                activeTab === 'theme'
-                  ? 'text-orange-500 border-b-2 border-orange-500 bg-orange-50/50 dark:bg-orange-900/10'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              <Star className="w-4 h-4 inline mr-2" />
-              模板快速生成
-            </button>
-          </div>
-
-          <div className="p-6">
-            {activeTab === 'category' ? (
-              <div className="space-y-6">
-                {/* 店铺信息 */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      店铺名称 *
-                    </label>
-                    <Input
-                      value={storeName}
-                      onChange={(e) => setStoreName(e.target.value)}
-                      placeholder="请输入店铺名称"
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      店铺口号
-                    </label>
-                    <Input
-                      value={storeSlogan}
-                      onChange={(e) => setStoreSlogan(e.target.value)}
-                      placeholder="如：美味从这里开始"
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      联系电话
-                    </label>
-                    <Input
-                      value={storePhone}
-                      onChange={(e) => setStorePhone(e.target.value)}
-                      placeholder="请输入联系电话"
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      店铺地址
-                    </label>
-                    <Input
-                      value={storeAddress}
-                      onChange={(e) => setStoreAddress(e.target.value)}
-                      placeholder="请输入店铺地址"
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-
-                {/* Logo和二维码 */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      店铺Logo
-                    </label>
-                    <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-4 text-center hover:border-orange-400 transition-colors cursor-pointer">
-                      {uploadedLogo ? (
-                        <div className="relative">
-                          <img src={uploadedLogo} alt="Logo" className="w-20 h-20 object-contain mx-auto rounded-lg" />
-                          <button
-                            onClick={() => setUploadedLogo(null)}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="py-4">
-                          <Upload className="w-8 h-8 mx-auto text-slate-400 mb-2" />
-                          <p className="text-sm text-slate-500">点击上传Logo</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      微信/外卖二维码
-                    </label>
-                    <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-4 text-center hover:border-orange-400 transition-colors cursor-pointer">
-                      {uploadedQrCode ? (
-                        <div className="relative">
-                          <img src={uploadedQrCode} alt="二维码" className="w-20 h-20 object-contain mx-auto rounded-lg" />
-                          <button
-                            onClick={() => setUploadedQrCode(null)}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="py-4">
-                          <QrCode className="w-8 h-8 mx-auto text-slate-400 mb-2" />
-                          <p className="text-sm text-slate-500">点击上传二维码</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* 菜品分类 */}
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                      菜品分类
-                    </label>
-                    <Button onClick={handleAddCategory} size="sm" variant="outline" className="border-orange-300 text-orange-500">
-                      <Plus className="w-4 h-4 mr-1" />
-                      添加分类
-                    </Button>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {categories.map((category, catIndex) => (
-                      <div key={category.id} className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-orange-500">{category.icon}</span>
-                          <Input
-                            value={category.name}
-                            onChange={(e) => handleCategoryNameChange(category.id, e.target.value)}
-                            className="w-32 font-medium bg-white dark:bg-slate-800"
-                          />
-                          {categories.length > 1 && (
-                            <button
-                              onClick={() => handleDeleteCategory(category.id)}
-                              className="text-slate-400 hover:text-red-500 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-2">
-                          {category.items.map((item, itemIndex) => (
-                            <div key={itemIndex} className="flex items-center gap-2">
-                              <Input
-                                value={item.name}
-                                onChange={(e) => handleItemChange(category.id, itemIndex, 'name', e.target.value)}
-                                placeholder="菜品名称"
-                                className="flex-1 bg-white dark:bg-slate-800"
-                              />
-                              <Input
-                                value={item.price}
-                                onChange={(e) => handleItemChange(category.id, itemIndex, 'price', e.target.value)}
-                                placeholder="价格"
-                                className="w-24 bg-white dark:bg-slate-800"
-                              />
-                              <span className="text-slate-400 text-sm">元</span>
-                              {category.items.length > 1 && (
-                                <button
-                                  onClick={() => handleDeleteItem(category.id, itemIndex)}
-                                  className="text-slate-400 hover:text-red-500 transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                          <button
-                            onClick={() => handleAddItem(category.id)}
-                            className="text-sm text-orange-500 hover:text-orange-600 flex items-center gap-1"
-                          >
-                            <Plus className="w-4 h-4" />
-                            添加菜品
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <BookOpen className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-                <h4 className="text-lg font-medium text-slate-600 dark:text-slate-400 mb-2">
-                  模板功能开发中
-                </h4>
-                <p className="text-sm text-slate-500">
-                  即将上线奶茶、烧烤、烘焙等20+品类的爆款菜单模板
+        {/* 尺寸选择 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <Printer className="w-4 h-4 text-orange-500" />
+            选择打印尺寸
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            {MENU_SIZES.map((size) => (
+              <button
+                key={size.value}
+                onClick={() => setSelectedSize(size.value)}
+                className={`p-4 rounded-xl border-2 transition-all text-center ${
+                  selectedSize === size.value
+                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
+                }`}
+              >
+                <span className="text-2xl mb-1 block">{size.icon}</span>
+                <p className={`text-sm font-medium ${
+                  selectedSize === size.value ? 'text-orange-600' : 'text-slate-700 dark:text-slate-300'
+                }`}>
+                  {size.label}
                 </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* 风格与尺寸 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 风格选择 */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-              <Palette className="w-4 h-4 text-orange-500" />
-              选择菜单风格
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {MENU_STYLES.map((style) => (
-                <button
-                  key={style.id}
-                  onClick={() => setSelectedStyle(style.id)}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    selectedStyle === style.id
-                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
-                  }`}
-                >
-                  <div className="flex gap-1 mb-2">
-                    {style.colors.map((color, i) => (
-                      <div key={i} className="w-4 h-4 rounded-full" style={{ backgroundColor: color }} />
-                    ))}
-                  </div>
-                  <p className={`text-sm font-medium ${
-                    selectedStyle === style.id ? 'text-orange-600' : 'text-slate-700 dark:text-slate-300'
-                  }`}>
-                    {style.name}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">{style.description}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 尺寸选择 */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-              <Printer className="w-4 h-4 text-orange-500" />
-              选择打印尺寸
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {MENU_SIZES.map((size) => (
-                <button
-                  key={size.value}
-                  onClick={() => setSelectedSize(size.value)}
-                  className={`p-4 rounded-xl border-2 transition-all text-left ${
-                    selectedSize === size.value
-                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                      : 'border-slate-200 dark:border-slate-700 hover:border-orange-300'
-                  }`}
-                >
-                  <div className={`text-center py-2 mb-2 rounded-lg ${
-                    selectedSize === size.value ? 'bg-orange-100 dark:bg-orange-900/30' : 'bg-slate-100 dark:bg-slate-700'
-                  }`}>
-                    <FileText className={`w-6 h-6 mx-auto ${
-                      selectedSize === size.value ? 'text-orange-500' : 'text-slate-400'
-                    }`} />
-                  </div>
-                  <p className={`text-sm font-medium ${
-                    selectedSize === size.value ? 'text-orange-600' : 'text-slate-700 dark:text-slate-300'
-                  }`}>
-                    {size.label}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">{size.size}</p>
-                </button>
-              ))}
-            </div>
+              </button>
+            ))}
           </div>
         </div>
 
         {/* 生成按钮 */}
         <Button
           onClick={handleGenerate}
-          disabled={generating || !storeName}
+          disabled={generating || (mode === 'image' && !uploadedImage) || (mode === 'text' && !menuText.trim())}
           className="w-full h-14 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white rounded-xl text-base font-medium shadow-lg shadow-orange-500/25"
         >
           {generating ? (
             <>
               <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              正在生成精美菜单...
+              AI正在生成中...
             </>
           ) : (
             <>
               <Wand2 className="w-5 h-5 mr-2" />
-              一键生成菜单
+              {mode === 'image' ? '一键优化菜单' : '一键生成菜单'}
             </>
           )}
         </Button>
@@ -538,12 +295,12 @@ export default function RestaurantMenuGenerator() {
         {generatedMenus.length > 0 && (
           <div className="bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm border border-slate-200 dark:border-slate-700">
             <h3 className="font-semibold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-orange-500" />
+              <FileText className="w-4 h-4 text-orange-500" />
               生成的菜单
               <Badge variant="secondary" className="ml-2">{generatedMenus.length}</Badge>
             </h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               {generatedMenus.map((menu) => (
                 <div key={menu.id} className="relative bg-slate-100 dark:bg-slate-900 rounded-xl overflow-hidden">
                   <img
@@ -553,11 +310,21 @@ export default function RestaurantMenuGenerator() {
                   />
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
                     <div className="flex gap-2">
-                      <Button size="sm" variant="secondary" className="bg-white/90" onClick={() => handleDownload(menu)}>
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="bg-white/90 hover:bg-white"
+                        onClick={() => handleDownload(menu)}
+                      >
                         <Download className="w-4 h-4 mr-1" />
                         下载
                       </Button>
-                      <Button size="sm" variant="secondary" className="bg-white/90" onClick={handleGenerate}>
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        className="bg-white/90 hover:bg-white"
+                        onClick={handleGenerate}
+                      >
                         <RefreshCw className="w-4 h-4 mr-1" />
                         重新生成
                       </Button>
@@ -572,27 +339,13 @@ export default function RestaurantMenuGenerator() {
           </div>
         )}
 
-        {/* 提示 */}
-        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
-          <h4 className="font-medium text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
-            <Star className="w-4 h-4" />
-            使用提示
-          </h4>
-          <ul className="text-sm text-amber-700 dark:text-amber-400 space-y-1">
-            <li>• 生成的菜单支持直接发给广告店印刷</li>
-            <li>• 可添加店铺Logo和二维码，提升品牌形象</li>
-            <li>• 支持A4/A5/台卡等多种打印尺寸</li>
-            <li>• 批量生成多版本菜单，可用于不同渠道</li>
-          </ul>
-        </div>
-
         {/* 登录提示 */}
         <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
           <div className="flex items-center gap-3">
             <ChefHat className="w-8 h-8 text-orange-500" />
             <div>
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">登录后享受更多权益</p>
-              <p className="text-xs text-slate-500">高清无水印下载、商用授权、批量生成</p>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">登录解锁高清无水印</p>
+              <p className="text-xs text-slate-500">商用授权、批量生成</p>
             </div>
           </div>
           <LoginButton />
