@@ -118,7 +118,7 @@ export default function RecentPage() {
       {/* 主内容区 - 响应式布局 */}
       <main className={`
         flex-1 transition-all duration-300 
-        md:${collapsed ? 'ml-[72px]' : 'ml-[268px]'}
+        ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}
       `}>
         {/* 移动端顶部导航栏 */}
         <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 px-4 py-3">

@@ -77,7 +77,7 @@ export default function MorePage() {
       <Sidebar />
 
       {/* 主内容区 - 响应式布局 */}
-      <main className={`flex-1 transition-all duration-300 md:${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
         {/* 统一顶部 */}
         <Header title="更多" subtitle="设置与服务" showRightArea={false} />
 
