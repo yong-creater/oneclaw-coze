@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Sidebar from '@/components/common/Sidebar';
+import Footer from '@/components/common/Footer';
 import { cn } from '@/lib/utils';
 import {
   FileText, BookOpen, Image as ImageIcon, Globe, Star,
@@ -159,6 +160,8 @@ export default function OwnToolsPage() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }
