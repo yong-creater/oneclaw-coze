@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Sparkles, BookOpen, FileText, Image as ImageIcon, Briefcase,
-  GraduationCap, Globe, Wand2, ChevronRight, ArrowRight, Heart
+  Wand2, ChevronRight, Heart, Copy, Check, ExternalLink, Search
 } from 'lucide-react';
 import Sidebar from '@/components/common/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 // 自建工具列表
@@ -19,7 +20,7 @@ const OWN_TOOLS = [
     name: '简历优化',
     icon: FileText,
     desc: 'AI 智能优化简历，提升求职竞争力',
-    href: '/tools/resume',
+    href: '/resume',
     badge: '热门',
     color: 'bg-blue-500/10 text-blue-600'
   },
@@ -28,16 +29,16 @@ const OWN_TOOLS = [
     name: '小说创作',
     icon: BookOpen,
     desc: 'AI 辅助小说创作，激发无限灵感',
-    href: '/tools/novel',
+    href: '/novel',
     badge: '新功能',
     color: 'bg-purple-500/10 text-purple-600'
   },
   {
     id: 'overseas',
     name: '出海详情页',
-    icon: Globe,
+    icon: ImageIcon,
     desc: '一键生成跨境电商产品详情页',
-    href: '/tools/overseas',
+    href: '/productpage',
     badge: null,
     color: 'bg-emerald-500/10 text-emerald-600'
   },
@@ -54,20 +55,130 @@ const OWN_TOOLS = [
 
 // 提示词分类
 const PROMPT_CATEGORIES = [
-  { name: '视频创作', desc: 'Sora、Runway 等视频生成提示词', count: 120, icon: Sparkles },
-  { name: '图像生成', desc: 'Midjourney、DALL-E 提示词', count: 85, icon: ImageIcon },
-  { name: '对话优化', desc: 'ChatGPT、Claude 提示词', count: 200, icon: Wand2 },
+  { name: '全部', key: 'all', count: 0 },
+  { name: '视频创作', key: 'video', count: 0 },
+  { name: '图像生成', key: 'image', count: 0 },
+  { name: '对话优化', key: 'chat', count: 0 },
 ];
 
 // 教程分类
 const TUTORIAL_CATEGORIES = [
-  { name: '视频教程', desc: '手把手视频教学', count: 45, icon: BookOpen },
-  { name: '图文教程', desc: '详细的图文指南', count: 120, icon: FileText },
-  { name: '实战案例', desc: '真实项目案例分析', count: 30, icon: Briefcase },
+  { name: '全部', key: 'all' },
+  { name: '视频教程', key: 'video' },
+  { name: '图文教程', key: 'article' },
+  { name: '实战案例', key: 'case' },
 ];
+
+interface Prompt {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  category: string;
+  is_featured: boolean;
+}
+
+interface Tutorial {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  category: string;
+  type: string;
+  is_featured: boolean;
+}
 
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState<'tools' | 'prompts' | 'tutorials'>('tools');
+  
+  // 提示词相关状态
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [promptsLoading, setPromptsLoading] = useState(false);
+  const [promptSearch, setPromptSearch] = useState('');
+  const [promptCategory, setPromptCategory] = useState('all');
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  
+  // 教程相关状态
+  const [tutorials, setTutorials] = useState<Tutorial[]>([]);
+  const [tutorialsLoading, setTutorialsLoading] = useState(false);
+  const [tutorialSearch, setTutorialSearch] = useState('');
+  const [tutorialCategory, setTutorialCategory] = useState('all');
+  const [expandedTutorial, setExpandedTutorial] = useState<number | null>(null);
+
+  // 加载提示词
+  useEffect(() => {
+    if (activeSection === 'prompts' && prompts.length === 0) {
+      fetchPrompts();
+    }
+  }, [activeSection]);
+
+  // 加载教程
+  useEffect(() => {
+    if (activeSection === 'tutorials' && tutorials.length === 0) {
+      fetchTutorials();
+    }
+  }, [activeSection]);
+
+  const fetchPrompts = async () => {
+    setPromptsLoading(true);
+    try {
+      const res = await fetch('/api/prompts?limit=50');
+      const data = await res.json();
+      if (data.success) {
+        setPrompts(data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch prompts:', error);
+    } finally {
+      setPromptsLoading(false);
+    }
+  };
+
+  const fetchTutorials = async () => {
+    setTutorialsLoading(true);
+    try {
+      const res = await fetch('/api/tutorials?limit=50');
+      const data = await res.json();
+      if (data.success) {
+        setTutorials(data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch tutorials:', error);
+    } finally {
+      setTutorialsLoading(false);
+    }
+  };
+
+  // 复制提示词
+  const copyPrompt = async (prompt: Prompt) => {
+    try {
+      await navigator.clipboard.writeText(prompt.content);
+      setCopiedId(prompt.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (error) {
+      console.error('Failed to copy:', error);
+    }
+  };
+
+  // 过滤提示词
+  const filteredPrompts = prompts.filter(p => {
+    const matchSearch = !promptSearch || 
+      p.title.toLowerCase().includes(promptSearch.toLowerCase()) ||
+      p.description.toLowerCase().includes(promptSearch.toLowerCase());
+    const matchCategory = promptCategory === 'all' || p.category === promptCategory;
+    return matchSearch && matchCategory;
+  });
+
+  // 过滤教程
+  const filteredTutorials = tutorials.filter(t => {
+    const matchSearch = !tutorialSearch || 
+      t.title.toLowerCase().includes(tutorialSearch.toLowerCase()) ||
+      t.description.toLowerCase().includes(tutorialSearch.toLowerCase());
+    const matchCategory = tutorialCategory === 'all' || t.type === tutorialCategory || t.category === tutorialCategory;
+    return matchSearch && matchCategory;
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,22 +200,22 @@ export default function HomePage() {
 
         <div className="max-w-5xl mx-auto px-4 py-8">
           {/* Hero 区域 */}
-          <section className="text-center py-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <section className="text-center py-8 mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               发现优质
               <span className="text-primary"> AI 工具</span>
             </h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            <p className="text-base text-muted-foreground max-w-xl mx-auto">
               自建 AI 工具 + 精选提示词 + 实用教程，一站式 AI 创作平台
             </p>
           </section>
 
           {/* Tab 切换 */}
-          <div className="flex items-center justify-center mb-10">
+          <div className="flex items-center justify-center mb-8">
             <div className="flex items-center bg-muted rounded-xl p-1">
               {[
-                { key: 'tools', label: 'AI工具', icon: Sparkles },
-                { key: 'prompts', label: '提示词', icon: Wand2 },
+                { key: 'tools', label: 'AI工具', icon: Wand2 },
+                { key: 'prompts', label: '提示词', icon: Sparkles },
                 { key: 'tutorials', label: '教程', icon: BookOpen },
               ].map(tab => {
                 const Icon = tab.icon;
@@ -131,23 +242,23 @@ export default function HomePage() {
           {/* AI 工具 */}
           {activeSection === 'tools' && (
             <section>
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">自建 AI 工具</h2>
-                <p className="text-muted-foreground">精心打造的实用工具，助力您的创作</p>
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-foreground mb-1">自建 AI 工具</h2>
+                <p className="text-sm text-muted-foreground">精心打造的实用工具，助力您的创作</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {OWN_TOOLS.map(tool => {
                   const Icon = tool.icon;
                   return (
                     <Link key={tool.id} href={tool.href}>
                       <Card className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all h-full">
-                        <CardContent className="p-6">
+                        <CardContent className="p-5">
                           <div className="flex items-start gap-4">
                             <div className={cn(
-                              "w-14 h-14 rounded-2xl flex items-center justify-center shrink-0",
+                              "w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
                               tool.color
                             )}>
-                              <Icon className="w-7 h-7" />
+                              <Icon className="w-6 h-6" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
@@ -171,90 +282,211 @@ export default function HomePage() {
             </section>
           )}
 
-          {/* 提示词库 */}
+          {/* 提示词库 - 当前页面展示 */}
           {activeSection === 'prompts' && (
             <section>
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">AI 提示词库</h2>
-                <p className="text-muted-foreground">精选优质提示词模板，助力 AI 创作</p>
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-foreground mb-1">AI 提示词库</h2>
+                <p className="text-sm text-muted-foreground">精选优质提示词模板，助力 AI 创作</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {PROMPT_CATEGORIES.map((cat, i) => {
-                  const Icon = cat.icon;
-                  return (
-                    <Link key={i} href="/prompts">
-                      <Card className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all h-full">
-                        <CardContent className="p-6 text-center">
-                          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                            <Icon className="w-7 h-7 text-primary" />
+
+              {/* 搜索和筛选 */}
+              <div className="mb-6 space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="搜索提示词..."
+                    value={promptSearch}
+                    onChange={(e) => setPromptSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {PROMPT_CATEGORIES.map(cat => (
+                    <button
+                      key={cat.key}
+                      onClick={() => setPromptCategory(cat.key)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                        promptCategory === cat.key
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 提示词列表 */}
+              {promptsLoading ? (
+                <div className="text-center py-12 text-muted-foreground">加载中...</div>
+              ) : filteredPrompts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground mb-2">暂无提示词</p>
+                  <p className="text-sm text-muted-foreground">在后台添加提示词内容</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredPrompts.map(prompt => (
+                    <Card key={prompt.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold text-foreground">{prompt.title}</h3>
+                              {prompt.is_featured && (
+                                <Badge variant="default" className="text-xs">精选</Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{prompt.description}</p>
                           </div>
-                          <h3 className="font-semibold text-foreground mb-2">{cat.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-3">{cat.desc}</p>
-                          <span className="text-sm text-primary font-medium">{cat.count} 条提示词</span>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
-              <div className="text-center mt-8">
-                <Button asChild size="lg">
-                  <Link href="/prompts">
-                    查看全部提示词
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-              </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => copyPrompt(prompt)}
+                              className="h-8 px-2"
+                            >
+                              {copiedId === prompt.id ? (
+                                <Check className="w-4 h-4 text-emerald-500" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
+                              <a href={`/prompts/${prompt.slug}`} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                            </Button>
+                          </div>
+                        </div>
+                        {/* 提示词内容预览 */}
+                        <div className="mt-3 p-3 bg-slate-900 dark:bg-slate-950 rounded-lg">
+                          <pre className="text-xs text-slate-300 whitespace-pre-wrap font-mono line-clamp-3">
+                            {prompt.content}
+                          </pre>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </section>
           )}
 
-          {/* 教程库 */}
+          {/* 教程库 - 当前页面展示 */}
           {activeSection === 'tutorials' && (
             <section>
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-foreground mb-2">AI 教程中心</h2>
-                <p className="text-muted-foreground">从入门到精通，掌握 AI 工具使用技巧</p>
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-bold text-foreground mb-1">AI 教程中心</h2>
+                <p className="text-sm text-muted-foreground">从入门到精通，掌握 AI 工具使用技巧</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {TUTORIAL_CATEGORIES.map((cat, i) => {
-                  const Icon = cat.icon;
-                  return (
-                    <Link key={i} href="/tutorials">
-                      <Card className="group cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all h-full">
-                        <CardContent className="p-6 text-center">
-                          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                            <Icon className="w-7 h-7 text-primary" />
+
+              {/* 搜索和筛选 */}
+              <div className="mb-6 space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="搜索教程..."
+                    value={tutorialSearch}
+                    onChange={(e) => setTutorialSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {TUTORIAL_CATEGORIES.map(cat => (
+                    <button
+                      key={cat.key}
+                      onClick={() => setTutorialCategory(cat.key)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                        tutorialCategory === cat.key
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 教程列表 */}
+              {tutorialsLoading ? (
+                <div className="text-center py-12 text-muted-foreground">加载中...</div>
+              ) : filteredTutorials.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground mb-2">暂无教程</p>
+                  <p className="text-sm text-muted-foreground">在后台添加教程内容</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredTutorials.map(tutorial => (
+                    <Card key={tutorial.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3 className="font-semibold text-foreground">{tutorial.title}</h3>
+                              {tutorial.is_featured && (
+                                <Badge variant="default" className="text-xs">精选</Badge>
+                              )}
+                              {tutorial.type && (
+                                <Badge variant="secondary" className="text-xs">{tutorial.type}</Badge>
+                              )}
+                              {tutorial.category && (
+                                <Badge variant="outline" className="text-xs">{tutorial.category}</Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{tutorial.description}</p>
                           </div>
-                          <h3 className="font-semibold text-foreground mb-2">{cat.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-3">{cat.desc}</p>
-                          <span className="text-sm text-primary font-medium">{cat.count} 篇内容</span>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
-              <div className="text-center mt-8">
-                <Button asChild size="lg" variant="outline">
-                  <Link href="/tutorials">
-                    浏览全部教程
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-              </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setExpandedTutorial(expandedTutorial === tutorial.id ? null : tutorial.id)}
+                              className="h-8 px-2"
+                            >
+                              <ChevronRight className={cn(
+                                "w-4 h-4 transition-transform",
+                                expandedTutorial === tutorial.id && "rotate-90"
+                              )} />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="h-8 px-2" asChild>
+                              <a href={`/tutorials/${tutorial.slug}`} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="w-4 h-4" />
+                              </a>
+                            </Button>
+                          </div>
+                        </div>
+                        {/* 展开的教程内容 */}
+                        {expandedTutorial === tutorial.id && (
+                          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                            <div className="text-sm text-foreground whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none">
+                              {tutorial.content}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </section>
           )}
         </div>
 
         {/* 底部 */}
-        <footer className="border-t border-border mt-16">
-          <div className="max-w-5xl mx-auto px-4 py-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <span className="font-semibold text-foreground">OneClaw</span>
-              <p className="text-sm text-muted-foreground">
+        <footer className="border-t border-border mt-12">
+          <div className="max-w-5xl mx-auto px-4 py-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+              <span className="font-semibold text-foreground text-sm">OneClaw</span>
+              <p className="text-xs text-muted-foreground">
                 自建 AI 工具 + 精选提示词 + 实用教程
               </p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <Link href="/about" className="hover:text-foreground transition-colors">关于我们</Link>
                 <Link href="/contact" className="hover:text-foreground transition-colors">联系我们</Link>
               </div>
