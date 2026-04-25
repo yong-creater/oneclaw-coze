@@ -92,11 +92,11 @@ export function Sidebar({
             </div>
           )}
 
-          {/* 折叠状态显示展开按钮 */}
+          {/* 折叠状态显示展开按钮 - 始终可见 */}
           {collapsed && (
             <button 
               onClick={handleToggle}
-              className="absolute top-4 left-[72px] p-2 bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg shadow-lg transition-all flex-shrink-0 opacity-0 hover:opacity-100 z-40"
+              className="absolute top-4 left-[72px] p-2 bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg shadow-md transition-all flex-shrink-0"
               title="展开侧边栏"
             >
               <PanelLeft className="w-5 h-5" />
