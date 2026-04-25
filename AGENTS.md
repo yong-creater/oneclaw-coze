@@ -57,7 +57,7 @@
 
 - **域名**: oneclaw.shop
 - **联系邮箱**: 1017760688@qq.com
-- **品牌元素**: 龙虾 🦞，灰蓝中性配色，现代科技风格 Logo
+- **品牌元素**: 龙虾 🦞，专业蓝配色，现代科技风格 Logo
 
 ### 分类体系
 
@@ -540,15 +540,16 @@ import { IconName } from 'lucide-react';
 ## 3.1 按钮样式
 
 ```tsx
-// 主要按钮（灰蓝色调 - 用于重要操作）
-<Button className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-800 hover:bg-slate-700 dark:hover:bg-slate-300">
+// 主要按钮（蓝色）
+<Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm">
   确认操作
 </Button>
 
+// CTA 按钮（绿色）
+<Button variant="cta">开始使用</Button>
+
 // 次要按钮（outline）
-<Button variant="outline" className="border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600">
-  取消
-</Button>
+<Button variant="outline">取消</Button>
 
 // 危险按钮（删除等）
 <Button variant="destructive">删除</Button>
@@ -563,12 +564,26 @@ import { IconName } from 'lucide-react';
 
 | 用途 | 颜色 | Tailwind 类 |
 |------|------|-------------|
-| 主题主色 | 灰蓝色 | `slate-800` / `slate-200` |
-| 成功/免费 | 绿色 | `green-500` / `emerald-500` |
+| 主题主色 | 专业蓝 | `primary` (#1E40AF) / `primary-foreground` |
+| CTA | 绿色 | `cta` (#22C55E) |
+| 成功/免费 | 绿色 | `emerald-500` / `emerald-400` |
 | 警告 | 黄色 | `amber-500` / `yellow-500` |
 | 错误/付费 | 红色 | `red-500` / `rose-500` |
-| 信息 | 蓝色 | `blue-500` / `sky-500` |
-| 边框 | 灰色 | `slate-200` / `slate-700` |
+| 边框 | 灰色 | `border` / `input` |
+
+## 3.3 软阴影 (Soft UI)
+
+```tsx
+// 卡片阴影
+<Card className="shadow-sm hover:shadow-md transition-shadow">
+  ...
+</Card>
+
+// 按钮阴影
+<Button className="shadow-sm">
+  ...
+</Button>
+```
 
 ## 3.3 间距规范
 
