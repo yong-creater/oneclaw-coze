@@ -119,7 +119,7 @@ export default function AdminLayout({
         {/* Logo */}
         <div className="flex items-center justify-between h-16 px-4">
           <Link href="/admin" className="flex items-center gap-2">
-            <img src="/oneclaw-logo.png" alt="OneClaw" className="w-8 h-8 object-contain" />
+            <img src="/oneclaw-logo-v2.png" alt="OneClaw" className="w-8 h-8 object-contain" />
             <span className="text-xl font-bold text-slate-800 dark:text-white">
               OneClaw
             </span>

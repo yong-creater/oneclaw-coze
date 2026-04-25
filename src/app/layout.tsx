@@ -136,7 +136,7 @@ const organizationJsonLd = {
   name: 'OneClaw',
   alternateName: '钳爪',
   url: siteUrl,
-  logo: `${siteUrl}/oneclaw-logo.png`,
+  logo: `${siteUrl}/oneclaw-logo-v2.png`,
   description: '全品类AI工具导航平台',
   contactPoint: {
     '@type': 'ContactPoint',

@@ -374,7 +374,7 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Image 
-                src="/oneclaw-logo.png" 
+                src="/oneclaw-logo-v2.png" 
                 alt="OneClaw" 
                 width={28}
                 height={28}
