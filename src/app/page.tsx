@@ -178,144 +178,31 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
           和我聊聊，你想要什么设计
         </h1>
         
-        {/* 整体容器 */}
-        <div className="max-w-3xl mx-auto space-y-4">
+        {/* 输入框区域 */}
+        <div className="max-w-3xl mx-auto">
           
-          {/* 已上传图片区域 - 卡片形式 */}
-          {uploadedImages.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                    <ImageIcon className="w-5 h-5 text-orange-500" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-slate-800 dark:text-white">已上传 {uploadedImages.length} 张图片</h3>
-                    <p className="text-xs text-slate-500">点击图片可调整参数</p>
-                  </div>
+          {/* 图片预览 - 有图片时显示 */}
+          {uploadedImages.length > 0 ? (
+            <div className="mb-4">
+              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
+                <div className="text-sm text-slate-600 dark:text-slate-400 mb-3">已上传 {uploadedImages.length} 张图片</div>
+                <div className="flex gap-2">
+                  {uploadedImages.map((img, idx) => (
+                    <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-slate-200">
+                      <img src={img} alt="" className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-xs"
+                      >×</button>
+                    </div>
+                  ))}
                 </div>
-                <button 
-                  onClick={() => setShowParams(!showParams)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  {showParams ? '收起参数' : '调整参数'}
-                </button>
               </div>
-              
-              {/* 图片预览网格 */}
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                {uploadedImages.map((img, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-3 transition-all ${
-                      selectedImageIdx === idx 
-                        ? 'border-orange-500 ring-2 ring-orange-200' 
-                        : 'border-slate-200 hover:border-orange-300'
-                    }`}
-                    onClick={() => handleSelectImage(idx)}
-                  >
-                    <img 
-                      src={img} 
-                      alt={`图片 ${idx + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
-                      className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold opacity-0 group-hover:opacity-100 hover:bg-red-600"
-                    >
-                      ×
-                    </button>
-                    {selectedImageIdx === idx && (
-                      <div className="absolute bottom-1 left-1 right-1 bg-orange-500 text-white text-xs text-center py-0.5 rounded">
-                        已选择
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              {/* 参数调整面板 - 大卡片形式 */}
-              {showParams && (
-                <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
-                  <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-4">生成参数</h4>
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* 尺寸 */}
-                    <div>
-                      <label className="text-sm text-slate-600 dark:text-slate-400 mb-2 block">输出尺寸</label>
-                      <div className="flex gap-2">
-                        {aspectRatios.map(ratio => (
-                          <button
-                            key={ratio.value}
-                            onClick={() => setImageParams(p => ({ ...p, aspectRatio: ratio.value }))}
-                            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                              imageParams.aspectRatio === ratio.value
-                                ? 'bg-orange-500 text-white shadow-md'
-                                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-orange-300'
-                            }`}
-                          >
-                            <div>{ratio.label}</div>
-                            <div className="text-xs opacity-70">{ratio.desc}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* 风格 */}
-                    <div>
-                      <label className="text-sm text-slate-600 dark:text-slate-400 mb-2 block">生成风格</label>
-                      <select
-                        value={imageParams.style}
-                        onChange={(e) => setImageParams(p => ({ ...p, style: e.target.value }))}
-                        className="w-full py-2.5 px-3 text-sm bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
-                      >
-                        {styles.map(s => (
-                          <option key={s.value} value={s.value}>{s.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    
-                    {/* 数量 */}
-                    <div>
-                      <label className="text-sm text-slate-600 dark:text-slate-400 mb-2 block">生成数量</label>
-                      <div className="flex gap-2">
-                        {[1, 2, 3, 4].map(num => (
-                          <button
-                            key={num}
-                            onClick={() => setImageParams(p => ({ ...p, count: num }))}
-                            className={`w-12 h-12 rounded-xl text-lg font-bold transition-all ${
-                              imageParams.count === num
-                                ? 'bg-orange-500 text-white shadow-md'
-                                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-orange-300'
-                            }`}
-                          >
-                            {num}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    {/* 质量 */}
-                    <div>
-                      <label className="text-sm text-slate-600 dark:text-slate-400 mb-2 block">输出质量</label>
-                      <select
-                        value={imageParams.quality}
-                        onChange={(e) => setImageParams(p => ({ ...p, quality: e.target.value }))}
-                        className="w-full py-2.5 px-3 text-sm bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500"
-                      >
-                        <option value="standard">标准质量</option>
-                        <option value="high">高清质量</option>
-                        <option value="premium">Premium (最高)</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
-          )}
+          ) : null}
           
           {/* 输入框卡片 */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -325,54 +212,34 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                   handleSend();
                 }
               }}
-              placeholder="描述你想要的设计，例如：生成一个可爱风格的微信头像，粉色背景..."
-              className="w-full resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-sm"
-              rows={4}
+              placeholder="描述你想要的设计..."
+              className="w-full resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none"
+              rows={3}
             />
             
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={handleUploadClick}
-                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-sm text-slate-600 dark:text-slate-300 flex items-center gap-2"
-                >
-                  <ImageIcon className="w-4 h-4" />
-                  上传图片
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-                
-                <button 
-                  onClick={handleAIAutoWrite}
-                  className="px-4 py-2 rounded-xl bg-orange-100 dark:bg-orange-900/30 hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors text-sm text-orange-600 dark:text-orange-400 flex items-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  AI帮写
-                </button>
-              </div>
-              
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+              <button 
+                onClick={handleUploadClick}
+                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-sm text-slate-600 dark:text-slate-300"
+              >
+                上传图片
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+              />
               <button 
                 onClick={handleSend}
-                className="px-6 py-2.5 bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-4 py-1.5 bg-slate-800 dark:bg-slate-600 text-white rounded-lg text-sm"
               >
                 发送
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                </svg>
               </button>
             </div>
           </div>
-          
-          {/* 提示文字 */}
-          <p className="text-sm text-slate-400 text-center">
-            输入需求或上传图片，AI 将为您生成设计
-          </p>
         </div>
       </div>
 
