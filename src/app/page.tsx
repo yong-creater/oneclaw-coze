@@ -334,37 +334,53 @@ function ToolsContent() {
     }
   };
 
+  // 工具封面图
+  const coverImages: Record<string, string> = {
+    avatar: '/tool-covers/ai-retouch.jpg',
+    remove: '/tool-covers/ai-cutout.jpg',
+    cutout: '/tool-covers/ai-cutout.jpg',
+    restore: '/tool-covers/ai-restore.jpg',
+    text2img: '/tool-covers/text2img.jpg',
+    img2img: '/tool-covers/img2img.jpg',
+    product: '/tool-covers/product-edit.jpg',
+    whitebg: '/tool-covers/white-bg.jpg',
+    scene: '/tool-covers/product-edit.jpg',
+    cover: '/tool-covers/social-cover.jpg',
+    wechat: '/tool-covers/social-cover.jpg',
+    resize: '/tool-covers/social-cover.jpg',
+  };
+
   const categories = [
     {
       title: 'AI修图',
       items: [
-        { name: 'AI一键精修', key: 'avatar', icon: 'Wand2', desc: '智能美化，一键出片', color: 'from-pink-100 to-rose-200' },
-        { name: 'AI智能消除', key: 'remove', icon: 'Eraser', desc: '无痕消除杂物路人', color: 'from-purple-100 to-violet-200' },
-        { name: 'AI抠图换背景', key: 'cutout', icon: 'ScanFace', desc: '发丝级精准抠图', color: 'from-blue-100 to-cyan-200' },
-        { name: '老照片修复', key: 'restore', icon: 'ImageIcon', desc: '模糊破损一键复原', color: 'from-amber-100 to-orange-200' },
+        { name: 'AI一键精修', key: 'avatar', icon: 'Wand2', desc: '智能美化，一键出片' },
+        { name: 'AI智能消除', key: 'remove', icon: 'Eraser', desc: '无痕消除杂物路人' },
+        { name: 'AI抠图换背景', key: 'cutout', icon: 'ScanFace', desc: '发丝级精准抠图' },
+        { name: '老照片修复', key: 'restore', icon: 'ImageIcon', desc: '模糊破损一键复原' },
       ]
     },
     {
       title: 'AI生成',
       items: [
-        { name: '文生图', key: 'text2img', icon: 'Sparkles', desc: '文字描述生成图片', color: 'from-emerald-100 to-teal-200' },
-        { name: '图生图', key: 'img2img', icon: 'Layers', desc: '风格迁移创意转换', color: 'from-violet-100 to-purple-200' },
+        { name: '文生图', key: 'text2img', icon: 'Sparkles', desc: '文字描述生成图片' },
+        { name: '图生图', key: 'img2img', icon: 'Layers', desc: '风格迁移创意转换' },
       ]
     },
     {
       title: '电商图片',
       items: [
-        { name: '商品精修', key: 'product', icon: 'Wand2', desc: '电商主图一键精修', color: 'from-sky-100 to-blue-200' },
-        { name: '白底图', key: 'whitebg', icon: 'Package', desc: '平台标准白底图', color: 'from-slate-100 to-zinc-200' },
-        { name: '场景合成', key: 'scene', icon: 'Sofa', desc: '商品场景图生成', color: 'from-rose-100 to-pink-200' },
+        { name: '商品精修', key: 'product', icon: 'Wand2', desc: '电商主图一键精修' },
+        { name: '白底图', key: 'whitebg', icon: 'Package', desc: '平台标准白底图' },
+        { name: '场景合成', key: 'scene', icon: 'Sofa', desc: '商品场景图生成' },
       ]
     },
     {
       title: '自媒体图片',
       items: [
-        { name: '小红书封面', key: 'cover', icon: 'FileText', desc: '爆款笔记封面', color: 'from-orange-100 to-amber-200' },
-        { name: '公众号配图', key: 'wechat', icon: 'ImageIcon', desc: '专业图文排版', color: 'from-green-100 to-emerald-200' },
-        { name: '尺寸适配', key: 'resize', icon: 'Play', desc: '多平台尺寸适配', color: 'from-indigo-100 to-blue-200' },
+        { name: '小红书封面', key: 'cover', icon: 'FileText', desc: '爆款笔记封面' },
+        { name: '公众号配图', key: 'wechat', icon: 'ImageIcon', desc: '专业图文排版' },
+        { name: '尺寸适配', key: 'resize', icon: 'Play', desc: '多平台尺寸适配' },
       ]
     },
   ];
@@ -391,15 +407,18 @@ function ToolsContent() {
                   border: '1px solid #f1f5f9',
                   textAlign: 'left',
                   transition: 'all 0.2s',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  padding: 0,
                 }}
                 onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
                 onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
               >
                 <div style={{ 
-                  height: '100px', 
-                  background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
-                  backgroundImage: `linear-gradient(to bottom right, ${item.color.replace('from-', '').replace(' to-', ', ')})`,
+                  height: '120px', 
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  backgroundImage: `url(${coverImages[item.key] || ''}), linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
@@ -408,15 +427,16 @@ function ToolsContent() {
                     width: '56px',
                     height: '56px',
                     borderRadius: '14px',
-                    background: 'white',
+                    background: 'rgba(255,255,255,0.95)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#667eea'
                   }}>
-                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#475569' }}>
-                      {item.name.slice(0, 1)}
-                    </span>
+                    {item.name.slice(0, 1)}
                   </div>
                 </div>
                 <div style={{ padding: '16px' }}>
