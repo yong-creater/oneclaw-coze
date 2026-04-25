@@ -8,7 +8,7 @@ import {
   Image, FileText, Music, Video, Archive, X,
   ChevronRight, Sparkles, Copy, Share2, Check
 } from 'lucide-react';
-import { Sidebar, Header, Footer, SidebarProvider, useSidebar } from '@/components/common';
+import { Sidebar, Header, Footer, useSidebar } from '@/components/common';
 
 // 文件类型配置
 const FILE_TYPES = {
@@ -49,14 +49,6 @@ function Toast({ message, onClose, icon }: { message: string; onClose: () => voi
 }
 
 export default function AssetsPage() {
-  return (
-    <SidebarProvider>
-      <AssetsPageContent />
-    </SidebarProvider>
-  );
-}
-
-function AssetsPageContent() {
   const [assets, setAssets] = useState(ASSETS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');

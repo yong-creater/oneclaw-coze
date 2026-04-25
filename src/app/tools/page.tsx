@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ChevronRight, Search, Sparkles, Zap, Star, Clock } from 'lucide-react';
-import { Header, Sidebar, SidebarProvider, useSidebar, Footer } from '@/components/common';
+import { Header, Sidebar, Footer, useSidebar } from '@/components/common';
 import { TOOLS_CONFIG, TOOL_CATEGORIES, ToolCategory, ToolConfig } from '@/components/tools/config';
 
 // 工具封面图配置（使用真实场景图片）
@@ -43,14 +43,6 @@ const TOOL_COVERS: Record<string, { image: string; title: string }> = {
 };
 
 export default function ToolsPage() {
-  return (
-    <SidebarProvider>
-      <ToolsPageContent />
-    </SidebarProvider>
-  );
-}
-
-function ToolsPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const { collapsed } = useSidebar();

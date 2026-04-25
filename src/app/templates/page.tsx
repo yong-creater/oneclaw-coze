@@ -7,7 +7,7 @@ import {
   Clock, Star, Download, Heart, TrendingUp,
   ChevronRight, Crown, X, Check, Sparkles
 } from 'lucide-react';
-import { Sidebar, Header, Footer, SidebarProvider, useSidebar } from '@/components/common';
+import { Sidebar, Header, Footer, useSidebar } from '@/components/common';
 
 // 模板分类
 const CATEGORIES = [
@@ -64,14 +64,6 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 export default function TemplatesPage() {
-  return (
-    <SidebarProvider>
-      <TemplatesPageContent />
-    </SidebarProvider>
-  );
-}
-
-function TemplatesPageContent() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState('popular');
   const [showFavorites, setShowFavorites] = useState(false);

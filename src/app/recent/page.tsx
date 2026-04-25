@@ -7,7 +7,7 @@ import {
   Search, Filter, MoreHorizontal, Eye, Calendar,
   ChevronRight, Sparkles, X, FolderOpen
 } from 'lucide-react';
-import { Sidebar, Header, Footer, SidebarProvider, useSidebar } from '@/components/common';
+import { Sidebar, Header, Footer, useSidebar } from '@/components/common';
 
 // 模拟最近打开数据
 const RECENT_ITEMS = [
@@ -41,14 +41,6 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 export default function RecentPage() {
-  return (
-    <SidebarProvider>
-      <RecentPageContent />
-    </SidebarProvider>
-  );
-}
-
-function RecentPageContent() {
   const [items, setItems] = useState(RECENT_ITEMS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
