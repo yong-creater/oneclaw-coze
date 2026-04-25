@@ -4,258 +4,352 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Grid3X3,
-  FolderTree,
-  Users,
-  TrendingUp,
-  ExternalLink,
-  Sparkles,
-  FileText,
-  Crown,
-  ArrowUpRight,
-  Loader2
+import { Badge } from '@/components/ui/badge';
+import {
+  Wrench, FolderTree, Tags, Eye, MousePointer, TrendingUp, 
+  Star, Users, FileText, AlertTriangle, Plus, Download,
+  ExternalLink, Settings, Database, RefreshCw
 } from 'lucide-react';
-import { getToolCards, formatUsageCount, TOOL_CONFIGS } from '@/config/tools';
 
-interface AdminStats {
-  users_count: number;
-  vip_count: number;
-  today_uses: number;
-  total_uses: number;
-  templates_count: number;
-  favorites_count: number;
+interface Stats {
+  tools_count: number;
+  featured_count: number;
+  active_count: number;
+  categories: number;
+  tags: number;
+  total_views: number;
+  total_clicks: number;
+  ratings_count: number;
+  reviews_pending: number;
+}
+
+interface RecentTool {
+  id: number;
+  name: string;
+  logo: string;
+  producer: string;
+  free_type: string;
+  is_featured: boolean;
+  is_active: boolean;
+  click_count: number;
+  created_at: string;
+}
+
+interface TopTool {
+  id: number;
+  name: string;
+  logo: string;
+  click_count: number;
+}
+
+interface HealthIssueItem {
+  type: string;
+  url: string;
+  healthy: boolean;
+  status?: number;
+  error?: string;
+}
+
+interface HealthIssue {
+  tool_id: number;
+  tool_name: string;
+  issues: HealthIssueItem[];
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<AdminStats>({
-    users_count: 0,
-    vip_count: 0,
-    today_uses: 0,
-    total_uses: 0,
-    templates_count: 0,
-    favorites_count: 0,
+  const [stats, setStats] = useState<Stats>({
+    tools_count: 0,
+    featured_count: 0,
+    active_count: 0,
+    categories: 0,
+    tags: 0,
+    total_views: 0,
+    total_clicks: 0,
+    ratings_count: 0,
+    reviews_pending: 0
   });
+  const [recentTools, setRecentTools] = useState<RecentTool[]>([]);
+  const [topTools, setTopTools] = useState<TopTool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checkingHealth, setCheckingHealth] = useState(false);
+  const [healthIssues, setHealthIssues] = useState<HealthIssue[]>([]);
 
   useEffect(() => {
-    fetchStats();
+    fetchDashboardData();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchDashboardData = async () => {
+    setLoading(true);
     try {
-      // 获取统计数据
-      const res = await fetch('/api/admin/stats');
-      const data = await res.json();
-      if (data.success) {
-        setStats({
-          users_count: data.data?.users_count || 0,
-          vip_count: data.data?.vip_count || 0,
-          today_uses: data.data?.today_uses || 0,
-          total_uses: data.data?.total_uses || getToolCards().reduce((sum, t) => sum + t.totalUsage, 0),
-          templates_count: data.data?.templates_count || 0,
-          favorites_count: data.data?.favorites_count || 0,
-        });
+      // 并行获取统计数据、最近工具、热门工具
+      const [statsRes, toolsRes, topRes] = await Promise.all([
+        fetch('/api/admin/stats'),
+        fetch('/api/admin/tools?limit=5'),
+        fetch('/api/tools?limit=5'),
+      ]);
+      
+      const statsData = await statsRes.json();
+      const toolsData = await toolsRes.json();
+      const topData = await topRes.json();
+      
+      if (statsData.success) {
+        setStats(statsData.data);
+      }
+      
+      if (toolsData.success) {
+        setRecentTools(toolsData.data || []);
+      }
+
+      if (topData.success) {
+        setTopTools(topData.data || []);
       }
     } catch (error) {
-      console.error('获取统计数据失败:', error);
-      // 使用工具配置的默认数据
-      setStats({
-        users_count: 0,
-        vip_count: 0,
-        today_uses: 0,
-        total_uses: getToolCards().reduce((sum, t) => sum + t.totalUsage, 0),
-        templates_count: 0,
-        favorites_count: 0,
-      });
+      console.error('获取数据失败:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // 统计卡片数据
+  const checkHealth = async () => {
+    setCheckingHealth(true);
+    try {
+      const res = await fetch('/api/admin/health-check');
+      const data = await res.json();
+      if (data.success) {
+        setHealthIssues(data.data.issues || []);
+        if (data.data.issues?.length > 0) {
+          alert(`发现 ${data.data.issues.length} 个工具链接异常`);
+        } else {
+          alert('所有工具链接正常');
+        }
+      }
+    } catch (error) {
+      console.error('健康检查失败:', error);
+    } finally {
+      setCheckingHealth(false);
+    }
+  };
+
   const statCards = [
-    { 
-      title: '用户数量', 
-      value: stats.users_count, 
-      icon: Users, 
-      href: '/admin/users',
-      color: 'from-blue-100 to-cyan-100',
-      iconColor: 'text-blue-600'
-    },
-    { 
-      title: 'VIP 会员', 
-      value: stats.vip_count, 
-      icon: Crown, 
-      href: null,
-      color: 'from-amber-100 to-orange-100',
-      iconColor: 'text-amber-600'
-    },
-    { 
-      title: '模板数量', 
-      value: stats.templates_count, 
-      icon: FileText, 
-      href: '/admin/templates',
-      color: 'from-purple-100 to-violet-100',
-      iconColor: 'text-purple-600'
-    },
-    { 
-      title: '收藏总数', 
-      value: stats.favorites_count, 
-      icon: Sparkles, 
-      href: null,
-      color: 'from-pink-100 to-rose-100',
-      iconColor: 'text-pink-600'
-    },
+    { name: '工具总数', value: stats.tools_count, icon: Wrench, color: 'bg-blue-500', href: '/admin/tools' },
+    { name: '分类数量', value: stats.categories, icon: FolderTree, color: 'bg-green-500', href: '/admin/categories' },
+    { name: '标签数量', value: stats.tags, icon: Tags, color: 'bg-purple-500', href: '/admin/tags' },
+    { name: '首页推荐', value: stats.featured_count, icon: TrendingUp, color: 'bg-orange-500' },
+    { name: '总浏览量', value: stats.total_views.toLocaleString(), icon: Eye, color: 'bg-cyan-500' },
+    { name: '总点击量', value: stats.total_clicks.toLocaleString(), icon: MousePointer, color: 'bg-pink-500' },
+    { name: '用户评分', value: stats.ratings_count, icon: Star, color: 'bg-yellow-500' },
+    { name: '待审评论', value: stats.reviews_pending, icon: AlertTriangle, color: 'bg-red-500', href: '/admin/reviews' },
   ];
 
-  // 使用统计
-  const usageCards = [
-    { 
-      title: '今日使用', 
-      value: stats.today_uses, 
-      icon: TrendingUp,
-      color: 'from-emerald-100 to-teal-100',
-      iconColor: 'text-emerald-600'
-    },
-    { 
-      title: '总使用量', 
-      value: formatUsageCount(stats.total_uses), 
-      icon: Grid3X3,
-      color: 'from-slate-100 to-gray-100',
-      iconColor: 'text-slate-600'
-    },
-  ];
-
-  // 热门工具（从本地配置获取）
-  const topTools = getToolCards()
-    .sort((a, b) => b.totalUsage - a.totalUsage)
-    .slice(0, 5);
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* 页面标题 */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">仪表盘</h1>
-        <p className="text-sm text-slate-500 mt-1">系统运行状态概览</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">管理后台</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">OneClaw AI视频工具导航站管理</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={checkHealth} disabled={checkingHealth}>
+            {checkingHealth ? (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Database className="w-4 h-4 mr-2" />
+            )}
+            链接检测
+          </Button>
+          <Link href="/" target="_blank">
+            <Button variant="outline" size="sm">
+              <ExternalLink className="w-4 h-4 mr-2" />
+              查看站点
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      {/* 用户统计卡片 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <Link key={idx} href={stat.href || '#'}>
-              <Card className={`bg-white border-slate-200 hover:border-slate-300 hover:shadow-lg transition-all cursor-pointer ${!stat.href ? 'pointer-events-none' : ''}`}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-slate-500">{stat.title}</p>
-                      <p className="text-3xl font-bold text-slate-900 mt-2">
-                        {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : stat.value.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
-                      <Icon className={`w-6 h-6 ${stat.iconColor}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* 使用统计 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {usageCards.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={idx} className="bg-white border-slate-200">
-              <CardContent className="p-6">
+      {/* 统计卡片 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {statCards.map((stat) => (
+          <Link key={stat.name} href={stat.href || '#'}>
+            <Card className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-slate-500">{stat.title}</p>
-                    <p className="text-2xl font-bold text-slate-900 mt-1">
-                      {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : stat.value}
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{stat.name}</p>
+                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
+                      {stat.value}
                     </p>
                   </div>
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
-                    <Icon className={`w-5 h-5 ${stat.iconColor}`} />
+                  <div className={`p-2.5 rounded-lg ${stat.color}`}>
+                    <stat.icon className="w-5 h-5 text-white" />
                   </div>
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
+          </Link>
+        ))}
       </div>
 
-      {/* 热门工具 */}
-      <Card className="bg-white border-slate-200">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2 text-slate-900">
-              <TrendingUp className="w-5 h-5 text-orange-500" />
-              热门工具
-            </CardTitle>
-            <span className="text-xs text-slate-400">数据来源：本地配置</span>
-          </div>
+      {/* 快捷操作 */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">快捷操作</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+          <div className="flex flex-wrap gap-2">
+            <Link href="/admin/tools/new">
+              <Button size="sm" className="bg-gradient-to-r from-orange-500 to-red-500">
+                <Plus className="w-4 h-4 mr-2" />
+                添加工具
+              </Button>
+            </Link>
+            <Link href="/admin/tools/import">
+              <Button variant="outline" size="sm">
+                <Download className="w-4 h-4 mr-2" />
+                批量导入
+              </Button>
+            </Link>
+            <Link href="/admin/categories">
+              <Button variant="outline" size="sm">
+                <FolderTree className="w-4 h-4 mr-2" />
+                分类管理
+              </Button>
+            </Link>
+            <Link href="/admin/tags">
+              <Button variant="outline" size="sm">
+                <Tags className="w-4 h-4 mr-2" />
+                标签管理
+              </Button>
+            </Link>
+            <Link href="/admin/reviews">
+              <Button variant="outline" size="sm">
+                <FileText className="w-4 h-4 mr-2" />
+                评论审核
+                {stats.reviews_pending > 0 && (
+                  <Badge className="ml-2 bg-red-500 text-white text-xs">{stats.reviews_pending}</Badge>
+                )}
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 最近添加 */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">最近添加</CardTitle>
+              <Link href="/admin/tools" className="text-sm text-orange-500 hover:text-orange-600">
+                查看全部
+              </Link>
             </div>
-          ) : (
+          </CardHeader>
+          <CardContent>
             <div className="space-y-3">
-              {topTools.map((tool, idx) => (
-                <div 
-                  key={tool.id}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                    idx === 0 ? 'bg-amber-100 text-amber-600' :
-                    idx === 1 ? 'bg-slate-200 text-slate-600' :
-                    idx === 2 ? 'bg-orange-100 text-orange-600' :
-                    'bg-slate-100 text-slate-500'
-                  }`}>
-                    {idx + 1}
-                  </div>
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-xl`}>
-                    {tool.icon}
-                  </div>
+              {recentTools.map(tool => (
+                <div key={tool.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <img 
+                    src={tool.logo} 
+                    alt={tool.name} 
+                    className="w-10 h-10 rounded-lg object-contain bg-slate-100"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
+                    }}
+                  />
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-900 truncate">{tool.name}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{tool.categoryName}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium text-slate-900">{formatUsageCount(tool.usageCount)}</p>
-                    <p className="text-xs text-slate-400">次使用</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</p>
+                      {tool.is_featured && (
+                        <TrendingUp className="w-3 h-3 text-orange-500" />
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500">{tool.producer}</p>
                   </div>
                 </div>
               ))}
+              {recentTools.length === 0 && (
+                <p className="text-center text-sm text-slate-500 py-4">暂无数据</p>
+              )}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* 提示信息 */}
-      <Card className="bg-gradient-to-r from-orange-50 to-amber-50 border-orange-100">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
-              <Grid3X3 className="w-5 h-5 text-orange-600" />
+        {/* 热门工具 */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">热门工具 TOP 5</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topTools.map((tool, index) => (
+                <div key={tool.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    index === 0 ? 'bg-yellow-500 text-white' :
+                    index === 1 ? 'bg-slate-400 text-white' :
+                    index === 2 ? 'bg-orange-400 text-white' :
+                    'bg-slate-200 text-slate-600'
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <img 
+                    src={tool.logo} 
+                    alt={tool.name} 
+                    className="w-10 h-10 rounded-lg object-contain bg-slate-100"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
+                    }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-slate-500">
+                    <MousePointer className="w-3 h-3" />
+                    {tool.click_count}
+                  </div>
+                </div>
+              ))}
+              {topTools.length === 0 && (
+                <p className="text-center text-sm text-slate-500 py-4">暂无数据</p>
+              )}
             </div>
-            <div>
-              <h3 className="font-semibold text-slate-900 mb-1">关于工具管理</h3>
-              <p className="text-sm text-slate-600">
-                OneClaw 的所有 AI 工具均为自主研发，工具配置通过代码管理，无需在后台添加或编辑。
-                后台主要用于用户管理、数据统计和模板管理。
-              </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 健康检查结果 */}
+      {healthIssues.length > 0 && (
+        <Card className="border-red-200 dark:border-red-800">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              链接异常 ({healthIssues.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {healthIssues.slice(0, 5).map((issue, index) => (
+                <div key={index} className="p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm">
+                  <p className="font-medium text-red-700 dark:text-red-300">{issue.tool_name}</p>
+                  {issue.issues.map((i, idx) => (
+                    <p key={idx} className="text-xs text-red-600 dark:text-red-400">
+                      {i.type}: {i.error || `状态码 ${i.status}`}
+                    </p>
+                  ))}
+                </div>
+              ))}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -5,7 +5,7 @@ const isEdgeRuntime = typeof window === 'undefined' && !process.env.NODE_ENV;
 
 // 延迟加载 child_process（仅 Node.js 环境）
 let envLoaded = false;
-const loadEnvFn: (() => void) | null = null;
+let loadEnvFn: (() => void) | null = null;
 
 interface SupabaseCredentials {
   url: string;
@@ -29,7 +29,6 @@ function loadEnv(): void {
   // Node.js 环境延迟加载
   if (!loadEnvFn) {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { execSync } = require('child_process');
       
       const pythonCode = `

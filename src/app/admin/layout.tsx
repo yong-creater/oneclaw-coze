@@ -3,29 +3,32 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { 
-  X,
   Menu,
+  X,
   ExternalLink,
   LogOut,
   Loader2,
-  LayoutDashboard,
-  FolderTree,
-  Users,
-  Settings,
-  FileText,
-  Wrench
+  Settings
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-// 后台导航菜单（工具配置通过代码管理）
 const navigation = [
-  { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
-  { name: '工具管理', href: '/admin/tools', icon: Wrench },
-  { name: '模板管理', href: '/admin/templates', icon: FileText },
-  { name: '分类管理', href: '/admin/categories', icon: FolderTree },
-  { name: '用户管理', href: '/admin/users', icon: Users },
-  { name: '系统设置', href: '/admin/settings', icon: Settings },
+  { name: '仪表盘', href: '/admin' },
+  { name: 'AI应用管理', href: '/admin/tools' },
+  { name: '分类管理', href: '/admin/categories' },
+  { name: '标签管理', href: '/admin/tags' },
+  { name: '提示词管理', href: '/admin/prompts' },
+  { name: '技能管理', href: '/admin/skills' },
+  { name: '教程管理', href: '/admin/tutorials' },
+  { name: '精选工具', href: '/admin/utilities' },
+  { name: '评论审核', href: '/admin/reviews' },
+  { name: '会员管理', href: '/admin/members' },
+  { name: '用户管理', href: '/admin/users' },
+  { name: '订单管理', href: '/admin/orders' },
+  { name: '广告管理', href: '/admin/ads' },
+  { name: 'API Key', href: '/admin/api-keys' },
+  { name: '微信配置', href: '/admin/wechat' },
 ];
 
 export default function AdminLayout({
@@ -41,6 +44,7 @@ export default function AdminLayout({
 
   // 检查登录状态
   useEffect(() => {
+    // 登录页面和修改密码页面不需要检查
     if (pathname === '/admin/login' || pathname === '/admin/change-password') {
       setChecking(false);
       return;
@@ -54,6 +58,7 @@ export default function AdminLayout({
         if (data.success && data.authenticated && data.data) {
           setUser(data.data);
           
+          // 检查是否需要修改密码
           if (data.data.must_change_password) {
             router.push('/admin/change-password');
             return;
@@ -89,51 +94,48 @@ export default function AdminLayout({
   // 检查中显示加载
   if (checking) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* 移动端侧边栏遮罩 */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* 侧边栏 - 简洁国际风 */}
+      {/* 侧边栏 */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-[260px] bg-white border-r border-slate-200
-        transform transition-all duration-300 ease-out
+        fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-800 
+        border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-200
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-slate-100">
-          <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
-              <span className="text-white text-base font-bold">O</span>
-            </div>
-            <div>
-              <span className="text-sm font-semibold text-slate-900">OneClaw</span>
-              <span className="text-xs text-slate-400 block">Admin</span>
-            </div>
+        <div className="flex items-center justify-between h-16 px-4">
+          <Link href="/admin" className="flex items-center gap-2">
+            <img src="/oneclaw-logo.png" alt="OneClaw" className="w-8 h-8 object-contain" />
+            <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+              OneClaw
+            </span>
+            <span className="text-sm text-slate-500">管理后台</span>
           </Link>
           <button 
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+            className="lg:hidden p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 导航菜单 */}
-        <nav className="p-3 space-y-0.5">
+        <nav className="p-4 space-y-1">
           {navigation.map((item) => {
-            const Icon = item.icon;
             const isActive = pathname === item.href || 
               (item.href !== '/admin' && pathname.startsWith(item.href));
 
@@ -141,71 +143,67 @@ export default function AdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                onClick={() => setSidebarOpen(false)}
                 className={`
-                  flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                  transition-all duration-200
+                  flex items-center px-3 py-2 rounded-lg text-sm font-medium
+                  transition-colors duration-200
                   ${isActive 
-                    ? 'bg-slate-900 text-white' 
-                    : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' 
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
                   }
                 `}
               >
-                <Icon className="w-5 h-5" />
-                <span>{item.name}</span>
+                {item.name}
               </Link>
             );
           })}
         </nav>
 
-        {/* 底部 */}
-        <div className="absolute bottom-6 left-4 right-4">
+        {/* 返回前台 */}
+        <div className="absolute bottom-4 left-4 right-4">
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl 
-              text-sm font-medium text-slate-500 hover:bg-slate-100 
-              hover:text-slate-900 transition-all duration-200"
+            className="flex items-center justify-center px-3 py-2 rounded-lg 
+              text-sm font-medium text-slate-600 hover:bg-slate-100 
+              dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
           >
-            <ExternalLink className="w-4 h-4" />
-            <span>返回前台</span>
+            <ExternalLink className="w-4 h-4 mr-2" />
+            返回前台
           </Link>
         </div>
       </aside>
 
       {/* 主内容区 */}
-      <div className="lg:pl-[260px]">
+      <div className="lg:pl-64">
         {/* 顶部栏 */}
-        <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200">
-          <div className="flex items-center justify-between h-full px-8">
+        <header className="sticky top-0 z-30 h-16 bg-white dark:bg-slate-800 shadow-sm">
+          <div className="flex items-center justify-between h-full px-4">
             <button 
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
             >
               <Menu className="w-5 h-5" />
             </button>
+            <h1 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+              {navigation.find(n => n.href === pathname || (n.href !== '/admin' && pathname.startsWith(n.href)))?.name || '管理后台'}
+            </h1>
             <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-400">欢迎回来</span>
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">{user?.username?.charAt(0).toUpperCase() || 'A'}</span>
-                </div>
-                <span className="text-sm font-medium text-slate-700">{user?.username || '管理员'}</span>
-              </div>
+              <span className="text-sm text-slate-500">{user?.username || '管理员'}</span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                className="text-slate-600 hover:text-red-600 dark:text-slate-300"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 mr-1" />
+                退出
               </Button>
             </div>
           </div>
         </header>
 
-        {/* 内容区域 */}
-        <main className="p-8">
+        {/* 页面内容 */}
+        <main className="p-6">
           {children}
         </main>
       </div>

@@ -1,239 +1,235 @@
-'use client';
-
-import React, { useState, useMemo } from 'react';
+import { Metadata } from 'next';
 import Link from 'next/link';
-import { 
-  Search, 
-  Grid3X3, 
-  List,
-  Star,
-  Sparkles,
-  Zap,
-  Coins
-} from 'lucide-react';
-import { Sidebar, Header, Footer, useSidebar } from '@/components/common';
-import { 
-  getToolCards, 
-  getCategoryStats, 
-  TOOL_CATEGORIES,
-  ToolCategory,
-  formatUsageCount
-} from '@/config/tools';
+import Image from 'next/image';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search, Filter, Star, ExternalLink } from 'lucide-react';
+import BackToHome from '@/components/common/BackToHome';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
 
-// 分类类型（包含全部）
-type FilterCategory = 'all' | ToolCategory;
+export const metadata: Metadata = {
+  title: 'AI工具库',
+  description: '822款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作等全品类',
+};
 
-export default function ToolsPage() {
-  const [search, setSearch] = useState('');
-  const [activeCategory, setActiveCategory] = useState<FilterCategory>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const { collapsed } = useSidebar();
+interface Props {
+  searchParams: Promise<{ category?: string; search?: string }>;
+}
 
-  // 获取分类统计数据
-  const categoryStats = useMemo(() => getCategoryStats(), []);
-  const allTools = useMemo(() => getToolCards(), []);
+async function getTools(category?: string, search?: string) {
+  const supabase = getSupabaseClient();
+  
+  let query = supabase
+    .from('tools')
+    .select(`
+      *,
+      categories (
+        id,
+        name,
+        slug
+      )
+    `)
+    .eq('is_active', true)
+    .order('is_featured', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(200);
 
-  // 筛选工具
-  const filteredTools = useMemo(() => {
-    return allTools.filter(tool => {
-      // 只显示启用的工具
-      if (!tool.enabled) return false;
+  if (category && category !== 'all') {
+    query = query.eq('categories.slug', category);
+  }
 
-      const matchSearch = 
-        tool.name.toLowerCase().includes(search.toLowerCase()) ||
-        tool.description.toLowerCase().includes(search.toLowerCase()) ||
-        tool.tags?.some(tag => tag.toLowerCase().includes(search.toLowerCase()));
-      
-      const matchCategory = 
-        activeCategory === 'all' || 
-        tool.category === activeCategory;
-      
-      return matchSearch && matchCategory;
-    });
-  }, [allTools, search, activeCategory]);
+  if (search) {
+    query = query.ilike('name', `%${search}%`);
+  }
 
-  // 分类统计（包含全部）
-  const categories = useMemo(() => {
-    const totalEnabled = allTools.filter(t => t.enabled).length;
-    return [
-      { id: 'all' as const, name: '全部', icon: '🎯', count: totalEnabled },
-      ...categoryStats.map(cat => ({
-        id: cat.category,
-        name: cat.name,
-        icon: cat.icon,
-        count: cat.enabledCount,
-      })),
-    ];
-  }, [categoryStats, allTools]);
+  const { data: tools, error } = await query;
+
+  if (error) {
+    console.error('获取工具失败:', error);
+    return [];
+  }
+
+  return tools || [];
+}
+
+async function getCategories() {
+  const supabase = getSupabaseClient();
+  
+  const { data: categories, error } = await supabase
+    .from('categories')
+    .select('*')
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('获取分类失败:', error);
+    return [];
+  }
+
+  return categories || [];
+}
+
+export default async function ToolsPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const [tools, categories] = await Promise.all([
+    getTools(params.category, params.search),
+    getCategories()
+  ]);
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
-      <Sidebar />
-      
-      <main className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-[268px]'}`}>
-        <Header title="AI 工具" subtitle={`${filteredTools.length} 个可用工具`} />
-        
-        <div className="p-8">
-          {/* 搜索框 */}
-          <div className="flex items-center gap-4 mb-8">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input
-                type="text"
-                placeholder="搜索工具名称..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-11 pl-12 pr-4 bg-white rounded-xl border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-              />
-            </div>
-            
-            {/* 视图切换 */}
-            <div className="flex items-center gap-1 bg-white rounded-xl border border-slate-200 p-1">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'grid' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'
-                }`}
-              >
-                <Grid3X3 className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2.5 rounded-lg transition-colors cursor-pointer ${
-                  viewMode === 'list' ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-100'
-                }`}
-              >
-                <List className="w-5 h-5" />
-              </button>
-            </div>
+    <div className="min-h-screen bg-gradient-to-b from-orange-50/50 via-white to-white dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <BackToHome />
+            <Link href="/" className="text-white/80 hover:text-white text-sm flex items-center gap-1">
+              <span>返回首页</span>
+            </Link>
           </div>
-
-          {/* 分类标签 - 简化版 */}
-          <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
-                  activeCategory === cat.id
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
-                }`}
-              >
-                <span>{cat.icon}</span>
-                <span>{cat.name}</span>
-                <span className={`text-xs ${activeCategory === cat.id ? 'text-white/60' : 'text-slate-400'}`}>
-                  {cat.count}
-                </span>
-              </button>
-            ))}
+          
+          <div className="text-center py-8">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">AI工具库</h1>
+            <p className="text-white/90 text-lg max-w-2xl mx-auto">
+              精选{tools.length}款优质AI工具，覆盖视频生成、数字人、AI绘画等多个领域
+            </p>
           </div>
+        </div>
+      </div>
 
-          {/* 工具列表 */}
-          {filteredTools.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="w-10 h-10 text-slate-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">未找到工具</h3>
-              <p className="text-slate-500">换个关键词试试</p>
-            </div>
-          ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredTools.map((tool, idx) => (
-                <Link
-                  key={tool.id}
-                  href={tool.href}
-                  className="group bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:border-slate-300 transition-all duration-300 cursor-pointer animate-fade-up"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="p-5">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-2xl`}>
-                        {tool.icon}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {tool.featured && (
-                          <span className="px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-md flex items-center gap-1">
-                            <Star className="w-3 h-3" />
-                            推荐
-                          </span>
-                        )}
-                        {!tool.isFree && (
-                          <span className="px-2 py-0.5 bg-orange-100 text-orange-600 text-xs font-medium rounded-md flex items-center gap-1">
-                            <Coins className="w-3 h-3" />
-                            {tool.credits}积分
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <h3 className="text-base font-semibold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">
-                      {tool.name}
-                    </h3>
-                    <p className="text-sm text-slate-500 line-clamp-2 mb-4">
-                      {tool.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                      <span className="text-xs text-slate-400">{tool.categoryName}</span>
-                      <span className="text-xs text-slate-400 flex items-center gap-1">
-                        <Zap className="w-3 h-3" />
-                        {formatUsageCount(tool.totalUsage)} 次使用
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredTools.map((tool, idx) => (
-                <Link
-                  key={tool.id}
-                  href={tool.href}
-                  className="group flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-200 hover:shadow-lg hover:border-slate-300 transition-all cursor-pointer animate-fade-up"
-                  style={{ animationDelay: `${idx * 30}ms` }}
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-2xl shrink-0`}>
-                    {tool.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-base font-semibold text-slate-900 group-hover:text-orange-600 transition-colors">
-                        {tool.name}
-                      </h3>
-                      {tool.featured && (
-                        <span className="px-1.5 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded flex items-center gap-0.5">
-                          <Star className="w-3 h-3" />
-                        </span>
-                      )}
-                      {!tool.isFree && (
-                        <span className="px-1.5 py-0.5 bg-orange-100 text-orange-600 text-xs font-medium rounded flex items-center gap-0.5">
-                          <Coins className="w-3 h-3" />
-                          {tool.credits}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-500 truncate">
-                      {tool.description}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <span className="text-xs text-slate-400">{tool.categoryName}</span>
-                    <span className="text-xs text-slate-400 flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
-                      {formatUsageCount(tool.totalUsage)}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+      {/* Tools Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* 分类筛选 */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          <Link 
+            href="/tools"
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              !params.category || params.category === 'all'
+                ? 'bg-orange-500 text-white'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+            }`}
+          >
+            全部
+          </Link>
+          {categories.map((cat) => (
+            <Link
+              key={cat.id}
+              href={`/tools?category=${cat.slug}`}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                params.category === cat.slug
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              {cat.name}
+            </Link>
+          ))}
         </div>
 
-        <Footer />
-      </main>
+        {/* 工具列表 */}
+        {tools.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-10 h-10 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-600 dark:text-slate-300 mb-2">暂无匹配工具</h2>
+            <p className="text-slate-500">试试其他分类或关键词</p>
+            <Link 
+              href="/tools"
+              className="inline-flex items-center gap-2 mt-4 text-orange-500 hover:text-orange-600"
+            >
+              查看全部工具
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {tools.map((tool) => (
+              <Link 
+                key={tool.id}
+                href={`/tools/${tool.id}`}
+                className="group"
+              >
+                <Card className="h-full hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-700 transition-all duration-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      {tool.logo ? (
+                        <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700">
+                          <Image
+                            src={tool.logo}
+                            alt={tool.name}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                          {tool.name.charAt(0)}
+                        </div>
+                      )}
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-orange-500 transition-colors truncate">
+                            {tool.name}
+                          </h3>
+                          {tool.is_featured && (
+                            <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                          {tool.highlight || tool.producer}
+                        </p>
+                        
+                        <div className="flex items-center gap-2 mt-3">
+                          {tool.categories && (
+                            <Badge variant="outline" className="text-xs">
+                              {tool.categories.name}
+                            </Badge>
+                          )}
+                          <Badge 
+                            variant={tool.free_type === '完全免费' ? 'default' : 'secondary'}
+                            className={`text-xs ${
+                              tool.free_type === '完全免费' 
+                                ? 'bg-green-500 text-white border-green-500' 
+                                : ''
+                            }`}
+                          >
+                            {tool.free_type}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm py-6 mt-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                <AnimatedLobster size={20} />
+              </div>
+              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+              <span className="text-xs text-slate-400 ml-2">AI工具库</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">
+                关于OneClaw
+              </Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

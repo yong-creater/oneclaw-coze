@@ -1,461 +1,419 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  LayoutDashboard, 
-  TrendingUp, 
-  Users, 
-  Zap, 
-  Settings,
-  Search,
-  Eye,
-  EyeOff,
-  Star,
-  Coins,
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-  BarChart3
-} from 'lucide-react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Search, Plus, Edit, Trash2, Star, ExternalLink, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-interface ToolData {
-  id: string;
+interface Tool {
+  id: number;
   name: string;
-  category: string;
-  icon: string;
-  color: string;
-  enabled: boolean;
-  credits: number;
-  featured: boolean;
-  totalUsage: number;
-  todayUsage: number;
-  uniqueUsers: number;
+  logo: string;
+  producer: string;
+  highlight: string;
+  category_id: number;
+  free_type: string;
+  is_featured: boolean;
+  is_active: boolean;
+  official_url: string;
+  promotion_url: string | null;
+  created_at: string;
+  categories: { name: string; slug: string };
 }
 
-interface StatsData {
-  totalUsage: number;
-  todayUsage: number;
-  uniqueUsers: number;
-  enabledCount: number;
-  totalCount: number;
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
 }
 
-// 格式化数字
-function formatNumber(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'M';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'K';
-  }
-  return num.toString();
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
 }
 
-export default function AdminToolsPage() {
-  const [tools, setTools] = useState<ToolData[]>([]);
-  const [stats, setStats] = useState<StatsData | null>(null);
+function ToolsAdminContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentCategoryId = searchParams.get('category') || 'all';
+  
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1, limit: 20, total: 0, total_pages: 0
+  });
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [editingTool, setEditingTool] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ credits: 0, enabled: true, featured: false });
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // 获取工具列表
-  const fetchTools = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/tools', {
-        credentials: 'include',
-      });
+      const params = new URLSearchParams();
+      params.set('page', pagination.page.toString());
+      params.set('limit', pagination.limit.toString());
+      if (search) params.set('search', search);
+      if (currentCategoryId && currentCategoryId !== 'all') {
+        params.set('category_id', currentCategoryId);
+      }
+      // 添加时间戳防止缓存
+      params.set('_t', Date.now().toString());
+      
+      const res = await fetch(`/api/admin/tools?${params}`);
       const data = await res.json();
+      
       if (data.success) {
-        setTools(data.data.tools);
-        setStats(data.data.stats);
+        setTools(data.data);
+        setPagination(prev => ({ ...prev, total: data.pagination.total, total_pages: data.pagination.total_pages }));
       }
     } catch (error) {
-      console.error('获取工具列表失败:', error);
-      showToast('获取工具列表失败', 'error');
+      console.error('获取数据失败:', error);
     } finally {
       setLoading(false);
     }
+  }, [pagination.page, pagination.limit, search, currentCategoryId]);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`/api/admin/init-data?_t=${Date.now()}`);
+      const data = await res.json();
+      if (data.success) {
+        setCategories(data.data.categories);
+      }
+    } catch (error) {
+      console.error('获取分类失败:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
   useEffect(() => {
-    fetchTools();
-  }, [fetchTools]);
+    setPagination(prev => ({ ...prev, page: 1 }));
+  }, [currentCategoryId]);
 
-  // 显示提示
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleSearch = () => {
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
-  // 更新工具配置
-  const handleUpdateTool = async (toolId: string) => {
-    setSaving(true);
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(`确定要删除工具「${name}」吗？`)) return;
+    
+    try {
+      const res = await fetch(`/api/admin/tools?id=${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+      } else {
+        alert('删除失败: ' + data.error);
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
+      alert('删除失败');
+    }
+  };
+
+  const handleToggleFeatured = async (id: number, is_featured: boolean) => {
     try {
       const res = await fetch('/api/admin/tools', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          toolId,
-          ...editForm,
-        }),
+        body: JSON.stringify({ id, is_featured: !is_featured }),
       });
       const data = await res.json();
       if (data.success) {
-        showToast('配置已更新', 'success');
-        setEditingTool(null);
-        fetchTools();
+        fetchData();
       } else {
-        showToast(data.error || '更新失败', 'error');
+        alert('更新失败: ' + data.error);
       }
-    } catch {
-      showToast('更新失败', 'error');
-    } finally {
-      setSaving(false);
+    } catch (error) {
+      console.error('更新失败:', error);
+      alert('更新失败');
     }
   };
 
-  // 开始编辑
-  const handleEdit = (tool: ToolData) => {
-    setEditingTool(tool.id);
-    setEditForm({
-      credits: tool.credits,
-      enabled: tool.enabled,
-      featured: tool.featured,
-    });
+  const handleToggleActive = async (id: number, is_active: boolean) => {
+    try {
+      const res = await fetch('/api/admin/tools', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_active: !is_active }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchData();
+      } else {
+        alert('更新失败: ' + data.error);
+      }
+    } catch (error) {
+      console.error('更新失败:', error);
+      alert('更新失败');
+    }
   };
 
-  // 取消编辑
-  const handleCancel = () => {
-    setEditingTool(null);
-    setEditForm({ credits: 0, enabled: true, featured: false });
+  const getCurrentCategoryName = () => {
+    if (currentCategoryId === 'all') return '全部工具';
+    const cat = categories.find(c => c.id.toString() === currentCategoryId.toString());
+    return cat?.name || '全部工具';
   };
 
-  // 筛选工具
-  const filteredTools = tools.filter(tool => {
-    const matchSearch = 
-      tool.name.toLowerCase().includes(search.toLowerCase()) ||
-      tool.category.toLowerCase().includes(search.toLowerCase());
-    const matchCategory = categoryFilter === 'all' || tool.category === categoryFilter;
-    return matchSearch && matchCategory;
-  });
-
-  // 获取分类列表
-  const categories = [...new Set(tools.map(t => t.category))];
+  const handleCategoryClick = (catId: string) => {
+    if (catId === 'all') {
+      router.push('/admin/tools');
+    } else {
+      router.push(`/admin/tools?category=${catId}`);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Toast 提示 */}
-      {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in ${
-          toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`}>
-          {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-          {toast.message}
-        </div>
-      )}
-
-      {/* 顶部导航 */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">工具管理</h1>
-            <p className="text-sm text-slate-500 mt-1">管理 AI 工具的使用统计和配置</p>
+    <div className="flex gap-6 min-h-[calc(100vh-120px)]">
+      {/* 左侧分类导航 */}
+      <aside className="w-56 flex-shrink-0">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 sticky top-4">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+            <h2 className="font-semibold text-slate-800 dark:text-white">分类筛选</h2>
           </div>
-          <button
-            onClick={fetchTools}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            刷新数据
-          </button>
+          <nav className="p-2">
+            <button
+              onClick={() => handleCategoryClick('all')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                currentCategoryId === 'all'
+                  ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span>全部工具</span>
+              <span className="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">
+                {pagination.total}
+              </span>
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat.id.toString())}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                  currentCategoryId?.toString() === cat.id.toString()
+                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                }`}
+              >
+                <span className="truncate">{cat.name}</span>
+              </button>
+            ))}
+          </nav>
         </div>
-      </header>
+      </aside>
 
-      <main className="p-6">
-        {/* 统计卡片 */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-slate-500">总使用次数</span>
-                <BarChart3 className="w-5 h-5 text-slate-400" />
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{formatNumber(stats.totalUsage)}</div>
-              <p className="text-xs text-slate-400 mt-1">累计使用次数</p>
-            </div>
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-slate-500">今日使用</span>
-                <Zap className="w-5 h-5 text-orange-500" />
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{formatNumber(stats.todayUsage)}</div>
-              <p className="text-xs text-slate-400 mt-1">今日使用次数</p>
-            </div>
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-slate-500">独立用户</span>
-                <Users className="w-5 h-5 text-blue-500" />
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{formatNumber(stats.uniqueUsers)}</div>
-              <p className="text-xs text-slate-400 mt-1">使用过的用户数</p>
-            </div>
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-slate-500">启用状态</span>
-                <TrendingUp className="w-5 h-5 text-green-500" />
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{stats.enabledCount}/{stats.totalCount}</div>
-              <p className="text-xs text-slate-400 mt-1">已启用/总工具数</p>
-            </div>
+      {/* 右侧内容区 */}
+      <div className="flex-1 space-y-4">
+        {/* 工具栏 */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-slate-800 dark:text-white">{getCurrentCategoryName()}</h1>
+            <span className="text-sm text-slate-500">({pagination.total})</span>
           </div>
-        )}
-
-        {/* 筛选器 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-6">
-          <div className="flex flex-wrap items-center gap-4">
+          
+          <div className="flex items-center gap-3">
             {/* 搜索框 */}
-            <div className="relative flex-1 min-w-[200px]">
+            <div className="relative flex items-center">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 type="text"
-                placeholder="搜索工具名称..."
+                placeholder="搜索工具..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 bg-slate-50 rounded-lg border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="pl-10 pr-4 py-2 w-56 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
-
-            {/* 分类筛选 */}
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="h-10 px-4 bg-slate-50 rounded-lg border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20 cursor-pointer"
+            
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm hover:bg-orange-600"
             >
-              <option value="all">全部分类</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
+              搜索
+            </button>
+            
+            <Link
+              href="/admin/tools/import"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                text-slate-600 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              导入
+            </Link>
+            <Link
+              href="/admin/tools/new"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white 
+                text-sm font-medium hover:bg-orange-600 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              添加
+            </Link>
           </div>
         </div>
 
         {/* 工具列表 */}
-        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">工具</th>
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">分类</th>
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">使用统计</th>
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">积分</th>
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">状态</th>
-                  <th className="text-left px-4 py-3 text-sm font-semibold text-slate-700">推荐</th>
-                  <th className="text-right px-4 py-3 text-sm font-semibold text-slate-700">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+            </div>
+          ) : tools.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 dark:bg-slate-700/50">
                   <tr>
-                    <td colSpan={7} className="text-center py-12 text-slate-400">
-                      加载中...
-                    </td>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">工具</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">分类</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">免费类型</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">状态</th>
+                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">操作</th>
                   </tr>
-                ) : filteredTools.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center py-12 text-slate-400">
-                      未找到工具
-                    </td>
-                  </tr>
-                ) : (
-                  filteredTools.map((tool) => (
-                    <tr key={tool.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-                      {/* 工具信息 */}
-                      <td className="px-4 py-4">
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                  {tools.map((tool) => (
+                    <tr key={tool.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                      <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${tool.color} flex items-center justify-center text-xl`}>
-                            {tool.icon}
-                          </div>
+                          <img 
+                            src={tool.logo} 
+                            alt={tool.name}
+                            className="w-10 h-10 rounded-lg object-cover bg-slate-100"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">' + tool.name[0] + '</text></svg>';
+                            }}
+                          />
                           <div>
-                            <div className="font-medium text-slate-900">{tool.name}</div>
-                            <div className="text-xs text-slate-400">ID: {tool.id}</div>
+                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{tool.name}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{tool.producer}</p>
                           </div>
                         </div>
                       </td>
-
-                      {/* 分类 */}
-                      <td className="px-4 py-4">
-                        <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded">
-                          {tool.category}
-                        </span>
+                      <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-300">
+                        {tool.categories?.name || '-'}
                       </td>
-
-                      {/* 使用统计 */}
-                      <td className="px-4 py-4">
-                        <div className="space-y-1 text-sm">
-                          <div className="text-slate-900">
-                            <span className="text-slate-500">总:</span> {formatNumber(tool.totalUsage)}
-                          </div>
-                          <div className="text-slate-500">
-                            <span className="text-slate-400">今日:</span> {formatNumber(tool.todayUsage)}
-                          </div>
-                          <div className="text-slate-500">
-                            <span className="text-slate-400">用户:</span> {formatNumber(tool.uniqueUsers)}
-                          </div>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleToggleFeatured(tool.id, tool.is_featured)}
+                            className={`p-1 rounded transition-colors ${
+                              tool.is_featured 
+                                ? 'text-orange-500 hover:text-orange-600' 
+                                : 'text-slate-300 hover:text-orange-500'
+                            }`}
+                            title={tool.is_featured ? '取消推荐' : '设为推荐'}
+                          >
+                            <Star className="w-4 h-4" fill={tool.is_featured ? 'currentColor' : 'none'} />
+                          </button>
+                          <button
+                            onClick={() => handleToggleActive(tool.id, tool.is_active)}
+                            className={`px-2 py-1 text-xs rounded-full transition-colors ${
+                              tool.is_active 
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                            }`}
+                          >
+                            {tool.is_active ? '上架' : '下架'}
+                          </button>
                         </div>
                       </td>
-
-                      {/* 积分 */}
-                      <td className="px-4 py-4">
-                        {editingTool === tool.id ? (
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="number"
-                              min="0"
-                              value={editForm.credits}
-                              onChange={(e) => setEditForm({ ...editForm, credits: parseInt(e.target.value) || 0 })}
-                              className="w-20 h-8 px-2 bg-white rounded-lg border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-                            />
-                            <Coins className="w-4 h-4 text-orange-500" />
-                          </div>
-                        ) : (
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded ${
-                            tool.credits === 0 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-orange-100 text-orange-700'
-                          }`}>
-                            <Coins className="w-3 h-3" />
-                            {tool.credits === 0 ? '免费' : `${tool.credits}积分`}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* 启用状态 */}
-                      <td className="px-4 py-4">
-                        {editingTool === tool.id ? (
-                          <button
-                            onClick={() => setEditForm({ ...editForm, enabled: !editForm.enabled })}
-                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded cursor-pointer ${
-                              editForm.enabled 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-red-100 text-red-700'
-                            }`}
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={tool.promotion_url || tool.official_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                            title="访问官网"
                           >
-                            {editForm.enabled ? (
-                              <>
-                                <Eye className="w-3 h-3" />
-                                已启用
-                              </>
-                            ) : (
-                              <>
-                                <EyeOff className="w-3 h-3" />
-                                已禁用
-                              </>
-                            )}
-                          </button>
-                        ) : (
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded ${
-                            tool.enabled 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-red-100 text-red-700'
-                          }`}>
-                            {tool.enabled ? (
-                              <>
-                                <Eye className="w-3 h-3" />
-                                已启用
-                              </>
-                            ) : (
-                              <>
-                                <EyeOff className="w-3 h-3" />
-                                已禁用
-                              </>
-                            )}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* 推荐 */}
-                      <td className="px-4 py-4">
-                        {editingTool === tool.id ? (
-                          <button
-                            onClick={() => setEditForm({ ...editForm, featured: !editForm.featured })}
-                            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded cursor-pointer ${
-                              editForm.featured 
-                                ? 'bg-amber-100 text-amber-700' 
-                                : 'bg-slate-100 text-slate-500'
-                            }`}
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                          <Link
+                            href={`/admin/tools/${tool.id}/edit`}
+                            className="p-1.5 rounded text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30"
+                            title="编辑"
                           >
-                            <Star className={`w-3 h-3 ${editForm.featured ? 'fill-amber-500' : ''}`} />
-                            {editForm.featured ? '已推荐' : '未推荐'}
+                            <Edit className="w-4 h-4" />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(tool.id, tool.name)}
+                            className="p-1.5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
+                            title="删除"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </button>
-                        ) : (
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded ${
-                            tool.featured 
-                              ? 'bg-amber-100 text-amber-700' 
-                              : 'bg-slate-100 text-slate-500'
-                          }`}>
-                            <Star className={`w-3 h-3 ${tool.featured ? 'fill-amber-500' : ''}`} />
-                            {tool.featured ? '已推荐' : '未推荐'}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* 操作 */}
-                      <td className="px-4 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          {editingTool === tool.id ? (
-                            <>
-                              <button
-                                onClick={() => handleUpdateTool(tool.id)}
-                                disabled={saving}
-                                className="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-lg transition-colors cursor-pointer disabled:opacity-50"
-                              >
-                                {saving ? '保存中...' : '保存'}
-                              </button>
-                              <button
-                                onClick={handleCancel}
-                                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors cursor-pointer"
-                              >
-                                取消
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handleEdit(tool)}
-                              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors cursor-pointer"
-                            >
-                              设置
-                            </button>
-                          )}
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-slate-500 dark:text-slate-400 mb-4">暂无工具数据</p>
+              <Link
+                href="/admin/tools/import"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white 
+                  text-sm font-medium hover:bg-blue-600 transition-colors"
+              >
+                批量导入工具
+              </Link>
+            </div>
+          )}
 
-        {/* 说明 */}
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-          <h3 className="font-medium text-blue-900 mb-2">使用说明</h3>
-          <ul className="text-sm text-blue-700 space-y-1">
-            <li>• 工具是代码内置的，不能增删</li>
-            <li>• 点击「设置」可以修改工具的积分价格、启用状态和推荐标记</li>
-            <li>• 禁用的工具不会在前台显示</li>
-            <li>• 积分设置为 0 表示免费使用</li>
-            <li>• 推荐的工具会显示在前台工具页的推荐标签</li>
-          </ul>
+          {/* 分页 */}
+          {pagination.total_pages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                共 {pagination.total} 条记录
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                  disabled={pagination.page === 1}
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                    disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-sm text-slate-600 dark:text-slate-300">
+                  {pagination.page} / {pagination.total_pages}
+                </span>
+                <button
+                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                  disabled={pagination.page === pagination.total_pages}
+                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                    disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
+  );
+}
+
+export default function ToolsAdminPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+      </div>
+    }>
+      <ToolsAdminContent />
+    </Suspense>
   );
 }

@@ -1,57 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search, Users, Crown, Calendar, Loader2, Eye, Ban, CheckCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Users, Search, Mail, Calendar, ChevronLeft, ChevronRight,
+  RefreshCw, UserCircle, Loader2
+} from 'lucide-react';
 
 interface User {
-  id: number;
-  user_id?: string;
-  openid?: string;
-  nickname: string;
-  phone?: string;
+  user_id: string;
   email?: string;
+  nickname?: string;
   avatar_url?: string;
+  openid?: string;
+  phone?: string;
   created_at: string;
-  last_login_at?: string;
+  updated_at: string;
 }
 
-interface UserStats {
-  total_uses: number;
-  total_favorites: number;
-  total_orders: number;
-}
-
-export default function UsersAdminPage() {
+export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [pageSize] = useState(15);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [userStats, setUserStats] = useState<UserStats | null>(null);
-  const [loadingStats, setLoadingStats] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(20);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // 获取用户列表
-  const fetchUsers = async () => {
+  const fetchUsers = async (pageNum: number = 1, searchQuery: string = search) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        page: page.toString(),
+        page: pageNum.toString(),
         pageSize: pageSize.toString(),
-        search: search,
+        ...(searchQuery && { search: searchQuery })
       });
-      const res = await fetch(`/api/admin/users?${params}`);
+
+      const res = await fetch(`/api/admin/users?${params}`, {
+        credentials: 'include'
+      });
       const data = await res.json();
+
       if (data.success) {
-        setUsers(data.data?.users || []);
-        setTotal(data.data?.total || 0);
+        setUsers(data.data.users);
+        setTotal(data.data.total);
+        setPage(pageNum);
+      } else {
+        console.error('获取用户列表失败:', data.error);
       }
     } catch (error) {
       console.error('获取用户列表失败:', error);
@@ -60,58 +67,49 @@ export default function UsersAdminPage() {
     }
   };
 
-  // 获取用户详情统计
-  const fetchUserStats = async (userId: number) => {
-    setLoadingStats(true);
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`);
-      const data = await res.json();
-      if (data.success) {
-        setUserStats(data.data?.stats || null);
-      }
-    } catch (error) {
-      console.error('获取用户详情失败:', error);
-    } finally {
-      setLoadingStats(false);
-    }
-  };
-
+  // 初始加载
   useEffect(() => {
     fetchUsers();
-  }, [page, search]);
+  }, []);
 
-  // 搜索防抖
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setPage(1);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [search]);
+  // 搜索处理（防抖）
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
 
-  // 查看用户详情
-  const handleViewUser = async (user: User) => {
-    setSelectedUser(user);
-    fetchUserStats(user.id);
+    const timeout = setTimeout(() => {
+      fetchUsers(1, value);
+    }, 500);
+    
+    setSearchTimeout(timeout);
   };
 
-  // 切换用户状态
-  const handleToggleStatus = async (userId: number, field: 'is_active' | 'is_banned', value: boolean) => {
-    try {
-      const res = await fetch(`/api/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setUsers(users.map(u => u.id === userId ? { ...u, [field]: value } : u));
-        if (selectedUser?.id === userId) {
-          setSelectedUser({ ...selectedUser, [field]: value });
-        }
-      }
-    } catch (error) {
-      console.error('更新失败:', error);
-    }
+  // 刷新
+  const handleRefresh = () => {
+    fetchUsers(page, search);
+  };
+
+  // 格式化日期
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // 获取登录类型
+  const getLoginType = (user: User) => {
+    if (user.email) return '邮箱';
+    if (user.openid) return '微信';
+    if (user.phone) return '手机';
+    return '未知';
   };
 
   const totalPages = Math.ceil(total / pageSize);
@@ -120,220 +118,152 @@ export default function UsersAdminPage() {
     <div className="space-y-6">
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">用户管理</h1>
-          <p className="text-sm text-slate-500 mt-1">共 {total} 个用户</p>
-        </div>
         <div className="flex items-center gap-3">
-          <div className="px-3 py-1.5 bg-slate-100 rounded-xl text-sm text-slate-600">
-            <Users className="w-4 h-4 inline mr-1" />
-            {total}
+          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
+            <Users className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">用户管理</h1>
+            <p className="text-sm text-slate-500">共 {total} 位注册用户</p>
           </div>
         </div>
+        <Button onClick={handleRefresh} variant="outline" size="sm" disabled={loading}>
+          <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+          刷新
+        </Button>
       </div>
 
-      {/* 搜索 */}
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <Input
-            placeholder="搜索用户..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 bg-white border-slate-200"
-          />
-        </div>
-      </div>
+      {/* 搜索和筛选 */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="搜索邮箱或昵称..."
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="text-sm text-slate-500">
+              显示 {users.length} 条，共 {total} 条
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* 用户列表 */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-        </div>
-      ) : users.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-2xl border border-slate-200">
-          <Users className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-slate-500">暂无用户</h3>
-          <p className="text-sm text-slate-400 mt-1">还没有用户注册</p>
-        </div>
-      ) : (
-        <>
-          <Card className="bg-white border-slate-200 overflow-hidden">
-            <CardContent className="p-0">
-              <div className="divide-y divide-slate-100">
-                {users.map((user) => (
-                  <div 
-                    key={user.id} 
-                    className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors"
-                  >
-                    {/* 头像 */}
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                      {user.avatar_url ? (
-                        <img src={user.avatar_url} alt={user.nickname} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-sm font-medium text-orange-600">{user.nickname?.slice(0, 1) || 'U'}</span>
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-slate-900 truncate">{user.nickname || '未设置昵称'}</h3>
-                        {user.email && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-600 text-xs font-medium rounded-full">
-                            <Crown className="w-3 h-3" />
-                            已绑定
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">用户列表</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            </div>
+          ) : users.length === 0 ? (
+            <div className="text-center py-12 text-slate-500">
+              <UserCircle className="w-12 h-12 mx-auto mb-3 opacity-50" />
+              <p>暂无用户数据</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>用户信息</TableHead>
+                    <TableHead>登录方式</TableHead>
+                    <TableHead>注册时间</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user, index) => (
+                    <TableRow key={user.user_id}>
+                      <TableCell className="font-medium text-slate-400">
+                        {(page - 1) * pageSize + index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center">
+                            {user.avatar_url ? (
+                              <img 
+                                src={user.avatar_url} 
+                                alt={user.nickname || 'User'} 
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-lg font-bold text-orange-500">
+                                {(user.nickname || user.email || 'U')[0].toUpperCase()}
+                              </span>
+                            )}
                           </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
-                        <span>{user.phone || user.email || '未绑定联系方式'}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span className="hidden sm:flex items-center gap-1">
+                          <div>
+                            <div className="font-medium text-slate-900 dark:text-white">
+                              {user.nickname || '未设置昵称'}
+                            </div>
+                            {user.email && (
+                              <div className="flex items-center gap-1 text-sm text-slate-500">
+                                <Mail className="w-3 h-3" />
+                                {user.email}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={user.email ? 'default' : user.openid ? 'secondary' : 'outline'}
+                          className={user.email ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : ''}
+                        >
+                          {getLoginType(user)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-500">
+                        <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="hidden md:flex items-center gap-6 text-right">
-                      <div className="text-xs text-slate-500">
-                        {user.user_id ? `ID: ${user.user_id.slice(0, 8)}...` : '-'}
-                      </div>
-                    </div>
-
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleViewUser(user)}
-                      className="text-slate-500 hover:text-slate-900 cursor-pointer"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                          {formatDate(user.created_at)}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
           {/* 分页 */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-                className="cursor-pointer"
-              >
-                上一页
-              </Button>
-              <span className="text-sm text-slate-500">
-                第 {page} / {totalPages} 页
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= totalPages}
-                onClick={() => setPage(p => p + 1)}
-                className="cursor-pointer"
-              >
-                下一页
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* 用户详情弹窗 */}
-      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-slate-900">用户详情</DialogTitle>
-          </DialogHeader>
-          {selectedUser && (
-            <div className="space-y-6 py-4">
-              {/* 用户基本信息 */}
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center overflow-hidden">
-                  {selectedUser.avatar_url ? (
-                    <img src={selectedUser.avatar_url} alt={selectedUser.nickname} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-xl font-bold text-orange-600">{selectedUser.nickname?.slice(0, 1) || 'U'}</span>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">{selectedUser.nickname || '未设置昵称'}</h3>
-                  <p className="text-sm text-slate-500">{selectedUser.phone || selectedUser.email || '未绑定'}</p>
-                  {selectedUser.user_id && (
-                    <div className="flex items-center gap-1 mt-1 px-2 py-0.5 bg-slate-100 text-slate-600 text-xs font-medium rounded-full w-fit">
-                      ID: {selectedUser.user_id.slice(0, 12)}...
-                    </div>
-                  )}
-                </div>
+            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+              <div className="text-sm text-slate-500">
+                第 {page} / {totalPages} 页，共 {total} 条
               </div>
-
-              {/* 用户统计 */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-slate-900">{userStats?.total_uses || '-'}</p>
-                  <p className="text-xs text-slate-500">使用次数</p>
-                </div>
-                <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-slate-900">{userStats?.total_favorites || '-'}</p>
-                  <p className="text-xs text-slate-500">收藏数</p>
-                </div>
-                <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <p className="text-xl font-bold text-slate-900">-</p>
-                  <p className="text-xs text-slate-500">积分</p>
-                </div>
-              </div>
-
-              {/* 账户信息 */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-slate-600">账户信息</h4>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="p-2 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-400 mb-1">注册时间</p>
-                    <p className="text-slate-700">{selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString() : '-'}</p>
-                  </div>
-                  <div className="p-2 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-400 mb-1">最后登录</p>
-                    <p className="text-slate-700">{selectedUser.last_login_at ? new Date(selectedUser.last_login_at).toLocaleDateString() : '-'}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* 状态控制 */}
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-slate-600">状态管理</h4>
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-700">启用账户</span>
-                  </div>
-                  <Switch 
-                    checked={selectedUser.is_active}
-                    onCheckedChange={(v) => handleToggleStatus(selectedUser.id, 'is_active', v)}
-                  />
-                </div>
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <Ban className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-700">封禁用户</span>
-                  </div>
-                  <Switch 
-                    checked={selectedUser.is_banned}
-                    onCheckedChange={(v) => handleToggleStatus(selectedUser.id, 'is_banned', v)}
-                  />
-                </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchUsers(page - 1)}
+                  disabled={page <= 1 || loading}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  上一页
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchUsers(page + 1)}
+                  disabled={page >= totalPages || loading}
+                >
+                  下一页
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
               </div>
             </div>
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedUser(null)} className="cursor-pointer">关闭</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </CardContent>
+      </Card>
     </div>
   );
 }

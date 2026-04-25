@@ -3,7 +3,6 @@
 import { UserProvider, useUser } from '@/contexts/UserContext';
 import LoginModal from '@/components/common/LoginModal';
 import { SWRConfig } from 'swr';
-import { SidebarProvider } from './SidebarContext';
 
 function UserAuthWrapper({ children }: { children: React.ReactNode }) {
   const { showLoginModal, setShowLoginModal, login } = useUser();
@@ -31,9 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }}
     >
       <UserProvider>
-        <SidebarProvider>
-          <UserAuthWrapper>{children}</UserAuthWrapper>
-        </SidebarProvider>
+        <UserAuthWrapper>{children}</UserAuthWrapper>
       </UserProvider>
     </SWRConfig>
   );

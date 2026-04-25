@@ -1,20 +1,8 @@
 # OneClaw (钳爪) - 全品类AI工具导航站
 
-## 目录
-
-1. [铁律](#铁律-critical---必须严格遵守)
-2. [项目概述](#项目概述)
-3. [技术架构](#技术架构)
-4. [工具管理系统](#工具管理系统)
-5. [UI设计规范](#ui设计规范)
-6. [安全设计](#安全设计)
-7. [性能优化](#性能优化)
-8. [开发规范](#开发规范)
-9. [测试规范](#测试规范)
-
----
-
 ## 铁律 (CRITICAL - 必须严格遵守)
+
+> **每次开发必须遵循以下铁律，违反将导致严重质量问题**
 
 ### 铁律一：前后台 UI 规范必须分离
 
@@ -29,21 +17,35 @@
 **前台禁止**：Tabs 组件、独立 header/footer、后台组件
 **后台禁止**：AnimatedLobster、BackToHome、WechatPromo、独立 header/min-h-screen
 
-### 铁律二：工具是代码内置的，不能增删！
-
-- 工具配置在 `src/config/tools.ts` 中定义
-- 后台管理**只能**查看统计、设置价格/积分、启用/禁用
-- **禁止**在后台增删工具
-
-### 铁律三：每次开发完成后必须执行全面回归测试
+### 铁律二：每次开发完成后必须执行全面回归测试
 
 **测试流程（必须完整执行）**：
 
-1. **代码静态检查** - `pnpm lint` + `pnpm ts-check`
-2. **构建检查** - `pnpm build`
-3. **API 接口测试** - 100% 覆盖所有接口
-4. **服务存活探测** - 验证 5000 端口
-5. **日志健康检查** - 检查 error/exception 日志
+1. **代码静态检查**
+   ```bash
+   pnpm lint
+   pnpm ts-check
+   ```
+
+2. **构建检查**
+   ```bash
+   pnpm build
+   ```
+
+3. **API 接口测试**（必须 100% 覆盖）
+   - 使用 `test_run` 工具并行测试所有接口
+   - 输出完整接口清单与测试结果
+
+4. **服务存活探测**
+   ```bash
+   curl -I http://localhost:5000
+   curl -I http://localhost:5000/admin
+   ```
+
+5. **日志健康检查**
+   ```bash
+   tail -n 50 /app/work/logs/bypass/app.log /app/work/logs/bypass/console.log | grep -iE "error|exception"
+   ```
 
 **禁止跳过任何测试步骤！**
 
@@ -53,1091 +55,759 @@
 
 **OneClaw** - 全品类AI工具导航站，精选238款优质AI工具，涵盖视频生成、数字人、AI绘画、AI写作、AI编程、AI音频、AI办公、AI营销、AI学习、AI聊天、AI搜索等全品类。
 
-### 品牌元素
 - **域名**: oneclaw.shop
 - **联系邮箱**: 1017760688@qq.com
-- **吉祥物**: 龙虾 🦞
-- **主色调**: 红橙渐变 (orange-400 → amber-500)
+- **品牌元素**: 龙虾 🦞，红橙渐变配色
 
----
+### 分类体系
 
-## 工具管理系统
-
-### 核心原则
-
-**工具是代码内置的，不是从数据库读取的！**
-
-- 工具信息在 `src/config/tools.ts` 中定义
-- 后台管理提供：使用统计、价格设置、启用/禁用
-- 前台展示从配置中读取，动态过滤禁用工具
-
-### 工具分类（简化版）
-
-| 分类 | 标识 | 说明 |
-|------|------|------|
-| 图片处理 | `image` | 智能抠图、图片变清晰、背景替换、AI消除 |
-| 电商工具 | `ecommerce` | 商品主图、模特试衣、A+详情页、商品图增强 |
-| 人像设计 | `portrait` | 证件照、海报设计、视频封面 |
-| 批量工具 | `batch` | 批量处理 |
-
-### 工具配置结构
-
-```typescript
-// src/config/tools.ts
-
-// 工具基础配置（静态）
-export interface ToolConfig {
-  id: string;           // 唯一标识
-  name: string;         // 工具名称
-  description: string;  // 描述
-  category: ToolCategory;
-  icon: string;         // Emoji
-  color: string;        // 渐变色
-  href: string;         // 跳转路径
-  tags?: string[];
-}
-
-// 工具运行时配置（可修改）
-export interface ToolRuntimeConfig {
-  toolId: string;
-  enabled: boolean;     // 是否启用
-  credits: number;      // 积分（0=免费）
-  featured: boolean;    // 是否推荐
-  totalUsage: number;   // 总使用次数
-  todayUsage: number;   // 今日使用
-  uniqueUsers: number;  // 独立用户数
-}
-```
-
-### 后台工具管理 API
-
-```typescript
-// GET /api/admin/tools - 获取所有工具及统计
-// PUT /api/admin/tools - 更新单个工具配置
-// PATCH /api/admin/tools - 批量更新工具配置
-
-// 请求体示例
-{
-  "toolId": "remove-bg",
-  "enabled": true,
-  "credits": 5,
-  "featured": true
-}
-```
-
-### 后台工具管理页面
-
-路径：`/admin/tools`
-
-功能：
-1. **查看统计** - 总使用次数、今日使用、独立用户数
-2. **设置价格** - 积分消耗（0=免费）
-3. **启用/禁用** - 控制前台是否显示
-4. **推荐标记** - 前台显示推荐标签
-
-**注意**：不能增删工具！
-
----
-
-## 技术架构
+| 分类 | 工具数 | 代表工具 |
+|------|--------|----------|
+| 视频生成 | 119 | Sora, Runway, 可灵AI, 即梦AI |
+| 数字人 | 31 | HeyGen, Synthesia, D-ID |
+| 视频编辑 | 29 | 剪映, CapCut, Runway ML |
+| AI绘画 | 9 | Midjourney, DALL·E 3, Stable Diffusion |
+| AI聊天 | 8 | ChatGPT, Claude, Kimi, 豆包 |
+| AI配音 | 8 | ElevenLabs, 讯飞配音 |
+| AI写作 | 7 | Notion AI, Jasper, 秘塔写作猫 |
+| AI编程 | 5 | GitHub Copilot, Cursor, 通义灵码 |
+| AI音频 | 4 | Suno, Udio, Mubert |
+| AI办公 | 4 | Gamma, 飞书妙记, Beautiful.ai |
+| AI搜索 | 3 | Perplexity, 秘塔AI搜索 |
+| AI营销 | 3 | Jasper Marketing, Copy.ai |
+| AI学习 | 3 | Duolingo, Speak |
 
 ### 技术栈
 
-| 层级 | 技术 | 版本 | 用途 |
-|------|------|------|------|
-| 框架 | Next.js | 16 | 服务端渲染、App Router |
-| 核心 | React | 19 | UI 渲染 |
-| 语言 | TypeScript | 5 | 类型安全 |
-| 数据库 | Supabase | - | PostgreSQL + Auth |
-| UI组件 | shadcn/ui | - | 基于 Radix UI |
-| 样式 | Tailwind CSS | 4 | 原子化CSS |
-| 图标 | Lucide React | - | 一致的图标系统 |
-| 认证 | jose + bcryptjs | - | JWT + 密码加密 |
-| 状态 | Zustand | - | 工具配置状态管理 |
+- **Framework**: Next.js 16 (App Router)
+- **Core**: React 19
+- **Language**: TypeScript 5
+- **Database**: Supabase (PostgreSQL)
+- **UI 组件**: shadcn/ui (基于 Radix UI)
+- **Styling**: Tailwind CSS 4
+- **Icons**: Lucide React
+- **认证**: jose (JWT), bcryptjs (密码加密)
 
-### 目录结构
+## 目录结构
 
 ```
-├── public/                     # 静态资源
-│   ├── images/                # 图片资源
-│   └── icons/                 # 图标资源
+├── public/                 # 静态资源
+├── scripts/                # 构建与启动脚本
 ├── src/
-│   ├── app/                   # Next.js App Router
-│   │   ├── page.tsx          # 首页 (AI对话 + 快捷入口)
-│   │   ├── tools/            # 工具页面
-│   │   │   └── page.tsx     # 工具列表页
-│   │   ├── templates/        # 模板页面
-│   │   │   └── page.tsx     # 模板列表页
-│   │   ├── recent/           # 最近打开
-│   │   │   └── page.tsx     # 最近打开页
-│   │   ├── projects/        # 项目页面
-│   │   ├── assets/          # 资产库
-│   │   │   └── page.tsx     # 资产库页
-│   │   ├── admin/           # 后台管理
+│   ├── app/                # 页面路由与布局
+│   │   ├── page.tsx        # 前台首页
+│   │   ├── layout.tsx      # 根布局
+│   │   ├── globals.css     # 全局样式
+│   │   ├── tools/[id]/     # 工具详情页(SEO优化)
+│   │   ├── admin/          # 后台管理系统
+│   │   │   ├── layout.tsx  # 后台布局
 │   │   │   ├── page.tsx    # 仪表盘
 │   │   │   ├── tools/      # 工具管理
-│   │   │   ├── users/      # 用户管理
-│   │   │   └── ...
-│   │   ├── api/             # API Routes
-│   │   └── layout.tsx       # 根布局
-│   ├── config/
-│   │   └── tools.ts         # 工具配置（核心！）
-│   ├── components/
-│   │   ├── ui/              # Shadcn UI 组件
-│   │   ├── common/          # 通用组件
-│   │   │   ├── Sidebar.tsx  # 统一侧边栏
-│   │   │   ├── Header.tsx   # 统一顶部栏
-│   │   │   └── Footer.tsx   # 底部组件
-│   │   └── tools/           # 工具组件
-│   └── lib/                  # 工具库
-│   │   ├── (frontend)/        # 前台页面组
-│   │   │   ├── page.tsx      # 首页
-│   │   │   ├── tools/         # 工具相关页面
-│   │   │   ├── rankings/      # 榜单中心
-│   │   │   ├── prompts/       # 提示词库
-│   │   │   └── tutorials/     # 教程库
-│   │   ├── admin/             # 后台管理组
-│   │   │   ├── layout.tsx    # 侧边栏布局
-│   │   │   ├── tools/        # 工具管理
-│   │   │   ├── categories/   # 分类管理
-│   │   │   └── users/        # 用户管理
-│   │   ├── api/               # API Routes
-│   │   │   ├── tools/        # 工具API
-│   │   │   ├── admin/        # 管理API
-│   │   │   └── upload/       # 上传API
-│   │   ├── layout.tsx        # 根布局
-│   │   └── globals.css       # 全局样式
-│   ├── components/
-│   │   ├── ui/               # Shadcn UI 组件
-│   │   ├── frontend/        # 前台专用组件
-│   │   ├── admin/            # 后台专用组件
-│   │   └── tools/            # 工具组件（可扩展）
-│   │       ├── ToolRenderer.tsx   # 动态工具渲染器
-│   │       └── registry.ts        # 工具注册表
-│   ├── lib/                   # 工具库
-│   │   ├── supabase.ts       # Supabase 客户端
-│   │   ├── auth.ts           # 认证工具
-│   │   ├── utils.ts          # 通用工具函数
-│   │   └── validators.ts     # 数据验证
-│   ├── hooks/                 # React Hooks
-│   │   ├── useAuth.ts        # 认证状态
-│   │   ├── useTool.ts        # 工具操作
-│   │   └── useUpload.ts      # 文件上传
-│   ├── types/                 # TypeScript 类型定义
-│   │   ├── tool.ts           # 工具相关类型
-│   │   ├── user.ts           # 用户相关类型
-│   │   └── api.ts            # API 响应类型
-│   └── storage/database/      # 数据库配置
-├── .env.local                 # 环境变量
-├── next.config.ts             # Next.js 配置
-└── package.json
+│   │   │   ├── categories/ # 分类管理
+│   │   │   ├── tags/       # 标签管理
+│   │   │   └── reviews/    # 评论审核
+│   │   ├── workspace/      # 用户工作台
+│   │   ├── rankings/       # 榜单中心
+│   │   ├── prompts/        # 提示词库(一级入口)
+│   │   ├── tutorials/      # 教程库(一级入口)
+│   │   ├── membership/     # 会员中心
+│   │   └── api/            # API路由
+│   │       ├── tools/      # 前台工具API (含[id]详情)
+│   │       ├── categories/ # 分类API
+│   │       ├── tags/       # 标签API
+│   │       ├── ratings/    # 评分API
+│   │       ├── reviews/    # 评论API
+│   │       ├── favorites/  # 收藏API
+│   │       ├── history/    # 浏览历史API
+│   │       ├── rankings/   # 榜单API
+│   │       ├── tutorials/  # 教程API
+│   │       ├── prompts/    # Prompt模板API
+│   │       ├── members/    # 会员API
+│   │       ├── ads/        # 广告API
+│   │       └── admin/      # 后台管理API
+│   ├── components/ui/      # Shadcn UI 组件库
+│   ├── data/               # 静态数据（旧）
+│   ├── storage/database/   # Supabase数据库
+│   └── lib/                # 工具库
+├── next.config.ts          # Next.js 配置
+├── package.json            # 项目依赖管理
+└── tsconfig.json           # TypeScript 配置
 ```
 
----
+## 数据库结构
 
-## UI设计规范
+### 主要表
 
-### 设计理念
-
-**核心理念**：简洁高效、专业可信、轻松愉悦
-
-- **目标用户**：普通用户、小白用户为主，需要极简操作路径
-- **使用场景**：快速找到工具、一键完成AI处理
-- **设计风格**：现代简约、功能导向、避免过度装饰
-
-### 色彩系统
-
-```css
-/* 主色调 - 龙虾红橙渐变 */
---color-primary: #f97316;        /* orange-500 */
---color-primary-hover: #ea580c;  /* orange-600 */
---color-primary-light: #fed7aa;  /* orange-200 */
-
-/* 语义色 */
---color-success: #22c55e;        /* green-500 - 免费/成功 */
---color-warning: #f59e0b;        /* amber-500 - 警告/热门 */
---color-danger: #ef4444;         /* red-500 - 错误/付费 */
---color-info: #3b82f6;           /* blue-500 - 信息/链接 */
-
-/* 中性色 */
---color-bg: #ffffff;             /* 背景色 */
---color-bg-muted: #f8fafc;       /* 次级背景 */
---color-border: #e2e8f0;         /* 边框色 */
---color-text: #0f172a;           /* 主文字 */
---color-text-muted: #64748b;     /* 次级文字 */
-```
-
-### 字体规范
-
-| 用途 | 字体 | 备选 | 字号 |
-|------|------|------|------|
-| 标题 | Inter | system-ui | 24-32px |
-| 副标题 | Inter | system-ui | 18-20px |
-| 正文 | Inter | system-ui | 14-16px |
-| 辅助文字 | Inter | system-ui | 12-13px |
-
-### 间距系统
-
-| 名称 | 值 | 用途 |
-|------|-----|------|
-| xs | 4px | 紧凑元素间距 |
-| sm | 8px | 小组件内间距 |
-| md | 16px | 常规间距 |
-| lg | 24px | 区块间距 |
-| xl | 32px | 大区块间距 |
-| 2xl | 48px | 页面内大区块 |
-
-### 圆角规范
-
-| 用途 | 圆角 | Tailwind |
+| 表名 | 说明 | 主要字段 |
 |------|------|----------|
-| 按钮 | 12px | `rounded-xl` |
-| 卡片 | 16px | `rounded-2xl` |
-| 输入框 | 12px | `rounded-xl` |
-| 头像 | 50% | `rounded-full` |
-| 徽章 | 6px | `rounded-md` |
+| `categories` | 一级分类 | id, name, slug, sort_order |
+| `sub_categories` | 二级分类 | id, name, parent_id |
+| `tools` | 工具库 | id, name, logo, producer, highlight, category_id, free_type, feature_tags, official_url, promotion_url, is_featured, is_active |
+| `tags` | 标签 | id, name, type |
+| `user_favorites` | 用户收藏 | id, user_id, tool_id |
+| `user_ratings` | 用户评分 | id, user_id, tool_id, effect_score, usability_score |
+| `admin_users` | 管理员用户 | id, username, password_hash, email, role, is_active |
+| `admin_sessions` | 管理员会话 | id, user_id, token, expires_at |
+| `users` | 用户表 | id, user_id, openid, nickname, avatar_url, phone |
+| `user_sessions` | 用户会话 | id, user_id, token, expires_at |
+| `skill_categories` | 技能分类表 | id, name, slug, icon, color, sort_order |
+| `skills` | 技能表 | id, name, slug, description, logo, category_id, official_url, tags |
 
-### 阴影规范
+### 技能库
 
-| 用途 | 阴影 | Tailwind |
-|------|------|----------|
-| 卡片 | 0 1px 3px rgba(0,0,0,0.1) | `shadow-sm` |
-| 悬浮 | 0 4px 6px rgba(0,0,0,0.1) | `shadow-md` |
-| 弹窗 | 0 20px 25px rgba(0,0,0,0.1) | `shadow-xl` |
-| 主按钮 | 0 4px 14px rgba(249,115,22,0.3) | 自定义 |
+技能库是从 [SkillHub](https://skillhub.cn/skills) 爬取的真实 AI 技能数据，涵盖 Agent、代码开发、效率工具等多个领域。
 
----
-
-## 工具扩展架构
-
-### 工具注册系统
-
-```typescript
-// src/components/tools/registry.ts
-
-// 工具配置接口
-export interface ToolConfig {
-  key: string;                    // 唯一标识
-  name: string;                   // 显示名称
-  description: string;            // 简短描述
-  category: ToolCategory;         // 所属分类
-  icon: string;                   // Emoji 或图标
-  color: string;                  // 渐变色类
-  component: React.ComponentType;  // 工具组件
-  requiresAuth: boolean;          // 是否需要登录
-  credits: number;                // 消耗积分
-  quota?: {                        // 免费额度
-    daily?: number;
-    total?: number;
-  };
-}
-
-// 工具分类
-export type ToolCategory = 
-  | 'image-processing'  // 图片处理
-  | 'marketing'         // 营销图
-  | 'ai-design'         // AI设计
-  | 'video'             // 视频处理
-  | 'document';         // 文档处理
-
-// 已注册工具
-export const TOOL_REGISTRY: Record<string, ToolConfig> = {};
-
-// 注册工具装饰器
-export function registerTool(config: ToolConfig) {
-  return (Component: React.ComponentType) => {
-    TOOL_REGISTRY[config.key] = { ...config, component: Component };
-    return Component;
-  };
-}
-```
-
-### 工具组件规范
-
-```typescript
-// src/components/tools/templates/BasicTool.tsx
-
-/**
- * 基础工具模板
- * 所有工具组件应继承此模板
- */
-export interface BaseToolProps {
-  onComplete?: (result: ToolResult) => void;  // 完成回调
-  onError?: (error: Error) => void;           // 错误回调
-}
-
-export function BasicToolTemplate({ 
-  config, 
-  onComplete, 
-  onError 
-}: BaseToolProps & { config: ToolConfig }) {
-  // 统一的状态管理
-  const [step, setStep] = useState<'input' | 'processing' | 'result'>('input');
-  const [result, setResult] = useState<string | null>(null);
-  
-  // 统一的上传处理
-  const handleUpload = async (file: File) => {
-    setStep('processing');
-    try {
-      const res = await processTool(config.key, file);
-      setResult(res.url);
-      setStep('result');
-      onComplete?.(res);
-    } catch (err) {
-      onError?.(err as Error);
-      setStep('input');
-    }
-  };
-  
-  // 统一的操作提示
-  const renderGuide = () => (
-    <div className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-4 border border-orange-100">
-      <p className="text-sm text-slate-600">
-        <span className="font-semibold text-orange-600">使用提示：</span>
-        {config.guide}
-      </p>
-    </div>
-  );
-  
-  // ... 具体实现
-}
-```
-
-### 工具路由映射
-
-```
-/tools
-├── page.tsx                    # 工具列表页
-├── [toolKey]/                  # 动态工具页
-│   └── page.tsx               # 独立工具页
-└── api/
-    └── process/               # 工具处理API
-        └── route.ts          # 统一处理入口
-```
-
-### 新增工具流程
-
-```
-1. 定义工具配置 → src/components/tools/registry.ts
-2. 创建工具组件 → src/components/tools/tools/{toolName}.tsx
-3. 注册工具 → 在 registry 中添加
-4. 添加国际化（可选）→ src/locales/
-5. 更新数据库分类（如需要）
-6. 测试验证
-```
-
----
-
-## 安全设计
-
-### 认证与授权
-
-#### JWT Token 管理
-
-```typescript
-// src/lib/auth.ts
-
-interface TokenPayload {
-  userId: string;
-  role: 'user' | 'admin';
-  exp: number;
-  iat: number;
-}
-
-// Token 有效期
-const ACCESS_TOKEN_EXPIRY = '1h';
-const REFRESH_TOKEN_EXPIRY = '7d';
-
-// 安全的 Token 存储
-function setAuthCookie(token: string) {
-  // HttpOnly: 防止 XSS
-  // Secure: 仅 HTTPS
-  // SameSite: 防止 CSRF
-  document.cookie = `auth_token=${token}; HttpOnly; Secure; SameSite=Strict; Path=/`;
-}
-```
-
-#### 权限层级
-
-| 角色 | 权限 |
+| 分类 | 说明 |
 |------|------|
-| 游客 | 浏览、搜索、使用基础工具 |
-| 注册用户 | 评分、收藏、评论、使用高级工具 |
-| 会员 | 无限使用、优先通道 |
-| 管理员 | 内容管理、用户管理、系统配置 |
+| AI | Agent、自我优化、知识图谱等 |
+| 智能开发 | 代码审查、API、浏览器自动化等 |
+| 工具效率 | 搜索、总结、文件处理等 |
+| 数据分析 | SQL、数据可视化等 |
+| 内容创作 | 写作、SEO等 |
+| 安全合规 | 安全检测、隐私保护等 |
+| 通讯协作 | 团队协作、客服等 |
 
-### 输入安全
-
-#### 文件上传验证
+### 工具字段说明
 
 ```typescript
-// src/lib/validators.ts
-
-interface UploadValidation {
-  maxSize: number;           // 最大文件大小 (MB)
-  allowedTypes: string[];    // 允许的类型
-  allowedExtensions: string[]; // 允许的扩展名
-}
-
-const IMAGE_UPLOAD_RULES: UploadValidation = {
-  maxSize: 10,               // 10MB
-  allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp']
-};
-
-function validateUpload(file: File, rules: UploadValidation): ValidationResult {
-  // 1. 检查文件大小
-  if (file.size > rules.maxSize * 1024 * 1024) {
-    return { valid: false, error: `文件大小不能超过 ${rules.maxSize}MB` };
-  }
-  
-  // 2. 检查 MIME 类型
-  if (!rules.allowedTypes.includes(file.type)) {
-    return { valid: false, error: '不支持的文件类型' };
-  }
-  
-  // 3. 检查扩展名
-  const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-  if (!rules.allowedExtensions.includes(ext)) {
-    return { valid: false, error: '不支持的文件扩展名' };
-  }
-  
-  // 4. 检查文件名（防止路径遍历）
-  if (/[<>:"/\\|?*]/.test(file.name)) {
-    return { valid: false, error: '文件名包含非法字符' };
-  }
-  
-  return { valid: true };
+interface Tool {
+  id: number;
+  name: string;              // 工具名称
+  logo: string;              // Logo URL
+  producer: string;          // 出品方
+  highlight: string;         // 一句话核心亮点(15字内)
+  category_id: number;       // 一级分类ID
+  sub_category_ids: number[]; // 二级分类ID数组
+  free_type: string;         // 免费类型: 完全免费/免费额度/限时免费/付费工具
+  free_quota_desc: string;   // 免费额度说明
+  feature_tags: string[];    // 功能标签
+  max_duration: string;      // 生成时长上限
+  official_url: string;      // 官网链接
+  promotion_url: string;     // 推广链接(优先)
+  is_official: boolean;      // 官方认证
+  is_featured: boolean;      // 首页推荐
+  is_active: boolean;        // 是否上架
+  advantages: string[];      // 核心优势(最多3条)
+  limitations: string[];     // 局限性(最多2条)
+  commercial_license: string; // 商用授权
 }
 ```
 
-#### API 请求验证
+## API接口
 
-```typescript
-// src/lib/validators.ts
+### 前台API
 
-// 速率限制配置
-const RATE_LIMITS = {
-  anonymous: { requests: 30, window: '1m' },
-  user: { requests: 100, window: '1m' },
-  admin: { requests: 1000, window: '1m' }
-};
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/tools` | GET | 获取工具列表(支持分页、筛选、搜索) |
+| `/api/categories` | GET | 获取分类列表 |
+| `/api/tags` | GET | 获取标签列表 |
+| `/api/ratings` | GET/POST | 工具评分统计与提交 |
+| `/api/reviews` | GET/POST | 评论列表与发布 |
+| `/api/favorites` | GET/POST/DELETE | 用户收藏管理 |
+| `/api/history` | GET/POST/DELETE | 浏览历史管理 |
+| `/api/rankings` | GET | 榜单数据(热门、免费、新品) |
+| `/api/tutorials` | GET/POST | 教程库 |
+| `/api/prompts` | GET/POST | Prompt模板库 |
+| `/api/members` | GET/POST | 会员信息管理 |
+| `/api/ads` | GET/POST | 广告位管理 |
 
-// 参数验证 Schema
-const toolProcessSchema = z.object({
-  toolKey: z.string().min(1).max(50),
-  params: z.record(z.any()).optional(),
-  fileId: z.string().uuid().optional()
-});
-```
+### 后台管理API
 
-### 数据安全
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/api/admin/tools` | GET/POST/PUT/DELETE | 工具CRUD |
+| `/api/admin/tools/import` | POST | 批量导入工具 |
+| `/api/admin/tools/migrate` | POST | 从静态数据迁移 |
+| `/api/admin/init-data` | GET/POST | 初始化基础数据 |
+| `/api/admin/health-check` | GET | 链接健康检查 |
 
-#### 敏感信息处理
+## 前台功能模块
 
-```typescript
-// 禁止在以下场景暴露敏感信息
-// ❌ console.log(user.password)
-// ❌ API 响应包含 password_hash
-// ❌ URL 参数传递敏感 ID
-// ❌ localStorage 存储 Token
+### 核心功能
+1. **用户评分与短评** - 四维评分(效果、易用性、额度、稳定性) + 文字评论
+2. **用户收藏与工作台** (`/workspace`) - 收藏管理、浏览历史、评分记录
+3. **榜单中心** (`/rankings`) - 热门榜单、免费神器、新品上线、场景化榜单
+4. **提示词库** (`/prompts`) - AI视频创作提示词模板库
+5. **教程库** (`/tutorials`) - AI工具使用教程
 
-// ✅ 正确做法
-// - 密码仅用于验证，不返回前端
-// - 使用 UUID 代替自增 ID
-// - Token 存储在 HttpOnly Cookie
-```
+### 增值功能
+1. **会员体系** - 月度/年度/终身三级会员
+2. **付费收录** - sponsor_type字段支持basic/premium/diamond
+3. **广告系统** - 多位置广告位管理
 
-#### 数据库安全
+## UI 设计规范 (CRITICAL)
 
-```sql
--- 敏感字段加密
-ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_encrypted text;
-
--- 审计日志
-CREATE TABLE audit_logs (
-  id bigserial PRIMARY KEY,
-  user_id uuid,
-  action text NOT NULL,
-  resource text NOT NULL,
-  ip_address inet,
-  user_agent text,
-  created_at timestamptz DEFAULT now()
-);
-
--- 定期清理敏感数据
-DELETE FROM sessions WHERE expires_at < now();
-```
+为保证全站 UI 风格统一，前台和后台必须遵循各自的规范，禁止混用。
 
 ---
 
-## 性能优化
+# 一、前台网站规范
 
-### 首屏加载优化
+## 1.1 布局架构
 
-#### 关键指标目标
-
-| 指标 | 目标值 | 优化策略 |
-|------|--------|----------|
-| FCP | < 1.8s | SSR + 关键CSS内联 |
-| LCP | < 2.5s | 预加载首图 |
-| FID | < 100ms | 代码分割 |
-| CLS | < 0.1 | 固定尺寸 |
-
-#### 资源加载策略
-
-```typescript
-// next.config.ts
-const nextConfig = {
-  images: {
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    domains: ['cdn.example.com']
-  },
-  async headers() {
-    return [{
-      source: '/:all*(svg|jpg|png|webp|avif)',
-      headers: [{
-        key: 'Cache-Control',
-        value: 'public, max-age=31536000, immutable'
-      }]
-    }];
-  }
-};
+```
+┌─────────────────────────────────────────────┐
+│  Header (固定顶部导航)                        │
+├─────────────────────────────────────────────┤
+│  主内容区                                    │
+│  ├── 列表页: max-w-7xl                      │
+│  ├── 详情页: max-w-4xl (居中)               │
+│  └── 特殊页面: 按需调整                      │
+├─────────────────────────────────────────────┤
+│  Footer (底部信息)                           │
+└─────────────────────────────────────────────┘
 ```
 
-### 运行时性能
+## 1.2 页面宽度规范
 
-#### 工具组件优化
+| 页面类型 | 宽度 | 备注 |
+|----------|------|------|
+| 首页 | `max-w-7xl` | 全宽展示 |
+| 列表页 | `max-w-7xl` | 工具列表、提示词库等 |
+| 详情页 | `max-w-4xl mx-auto` | 工具、提示词、技能、教程 |
+| 弹窗/表单 | `max-w-md` ~ `max-w-2xl` | Dialog、Form等 |
+| 落地页 | `max-w-6xl` | 专题页、活动页 |
 
-```typescript
-// src/components/tools/ImageProcessor.tsx
+## 1.3 详情页统一结构
 
-'use client';
+所有详情页（工具/提示词/技能/教程）必须保持一致：
 
-// 1. 使用 useMemo 缓存计算结果
-const processedImage = useMemo(() => {
-  return applyFilters(imageData, filters);
-}, [imageData, filters]);
+```
+┌─────────────────────────────────────────┐
+│  BackToHome 组件（返回首页按钮）         │
+├─────────────────────────────────────────┤
+│  主内容区（max-w-4xl mx-auto）           │
+│  ├── 面包屑/标题区                       │
+│  ├── 核心信息卡片                        │
+│  ├── 数据平铺区（无Tab，按重要程度排序）  │
+│  └── 相关推荐                            │
+├─────────────────────────────────────────┤
+│  WechatPromo 组件（公众号推广）          │
+└─────────────────────────────────────────┘
+```
 
-// 2. 使用 useCallback 缓存回调
-const handleProcess = useCallback(async () => {
-  await processImage(uploadedImage);
-}, [uploadedImage]);
+## 1.4 前台禁止事项
 
-// 3. 使用 useTransition 处理长时间操作
-const [isPending, startTransition] = useTransition();
-startTransition(() => {
-  setProcessingState('processing');
-});
+| 禁止项 | 说明 |
+|--------|------|
+| Tabs 组件 | 详情页严禁使用 Tabs，数据必须平铺展示 |
+| 独立布局 | 禁止创建独立 header/footer，必须使用 layout.tsx 的全局布局 |
+| 后台组件 | 禁止使用 admin/ 目录下的组件 |
 
-// 4. 图片懒加载
-<img 
-  src={src} 
-  loading="lazy" 
-  decoding="async"
-  fetchpriority="high"  // LCP 图片高优先级
+## 1.5 前台专用组件
+
+| 组件 | 用途 | 导入路径 |
+|------|------|----------|
+| `BackToHome` | 返回首页按钮 | `@/components/BackToHome` |
+| `WechatPromo` | 公众号推广 | `@/components/WechatPromo` |
+| `LobsterLoading` | 加载状态 | `@/components/LobsterLoading` |
+
+## 1.6 前台卡片样式
+
+```tsx
+// 标准卡片
+<Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
+  <CardContent className="p-4">
+    {/* 内容 */}
+  </CardContent>
+</Card>
+
+// 列表卡片（带hover效果）
+<Card className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200">
+  <CardContent className="p-5">
+    {/* 内容 */}
+  </CardContent>
+</Card>
+```
+
+## 1.7 表单输入框交互规范 (CRITICAL)
+
+**必须遵循的交互状态规范**：
+
+| 状态 | 边框颜色 | 说明 |
+|------|----------|------|
+| 默认 | `border-2 border-slate-200 dark:border-slate-700` | 2px 灰色边框 |
+| Hover | `hover:border-orange-400 dark:hover:border-orange-500` | 橙色边框 |
+| Focus | `border-orange-500` | 橙色边框（Input 组件内置） |
+
+### ⚠️ Input 组件全局样式修复 (必须执行)
+
+shadcn/ui 的 Input 组件有默认的 focus 样式，会覆盖自定义样式。**必须修改 `src/components/ui/input.tsx`**：
+
+```tsx
+// ❌ 错误：默认的 focus 样式会覆盖自定义样式
+"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+
+// ✅ 正确：使用橙色边框作为默认 focus 样式
+"focus-visible:border-orange-500"
+```
+
+### ✅ 全局输入框样式规范
+
+所有输入框必须保持一致的样式，包括圆角、padding、边框等细节：
+
+```tsx
+// ========== Input 输入框 ==========
+<Input 
+  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
+             border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+             hover:border-orange-400 dark:hover:border-orange-500 
+             transition-colors text-sm text-slate-800 dark:text-slate-200"
 />
 
-// 5. 组件懒加载
-const HeavyChart = dynamic(() => import('./Chart'), {
-  loading: () => <Skeleton />,
-  ssr: false
-});
+// ========== Textarea 多行文本框 ==========
+<textarea
+  className="w-full px-4 py-3 bg-white dark:bg-slate-800 
+             border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+             hover:border-orange-400 dark:hover:border-orange-500 
+             focus:outline-none focus:border-orange-500 
+             transition-colors text-sm text-slate-800 dark:text-slate-200 
+             resize-none placeholder:text-slate-400"
+/>
+
+// ========== Select 选择器 ==========
+<SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
+                         border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                         hover:border-orange-400 dark:hover:border-orange-500 
+                         focus:outline-none focus:border-orange-500 
+                         transition-colors text-sm text-slate-800 dark:text-slate-200">
+  <SelectValue />
+</SelectTrigger>
+
+// ========== Outline 按钮 ==========
+<Button variant="outline" className="px-4 py-2.5 
+                                    border-2 border-slate-200 dark:border-slate-700 
+                                    hover:border-orange-400 dark:hover:border-orange-500 
+                                    transition-colors">
+  按钮文字
+</Button>
 ```
 
-#### 状态管理优化
+### 样式细节说明
 
-```typescript
-// 1. 使用 Context 分离频繁变化的状态
-const ImageContext = createContext<{
-  image: string | null;
-  setImage: (img: string) => void;
-}>();
+| 元素 | 样式 | 值 |
+|------|------|-----|
+| 圆角 | `rounded-xl` | 12px |
+| 边框宽度 | `border-2` | 2px |
+| 内边距-单行 | `px-4 py-2.5` | 16px 10px |
+| 内边距-多行 | `px-4 py-3` | 16px 12px |
+| 背景色 | `bg-white dark:bg-slate-800` | 白色/深色 |
+| 边框色-默认 | `border-slate-200 dark:border-slate-700` | 灰/深灰 |
+| 边框色-Hover | `hover:border-orange-400` | 橙色 |
+| 边框色-Focus | `focus:border-orange-500` | 深橙色 |
+| 文字大小 | `text-sm` | 14px |
+| 过渡动画 | `transition-colors` | 颜色过渡 |
 
-// 2. 使用 Zustand 管理工具状态（比 Redux 更轻量）
-import { create } from 'zustand';
+### ❌ 禁止的错误写法
 
-interface ToolState {
-  activeTool: string | null;
-  processingQueue: string[];
-  results: Record<string, ToolResult>;
-  setActiveTool: (key: string) => void;
-  addToQueue: (id: string) => void;
-}
+```tsx
+// 错误1: 圆角不一致（用了 rounded-lg 而非 rounded-xl）
+className="... rounded-lg ..."
 
-export const useToolStore = create<ToolState>((set) => ({
-  activeTool: null,
-  processingQueue: [],
-  results: {},
-  setActiveTool: (key) => set({ activeTool: key }),
-  addToQueue: (id) => set((state) => ({
-    processingQueue: [...state.processingQueue, id]
-  })),
-}));
+// 错误2: padding 不一致
+className="... px-3 py-2 ..." // 应该是 px-4 py-2.5
+
+// 错误3: 边框宽度不一致
+className="... border ..." // 应该是 border-2
+
+// 错误4: 背景色不一致
+className="... bg-slate-50 ..." // 应该是 bg-white
+
+// 错误5: hover/focus 颜色不一致
+className="... hover:border-slate-300 ..." // 应该是 hover:border-orange-400
+
+// 错误6: focus 使用 ring（导致双层边框）
+className="... focus:ring-2 focus:ring-orange-500 ..."
+
+// 错误7: 缺少 transition
+className="..." // 应该加上 transition-colors
 ```
 
-### API 性能
+### 规范要点
 
-#### 缓存策略
+1. **Input 组件**：已内置 `focus-visible:border-orange-500`，只需添加 hover 样式
+2. **Textarea/Select**：需要手动添加 `focus:outline-none focus:border-orange-500`
+3. **圆角统一**：`rounded-xl`（12px）
+4. **边框宽度**：统一使用 `border-2`
+5. **背景色**：统一使用 `bg-white dark:bg-slate-800`
+6. **Hover 颜色**：`hover:border-orange-400`
+7. **禁止 ring**：Focus 时禁止使用 `focus:ring-*`
 
-```typescript
-// src/app/api/tools/route.ts
+---
 
-// 1. 数据缓存（5分钟）
-export const revalidate = 300;
+# 二、后台管理系统规范
 
-// 2. 静态生成
-export async function generateStaticParams() {
-  const categories = await getCategories();
-  return categories.map((cat) => ({ category: cat.slug }));
-}
+## 2.1 布局架构
 
-// 3. On-Demand Revalidation
-// 当数据库更新时触发
-// await revalidatePath('/tools');
+```
+┌──────────┬─────────────────────────────────┐
+│          │  Header (页面标题)              │
+│  Sidebar │─────────────────────────────────│
+│  (固定)  │                                 │
+│          │  主内容区 (无固定宽度限制)        │
+│          │                                 │
+│          │                                 │
+└──────────┴─────────────────────────────────┘
 ```
 
-#### 分页与无限滚动
+**核心原则**：后台所有页面都基于 `/app/admin/layout.tsx` 的侧边栏布局，不允许创建独立布局。
 
-```typescript
-// src/lib/pagination.ts
+## 2.2 页面结构规范
 
-interface PaginationParams {
-  page: number;
-  pageSize: number;
-  cursor?: string;
+**✅ 正确的后台页面结构：**
+
+```tsx
+// src/app/admin/xxx/page.tsx
+export default function AdminXxxPage() {
+  return (
+    <div className="space-y-6">
+      {/* 页面标题 */}
+      <div>
+        <h2 className="text-2xl font-bold">页面标题</h2>
+        <p className="text-sm text-slate-500">页面描述</p>
+      </div>
+      
+      {/* 内容区域 */}
+      <div className="space-y-4">
+        {/* ... */}
+      </div>
+    </div>
+  );
 }
+```
 
-interface PaginatedResponse<T> {
-  items: T[];
-  nextCursor?: string;
-  hasMore: boolean;
-  total: number;
-}
+**❌ 后台禁止事项：**
 
-// 使用 cursor  pagination 优化大数据量
-async function getTools({ cursor, pageSize = 20 }: PaginationParams) {
-  const query = supabase
-    .from('tools')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(pageSize);
-  
-  if (cursor) {
-    query.gt('id', cursor);
-  }
-  
-  const { data, count } = await query;
-  return {
-    items: data,
-    nextCursor: data?.[data.length - 1]?.id,
-    hasMore: data?.length === pageSize,
-    total: count || 0
-  };
-}
+| 禁止项 | 说明 | 正确做法 |
+|--------|------|----------|
+| `<header>` | 禁止创建独立导航 | 使用 layout 的 Header |
+| `min-h-screen` | 禁止全屏高度 | 使用 `space-y-6` 间距 |
+| `<main>` | 禁止独立 main 标签 | 使用 `<div>` 或 `<section>` |
+| `AnimatedLobster` | 禁止前台组件 | 不导入 |
+| `BackToHome` | 禁止前台组件 | 不导入 |
+| `WechatPromo` | 禁止前台组件 | 不导入 |
+| 独立 CSS | 禁止内联样式 | 使用 Tailwind 类 |
+
+## 2.3 后台页面宽度规范
+
+| 页面类型 | 宽度 | 备注 |
+|----------|------|------|
+| 列表页 | `max-w-7xl` | 数据表格、分页列表 |
+| 表单页 | `max-w-5xl` | 添加/编辑表单 |
+| 弹窗 | `max-w-md` ~ `max-w-2xl` | Dialog |
+| 仪表盘 | 无限制 | 统计卡片自适应 |
+
+## 2.4 后台卡片样式
+
+```tsx
+// 后台标准卡片
+<Card className="bg-white dark:bg-slate-800">
+  <CardHeader>
+    <CardTitle>标题</CardTitle>
+  </CardHeader>
+  <CardContent>
+    {/* 内容 */}
+  </CardContent>
+</Card>
+
+// 后台紧凑卡片
+<Card className="bg-white dark:bg-slate-800">
+  <CardContent className="p-4">
+    {/* 内容 */}
+  </CardContent>
+</Card>
+```
+
+## 2.5 后台常用组件
+
+```tsx
+// UI 组件
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+// Lucide 图标
+import { IconName } from 'lucide-react';
 ```
 
 ---
+
+# 三、通用规范（前后台共用）
+
+## 3.1 按钮样式
+
+```tsx
+// 主要按钮（橙色调 - 用于重要操作）
+<Button className="bg-orange-500 hover:bg-orange-600 text-white">
+  确认操作
+</Button>
+
+// 次要按钮（outline）
+<Button variant="outline" className="border-slate-300 hover:bg-slate-50">
+  取消
+</Button>
+
+// 危险按钮（删除等）
+<Button variant="destructive">删除</Button>
+
+// 幽灵按钮（图标按钮）
+<Button variant="ghost" size="icon">
+  <Icon className="w-4 h-4" />
+</Button>
+```
+
+## 3.2 主题色彩
+
+| 用途 | 颜色 | Tailwind 类 |
+|------|------|-------------|
+| 主题主色 | 橙色 | `orange-500` / `orange-600` |
+| 成功/免费 | 绿色 | `green-500` / `emerald-500` |
+| 警告 | 黄色 | `amber-500` / `yellow-500` |
+| 错误/付费 | 红色 | `red-500` / `rose-500` |
+| 信息 | 蓝色 | `blue-500` / `sky-500` |
+| 边框 | 灰色 | `slate-200` / `slate-700` |
+
+## 3.3 间距规范
+
+| 用途 | Tailwind 类 |
+|------|-------------|
+| 页面内大间距 | `space-y-6` 或 `gap-6` |
+| 卡片内间距 | `p-4` 或 `p-6` |
+| 元素间距 | `gap-2` 或 `gap-4` |
+| 标题与内容 | `mb-4` 或 `mt-6` |
+
+## 3.4 响应式断点
+
+| 断点 | Tailwind | 适用场景 |
+|------|----------|----------|
+| 手机 | 默认 | 移动端布局 |
+| 平板 | `md:` | 2列布局 |
+| 桌面 | `lg:` | 3-4列布局、侧边栏 |
+| 大屏 | `xl:` 或 `2xl:` | 全宽展示 |
+
+---
+
+# 四、检查清单
+
+## 前台开发检查
+
+- [ ] 是否使用 `max-w-7xl` 或 `max-w-4xl`
+- [ ] 详情页是否使用 `BackToHome` + `WechatPromo`
+- [ ] 详情页是否**没有** Tabs 组件
+- [ ] 是否**没有**导入后台组件
+
+## 后台开发检查
+
+- [ ] 是否**没有**独立 `<header>`
+- [ ] 是否**没有** `min-h-screen`
+- [ ] 是否**没有** `<main>` 标签
+- [ ] 是否**没有** `AnimatedLobster`
+- [ ] 是否**没有** `BackToHome`
+- [ ] 是否**没有** `WechatPromo`
+- [ ] 根元素是否使用 `<div className="space-y-6">`
+
+#### 3.4 间距规范
+
+| 用途 | Tailwind 类 |
+|------|-------------|
+| 页面内大间距 | `space-y-6` 或 `gap-6` |
+| 卡片内间距 | `p-4` 或 `p-6` |
+| 元素间距 | `gap-2` 或 `gap-4` |
+| 标题与内容 | `mb-4` 或 `mt-6` |
+
+#### 3.5 响应式断点
+
+| 断点 | Tailwind | 适用场景 |
+|------|----------|----------|
+| 手机 | 默认 | 移动端布局 |
+| 平板 | `md:` | 2列布局 |
+| 桌面 | `lg:` | 3-4列布局、侧边栏 |
+| 大屏 | `xl:` 或 `2xl:` | 全宽展示 |
+
+---
+
+### 四、组件导入规范
+
+```tsx
+// UI 组件
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+
+// 前台专用
+import BackToHome from '@/components/BackToHome';
+import WechatPromo from '@/components/WechatPromo';
+import LobsterLoading from '@/components/LobsterLoading';
+
+// Lucide 图标
+import { IconName } from 'lucide-react';
+```
+
+## 后台管理系统
+
+访问地址: `/admin`
+
+### 管理员账号安全
+
+**重要**：生产环境初始化时，系统会自动创建管理员账号：
+- 用户名：`admin`
+- 密码：优先使用环境变量 `ADMIN_PASSWORD`，若未设置则生成随机高强度密码
+- 密码仅在初始化时返回一次，请妥善保存
+- **切勿在代码或日志中明文存储密码**
+
+### 功能模块
+
+1. **仪表盘** (`/admin`) 
+   - 统计概览（工具数、浏览量、点击量、评分数等）
+   - 快捷操作入口
+   - 最近添加工具
+   - 热门工具 TOP 5
+   - 链接健康检查
+
+2. **工具管理** (`/admin/tools`)
+   - 工具列表(搜索、筛选、分页)
+   - 添加/编辑工具
+   - 批量导入
+   - 推荐设置
+   - 上下架管理
+
+3. **分类管理** (`/admin/categories`) 
+   - 一级分类CRUD
+   - 二级分类展示
+   - 排序设置
+   
+4. **标签管理** (`/admin/tags`)
+   - 标签分类展示
+   - 标签CRUD
+   - 按类型筛选
+
+5. **评论审核** (`/admin/reviews`)
+   - 待审核评论列表
+   - 通过/拒绝操作
+   - 评论详情查看
+
+6. **微信配置** (`/admin/wechat`)
+   - 公众号AppID/AppSecret配置
+   - 登录二维码URL配置
+   - 消息服务器配置
+
+## 用户登录系统
+
+### 微信扫码登录
+
+C端用户通过微信扫码登录，登录后可进行评分、收藏、评论等互动操作。
+
+**登录流程：**
+1. 用户点击登录按钮，打开登录弹窗
+2. 前端请求 `/api/auth?action=qrcode` 获取二维码
+3. 前端轮询 `/api/auth?action=check&sceneId=xxx` 检查扫码状态
+4. 用户扫码后状态变为 `scanned`，确认后变为 `confirmed`
+5. 登录成功，设置 `user_token` Cookie（有效期30天）
+
+**开发环境：**
+- 支持模拟登录按钮，方便开发调试
+- 模拟登录会创建测试用户并返回token
+
+**生产环境配置：**
+1. 在微信公众平台获取 AppID 和 AppSecret
+2. 配置服务器URL：`https://oneclaw.shop/api/wechat/callback`
+3. 生成带参数的二维码，将URL配置到后台
+4. 实现微信消息回调处理（需单独开发）
+
+### 用户数据表
+
+| 表名 | 说明 |
+|------|------|
+| `users` | 用户信息表 |
+| `user_sessions` | 用户会话表 |
+| `login_requests` | 登录请求表（扫码状态跟踪） |
+| `wechat_config` | 微信公众号配置表 |
+
+4. **标签管理** (`/admin/tags`)
+   - 标签分类展示
+   - 标签CRUD
+   - 按类型筛选
+
+5. **评论审核** (`/admin/reviews`)
+   - 待审核评论列表
+   - 通过/拒绝操作
+   - 评论详情查看
+
+## SEO优化
+
+### Favicon配置
+- 使用Next.js的icon约定，动态生成favicon
+- `/icon` - 32x32 PNG格式favicon
+- `/apple-icon` - 180x180 PNG格式Apple Touch Icon
+- 使用龙虾emoji(🦞)配合红橙渐变背景
+
+### 元数据配置
+- 完整的title、description、keywords
+- Open Graph标签（Facebook、微信分享）
+- Twitter Card标签
+- 百度站长验证meta标签
+- 结构化数据（JSON-LD）：WebSite、Organization、ItemList
+
+### 百度SEO优化
+1. **百度站长验证**：在`layout.tsx`中添加验证meta标签
+2. **百度自动推送**：自动向百度提交新页面
+3. **百度统计**：需替换`YOUR_BAIDU_ANALYTICS_ID`
+4. **robots.txt**：配置Baiduspider、Baiduspider-image爬虫规则
+5. **sitemap.xml**：包含所有主要页面，每日更新
+
+### 百度收录步骤
+1. 访问 [百度搜索资源平台](https://ziyuan.baidu.com/)
+2. 添加网站并选择验证方式（推荐HTML标签验证）
+3. 将验证码替换到`layout.tsx`中的`baidu-site-verification` meta标签
+4. 提交sitemap：`https://oneclaw.shop/sitemap.xml`
+5. 等待百度爬虫收录（通常需要1-2周）
+
+## 包管理规范
+
+**仅允许使用 pnpm** 作为包管理器，**严禁使用 npm 或 yarn**。
 
 ## 开发规范
 
-### TypeScript 规范
-
-```typescript
-// 1. 严格模式
-{
-  "compilerOptions": {
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitReturns": true
-  }
-}
-
-// 2. 类型定义位置
-// - 组件 Props → 组件文件内
-// - API 类型 → src/types/api.ts
-// - 数据库模型 → src/types/models.ts
-// - 工具配置 → src/types/tool.ts
-
-// 3. 禁止使用 any
-// ❌ function process(data: any)
-// ✅ function process(data: ToolInput)
-
-// 4. 显式返回类型
-function getToolByKey(key: string): ToolConfig | null {
-  return TOOL_REGISTRY[key] ?? null;
-}
-```
-
-### React 组件规范
-
-```typescript
-// 1. 组件文件结构
-// src/components/tools/ExampleTool.tsx
-
-/**
- * 示例工具组件
- * 
- * @description 工具的详细说明
- * @requires auth - 是否需要登录
- * @credits 10 - 消耗积分
- */
-'use client';
-
-import { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-
-// Props 类型定义
-interface ExampleToolProps {
-  onComplete?: (result: string) => void;
-}
-
-// 组件实现
-export function ExampleTool({ onComplete }: ExampleToolProps) {
-  // Hooks
-  const [value, setValue] = useState('');
-  
-  // 回调使用 useCallback
-  const handleSubmit = useCallback(() => {
-    onComplete?.(value);
-  }, [value, onComplete]);
-  
-  // 渲染
-  return (
-    <Card>
-      <CardContent>
-        {/* 内容 */}
-      </CardContent>
-    </Card>
-  );
-}
-
-// 默认导出（支持动态导入）
-export default ExampleTool;
-```
-
-### CSS / Tailwind 规范
-
-```tsx
-// 1. 使用语义化类名
-// ❌ <div className="mt-4 p-4 bg-white rounded-lg shadow">
-// ✅ <div className="mt-6 p-6 bg-card rounded-xl shadow-sm">
-
-// 2. 使用 CSS 变量
-<div className="text-primary hover:bg-primary/10" />
-
-// 3. 响应式断点
-// 手机优先：默认 → md: → lg: → xl:
-// ❌ lg:grid lg:grid-cols-4
-// ✅ grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4
-
-// 4. 动画优先使用 CSS
-<div className="transition-all duration-300 hover:scale-105" />
-```
-
-### Git 提交规范
-
-```bash
-# 格式
-<type>(<scope>): <subject>
-
-# 示例
-feat(tools): add image background removal tool
-fix(ui): correct button hover state
-docs(readme): update installation guide
-refactor(auth): simplify token refresh logic
-perf(api): optimize database queries
-test(tools): add unit tests for image processor
-
-# Type
-- feat: 新功能
-- fix: 修复 bug
-- docs: 文档更新
-- style: 代码格式（不影响功能）
-- refactor: 重构
-- perf: 性能优化
-- test: 测试相关
-- chore: 构建/工具相关
-```
-
----
-
-## 测试规范
-
-### 单元测试
-
-```typescript
-// src/lib/__tests__/validators.test.ts
-
-import { validateUpload } from '../validators';
-import { IMAGE_UPLOAD_RULES } from '../constants';
-
-describe('validateUpload', () => {
-  it('should reject oversized files', () => {
-    const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
-    Object.defineProperty(file, 'size', { value: 20 * 1024 * 1024 }); // 20MB
-    
-    const result = validateUpload(file, IMAGE_UPLOAD_RULES);
-    expect(result.valid).toBe(false);
-    expect(result.error).toContain('10MB');
-  });
-  
-  it('should accept valid image types', () => {
-    const file = new File(['test'], 'test.png', { type: 'image/png' });
-    Object.defineProperty(file, 'size', { value: 1024 * 1024 }); // 1MB
-    
-    const result = validateUpload(file, IMAGE_UPLOAD_RULES);
-    expect(result.valid).toBe(true);
-  });
-});
-```
-
-### 集成测试
-
-```typescript
-// src/app/api/tools/__tests__/route.test.ts
-
-describe('GET /api/tools', () => {
-  it('should return paginated tools', async () => {
-    const response = await fetch('/api/tools?page=1&pageSize=10');
-    const data = await response.json();
-    
-    expect(response.status).toBe(200);
-    expect(data.items).toBeInstanceOf(Array);
-    expect(data.total).toBeGreaterThan(0);
-  });
-  
-  it('should filter by category', async () => {
-    const response = await fetch('/api/tools?category=image-processing');
-    const data = await response.json();
-    
-    expect(data.items.every((t: any) => t.category === 'image-processing')).toBe(true);
-  });
-});
-```
-
-### E2E 测试（Playwright）
-
-```typescript
-// e2e/tools.spec.ts
-
-import { test, expect } from '@playwright/test';
-
-test.describe('工具页面', () => {
-  test('should load tool list', async ({ page }) => {
-    await page.goto('/tools');
-    
-    // 验证标题
-    await expect(page.locator('h1')).toContainText('AI工具箱');
-    
-    // 验证工具卡片
-    const cards = page.locator('[data-testid="tool-card"]');
-    await expect(cards.first()).toBeVisible();
-  });
-  
-  test('should process image tool', async ({ page }) => {
-    await page.goto('/tools/remove-bg');
-    
-    // 上传图片
-    const input = page.locator('input[type="file"]');
-    await input.setInputFiles('test-image.png');
-    
-    // 验证处理按钮
-    const processBtn = page.locator('button:has-text("一键抠图")');
-    await expect(processBtn).toBeEnabled();
-    
-    // 点击处理
-    await processBtn.click();
-    
-    // 验证结果
-    await expect(page.locator('text=抠图完成')).toBeVisible({ timeout: 10000 });
-  });
-});
-```
-
-### 公共组件规范
-
-#### 组件导出结构
-
-```typescript
-// src/components/common/index.ts
-// 通用组件统一导出
-
-// 默认导出组件
-export { default as BackButton } from './BackButton';
-export { default as BackToHome } from './BackToHome';
-export { default as LoginButton } from './LoginButton';
-export { default as LoginModal } from './LoginModal';
-export { default as WechatPromo } from './WechatPromo';
-export { default as UserButton } from './UserButton';
-export { default as Sidebar } from './Sidebar';
-export { default as Header } from './Header';
-export { default as Footer } from './Footer';
-export { default as SkeletonGrid } from './LobsterSkeleton';
-
-// 命名导出组件
-export { AnimatedLobster } from './AnimatedLobster';
-export { LobsterLoading } from './LobsterLoading';
-export { ToolCardSkeleton, SkillCardSkeleton, PromptCardSkeleton } from './LobsterSkeleton';
-export { ErrorBoundary, withApiError, LazyLoad } from './ErrorBoundary';
-export { Providers } from './Providers';
-```
-
-#### 布局结构规范
-
-所有前台页面必须遵循以下布局结构：
-
-```tsx
-export default function Page() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
-      {/* 1. 左侧统一侧边栏 - 固定定位 */}
-      <Sidebar />
-
-      {/* 2. 主内容区 - 使用 ml-56 偏移 */}
-      <main className="flex-1 ml-56">
-        {/* 3. 统一顶部栏 */}
-        <Header title="页面标题" showRightArea={false} />
-
-        {/* 4. 页面内容 */}
-        <div className="p-8">
-          {/* ... */}
-        </div>
-      </main>
-
-      {/* 5. 底部 Footer - 需要 ml-56 包裹 */}
-      <div className="ml-56">
-        <Footer />
-      </div>
-    </div>
-  );
-}
-```
-
-**关键规范**：
-- `ml-56`：主内容区和 Footer 必须使用此偏移量，与侧边栏宽度 (268px) 对齐
-- `showRightArea={false}`：Header 默认显示登录/会员按钮，在使用 Sidebar 底部的统一按钮时需关闭
-- Footer 必须包裹在 `ml-56` 容器内，确保对齐
-
-#### Sidebar 组件规范
-
-```tsx
-// 使用示例
-<Sidebar 
-  showUserArea={true}  // 是否显示底部登录/会员区域
-  className=""         // 自定义样式
-/>
-```
-
-**功能特性**：
-- 可折叠侧边栏（展开 268px，折叠 72px）
-- Logo 区域：点击跳转首页，折叠时 hover 显示展开按钮
-- 导航菜单：主要菜单（首页、工具、模板）、次要菜单（最近打开、资产库）、底部菜单（更多）
-- 用户区域：登录按钮 + 开通会员按钮
-
-#### Header 组件规范
-
-```tsx
-// 使用示例
-<Header 
-  title="页面标题"
-  subtitle="副标题描述"
-  badge="徽章文字"           // 可选会员徽章
-  showRightArea={false}       // 是否显示右侧区域（默认 true）
-  rightContent={null}         // 自定义右侧内容
-/>
-```
-
-**规范**：
-- 当页面使用 Sidebar 底部的统一登录/会员按钮时，需设置 `showRightArea={false}`
-- `badge` 属性用于显示会员徽章（如 "1.1元开通会员"）
-
-#### 页面模板
-
-```tsx
-// src/app/example/page.tsx
-
-'use client';
-
-import { Sidebar, Header, Footer } from '@/components/common';
-
-export default function ExamplePage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
-      {/* 左侧统一侧边栏 */}
-      <Sidebar />
-
-      {/* 主内容区 */}
-      <main className="flex-1 ml-56">
-        {/* 统一顶部 */}
-        <Header title="示例页面" subtitle="页面描述" showRightArea={false} />
-
-        <div className="p-8">
-          {/* 页面内容 */}
-        </div>
-      </main>
-
-      {/* 底部 - 全宽 */}
-      <div className="ml-56">
-        <Footer />
-      </div>
-    </div>
-  );
-}
-```
-
----
-
-## 附录
-
-### 环境变量
-
-```bash
-# .env.local
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=xxx
-SUPABASE_SERVICE_ROLE_KEY=xxx
-
-# 认证
-JWT_SECRET=xxx
-ADMIN_PASSWORD=xxx
-
-# API Keys
-BAIDU_ANALYTICS_ID=xxx
-
-# 文件存储
-NEXT_PUBLIC_CDN_URL=https://cdn.oneclaw.shop
-```
-
-### 常用命令
+- **字段命名**: 使用 snake_case (数据库字段)
+- **Hydration 错误预防**: 严禁在 JSX 渲染逻辑中直接使用 typeof window、Date.now()、Math.random() 等
+- **UI 设计**: 采用 shadcn/ui 组件、风格和规范
+- **数据操作**: 使用 Supabase SDK，每次调用检查 { data, error }
+
+## 常用命令
 
 ```bash
 # 开发
-pnpm dev              # 启动开发服务器
-pnpm lint             # 代码检查
-pnpm ts-check         # 类型检查
+pnpm dev
 
 # 构建
-pnpm build            # 生产构建
-pnpm start            # 启动生产服务器
+pnpm build
 
-# 数据库
-pnpm db:generate      # 生成类型
-pnpm db:migrate        # 执行迁移
+# 生产环境数据初始化
+curl -X POST https://oneclaw.shop/api/admin/init-production
 
-# 测试
-pnpm test             # 单元测试
-pnpm test:e2e         # E2E 测试
+# 导入工具数据
+curl -X POST https://oneclaw.shop/api/admin/tools/import \
+  -H "Content-Type: application/json" \
+  -d '{"tools": [...]}'
+
+# 数据库迁移
+coze-coding-ai db generate-models  # 同步模型
+coze-coding-ai db upgrade          # 同步到数据库
+
+# 初始化基础数据
+curl -X POST http://localhost:5000/api/admin/init-data
+
+# 迁移工具数据
+curl -X POST http://localhost:5000/api/admin/tools/migrate
 ```
 
-### 相关资源
+## SEO优化
 
-- [Next.js 文档](https://nextjs.org/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [shadcn/ui](https://ui.shadcn.com/)
-- [Supabase](https://supabase.com/docs)
+- 已配置完整的 metadata
+- 支持 sitemap.xml 和 robots.txt
+- 包含 JSON-LD 结构化数据
