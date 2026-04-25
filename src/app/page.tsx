@@ -7,7 +7,8 @@ import {
   Search, Wand2, Home, LayoutDashboard,
   Sparkles, ImageIcon, Star, Plus, Sparkle,
   PartyPopper, Coffee, FileText, Smartphone,
-  ChevronRight, Crown, Shirt, Video, Smile
+  ChevronRight, Crown, Shirt, Video, Smile,
+  ChevronLeft, PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -431,6 +432,7 @@ function TemplatesPage() {
 // ==================== 主页面组件 ====================
 export default function MainPage() {
   const [mainTab, setMainTab] = useState<MainTab>('home');
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   return (
     <div className="min-h-screen bg-slate-50/50 dark:bg-slate-900/50">
@@ -444,18 +446,31 @@ export default function MainPage() {
       {/* 主内容区 - DesignKit 布局 */}
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="flex gap-6">
-          {/* 左侧导航 - DesignKit 侧边栏风格 */}
-          <aside className="hidden lg:block w-16 flex-shrink-0">
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm sticky top-20 p-2 space-y-1 border border-slate-100 dark:border-slate-700">
-              {/* Logo */}
-              <div className="flex justify-center mb-3 pt-2">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-sm">
+          {/* 左侧导航 - DesignKit 可折叠侧边栏 */}
+          <aside className={`hidden lg:block flex-shrink-0 transition-all duration-300 ease-in-out ${sidebarExpanded ? 'w-48' : 'w-16'}`}>
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm sticky top-20 border border-slate-100 dark:border-slate-700 overflow-hidden h-fit">
+              {/* Logo 区域 - 可点击展开/收起 */}
+              <button 
+                onClick={() => setSidebarExpanded(!sidebarExpanded)}
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-sm flex-shrink-0">
                   <AnimatedLobster size={22} />
                 </div>
-              </div>
+                <span className={`font-bold text-sm text-slate-800 dark:text-white whitespace-nowrap overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                  OneClaw
+                </span>
+                <div className={`ml-auto transition-transform duration-300 ${sidebarExpanded ? 'rotate-0' : 'rotate-180'}`}>
+                  {sidebarExpanded ? (
+                    <PanelLeftClose className="w-4 h-4 text-slate-400" />
+                  ) : (
+                    <PanelLeft className="w-4 h-4 text-slate-400" />
+                  )}
+                </div>
+              </button>
               
               {/* 导航列表 */}
-              <nav className="space-y-1">
+              <nav className="px-2 pb-2 space-y-1">
                 {NAV_ITEMS.map(tab => {
                   const Icon = tab.icon;
                   const isActive = mainTab === tab.key;
@@ -464,23 +479,33 @@ export default function MainPage() {
                     <button
                       key={tab.key}
                       onClick={() => setMainTab(tab.key)}
-                      title={tab.label}
-                      className={`w-full aspect-square rounded-xl flex items-center justify-center transition-all ${
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group ${
                         isActive
-                          ? 'bg-gradient-to-br from-orange-400 to-amber-400 text-white shadow-sm'
-                          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200'
+                          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-sm'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200'
                       }`}
                     >
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                        {tab.label}
+                      </span>
                     </button>
                   );
                 })}
               </nav>
               
               {/* 底部会员入口 */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-700 space-y-1">
-                <Link href="/membership" title="会员中心" className="w-full aspect-square rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-500 transition-colors">
-                  <Crown className="w-5 h-5" />
+              <div className="px-2 pb-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                <Link 
+                  href="/membership" 
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 hover:text-amber-500 transition-colors ${
+                    sidebarExpanded ? '' : 'justify-center'
+                  }`}
+                >
+                  <Crown className="w-5 h-5 flex-shrink-0" />
+                  <span className={`text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ${sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0'}`}>
+                    会员中心
+                  </span>
                 </Link>
               </div>
             </div>

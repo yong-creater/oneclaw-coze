@@ -551,6 +551,11 @@ html {
 }
 .dark .tag-pill-inactive:hover {
   background-color: #4b5563;
+}
+
+/* 侧边栏展开/收起动画 */
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }/* 卡片柔和hover效果 */
 .card-soft {
   transition: all 0.2s ease;
