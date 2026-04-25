@@ -27,6 +27,7 @@ const navigation = [
   { name: '用户管理', href: '/admin/users' },
   { name: '订单管理', href: '/admin/orders' },
   { name: '广告管理', href: '/admin/ads' },
+  { name: 'API Key', href: '/admin/api-keys' },
   { name: '微信配置', href: '/admin/wechat' },
 ];
 
