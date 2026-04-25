@@ -1,419 +1,163 @@
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { Search, Plus, Edit, Trash2, Star, ExternalLink, ChevronLeft, ChevronRight, Upload } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Search, Plus, Edit, ExternalLink, Grid3X3, Trash2 } from 'lucide-react';
 
-interface Tool {
-  id: number;
-  name: string;
-  logo: string;
-  producer: string;
-  highlight: string;
-  category_id: number;
-  free_type: string;
-  is_featured: boolean;
-  is_active: boolean;
-  official_url: string;
-  promotion_url: string | null;
-  created_at: string;
-  categories: { name: string; slug: string };
-}
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  total_pages: number;
-}
-
-function ToolsAdminContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const currentCategoryId = searchParams.get('category') || 'all';
-  
-  const [tools, setTools] = useState<Tool[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1, limit: 20, total: 0, total_pages: 0
-  });
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      params.set('page', pagination.page.toString());
-      params.set('limit', pagination.limit.toString());
-      if (search) params.set('search', search);
-      if (currentCategoryId && currentCategoryId !== 'all') {
-        params.set('category_id', currentCategoryId);
-      }
-      // 添加时间戳防止缓存
-      params.set('_t', Date.now().toString());
-      
-      const res = await fetch(`/api/admin/tools?${params}`);
-      const data = await res.json();
-      
-      if (data.success) {
-        setTools(data.data);
-        setPagination(prev => ({ ...prev, total: data.pagination.total, total_pages: data.pagination.total_pages }));
-      }
-    } catch (error) {
-      console.error('获取数据失败:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [pagination.page, pagination.limit, search, currentCategoryId]);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch(`/api/admin/init-data?_t=${Date.now()}`);
-      const data = await res.json();
-      if (data.success) {
-        setCategories(data.data.categories);
-      }
-    } catch (error) {
-      console.error('获取分类失败:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    setPagination(prev => ({ ...prev, page: 1 }));
-  }, [currentCategoryId]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
-
-  const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`确定要删除工具「${name}」吗？`)) return;
-    
-    try {
-      const res = await fetch(`/api/admin/tools?id=${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        fetchData();
-      } else {
-        alert('删除失败: ' + data.error);
-      }
-    } catch (error) {
-      console.error('删除失败:', error);
-      alert('删除失败');
-    }
-  };
-
-  const handleToggleFeatured = async (id: number, is_featured: boolean) => {
-    try {
-      const res = await fetch('/api/admin/tools', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, is_featured: !is_featured }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        fetchData();
-      } else {
-        alert('更新失败: ' + data.error);
-      }
-    } catch (error) {
-      console.error('更新失败:', error);
-      alert('更新失败');
-    }
-  };
-
-  const handleToggleActive = async (id: number, is_active: boolean) => {
-    try {
-      const res = await fetch('/api/admin/tools', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, is_active: !is_active }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        fetchData();
-      } else {
-        alert('更新失败: ' + data.error);
-      }
-    } catch (error) {
-      console.error('更新失败:', error);
-      alert('更新失败');
-    }
-  };
-
-  const getCurrentCategoryName = () => {
-    if (currentCategoryId === 'all') return '全部工具';
-    const cat = categories.find(c => c.id.toString() === currentCategoryId.toString());
-    return cat?.name || '全部工具';
-  };
-
-  const handleCategoryClick = (catId: string) => {
-    if (catId === 'all') {
-      router.push('/admin/tools');
-    } else {
-      router.push(`/admin/tools?category=${catId}`);
-    }
-  };
-
-  return (
-    <div className="flex gap-6 min-h-[calc(100vh-120px)]">
-      {/* 左侧分类导航 */}
-      <aside className="w-56 flex-shrink-0">
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 sticky top-4">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-            <h2 className="font-semibold text-slate-800 dark:text-white">分类筛选</h2>
-          </div>
-          <nav className="p-2">
-            <button
-              onClick={() => handleCategoryClick('all')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                currentCategoryId === 'all'
-                  ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-              }`}
-            >
-              <span>全部工具</span>
-              <span className="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">
-                {pagination.total}
-              </span>
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat.id.toString())}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                  currentCategoryId?.toString() === cat.id.toString()
-                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                <span className="truncate">{cat.name}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
-      </aside>
-
-      {/* 右侧内容区 */}
-      <div className="flex-1 space-y-4">
-        {/* 工具栏 */}
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-slate-800 dark:text-white">{getCurrentCategoryName()}</h1>
-            <span className="text-sm text-slate-500">({pagination.total})</span>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {/* 搜索框 */}
-            <div className="relative flex items-center">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="搜索工具..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="pl-10 pr-4 py-2 w-56 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
-            </div>
-            
-            <button
-              onClick={handleSearch}
-              className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm hover:bg-orange-600"
-            >
-              搜索
-            </button>
-            
-            <Link
-              href="/admin/tools/import"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                text-slate-600 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              <Upload className="w-4 h-4" />
-              导入
-            </Link>
-            <Link
-              href="/admin/tools/new"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white 
-                text-sm font-medium hover:bg-orange-600 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              添加
-            </Link>
-          </div>
-        </div>
-
-        {/* 工具列表 */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-          {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
-            </div>
-          ) : tools.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 dark:bg-slate-700/50">
-                  <tr>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">工具</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">分类</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">免费类型</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">状态</th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-slate-500 dark:text-slate-400">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
-                  {tools.map((tool) => (
-                    <tr key={tool.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <img 
-                            src={tool.logo} 
-                            alt={tool.name}
-                            className="w-10 h-10 rounded-lg object-cover bg-slate-100"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">' + tool.name[0] + '</text></svg>';
-                            }}
-                          />
-                          <div>
-                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{tool.name}</p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">{tool.producer}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm text-slate-600 dark:text-slate-300">
-                        {tool.categories?.name || '-'}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleToggleFeatured(tool.id, tool.is_featured)}
-                            className={`p-1 rounded transition-colors ${
-                              tool.is_featured 
-                                ? 'text-orange-500 hover:text-orange-600' 
-                                : 'text-slate-300 hover:text-orange-500'
-                            }`}
-                            title={tool.is_featured ? '取消推荐' : '设为推荐'}
-                          >
-                            <Star className="w-4 h-4" fill={tool.is_featured ? 'currentColor' : 'none'} />
-                          </button>
-                          <button
-                            onClick={() => handleToggleActive(tool.id, tool.is_active)}
-                            className={`px-2 py-1 text-xs rounded-full transition-colors ${
-                              tool.is_active 
-                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
-                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                            }`}
-                          >
-                            {tool.is_active ? '上架' : '下架'}
-                          </button>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-2">
-                          <a
-                            href={tool.promotion_url || tool.official_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-1.5 rounded text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30"
-                            title="访问官网"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                          <Link
-                            href={`/admin/tools/${tool.id}/edit`}
-                            className="p-1.5 rounded text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30"
-                            title="编辑"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Link>
-                          <button
-                            onClick={() => handleDelete(tool.id, tool.name)}
-                            className="p-1.5 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30"
-                            title="删除"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-slate-500 dark:text-slate-400 mb-4">暂无工具数据</p>
-              <Link
-                href="/admin/tools/import"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white 
-                  text-sm font-medium hover:bg-blue-600 transition-colors"
-              >
-                批量导入工具
-              </Link>
-            </div>
-          )}
-
-          {/* 分页 */}
-          {pagination.total_pages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 dark:border-slate-700">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                共 {pagination.total} 条记录
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-                  disabled={pagination.page === 1}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                    disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <span className="text-sm text-slate-600 dark:text-slate-300">
-                  {pagination.page} / {pagination.total_pages}
-                </span>
-                <button
-                  onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-                  disabled={pagination.page === pagination.total_pages}
-                  className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                    disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+// 7个AI生图工具
+const AI_IMAGE_TOOLS = [
+  { 
+    id: 1,
+    name: 'AI头像表情包', 
+    desc: '上传照片，一键生成精美头像和表情包', 
+    tag: '热门',
+    color: 'from-pink-100 to-rose-100',
+    key: 'avatar-emoji',
+    url: '/avatar-emoji'
+  },
+  { 
+    id: 2,
+    name: '形象照生成', 
+    desc: 'AI生成专业简历形象照', 
+    tag: '推荐',
+    color: 'from-sky-100 to-blue-100',
+    key: 'resume-photo',
+    url: '/resume-photo'
+  },
+  { 
+    id: 3,
+    name: '小红书配图', 
+    desc: '爆款小红书封面图一键生成', 
+    tag: '热门',
+    color: 'from-pink-50 to-red-50',
+    key: 'xiaohongshu',
+    url: '/xiaohongshu'
+  },
+  { 
+    id: 4,
+    name: '抖音封面生成', 
+    desc: '视频封面一键生成，支持多种风格', 
+    tag: '新版',
+    color: 'from-purple-100 to-pink-100',
+    key: 'douyin',
+    url: '/douyin'
+  },
+  { 
+    id: 5,
+    name: '餐饮菜单设计', 
+    desc: '上传菜品图片，智能生成精美菜单', 
+    tag: '实用',
+    color: 'from-amber-100 to-orange-100',
+    key: 'restaurant-menu',
+    url: '/restaurant-menu'
+  },
+  { 
+    id: 6,
+    name: '节日营销海报', 
+    desc: '端午、中秋等节日海报一键生成', 
+    tag: '限时',
+    color: 'from-red-100 to-orange-100',
+    key: 'festival-poster',
+    url: '/festival-poster'
+  },
+  { 
+    id: 7,
+    name: '商品详情页', 
+    desc: '电商主图和详情页设计', 
+    tag: '新版',
+    color: 'from-emerald-100 to-teal-100',
+    key: 'productpage',
+    url: '/productpage'
+  },
+];
 
 export default function ToolsAdminPage() {
+  const [tools] = useState(AI_IMAGE_TOOLS);
+  const [search, setSearch] = useState('');
+
+  const filteredTools = tools.filter(tool => 
+    tool.name.toLowerCase().includes(search.toLowerCase()) ||
+    tool.desc.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+    <div className="space-y-6">
+      {/* 页面标题 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">工具管理</h1>
+          <p className="text-sm text-slate-500 mt-1">管理AI生图工具，共 {tools.length} 个工具</p>
+        </div>
+        <Button>
+          <Plus className="w-4 h-4 mr-2" />
+          添加工具
+        </Button>
       </div>
-    }>
-      <ToolsAdminContent />
-    </Suspense>
+
+      {/* 搜索 */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        <Input
+          placeholder="搜索工具..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      {/* 工具列表 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredTools.map((tool) => (
+          <Card key={tool.id} className="overflow-hidden">
+            {/* 预览图 */}
+            <div className={`h-32 bg-gradient-to-br ${tool.color} flex items-center justify-center relative`}>
+              <div className="w-16 h-16 rounded-2xl bg-white/80 dark:bg-slate-700/80 flex items-center justify-center">
+                <span className="text-xl font-bold text-slate-600 dark:text-slate-300">{tool.name.slice(0, 2)}</span>
+              </div>
+              <Badge className="absolute top-3 right-3" variant="secondary">
+                {tool.tag}
+              </Badge>
+            </div>
+            
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <h3 className="font-semibold text-slate-800 dark:text-white">{tool.name}</h3>
+                  <p className="text-sm text-slate-500 mt-0.5">{tool.desc}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
+                <Link href={tool.url} target="_blank" className="flex-1">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <ExternalLink className="w-4 h-4 mr-1" />
+                    访问
+                  </Button>
+                </Link>
+                <Button variant="outline" size="sm">
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* 空状态 */}
+      {filteredTools.length === 0 && (
+        <div className="text-center py-12">
+          <Grid3X3 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-slate-500">没有找到匹配的工具</h3>
+          <p className="text-sm text-slate-400 mt-1">尝试其他关键词</p>
+        </div>
+      )}
+    </div>
   );
 }

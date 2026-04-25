@@ -3,353 +3,222 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Wrench, FolderTree, Tags, Eye, MousePointer, TrendingUp, 
-  Star, Users, FileText, AlertTriangle, Plus, Download,
-  ExternalLink, Settings, Database, RefreshCw
+import { 
+  Grid3X3,
+  FolderTree,
+  Tags,
+  Users,
+  TrendingUp,
+  Clock,
+  ExternalLink
 } from 'lucide-react';
 
 interface Stats {
   tools_count: number;
-  featured_count: number;
-  active_count: number;
   categories: number;
   tags: number;
-  total_views: number;
-  total_clicks: number;
-  ratings_count: number;
-  reviews_pending: number;
+  users: number;
 }
 
-interface RecentTool {
-  id: number;
-  name: string;
-  logo: string;
-  producer: string;
-  free_type: string;
-  is_featured: boolean;
-  is_active: boolean;
-  click_count: number;
-  created_at: string;
-}
-
-interface TopTool {
-  id: number;
-  name: string;
-  logo: string;
-  click_count: number;
-}
-
-interface HealthIssueItem {
-  type: string;
-  url: string;
-  healthy: boolean;
-  status?: number;
-  error?: string;
-}
-
-interface HealthIssue {
-  tool_id: number;
-  tool_name: string;
-  issues: HealthIssueItem[];
-}
+// 7个AI生图工具
+const AI_IMAGE_TOOLS = [
+  { name: 'AI头像表情包', key: 'avatar-emoji', color: 'bg-pink-100 text-pink-600' },
+  { name: '形象照生成', key: 'resume-photo', color: 'bg-sky-100 text-sky-600' },
+  { name: '小红书配图', key: 'xiaohongshu', color: 'bg-red-100 text-red-600' },
+  { name: '抖音封面生成', key: 'douyin', color: 'bg-purple-100 text-purple-600' },
+  { name: '餐饮菜单设计', key: 'restaurant-menu', color: 'bg-amber-100 text-amber-600' },
+  { name: '节日营销海报', key: 'festival-poster', color: 'bg-orange-100 text-orange-600' },
+  { name: '商品详情页', key: 'productpage', color: 'bg-emerald-100 text-emerald-600' },
+];
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats>({
     tools_count: 0,
-    featured_count: 0,
-    active_count: 0,
     categories: 0,
     tags: 0,
-    total_views: 0,
-    total_clicks: 0,
-    ratings_count: 0,
-    reviews_pending: 0
+    users: 0
   });
-  const [recentTools, setRecentTools] = useState<RecentTool[]>([]);
-  const [topTools, setTopTools] = useState<TopTool[]>([]);
   const [loading, setLoading] = useState(true);
-  const [checkingHealth, setCheckingHealth] = useState(false);
-  const [healthIssues, setHealthIssues] = useState<HealthIssue[]>([]);
 
   useEffect(() => {
-    fetchDashboardData();
+    fetchStats();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchStats = async () => {
     setLoading(true);
     try {
-      // 并行获取统计数据、最近工具、热门工具
-      const [statsRes, toolsRes, topRes] = await Promise.all([
-        fetch('/api/admin/stats'),
-        fetch('/api/admin/tools?limit=5'),
-        fetch('/api/tools?limit=5'),
-      ]);
-      
-      const statsData = await statsRes.json();
-      const toolsData = await toolsRes.json();
-      const topData = await topRes.json();
-      
-      if (statsData.success) {
-        setStats(statsData.data);
-      }
-      
-      if (toolsData.success) {
-        setRecentTools(toolsData.data || []);
-      }
-
-      if (topData.success) {
-        setTopTools(topData.data || []);
+      const res = await fetch('/api/admin/stats');
+      const data = await res.json();
+      if (data.success) {
+        setStats({
+          tools_count: data.data?.tools_count || 0,
+          categories: data.data?.categories || 0,
+          tags: data.data?.tags || 0,
+          users: data.data?.users_count || 0
+        });
       }
     } catch (error) {
-      console.error('获取数据失败:', error);
+      console.error('获取统计数据失败:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const checkHealth = async () => {
-    setCheckingHealth(true);
-    try {
-      const res = await fetch('/api/admin/health-check');
-      const data = await res.json();
-      if (data.success) {
-        setHealthIssues(data.data.issues || []);
-        if (data.data.issues?.length > 0) {
-          alert(`发现 ${data.data.issues.length} 个工具链接异常`);
-        } else {
-          alert('所有工具链接正常');
-        }
-      }
-    } catch (error) {
-      console.error('健康检查失败:', error);
-    } finally {
-      setCheckingHealth(false);
-    }
-  };
-
   const statCards = [
-    { name: '工具总数', value: stats.tools_count, icon: Wrench, color: 'bg-blue-500', href: '/admin/tools' },
-    { name: '分类数量', value: stats.categories, icon: FolderTree, color: 'bg-green-500', href: '/admin/categories' },
-    { name: '标签数量', value: stats.tags, icon: Tags, color: 'bg-purple-500', href: '/admin/tags' },
-    { name: '首页推荐', value: stats.featured_count, icon: TrendingUp, color: 'bg-orange-500' },
-    { name: '总浏览量', value: stats.total_views.toLocaleString(), icon: Eye, color: 'bg-cyan-500' },
-    { name: '总点击量', value: stats.total_clicks.toLocaleString(), icon: MousePointer, color: 'bg-pink-500' },
-    { name: '用户评分', value: stats.ratings_count, icon: Star, color: 'bg-yellow-500' },
-    { name: '待审评论', value: stats.reviews_pending, icon: AlertTriangle, color: 'bg-red-500', href: '/admin/reviews' },
+    { title: 'AI生图工具', value: 7, icon: Grid3X3, color: 'text-orange-500', bg: 'bg-orange-50' },
+    { title: '分类数量', value: stats.categories || 1, icon: FolderTree, color: 'text-blue-500', bg: 'bg-blue-50' },
+    { title: '标签数量', value: stats.tags || 3, icon: Tags, color: 'text-purple-500', bg: 'bg-purple-50' },
+    { title: '用户数量', value: stats.users || 0, icon: Users, color: 'text-green-500', bg: 'bg-green-50' },
   ];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">管理后台</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">OneClaw AI视频工具导航站管理</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={checkHealth} disabled={checkingHealth}>
-            {checkingHealth ? (
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Database className="w-4 h-4 mr-2" />
-            )}
-            链接检测
-          </Button>
-          <Link href="/" target="_blank">
-            <Button variant="outline" size="sm">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              查看站点
-            </Button>
-          </Link>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">仪表盘</h1>
+        <p className="text-sm text-slate-500 mt-1">欢迎回来，查看系统概览</p>
       </div>
 
       {/* 统计卡片 */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {statCards.map((stat) => (
-          <Link key={stat.name} href={stat.href || '#'}>
-            <Card className="hover:shadow-md transition-shadow cursor-pointer">
-              <CardContent className="p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statCards.map((stat, idx) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={idx}>
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{stat.name}</p>
-                    <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-1">
-                      {stat.value}
+                    <p className="text-sm text-slate-500">{stat.title}</p>
+                    <p className="text-2xl font-bold text-slate-800 dark:text-white mt-1">
+                      {loading ? '-' : stat.value}
                     </p>
                   </div>
-                  <div className={`p-2.5 rounded-lg ${stat.color}`}>
-                    <stat.icon className="w-5 h-5 text-white" />
+                  <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center`}>
+                    <Icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </Link>
-        ))}
+          );
+        })}
       </div>
 
-      {/* 快捷操作 */}
+      {/* AI生图工具管理 */}
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">快捷操作</CardTitle>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Grid3X3 className="w-5 h-5 text-orange-500" />
+              AI生图工具
+            </CardTitle>
+            <Link href="/admin/tools">
+              <Badge variant="outline" className="cursor-pointer hover:bg-slate-50">
+                管理工具
+                <ExternalLink className="w-3 h-3 ml-1" />
+              </Badge>
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/admin/tools/new">
-              <Button size="sm" className="bg-gradient-to-r from-orange-500 to-red-500">
-                <Plus className="w-4 h-4 mr-2" />
-                添加工具
-              </Button>
-            </Link>
-            <Link href="/admin/tools/import">
-              <Button variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                批量导入
-              </Button>
-            </Link>
-            <Link href="/admin/categories">
-              <Button variant="outline" size="sm">
-                <FolderTree className="w-4 h-4 mr-2" />
-                分类管理
-              </Button>
-            </Link>
-            <Link href="/admin/tags">
-              <Button variant="outline" size="sm">
-                <Tags className="w-4 h-4 mr-2" />
-                标签管理
-              </Button>
-            </Link>
-            <Link href="/admin/reviews">
-              <Button variant="outline" size="sm">
-                <FileText className="w-4 h-4 mr-2" />
-                评论审核
-                {stats.reviews_pending > 0 && (
-                  <Badge className="ml-2 bg-red-500 text-white text-xs">{stats.reviews_pending}</Badge>
-                )}
-              </Button>
-            </Link>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            {AI_IMAGE_TOOLS.map((tool, idx) => (
+              <div
+                key={idx}
+                className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 text-center"
+              >
+                <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${tool.color} mb-2`}>
+                  <span className="text-sm font-bold">{tool.name.slice(0, 2)}</span>
+                </div>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{tool.name}</p>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 最近添加 */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">最近添加</CardTitle>
-              <Link href="/admin/tools" className="text-sm text-orange-500 hover:text-orange-600">
-                查看全部
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {recentTools.map(tool => (
-                <div key={tool.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <img 
-                    src={tool.logo} 
-                    alt={tool.name} 
-                    className="w-10 h-10 rounded-lg object-contain bg-slate-100"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</p>
-                      {tool.is_featured && (
-                        <TrendingUp className="w-3 h-3 text-orange-500" />
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-500">{tool.producer}</p>
-                  </div>
-                </div>
-              ))}
-              {recentTools.length === 0 && (
-                <p className="text-center text-sm text-slate-500 py-4">暂无数据</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      {/* 快捷操作 */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Link href="/admin/tools">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center">
+                <Grid3X3 className="w-6 h-6 text-orange-500" />
+              </div>
+              <div>
+                <h3 className="font-medium text-slate-800 dark:text-white">工具管理</h3>
+                <p className="text-sm text-slate-500">管理AI生图工具</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
-        {/* 热门工具 */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">热门工具 TOP 5</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {topTools.map((tool, index) => (
-                <div key={tool.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                    index === 0 ? 'bg-yellow-500 text-white' :
-                    index === 1 ? 'bg-slate-400 text-white' :
-                    index === 2 ? 'bg-orange-400 text-white' :
-                    'bg-slate-200 text-slate-600'
-                  }`}>
-                    {index + 1}
-                  </div>
-                  <img 
-                    src={tool.logo} 
-                    alt={tool.name} 
-                    className="w-10 h-10 rounded-lg object-contain bg-slate-100"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${tool.name[0]}</text></svg>`;
-                    }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</p>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm text-slate-500">
-                    <MousePointer className="w-3 h-3" />
-                    {tool.click_count}
-                  </div>
-                </div>
-              ))}
-              {topTools.length === 0 && (
-                <p className="text-center text-sm text-slate-500 py-4">暂无数据</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/admin/categories">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                <FolderTree className="w-6 h-6 text-blue-500" />
+              </div>
+              <div>
+                <h3 className="font-medium text-slate-800 dark:text-white">分类管理</h3>
+                <p className="text-sm text-slate-500">管理工具分类</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/admin/users">
+          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+                <Users className="w-6 h-6 text-green-500" />
+              </div>
+              <div>
+                <h3 className="font-medium text-slate-800 dark:text-white">用户管理</h3>
+                <p className="text-sm text-slate-500">管理系统用户</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
-      {/* 健康检查结果 */}
-      {healthIssues.length > 0 && (
-        <Card className="border-red-200 dark:border-red-800">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2 text-red-600">
-              <AlertTriangle className="w-5 h-5" />
-              链接异常 ({healthIssues.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {healthIssues.slice(0, 5).map((issue, index) => (
-                <div key={index} className="p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm">
-                  <p className="font-medium text-red-700 dark:text-red-300">{issue.tool_name}</p>
-                  {issue.issues.map((i, idx) => (
-                    <p key={idx} className="text-xs text-red-600 dark:text-red-400">
-                      {i.type}: {i.error || `状态码 ${i.status}`}
-                    </p>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* 最近活动 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="w-5 h-5 text-slate-500" />
+            快速入口
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Link href="/admin/tags" className="block">
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
+                <Tags className="w-5 h-5 text-purple-500 mb-2" />
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">标签管理</p>
+              </div>
+            </Link>
+            <Link href="/admin/settings" className="block">
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
+                <TrendingUp className="w-5 h-5 text-blue-500 mb-2" />
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">系统设置</p>
+              </div>
+            </Link>
+            <Link href="/" target="_blank" className="block">
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
+                <ExternalLink className="w-5 h-5 text-orange-500 mb-2" />
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">访问前台</p>
+              </div>
+            </Link>
+            <Link href="/admin/tools" className="block">
+              <div className="p-4 rounded-xl border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition-colors">
+                <Grid3X3 className="w-5 h-5 text-green-500 mb-2" />
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">添加工具</p>
+              </div>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

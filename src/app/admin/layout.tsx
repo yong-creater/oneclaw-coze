@@ -3,32 +3,29 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import { 
-  Menu,
   X,
+  Menu,
   ExternalLink,
   LogOut,
   Loader2,
+  LayoutDashboard,
+  Grid3X3,
+  FolderTree,
+  Tags,
+  Users,
   Settings
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
+// 简化的导航菜单
 const navigation = [
-  { name: '仪表盘', href: '/admin' },
-  { name: 'AI应用管理', href: '/admin/tools' },
-  { name: '分类管理', href: '/admin/categories' },
-  { name: '标签管理', href: '/admin/tags' },
-  { name: '提示词管理', href: '/admin/prompts' },
-  { name: '技能管理', href: '/admin/skills' },
-  { name: '教程管理', href: '/admin/tutorials' },
-  { name: '精选工具', href: '/admin/utilities' },
-  { name: '评论审核', href: '/admin/reviews' },
-  { name: '会员管理', href: '/admin/members' },
-  { name: '用户管理', href: '/admin/users' },
-  { name: '订单管理', href: '/admin/orders' },
-  { name: '广告管理', href: '/admin/ads' },
-  { name: 'API Key', href: '/admin/api-keys' },
-  { name: '微信配置', href: '/admin/wechat' },
+  { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
+  { name: '工具管理', href: '/admin/tools', icon: Grid3X3 },
+  { name: '分类管理', href: '/admin/categories', icon: FolderTree },
+  { name: '标签管理', href: '/admin/tags', icon: Tags },
+  { name: '用户管理', href: '/admin/users', icon: Users },
+  { name: '系统设置', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({
@@ -117,25 +114,28 @@ export default function AdminLayout({
         lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-4">
+        <div className="flex items-center justify-between h-14 px-4 border-b border-slate-100 dark:border-slate-700">
           <Link href="/admin" className="flex items-center gap-2">
-            <img src="/oneclaw-logo.png" alt="OneClaw" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-              OneClaw
-            </span>
-            <span className="text-sm text-slate-500">管理后台</span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+              <span className="text-white text-sm font-bold">🦞</span>
+            </div>
+            <div>
+              <span className="text-sm font-bold text-slate-800 dark:text-white">OneClaw</span>
+              <span className="text-xs text-slate-400 block">管理后台</span>
+            </div>
           </Link>
           <button 
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
         {/* 导航菜单 */}
-        <nav className="p-4 space-y-1">
+        <nav className="p-3 space-y-0.5">
           {navigation.map((item) => {
+            const Icon = item.icon;
             const isActive = pathname === item.href || 
               (item.href !== '/admin' && pathname.startsWith(item.href));
 
@@ -144,31 +144,32 @@ export default function AdminLayout({
                 key={item.name}
                 href={item.href}
                 className={`
-                  flex items-center px-3 py-2 rounded-lg text-sm font-medium
+                  flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
                   transition-colors duration-200
                   ${isActive 
-                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' 
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                    ? 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-white' 
+                    : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200'
                   }
                 `}
               >
-                {item.name}
+                <Icon className="w-5 h-5" />
+                <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* 返回前台 */}
+        {/* 底部操作 */}
         <div className="absolute bottom-4 left-4 right-4">
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-center px-3 py-2 rounded-lg 
-              text-sm font-medium text-slate-600 hover:bg-slate-100 
-              dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg 
+              text-sm font-medium text-slate-500 hover:bg-slate-50 
+              dark:text-slate-400 dark:hover:bg-slate-700/50 transition-colors"
           >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            返回前台
+            <ExternalLink className="w-4 h-4" />
+            <span>返回前台</span>
           </Link>
         </div>
       </aside>
