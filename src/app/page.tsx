@@ -13,7 +13,7 @@ import {
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
   FileText, Globe, TrendingUp, Briefcase, MapPin, Palette, Layers,
-  ShoppingCart, Shirt, Video, Smile, Coffee, Camera, PartyPopper
+  ShoppingCart, Shirt, Video, Smile, Coffee, Camera, PartyPopper, Smartphone
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -139,7 +139,8 @@ function UtilityToolsPage() {
               'local-poster': '/local-poster',
               'kids-creative': '/kids-creative',
               'restaurant-menu': '/restaurant-menu',
-              'social-media': '/social-media',
+              'xiaohongshu': '/xiaohongshu',
+              'douyin': '/douyin',
               'festival-poster': '/festival-poster',
             };
             return urls[key] || '/';
@@ -221,7 +222,7 @@ const UTILITY_TOOLS = [
     key: 'avatar-emoji',
     name: '头像表情包',
     icon: Sparkles,
-    description: 'AI表情包/头像一键生成，支持多种风格定制',
+    description: '上传照片，一键生成各种风格的精美头像和表情包',
     color: 'from-yellow-500 to-orange-500',
     tags: ['头像生成', '表情包', '个性定制'],
     useCases: [
@@ -234,7 +235,7 @@ const UTILITY_TOOLS = [
     key: 'resume-photo',
     name: '形象照生成',
     icon: UserCircle,
-    description: 'AI简历形象照/职业形象照生成，商务感十足',
+    description: '上传照片，一键生成专业简历形象照/职业照',
     color: 'from-blue-500 to-cyan-500',
     tags: ['形象照', '职业照', '商务形象'],
     useCases: [
@@ -247,22 +248,22 @@ const UTILITY_TOOLS = [
     key: 'restaurant-menu',
     name: '餐饮菜单生成',
     icon: Coffee,
-    description: '餐饮门店菜单/价目表一键生成，零设计基础也能做出高级感菜单',
+    description: '上传图片一键优化，或输入文字自动生成精美菜单',
     color: 'from-orange-500 to-amber-500',
     tags: ['餐饮模板', '菜单设计', '价目表'],
     useCases: [
-      { title: '奶茶饮品', desc: '奶茶店菜单模板' },
-      { title: '烧烤火锅', desc: '餐饮门店价目表' },
-      { title: '烘焙甜品', desc: '面包店/甜品店菜单' },
+      { title: '图片优化', desc: '上传现有菜单一键美化' },
+      { title: '文字生成', desc: '输入菜品自动生成菜单' },
+      { title: '多风格', desc: 'Ins风/国潮风/复古风' },
     ]
   },
   {
-    key: 'social-media',
-    name: '小红书抖音配图',
-    icon: Camera,
-    description: '小红书/抖音爆款图文配图一键生成，助力博主轻松产出高质量内容',
-    color: 'from-pink-500 to-purple-500',
-    tags: ['小红书配图', '抖音封面', '自媒体工具'],
+    key: 'xiaohongshu',
+    name: '小红书配图',
+    icon: BookOpen,
+    description: '输入标题，一键生成小红书爆款封面图和配图',
+    color: 'from-pink-500 to-rose-500',
+    tags: ['小红书配图', '封面图', '自媒体工具'],
     useCases: [
       { title: '封面图', desc: '爆款笔记封面生成' },
       { title: '内页配图', desc: '干货内容配图' },
@@ -270,29 +271,29 @@ const UTILITY_TOOLS = [
     ]
   },
   {
-    key: 'festival-poster',
-    name: '节日营销海报',
-    icon: PartyPopper,
-    description: '节日/门店营销活动海报一键生成，助力门店快速落地营销推广',
-    color: 'from-red-500 to-orange-500',
-    tags: ['节日海报', '营销物料', '促销宣传'],
+    key: 'douyin',
+    name: '抖音封面生成',
+    icon: Smartphone,
+    description: '输入标题，一键生成抖音爆款视频封面图',
+    color: 'from-cyan-500 to-blue-500',
+    tags: ['抖音封面', '视频封面', '自媒体工具'],
     useCases: [
-      { title: '开业大吉', desc: '新店开业宣传海报' },
-      { title: '节日专题', desc: '春节/中秋等节日海报' },
-      { title: '促销引流', desc: '打折/满减活动海报' },
+      { title: '视频封面', desc: '爆款视频封面生成' },
+      { title: '文案配图', desc: '配合文案的配图' },
+      { title: '热点模板', desc: '热点话题封面' },
     ]
   },
   {
-    key: 'local-poster',
-    name: '门店营销海报',
-    icon: MapPin,
-    description: '本地生活/实体店营销海报一键生成，高级感满满',
-    color: 'from-rose-500 to-pink-500',
-    tags: ['营销海报', '门店物料', '节日促销'],
+    key: 'festival-poster',
+    name: '节日营销海报',
+    icon: PartyPopper,
+    description: '选择节日/场景，输入主题，一键生成精美营销海报',
+    color: 'from-red-500 to-orange-500',
+    tags: ['节日海报', '营销物料', '促销宣传'],
     useCases: [
-      { title: '餐饮海报', desc: '餐厅菜单/促销海报' },
-      { title: '零售物料', desc: '超市/便利店促销物料' },
-      { title: '节日特供', desc: '春节/中秋等节日海报' },
+      { title: '春节', desc: '新春促销海报' },
+      { title: '中秋', desc: '团圆节海报' },
+      { title: '开业', desc: '新店开业海报' },
     ]
   },
   {
