@@ -289,14 +289,32 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
             <button
               key={idx}
               onClick={() => handleToolClick(tool.key)}
-              style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #f1f5f9', textAlign: 'left' }}
+              style={{ 
+                background: 'white', 
+                borderRadius: '14px', 
+                overflow: 'hidden', 
+                border: '1px solid #e2e8f0',
+                textAlign: 'left',
+                transition: 'all 200ms ease',
+                cursor: 'pointer',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px)';
+                e.currentTarget.style.boxShadow = '0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+                e.currentTarget.style.borderColor = '#f97316';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+                e.currentTarget.style.borderColor = '#e2e8f0';
+              }}
             >
-              <div style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(to bottom right, ${tool.color.replace('from-', '').replace(' to-', ', ')})` }}>
+              <div style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(135deg, ${tool.color.replace('from-', '').replace(' to-', ', ')})` }}>
                 <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'rgba(255,255,255,0.6)' }}>{tool.name.slice(0, 2)}</span>
               </div>
-              <div style={{ padding: '10px' }}>
-                <h3 style={{ fontWeight: '500', fontSize: '12px', color: '#1e293b' }}>{tool.name}</h3>
-                <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tool.desc}</p>
+              <div style={{ padding: '12px' }}>
+                <h3 style={{ fontWeight: '600', fontSize: '13px', color: '#1e293b', marginBottom: '3px' }}>{tool.name}</h3>
+                <p style={{ fontSize: '12px', color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tool.desc}</p>
               </div>
             </button>
           ))}
@@ -1011,26 +1029,26 @@ export default function MainPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex">
       {/* 左侧固定导航栏 */}
-      <aside className="w-60 bg-white border-r border-slate-200 flex flex-col h-screen fixed left-0 top-0 z-20 shadow-sm">
+      <aside className="w-60 bg-white border-r border-slate-200/80 flex flex-col h-screen fixed left-0 top-0 z-20">
         {/* Logo区域 */}
         <div className="p-4 border-b border-slate-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
-              <AnimatedLobster size={18} />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-sm shadow-orange-500/20">
+              <AnimatedLobster size={20} className="text-white" />
             </div>
             <span className="font-bold text-sm text-slate-800">OneClaw</span>
           </div>
         </div>
 
         {/* 主导航 */}
-        <nav className="flex-1 p-2 overflow-y-auto">
+        <nav className="flex-1 p-3 overflow-y-auto">
           {/* 首页 */}
           <button
             onClick={() => { setExpandedMenu(null); setActiveTab('home'); }}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all mb-1 ${
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 mb-1 ${
               activeTab === 'home' && !expandedMenu
-                ? 'bg-orange-50 text-orange-600 font-medium'
-                : 'text-slate-600 hover:bg-slate-50'
+                ? 'bg-gradient-to-r from-orange-50 to-orange-50/50 text-orange-600 border border-orange-200/50'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
             <Home className="w-5 h-5" />
@@ -1047,12 +1065,12 @@ export default function MainPage() {
               <div key={item.key}>
                 <button
                   onClick={() => handleNavClick(item.key)}
-                  className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all mb-0.5 ${
+                  className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 mb-0.5 ${
                     expandedMenu === item.key
-                      ? 'bg-orange-50 text-orange-600 font-medium'
+                      ? 'bg-gradient-to-r from-orange-50 to-orange-50/50 text-orange-600 border border-orange-200/50'
                       : activeTab === item.key && !expandedMenu
-                      ? 'bg-orange-50 text-orange-600 font-medium'
-                      : 'text-slate-600 hover:bg-slate-50'
+                      ? 'bg-gradient-to-r from-orange-50 to-orange-50/50 text-orange-600 border border-orange-200/50'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -1060,22 +1078,22 @@ export default function MainPage() {
                     <span>{item.label}</span>
                   </div>
                   {hasSub && (
-                    <ChevronRight className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    <ChevronRight className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
                   )}
                 </button>
                 
                 {/* 二级菜单 */}
                 {isExpanded && hasSub && (
-                  <div className="ml-4 mt-1 mb-2 space-y-0.5">
+                  <div className="ml-2 mt-1.5 mb-2 space-y-0.5 animate-slideDown">
                     {subNav[item.key].map((sub) => {
                       const SubIcon = sub.icon;
                       return (
                         <button
                           key={sub.key}
                           onClick={() => setActiveTab(sub.key)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
                             activeTab === sub.key
-                              ? 'bg-slate-100 text-orange-600 font-medium'
+                              ? 'bg-orange-100/70 text-orange-600 font-medium'
                               : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                           }`}
                         >
@@ -1095,7 +1113,7 @@ export default function MainPage() {
         <div className="p-3 border-t border-slate-100">
           <button
             onClick={() => router.push('/login')}
-            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-sm font-semibold transition-all duration-200 shadow-sm shadow-orange-500/25 hover:shadow-md hover:shadow-orange-500/30"
           >
             <LogIn className="w-4 h-4" />
             <span>登录 / 注册</span>
@@ -1137,25 +1155,25 @@ export default function MainPage() {
         </div>
 
         {/* 右下角悬浮按钮 */}
-        <div className="fixed right-6 bottom-6 flex flex-col gap-2 z-20">
-          <button className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-md flex items-center justify-center hover:shadow-lg transition-shadow border border-slate-100 dark:border-slate-700">
+        <div className="fixed right-6 bottom-6 flex flex-col gap-3 z-20">
+          <button className="w-11 h-11 bg-white dark:bg-slate-800 rounded-full shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 flex items-center justify-center hover:shadow-xl hover:scale-105 transition-all duration-200 border border-slate-100/80 dark:border-slate-700/50">
             <StickyNote className="w-5 h-5 text-slate-500" />
           </button>
-          <button className="w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-md flex items-center justify-center hover:shadow-lg transition-shadow border border-slate-100 dark:border-slate-700">
+          <button className="w-11 h-11 bg-white dark:bg-slate-800 rounded-full shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 flex items-center justify-center hover:shadow-xl hover:scale-105 transition-all duration-200 border border-slate-100/80 dark:border-slate-700/50">
             <HelpCircle className="w-5 h-5 text-slate-500" />
           </button>
         </div>
 
         {/* 页面底部Footer */}
-        <div className="mt-auto pt-8 border-t border-slate-100 dark:border-slate-700">
-          <div className="flex items-center justify-between px-6 pb-6">
+        <div className="mt-auto pt-8 border-t border-slate-100/80 dark:border-slate-800">
+          <div className="flex items-center justify-between px-6 pb-8">
             <div className="text-sm text-slate-400">
               <p className="mb-1">关于我们 · 快速链接 · 联系我们</p>
               <p>© 2025 OneClaw. All rights reserved.</p>
             </div>
             <div className="flex items-center gap-2">
               <Crown className="w-4 h-4 text-amber-500" />
-              <span className="text-sm text-slate-400">OneClaw</span>
+              <span className="text-sm text-slate-400 font-medium">OneClaw</span>
             </div>
           </div>
         </div>
