@@ -11,7 +11,8 @@ import {
   PartyPopper, Coffee, Search,
   Shirt, Wand2, Layers, Zap, ScanFace,
   Eraser, FileText, Sofa, Play, Package,
-  HelpCircle, StickyNote, Check
+  HelpCircle, StickyNote, Check,
+  ShoppingBag, Star
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import Footer from '@/components/common/Footer';
@@ -864,7 +865,14 @@ function MoreContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
   const router = useRouter();
 
   const items = [
-    { name: '会员中心', icon: Crown, action: () => router.push('/membership') },
+    { name: '会员中心', icon: Crown, action: () => router.push('/vip') },
+    { name: 'AI修图中心', icon: Wand2, action: () => router.push('/retouch') },
+    { name: 'AI生成中心', icon: Sparkles, action: () => router.push('/generate') },
+    { name: '电商专区', icon: ShoppingBag, action: () => router.push('/ecommerce') },
+    { name: '自媒体专区', icon: Star, action: () => router.push('/social') },
+  ];
+
+  const subItems = [
     { name: '系统设置', icon: Settings, action: () => router.push('/admin/settings') },
     { name: '帮助中心', icon: HelpCircle, action: () => {} },
     { name: '意见反馈', icon: StickyNote, action: () => {} },
@@ -877,22 +885,46 @@ function MoreContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
         <p className="text-sm text-slate-500">更多功能和服务</p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {items.map((item, idx) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={idx}
-              onClick={item.action}
-              className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
-            >
-              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-2">
-                <Icon className="w-6 h-6 text-slate-500" />
-              </div>
-              <span className="text-sm text-slate-700 dark:text-slate-200">{item.name}</span>
-            </button>
-          );
-        })}
+      <div className="mb-8">
+        <h3 className="text-sm font-medium text-slate-500 mb-3">会员与AI功能</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {items.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={idx}
+                onClick={item.action}
+                className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 flex items-center justify-center mb-2">
+                  <Icon className="w-6 h-6 text-amber-600" />
+                </div>
+                <span className="text-sm text-slate-700 dark:text-slate-200">{item.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-medium text-slate-500 mb-3">其他</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {subItems.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={idx}
+                onClick={item.action}
+                className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all flex flex-col items-center text-center"
+              >
+                <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-2">
+                  <Icon className="w-6 h-6 text-slate-500" />
+                </div>
+                <span className="text-sm text-slate-700 dark:text-slate-200">{item.name}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -921,8 +953,6 @@ export default function MainPage() {
         <nav className="flex-1 p-3 space-y-0.5">
           {[
             { key: 'home', label: '首页', icon: Home },
-            { key: 'tools', label: '工具', icon: Grid3X3 },
-            { key: 'templates', label: '模板', icon: LayoutDashboard },
           ].map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.key;
@@ -944,6 +974,55 @@ export default function MainPage() {
 
           {/* 分割线 */}
           <div className="h-px bg-slate-100 dark:bg-slate-700 my-3" />
+
+          {/* AI功能专区 */}
+          <div className="px-3 py-1">
+            <span className="text-[10px] text-slate-400 uppercase tracking-wider">AI功能</span>
+          </div>
+          {[
+            { key: 'retouch', label: 'AI修图', icon: Wand2, href: '/retouch' },
+            { key: 'generate', label: 'AI生成', icon: Sparkles, href: '/generate' },
+            { key: 'ecommerce', label: '电商专区', icon: ShoppingBag, href: '/ecommerce' },
+            { key: 'social', label: '自媒体专区', icon: Star, href: '/social' },
+          ].map(item => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200"
+              >
+                <Icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+
+          {/* 分割线 */}
+          <div className="h-px bg-slate-100 dark:bg-slate-700 my-3" />
+
+          {/* 工具与模板 */}
+          {[
+            { key: 'tools', label: '工具', icon: Grid3X3 },
+            { key: 'templates', label: '模板', icon: LayoutDashboard },
+          ].map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.key;
+            return (
+              <button
+                key={item.key}
+                onClick={() => setActiveTab(item.key)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                  isActive
+                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white font-medium'
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
 
           {/* 个人导航 */}
           {[
