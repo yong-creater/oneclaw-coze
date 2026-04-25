@@ -220,40 +220,40 @@ export function Sidebar({
         <div className="p-3 border-t border-slate-100/60 mt-auto">
           {!collapsed ? (
             <div className="space-y-2">
-              {/* 开通会员按钮 - 在上 */}
-              <Link 
-                href="/vip"
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-orange-200/50 hover:from-orange-600 hover:to-amber-600 transition-all"
-              >
-                <Sparkles className="w-4 h-4" />
-                开通会员
-              </Link>
-              {/* 登录按钮 - 在下 */}
+              {/* 登录按钮 - 最重要，放上面 */}
               <Link 
                 href="/login"
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-orange-200/50 hover:from-orange-600 hover:to-amber-600 transition-all"
               >
                 <User className="w-4 h-4" />
                 登录
               </Link>
+              {/* 开通会员按钮 - 次要，轻量样式 */}
+              <Link 
+                href="/vip"
+                className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm text-slate-500 hover:text-orange-500 rounded-xl hover:bg-orange-50 transition-all"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                开通会员
+              </Link>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              {/* 开通会员 - 在上 */}
-              <Link 
-                href="/vip"
-                className="w-11 h-11 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-200/50 hover:shadow-xl transition-all"
-                title="开通会员"
-              >
-                <Sparkles className="w-[18px] h-[18px] text-white" />
-              </Link>
-              {/* 登录 - 在下 */}
+              {/* 登录 - 重要，上方，圆形图标 */}
               <Link 
                 href="/login"
-                className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all"
+                className="w-11 h-11 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-200/50 hover:shadow-xl hover:scale-105 transition-all"
                 title="登录"
               >
-                <User className="w-[18px] h-[18px] text-slate-500" />
+                <User className="w-[18px] h-[18px] text-white" />
+              </Link>
+              {/* 开通会员 - 次要，下方，小图标 */}
+              <Link 
+                href="/vip"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-400 hover:text-orange-500 hover:bg-orange-50 transition-all"
+                title="开通会员"
+              >
+                <Sparkles className="w-[16px] h-[16px]" />
               </Link>
             </div>
           )}
