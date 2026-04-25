@@ -8,6 +8,7 @@ import {
   ChevronRight, Crown, MoreHorizontal, X, Check
 } from 'lucide-react';
 import { Sidebar } from '@/components/common/Sidebar';
+import Footer from '@/components/common/Footer';
 
 // 模板分类
 const CATEGORIES = [
@@ -298,6 +299,9 @@ export default function TemplatesPage() {
 
       {/* Toast */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+      {/* 底部 */}
+      <Footer />
     </div>
   );
 }

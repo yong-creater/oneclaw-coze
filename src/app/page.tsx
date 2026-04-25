@@ -9,6 +9,7 @@ import {
   Bell, User
 } from 'lucide-react';
 import { Sidebar } from '@/components/common/Sidebar';
+import Footer from '@/components/common/Footer';
 
 // AI Agent 入口
 const AI_AGENTS = [
@@ -233,6 +234,9 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* 底部 */}
+      <Footer />
     </div>
   );
 }

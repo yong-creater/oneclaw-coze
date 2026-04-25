@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { Sidebar } from '@/components/common/Sidebar';
+import Footer from '@/components/common/Footer';
 import { TOOLS_CONFIG, TOOL_CATEGORIES, ToolCategory, ToolConfig } from '@/components/tools/config';
 
 // 工具封面图配置（使用真实场景图片）
@@ -187,6 +188,9 @@ export default function ToolsPage() {
           )}
         </div>
       </main>
+
+      {/* 底部 */}
+      <Footer />
     </div>
   );
 }
