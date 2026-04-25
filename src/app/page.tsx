@@ -7,7 +7,7 @@ import {
   Search, Star, ExternalLink, TrendingUp, Sparkles, Grid3X3,
   Clock, Heart, ChevronRight, Filter, X, Zap, ArrowRight,
   Play, BookOpen, Wand2, Layers, Palette, Code2, MessageSquare,
-  Music, Video, Image, FileText, Mic, Briefcase, GraduationCap, Globe,
+  Music, Video, Image, FileImage as ImageIcon, FileText, Mic, Briefcase, GraduationCap, Globe,
   Crown, Shield, Award, Users, BarChart3, Lock, Unlock, Check, Loader2
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
@@ -433,6 +433,37 @@ export default function HomePage() {
                   </button>
                 ))}
               </div>
+            </section>
+
+            {/* 快捷工具入口 - AI证件照 */}
+            <section className="mb-8">
+              <Link href="/photo-id">
+                <Card className="group cursor-pointer overflow-hidden bg-gradient-to-r from-primary to-blue-600 hover:shadow-xl hover:shadow-primary/20 transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                          <ImageIcon className="w-8 h-8 text-white" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-xl font-bold text-white">AI证件照生成</h3>
+                            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+                              <Zap className="w-3 h-3 mr-1" />
+                              新功能
+                            </Badge>
+                          </div>
+                          <p className="text-white/80">上传照片 · 智能抠图 · 一键生成合规证件照</p>
+                        </div>
+                      </div>
+                      <div className="hidden sm:flex items-center gap-2 text-white/80">
+                        <span className="text-sm">立即体验</span>
+                        <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             </section>
 
             {/* 工具 Tab 切换 */}
