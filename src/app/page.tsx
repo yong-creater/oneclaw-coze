@@ -360,6 +360,15 @@ export default function HomePage() {
     }
   }, []);
 
+  // 从 URL 参数读取初始 Tab
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab && ['ai-tools', 'own-tools', 'prompts', 'tutorials'].includes(tab)) {
+      setMainTab(tab);
+    }
+  }, []);
+
   // 获取AI工具列表
   useEffect(() => {
     if (mainTab === 'ai-tools') {
