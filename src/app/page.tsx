@@ -103,6 +103,42 @@ function analyzeIntent(message: string): { type: 'tools' | 'prompts' | 'tutorial
   return { type: 'tools', query: message };
 }
 
+// 精选工具数据
+const FEATURED_TOOLS = [
+  {
+    id: 'resume',
+    name: '简历优化',
+    desc: 'AI智能优化简历，提升求职竞争力',
+    icon: FileText,
+    bgColor: 'bg-orange-50 dark:bg-orange-950/30',
+    iconColor: 'text-orange-500'
+  },
+  {
+    id: 'novel',
+    name: '小说创作',
+    desc: 'AI辅助小说创作，激发无限灵感',
+    icon: BookOpen,
+    bgColor: 'bg-purple-50 dark:bg-purple-950/30',
+    iconColor: 'text-purple-500'
+  },
+  {
+    id: 'overseas',
+    name: '出海详情页',
+    desc: '一键生成跨境电商产品详情页',
+    icon: Globe,
+    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    iconColor: 'text-blue-500'
+  },
+  {
+    id: 'photo-id',
+    name: 'AI证件照',
+    desc: '上传照片智能抠图生成合规证件照',
+    icon: ImageIcon,
+    bgColor: 'bg-green-50 dark:bg-green-950/30',
+    iconColor: 'text-green-500'
+  },
+];
+
 export default function HomePage() {
   const router = useRouter();
   const [input, setInput] = useState('');
@@ -222,7 +258,7 @@ export default function HomePage() {
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-3xl mx-auto px-4 py-8">
             {/* Logo 区域 */}
-            <div className="text-center mb-12">
+            <div className="text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-lg mb-6">
                 <Bot className="w-8 h-8 text-white" />
               </div>
@@ -232,6 +268,42 @@ export default function HomePage() {
               <p className="text-muted-foreground max-w-md mx-auto">
                 告诉我想做什么，我来帮你找到合适的AI工具
               </p>
+            </div>
+
+            {/* 精选工具 */}
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-foreground mb-4 text-center">
+                精选工具
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {FEATURED_TOOLS.map((tool) => {
+                  const Icon = tool.icon;
+                  return (
+                    <button
+                      key={tool.id}
+                      onClick={() => router.push(`/${tool.id === 'overseas' ? 'productpage' : tool.id}`)}
+                      className="group bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/30 hover:shadow-lg transition-all duration-200"
+                    >
+                      {/* 预览区 */}
+                      <div className={cn(
+                        "h-24 flex items-center justify-center transition-colors",
+                        tool.bgColor
+                      )}>
+                        <Icon className={cn("w-10 h-10 transition-transform group-hover:scale-110", tool.iconColor)} />
+                      </div>
+                      {/* 说明区 */}
+                      <div className="p-3 bg-white dark:bg-slate-800">
+                        <h3 className="font-semibold text-sm text-foreground mb-1 group-hover:text-primary transition-colors">
+                          {tool.name}
+                        </h3>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {tool.desc}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* 消息列表 */}
