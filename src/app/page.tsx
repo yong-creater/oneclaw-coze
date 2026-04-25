@@ -180,8 +180,8 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
         {/* 对话输入框 */}
         <div className="max-w-2xl mx-auto">
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-            {/* 已上传图片预览 */}
-            {uploadedImages.length > 0 && (
+            {/* 已上传图片预览和参数调整 */}
+            {uploadedImages.length > 0 ? (
               <div className="px-5 pt-4 pb-2">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-slate-500">已上传 {uploadedImages.length} 张图片</span>
@@ -218,12 +218,11 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                     </div>
                   ))}
                 </div>
-
+                
                 {/* 参数调整面板 */}
                 {showParams && (
                   <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 space-y-3">
                     <div className="grid grid-cols-4 gap-3">
-                      {/* 尺寸比例 */}
                       <div>
                         <label className="text-[10px] text-slate-400 mb-1 block">尺寸</label>
                         <div className="flex gap-1">
@@ -242,7 +241,6 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                           ))}
                         </div>
                       </div>
-                      {/* 生成风格 */}
                       <div>
                         <label className="text-[10px] text-slate-400 mb-1 block">风格</label>
                         <select
@@ -255,7 +253,6 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                           ))}
                         </select>
                       </div>
-                      {/* 生成数量 */}
                       <div>
                         <label className="text-[10px] text-slate-400 mb-1 block">数量</label>
                         <div className="flex gap-1">
@@ -274,7 +271,6 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                           ))}
                         </div>
                       </div>
-                      {/* 图片质量 */}
                       <div>
                         <label className="text-[10px] text-slate-400 mb-1 block">质量</label>
                         <select
@@ -291,7 +287,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                   </div>
                 )}
               </div>
-            )}
+            ) : null}
             
             {/* 输入框 */}
             <div className="px-5 pt-3 pb-2">
