@@ -91,7 +91,7 @@ export default function Sidebar({ className }: SidebarProps) {
       {/* 移动端遮罩 */}
       {mobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -100,7 +100,7 @@ export default function Sidebar({ className }: SidebarProps) {
       <aside className={cn(
         "fixed top-0 left-0 h-full bg-background border-r border-border z-50 transition-all duration-300 flex flex-col",
         collapsed ? "w-[72px]" : "w-[240px]",
-        mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         className
       )}>
         {/* Logo 区域 */}
@@ -112,7 +112,7 @@ export default function Sidebar({ className }: SidebarProps) {
           )}
           <button
             onClick={toggleCollapsed}
-            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors"
+            className="hidden md:flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors"
           >
             {collapsed ? (
               <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -122,7 +122,7 @@ export default function Sidebar({ className }: SidebarProps) {
           </button>
           <button
             onClick={() => setMobileOpen(false)}
-            className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors"
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg hover:bg-muted transition-colors"
           >
             <ChevronLeft className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -220,7 +220,7 @@ export default function Sidebar({ className }: SidebarProps) {
       {/* 移动端菜单按钮 */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed bottom-4 left-4 z-30 lg:hidden flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg"
+        className="fixed bottom-4 left-4 z-30 md:hidden flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg"
       >
         <Home className="w-5 h-5" />
       </button>
