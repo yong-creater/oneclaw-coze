@@ -18,6 +18,7 @@ interface SidebarProps {
 
 const MENU_ITEMS = [
   { id: 'home', label: '首页', icon: Home, href: '/' },
+  { id: 'own-tools', label: '自建工具', icon: Star, href: '/own-tools' },
   { id: 'ai-tools', label: 'AI工具库', icon: Wand2, href: '/ai-tools' },
   { id: 'prompts', label: '提示词', icon: Sparkles, href: '/prompts' },
   { id: 'tutorials', label: '教程', icon: BookOpen, href: '/tutorials' },
