@@ -164,8 +164,8 @@ export function Sidebar({
           })}
         </div>
 
-        {/* 底部菜单 */}
-        <div className="pt-3 mt-3 border-t border-slate-100/60 space-y-1">
+        {/* 底部菜单 - 无分隔线 */}
+        <div className="pt-3 space-y-1">
           {BOTTOM_NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
