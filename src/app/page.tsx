@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -50,14 +50,6 @@ const FEATURED_TOOLS = [
   { name: '抖音封面', desc: '视频封面生成', icon: Play, color: 'from-purple-50 to-pink-50', key: 'douyin' },
 ];
 
-// AI Agent分类
-const AGENTS = [
-  { name: '头像生成', icon: '👤', prompt: '我想生成头像' },
-  { name: '封面设计', icon: '📄', prompt: '我想做封面设计' },
-  { name: '营销海报', icon: '🎨', prompt: '我想生成营销海报' },
-  { name: '商品展示', icon: '🛍️', prompt: '我想做商品展示图' },
-];
-
 // 基础工具
 const BASIC_TOOLS = [
   { name: '餐饮菜单', icon: Coffee, key: 'restaurant-menu' },
@@ -88,23 +80,50 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
   const router = useRouter();
   const [inputValue, setInputValue] = useState('');
   const [toast, setToast] = useState<string | null>(null);
-  const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 处理发送消息
   const handleSend = () => {
-    if (!inputValue.trim()) {
-      setToast('请输入设计需求');
+    if (!inputValue.trim() && uploadedImages.length === 0) {
+      setToast('请输入设计需求或上传图片');
       return;
     }
-    setSelectedAgent(null);
     setToast('AI功能开发中，敬请期待！');
   };
 
-  // 处理Agent点击
-  const handleAgentClick = (prompt: string) => {
-    setInputValue(prompt);
-    setSelectedAgent(prompt);
-    setToast('AI功能开发中，敬请期待！');
+  // 处理上传图片
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // 处理文件选择
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // 模拟上传，显示预览
+      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
+      setUploadedImages(prev => [...prev, ...newImages]);
+      setToast(`已上传 ${files.length} 张图片`);
+    }
+  };
+
+  // 删除已上传的图片
+  const removeImage = (index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // AI帮写功能
+  const handleAIAutoWrite = () => {
+    const suggestions = [
+      '生成一个可爱风格的微信头像，粉色背景',
+      '设计一张端午节节日海报，包含粽子元素',
+      '制作电商主图，白底产品图配促销文案',
+      '创作小红书封面，吸引眼球的排版设计',
+    ];
+    const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+    setInputValue(randomSuggestion);
+    setToast('已为您生成设计建议');
   };
 
   // 处理工具点击
@@ -122,52 +141,92 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* AI对话引导区 */}
-      <div className="text-center py-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-3">
+      <div className="py-6">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-5 text-center">
           和我聊聊，你想要什么设计
         </h1>
         
-        {/* Agent分类标签 */}
-        <div className="flex items-center justify-center gap-2 mb-5">
-          {AGENTS.map((agent, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleAgentClick(agent.prompt)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all text-sm ${
-                selectedAgent === agent.prompt
-                  ? 'bg-orange-100 border-orange-300 text-orange-600'
-                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-orange-300 dark:hover:border-orange-600 hover:shadow-sm'
-              }`}
-            >
-              <span>{agent.icon}</span>
-              <span className="text-slate-700 dark:text-slate-200">{agent.name}</span>
-            </button>
-          ))}
-        </div>
-
         {/* 对话输入框 */}
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700">
-            <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              placeholder="和我聊聊，你想要什么设计..."
-              className="w-full px-5 py-4 resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-sm"
-              rows={2}
-            />
-            <div className="flex items-center justify-between px-4 pb-3">
-              <button 
-                onClick={() => setToast('图片上传功能开发中')}
-                className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
-              >
-                <ImageIcon className="w-4 h-4 text-slate-500" />
-              </button>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            {/* 已上传图片预览 */}
+            {uploadedImages.length > 0 && (
+              <div className="px-5 pt-4 pb-2 flex gap-2 flex-wrap">
+                {uploadedImages.map((img, idx) => (
+                  <div key={idx} className="relative group">
+                    <img 
+                      src={img} 
+                      alt={`上传图片 ${idx + 1}`}
+                      className="w-16 h-16 object-cover rounded-lg border border-slate-200"
+                    />
+                    <button
+                      onClick={() => removeImage(idx)}
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* 输入框 */}
+            <div className="px-5 pt-3">
+              <textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                placeholder="输入你的设计需求，或者上传图片..."
+                className="w-full resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-sm leading-relaxed"
+                rows={4}
+              />
+            </div>
+            
+            {/* 底部工具栏 */}
+            <div className="flex items-center justify-between px-4 pb-4 pt-2">
+              <div className="flex items-center gap-2">
+                {/* 添加按钮 */}
+                <button 
+                  onClick={() => setToast('添加素材功能开发中')}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-xs text-slate-600 dark:text-slate-300"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  添加
+                </button>
+                
+                {/* 上传图片按钮 */}
+                <button 
+                  onClick={handleUploadClick}
+                  className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                  title="上传图片"
+                >
+                  <ImageIcon className="w-4 h-4 text-slate-500" />
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                
+                {/* AI帮写按钮 */}
+                <button 
+                  onClick={handleAIAutoWrite}
+                  className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
+                  title="AI帮写"
+                >
+                  <Sparkles className="w-4 h-4 text-orange-500" />
+                </button>
+              </div>
+              
+              {/* 发送按钮 */}
               <button 
                 onClick={handleSend}
                 className="px-5 py-2 bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
@@ -179,6 +238,11 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
               </button>
             </div>
           </div>
+          
+          {/* 提示文字 */}
+          <p className="text-xs text-slate-400 mt-2 text-center">
+            输入需求或上传图片，AI 将为您生成设计
+          </p>
         </div>
       </div>
 
@@ -580,19 +644,6 @@ export default function MainPage() {
 
       {/* 右侧主内容区 */}
       <main className="flex-1 ml-56">
-        {/* 顶部栏 */}
-        <header className="h-14 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center px-6 sticky top-0 z-10">
-          <div className="text-sm font-medium text-slate-800 dark:text-white">
-            {activeTab === 'home' && '首页'}
-            {activeTab === 'tools' && '工具'}
-            {activeTab === 'templates' && '模板'}
-            {activeTab === 'recent' && '最近打开'}
-            {activeTab === 'projects' && '项目'}
-            {activeTab === 'assets' && '资产库'}
-            {activeTab === 'more' && '更多'}
-          </div>
-        </header>
-
         {/* 页面内容 */}
         <div className="p-6 pb-24">
           {activeTab === 'home' && <HomeContent setActiveTab={setActiveTab} />}
