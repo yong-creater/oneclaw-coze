@@ -307,14 +307,13 @@ const UTILITY_TOOLS = [
 type UtilityTool = typeof UTILITY_TOOLS[number]['key'];
 
 const MAIN_TABS = [
-  { key: 'utilities', label: '精选工具', icon: Star },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
 ] as const;
 
-type MainTab = typeof MAIN_TABS[number]['key'];
+type MainTab = 'home' | 'utilities' | typeof MAIN_TABS[number]['key'];
 
 // ==================== 工具函数 ====================
 const getUserId = (): string => {
@@ -735,16 +734,29 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
-            {/* Logo - 防止被压缩 */}
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
+            {/* Logo */}
+            <button 
+              onClick={() => setMainTab('home')}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
+            >
               <AnimatedLobster size={32} className="sm:size-9" />
               <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent whitespace-nowrap">
                 OneClaw
               </span>
-            </Link>
+            </button>
 
-            {/* 主导航Tab - 移动端隐藏文字 */}
+            {/* 主导航Tab */}
             <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-full p-1">
+              <button
+                onClick={() => setMainTab('home')}
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  mainTab === 'home'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-orange-500'
+                }`}
+              >
+                <span className="hidden md:inline">首页</span>
+              </button>
               {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = mainTab === tab.key;
@@ -775,10 +787,10 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* ==================== 品牌展示区（首页精选工具Tab） ==================== */}
-        {mainTab === 'utilities' && (
-          <div className="mb-8 space-y-6">
-            {/* Hero Banner - 简洁版 */}
+        {/* ==================== 首页（Logo落地页） ==================== */}
+        {mainTab === 'home' && (
+          <div className="space-y-6">
+            {/* Hero Banner */}
             <div className="bg-gradient-to-br from-orange-500 via-red-500 to-amber-500 rounded-2xl p-8 text-white">
               <div className="flex flex-col md:flex-row items-center gap-8">
                 <div className="flex-1 text-center md:text-left">
@@ -797,10 +809,10 @@ export default function HomePage() {
                   <div className="flex items-center justify-center md:justify-start gap-4">
                     <Button 
                       size="lg"
-                      onClick={() => setMainTab('tools')}
+                      onClick={() => setMainTab('utilities')}
                       className="bg-white text-orange-600 hover:bg-white/90 shadow-lg"
                     >
-                      立即体验
+                      7大AI神器
                       <ArrowRight className="ml-2 w-5 h-5" />
                     </Button>
                     <Button 
@@ -816,44 +828,17 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 精选工具入口 - 大卡片样式 */}
-            <div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-                <Star className="w-5 h-5 text-orange-500" />
-                精选工具
-              </h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                {UTILITY_TOOLS.map((tool) => {
-                  const Icon = tool.icon;
-                  return (
-                    <button
-                      key={tool.key}
-                      onClick={() => setMainTab('tools')}
-                      className="group flex flex-col items-center p-4 rounded-xl bg-white dark:bg-slate-800 hover:shadow-lg border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 transition-all"
-                    >
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-2 group-hover:scale-110 transition-transform`}>
-                        <Icon className="w-6 h-6 text-white" />
-                      </div>
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 text-center leading-tight">
-                        {tool.name}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* 快捷入口 */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: 'AI应用', count: '238+', icon: Wand2, tab: 'tools' },
-                { label: '提示词', count: '1000+', icon: Lightbulb, tab: 'prompts' },
-                { label: '技能', count: '500+', icon: Sparkles, tab: 'skills' },
-                { label: '教程', count: '200+', icon: BookOpen, tab: 'tutorials' },
-              ].map((item, i) => (
+              {([
+                { label: '精选工具', desc: '7大AI神器', icon: Star, tab: 'utilities' as MainTab },
+                { label: 'AI应用', desc: '238+工具', icon: Wand2, tab: 'tools' as MainTab },
+                { label: '提示词', desc: '1000+模板', icon: Lightbulb, tab: 'prompts' as MainTab },
+                { label: '技能', desc: '500+技能', icon: Sparkles, tab: 'skills' as MainTab },
+              ] as { label: string; desc: string; icon: typeof Star; tab: MainTab }[]).map((item, i) => (
                 <button
                   key={i}
-                  onClick={() => setMainTab(item.tab as MainTab)}
+                  onClick={() => setMainTab(item.tab)}
                   className="flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 transition-all"
                 >
                   <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
@@ -861,13 +846,15 @@ export default function HomePage() {
                   </div>
                   <div className="text-left">
                     <div className="font-semibold text-slate-800 dark:text-white">{item.label}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{item.count}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">{item.desc}</div>
                   </div>
                 </button>
               ))}
             </div>
           </div>
         )}
+
+        {/* ==================== 精选工具（7大AI神器） ==================== */}
 
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
