@@ -81,7 +81,17 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
   const [inputValue, setInputValue] = useState('');
   const [toast, setToast] = useState<string | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [showParams, setShowParams] = useState(false);
+  const [selectedImageIdx, setSelectedImageIdx] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 图片参数设置
+  const [imageParams, setImageParams] = useState({
+    aspectRatio: '1:1', // 1:1, 16:9, 9:16, 4:3
+    style: 'auto', // auto, realistic, cartoon, art
+    count: 1, // 1-4
+    quality: 'high', // standard, high, premium
+  });
 
   // 处理发送消息
   const handleSend = () => {
@@ -101,9 +111,9 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      // 模拟上传，显示预览
       const newImages = Array.from(files).map(file => URL.createObjectURL(file));
       setUploadedImages(prev => [...prev, ...newImages]);
+      setShowParams(true); // 上传后自动显示参数面板
       setToast(`已上传 ${files.length} 张图片`);
     }
   };
@@ -111,6 +121,12 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
   // 删除已上传的图片
   const removeImage = (index: number) => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    if (selectedImageIdx === index) setSelectedImageIdx(null);
+  };
+
+  // 选择图片进行参数调整
+  const handleSelectImage = (idx: number) => {
+    setSelectedImageIdx(idx === selectedImageIdx ? null : idx);
   };
 
   // AI帮写功能
@@ -135,6 +151,21 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
     }
   };
 
+  // 参数选项
+  const aspectRatios = [
+    { value: '1:1', label: '1:1', desc: '正方形' },
+    { value: '16:9', label: '16:9', desc: '横版' },
+    { value: '9:16', label: '9:16', desc: '竖版' },
+    { value: '4:3', label: '4:3', desc: '横版' },
+  ];
+
+  const styles = [
+    { value: 'auto', label: '自动' },
+    { value: 'realistic', label: '写实' },
+    { value: 'cartoon', label: '卡通' },
+    { value: 'art', label: '艺术' },
+  ];
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Toast通知 */}
@@ -151,22 +182,141 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
             {/* 已上传图片预览 */}
             {uploadedImages.length > 0 && (
-              <div className="px-5 pt-4 pb-2 flex gap-2 flex-wrap">
-                {uploadedImages.map((img, idx) => (
-                  <div key={idx} className="relative group">
-                    <img 
-                      src={img} 
-                      alt={`上传图片 ${idx + 1}`}
-                      className="w-16 h-16 object-cover rounded-lg border border-slate-200"
-                    />
-                    <button
-                      onClick={() => removeImage(idx)}
-                      className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              <div className="px-5 pt-4 pb-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-slate-500">已上传 {uploadedImages.length} 张图片</span>
+                  <button 
+                    onClick={() => setShowParams(!showParams)}
+                    className="text-xs text-orange-500 hover:text-orange-600 flex items-center gap-1"
+                  >
+                    <svg className={`w-3.5 h-3.5 transition-transform ${showParams ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    {showParams ? '收起参数' : '调整参数'}
+                  </button>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {uploadedImages.map((img, idx) => (
+                    <div 
+                      key={idx} 
+                      className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
+                        selectedImageIdx === idx ? 'border-orange-400 ring-2 ring-orange-100' : 'border-slate-200 hover:border-orange-300'
+                      }`}
+                      onClick={() => handleSelectImage(idx)}
                     >
-                      ×
-                    </button>
+                      <img 
+                        src={img} 
+                        alt={`上传图片 ${idx + 1}`}
+                        className="w-16 h-16 object-cover"
+                      />
+                      {selectedImageIdx === idx && (
+                        <div className="absolute inset-0 bg-orange-500/20 flex items-center justify-center">
+                          <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-[10px] text-white">点击选中</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 参数调整面板 */}
+                {showParams && (
+                  <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl space-y-4">
+                    {/* 尺寸比例 */}
+                    <div>
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">尺寸比例</label>
+                      <div className="flex gap-2">
+                        {aspectRatios.map(ratio => (
+                          <button
+                            key={ratio.value}
+                            onClick={() => setImageParams(p => ({ ...p, aspectRatio: ratio.value }))}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              imageParams.aspectRatio === ratio.value
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
+                            }`}
+                          >
+                            {ratio.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 生成风格 */}
+                    <div>
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">生成风格</label>
+                      <div className="flex gap-2">
+                        {styles.map(style => (
+                          <button
+                            key={style.value}
+                            onClick={() => setImageParams(p => ({ ...p, style: style.value }))}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              imageParams.style === style.value
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
+                            }`}
+                          >
+                            {style.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 生成数量 */}
+                    <div>
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">生成数量</label>
+                      <div className="flex gap-2">
+                        {[1, 2, 3, 4].map(num => (
+                          <button
+                            key={num}
+                            onClick={() => setImageParams(p => ({ ...p, count: num }))}
+                            className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
+                              imageParams.count === num
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
+                            }`}
+                          >
+                            {num}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* 图片质量 */}
+                    <div>
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">图片质量</label>
+                      <div className="flex gap-2">
+                        {[
+                          { value: 'standard', label: '标准' },
+                          { value: 'high', label: '高清' },
+                          { value: 'premium', label: ' premium' },
+                        ].map(q => (
+                          <button
+                            key={q.value}
+                            onClick={() => setImageParams(p => ({ ...p, quality: q.value }))}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                              imageParams.quality === q.value
+                                ? 'bg-orange-500 text-white'
+                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
+                            }`}
+                          >
+                            {q.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                ))}
+                )}
               </div>
             )}
             
