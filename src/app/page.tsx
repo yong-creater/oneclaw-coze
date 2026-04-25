@@ -168,31 +168,33 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div style={{ maxWidth: '896px', margin: '0 auto' }}>
       {/* Toast通知 */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* AI对话引导区 */}
-      <div className="py-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-6 text-center">
+      <section style={{ paddingTop: '24px', paddingBottom: '24px' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', textAlign: 'center', marginBottom: '24px', color: '#1e293b' }}>
           和我聊聊，你想要什么设计
         </h1>
         
         {/* 输入框区域 */}
-        <div className="max-w-3xl mx-auto">
+        <div style={{ maxWidth: '672px', margin: '0 auto' }}>
           
           {/* 图片预览 - 有图片时显示 */}
           {uploadedImages.length > 0 ? (
-            <div className="mb-4">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
-                <div className="text-sm text-slate-600 dark:text-slate-400 mb-3">已上传 {uploadedImages.length} 张图片</div>
-                <div className="flex gap-2">
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ background: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '12px' }}>
+                  已上传 {uploadedImages.length} 张图片
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {uploadedImages.map((img, idx) => (
-                    <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border-2 border-slate-200">
-                      <img src={img} alt="" className="w-full h-full object-cover" />
+                    <div key={idx} style={{ position: 'relative', width: '64px', height: '64px', borderRadius: '8px', overflow: 'hidden', border: '2px solid #e2e8f0' }}>
+                      <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       <button
                         onClick={() => removeImage(idx)}
-                        className="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-xs"
+                        style={{ position: 'absolute', top: '0', right: '0', width: '16px', height: '16px', background: '#ef4444', color: 'white', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                       >×</button>
                     </div>
                   ))}
@@ -202,7 +204,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
           ) : null}
           
           {/* 输入框卡片 */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
+          <div style={{ background: 'white', borderRadius: '16px', padding: '16px', border: '1px solid #e2e8f0' }}>
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -213,14 +215,14 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                 }
               }}
               placeholder="描述你想要的设计..."
-              className="w-full resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none"
+              style={{ width: '100%', resize: 'none', fontSize: '14px', outline: 'none', border: 'none', background: 'transparent', color: '#1e293b' }}
               rows={3}
             />
             
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
               <button 
                 onClick={handleUploadClick}
-                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-sm text-slate-600 dark:text-slate-300"
+                style={{ padding: '6px 12px', borderRadius: '8px', background: '#f1f5f9', fontSize: '14px', color: '#475569' }}
               >
                 上传图片
               </button>
@@ -230,75 +232,72 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                 accept="image/*"
                 multiple
                 onChange={handleFileChange}
-                className="hidden"
+                style={{ display: 'none' }}
               />
               <button 
                 onClick={handleSend}
-                className="px-4 py-1.5 bg-slate-800 dark:bg-slate-600 text-white rounded-lg text-sm"
+                style={{ padding: '6px 16px', background: '#1e293b', color: 'white', borderRadius: '8px', fontSize: '14px' }}
               >
                 发送
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* 特色AI功能 */}
-      <div>
-        <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">特色AI功能</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <section style={{ marginTop: '32px' }}>
+        <h2 style={{ fontSize: '14px', fontWeight: '500', color: '#64748b', marginBottom: '12px' }}>特色AI功能</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
           {FEATURED_TOOLS.map((tool, idx) => {
             const Icon = tool.icon;
             return (
               <button
                 key={idx}
                 onClick={() => handleToolClick(tool.key)}
-                className="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-700 transition-all text-left"
+                style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #f1f5f9', textAlign: 'left' }}
               >
-                <div className={`h-20 bg-gradient-to-br ${tool.color} relative flex items-center justify-center`}>
-                  <div className="w-12 h-12 rounded-xl bg-white/90 dark:bg-slate-700/90 flex items-center justify-center shadow-sm">
-                    <Icon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
+                <div style={{ height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(to bottom right, ${tool.color.replace('from-', '').replace(' to-', ', ')})` }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+                    <Icon style={{ width: '24px', height: '24px', color: '#475569' }} />
                   </div>
                 </div>
-                <div className="p-3">
-                  <h3 className="font-medium text-slate-800 dark:text-white text-sm">{tool.name}</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">{tool.desc}</p>
+                <div style={{ padding: '12px' }}>
+                  <h3 style={{ fontWeight: '500', fontSize: '14px', color: '#1e293b' }}>{tool.name}</h3>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{tool.desc}</p>
                 </div>
               </button>
             );
           })}
         </div>
-      </div>
+      </section>
 
       {/* 全部工具 */}
-      <div>
-        <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">全部工具</h2>
-        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+      <section style={{ marginTop: '32px' }}>
+        <h2 style={{ fontSize: '14px', fontWeight: '500', color: '#64748b', marginBottom: '12px' }}>全部工具</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px' }}>
           {AI_IMAGE_TOOLS.map((tool, idx) => (
             <button
               key={idx}
               onClick={() => handleToolClick(tool.key)}
-              className="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-orange-200 dark:hover:border-orange-700 transition-all text-left"
+              style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #f1f5f9', textAlign: 'left' }}
             >
-              <div className={`h-16 bg-gradient-to-br ${tool.color} relative flex items-center justify-center`}>
-                <span className="text-sm font-bold text-white/60">{tool.name.slice(0, 2)}</span>
-                <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-white/90 rounded text-xs text-slate-500">
-                  {tool.tag}
-                </span>
+              <div style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: `linear-gradient(to bottom right, ${tool.color.replace('from-', '').replace(' to-', ', ')})` }}>
+                <span style={{ fontSize: '14px', fontWeight: 'bold', color: 'rgba(255,255,255,0.6)' }}>{tool.name.slice(0, 2)}</span>
               </div>
-              <div className="p-2.5">
-                <h3 className="font-medium text-slate-800 dark:text-white text-xs">{tool.name}</h3>
-                <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{tool.desc}</p>
+              <div style={{ padding: '10px' }}>
+                <h3 style={{ fontWeight: '500', fontSize: '12px', color: '#1e293b' }}>{tool.name}</h3>
+                <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tool.desc}</p>
               </div>
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
       {/* 模板入口 */}
-      <div>
-        <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">设计模板</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <section style={{ marginTop: '32px' }}>
+        <h2 style={{ fontSize: '14px', fontWeight: '500', color: '#64748b', marginBottom: '12px' }}>设计模板</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
           {[
             { name: '头像模板', count: 32, color: 'from-pink-100 to-rose-100' },
             { name: '封面模板', count: 28, color: 'from-orange-100 to-amber-100' },
@@ -308,17 +307,17 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
             <button
               key={idx}
               onClick={() => router.push('/templates')}
-              className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-orange-200 dark:hover:border-orange-700 transition-all text-left"
+              style={{ background: 'white', borderRadius: '12px', padding: '16px', border: '1px solid #f1f5f9', textAlign: 'left' }}
             >
-              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${template.color} flex items-center justify-center mb-2`}>
-                <Sparkles className="w-5 h-5 text-slate-500" />
+              <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: `linear-gradient(to bottom right, ${template.color.replace('from-', '').replace(' to-', ', ')})`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                <Sparkles style={{ width: '20px', height: '20px', color: '#64748b' }} />
               </div>
-              <h3 className="font-medium text-slate-800 dark:text-white text-sm">{template.name}</h3>
-              <p className="text-xs text-slate-400 mt-0.5">{template.count}个模板</p>
+              <h3 style={{ fontWeight: '500', fontSize: '14px', color: '#1e293b' }}>{template.name}</h3>
+              <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{template.count}个模板</p>
             </button>
           ))}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
