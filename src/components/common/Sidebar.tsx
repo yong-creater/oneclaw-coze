@@ -35,13 +35,11 @@ const MAIN_NAV_ITEMS: NavItem[] = [
 // 导航配置 - 次要菜单（带分隔线）
 const SECONDARY_NAV_ITEMS: NavItem[] = [
   { icon: Clock, label: '最近打开', href: '/recent' },
-  { icon: FolderOpen, label: '项目', href: '/projects' },
   { icon: Star, label: '资产库', href: '/assets' },
 ];
 
 // 底部菜单
 const BOTTOM_NAV_ITEMS: NavItem[] = [
-  { icon: Settings, label: '设置', href: '/settings' },
   { icon: MoreHorizontal, label: '更多', href: '/more' },
 ];
 
