@@ -1010,10 +1010,21 @@ export default function MainPage() {
             <HelpCircle className="w-5 h-5 text-slate-500" />
           </button>
         </div>
-      </main>
 
-      {/* 页脚 - 放在根容器里，不在main中 */}
-      <Footer />
+        {/* 页面底部Footer */}
+        <div className="mt-auto pt-8 border-t border-slate-100 dark:border-slate-700">
+          <div className="flex items-center justify-between px-6 pb-6">
+            <div className="text-sm text-slate-400">
+              <p className="mb-1">关于我们 · 快速链接 · 联系我们</p>
+              <p>© 2025 OneClaw. All rights reserved.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Crown className="w-4 h-4 text-amber-500" />
+              <span className="text-sm text-slate-400">OneClaw</span>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
