@@ -62,25 +62,19 @@ export function Sidebar({
     >
       {/* Logo 区域 */}
       <div className="p-4 border-b border-slate-100/60">
-        <div className="flex items-center gap-3">
-          {/* Logo 图标 */}
-          <div 
-            ref={logoRef}
-            className="relative flex-shrink-0"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50 cursor-pointer">
-              <AnimatedLobster size={22} />
-            </div>
-          </div>
-
-          {/* 展开状态显示的内容 */}
-          {!collapsed && (
+        {/* 展开状态 */}
+        {!collapsed && (
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50 cursor-pointer">
+                <AnimatedLobster size={22} />
+              </div>
+            </Link>
             <div className="flex items-center justify-between flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-200">
-              <div>
+              <Link href="/" className="flex-1 min-w-0">
                 <span className="font-bold text-lg bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">OneClaw</span>
                 <p className="text-[11px] text-slate-400">AI 智能工具箱</p>
-              </div>
-              
+              </Link>
               {/* 折叠按钮 */}
               <button 
                 onClick={handleToggle}
@@ -90,19 +84,21 @@ export function Sidebar({
                 <PanelLeftClose className="w-5 h-5" />
               </button>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* 折叠状态显示展开按钮 - 始终可见 */}
-          {collapsed && (
+        {/* 折叠状态 - hover 显示展开按钮，点击整个区域展开 */}
+        {collapsed && (
+          <div className="flex items-center justify-center">
             <button 
               onClick={handleToggle}
-              className="absolute top-4 left-[72px] p-2 bg-white border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 rounded-lg shadow-md transition-all flex-shrink-0"
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50 hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
               title="展开侧边栏"
             >
-              <PanelLeft className="w-5 h-5" />
+              <PanelLeft className="w-5 h-5 text-white" />
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* 导航菜单 */}
