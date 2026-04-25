@@ -325,6 +325,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
 // ==================== 工具页面 ====================
 function ToolsContent() {
   const [toast, setToast] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleToolClick = (key: string) => {
     if (TOOL_URLS[key]) {
@@ -334,40 +335,100 @@ function ToolsContent() {
     }
   };
 
+  const categories = [
+    {
+      title: 'AI修图',
+      items: [
+        { name: 'AI一键精修', key: 'avatar', icon: 'Wand2', desc: '智能美化，一键出片', color: 'from-pink-100 to-rose-200' },
+        { name: 'AI智能消除', key: 'remove', icon: 'Eraser', desc: '无痕消除杂物路人', color: 'from-purple-100 to-violet-200' },
+        { name: 'AI抠图换背景', key: 'cutout', icon: 'ScanFace', desc: '发丝级精准抠图', color: 'from-blue-100 to-cyan-200' },
+        { name: '老照片修复', key: 'restore', icon: 'ImageIcon', desc: '模糊破损一键复原', color: 'from-amber-100 to-orange-200' },
+      ]
+    },
+    {
+      title: 'AI生成',
+      items: [
+        { name: '文生图', key: 'text2img', icon: 'Sparkles', desc: '文字描述生成图片', color: 'from-emerald-100 to-teal-200' },
+        { name: '图生图', key: 'img2img', icon: 'Layers', desc: '风格迁移创意转换', color: 'from-violet-100 to-purple-200' },
+      ]
+    },
+    {
+      title: '电商图片',
+      items: [
+        { name: '商品精修', key: 'product', icon: 'Wand2', desc: '电商主图一键精修', color: 'from-sky-100 to-blue-200' },
+        { name: '白底图', key: 'whitebg', icon: 'Package', desc: '平台标准白底图', color: 'from-slate-100 to-zinc-200' },
+        { name: '场景合成', key: 'scene', icon: 'Sofa', desc: '商品场景图生成', color: 'from-rose-100 to-pink-200' },
+      ]
+    },
+    {
+      title: '自媒体图片',
+      items: [
+        { name: '小红书封面', key: 'cover', icon: 'FileText', desc: '爆款笔记封面', color: 'from-orange-100 to-amber-200' },
+        { name: '公众号配图', key: 'wechat', icon: 'ImageIcon', desc: '专业图文排版', color: 'from-green-100 to-emerald-200' },
+        { name: '尺寸适配', key: 'resize', icon: 'Play', desc: '多平台尺寸适配', color: 'from-indigo-100 to-blue-200' },
+      ]
+    },
+  ];
+
   return (
-    <div className="max-w-5xl mx-auto">
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
       
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">AI生图工具</h1>
-        <p className="text-sm text-slate-500">精选7款高效AI生图工具</p>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {AI_IMAGE_TOOLS.map((tool, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleToolClick(tool.key)}
-            className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all text-left"
-          >
-            <div className={`h-28 bg-gradient-to-br ${tool.color} relative flex items-center justify-center`}>
-              <div className="w-14 h-14 rounded-2xl bg-white/90 dark:bg-slate-700/90 flex items-center justify-center shadow-sm">
-                <span className="text-lg font-bold text-slate-600 dark:text-slate-300">{tool.name.slice(0, 2)}</span>
-              </div>
-              <span className="absolute top-2 right-2 px-2 py-0.5 bg-white/90 dark:bg-slate-700/90 rounded text-xs text-slate-500">
-                {tool.tag}
-              </span>
-              <div className="absolute top-2 left-2 w-6 h-6 bg-white/80 dark:bg-slate-700/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <ChevronRight className="w-4 h-4 text-slate-500" />
-              </div>
-            </div>
-            <div className="p-4">
-              <h3 className="font-semibold text-slate-800 dark:text-white text-sm mb-0.5">{tool.name}</h3>
-              <p className="text-xs text-slate-400 line-clamp-1">{tool.desc}</p>
-            </div>
-          </button>
-        ))}
-      </div>
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>工具</h1>
+      <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '32px' }}>选择AI工具开始创作</p>
+      
+      {categories.map((cat, idx) => (
+        <div key={idx} style={{ marginBottom: '32px' }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#475569', marginBottom: '16px' }}>{cat.title}</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
+            {cat.items.map((item, i) => (
+              <button
+                key={i}
+                onClick={() => handleToolClick(item.key)}
+                style={{ 
+                  background: 'white', 
+                  borderRadius: '16px', 
+                  overflow: 'hidden', 
+                  border: '1px solid #f1f5f9',
+                  textAlign: 'left',
+                  transition: 'all 0.2s',
+                  cursor: 'pointer'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
+                onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
+              >
+                <div style={{ 
+                  height: '100px', 
+                  background: `linear-gradient(135deg, var(--tw-gradient-stops))`,
+                  backgroundImage: `linear-gradient(to bottom right, ${item.color.replace('from-', '').replace(' to-', ', ')})`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '14px',
+                    background: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                  }}>
+                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#475569' }}>
+                      {item.name.slice(0, 1)}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ padding: '16px' }}>
+                  <h3 style={{ fontWeight: '600', fontSize: '15px', color: '#1e293b', marginBottom: '4px' }}>{item.name}</h3>
+                  <p style={{ fontSize: '13px', color: '#94a3b8' }}>{item.desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -375,37 +436,51 @@ function ToolsContent() {
 // ==================== 模板页面 ====================
 function TemplatesContent() {
   const templates = [
-    { name: '头像模板', count: 120 },
-    { name: '小红书封面', count: 85 },
-    { name: '抖音封面', count: 72 },
-    { name: '节日海报', count: 156 },
-    { name: '餐饮菜单', count: 45 },
-    { name: '简历模板', count: 38 },
-    { name: '形象照', count: 92 },
-    { name: '详情页', count: 64 },
+    { name: '头像模板', count: 120, color: 'from-pink-100 to-rose-200' },
+    { name: '小红书封面', count: 85, color: 'from-orange-100 to-amber-200' },
+    { name: '抖音封面', count: 72, color: 'from-purple-100 to-violet-200' },
+    { name: '节日海报', count: 156, color: 'from-red-100 to-rose-200' },
+    { name: '餐饮菜单', count: 45, color: 'from-green-100 to-emerald-200' },
+    { name: '简历模板', count: 38, color: 'from-blue-100 to-cyan-200' },
+    { name: '形象照', count: 92, color: 'from-indigo-100 to-blue-200' },
+    { name: '详情页', count: 64, color: 'from-teal-100 to-cyan-200' },
   ];
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">设计模板</h1>
-        <p className="text-sm text-slate-500">海量设计模板，一键使用</p>
-      </div>
+    <div style={{ maxWidth: '896px', margin: '0 auto' }}>
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>设计模板</h1>
+      <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '32px' }}>海量设计模板，一键使用</p>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
         {templates.map((t, idx) => (
           <button
             key={idx}
-            className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all text-left"
+            style={{ 
+              background: 'white', 
+              borderRadius: '16px', 
+              overflow: 'hidden', 
+              border: '1px solid #f1f5f9',
+              textAlign: 'left',
+              transition: 'all 0.2s',
+              cursor: 'pointer'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
+            onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
           >
-            <div className="w-full aspect-square bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-700 dark:to-slate-800 relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl font-bold text-slate-200 dark:text-slate-600">{t.name.slice(0, 1)}</span>
-              </div>
+            <div style={{ 
+              height: '140px', 
+              background: `linear-gradient(to bottom right, ${t.color.replace('from-', '').replace(' to-', ', ')})`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <span style={{ fontSize: '32px', fontWeight: 'bold', color: 'rgba(0,0,0,0.2)' }}>
+                {t.name.slice(0, 1)}
+              </span>
             </div>
-            <div className="p-3">
-              <h3 className="text-sm font-medium text-slate-800 dark:text-white">{t.name}</h3>
-              <p className="text-xs text-slate-400">{t.count}套模板</p>
+            <div style={{ padding: '12px' }}>
+              <h3 style={{ fontWeight: '600', fontSize: '14px', color: '#1e293b' }}>{t.name}</h3>
+              <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{t.count}套模板</p>
             </div>
           </button>
         ))}
@@ -829,58 +904,12 @@ export default function MainPage() {
         <nav className="flex-1 p-3 space-y-0.5">
           {[
             { key: 'home', label: '首页', icon: Home },
-          ].map(item => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.key;
-            return (
-              <button
-                key={item.key}
-                onClick={() => setActiveTab(item.key)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                  isActive
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white font-medium'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-
-          {/* 分割线 */}
-          <div className="h-px bg-slate-100 dark:bg-slate-700 my-3" />
-
-          {/* AI功能专区 */}
-          <div className="px-3 py-1">
-            <span className="text-[10px] text-slate-400 uppercase tracking-wider">AI功能</span>
-          </div>
-          {[
-            { key: 'retouch', label: 'AI修图', icon: Wand2, href: '/retouch' },
-            { key: 'generate', label: 'AI生成', icon: Sparkles, href: '/generate' },
-            { key: 'ecommerce', label: '电商专区', icon: ShoppingBag, href: '/ecommerce' },
-            { key: 'social', label: '自媒体专区', icon: Star, href: '/social' },
-          ].map(item => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.key}
-                href={item.href}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200"
-              >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-
-          {/* 分割线 */}
-          <div className="h-px bg-slate-100 dark:bg-slate-700 my-3" />
-
-          {/* 工具与模板 */}
-          {[
             { key: 'tools', label: '工具', icon: Grid3X3 },
             { key: 'templates', label: '模板', icon: LayoutDashboard },
+            { key: 'recent', label: '最近打开', icon: Clock },
+            { key: 'projects', label: '项目', icon: FolderOpen },
+            { key: 'assets', label: '资产库', icon: Database },
+            { key: 'more', label: '更多', icon: MoreHorizontal },
           ].map(item => {
             const Icon = item.icon;
             const isActive = activeTab === item.key;
