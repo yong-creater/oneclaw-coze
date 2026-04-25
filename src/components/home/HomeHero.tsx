@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Sparkles, Palette, FileText, ShoppingCart, TrendingUp, Settings } from 'lucide-react';
-import FeaturedTools from './FeaturedTools';
+import { Sparkles, ArrowRight, Palette, FileText, ShoppingCart, TrendingUp, Settings } from 'lucide-react';
 
 const CATEGORIES = [
   {
@@ -57,6 +56,7 @@ const CATEGORIES = [
   },
 ];
 
+// 热门工具
 const HOT_TOOLS = [
   {
     name: '小红书封面生成',
@@ -78,6 +78,40 @@ const HOT_TOOLS = [
     href: '/tools/ad-poster',
     gradient: 'from-orange-400 to-red-500',
     icon: '🎯',
+  },
+];
+
+// 精选工具
+const FEATURED_TOOLS = [
+  {
+    name: 'STAR简历优化',
+    description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
+    gradient: 'from-blue-500 to-sky-400',
+    icon: '📋',
+    href: '/tools/star-resume',
+    tags: ['JD精准匹配', '量化成果'],
+    tagBg: 'bg-blue-50 dark:bg-blue-900/30',
+    tagText: 'text-blue-600 dark:text-blue-400',
+  },
+  {
+    name: '小说创作工坊',
+    description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
+    gradient: 'from-violet-500 to-pink-400',
+    icon: '✍️',
+    href: '/tools/novel-studio',
+    tags: ['全流程', '一键导出'],
+    tagBg: 'bg-violet-50 dark:bg-violet-900/30',
+    tagText: 'text-violet-600 dark:text-violet-400',
+  },
+  {
+    name: '出海详情页',
+    description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
+    gradient: 'from-emerald-500 to-teal-400',
+    icon: '🌍',
+    href: '/tools/overseas-detail',
+    tags: ['海外合规', '多平台适配'],
+    tagBg: 'bg-emerald-50 dark:bg-emerald-900/30',
+    tagText: 'text-emerald-600 dark:text-emerald-400',
   },
 ];
 
@@ -136,44 +170,84 @@ export default function HomeHero() {
         })}
       </div>
 
-      {/* 热门工具横向滚动区 */}
-      <div className="relative">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-orange-500" />
-            热门工具
-          </h2>
-          <Link href="/create" className="text-sm text-orange-500 hover:text-orange-600 font-medium">
-            查看全部 →
-          </Link>
-        </div>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-          {HOT_TOOLS.map((tool) => (
-            <Link
-              key={tool.name}
-              href={tool.href}
-              className={`flex-shrink-0 w-48 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-lg hover:border-orange-300 dark:hover:border-orange-600 transition-all`}
-            >
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center text-2xl mb-3 shadow-md`}>
-                {tool.icon}
-              </div>
-              <h3 className="font-semibold text-slate-800 dark:text-white text-sm mb-1">
-                {tool.name}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {tool.desc}
-              </p>
-              <div className="mt-3 flex items-center gap-1 text-xs text-orange-500">
-                <span>立即使用</span>
-                <span>→</span>
-              </div>
+      {/* 热门工具 + 精选工具整合区 */}
+      <div className="space-y-8">
+        {/* 热门工具 */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
+              <span className="w-1 h-5 bg-gradient-to-b from-orange-500 to-red-500 rounded-full"></span>
+              <Sparkles className="w-5 h-5 text-orange-500" />
+              热门工具
+            </h2>
+            <Link href="/create" className="text-sm text-orange-500 hover:text-orange-600 font-medium flex items-center gap-1">
+              查看全部
+              <ArrowRight className="w-4 h-4" />
             </Link>
-          ))}
-        </div>
-      </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {HOT_TOOLS.map((tool) => (
+              <Link
+                key={tool.name}
+                href={tool.href}
+                className="group bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-100 dark:border-slate-700 hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-700 transition-all"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center text-2xl mb-3 shadow-md group-hover:scale-105 transition-transform`}>
+                  {tool.icon}
+                </div>
+                <h3 className="font-bold text-slate-800 dark:text-white mb-1">{tool.name}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">{tool.desc}</p>
+                <span className="inline-flex items-center gap-1 text-sm text-orange-500 font-medium">
+                  立即使用
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
-      {/* 精选工具板块 */}
-      <FeaturedTools />
+        {/* 精选工具 */}
+        <section>
+          <div className="text-center mb-4">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white flex items-center justify-center gap-2">
+              <span className="w-1 h-5 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></span>
+              精选工具
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              AI驱动的精选工具，提升您的工作效率
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {FEATURED_TOOLS.map((tool) => (
+              <Link
+                key={tool.name}
+                href={tool.href}
+                className="group bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-100 dark:border-slate-700 hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-700 transition-all"
+              >
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center text-2xl mb-3 shadow-md group-hover:scale-105 transition-transform`}>
+                  {tool.icon}
+                </div>
+                <h3 className="font-bold text-slate-800 dark:text-white mb-1">{tool.name}</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">{tool.description}</p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {tool.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className={`px-2 py-0.5 text-xs font-medium rounded-full ${tool.tagBg} ${tool.tagText}`}
+                    >
+                      →{tag}
+                    </span>
+                  ))}
+                </div>
+                <span className="inline-flex items-center gap-1 text-sm text-orange-500 font-medium">
+                  开始使用
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
