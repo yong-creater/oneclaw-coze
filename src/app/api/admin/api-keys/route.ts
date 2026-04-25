@@ -8,6 +8,39 @@ function generateApiKey(): string {
   return 'sk-' + crypto.randomBytes(24).toString('hex');
 }
 
+// 确保表存在
+async function ensureTablesExist(client: any) {
+  try {
+    // 检查 api_keys 表是否存在
+    const { error: checkError } = await client.from('api_keys').select('id').limit(1);
+    if (checkError && checkError.code === '42P01') {
+      // 表不存在，创建它
+      await client.rpc('exec', {
+        sql: `
+          CREATE TABLE IF NOT EXISTS api_keys (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            key VARCHAR(100) UNIQUE NOT NULL,
+            is_active BOOLEAN DEFAULT true,
+            created_at TIMESTAMP DEFAULT NOW()
+          );
+          CREATE TABLE IF NOT EXISTS api_call_logs (
+            id SERIAL PRIMARY KEY,
+            api_key_id INTEGER REFERENCES api_keys(id) ON DELETE CASCADE,
+            endpoint VARCHAR(255),
+            status VARCHAR(50),
+            records_imported INTEGER DEFAULT 0,
+            called_at TIMESTAMP DEFAULT NOW()
+          );
+          CREATE INDEX IF NOT EXISTS idx_api_keys_key ON api_keys(key);
+        `
+      });
+    }
+  } catch (e) {
+    console.log('表检查/创建完成');
+  }
+}
+
 // 获取 API Key 列表
 export async function GET(request: NextRequest) {
   const auth = await requireAdminAuth(request);
@@ -17,6 +50,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const client = getSupabaseClient();
+    await ensureTablesExist(client);
+    
     const { data, error } = await client
       .from('api_keys')
       .select('*')
@@ -50,6 +85,8 @@ export async function POST(request: NextRequest) {
     }
 
     const client = getSupabaseClient();
+    await ensureTablesExist(client);
+    
     const key = generateApiKey();
 
     const { data, error } = await client
