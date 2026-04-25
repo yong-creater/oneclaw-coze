@@ -151,7 +151,7 @@ function CoverImageUploader({
         onPaste={handlePaste}
         className={cn(
           "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
-          "border-slate-300 dark:border-slate-600 hover:border-orange-400 dark:hover:border-orange-500",
+          "border-slate-300 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-400",
           uploading && "opacity-50 pointer-events-none"
         )}
         onClick={() => fileInputRef.current?.click()}
@@ -449,7 +449,7 @@ export default function EditTutorialPage({ params }: { params: Promise<{ id: str
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[50vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-slate-600" />
       </div>
     );
   }
@@ -492,7 +492,7 @@ export default function EditTutorialPage({ params }: { params: Promise<{ id: str
           <Button 
             onClick={handleSubmit} 
             disabled={saving}
-            className="bg-orange-500 hover:bg-orange-600"
+            className="bg-slate-1000 hover:bg-slate-700"
           >
             {saving ? (
               <span className="flex items-center gap-2">

@@ -95,7 +95,7 @@ export default function AdminLayout({
   if (checking) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-slate-500" />
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function AdminLayout({
         <div className="flex items-center justify-between h-16 px-4">
           <Link href="/admin" className="flex items-center gap-2">
             <img src="/oneclaw-logo.png" alt="OneClaw" className="w-8 h-8 object-contain" />
-            <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-slate-800 dark:text-white">
               OneClaw
             </span>
             <span className="text-sm text-slate-500">管理后台</span>
@@ -147,8 +147,8 @@ export default function AdminLayout({
                   flex items-center px-3 py-2 rounded-lg text-sm font-medium
                   transition-colors duration-200
                   ${isActive 
-                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' 
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                    ? 'bg-slate-100 text-slate-800 dark:bg-slate-700/80 dark:text-slate-100' 
+                    : 'text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700/50'
                   }
                 `}
               >

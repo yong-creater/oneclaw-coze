@@ -110,7 +110,7 @@ export default function ReviewsAdminPage() {
             onClick={() => setStatusFilter(status)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               statusFilter === status
-                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                ? 'bg-gradient-to-r slate-600 dark:bg-slate-500 text-white'
                 : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
             }`}
           >
@@ -125,7 +125,7 @@ export default function ReviewsAdminPage() {
       {/* 评论列表 */}
       {loading ? (
         <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500" />
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-400" />
         </div>
       ) : reviews.length > 0 ? (
         <div className="space-y-4">
@@ -137,7 +137,7 @@ export default function ReviewsAdminPage() {
               <CardContent className="p-4">
                 <div className="flex items-start gap-4">
                   {/* 用户头像 */}
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-medium flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-r slate-600 dark:bg-slate-500 flex items-center justify-center text-white font-medium flex-shrink-0">
                     {review.user_id.slice(-2).toUpperCase()}
                   </div>
                   
@@ -148,7 +148,7 @@ export default function ReviewsAdminPage() {
                       </span>
                       {review.user_ratings && (
                         <div className="flex items-center gap-1 text-sm">
-                          <span className="text-orange-500">★</span>
+                          <span className="text-slate-600">★</span>
                           <span>{review.user_ratings.overall_score}</span>
                         </div>
                       )}
@@ -236,7 +236,7 @@ export default function ReviewsAdminPage() {
             <div className="space-y-4">
               {/* 用户信息 */}
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-red-500 flex items-center justify-center text-white font-medium">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-r slate-600 dark:bg-slate-500 flex items-center justify-center text-white font-medium">
                   {selectedReview.user_id.slice(-2).toUpperCase()}
                 </div>
                 <div>
@@ -287,7 +287,7 @@ export default function ReviewsAdminPage() {
                     拒绝
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-orange-500 to-red-500"
+                    className="bg-gradient-to-r slate-600 dark:bg-slate-500"
                     onClick={() => handleReview(selectedReview.id, 'approve')}
                   >
                     <Check className="w-4 h-4 mr-2" />

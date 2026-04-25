@@ -191,7 +191,7 @@ function ImageUploader({
           onDragOver={(e) => e.preventDefault()}
           onClick={() => fileInputRef.current?.click()}
           className={cn(
-            "border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center cursor-pointer hover:border-orange-400 transition-colors",
+            "border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-6 text-center cursor-pointer hover:border-slate-300 transition-colors",
             uploading && "opacity-50 pointer-events-none"
           )}
         >
@@ -224,7 +224,7 @@ function ImageUploader({
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setShowUrlInput(false)}>取消</Button>
-            <Button onClick={handleUrlConfirm} className="bg-orange-500 hover:bg-orange-600">确认</Button>
+            <Button onClick={handleUrlConfirm} className="bg-slate-1000 hover:bg-slate-700">确认</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -395,7 +395,7 @@ export default function AdminAdsPage() {
             setEditingAd(null);
             setDialogOpen(true);
           }}
-          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+          className="bg-gradient-to-r slate-600 dark:bg-slate-500 hover:bg-slate-700"
         >
           <Plus className="w-4 h-4 mr-2" />
           添加广告
@@ -403,7 +403,7 @@ export default function AdminAdsPage() {
       </div>
 
         {/* 广告位置说明 */}
-        <Card className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 mb-6">
+        <Card className="bg-slate-100 dark:bg-slate-800 mb-6">
           <CardContent className="p-4">
             <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-3">广告位说明</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
@@ -463,7 +463,7 @@ export default function AdminAdsPage() {
                                 {ad.is_active ? '启用' : '禁用'}
                               </Badge>
                               {ad.is_highlight && (
-                                <Badge variant="outline" className="text-orange-500 border-orange-300">置顶</Badge>
+                                <Badge variant="outline" className="text-slate-600 border-slate-300">置顶</Badge>
                               )}
                             </div>
                             {ad.description && (
@@ -635,7 +635,7 @@ export default function AdminAdsPage() {
                   type="checkbox"
                   checked={form.is_highlight}
                   onChange={(e) => setForm({ ...form, is_highlight: e.target.checked })}
-                  className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                  className="w-4 h-4 rounded border-slate-300 text-slate-600 focus:ring-slate-500"
                 />
                 <span className="text-sm">置顶显示</span>
               </label>
@@ -646,7 +646,7 @@ export default function AdminAdsPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
             <Button
               onClick={handleSubmit}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+              className="bg-gradient-to-r slate-600 dark:bg-slate-500 hover:bg-slate-700"
             >
               {editingAd ? '保存修改' : '添加广告'}
             </Button>

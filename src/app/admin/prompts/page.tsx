@@ -198,7 +198,7 @@ export default function PromptsAdminPage() {
             共 {pagination.total} 个Prompt模板
           </p>
         </div>
-        <Button onClick={() => openEditDialog()} className="bg-orange-500 hover:bg-orange-600">
+        <Button onClick={() => openEditDialog()} className="bg-slate-1000 hover:bg-slate-700">
           <Plus className="w-4 h-4 mr-2" />
           添加Prompt
         </Button>
@@ -249,7 +249,7 @@ export default function PromptsAdminPage() {
         <CardContent className="p-0">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto"></div>
             </div>
           ) : prompts.length === 0 ? (
             <div className="text-center py-12">
@@ -275,8 +275,8 @@ export default function PromptsAdminPage() {
                     <tr key={prompt.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-orange-500" />
+                          <div className="w-10 h-10 rounded bg-gradient-to-br slate-100 dark:bg-slate-800 dark:dark:bg-slate-800 flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-slate-600" />
                           </div>
                           <div>
                             <p className="font-medium text-slate-800 dark:text-white line-clamp-1">{prompt.title}</p>
@@ -462,7 +462,7 @@ export default function PromptsAdminPage() {
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>取消</Button>
-            <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600">保存</Button>
+            <Button onClick={handleSave} className="bg-slate-1000 hover:bg-slate-700">保存</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

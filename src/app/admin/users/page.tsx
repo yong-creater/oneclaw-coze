@@ -119,7 +119,7 @@ export default function UsersPage() {
       {/* 页面标题 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-gradient-to-br slate-600 dark:bg-slate-500 rounded-xl flex items-center justify-center">
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -161,7 +161,7 @@ export default function UsersPage() {
         <CardContent>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-slate-600" />
             </div>
           ) : users.length === 0 ? (
             <div className="text-center py-12 text-slate-500">
@@ -187,7 +187,7 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br slate-100 dark:bg-slate-700/50 dark:dark:bg-slate-800 flex items-center justify-center">
                             {user.avatar_url ? (
                               <img 
                                 src={user.avatar_url} 
@@ -195,7 +195,7 @@ export default function UsersPage() {
                                 className="w-10 h-10 rounded-full object-cover"
                               />
                             ) : (
-                              <span className="text-lg font-bold text-orange-500">
+                              <span className="text-lg font-bold text-slate-600">
                                 {(user.nickname || user.email || 'U')[0].toUpperCase()}
                               </span>
                             )}
@@ -216,7 +216,7 @@ export default function UsersPage() {
                       <TableCell>
                         <Badge 
                           variant={user.email ? 'default' : user.openid ? 'secondary' : 'outline'}
-                          className={user.email ? 'bg-orange-100 text-orange-700 hover:bg-orange-200' : ''}
+                          className={user.email ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : ''}
                         >
                           {getLoginType(user)}
                         </Badge>

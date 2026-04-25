@@ -27,7 +27,7 @@ import Link from 'next/link';
 // 会员等级配置
 const MEMBER_LEVELS = {
   free: { name: '免费会员', color: 'bg-slate-500', price: 0 },
-  pro: { name: 'Pro会员', color: 'bg-gradient-to-r from-orange-500 to-red-500', price: 99 },
+  pro: { name: 'Pro会员', color: 'bg-gradient-to-r slate-600 dark:bg-slate-500', price: 99 },
   enterprise: { name: '企业会员', color: 'bg-gradient-to-r from-purple-500 to-pink-500', price: 299 },
 };
 
@@ -128,9 +128,9 @@ export default function AdminMembersPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">Pro会员</p>
-                <p className="text-2xl font-bold text-orange-500">{stats.pro}</p>
+                <p className="text-2xl font-bold text-slate-600">{stats.pro}</p>
               </div>
-              <Star className="w-8 h-8 text-orange-400" />
+              <Star className="w-8 h-8 text-amber-500" />
             </div>
           </CardContent>
         </Card>

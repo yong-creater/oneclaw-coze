@@ -143,7 +143,7 @@ function UtilityToolsPage() {
               onClick={() => {
                 window.open(getToolUrl(tool.key), '_blank');
               }}
-              className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left overflow-hidden flex flex-col"
+              className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 text-left overflow-hidden flex flex-col"
             >
               {/* 背景渐变装饰 */}
               <div className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
@@ -154,7 +154,7 @@ function UtilityToolsPage() {
                   <Icon className="w-7 h-7 text-white" />
                 </div>
                 
-                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-orange-500 transition-colors">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors">
                   {tool.name}
                 </h3>
                 
@@ -166,7 +166,7 @@ function UtilityToolsPage() {
               {/* 底部区域：默认显示开始使用，悬浮时显示标签 */}
               <div className="relative mt-4">
                 {/* 默认显示 */}
-                <div className="flex items-center gap-2 text-orange-500 text-sm font-medium group-hover:opacity-0 transition-opacity h-6">
+                <div className="flex items-center gap-2 text-slate-500 text-sm font-medium group-hover:opacity-0 transition-opacity h-6">
                   <span>开始使用</span>
                   <ArrowRight className="w-4 h-4" />
                 </div>
@@ -685,13 +685,13 @@ export default function HomePage() {
             {/* Logo - 防止被压缩 */}
             <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
               <AnimatedLobster size={32} className="sm:size-9" />
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent whitespace-nowrap">
+              <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white whitespace-nowrap">
                 OneClaw
               </span>
             </Link>
 
             {/* 主导航Tab - 移动端隐藏文字 */}
-            <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-full p-1">
+            <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 rounded-xl p-1">
               {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = mainTab === tab.key;
@@ -700,10 +700,10 @@ export default function HomePage() {
                   <button
                     key={tab.key}
                     onClick={() => setMainTab(tab.key)}
-                    className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-orange-500'
+                        ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-sm'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -736,8 +736,8 @@ export default function HomePage() {
                     onClick={() => setActiveCategory('all')}
                     className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                       activeCategory === 'all'
-                        ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-100 font-medium'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                     }`}
                   >
                     <span className="truncate flex-1 text-left">全部</span>
@@ -750,8 +750,8 @@ export default function HomePage() {
                         onClick={() => setActiveCategory(cat.slug)}
                         className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                           isActive
-                            ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-100 font-medium'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                         }`}
                       >
                         <span className="truncate flex-1 text-left">{cat.name}</span>
@@ -768,7 +768,7 @@ export default function HomePage() {
               <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-4 mb-4">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-semibold text-slate-800 dark:text-white">选择分类</h2>
-                  <span className="text-sm text-orange-500">
+                  <span className="text-sm text-slate-500">
                     {activeCategory === 'all' ? '全部' : categories.find(c => c.slug === activeCategory)?.name}
                   </span>
                 </div>
@@ -777,7 +777,7 @@ export default function HomePage() {
                     onClick={() => setActiveCategory('all')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       activeCategory === 'all'
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-slate-600 text-white'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                     }`}
                   >
@@ -789,7 +789,7 @@ export default function HomePage() {
                       onClick={() => setActiveCategory(cat.slug)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                         activeCategory === cat.slug
-                          ? 'bg-orange-500 text-white'
+                          ? 'bg-slate-600 text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                       }`}
                     >
@@ -800,7 +800,7 @@ export default function HomePage() {
                 {categories.length > 8 && (
                   <button
                     onClick={() => setShowMoreCategories(!showMoreCategories)}
-                    className="mt-2 text-sm text-orange-500 hover:text-orange-600"
+                    className="mt-2 text-sm text-slate-500 hover:text-slate-700"
                   >
                     {showMoreCategories ? '收起' : `更多分类 (${categories.length - 8})`}
                   </button>
@@ -813,7 +813,7 @@ export default function HomePage() {
                         onClick={() => setActiveCategory(cat.slug)}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                           activeCategory === cat.slug
-                            ? 'bg-orange-500 text-white'
+                            ? 'bg-slate-600 text-white'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                         }`}
                       >
@@ -912,7 +912,7 @@ export default function HomePage() {
                                   <SponsorBadge sponsorType={tool.sponsor_type} size="sm" />
                                 )}
                                 {tool.is_featured && !tool.sponsor_type && (
-                                  <Star className="w-3 h-3 text-orange-500 fill-orange-500 flex-shrink-0" />
+                                  <Star className="w-3 h-3 text-amber-500 fill-amber-500 flex-shrink-0" />
                                 )}
                               </div>
                               <p className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">{tool.highlight}</p>
@@ -987,8 +987,8 @@ export default function HomePage() {
                         onClick={() => { setPromptCategory(cat); setPromptsPagination(prev => ({ ...prev, page: 1 })); }}
                         className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                           isActive
-                            ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-100 font-medium'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                         }`}
                       >
                         <span className="truncate flex-1 text-left">{cat}</span>
@@ -1019,7 +1019,7 @@ export default function HomePage() {
             {/* Prompt列表 */}
             {promptsLoading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 dark:border-slate-600"></div>
               </div>
             ) : prompts.length > 0 ? (
               <>
@@ -1027,7 +1027,7 @@ export default function HomePage() {
                   {prompts.map(prompt => (
                     <Card 
                       key={prompt.id} 
-                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
                       onClick={() => {
                         // 记录来源页面
                         if (typeof window !== 'undefined') {
@@ -1110,8 +1110,8 @@ export default function HomePage() {
                         onClick={() => { setTutorialCategory(cat); setTutorialsPagination(prev => ({ ...prev, page: 1 })); }}
                         className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                           isActive
-                            ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-100 font-medium'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                         }`}
                       >
                         <span className="truncate flex-1 text-left">{cat}</span>
@@ -1142,7 +1142,7 @@ export default function HomePage() {
             {/* 教程列表 */}
             {tutorialsLoading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 dark:border-slate-600"></div>
               </div>
             ) : tutorials.length > 0 ? (
               <>
@@ -1150,7 +1150,7 @@ export default function HomePage() {
                   {tutorials.map(tutorial => (
                     <Card 
                       key={tutorial.id} 
-                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors cursor-pointer"
+                      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors cursor-pointer"
                       onClick={() => {
                         // 记录来源页面
                         if (typeof window !== 'undefined') {
@@ -1173,8 +1173,8 @@ export default function HomePage() {
                               <img src={tutorial.cover_image} alt="" className="w-full h-full object-cover" loading="lazy" />
                             </div>
                           ) : (
-                            <div className="w-32 h-20 rounded-lg bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 flex-shrink-0 flex items-center justify-center">
-                              <BookOpen className="w-8 h-8 text-orange-500" />
+                            <div className="w-32 h-20 rounded-lg bg-slate-100 dark:bg-slate-700/50 flex-shrink-0 flex items-center justify-center">
+                              <BookOpen className="w-8 h-8 text-slate-500" />
                             </div>
                           )}
                           <div className="flex-1">
@@ -1244,8 +1244,8 @@ export default function HomePage() {
                     onClick={() => { setSkillCategory('all'); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
                     className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                       skillCategory === 'all'
-                        ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-100 font-medium'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                     }`}
                   >
                     <span className="truncate flex-1 text-left">全部</span>
@@ -1258,8 +1258,8 @@ export default function HomePage() {
                         onClick={() => { setSkillCategory(cat.id); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
                         className={`w-full flex items-center px-3 py-2 rounded-lg text-sm transition-colors ${
                           isActive
-                            ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 font-medium'
-                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                            ? 'bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-100 font-medium'
+                            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
                         }`}
                       >
                         <span className="truncate flex-1 text-left">{cat.name}</span>
@@ -1290,7 +1290,7 @@ export default function HomePage() {
             {/* 技能列表 - SkillHub 风格 */}
             {skillsLoading ? (
               <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 dark:border-slate-600"></div>
               </div>
             ) : skills.length > 0 ? (
               <>
@@ -1329,7 +1329,7 @@ export default function HomePage() {
                             <span style={{ color: bgColor }}>{letter}</span>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-1 group-hover:text-orange-500 transition-colors">
+                            <h3 className="font-medium text-slate-800 dark:text-slate-100 mb-1 group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors">
                               {skill.name}
                             </h3>
                             <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-1">
@@ -1371,11 +1371,11 @@ export default function HomePage() {
       <footer className="bg-gradient-to-t from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
         <div className="max-w-7xl mx-auto px-4 py-12">
           {/* 公众号推广 - 居中卡片设计 */}
-          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-900/20 dark:via-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 mb-8 border border-orange-100 dark:border-orange-800/30">
+          <div className="bg-slate-100 dark:bg-slate-800/80 rounded-2xl p-8 mb-8 border border-slate-200 dark:border-slate-700/50">
             <div className="flex flex-col md:flex-row items-center gap-8">
               {/* 二维码区域 */}
               <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-r from-orange-400 to-amber-400 rounded-2xl blur-lg opacity-30"></div>
+                <div className="absolute -inset-2 bg-slate-200 dark:bg-slate-700 rounded-2xl blur-lg opacity-20"></div>
                 <div className="relative bg-white dark:bg-slate-800 rounded-xl p-3 shadow-xl">
                   <Image 
                     src="/wechat-qrcode.jpg" 
@@ -1399,15 +1399,15 @@ export default function HomePage() {
                 <p className="text-slate-600 dark:text-slate-300 mb-1">
                   获取最新AI工具资讯、技巧与资源
                 </p>
-                <div className="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-4 py-2 rounded-full text-sm">
-                  <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                <div className="inline-flex items-center gap-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-4 py-2 rounded-full text-sm">
+                  <span className="w-2 h-2 bg-slate-500 rounded-full animate-pulse"></span>
                   回复「AI」送你一份AI工具使用指南
                 </div>
               </div>
               
               {/* 右侧品牌 */}
               <div className="hidden md:flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 rounded-2xl bg-slate-600 dark:bg-slate-500 flex items-center justify-center shadow-lg">
                   <AnimatedLobster size={40} />
                 </div>
                 <span className="font-bold text-lg text-slate-700 dark:text-slate-200">OneClaw</span>
@@ -1418,16 +1418,16 @@ export default function HomePage() {
           {/* 底部导航 */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
                 <AnimatedLobster size={20} />
               </div>
               <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
               <span className="text-xs text-slate-400 ml-2">AI工具导航</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <Link href="/about" className="hover:text-slate-500 transition-colors">关于OneClaw</Link>
               <span className="text-slate-300 dark:text-slate-600">|</span>
-              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-500 transition-colors">
                 渝ICP备2026004291号-2
               </a>
             </div>

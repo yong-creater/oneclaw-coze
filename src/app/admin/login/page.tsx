@@ -50,18 +50,18 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
       {/* 背景装饰 */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-slate-1000/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
       </div>
 
       <Card className="w-full max-w-md relative z-10 bg-slate-800/50 border-slate-700 backdrop-blur-xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br slate-600 dark:bg-slate-500 flex items-center justify-center">
               <Shield className="w-8 h-8 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r slate-600 dark:bg-slate-500 bg-clip-text text-transparent">
             OneClaw Admin
           </CardTitle>
           <p className="text-slate-400 text-sm mt-1">管理后台登录</p>
@@ -84,7 +84,7 @@ export default function AdminLoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="请输入用户名"
-                  className="pl-10 bg-slate-100 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-orange-500 focus:ring-orange-500"
+                  className="pl-10 bg-slate-100 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-400 focus:ring-slate-500"
                   disabled={loading}
                   required
                   autoComplete="username"
@@ -101,7 +101,7 @@ export default function AdminLoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="请输入密码"
-                  className="pl-10 pr-10 bg-slate-100 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-orange-500 focus:ring-orange-500"
+                  className="pl-10 pr-10 bg-slate-100 border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-slate-400 focus:ring-slate-500"
                   disabled={loading}
                   required
                   autoComplete="current-password"
@@ -119,7 +119,7 @@ export default function AdminLoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2.5"
+              className="w-full bg-gradient-to-r slate-600 dark:bg-slate-500 hover:bg-slate-700 text-white font-medium py-2.5"
             >
               {loading ? (
                 <>

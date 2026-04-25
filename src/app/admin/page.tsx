@@ -134,7 +134,7 @@ export default function AdminDashboard() {
     { name: '工具总数', value: stats.tools_count, icon: Wrench, color: 'bg-blue-500', href: '/admin/tools' },
     { name: '分类数量', value: stats.categories, icon: FolderTree, color: 'bg-green-500', href: '/admin/categories' },
     { name: '标签数量', value: stats.tags, icon: Tags, color: 'bg-purple-500', href: '/admin/tags' },
-    { name: '首页推荐', value: stats.featured_count, icon: TrendingUp, color: 'bg-orange-500' },
+    { name: '首页推荐', value: stats.featured_count, icon: TrendingUp, color: 'bg-slate-1000' },
     { name: '总浏览量', value: stats.total_views.toLocaleString(), icon: Eye, color: 'bg-cyan-500' },
     { name: '总点击量', value: stats.total_clicks.toLocaleString(), icon: MousePointer, color: 'bg-pink-500' },
     { name: '用户评分', value: stats.ratings_count, icon: Star, color: 'bg-yellow-500' },
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400" />
       </div>
     );
   }
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
         <CardContent>
           <div className="flex flex-wrap gap-2">
             <Link href="/admin/tools/new">
-              <Button size="sm" className="bg-gradient-to-r from-orange-500 to-red-500">
+              <Button size="sm" className="bg-gradient-to-r slate-600 dark:bg-slate-500">
                 <Plus className="w-4 h-4 mr-2" />
                 添加工具
               </Button>
@@ -248,7 +248,7 @@ export default function AdminDashboard() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">最近添加</CardTitle>
-              <Link href="/admin/tools" className="text-sm text-orange-500 hover:text-orange-600">
+              <Link href="/admin/tools" className="text-sm text-slate-600 hover:text-slate-700">
                 查看全部
               </Link>
             </div>
@@ -269,7 +269,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2">
                       <p className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name}</p>
                       {tool.is_featured && (
-                        <TrendingUp className="w-3 h-3 text-orange-500" />
+                        <TrendingUp className="w-3 h-3 text-slate-600" />
                       )}
                     </div>
                     <p className="text-xs text-slate-500">{tool.producer}</p>
@@ -295,7 +295,7 @@ export default function AdminDashboard() {
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                     index === 0 ? 'bg-yellow-500 text-white' :
                     index === 1 ? 'bg-slate-400 text-white' :
-                    index === 2 ? 'bg-orange-400 text-white' :
+                    index === 2 ? 'bg-slate-500 text-white' :
                     'bg-slate-200 text-slate-600'
                   }`}>
                     {index + 1}

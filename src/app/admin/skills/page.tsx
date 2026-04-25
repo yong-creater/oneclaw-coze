@@ -419,7 +419,7 @@ export default function AdminSkillsPage() {
             <CardContent>
               {categoriesLoading ? (
                 <div className="flex items-center justify-center py-10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400"></div>
                 </div>
               ) : categories.length > 0 ? (
                 <div className="space-y-3">
@@ -497,7 +497,7 @@ export default function AdminSkillsPage() {
             <CardContent>
               {skillsLoading ? (
                 <div className="flex items-center justify-center py-10">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400"></div>
                 </div>
               ) : skills.length > 0 ? (
                 <>

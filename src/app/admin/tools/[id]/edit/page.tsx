@@ -317,7 +317,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400" />
       </div>
     );
   }
@@ -385,7 +385,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 required
               />
             </div>
@@ -399,7 +399,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.producer}
                 onChange={(e) => setFormData(prev => ({ ...prev, producer: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 required
               />
             </div>
@@ -413,7 +413,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.logo}
                 onChange={(e) => setFormData(prev => ({ ...prev, logo: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 required
               />
             </div>
@@ -429,7 +429,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 placeholder="最多15字"
                 maxLength={15}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 required
               />
             </div>
@@ -452,7 +452,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 placeholder="一句话介绍工具用途"
                 maxLength={100}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
 
@@ -466,7 +466,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 placeholder="详细介绍工具的功能、特点和使用场景..."
                 rows={4}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
 
@@ -480,7 +480,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 placeholder="分步骤说明工具的使用方法..."
                 rows={3}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
           </div>
@@ -499,7 +499,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.category_id}
                 onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 required
               >
                 <option value="">请选择分类</option>
@@ -517,7 +517,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.max_duration}
                 onChange={(e) => setFormData(prev => ({ ...prev, max_duration: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               >
                 {DURATION_OPTIONS.map(dur => (
                   <option key={dur} value={dur}>{dur}</option>
@@ -541,7 +541,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.official_url}
                 onChange={(e) => setFormData(prev => ({ ...prev, official_url: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
                 required
               />
             </div>
@@ -556,7 +556,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 onChange={(e) => setFormData(prev => ({ ...prev, promotion_url: e.target.value }))}
                 placeholder="联盟推广链接（可选）"
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
 
@@ -570,7 +570,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 onChange={(e) => setFormData(prev => ({ ...prev, customer_email: e.target.value }))}
                 placeholder="用户反馈联系邮箱"
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
 
@@ -584,7 +584,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 onChange={(e) => setFormData(prev => ({ ...prev, feedback_link: e.target.value }))}
                 placeholder="用户反馈表单链接"
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
           </div>
@@ -602,8 +602,8 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 onClick={() => handleFeatureTagToggle(tag.name)}
                 className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                   formData.feature_tags.includes(tag.name)
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-orange-100'
+                    ? 'bg-slate-1000 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100'
                 }`}
               >
                 {tag.name}
@@ -629,7 +629,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 }}
                 placeholder={`优势${i + 1}`}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             ))}
           </div>
@@ -652,7 +652,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 }}
                 placeholder={`局限性${i + 1}`}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             ))}
           </div>
@@ -678,7 +678,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => updateScene(index, 'user_group', e.target.value)}
                     placeholder="适用人群（如：学生/科研人群）"
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
-                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
                   />
                   <input
                     type="text"
@@ -686,7 +686,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => updateScene(index, 'scene_desc', e.target.value)}
                     placeholder="场景描述"
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
-                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
                   />
                 </div>
                 <button
@@ -721,7 +721,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => updateFunction(index, 'func_name', e.target.value)}
                     placeholder="功能名称（如：智能搜索）"
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
-                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
                   />
                   <input
                     type="text"
@@ -729,7 +729,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => updateFunction(index, 'func_desc', e.target.value)}
                     placeholder="功能描述"
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
-                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
                   />
                 </div>
                 <button
@@ -765,7 +765,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                     onChange={(e) => updateFAQ(index, 'question', e.target.value)}
                     placeholder="问题"
                     className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
-                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
                   />
                   <button
                     type="button"
@@ -783,7 +783,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                     placeholder="回答"
                     rows={2}
                     className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 
-                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500"
                   />
                 </div>
               </div>
@@ -804,7 +804,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.commercial_license}
                 onChange={(e) => setFormData(prev => ({ ...prev, commercial_license: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               >
                 {LICENSE_TYPES.map(lic => (
                   <option key={lic} value={lic}>{lic}</option>
@@ -821,7 +821,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 value={formData.launch_date}
                 onChange={(e) => setFormData(prev => ({ ...prev, launch_date: e.target.value }))}
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
           </div>
@@ -832,7 +832,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 type="checkbox"
                 checked={formData.is_official}
                 onChange={(e) => setFormData(prev => ({ ...prev, is_official: e.target.checked }))}
-                className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                className="w-4 h-4 rounded border-slate-300 text-slate-600 focus:ring-slate-500"
               />
               <span className="text-sm text-slate-700 dark:text-slate-300">官方认证</span>
             </label>
@@ -842,7 +842,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 type="checkbox"
                 checked={formData.is_featured}
                 onChange={(e) => setFormData(prev => ({ ...prev, is_featured: e.target.checked }))}
-                className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                className="w-4 h-4 rounded border-slate-300 text-slate-600 focus:ring-slate-500"
               />
               <span className="text-sm text-slate-700 dark:text-slate-300">首页推荐</span>
             </label>
@@ -852,7 +852,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 type="checkbox"
                 checked={formData.is_active}
                 onChange={(e) => setFormData(prev => ({ ...prev, is_active: e.target.checked }))}
-                className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                className="w-4 h-4 rounded border-slate-300 text-slate-600 focus:ring-slate-500"
               />
               <span className="text-sm text-slate-700 dark:text-slate-300">上架显示</span>
             </label>
@@ -867,7 +867,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
           <Button
             type="submit"
             disabled={saving}
-            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+            className="bg-gradient-to-r slate-600 dark:bg-slate-500 hover:bg-slate-700"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? '保存中...' : '保存修改'}

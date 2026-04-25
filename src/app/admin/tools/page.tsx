@@ -185,7 +185,7 @@ function ToolsAdminContent() {
               onClick={() => handleCategoryClick('all')}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
                 currentCategoryId === 'all'
-                  ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+                  ? 'bg-slate-100 text-slate-700 dark:bg-slate-700/80 dark:text-slate-300'
                   : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
@@ -200,7 +200,7 @@ function ToolsAdminContent() {
                 onClick={() => handleCategoryClick(cat.id.toString())}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
                   currentCategoryId?.toString() === cat.id.toString()
-                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400'
+                    ? 'bg-slate-100 text-slate-700 dark:bg-slate-700/80 dark:text-slate-300'
                     : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
                 }`}
               >
@@ -231,13 +231,13 @@ function ToolsAdminContent() {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 className="pl-10 pr-4 py-2 w-56 rounded-lg border border-slate-200 dark:border-slate-700 
-                  bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
             </div>
             
             <button
               onClick={handleSearch}
-              className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm hover:bg-orange-600"
+              className="px-4 py-2 rounded-lg bg-slate-1000 text-white text-sm hover:bg-slate-700"
             >
               搜索
             </button>
@@ -252,8 +252,8 @@ function ToolsAdminContent() {
             </Link>
             <Link
               href="/admin/tools/new"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white 
-                text-sm font-medium hover:bg-orange-600 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-1000 text-white 
+                text-sm font-medium hover:bg-slate-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
               添加
@@ -265,7 +265,7 @@ function ToolsAdminContent() {
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
           {loading ? (
             <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400" />
             </div>
           ) : tools.length > 0 ? (
             <div className="overflow-x-auto">
@@ -307,8 +307,8 @@ function ToolsAdminContent() {
                             onClick={() => handleToggleFeatured(tool.id, tool.is_featured)}
                             className={`p-1 rounded transition-colors ${
                               tool.is_featured 
-                                ? 'text-orange-500 hover:text-orange-600' 
-                                : 'text-slate-300 hover:text-orange-500'
+                                ? 'text-slate-600 hover:text-slate-700' 
+                                : 'text-slate-300 hover:text-slate-600'
                             }`}
                             title={tool.is_featured ? '取消推荐' : '设为推荐'}
                           >
@@ -339,7 +339,7 @@ function ToolsAdminContent() {
                           </a>
                           <Link
                             href={`/admin/tools/${tool.id}/edit`}
-                            className="p-1.5 rounded text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30"
+                            className="p-1.5 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700/50"
                             title="编辑"
                           >
                             <Edit className="w-4 h-4" />
@@ -410,7 +410,7 @@ export default function ToolsAdminPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400" />
       </div>
     }>
       <ToolsAdminContent />

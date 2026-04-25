@@ -23,7 +23,7 @@ interface Tag {
 const TAG_TYPES = [
   { value: 'feature', label: '功能标签', color: 'bg-blue-100 text-blue-700' },
   { value: 'duration', label: '时长标签', color: 'bg-purple-100 text-purple-700' },
-  { value: 'scene', label: '场景标签', color: 'bg-orange-100 text-orange-700' },
+  { value: 'scene', label: '场景标签', color: 'bg-slate-100 text-slate-700' },
   { value: 'license', label: '商用权限', color: 'bg-cyan-100 text-cyan-700' },
 ];
 
@@ -132,7 +132,7 @@ export default function TagsAdminPage() {
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">标签管理</h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">管理工具标签，共 {tags.length} 个</p>
         </div>
-        <Button onClick={() => openEditDialog()} className="bg-gradient-to-r from-orange-500 to-red-500">
+        <Button onClick={() => openEditDialog()} className="bg-gradient-to-r slate-600 dark:bg-slate-500">
           <Plus className="w-4 h-4 mr-2" />
           添加标签
         </Button>
@@ -144,7 +144,7 @@ export default function TagsAdminPage() {
           onClick={() => setActiveType('all')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeType === 'all'
-              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+              ? 'bg-gradient-to-r slate-600 dark:bg-slate-500 text-white'
               : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
           }`}
         >
@@ -156,7 +156,7 @@ export default function TagsAdminPage() {
             onClick={() => setActiveType(type.value)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeType === type.value
-                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+                ? 'bg-gradient-to-r slate-600 dark:bg-slate-500 text-white'
                 : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
             }`}
           >
@@ -168,7 +168,7 @@ export default function TagsAdminPage() {
       {/* 标签列表 */}
       {loading ? (
         <div className="flex items-center justify-center h-32">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500" />
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-400" />
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
@@ -238,7 +238,7 @@ export default function TagsAdminPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditDialogOpen(false)}>取消</Button>
-            <Button onClick={handleSave} className="bg-gradient-to-r from-orange-500 to-red-500">保存</Button>
+            <Button onClick={handleSave} className="bg-gradient-to-r slate-600 dark:bg-slate-500">保存</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

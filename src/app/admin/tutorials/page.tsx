@@ -48,7 +48,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   '入门': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
   '中级': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   '进阶': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  '高级': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+  '高级': 'bg-slate-100 text-slate-700 dark:bg-slate-700/80 dark:text-slate-300',
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -139,7 +139,7 @@ export default function TutorialsAdminPage() {
             共 {pagination.total} 个教程
           </p>
         </div>
-        <Button onClick={() => router.push('/admin/tutorials/new')} className="bg-orange-500 hover:bg-orange-600">
+        <Button onClick={() => router.push('/admin/tutorials/new')} className="bg-slate-1000 hover:bg-slate-700">
           <Plus className="w-4 h-4 mr-2" />
           添加教程
         </Button>
@@ -194,7 +194,7 @@ export default function TutorialsAdminPage() {
         <CardContent className="p-0">
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400 mx-auto"></div>
             </div>
           ) : tutorials.length === 0 ? (
             <div className="text-center py-12">
@@ -223,8 +223,8 @@ export default function TutorialsAdminPage() {
                           {tutorial.cover_image ? (
                             <img src={tutorial.cover_image} alt="" className="w-10 h-10 rounded object-cover" />
                           ) : (
-                            <div className="w-10 h-10 rounded bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 flex items-center justify-center">
-                              <BookOpen className="w-5 h-5 text-orange-500" />
+                            <div className="w-10 h-10 rounded bg-gradient-to-br slate-100 dark:bg-slate-800 dark:dark:bg-slate-800 flex items-center justify-center">
+                              <BookOpen className="w-5 h-5 text-slate-600" />
                             </div>
                           )}
                           <div>

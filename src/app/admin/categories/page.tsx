@@ -76,7 +76,7 @@ function SortableItem({ id, item, onEdit, onDelete }: SortableItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-orange-300 dark:hover:border-orange-600 transition-colors"
+      className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
     >
       <button
         {...attributes}
@@ -286,7 +286,7 @@ export default function CategoriesAdminPage() {
           <h1 className="text-2xl font-bold">分类管理</h1>
           <p className="text-sm text-slate-500">拖拽调整顺序，共 {categories.length} 个</p>
         </div>
-        <Button onClick={() => openDialog()} className="bg-orange-500 hover:bg-orange-600">
+        <Button onClick={() => openDialog()} className="bg-slate-1000 hover:bg-slate-700">
           <Plus className="w-4 h-4 mr-1" /> 添加分类
         </Button>
       </div>
@@ -294,7 +294,7 @@ export default function CategoriesAdminPage() {
       {/* 分类列表 */}
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-400" />
         </div>
       ) : categories.length === 0 ? (
         <Card>
@@ -371,7 +371,7 @@ export default function CategoriesAdminPage() {
           
           <DialogFooter>
             <Button variant="outline" onClick={closeDialog}>取消</Button>
-            <Button onClick={handleSave} disabled={saving} className="bg-orange-500 hover:bg-orange-600">
+            <Button onClick={handleSave} disabled={saving} className="bg-slate-1000 hover:bg-slate-700">
               {saving ? '保存中...' : '保存'}
             </Button>
           </DialogFooter>

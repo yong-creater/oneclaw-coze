@@ -173,7 +173,7 @@ export default function BatchImportPage() {
               >
                 {file ? (
                   <>
-                    <FileJson className="w-12 h-12 text-orange-500 mb-2" />
+                    <FileJson className="w-12 h-12 text-slate-600 mb-2" />
                     <span className="text-sm text-slate-600 dark:text-slate-300">{file.name}</span>
                   </>
                 ) : (
@@ -221,7 +221,7 @@ export default function BatchImportPage() {
   }
 ]`}
               className="w-full h-64 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 
+                bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 
                 font-mono text-sm text-slate-600 dark:text-slate-300"
             />
           </div>
@@ -287,7 +287,7 @@ export default function BatchImportPage() {
             <Button
               onClick={handleImport}
               disabled={importing || !jsonInput.trim()}
-              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+              className="bg-gradient-to-r slate-600 dark:bg-slate-500 hover:bg-slate-700"
             >
               {importing ? (
                 <>

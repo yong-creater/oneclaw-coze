@@ -293,7 +293,7 @@ export default function NewTutorialPage() {
         <Button 
           onClick={handleSubmit} 
           disabled={loading}
-          className="bg-orange-500 hover:bg-orange-600"
+          className="bg-slate-1000 hover:bg-slate-700"
         >
           {loading ? (
             <span className="flex items-center gap-2">
@@ -342,7 +342,7 @@ export default function NewTutorialPage() {
                       size="sm" 
                       variant="outline"
                       onClick={handleConvert}
-                      className="text-orange-500 border-orange-200 hover:bg-orange-50"
+                      className="text-slate-600 border-slate-200 hover:bg-slate-100"
                     >
                       <FileText className="w-3 h-3 mr-1" />
                       转换为 HTML
