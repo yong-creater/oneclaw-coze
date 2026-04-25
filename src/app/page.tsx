@@ -115,24 +115,14 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
     }
   };
 
-  // 处理添加按钮
-  const handleAdd = () => {
-    setToast('上传功能开发中');
-  };
-
-  // 处理上传图片
-  const handleUploadImage = () => {
-    setToast('图片上传功能开发中');
-  };
-
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8">
       {/* Toast通知 */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* AI对话引导区 */}
-      <div className="text-center py-8">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+      <div className="text-center py-6">
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-3">
           和我聊聊，你想要什么设计
         </h1>
         
@@ -156,7 +146,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
 
         {/* 对话输入框 */}
         <div className="max-w-2xl mx-auto">
-          <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-1">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-1 border border-slate-200 dark:border-slate-700">
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -167,28 +157,19 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                 }
               }}
               placeholder="和我聊聊，你想要什么设计..."
-              className="w-full px-5 py-4 bg-transparent resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-sm"
+              className="w-full px-5 py-4 resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-sm"
               rows={2}
             />
             <div className="flex items-center justify-between px-4 pb-3">
-              <div className="flex items-center gap-2">
-                <button 
-                  onClick={handleAdd}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors text-xs text-slate-500"
-                >
-                  <Plus className="w-3 h-3" />
-                  添加
-                </button>
-                <button 
-                  onClick={handleUploadImage}
-                  className="w-8 h-8 rounded-lg bg-white dark:bg-slate-700 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
-                >
-                  <ImageIcon className="w-4 h-4 text-slate-500" />
-                </button>
-              </div>
+              <button 
+                onClick={() => setToast('图片上传功能开发中')}
+                className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                <ImageIcon className="w-4 h-4 text-slate-500" />
+              </button>
               <button 
                 onClick={handleSend}
-                className="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-1.5"
+                className="px-5 py-2 bg-slate-800 dark:bg-slate-600 hover:bg-slate-900 dark:hover:bg-slate-500 text-white rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
               >
                 发送
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -200,7 +181,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
         </div>
       </div>
 
-      {/* 特色功能卡片 */}
+      {/* 特色AI功能 */}
       <div>
         <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">特色AI功能</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -210,18 +191,15 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
               <button
                 key={idx}
                 onClick={() => handleToolClick(tool.key)}
-                className="group bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all text-left"
+                className="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:shadow-lg hover:border-orange-200 dark:hover:border-orange-700 transition-all text-left"
               >
-                <div className={`h-24 bg-gradient-to-br ${tool.color} relative flex items-center justify-center`}>
-                  <div className="w-12 h-12 rounded-2xl bg-white/90 dark:bg-slate-700/90 flex items-center justify-center shadow-sm">
+                <div className={`h-20 bg-gradient-to-br ${tool.color} relative flex items-center justify-center`}>
+                  <div className="w-12 h-12 rounded-xl bg-white/90 dark:bg-slate-700/90 flex items-center justify-center shadow-sm">
                     <Icon className="w-6 h-6 text-slate-600 dark:text-slate-300" />
-                  </div>
-                  <div className="absolute top-2 right-2 w-6 h-6 bg-white/80 dark:bg-slate-700/80 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight className="w-4 h-4 text-slate-500" />
                   </div>
                 </div>
                 <div className="p-3">
-                  <h3 className="font-semibold text-slate-800 dark:text-white text-sm">{tool.name}</h3>
+                  <h3 className="font-medium text-slate-800 dark:text-white text-sm">{tool.name}</h3>
                   <p className="text-xs text-slate-400 mt-0.5">{tool.desc}</p>
                 </div>
               </button>
@@ -230,96 +208,53 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
         </div>
       </div>
 
-      {/* 基础工具区 */}
-      <div className="grid grid-cols-3 gap-3">
-        {/* 左侧大卡片 */}
-        <button
-          onClick={() => setActiveTab('tools')}
-          className="row-span-2 bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all flex flex-col items-center justify-center text-center"
-        >
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
-            <LayoutDashboard className="w-7 h-7 text-slate-500" />
-          </div>
-          <h3 className="font-semibold text-slate-800 dark:text-white mb-1">图片编辑</h3>
-          <p className="text-xs text-slate-400">导入图片，即刻编辑</p>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('templates')}
-          className="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all flex items-center gap-3"
-        >
-          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-slate-500" />
-          </div>
-          <div className="text-left">
-            <h3 className="font-semibold text-slate-800 dark:text-white text-sm">创建设计</h3>
-            <p className="text-xs text-slate-400">从空白画布开始</p>
-          </div>
-        </button>
-
-        <button 
-          onClick={() => router.push('/membership')}
-          className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-4 border border-amber-200 dark:border-amber-800 hover:shadow-md transition-all flex items-center gap-3"
-        >
-          <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
-            <Heart className="w-6 h-6 text-amber-500" />
-          </div>
-          <div className="text-left">
-            <h3 className="font-semibold text-slate-800 dark:text-white text-sm">开通会员</h3>
-            <p className="text-xs text-amber-500 font-medium">1.1元起</p>
-          </div>
-        </button>
-
-        {/* 右侧工具网格 */}
-        <div className="col-span-2 grid grid-cols-4 gap-3">
-          {BASIC_TOOLS.map((tool, idx) => {
-            const Icon = tool.icon;
-            return (
-              <button
-                key={idx}
-                onClick={() => handleToolClick(tool.key)}
-                className="bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-700 hover:shadow-sm transition-all text-center"
-              >
-                <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-700 flex items-center justify-center mx-auto mb-1.5">
-                  <Icon className="w-5 h-5 text-slate-500" />
-                </div>
-                <p className="text-xs text-slate-600 dark:text-slate-300">{tool.name}</p>
-              </button>
-            );
-          })}
+      {/* 全部工具 */}
+      <div>
+        <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">全部工具</h2>
+        <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+          {AI_IMAGE_TOOLS.map((tool, idx) => (
+            <button
+              key={idx}
+              onClick={() => handleToolClick(tool.key)}
+              className="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-orange-200 dark:hover:border-orange-700 transition-all text-left"
+            >
+              <div className={`h-16 bg-gradient-to-br ${tool.color} relative flex items-center justify-center`}>
+                <span className="text-sm font-bold text-white/60">{tool.name.slice(0, 2)}</span>
+                <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-white/90 rounded text-xs text-slate-500">
+                  {tool.tag}
+                </span>
+              </div>
+              <div className="p-2.5">
+                <h3 className="font-medium text-slate-800 dark:text-white text-xs">{tool.name}</h3>
+                <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{tool.desc}</p>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* 快捷入口 */}
+      {/* 模板入口 */}
       <div>
-        <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">快捷入口</h2>
-        <div className="grid grid-cols-4 gap-3">
+        <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3">设计模板</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: '最近打开', icon: Clock, count: 3, tab: 'recent' },
-            { label: '我的项目', icon: FolderOpen, count: 0, tab: 'projects' },
-            { label: '资产库', icon: Database, count: 0, tab: 'assets' },
-            { label: '会员中心', icon: Crown, count: 0, tab: 'more' },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={idx}
-                onClick={() => {
-                  if (item.tab === 'more') {
-                    router.push('/membership');
-                  } else {
-                    setActiveTab(item.tab);
-                  }
-                }}
-                className="flex items-center gap-2 bg-white dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-700 hover:shadow-sm transition-all"
-              >
-                <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                  <Icon className="w-4 h-4 text-slate-500" />
-                </div>
-                <span className="text-sm text-slate-700 dark:text-slate-200">{item.label}</span>
-              </button>
-            );
-          })}
+            { name: '头像模板', count: 32, color: 'from-pink-100 to-rose-100' },
+            { name: '封面模板', count: 28, color: 'from-orange-100 to-amber-100' },
+            { name: '海报模板', count: 35, color: 'from-green-100 to-emerald-100' },
+            { name: '简历模板', count: 18, color: 'from-sky-100 to-blue-100' },
+          ].map((template, idx) => (
+            <button
+              key={idx}
+              onClick={() => router.push('/templates')}
+              className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md hover:border-orange-200 dark:hover:border-orange-700 transition-all text-left"
+            >
+              <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${template.color} flex items-center justify-center mb-2`}>
+                <Sparkles className="w-5 h-5 text-slate-500" />
+              </div>
+              <h3 className="font-medium text-slate-800 dark:text-white text-sm">{template.name}</h3>
+              <p className="text-xs text-slate-400 mt-0.5">{template.count}个模板</p>
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -646,44 +581,15 @@ export default function MainPage() {
       {/* 右侧主内容区 */}
       <main className="flex-1 ml-56">
         {/* 顶部栏 */}
-        <header className="h-14 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between px-6 sticky top-0 z-10">
-          <div className="flex items-center gap-2">
-            <div className="text-sm text-slate-500">
-              {activeTab === 'home' && '首页'}
-              {activeTab === 'tools' && '工具'}
-              {activeTab === 'templates' && '模板'}
-              {activeTab === 'recent' && '最近打开'}
-              {activeTab === 'projects' && '项目'}
-              {activeTab === 'assets' && '资产库'}
-              {activeTab === 'more' && '更多'}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {/* 会员按钮 */}
-            <button
-              onClick={() => router.push('/membership')}
-              className="px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-full text-xs font-medium text-amber-600 dark:text-amber-400 hover:shadow-sm transition-all flex items-center gap-1.5"
-            >
-              <Heart className="w-3 h-3" />
-              1.1元开通会员
-            </button>
-            
-            {/* 通知 */}
-            <button 
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-            >
-              <Bell className="w-5 h-5 text-slate-500" />
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">3</span>
-            </button>
-            
-            {/* 用户头像 */}
-            <button 
-              onClick={() => router.push('/login')}
-              className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"
-            >
-              <User className="w-4 h-4 text-slate-400" />
-            </button>
+        <header className="h-14 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 flex items-center px-6 sticky top-0 z-10">
+          <div className="text-sm font-medium text-slate-800 dark:text-white">
+            {activeTab === 'home' && '首页'}
+            {activeTab === 'tools' && '工具'}
+            {activeTab === 'templates' && '模板'}
+            {activeTab === 'recent' && '最近打开'}
+            {activeTab === 'projects' && '项目'}
+            {activeTab === 'assets' && '资产库'}
+            {activeTab === 'more' && '更多'}
           </div>
         </header>
 
