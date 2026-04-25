@@ -5,8 +5,8 @@
 1. [铁律](#铁律-critical---必须严格遵守)
 2. [项目概述](#项目概述)
 3. [技术架构](#技术架构)
-4. [UI设计规范](#ui设计规范)
-5. [工具扩展架构](#工具扩展架构)
+4. [工具管理系统](#工具管理系统)
+5. [UI设计规范](#ui设计规范)
 6. [安全设计](#安全设计)
 7. [性能优化](#性能优化)
 8. [开发规范](#开发规范)
@@ -29,7 +29,13 @@
 **前台禁止**：Tabs 组件、独立 header/footer、后台组件
 **后台禁止**：AnimatedLobster、BackToHome、WechatPromo、独立 header/min-h-screen
 
-### 铁律二：每次开发完成后必须执行全面回归测试
+### 铁律二：工具是代码内置的，不能增删！
+
+- 工具配置在 `src/config/tools.ts` 中定义
+- 后台管理**只能**查看统计、设置价格/积分、启用/禁用
+- **禁止**在后台增删工具
+
+### 铁律三：每次开发完成后必须执行全面回归测试
 
 **测试流程（必须完整执行）**：
 
@@ -55,6 +61,84 @@
 
 ---
 
+## 工具管理系统
+
+### 核心原则
+
+**工具是代码内置的，不是从数据库读取的！**
+
+- 工具信息在 `src/config/tools.ts` 中定义
+- 后台管理提供：使用统计、价格设置、启用/禁用
+- 前台展示从配置中读取，动态过滤禁用工具
+
+### 工具分类（简化版）
+
+| 分类 | 标识 | 说明 |
+|------|------|------|
+| 图片处理 | `image` | 智能抠图、图片变清晰、背景替换、AI消除 |
+| 电商工具 | `ecommerce` | 商品主图、模特试衣、A+详情页、商品图增强 |
+| 人像设计 | `portrait` | 证件照、海报设计、视频封面 |
+| 批量工具 | `batch` | 批量处理 |
+
+### 工具配置结构
+
+```typescript
+// src/config/tools.ts
+
+// 工具基础配置（静态）
+export interface ToolConfig {
+  id: string;           // 唯一标识
+  name: string;         // 工具名称
+  description: string;  // 描述
+  category: ToolCategory;
+  icon: string;         // Emoji
+  color: string;        // 渐变色
+  href: string;         // 跳转路径
+  tags?: string[];
+}
+
+// 工具运行时配置（可修改）
+export interface ToolRuntimeConfig {
+  toolId: string;
+  enabled: boolean;     // 是否启用
+  credits: number;      // 积分（0=免费）
+  featured: boolean;    // 是否推荐
+  totalUsage: number;   // 总使用次数
+  todayUsage: number;   // 今日使用
+  uniqueUsers: number;  // 独立用户数
+}
+```
+
+### 后台工具管理 API
+
+```typescript
+// GET /api/admin/tools - 获取所有工具及统计
+// PUT /api/admin/tools - 更新单个工具配置
+// PATCH /api/admin/tools - 批量更新工具配置
+
+// 请求体示例
+{
+  "toolId": "remove-bg",
+  "enabled": true,
+  "credits": 5,
+  "featured": true
+}
+```
+
+### 后台工具管理页面
+
+路径：`/admin/tools`
+
+功能：
+1. **查看统计** - 总使用次数、今日使用、独立用户数
+2. **设置价格** - 积分消耗（0=免费）
+3. **启用/禁用** - 控制前台是否显示
+4. **推荐标记** - 前台显示推荐标签
+
+**注意**：不能增删工具！
+
+---
+
 ## 技术架构
 
 ### 技术栈
@@ -69,6 +153,7 @@
 | 样式 | Tailwind CSS | 4 | 原子化CSS |
 | 图标 | Lucide React | - | 一致的图标系统 |
 | 认证 | jose + bcryptjs | - | JWT + 密码加密 |
+| 状态 | Zustand | - | 工具配置状态管理 |
 
 ### 目录结构
 
@@ -80,8 +165,7 @@
 │   ├── app/                   # Next.js App Router
 │   │   ├── page.tsx          # 首页 (AI对话 + 快捷入口)
 │   │   ├── tools/            # 工具页面
-│   │   │   ├── page.tsx     # 工具列表页
-│   │   │   └── [key]/       # 各工具详情页
+│   │   │   └── page.tsx     # 工具列表页
 │   │   ├── templates/        # 模板页面
 │   │   │   └── page.tsx     # 模板列表页
 │   │   ├── recent/           # 最近打开
@@ -90,8 +174,14 @@
 │   │   ├── assets/          # 资产库
 │   │   │   └── page.tsx     # 资产库页
 │   │   ├── admin/           # 后台管理
+│   │   │   ├── page.tsx    # 仪表盘
+│   │   │   ├── tools/      # 工具管理
+│   │   │   ├── users/      # 用户管理
+│   │   │   └── ...
 │   │   ├── api/             # API Routes
 │   │   └── layout.tsx       # 根布局
+│   ├── config/
+│   │   └── tools.ts         # 工具配置（核心！）
 │   ├── components/
 │   │   ├── ui/              # Shadcn UI 组件
 │   │   ├── common/          # 通用组件

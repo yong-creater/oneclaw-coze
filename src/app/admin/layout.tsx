@@ -14,12 +14,14 @@ import {
   FolderTree,
   Users,
   Settings,
-  FileText
+  FileText,
+  Wrench
 } from 'lucide-react';
 
 // 后台导航菜单（工具配置通过代码管理）
 const navigation = [
   { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
+  { name: '工具管理', href: '/admin/tools', icon: Wrench },
   { name: '模板管理', href: '/admin/templates', icon: FileText },
   { name: '分类管理', href: '/admin/categories', icon: FolderTree },
   { name: '用户管理', href: '/admin/users', icon: Users },

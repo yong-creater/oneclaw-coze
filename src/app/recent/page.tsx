@@ -11,7 +11,7 @@ import {
   Zap
 } from 'lucide-react';
 import { Sidebar, Header, Footer, useSidebar } from '@/components/common';
-import { OUR_TOOLS, formatUsageCount, ToolConfig } from '@/config/tools';
+import { getToolCards, formatUsageCount, TOOL_CONFIGS } from '@/config/tools';
 
 interface RecentItem {
   id: number;
@@ -42,7 +42,7 @@ export default function RecentPage() {
         setRecentItems(data.data);
       } else {
         // 如果没有数据，使用默认数据（最近添加的工具）
-        const defaultRecent = OUR_TOOLS.slice(0, 8).map((tool, idx) => ({
+        const defaultRecent = getToolCards().slice(0, 8).map((tool, idx) => ({
           id: idx,
           tool_id: tool.id,
           tool_name: tool.name,
@@ -58,7 +58,7 @@ export default function RecentPage() {
     } catch (error) {
       console.error('获取最近使用失败:', error);
       // 使用默认数据
-      const defaultRecent = OUR_TOOLS.slice(0, 8).map((tool, idx) => ({
+      const defaultRecent = getToolCards().slice(0, 8).map((tool, idx) => ({
         id: idx,
         tool_id: tool.id,
         tool_name: tool.name,

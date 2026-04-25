@@ -16,7 +16,7 @@ import {
   ArrowUpRight,
   Loader2
 } from 'lucide-react';
-import { OUR_TOOLS, formatUsageCount } from '@/config/tools';
+import { getToolCards, formatUsageCount, TOOL_CONFIGS } from '@/config/tools';
 
 interface AdminStats {
   users_count: number;
@@ -52,7 +52,7 @@ export default function AdminDashboard() {
           users_count: data.data?.users_count || 0,
           vip_count: data.data?.vip_count || 0,
           today_uses: data.data?.today_uses || 0,
-          total_uses: data.data?.total_uses || OUR_TOOLS.reduce((sum, t) => sum + t.usageCount, 0),
+          total_uses: data.data?.total_uses || getToolCards().reduce((sum, t) => sum + t.totalUsage, 0),
           templates_count: data.data?.templates_count || 0,
           favorites_count: data.data?.favorites_count || 0,
         });
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
         users_count: 0,
         vip_count: 0,
         today_uses: 0,
-        total_uses: OUR_TOOLS.reduce((sum, t) => sum + t.usageCount, 0),
+        total_uses: getToolCards().reduce((sum, t) => sum + t.totalUsage, 0),
         templates_count: 0,
         favorites_count: 0,
       });
@@ -128,8 +128,8 @@ export default function AdminDashboard() {
   ];
 
   // 热门工具（从本地配置获取）
-  const topTools = OUR_TOOLS
-    .sort((a, b) => b.usageCount - a.usageCount)
+  const topTools = getToolCards()
+    .sort((a, b) => b.totalUsage - a.totalUsage)
     .slice(0, 5);
 
   return (
