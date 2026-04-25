@@ -16,3 +16,5 @@ export { LobsterLoading } from './LobsterLoading';
 export { ToolCardSkeleton, SkillCardSkeleton, PromptCardSkeleton } from './LobsterSkeleton';
 export { ErrorBoundary, withApiError, LazyLoad } from './ErrorBoundary';
 export { Providers } from './Providers';
+export { SidebarProvider, useSidebar, SIDEBAR_EXPANDED_ML, SIDEBAR_COLLAPSED_ML } from './SidebarContext';
+export { LayoutContent, PageLayout } from './LayoutContent';

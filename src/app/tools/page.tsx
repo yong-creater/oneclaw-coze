@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ChevronRight, Search, Sparkles, Zap, Star, Clock } from 'lucide-react';
-import { Sidebar, Header, Footer } from '@/components/common';
+import { Header, Sidebar, SidebarProvider, useSidebar, Footer } from '@/components/common';
 import { TOOLS_CONFIG, TOOL_CATEGORIES, ToolCategory, ToolConfig } from '@/components/tools/config';
 
 // 工具封面图配置（使用真实场景图片）
@@ -43,8 +43,17 @@ const TOOL_COVERS: Record<string, { image: string; title: string }> = {
 };
 
 export default function ToolsPage() {
+  return (
+    <SidebarProvider>
+      <ToolsPageContent />
+    </SidebarProvider>
+  );
+}
+
+function ToolsPageContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const { collapsed } = useSidebar();
 
   // 按分类分组工具
   const toolsByCategory = TOOLS_CONFIG.reduce((acc, tool) => {
@@ -119,12 +128,12 @@ export default function ToolsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/20">
       {/* 左侧统一导航 */}
       <Sidebar />
 
-      {/* 主内容区 */}
-      <main className="flex-1 ml-56">
+      {/* 主内容区 - 响应侧边栏折叠状态 */}
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         {/* 统一顶部 */}
         <Header title="AI工具箱" subtitle={`共 ${TOOLS_CONFIG.length} 个工具`} showRightArea={false} />
 
@@ -213,8 +222,8 @@ export default function ToolsPage() {
         </div>
       </main>
 
-      {/* 底部 - 全宽 */}
-      <div className="ml-56">
+      {/* 底部 - 响应侧边栏折叠状态 */}
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         <Footer />
       </div>
     </div>

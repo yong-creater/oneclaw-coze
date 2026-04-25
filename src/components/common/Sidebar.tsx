@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -9,6 +9,7 @@ import {
   PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import AnimatedLobster from './AnimatedLobster';
+import { useSidebar } from './SidebarContext';
 
 interface NavItem {
   icon: React.ElementType;
@@ -44,7 +45,7 @@ export function Sidebar({
   className = ''
 }: SidebarProps) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, toggleCollapsed } = useSidebar();
   const [isHoveringLogo, setIsHoveringLogo] = useState(false);
 
   const isActive = (href: string) => {
@@ -53,7 +54,7 @@ export function Sidebar({
   };
 
   const handleToggle = () => {
-    setCollapsed(!collapsed);
+    toggleCollapsed();
   };
 
   return (

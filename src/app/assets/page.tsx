@@ -8,7 +8,7 @@ import {
   Image, FileText, Music, Video, Archive, X,
   ChevronRight, Sparkles, Copy, Share2, Check
 } from 'lucide-react';
-import { Sidebar, Header, Footer } from '@/components/common';
+import { Sidebar, Header, Footer, SidebarProvider, useSidebar } from '@/components/common';
 
 // 文件类型配置
 const FILE_TYPES = {
@@ -49,6 +49,14 @@ function Toast({ message, onClose, icon }: { message: string; onClose: () => voi
 }
 
 export default function AssetsPage() {
+  return (
+    <SidebarProvider>
+      <AssetsPageContent />
+    </SidebarProvider>
+  );
+}
+
+function AssetsPageContent() {
   const [assets, setAssets] = useState(ASSETS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
@@ -57,6 +65,7 @@ export default function AssetsPage() {
   const [toast, setToast] = useState<{ message: string; icon?: React.ReactNode } | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const { collapsed } = useSidebar();
 
   // 筛选
   const filteredAssets = assets.filter(asset => {
@@ -120,8 +129,8 @@ export default function AssetsPage() {
       {/* 左侧统一侧边栏 */}
       <Sidebar />
 
-      {/* 主内容区 */}
-      <main className="flex-1 ml-56">
+      {/* 主内容区 - 响应侧边栏折叠状态 */}
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         {/* 统一顶部 */}
         <Header 
           title="资产库" 
@@ -418,8 +427,8 @@ export default function AssetsPage() {
       {/* Toast */}
       {toast && <Toast message={toast.message} onClose={() => setToast(null)} icon={toast.icon} />}
 
-      {/* 底部 - 全宽 */}
-      <div className="ml-56">
+      {/* 底部 - 响应侧边栏折叠状态 */}
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         <Footer />
       </div>
     </div>

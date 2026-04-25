@@ -7,7 +7,7 @@ import {
   Search, Filter, MoreHorizontal, Eye, Calendar,
   ChevronRight, Sparkles, X, FolderOpen
 } from 'lucide-react';
-import { Sidebar, Header, Footer } from '@/components/common';
+import { Sidebar, Header, Footer, SidebarProvider, useSidebar } from '@/components/common';
 
 // 模拟最近打开数据
 const RECENT_ITEMS = [
@@ -41,12 +41,21 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 export default function RecentPage() {
+  return (
+    <SidebarProvider>
+      <RecentPageContent />
+    </SidebarProvider>
+  );
+}
+
+function RecentPageContent() {
   const [items, setItems] = useState(RECENT_ITEMS);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [selectedItems, setSelectedItems] = useState<Set<number>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { collapsed } = useSidebar();
 
   // 筛选
   const filteredItems = items.filter(item => {
@@ -114,8 +123,8 @@ export default function RecentPage() {
       {/* 左侧统一侧边栏 */}
       <Sidebar />
 
-      {/* 主内容区 */}
-      <main className="flex-1 ml-56">
+      {/* 主内容区 - 响应侧边栏折叠状态 */}
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         {/* 统一顶部 */}
         <Header title="最近打开" subtitle={`共 ${items.length} 个项目`} showRightArea={false} />
 
@@ -317,8 +326,8 @@ export default function RecentPage() {
       {/* Toast */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-      {/* 底部 - 全宽 */}
-      <div className="ml-56">
+      {/* 底部 - 响应侧边栏折叠状态 */}
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         <Footer />
       </div>
     </div>

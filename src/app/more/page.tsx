@@ -9,7 +9,7 @@ import {
   CreditCard, Gift, Users, Star, Crown, Zap,
   Download, Trash2, User, LogOut, Key, Clock
 } from 'lucide-react';
-import { Sidebar, Header, Footer } from '@/components/common';
+import { Sidebar, Header, Footer, SidebarProvider, useSidebar } from '@/components/common';
 
 // 设置分类
 const SETTINGS_CATEGORIES = [
@@ -55,6 +55,14 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 }
 
 export default function MorePage() {
+  return (
+    <SidebarProvider>
+      <MorePageContent />
+    </SidebarProvider>
+  );
+}
+
+function MorePageContent() {
   const [activeTab, setActiveTab] = useState<'settings' | 'features'>('settings');
   const [theme, setTheme] = useState('light');
   const [notifications, setNotifications] = useState({
@@ -63,6 +71,7 @@ export default function MorePage() {
     sms: false,
   });
   const [toast, setToast] = useState<string | null>(null);
+  const { collapsed } = useSidebar();
 
   // 切换设置项
   const toggleSetting = (key: keyof typeof notifications) => {
@@ -75,8 +84,8 @@ export default function MorePage() {
       {/* 左侧统一侧边栏 */}
       <Sidebar />
 
-      {/* 主内容区 */}
-      <main className="flex-1 ml-56">
+      {/* 主内容区 - 响应侧边栏折叠状态 */}
+      <main className={`flex-1 transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         {/* 统一顶部 */}
         <Header title="更多" subtitle="设置与服务" showRightArea={false} />
 
@@ -343,8 +352,8 @@ export default function MorePage() {
       {/* Toast */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
-      {/* 底部 - 全宽 */}
-      <div className="ml-56">
+      {/* 底部 - 响应侧边栏折叠状态 */}
+      <div className={`transition-all duration-300 ${collapsed ? 'ml-[72px]' : 'ml-56'}`}>
         <Footer />
       </div>
     </div>
