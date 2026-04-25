@@ -53,7 +53,7 @@ export default function ApiKeysPage() {
 
   const handleCreate = async () => {
     if (!newName.trim()) {
-      toast.error('请输入 Key 名称');
+      alert('请输入 Key 名称');
       return;
     }
 
@@ -71,13 +71,13 @@ export default function ApiKeysPage() {
         setKeys([data.data, ...keys]);
         setShowCreate(false);
         setNewName('');
-        // 自动显示新创建的 key
         setShowKey(data.data.id);
       } else {
-        toast.error(data.error || '创建失败');
+        alert('创建失败: ' + (data.error || '未知错误'));
       }
     } catch (error) {
-      toast.error('创建失败');
+      alert('创建失败，请检查网络或数据库连接');
+      console.error('创建API Key失败:', error);
     } finally {
       setCreating(false);
     }
