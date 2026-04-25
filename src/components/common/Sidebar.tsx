@@ -35,8 +35,8 @@ const MENU_ITEMS = [
     { id: 'overseas', label: '出海详情页', icon: Globe, href: '/productpage' },
     { id: 'photo-id', label: 'AI证件照', icon: ImageIcon, href: '/photo-id' },
   ]},
-  { id: 'prompts', label: '提示词', icon: Sparkles, href: '/?tab=prompts' },
-  { id: 'tutorials', label: '教程', icon: BookOpen, href: '/?tab=tutorials' },
+  { id: 'prompts', label: '提示词', icon: Sparkles, href: '/prompts' },
+  { id: 'tutorials', label: '教程', icon: BookOpen, href: '/tutorials' },
 ];
 
 const USER_MENU = [
