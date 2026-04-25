@@ -246,15 +246,15 @@ export default function RootLayout({
             id="baidu-analytics"
             strategy="afterInteractive"
             dangerouslySetInnerHTML={{
-              __html: `
-              var _hmt = _hmt || [];
-              (function() {
-                var hm = document.createElement('script');
-                hm.src = 'https://hm.baidu.com/hm.js?${baiduAnalyticsId}';
-                var s = document.getElementsByTagName('script')[0];
-                s.parentNode.insertBefore(hm, s);
-              })();
-            `,
+              __html: [
+                "var _hmt = _hmt || [];",
+                "(function() {",
+                "  var hm = document.createElement('script');",
+                "  hm.src = 'https://hm.baidu.com/hm.js?" + baiduAnalyticsId + "';",
+                "  var s = document.getElementsByTagName('script')[0];",
+                "  s.parentNode.insertBefore(hm, s);",
+                "})();"
+              ].join('\n'),
             }}
           />
         )}
