@@ -747,16 +747,6 @@ export default function HomePage() {
 
             {/* 主导航Tab */}
             <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-full p-1">
-              <button
-                onClick={() => setMainTab('home')}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  mainTab === 'home'
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-orange-500'
-                }`}
-              >
-                <span className="hidden md:inline">首页</span>
-              </button>
               {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = mainTab === tab.key;
