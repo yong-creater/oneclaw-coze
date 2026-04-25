@@ -168,7 +168,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
   ];
 
   return (
-    <div style={{ maxWidth: '896px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '896px', margin: '0 auto', display: 'block', width: '100%' }}>
       {/* Toast通知 */}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
@@ -960,9 +960,9 @@ export default function MainPage() {
       </aside>
 
       {/* 右侧主内容区 */}
-      <main className="flex-1 ml-56">
+      <main className="flex-1 ml-56 flex flex-col">
         {/* 页面内容 */}
-        <div className="p-6 pb-24">
+        <div className="p-6 pb-24 flex-1">
           {activeTab === 'home' && <HomeContent setActiveTab={setActiveTab} />}
           {activeTab === 'tools' && <ToolsContent />}
           {activeTab === 'templates' && <TemplatesContent />}
@@ -981,10 +981,10 @@ export default function MainPage() {
             <HelpCircle className="w-5 h-5 text-slate-500" />
           </button>
         </div>
-      </main>
 
-      {/* 页脚 */}
-      <Footer />
+        {/* 页脚 */}
+        <Footer />
+      </main>
     </div>
   );
 }
