@@ -22,7 +22,6 @@ import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
 import NovelCreator from '@/components/tools/NovelCreator';
 import { ToolLogo } from '@/components/common/ToolLogo';
-import HomeHero from '@/components/home/HomeHero';
 
 // ==================== 类型定义 ====================
 interface Category {
@@ -255,7 +254,7 @@ const UTILITY_TOOLS = [
 type UtilityTool = typeof UTILITY_TOOLS[number]['key'];
 
 const MAIN_TABS = [
-  { key: 'utilities', label: 'AI工具', icon: Star },
+  { key: 'utilities', label: '精选工具', icon: Star },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
@@ -723,9 +722,6 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* ==================== 新版Hero区 ==================== */}
-        {mainTab === 'utilities' && <HomeHero />}
-        
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
           <div className="flex gap-6">
