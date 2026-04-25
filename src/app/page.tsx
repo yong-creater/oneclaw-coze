@@ -960,9 +960,9 @@ export default function MainPage() {
       </aside>
 
       {/* 右侧主内容区 */}
-      <main className="flex-1 ml-56 flex flex-col">
+      <main className="flex-1 ml-56">
         {/* 页面内容 */}
-        <div className="p-6 pb-24 flex-1">
+        <div className="p-6 pb-24">
           {activeTab === 'home' && <HomeContent setActiveTab={setActiveTab} />}
           {activeTab === 'tools' && <ToolsContent />}
           {activeTab === 'templates' && <TemplatesContent />}
@@ -981,10 +981,10 @@ export default function MainPage() {
             <HelpCircle className="w-5 h-5 text-slate-500" />
           </button>
         </div>
-
-        {/* 页脚 */}
-        <Footer />
       </main>
+
+      {/* 页脚 - 放在根容器里，不在main中 */}
+      <Footer />
     </div>
   );
 }
