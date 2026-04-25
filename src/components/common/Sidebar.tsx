@@ -219,21 +219,21 @@ export function Sidebar({
       {showUserArea && (
         <div className="p-3 border-t border-slate-100/60 mt-auto">
           {!collapsed ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* 登录按钮 */}
               <Link 
                 href="/login"
-                className="flex-1 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all text-center"
+                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all"
               >
                 登录
               </Link>
-              {/* 开通会员按钮 */}
+              {/* 开通会员按钮 - 轻量图标样式 */}
               <Link 
                 href="/vip"
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-orange-200/50 hover:from-orange-600 hover:to-amber-600 transition-all text-center flex items-center justify-center gap-2"
+                className="p-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:shadow-lg hover:shadow-orange-200/50 hover:from-orange-600 hover:to-amber-600 transition-all"
+                title="开通会员"
               >
                 <Sparkles className="w-4 h-4" />
-                会员
               </Link>
             </div>
           ) : (
