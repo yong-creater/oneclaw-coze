@@ -18,7 +18,7 @@ export function GoogleAdSense({
   useEffect(() => {
     if (GOOGLE_ADSENSE_ID && typeof window !== 'undefined') {
       try {
-        // @ts-ignore
+        // @ts-expect-error - Google AdSense script typing
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       } catch {
         // 忽略广告加载错误
