@@ -113,18 +113,18 @@ interface Skill {
 function UtilityToolsPage() {
   const router = useRouter();
   
-  // 马卡龙色系配置
+  // 马卡龙色系配置 - 清新柔和
   const MACARON_COLORS = [
-    { bg: 'bg-gradient-to-br from-pink-100 to-rose-100', border: 'border-rose-200', accent: 'text-rose-500' },
-    { bg: 'bg-gradient-to-br from-blue-100 to-indigo-100', border: 'border-blue-200', accent: 'text-blue-500' },
-    { bg: 'bg-gradient-to-br from-green-100 to-emerald-100', border: 'border-emerald-200', accent: 'text-emerald-500' },
-    { bg: 'bg-gradient-to-br from-amber-100 to-orange-100', border: 'border-amber-200', accent: 'text-amber-500' },
-    { bg: 'bg-gradient-to-br from-purple-100 to-violet-100', border: 'border-purple-200', accent: 'text-purple-500' },
-    { bg: 'bg-gradient-to-br from-cyan-100 to-teal-100', border: 'border-cyan-200', accent: 'text-cyan-500' },
-    { bg: 'bg-gradient-to-br from-rose-100 to-pink-100', border: 'border-rose-200', accent: 'text-pink-500' },
-    { bg: 'bg-gradient-to-br from-orange-100 to-amber-100', border: 'border-orange-200', accent: 'text-orange-500' },
-    { bg: 'bg-gradient-to-br from-lime-100 to-green-100', border: 'border-lime-200', accent: 'text-lime-600' },
-    { bg: 'bg-gradient-to-br from-fuchsia-100 to-pink-100', border: 'border-fuchsia-200', accent: 'text-fuchsia-500' },
+    { bg: 'bg-gradient-to-br from-pink-50 to-rose-50', border: 'border-pink-100', accent: 'text-rose-400' },
+    { bg: 'bg-gradient-to-br from-sky-50 to-blue-50', border: 'border-sky-100', accent: 'text-sky-400' },
+    { bg: 'bg-gradient-to-br from-emerald-50 to-green-50', border: 'border-emerald-100', accent: 'text-emerald-400' },
+    { bg: 'bg-gradient-to-br from-amber-50 to-orange-50', border: 'border-amber-100', accent: 'text-amber-500' },
+    { bg: 'bg-gradient-to-br from-violet-50 to-purple-50', border: 'border-violet-100', accent: 'text-violet-400' },
+    { bg: 'bg-gradient-to-br from-teal-50 to-cyan-50', border: 'border-teal-100', accent: 'text-teal-400' },
+    { bg: 'bg-gradient-to-br from-fuchsia-50 to-pink-50', border: 'border-fuchsia-100', accent: 'text-fuchsia-400' },
+    { bg: 'bg-gradient-to-br from-orange-50 to-yellow-50', border: 'border-orange-100', accent: 'text-orange-400' },
+    { bg: 'bg-gradient-to-br from-lime-50 to-green-50', border: 'border-lime-100', accent: 'text-lime-500' },
+    { bg: 'bg-gradient-to-br from-indigo-50 to-blue-50', border: 'border-indigo-100', accent: 'text-indigo-400' },
   ];
 
   const getToolUrl = (key: string) => {
@@ -148,7 +148,7 @@ function UtilityToolsPage() {
     <div className="space-y-8">
       {/* 页面标题 */}
       <div className="text-center py-4">
-        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-rose-500 text-white px-6 py-2 rounded-full text-sm font-medium mb-4">
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-400 to-amber-400 text-white px-6 py-2 rounded-full text-sm font-medium mb-4 shadow-sm">
           <Sparkles className="w-4 h-4" />
           <span>精选工具 · 零门槛AI生图</span>
         </div>
@@ -300,7 +300,7 @@ const UTILITY_TOOLS = [
     name: '头像表情包',
     icon: Sparkles,
     description: '上传照片，一键生成各种风格的精美头像和表情包',
-    color: 'from-yellow-500 to-orange-500',
+    color: 'from-amber-300 to-orange-400',
     tags: ['头像生成', '表情包', '个性定制'],
     useCases: [
       { title: '头像定制', desc: '真人照片转动漫/插画头像' },
@@ -313,7 +313,7 @@ const UTILITY_TOOLS = [
     name: '形象照生成',
     icon: UserCircle,
     description: '上传照片，一键生成专业简历形象照/职业照',
-    color: 'from-blue-500 to-cyan-500',
+    color: 'from-sky-300 to-blue-400',
     tags: ['形象照', '职业照', '商务形象'],
     useCases: [
       { title: '简历照片', desc: '专业商务形象照' },
@@ -326,7 +326,7 @@ const UTILITY_TOOLS = [
     name: '餐饮菜单生成',
     icon: Coffee,
     description: '上传图片一键优化，或输入文字自动生成精美菜单',
-    color: 'from-orange-500 to-amber-500',
+    color: 'from-orange-300 to-amber-400',
     tags: ['餐饮模板', '菜单设计', '价目表'],
     useCases: [
       { title: '图片优化', desc: '上传现有菜单一键美化' },
@@ -339,7 +339,7 @@ const UTILITY_TOOLS = [
     name: '小红书配图',
     icon: BookOpen,
     description: '输入标题，一键生成小红书爆款封面图和配图',
-    color: 'from-pink-500 to-rose-500',
+    color: 'from-pink-300 to-rose-400',
     tags: ['小红书配图', '封面图', '自媒体工具'],
     useCases: [
       { title: '封面图', desc: '爆款笔记封面生成' },
@@ -352,7 +352,7 @@ const UTILITY_TOOLS = [
     name: '抖音封面生成',
     icon: Smartphone,
     description: '输入标题，一键生成抖音爆款视频封面图',
-    color: 'from-cyan-500 to-blue-500',
+    color: 'from-cyan-300 to-sky-400',
     tags: ['抖音封面', '视频封面', '自媒体工具'],
     useCases: [
       { title: '视频封面', desc: '爆款视频封面生成' },
@@ -365,7 +365,7 @@ const UTILITY_TOOLS = [
     name: '节日营销海报',
     icon: PartyPopper,
     description: '选择节日/场景，输入主题，一键生成精美营销海报',
-    color: 'from-red-500 to-orange-500',
+    color: 'from-red-300 to-orange-400',
     tags: ['节日海报', '营销物料', '促销宣传'],
     useCases: [
       { title: '春节', desc: '新春促销海报' },
@@ -378,7 +378,7 @@ const UTILITY_TOOLS = [
     name: '儿童创意工坊',
     icon: Palette,
     description: 'AI儿童手抄报/手账/涂色绘本一键生成，亲子必备',
-    color: 'from-cyan-500 to-teal-500',
+    color: 'from-teal-300 to-cyan-400',
     tags: ['手抄报', '涂色绘本', '儿童手工'],
     useCases: [
       { title: '手抄报', desc: '节日/主题手抄报模板' },
@@ -391,7 +391,7 @@ const UTILITY_TOOLS = [
     name: 'STAR简历优化', 
     icon: FileText,
     description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
-    color: 'from-indigo-500 to-blue-500',
+    color: 'from-indigo-300 to-blue-400',
     tags: ['PDF上传', 'JD精准匹配', '量化成果'],
     useCases: [
       { title: '校招求职', desc: '应届生简历优化，突出项目经验' },
@@ -404,7 +404,7 @@ const UTILITY_TOOLS = [
     name: '小说创作工坊', 
     icon: Feather,
     description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
-    color: 'from-purple-500 to-pink-500',
+    color: 'from-violet-300 to-purple-400',
     tags: ['深度洗稿', '漫画生图', '推文脚本'],
     useCases: [
       { title: '小说改编', desc: '番茄小说爆款文改编为漫画脚本' },
@@ -417,7 +417,7 @@ const UTILITY_TOOLS = [
     name: '出海详情页', 
     icon: Globe,
     description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
-    color: 'from-emerald-500 to-teal-500',
+    color: 'from-emerald-300 to-teal-400',
     tags: ['多语言', '海外合规', '批量分发'],
     useCases: [
       { title: '亚马逊Listing', desc: '符合亚马逊规范的多语言详情页' },
@@ -914,7 +914,7 @@ export default function HomePage() {
                       onClick={() => setMainTab(tab.key)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                         isActive
-                          ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-md'
+                          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white shadow-sm'
                           : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                       }`}
                     >
@@ -956,7 +956,7 @@ export default function HomePage() {
                       onClick={() => setMainTab(tab.key)}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
                         isActive
-                          ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white'
+                          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                           : 'text-slate-600 dark:text-slate-300'
                       }`}
                     >
@@ -995,7 +995,7 @@ export default function HomePage() {
                       onClick={() => setActiveCategory('all')}
                       className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                         activeCategory === 'all'
-                          ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white'
+                          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                       }`}
                     >
@@ -1007,7 +1007,7 @@ export default function HomePage() {
                         onClick={() => setActiveCategory(cat.slug)}
                         className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                           activeCategory === cat.slug
-                            ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white'
+                            ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                         }`}
                       >
@@ -1123,7 +1123,7 @@ export default function HomePage() {
                         onClick={() => { setPromptCategory(cat); setPromptsPagination(prev => ({ ...prev, page: 1 })); }}
                         className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                           promptCategory === cat
-                            ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white'
+                            ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                         }`}
                       >
@@ -1194,7 +1194,7 @@ export default function HomePage() {
                         onClick={() => { setTutorialCategory(cat); setTutorialsPagination(prev => ({ ...prev, page: 1 })); }}
                         className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                           tutorialCategory === cat
-                            ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white'
+                            ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                         }`}
                       >
@@ -1274,7 +1274,7 @@ export default function HomePage() {
                       onClick={() => { setSkillCategory('all'); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
                       className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                         skillCategory === 'all'
-                          ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white'
+                          ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                       }`}
                     >
@@ -1286,7 +1286,7 @@ export default function HomePage() {
                         onClick={() => { setSkillCategory(cat.id); setSkillsPagination(prev => ({ ...prev, page: 1 })); }}
                         className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                           skillCategory === cat.id
-                            ? 'bg-gradient-to-r from-orange-500 to-rose-500 text-white'
+                            ? 'bg-gradient-to-r from-orange-400 to-amber-400 text-white'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                         }`}
                       >

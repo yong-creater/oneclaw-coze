@@ -60,72 +60,77 @@ html {
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --radius: 0.875rem;
+  /* 清新柔和的浅色主题 - 美图风格 */
+  --background: oklch(0.995 0 0);
+  --foreground: oklch(0.35 0.02 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.35 0.02 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.35 0.02 60);
+  /* 柔和的橙色调主色 */
+  --primary: oklch(0.65 0.18 50);
+  --primary-foreground: oklch(0.99 0 0);
+  /* 浅灰/粉色背景 */
+  --secondary: oklch(0.98 0.01 60);
+  --secondary-foreground: oklch(0.45 0.02 60);
+  /* 柔和的文字颜色 */
+  --muted: oklch(0.96 0.01 60);
+  --muted-foreground: oklch(0.55 0.01 60);
+  --accent: oklch(0.97 0.02 50);
+  --accent-foreground: oklch(0.65 0.15 45);
+  --destructive: oklch(0.55 0.2 25);
+  --border: oklch(0.92 0.01 60);
+  --input: oklch(0.94 0.01 60);
+  --ring: oklch(0.65 0.18 50);
+  /* 马卡龙色系图表 */
+  --chart-1: oklch(0.7 0.15 45);
+  --chart-2: oklch(0.75 0.12 220);
+  --chart-3: oklch(0.72 0.14 280);
+  --chart-4: oklch(0.68 0.16 145);
+  --chart-5: oklch(0.75 0.18 30);
+  --sidebar: oklch(0.995 0 0);
+  --sidebar-foreground: oklch(0.35 0.02 60);
+  --sidebar-primary: oklch(0.65 0.18 50);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.97 0.02 50);
+  --sidebar-accent-foreground: oklch(0.45 0.02 60);
+  --sidebar-border: oklch(0.92 0.01 60);
+  --sidebar-ring: oklch(0.65 0.18 50);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: oklch(0.15 0.01 60);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.2 0.01 60);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.2 0.01 60);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.7 0.16 45);
+  --primary-foreground: oklch(0.15 0.01 60);
+  --secondary: oklch(0.25 0.01 60);
+  --secondary-foreground: oklch(0.9 0 0);
+  --muted: oklch(0.22 0.01 60);
+  --muted-foreground: oklch(0.65 0.01 60);
+  --accent: oklch(0.28 0.02 50);
+  --accent-foreground: oklch(0.85 0 0);
+  --destructive: oklch(0.6 0.2 25);
+  --border: oklch(0.3 0.01 60);
+  --input: oklch(0.25 0.01 60);
+  --ring: oklch(0.7 0.16 45);
+  --chart-1: oklch(0.7 0.15 45);
+  --chart-2: oklch(0.75 0.12 220);
+  --chart-3: oklch(0.72 0.14 280);
+  --chart-4: oklch(0.68 0.16 145);
+  --chart-5: oklch(0.75 0.18 30);
+  --sidebar: oklch(0.18 0.01 60);
+  --sidebar-foreground: oklch(0.95 0 0);
+  --sidebar-primary: oklch(0.7 0.16 45);
+  --sidebar-primary-foreground: oklch(0.15 0.01 60);
+  --sidebar-accent: oklch(0.25 0.01 60);
+  --sidebar-accent-foreground: oklch(0.9 0 0);
+  --sidebar-border: oklch(0.3 0.01 60);
+  --sidebar-ring: oklch(0.7 0.16 45);
 }
 
 @layer base {
@@ -141,13 +146,13 @@ body {
   @apply font-sans;
 }
 
-/* 全局背景 - 简洁的浅灰背景 */
+/* 全局背景 - 清新纯白背景 */
 body {
-  background: #fafafa;
+  background: #ffffff;
 }
 
 .dark body {
-  background: #0f0f0f;
+  background: #121212;
 }
 
 /* 平滑滚动 */
@@ -182,9 +187,9 @@ html {
   background: #4b5563;
 }
 
-/* 渐变文字 - 品牌标识用 */
+/* 渐变文字 - 柔和的橙珊瑚渐变 */
 .text-gradient {
-  background: linear-gradient(135deg, #ef4444, #f97316);
+  background: linear-gradient(135deg, #f97316, #fb923c);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -347,4 +352,106 @@ html {
   button:active, a:active {
     opacity: 0.8;
   }
+}
+
+/* ==================== 美图风格清新配色增强 ==================== */
+
+/* 柔和阴影 */
+.shadow-soft {
+  box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+}
+
+.dark .shadow-soft {
+  box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.3), 0 10px 20px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* 卡片柔和hover效果 */
+.card-soft {
+  transition: all 0.2s ease;
+}
+
+.card-soft:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.dark .card-soft:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* 马卡龙色背景 */
+.bg-macaron-pink {
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+}
+
+.bg-macaron-blue {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.bg-macaron-green {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+.bg-macaron-orange {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+}
+
+.bg-macaron-purple {
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+}
+
+.bg-macaron-yellow {
+  background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+}
+
+/* 柔和边框 */
+.border-soft {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+.dark .border-soft {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 文本柔和色 */
+.text-soft {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.dark .text-soft {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* 背景柔和色 */
+.bg-soft {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.dark .bg-soft {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* 禁用时的柔和样式 */
+.disabled-soft {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* 输入框柔和聚焦 */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: oklch(0.65 0.18 50) !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* 按钮柔和hover */
+button:not(:disabled):hover {
+  transition: all 0.15s ease;
+}
+
+/* 链接柔和hover */
+a:not(:disabled):hover {
+  opacity: 0.85;
+  transition: opacity 0.15s ease;
 }
