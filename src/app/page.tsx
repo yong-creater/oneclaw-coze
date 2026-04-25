@@ -420,79 +420,322 @@ function TemplatesContent() {
 
 // ==================== 最近打开页面 ====================
 function RecentContent() {
-  const recentItems = [
-    { name: '头像表情包设计', time: '10分钟前' },
-    { name: '端午海报制作', time: '1小时前' },
-    { name: '小红书封面', time: '昨天' },
-  ];
+  const [recentItems, setRecentItems] = useState([
+    { id: 1, name: '头像表情包设计', time: '10分钟前', type: 'avatar-emoji', thumbnail: '' },
+    { id: 2, name: '端午海报制作', time: '1小时前', type: 'festival-poster', thumbnail: '' },
+    { id: 3, name: '小红书封面', time: '昨天', type: 'xiaohongshu', thumbnail: '' },
+    { id: 4, name: '抖音封面设计', time: '2天前', type: 'douyin', thumbnail: '' },
+    { id: 5, name: '商品详情页', time: '3天前', type: 'productpage', thumbnail: '' },
+  ]);
+  const [toast, setToast] = useState<string | null>(null);
 
-  const handleItemClick = (name: string) => {
-    if (name.includes('头像')) window.open('/avatar-emoji', '_blank');
-    else if (name.includes('海报')) window.open('/festival-poster', '_blank');
-    else if (name.includes('小红书')) window.open('/xiaohongshu', '_blank');
+  const handleItemClick = (item: typeof recentItems[0]) => {
+    if (TOOL_URLS[item.type]) {
+      window.open(TOOL_URLS[item.type], '_blank');
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    setRecentItems(recentItems.filter(item => item.id !== id));
+    setToast('已删除');
+  };
+
+  const handleClearAll = () => {
+    setRecentItems([]);
+    setToast('已清空全部历史');
+  };
+
+  const typeIcons: Record<string, string> = {
+    'avatar-emoji': '👤',
+    'festival-poster': '🎉',
+    'xiaohongshu': '📕',
+    'douyin': '🎵',
+    'resume-photo': '📸',
+    'restaurant-menu': '🍜',
+    'productpage': '📦',
   };
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">最近打开</h1>
-        <p className="text-sm text-slate-500">快速访问最近编辑的项目</p>
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">最近打开</h1>
+          <p className="text-sm text-slate-500">快速访问最近编辑的项目</p>
+        </div>
+        {recentItems.length > 0 && (
+          <button onClick={handleClearAll} className="text-sm text-slate-400 hover:text-red-500 transition-colors">
+            清空全部
+          </button>
+        )}
       </div>
 
-      <div className="space-y-3">
-        {recentItems.map((item, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleItemClick(item.name)}
-            className="w-full flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all"
-          >
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-slate-400" />
+      {recentItems.length === 0 ? (
+        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+          <Clock className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无历史记录</h3>
+          <p className="text-sm text-slate-400 mt-1">使用工具后会在这里显示</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {recentItems.map((item) => (
+            <div
+              key={item.id}
+              className="group flex items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all"
+            >
+              <button
+                onClick={() => handleItemClick(item)}
+                className="flex items-center gap-4 flex-1"
+              >
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-2xl">
+                  {typeIcons[item.type] || '📄'}
+                </div>
+                <div className="flex-1 text-left">
+                  <h3 className="text-sm font-medium text-slate-800 dark:text-white">{item.name}</h3>
+                  <p className="text-xs text-slate-400">{item.time}</p>
+                </div>
+              </button>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button className="p-2 text-slate-400 hover:text-orange-500 transition-colors">
+                  <Sparkles className="w-4 h-4" />
+                </button>
+                <button onClick={() => handleDelete(item.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+              <ChevronRight className="w-5 h-5 text-slate-300" />
             </div>
-            <div className="flex-1 text-left">
-              <h3 className="text-sm font-medium text-slate-800 dark:text-white">{item.name}</h3>
-              <p className="text-xs text-slate-400">{item.time}</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-slate-300" />
-          </button>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 // ==================== 项目页面 ====================
 function ProjectsContent() {
+  const [projects, setProjects] = useState([
+    { id: 1, name: '端午活动物料', type: 'festival-poster', updated: '今天', count: 3 },
+    { id: 2, name: '小红书运营素材', type: 'xiaohongshu', updated: '昨天', count: 8 },
+    { id: 3, name: '产品展示图集', type: 'productpage', updated: '3天前', count: 12 },
+  ]);
+  const [toast, setToast] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreateNew = () => {
+    setIsCreating(true);
+  };
+
+  const handleDelete = (id: number) => {
+    setProjects(projects.filter(p => p.id !== id));
+    setToast('项目已删除');
+  };
+
+  const typeColors: Record<string, string> = {
+    'festival-poster': 'from-red-100 to-orange-100',
+    'xiaohongshu': 'from-pink-100 to-rose-100',
+    'productpage': 'from-emerald-100 to-teal-100',
+    'douyin': 'from-purple-100 to-pink-100',
+    'avatar-emoji': 'from-sky-100 to-blue-100',
+    'restaurant-menu': 'from-amber-100 to-orange-100',
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">我的项目</h1>
-        <p className="text-sm text-slate-500">管理你创建的所有设计项目</p>
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">我的项目</h1>
+          <p className="text-sm text-slate-500">管理你创建的所有设计项目</p>
+        </div>
+        <button 
+          onClick={handleCreateNew}
+          className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium flex items-center gap-2 transition-colors"
+        >
+          <Plus className="w-4 h-4" />新建项目
+        </button>
       </div>
 
-      <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-        <FolderOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-        <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无项目</h3>
-        <p className="text-sm text-slate-400 mt-1">使用工具后会在这里显示</p>
-      </div>
+      {projects.length === 0 ? (
+        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+          <FolderOpen className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无项目</h3>
+          <p className="text-sm text-slate-400 mt-1">使用工具后会在这里显示</p>
+          <button 
+            onClick={handleCreateNew}
+            className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition-colors"
+          >
+            创建第一个项目
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all overflow-hidden"
+            >
+              <div className={`h-24 bg-gradient-to-br ${typeColors[project.type] || 'from-slate-100 to-slate-200'} flex items-center justify-center`}>
+                <span className="text-4xl opacity-50">📁</span>
+              </div>
+              <div className="p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-sm font-medium text-slate-800 dark:text-white">{project.name}</h3>
+                    <p className="text-xs text-slate-400 mt-1">{project.count} 个设计 · {project.updated}</p>
+                  </div>
+                  <button 
+                    onClick={() => handleDelete(project.id)}
+                    className="p-1.5 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 // ==================== 资产库页面 ====================
 function AssetsContent() {
+  const [assets, setAssets] = useState([
+    { id: 1, name: '产品主图-001.jpg', size: '2.3MB', type: 'image', date: '今天' },
+    { id: 2, name: '头像素材集', size: '15张', type: 'folder', date: '昨天' },
+    { id: 3, name: '端午节元素.png', size: '890KB', type: 'image', date: '3天前' },
+    { id: 4, name: '品牌配色方案.ai', size: '1.2MB', type: 'file', date: '上周' },
+  ]);
+  const [toast, setToast] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'images' | 'templates' | 'others'>('all');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const newAssets = Array.from(files).map((file, idx) => ({
+        id: Date.now() + idx,
+        name: file.name,
+        size: `${(file.size / 1024 / 1024).toFixed(1)}MB`,
+        type: file.type.startsWith('image/') ? 'image' as const : 'file' as const,
+        date: '今天',
+      }));
+      setAssets([...newAssets, ...assets]);
+      setToast(`已上传 ${files.length} 个文件`);
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    setAssets(assets.filter(a => a.id !== id));
+    setToast('已删除');
+  };
+
+  const filteredAssets = assets.filter(asset => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'images') return asset.type === 'image';
+    if (activeTab === 'templates') return asset.name.includes('模板');
+    if (activeTab === 'others') return asset.type === 'file';
+    return true;
+  });
+
+  const typeIcons: Record<string, { icon: string; color: string }> = {
+    'image': { icon: '🖼️', color: 'from-sky-100 to-blue-100' },
+    'folder': { icon: '📁', color: 'from-amber-100 to-orange-100' },
+    'file': { icon: '📄', color: 'from-slate-100 to-slate-200' },
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">资产库</h1>
-        <p className="text-sm text-slate-500">管理你的设计素材和模板</p>
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+      
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">资产库</h1>
+          <p className="text-sm text-slate-500">管理你的设计素材和模板</p>
+        </div>
+        <button 
+          onClick={handleUpload}
+          className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium flex items-center gap-2 transition-colors"
+        >
+          <Plus className="w-4 h-4" />上传素材
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,.ai,.psd,.svg,.pdf"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </div>
 
-      <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
-        <Database className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-        <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无素材</h3>
-        <p className="text-sm text-slate-400 mt-1">上传素材后会在这里显示</p>
+      {/* 筛选标签 */}
+      <div className="flex items-center gap-2 mb-6">
+        {(['all', 'images', 'templates', 'others'] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-xl text-sm transition-colors ${
+              activeTab === tab 
+                ? 'bg-orange-100 text-orange-600 font-medium' 
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+            }`}
+          >
+            {tab === 'all' ? '全部' : tab === 'images' ? '图片' : tab === 'templates' ? '模板' : '其他'}
+          </button>
+        ))}
       </div>
+
+      {filteredAssets.length === 0 ? (
+        <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700">
+          <Database className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+          <h3 className="text-base font-medium text-slate-500 dark:text-slate-400">暂无素材</h3>
+          <p className="text-sm text-slate-400 mt-1">上传素材后会在这里显示</p>
+          <button 
+            onClick={handleUpload}
+            className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition-colors"
+          >
+            上传第一个素材
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {filteredAssets.map((asset) => (
+            <div
+              key={asset.id}
+              className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all overflow-hidden"
+            >
+              <div className={`aspect-square bg-gradient-to-br ${typeIcons[asset.type]?.color || 'from-slate-100 to-slate-200'} flex items-center justify-center relative`}>
+                <span className="text-3xl">{typeIcons[asset.type]?.icon || '📄'}</span>
+                <button 
+                  onClick={() => handleDelete(asset.id)}
+                  className="absolute top-2 right-2 p-1.5 bg-white/90 rounded-full text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="p-3">
+                <h3 className="text-xs font-medium text-slate-800 dark:text-white truncate">{asset.name}</h3>
+                <p className="text-xs text-slate-400 mt-0.5">{asset.size} · {asset.date}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
