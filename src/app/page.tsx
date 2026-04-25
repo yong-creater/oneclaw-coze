@@ -8,12 +8,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
-  Search, Wand2, Star, X, Rocket,
+  Search, Wand2, Star, X,
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
   FileText, Globe, TrendingUp, Briefcase, MapPin, Palette, Layers,
-  ShoppingCart, Shirt, Video, Smile, Clock, Shield, Zap
+  ShoppingCart, Shirt, Video, Smile
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -307,13 +307,14 @@ const UTILITY_TOOLS = [
 type UtilityTool = typeof UTILITY_TOOLS[number]['key'];
 
 const MAIN_TABS = [
+  { key: 'utilities', label: '精选工具', icon: Star },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
   { key: 'tutorials', label: '教程', icon: BookOpen },
 ] as const;
 
-type MainTab = 'home' | 'utilities' | typeof MAIN_TABS[number]['key'];
+type MainTab = typeof MAIN_TABS[number]['key'];
 
 // ==================== 工具函数 ====================
 const getUserId = (): string => {
@@ -734,18 +735,15 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
-            {/* Logo */}
-            <button 
-              onClick={() => setMainTab('home')}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
-            >
+            {/* Logo - 防止被压缩 */}
+            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0">
               <AnimatedLobster size={32} className="sm:size-9" />
               <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent whitespace-nowrap">
                 OneClaw
               </span>
-            </button>
+            </Link>
 
-            {/* 主导航Tab */}
+            {/* 主导航Tab - 移动端隐藏文字 */}
             <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-full p-1">
               {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
@@ -777,75 +775,6 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* ==================== 首页（Logo落地页） ==================== */}
-        {mainTab === 'home' && (
-          <div className="space-y-6">
-            {/* Hero Banner */}
-            <div className="bg-gradient-to-br from-orange-500 via-red-500 to-amber-500 rounded-2xl p-8 text-white">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-                    <AnimatedLobster size={48} />
-                    <div>
-                      <h1 className="text-2xl md:text-3xl font-bold">OneClaw 虾评</h1>
-                      <p className="text-white/80 text-sm">全品类AI工具导航站</p>
-                    </div>
-                  </div>
-                  <p className="text-lg text-white/90 mb-6">
-                    一爪搞定238款AI工具 · 7大自研神器
-                    <br />
-                    <span className="font-medium text-white">零门槛 · 商用无忧 · 极速出图</span>
-                  </p>
-                  <div className="flex items-center justify-center md:justify-start gap-4">
-                    <Button 
-                      size="lg"
-                      onClick={() => setMainTab('utilities')}
-                      className="bg-white text-orange-600 hover:bg-white/90 shadow-lg"
-                    >
-                      7大AI神器
-                      <ArrowRight className="ml-2 w-5 h-5" />
-                    </Button>
-                    <Button 
-                      size="lg"
-                      variant="outline"
-                      className="border-2 border-white/50 text-white hover:bg-white/20"
-                      onClick={() => setMainTab('tools')}
-                    >
-                      浏览全部工具
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 快捷入口 */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {([
-                { label: '精选工具', desc: '7大AI神器', icon: Star, tab: 'utilities' as MainTab },
-                { label: 'AI应用', desc: '238+工具', icon: Wand2, tab: 'tools' as MainTab },
-                { label: '提示词', desc: '1000+模板', icon: Lightbulb, tab: 'prompts' as MainTab },
-                { label: '技能', desc: '500+技能', icon: Sparkles, tab: 'skills' as MainTab },
-              ] as { label: string; desc: string; icon: typeof Star; tab: MainTab }[]).map((item, i) => (
-                <button
-                  key={i}
-                  onClick={() => setMainTab(item.tab)}
-                  className="flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 transition-all"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-                    <item.icon className="w-5 h-5 text-orange-500" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-semibold text-slate-800 dark:text-white">{item.label}</div>
-                    <div className="text-xs text-slate-500 dark:text-slate-400">{item.desc}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ==================== 精选工具（7大AI神器） ==================== */}
-
         {/* ==================== 工具导航 ==================== */}
         {mainTab === 'tools' && (
           <div className="flex gap-6">
