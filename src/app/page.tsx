@@ -112,20 +112,6 @@ interface Skill {
 // ==================== 美图风格精选工具页面 ====================
 function UtilityToolsPage() {
   const router = useRouter();
-  
-  // 马卡龙色系配置 - 清新柔和
-  const MACARON_COLORS = [
-    { bg: 'bg-gradient-to-br from-pink-50 to-rose-50', border: 'border-pink-100', accent: 'text-rose-400' },
-    { bg: 'bg-gradient-to-br from-sky-50 to-blue-50', border: 'border-sky-100', accent: 'text-sky-400' },
-    { bg: 'bg-gradient-to-br from-emerald-50 to-green-50', border: 'border-emerald-100', accent: 'text-emerald-400' },
-    { bg: 'bg-gradient-to-br from-amber-50 to-orange-50', border: 'border-amber-100', accent: 'text-amber-500' },
-    { bg: 'bg-gradient-to-br from-violet-50 to-purple-50', border: 'border-violet-100', accent: 'text-violet-400' },
-    { bg: 'bg-gradient-to-br from-teal-50 to-cyan-50', border: 'border-teal-100', accent: 'text-teal-400' },
-    { bg: 'bg-gradient-to-br from-fuchsia-50 to-pink-50', border: 'border-fuchsia-100', accent: 'text-fuchsia-400' },
-    { bg: 'bg-gradient-to-br from-orange-50 to-yellow-50', border: 'border-orange-100', accent: 'text-orange-400' },
-    { bg: 'bg-gradient-to-br from-lime-50 to-green-50', border: 'border-lime-100', accent: 'text-lime-500' },
-    { bg: 'bg-gradient-to-br from-indigo-50 to-blue-50', border: 'border-indigo-100', accent: 'text-indigo-400' },
-  ];
 
   const getToolUrl = (key: string) => {
     const urls: Record<string, string> = {
@@ -160,12 +146,11 @@ function UtilityToolsPage() {
         </p>
       </div>
 
-      {/* 工具网格 - 美图风格 */}
+      {/* 工具网格 - 美图风格：单图大预览 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {UTILITY_TOOLS.map((tool, index) => {
           const Icon = tool.icon;
-          const colorScheme = MACARON_COLORS[index % MACARON_COLORS.length];
-          const [primaryColor, secondaryColor] = tool.color.split(' ')[1]?.split('-') || ['orange', '500'];
+          const bgColor = tool.bgColor;
           
           return (
             <button
@@ -175,49 +160,46 @@ function UtilityToolsPage() {
               }}
               className="group relative bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:-translate-y-1 text-left"
             >
-              {/* 预览图区域 - 左右分栏 */}
-              <div className="h-28 flex relative overflow-hidden">
-                {/* 左侧：输入示意 */}
-                <div className={`flex-1 ${colorScheme.bg} flex items-center justify-center p-3`}>
-                  <div className="text-center opacity-60">
-                    <Icon className={`w-8 h-8 ${colorScheme.accent} mx-auto mb-1`} />
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">输入</span>
-                  </div>
-                </div>
-                {/* 中间箭头 */}
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
-                  <div className="w-6 h-6 bg-white dark:bg-slate-700 rounded-full shadow-md flex items-center justify-center">
-                    <ArrowRight className={`w-3 h-3 ${colorScheme.accent}`} />
-                  </div>
-                </div>
-                {/* 右侧：输出示意 */}
-                <div className="flex-1 bg-white dark:bg-slate-700 flex items-center justify-center p-3">
-                  <div className="text-center">
-                    <div className={`w-10 h-10 rounded-lg ${colorScheme.bg} flex items-center justify-center mx-auto mb-1 shadow-sm`}>
-                      <Icon className={`w-5 h-5 ${colorScheme.accent}`} />
+              {/* 预览图区域 - 真实效果图展示 */}
+              <div className="relative h-32 overflow-hidden">
+                {/* 背景渐变 */}
+                <div className={`absolute inset-0 ${bgColor}`} />
+                
+                {/* 示例效果图 */}
+                <div className="absolute inset-0 flex items-center justify-center p-3">
+                  <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg">
+                    <img 
+                      src={tool.preview} 
+                      alt={tool.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    {/* 悬浮时显示遮罩 */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 dark:bg-slate-800/90 rounded-full px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium">
+                        <Icon className="w-3.5 h-3.5 text-orange-500" />
+                        <span>立即使用</span>
+                      </div>
                     </div>
-                    <span className="text-[10px] text-slate-400">输出</span>
+                  </div>
+                </div>
+                
+                {/* 工具图标标签 */}
+                <div className="absolute top-2 left-2">
+                  <div className={`w-8 h-8 rounded-lg ${bgColor} shadow-sm flex items-center justify-center`}>
+                    <Icon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                   </div>
                 </div>
               </div>
               
               {/* 信息区域 */}
-              <div className="p-4">
-                <h3 className="font-semibold text-slate-800 dark:text-white mb-1 group-hover:text-orange-500 transition-colors text-sm">
+              <div className="p-3">
+                <h3 className="font-semibold text-slate-800 dark:text-white mb-0.5 group-hover:text-orange-500 transition-colors text-sm">
                   {tool.name}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                   {tool.description}
                 </p>
-                
-                {/* 功能标签 */}
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {tool.tags?.slice(0, 2).map((tag, idx) => (
-                    <span key={idx} className={`px-2 py-0.5 text-[10px] rounded-full ${colorScheme.bg} ${colorScheme.accent} border ${colorScheme.border}`}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
               </div>
             </button>
           );
@@ -293,7 +275,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   '高级': 'bg-red-100 text-red-700',
 };
 
-// 精选工具列表
+// 精选工具列表 - 带真实示例效果图
 const UTILITY_TOOLS = [
   {
     key: 'avatar-emoji',
@@ -301,12 +283,9 @@ const UTILITY_TOOLS = [
     icon: Sparkles,
     description: '上传照片，一键生成各种风格的精美头像和表情包',
     color: 'from-amber-300 to-orange-400',
-    tags: ['头像生成', '表情包', '个性定制'],
-    useCases: [
-      { title: '头像定制', desc: '真人照片转动漫/插画头像' },
-      { title: '表情包', desc: '批量生成系列表情包' },
-      { title: '节日专属', desc: '节日主题头像一键生成' },
-    ]
+    bgColor: 'bg-gradient-to-br from-pink-50 to-rose-50',
+    tags: ['头像生成', '表情包'],
+    preview: 'https://picsum.photos/seed/avatar/400/280',
   },
   {
     key: 'resume-photo',
@@ -314,12 +293,9 @@ const UTILITY_TOOLS = [
     icon: UserCircle,
     description: '上传照片，一键生成专业简历形象照/职业照',
     color: 'from-sky-300 to-blue-400',
-    tags: ['形象照', '职业照', '商务形象'],
-    useCases: [
-      { title: '简历照片', desc: '专业商务形象照' },
-      { title: '职业头像', desc: 'LinkedIn/脉脉头像' },
-      { title: '团队合影', desc: '公司团队统一形象照' },
-    ]
+    bgColor: 'bg-gradient-to-br from-sky-50 to-blue-50',
+    tags: ['形象照', '职业照'],
+    preview: 'https://picsum.photos/seed/portrait/400/280',
   },
   {
     key: 'restaurant-menu',
@@ -327,12 +303,9 @@ const UTILITY_TOOLS = [
     icon: Coffee,
     description: '上传图片一键优化，或输入文字自动生成精美菜单',
     color: 'from-orange-300 to-amber-400',
-    tags: ['餐饮模板', '菜单设计', '价目表'],
-    useCases: [
-      { title: '图片优化', desc: '上传现有菜单一键美化' },
-      { title: '文字生成', desc: '输入菜品自动生成菜单' },
-      { title: '多风格', desc: 'Ins风/国潮风/复古风' },
-    ]
+    bgColor: 'bg-gradient-to-br from-amber-50 to-orange-50',
+    tags: ['餐饮模板', '菜单设计'],
+    preview: 'https://picsum.photos/seed/menu/400/280',
   },
   {
     key: 'xiaohongshu',
@@ -340,12 +313,9 @@ const UTILITY_TOOLS = [
     icon: BookOpen,
     description: '输入标题，一键生成小红书爆款封面图和配图',
     color: 'from-pink-300 to-rose-400',
-    tags: ['小红书配图', '封面图', '自媒体工具'],
-    useCases: [
-      { title: '封面图', desc: '爆款笔记封面生成' },
-      { title: '内页配图', desc: '干货内容配图' },
-      { title: '热点模板', desc: '节日/话题热点模板' },
-    ]
+    bgColor: 'bg-gradient-to-br from-pink-50 to-rose-50',
+    tags: ['小红书配图', '封面图'],
+    preview: 'https://picsum.photos/seed/social/400/280',
   },
   {
     key: 'douyin',
@@ -353,12 +323,9 @@ const UTILITY_TOOLS = [
     icon: Smartphone,
     description: '输入标题，一键生成抖音爆款视频封面图',
     color: 'from-cyan-300 to-sky-400',
-    tags: ['抖音封面', '视频封面', '自媒体工具'],
-    useCases: [
-      { title: '视频封面', desc: '爆款视频封面生成' },
-      { title: '文案配图', desc: '配合文案的配图' },
-      { title: '热点模板', desc: '热点话题封面' },
-    ]
+    bgColor: 'bg-gradient-to-br from-cyan-50 to-sky-50',
+    tags: ['抖音封面', '视频封面'],
+    preview: 'https://picsum.photos/seed/video/400/280',
   },
   {
     key: 'festival-poster',
@@ -366,12 +333,9 @@ const UTILITY_TOOLS = [
     icon: PartyPopper,
     description: '选择节日/场景，输入主题，一键生成精美营销海报',
     color: 'from-red-300 to-orange-400',
-    tags: ['节日海报', '营销物料', '促销宣传'],
-    useCases: [
-      { title: '春节', desc: '新春促销海报' },
-      { title: '中秋', desc: '团圆节海报' },
-      { title: '开业', desc: '新店开业海报' },
-    ]
+    bgColor: 'bg-gradient-to-br from-red-50 to-orange-50',
+    tags: ['节日海报', '营销物料'],
+    preview: 'https://picsum.photos/seed/festival/400/280',
   },
   {
     key: 'kids-creative',
@@ -379,12 +343,9 @@ const UTILITY_TOOLS = [
     icon: Palette,
     description: 'AI儿童手抄报/手账/涂色绘本一键生成，亲子必备',
     color: 'from-teal-300 to-cyan-400',
-    tags: ['手抄报', '涂色绘本', '儿童手工'],
-    useCases: [
-      { title: '手抄报', desc: '节日/主题手抄报模板' },
-      { title: '涂色绘本', desc: '儿童涂色绘本素材' },
-      { title: '手账素材', desc: '亲子手账贴纸/素材' },
-    ]
+    bgColor: 'bg-gradient-to-br from-teal-50 to-cyan-50',
+    tags: ['手抄报', '涂色绘本'],
+    preview: 'https://picsum.photos/seed/kids/400/280',
   },
   { 
     key: 'resume', 
@@ -392,12 +353,9 @@ const UTILITY_TOOLS = [
     icon: FileText,
     description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
     color: 'from-indigo-300 to-blue-400',
-    tags: ['PDF上传', 'JD精准匹配', '量化成果'],
-    useCases: [
-      { title: '校招求职', desc: '应届生简历优化，突出项目经验' },
-      { title: '社招跳槽', desc: '量化工作成果，提升面试邀约率' },
-      { title: '简历升级', desc: 'STAR法则重构，让经历更有说服力' },
-    ]
+    bgColor: 'bg-gradient-to-br from-indigo-50 to-blue-50',
+    tags: ['PDF上传', 'JD匹配'],
+    preview: 'https://picsum.photos/seed/resume/400/280',
   },
   { 
     key: 'novel', 
@@ -405,12 +363,9 @@ const UTILITY_TOOLS = [
     icon: Feather,
     description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
     color: 'from-violet-300 to-purple-400',
-    tags: ['深度洗稿', '漫画生图', '推文脚本'],
-    useCases: [
-      { title: '小说改编', desc: '番茄小说爆款文改编为漫画脚本' },
-      { title: 'IP孵化', desc: '原创故事快速生成多形式内容' },
-      { title: '短剧创作', desc: '小说改短剧，批量产出推文素材' },
-    ]
+    bgColor: 'bg-gradient-to-br from-violet-50 to-purple-50',
+    tags: ['深度洗稿', '漫画生图'],
+    preview: 'https://picsum.photos/seed/novel/400/280',
   },
   { 
     key: 'productpage', 
@@ -418,12 +373,9 @@ const UTILITY_TOOLS = [
     icon: Globe,
     description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
     color: 'from-emerald-300 to-teal-400',
-    tags: ['多语言', '海外合规', '批量分发'],
-    useCases: [
-      { title: '亚马逊Listing', desc: '符合亚马逊规范的多语言详情页' },
-      { title: '独立站详情', desc: 'Shopify/WooCommerce适配版本' },
-      { title: '多平台分发', desc: '速卖通/eBay/Shopee统一模板' },
-    ]
+    bgColor: 'bg-gradient-to-br from-emerald-50 to-teal-50',
+    tags: ['多语言', '海外合规'],
+    preview: 'https://picsum.photos/seed/product/400/280',
   },
 ] as const;
 
