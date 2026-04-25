@@ -192,7 +192,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                     <svg className={`w-3.5 h-3.5 transition-transform ${showParams ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
-                    {showParams ? '收起参数' : '调整参数'}
+                    {showParams ? '收起' : '参数'}
                   </button>
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -200,119 +200,92 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                     <div 
                       key={idx} 
                       className={`relative group cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImageIdx === idx ? 'border-orange-400 ring-2 ring-orange-100' : 'border-slate-200 hover:border-orange-300'
+                        selectedImageIdx === idx ? 'border-orange-400' : 'border-slate-200 hover:border-orange-300'
                       }`}
                       onClick={() => handleSelectImage(idx)}
                     >
                       <img 
                         src={img} 
-                        alt={`上传图片 ${idx + 1}`}
-                        className="w-16 h-16 object-cover"
+                        alt={`图片 ${idx + 1}`}
+                        className="w-14 h-14 object-cover"
                       />
-                      {selectedImageIdx === idx && (
-                        <div className="absolute inset-0 bg-orange-500/20 flex items-center justify-center">
-                          <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      )}
                       <button
                         onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center opacity-0 group-hover:opacity-100"
                       >
                         ×
                       </button>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="text-[10px] text-white">点击选中</span>
-                      </div>
                     </div>
                   ))}
                 </div>
 
                 {/* 参数调整面板 */}
                 {showParams && (
-                  <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl space-y-4">
-                    {/* 尺寸比例 */}
-                    <div>
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">尺寸比例</label>
-                      <div className="flex gap-2">
-                        {aspectRatios.map(ratio => (
-                          <button
-                            key={ratio.value}
-                            onClick={() => setImageParams(p => ({ ...p, aspectRatio: ratio.value }))}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                              imageParams.aspectRatio === ratio.value
-                                ? 'bg-orange-500 text-white'
-                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
-                            }`}
-                          >
-                            {ratio.label}
-                          </button>
-                        ))}
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700 space-y-3">
+                    <div className="grid grid-cols-4 gap-3">
+                      {/* 尺寸比例 */}
+                      <div>
+                        <label className="text-[10px] text-slate-400 mb-1 block">尺寸</label>
+                        <div className="flex gap-1">
+                          {aspectRatios.map(ratio => (
+                            <button
+                              key={ratio.value}
+                              onClick={() => setImageParams(p => ({ ...p, aspectRatio: ratio.value }))}
+                              className={`flex-1 py-1 rounded text-[10px] font-medium ${
+                                imageParams.aspectRatio === ratio.value
+                                  ? 'bg-orange-500 text-white'
+                                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                              }`}
+                            >
+                              {ratio.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-
-                    {/* 生成风格 */}
-                    <div>
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">生成风格</label>
-                      <div className="flex gap-2">
-                        {styles.map(style => (
-                          <button
-                            key={style.value}
-                            onClick={() => setImageParams(p => ({ ...p, style: style.value }))}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                              imageParams.style === style.value
-                                ? 'bg-orange-500 text-white'
-                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
-                            }`}
-                          >
-                            {style.label}
-                          </button>
-                        ))}
+                      {/* 生成风格 */}
+                      <div>
+                        <label className="text-[10px] text-slate-400 mb-1 block">风格</label>
+                        <select
+                          value={imageParams.style}
+                          onChange={(e) => setImageParams(p => ({ ...p, style: e.target.value }))}
+                          className="w-full py-1 px-2 text-[10px] bg-slate-100 dark:bg-slate-700 rounded border-none focus:outline-none"
+                        >
+                          {styles.map(s => (
+                            <option key={s.value} value={s.value}>{s.label}</option>
+                          ))}
+                        </select>
                       </div>
-                    </div>
-
-                    {/* 生成数量 */}
-                    <div>
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">生成数量</label>
-                      <div className="flex gap-2">
-                        {[1, 2, 3, 4].map(num => (
-                          <button
-                            key={num}
-                            onClick={() => setImageParams(p => ({ ...p, count: num }))}
-                            className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
-                              imageParams.count === num
-                                ? 'bg-orange-500 text-white'
-                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
-                            }`}
-                          >
-                            {num}
-                          </button>
-                        ))}
+                      {/* 生成数量 */}
+                      <div>
+                        <label className="text-[10px] text-slate-400 mb-1 block">数量</label>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4].map(num => (
+                            <button
+                              key={num}
+                              onClick={() => setImageParams(p => ({ ...p, count: num }))}
+                              className={`flex-1 py-1 rounded text-[10px] font-medium ${
+                                imageParams.count === num
+                                  ? 'bg-orange-500 text-white'
+                                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                              }`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-
-                    {/* 图片质量 */}
-                    <div>
-                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 mb-2 block">图片质量</label>
-                      <div className="flex gap-2">
-                        {[
-                          { value: 'standard', label: '标准' },
-                          { value: 'high', label: '高清' },
-                          { value: 'premium', label: ' premium' },
-                        ].map(q => (
-                          <button
-                            key={q.value}
-                            onClick={() => setImageParams(p => ({ ...p, quality: q.value }))}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                              imageParams.quality === q.value
-                                ? 'bg-orange-500 text-white'
-                                : 'bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-500'
-                            }`}
-                          >
-                            {q.label}
-                          </button>
-                        ))}
+                      {/* 图片质量 */}
+                      <div>
+                        <label className="text-[10px] text-slate-400 mb-1 block">质量</label>
+                        <select
+                          value={imageParams.quality}
+                          onChange={(e) => setImageParams(p => ({ ...p, quality: e.target.value }))}
+                          className="w-full py-1 px-2 text-[10px] bg-slate-100 dark:bg-slate-700 rounded border-none focus:outline-none"
+                        >
+                          <option value="standard">标准</option>
+                          <option value="high">高清</option>
+                          <option value="premium">Premium</option>
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -321,7 +294,7 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
             )}
             
             {/* 输入框 */}
-            <div className="px-5 pt-3">
+            <div className="px-5 pt-3 pb-2">
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -332,8 +305,8 @@ function HomeContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
                   }
                 }}
                 placeholder="输入你的设计需求，或者上传图片..."
-                className="w-full resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-sm leading-relaxed"
-                rows={4}
+                className="w-full resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none text-sm"
+                rows={3}
               />
             </div>
             
