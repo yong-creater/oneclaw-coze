@@ -119,7 +119,7 @@ export default function ToolsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10 flex flex-col">
       {/* 左侧统一导航 */}
       <Sidebar searchPlaceholder="搜索工具..." />
 
@@ -214,7 +214,7 @@ export default function ToolsPage() {
       </main>
 
       {/* 底部 - 全宽 */}
-      <div className="ml-56">
+      <div className="ml-56 mt-auto">
         <Footer />
       </div>
     </div>

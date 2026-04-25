@@ -122,7 +122,7 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/20 to-amber-50/10 flex flex-col">
       {/* 左侧统一侧边栏 */}
       <Sidebar searchPlaceholder="搜索模板..." />
 
@@ -320,7 +320,7 @@ export default function TemplatesPage() {
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
 
       {/* 底部 - 全宽 */}
-      <div className="ml-56">
+      <div className="ml-56 mt-auto">
         <Footer />
       </div>
     </div>

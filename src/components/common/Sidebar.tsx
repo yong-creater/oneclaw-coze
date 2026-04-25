@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { 
   Home, Grid3X3, FileText, Clock, Star, 
   MoreHorizontal, Search, Bell, User, Menu, X,
-  Sparkles, ChevronRight
+  Sparkles, ChevronRight, PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import AnimatedLobster from './AnimatedLobster';
 
@@ -31,7 +31,7 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   { icon: FileText, label: '模板', href: '/templates' },
 ];
 
-// 导航配置 - 次要菜单（带分隔线）
+// 导航配置 - 次要菜单
 const SECONDARY_NAV_ITEMS: NavItem[] = [
   { icon: Clock, label: '最近打开', href: '/recent' },
   { icon: Star, label: '资产库', href: '/assets' },
@@ -51,6 +51,7 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [isHoveringLogo, setIsHoveringLogo] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const isActive = (href: string) => {
@@ -62,19 +63,54 @@ export function Sidebar({
     <aside 
       className={`bg-white/80 backdrop-blur-xl border-r border-slate-200/50 flex flex-col h-screen fixed left-0 top-0 z-30 transition-all duration-300 ${collapsed ? 'w-[72px]' : 'w-[268px]'} ${className}`}
     >
-      {/* Logo 区域 */}
+      {/* Logo 区域 - 展开时包含折叠按钮 */}
       <div className="p-4 border-b border-slate-100/60">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50 group-hover:shadow-xl group-hover:shadow-orange-300/50 transition-all">
-            <AnimatedLobster size={22} />
-          </div>
+        <div className="flex items-center gap-3">
+          <Link 
+            href="/" 
+            className="relative flex-shrink-0"
+            onMouseEnter={() => setIsHoveringLogo(true)}
+            onMouseLeave={() => setIsHoveringLogo(false)}
+          >
+            {/* 折叠状态下：hover 显示展开按钮，否则显示 Logo */}
+            {collapsed ? (
+              isHoveringLogo ? (
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center hover:from-orange-200 hover:to-amber-200 transition-all cursor-pointer">
+                  <PanelLeft className="w-5 h-5 text-orange-500" />
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50">
+                  <AnimatedLobster size={22} />
+                </div>
+              )
+            ) : (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50">
+                <AnimatedLobster size={22} />
+              </div>
+            )}
+          </Link>
+
+          {/* 展开时显示 Logo 文字和名称 */}
           {!collapsed && (
-            <div className="animate-in fade-in slide-in-from-left-2 duration-200">
-              <span className="font-bold text-lg bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">OneClaw</span>
-              <p className="text-[11px] text-slate-400">AI 智能工具箱</p>
+            <div className="flex items-center justify-between flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-200">
+              <div>
+                <span className="font-bold text-lg bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">OneClaw</span>
+                <p className="text-[11px] text-slate-400">AI 智能工具箱</p>
+              </div>
+              
+              {/* 折叠按钮 - 展开时在 logo 旁边 */}
+              {showCollapseButton && (
+                <button 
+                  onClick={() => setCollapsed(!collapsed)}
+                  className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all flex-shrink-0"
+                  title="收起侧边栏"
+                >
+                  <PanelLeftClose className="w-5 h-5" />
+                </button>
+              )}
             </div>
           )}
-        </Link>
+        </div>
       </div>
 
       {/* 搜索框 */}
@@ -230,25 +266,6 @@ export function Sidebar({
               </Link>
             </div>
           )}
-        </div>
-      )}
-
-      {/* 折叠按钮 */}
-      {showCollapseButton && (
-        <div className="p-3 border-t border-slate-100/60">
-          <button 
-            onClick={() => setCollapsed(!collapsed)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
-          >
-            {collapsed ? (
-              <Menu className="w-[18px] h-[18px]" />
-            ) : (
-              <>
-                <X className="w-[18px] h-[18px]" />
-                <span className="text-sm">收起</span>
-              </>
-            )}
-          </button>
         </div>
       )}
     </aside>
