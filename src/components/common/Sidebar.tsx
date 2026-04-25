@@ -219,25 +219,27 @@ export function Sidebar({
       {showUserArea && (
         <div className="p-3 border-t border-slate-100/60 mt-auto">
           {!collapsed ? (
-            <div className="flex items-center gap-2">
-              {/* 登录按钮 */}
-              <Link 
-                href="/login"
-                className="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all"
-              >
-                登录
-              </Link>
-              {/* 开通会员按钮 - 轻量图标样式 */}
+            <div className="space-y-2">
+              {/* 开通会员按钮 - 在上 */}
               <Link 
                 href="/vip"
-                className="p-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:shadow-lg hover:shadow-orange-200/50 hover:from-orange-600 hover:to-amber-600 transition-all"
-                title="开通会员"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-sm font-medium rounded-xl hover:shadow-lg hover:shadow-orange-200/50 hover:from-orange-600 hover:to-amber-600 transition-all"
               >
                 <Sparkles className="w-4 h-4" />
+                开通会员
+              </Link>
+              {/* 登录按钮 - 在下 */}
+              <Link 
+                href="/login"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all"
+              >
+                <User className="w-4 h-4" />
+                登录
               </Link>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
+              {/* 开通会员 - 在上 */}
               <Link 
                 href="/vip"
                 className="w-11 h-11 rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-200/50 hover:shadow-xl transition-all"
@@ -245,6 +247,7 @@ export function Sidebar({
               >
                 <Sparkles className="w-[18px] h-[18px] text-white" />
               </Link>
+              {/* 登录 - 在下 */}
               <Link 
                 href="/login"
                 className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-50 transition-all"
