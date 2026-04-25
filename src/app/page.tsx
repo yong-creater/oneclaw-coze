@@ -6,14 +6,15 @@ import { useRouter } from 'next/navigation';
 import { 
   Home, LayoutDashboard, Clock, FolderOpen, 
   Database, MoreHorizontal, Grid3X3, 
-  Crown, Settings, LogIn, User,
+  Crown, Settings, LogIn,
   ChevronRight, Plus, ImageIcon, Sparkles,
-  PartyPopper, Coffee, Bell, Heart, Search,
+  PartyPopper, Coffee, Search,
   Shirt, Wand2, Layers, Zap, ScanFace,
   Eraser, FileText, Sofa, Play, Package,
-  HelpCircle, StickyNote, X, Check
+  HelpCircle, StickyNote, Check
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
+import Footer from '@/components/common/Footer';
 
 // ==================== 类型定义 ====================
 type MainTab = 'home' | 'tools' | 'templates' | 'recent' | 'projects' | 'assets' | 'more';
@@ -475,7 +476,6 @@ function MoreContent({ setActiveTab }: { setActiveTab: (tab: string) => void }) 
 export default function MainPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<string>('home');
-  const [showNotifications, setShowNotifications] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex">
@@ -593,30 +593,8 @@ export default function MainPage() {
           </div>
         </header>
 
-        {/* 通知弹窗 */}
-        {showNotifications && (
-          <div className="absolute right-6 top-16 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 p-4 z-30">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-medium text-slate-800 dark:text-white">通知</h3>
-              <button onClick={() => setShowNotifications(false)}>
-                <X className="w-4 h-4 text-slate-400" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                <p className="text-sm text-slate-700 dark:text-slate-200">欢迎使用 OneClaw AI生图工具</p>
-                <p className="text-xs text-slate-400 mt-1">刚刚</p>
-              </div>
-              <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
-                <p className="text-sm text-slate-700 dark:text-slate-200">新功能上线：节日营销海报</p>
-                <p className="text-xs text-slate-400 mt-1">昨天</p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* 页面内容 */}
-        <div className="p-6">
+        <div className="p-6 pb-24">
           {activeTab === 'home' && <HomeContent setActiveTab={setActiveTab} />}
           {activeTab === 'tools' && <ToolsContent />}
           {activeTab === 'templates' && <TemplatesContent />}
@@ -636,6 +614,9 @@ export default function MainPage() {
           </button>
         </div>
       </main>
+
+      {/* 页脚 */}
+      <Footer />
     </div>
   );
 }
