@@ -927,59 +927,13 @@ export default function MainPage() {
               </button>
             );
           })}
-
-          {/* 个人导航 */}
-          {[
-            { key: 'recent', label: '最近打开', icon: Clock },
-            { key: 'projects', label: '项目', icon: FolderOpen },
-            { key: 'assets', label: '资产库', icon: Database },
-          ].map(item => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.key;
-            return (
-              <button
-                key={item.key}
-                onClick={() => setActiveTab(item.key)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                  isActive
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white font-medium'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
         </nav>
 
-        {/* 底部导航 */}
-        <div className="p-3 border-t border-slate-100 dark:border-slate-700 space-y-0.5">
-          {[
-            { key: 'more', label: '更多', icon: MoreHorizontal },
-          ].map(item => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.key;
-            return (
-              <button
-                key={item.key}
-                onClick={() => setActiveTab(item.key)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                  isActive
-                    ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-white font-medium'
-                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-          
-          {/* 登录入口 */}
+        {/* 底部登录入口 */}
+        <div className="p-3 border-t border-slate-100 dark:border-slate-700">
           <button
             onClick={() => router.push('/login')}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-600 dark:hover:text-slate-300 transition-all mt-1"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-600 dark:hover:text-slate-300 transition-all"
           >
             <LogIn className="w-5 h-5" />
             <span>登录</span>
