@@ -45,7 +45,7 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const logoRef = useRef<HTMLDivElement>(null);
+  const [isHoveringLogo, setIsHoveringLogo] = useState(false);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -87,15 +87,29 @@ export function Sidebar({
           </div>
         )}
 
-        {/* 折叠状态 - hover 显示展开按钮，点击整个区域展开 */}
+        {/* 折叠状态 - hover 时 Logo 切换为展开图标 */}
         {collapsed && (
-          <div className="flex items-center justify-center">
+          <div 
+            className="flex items-center justify-center"
+            onMouseEnter={() => setIsHoveringLogo(true)}
+            onMouseLeave={() => setIsHoveringLogo(false)}
+          >
             <button 
               onClick={handleToggle}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50 hover:shadow-xl hover:scale-105 transition-all cursor-pointer"
-              title="展开侧边栏"
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 via-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-200/50 transition-all duration-200 cursor-pointer"
+              title={isHoveringLogo ? "展开侧边栏" : "点击展开"}
             >
-              <PanelLeft className="w-5 h-5 text-white" />
+              {/* Logo 和展开图标切换 */}
+              <div className="relative w-5 h-5">
+                {/* Logo 图标 - 默认显示 */}
+                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${isHoveringLogo ? 'opacity-0 scale-75' : 'opacity-100 scale-100'}`}>
+                  <AnimatedLobster size={18} />
+                </div>
+                {/* 展开图标 - hover 时显示 */}
+                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${isHoveringLogo ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                  <PanelLeft className="w-5 h-5 text-white" />
+                </div>
+              </div>
             </button>
           </div>
         )}
