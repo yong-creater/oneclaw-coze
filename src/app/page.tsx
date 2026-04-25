@@ -456,56 +456,234 @@ function ToolsContent() {
 
 // ==================== 模板页面 ====================
 function TemplatesContent() {
-  const templates = [
-    { name: '头像模板', count: 120, color: 'from-pink-100 to-rose-200' },
-    { name: '小红书封面', count: 85, color: 'from-orange-100 to-amber-200' },
-    { name: '抖音封面', count: 72, color: 'from-purple-100 to-violet-200' },
-    { name: '节日海报', count: 156, color: 'from-red-100 to-rose-200' },
-    { name: '餐饮菜单', count: 45, color: 'from-green-100 to-emerald-200' },
-    { name: '简历模板', count: 38, color: 'from-blue-100 to-cyan-200' },
-    { name: '形象照', count: 92, color: 'from-indigo-100 to-blue-200' },
-    { name: '详情页', count: 64, color: 'from-teal-100 to-cyan-200' },
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeStyle, setActiveStyle] = useState('all');
+  const [toast, setToast] = useState<string | null>(null);
+
+  const categories = [
+    { key: 'all', name: '全部' },
+    { key: 'social', name: '社交媒体' },
+    { key: 'ecommerce', name: '电商设计' },
+    { key: 'poster', name: '海报宣传' },
+    { key: 'video', name: '视频封面' },
+    { key: 'document', name: '文档PPT' },
+    { key: 'logo', name: 'LOGO设计' },
   ];
 
-  return (
-    <div style={{ maxWidth: '896px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>设计模板</h1>
-      <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '32px' }}>海量设计模板，一键使用</p>
+  const styles = [
+    { key: 'all', name: '全部风格' },
+    { key: 'minimal', name: '简约' },
+    { key: 'vibrant', name: '活泼' },
+    { key: 'luxury', name: '高端' },
+    { key: 'cute', name: '可爱' },
+    { key: 'tech', name: '科技' },
+  ];
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px' }}>
-        {templates.map((t, idx) => (
-          <button
-            key={idx}
-            style={{ 
-              background: 'white', 
-              borderRadius: '16px', 
-              overflow: 'hidden', 
-              border: '1px solid #f1f5f9',
-              textAlign: 'left',
-              transition: 'all 0.2s',
-              cursor: 'pointer'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)'}
-            onMouseOut={(e) => e.currentTarget.style.boxShadow = 'none'}
-          >
-            <div style={{ 
-              height: '140px', 
-              background: `linear-gradient(to bottom right, ${t.color.replace('from-', '').replace(' to-', ', ')})`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <span style={{ fontSize: '32px', fontWeight: 'bold', color: 'rgba(0,0,0,0.2)' }}>
-                {t.name.slice(0, 1)}
-              </span>
-            </div>
-            <div style={{ padding: '12px' }}>
-              <h3 style={{ fontWeight: '600', fontSize: '14px', color: '#1e293b' }}>{t.name}</h3>
-              <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{t.count}套模板</p>
-            </div>
+  // 模拟模板数据
+  const templates = [
+    { id: 1, name: '小红书爆款封面', category: 'social', style: 'vibrant', useCount: 12580, thumbnail: '' },
+    { id: 2, name: '抖音视频封面', category: 'video', style: 'vibrant', useCount: 8932, thumbnail: '' },
+    { id: 3, name: '电商主图模板', category: 'ecommerce', style: 'minimal', useCount: 15620, thumbnail: '' },
+    { id: 4, name: '节日促销海报', category: 'poster', style: 'vibrant', useCount: 23450, thumbnail: '' },
+    { id: 5, name: '企业PPT模板', category: 'document', style: 'luxury', useCount: 6780, thumbnail: '' },
+    { id: 6, name: '品牌LOGO设计', category: 'logo', style: 'minimal', useCount: 4560, thumbnail: '' },
+    { id: 7, name: '朋友圈九宫格', category: 'social', style: 'cute', useCount: 9870, thumbnail: '' },
+    { id: 8, name: '商品详情页', category: 'ecommerce', style: 'minimal', useCount: 11230, thumbnail: '' },
+    { id: 9, name: 'B站视频封面', category: 'video', style: 'tech', useCount: 7650, thumbnail: '' },
+    { id: 10, name: '餐饮菜单设计', category: 'poster', style: 'cute', useCount: 5430, thumbnail: '' },
+    { id: 11, name: '简历模板套装', category: 'document', style: 'minimal', useCount: 18900, thumbnail: '' },
+    { id: 12, name: 'ins风配图', category: 'social', style: 'cute', useCount: 6540, thumbnail: '' },
+  ];
+
+  const filteredTemplates = templates.filter(t => {
+    const matchSearch = t.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchCategory = activeCategory === 'all' || t.category === activeCategory;
+    const matchStyle = activeStyle === 'all' || t.style === activeStyle;
+    return matchSearch && matchCategory && matchStyle;
+  });
+
+  const handleUseTemplate = (id: number) => {
+    setToast('模板已应用');
+  };
+
+  const handleCollect = (id: number) => {
+    setToast('已收藏');
+  };
+
+  return (
+    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      {toast && (
+        <div style={{
+          position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+          background: '#1e293b', color: 'white', padding: '10px 20px', borderRadius: '8px',
+          zIndex: 100, fontSize: '14px'
+        }}>
+          {toast}
+        </div>
+      )}
+
+      {/* 标题 */}
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e293b', marginBottom: '8px' }}>设计模板</h1>
+      <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>海量精选模板，一键套用</p>
+
+      {/* 搜索栏 */}
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{
+          display: 'flex', gap: '12px', maxWidth: '600px',
+          background: 'white', padding: '4px', borderRadius: '10px',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '12px' }}>
+            <Search className="w-5 h-5" style={{ color: '#94a3b8' }} />
+            <input
+              type="text"
+              placeholder="搜索模板..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: '14px', padding: '8px 0' }}
+            />
+          </div>
+          <button style={{
+            padding: '8px 20px', background: '#f97316', color: 'white', border: 'none',
+            borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500'
+          }}>
+            搜索
           </button>
+        </div>
+      </div>
+
+      {/* 分类筛选 */}
+      <div style={{ marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+          {categories.map(cat => (
+            <button
+              key={cat.key}
+              onClick={() => setActiveCategory(cat.key)}
+              style={{
+                padding: '6px 16px', borderRadius: '20px', border: '1px solid',
+                borderColor: activeCategory === cat.key ? '#f97316' : '#e2e8f0',
+                background: activeCategory === cat.key ? '#fff7ed' : 'white',
+                color: activeCategory === cat.key ? '#f97316' : '#64748b',
+                fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {styles.map(s => (
+            <button
+              key={s.key}
+              onClick={() => setActiveStyle(s.key)}
+              style={{
+                padding: '4px 12px', borderRadius: '16px', border: '1px solid',
+                borderColor: activeStyle === s.key ? '#f97316' : '#e2e8f0',
+                background: activeStyle === s.key ? '#fff7ed' : 'white',
+                color: activeStyle === s.key ? '#f97316' : '#94a3b8',
+                fontSize: '12px', cursor: 'pointer', transition: 'all 0.2s'
+              }}
+            >
+              {s.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 结果统计 */}
+      <div style={{ marginBottom: '16px', fontSize: '13px', color: '#94a3b8' }}>
+        共找到 {filteredTemplates.length} 个模板
+      </div>
+
+      {/* 模板网格 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '16px' }}>
+        {filteredTemplates.map(template => (
+          <div
+            key={template.id}
+            style={{
+              background: 'white', borderRadius: '12px', overflow: 'hidden',
+              border: '1px solid #e2e8f0', transition: 'all 0.2s'
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+              (e.currentTarget as HTMLElement).style.borderColor = '#f97316';
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+              (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+            }}
+          >
+            {/* 缩略图 */}
+            <div style={{
+              height: '160px', background: 'linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'relative'
+            }}>
+              <span style={{ fontSize: '48px', opacity: 0.3 }}>{template.name.slice(0, 1)}</span>
+              {/* 悬浮操作 */}
+              <div style={{
+                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                opacity: 0, transition: 'opacity 0.2s'
+              }}
+              onMouseOver={(e) => ((e.currentTarget as HTMLElement).style.opacity = '1')}
+              onMouseOut={(e) => ((e.currentTarget as HTMLElement).style.opacity = '0')}
+              >
+                <button
+                  onClick={() => handleUseTemplate(template.id)}
+                  style={{
+                    padding: '8px 16px', background: '#f97316', color: 'white',
+                    border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '13px'
+                  }}
+                >
+                  使用
+                </button>
+                <button
+                  onClick={() => handleCollect(template.id)}
+                  style={{
+                    padding: '8px', background: 'white', color: '#f97316',
+                    border: 'none', borderRadius: '6px', cursor: 'pointer'
+                  }}
+                >
+                  <Heart className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            {/* 信息 */}
+            <div style={{ padding: '12px' }}>
+              <h3 style={{ fontWeight: '600', fontSize: '14px', color: '#1e293b', marginBottom: '6px' }}>
+                {template.name}
+              </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                  使用 {template.useCount.toLocaleString()} 次
+                </span>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {template.style === 'minimal' && <span style={{ fontSize: '10px', padding: '2px 6px', background: '#f1f5f9', borderRadius: '4px', color: '#64748b' }}>简约</span>}
+                  {template.style === 'vibrant' && <span style={{ fontSize: '10px', padding: '2px 6px', background: '#fef3c7', borderRadius: '4px', color: '#d97706' }}>活泼</span>}
+                  {template.style === 'cute' && <span style={{ fontSize: '10px', padding: '2px 6px', background: '#fce7f3', borderRadius: '4px', color: '#db2777' }}>可爱</span>}
+                  {template.style === 'luxury' && <span style={{ fontSize: '10px', padding: '2px 6px', background: '#1e293b', borderRadius: '4px', color: 'white' }}>高端</span>}
+                  {template.style === 'tech' && <span style={{ fontSize: '10px', padding: '2px 6px', background: '#dbeafe', borderRadius: '4px', color: '#2563eb' }}>科技</span>}
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
+
+      {/* 加载更多 */}
+      {filteredTemplates.length > 0 && (
+        <div style={{ textAlign: 'center', marginTop: '32px' }}>
+          <button style={{
+            padding: '10px 32px', background: 'white', color: '#64748b',
+            border: '1px solid #e2e8f0', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '14px'
+          }}>
+            加载更多
+          </button>
+        </div>
+      )}
     </div>
   );
 }
