@@ -18,23 +18,8 @@ interface SidebarProps {
 
 const MENU_ITEMS = [
   { id: 'home', label: '首页', icon: Home, href: '/' },
-  { id: 'ai-tools', label: 'AI工具库', icon: Wand2, href: '/#ai-tools', children: [
-    { id: 'video', label: '视频生成', icon: Video, href: '/#category-video' },
-    { id: 'digital-human', label: '数字人', icon: Users, href: '/#category-digital-human' },
-    { id: 'video-edit', label: '视频编辑', icon: Play, href: '/#category-video-edit' },
-    { id: 'image', label: 'AI绘画', icon: ImageIcon, href: '/#category-image' },
-    { id: 'chat', label: 'AI聊天', icon: MessageSquare, href: '/#category-chat' },
-    { id: 'voice', label: 'AI配音', icon: Mic, href: '/#category-voice' },
-    { id: 'writing', label: 'AI写作', icon: FileText, href: '/#category-writing' },
-    { id: 'coding', label: 'AI编程', icon: Code2, href: '/#category-coding' },
-    { id: 'other', label: '其他工具', icon: Sparkles, href: '/#category-other' },
-  ]},
-  { id: 'own-tools', label: '自建工具', icon: Star, href: '#own-tools', children: [
-    { id: 'resume', label: '简历优化', icon: FileText, href: '/resume' },
-    { id: 'novel', label: '小说创作', icon: BookOpen, href: '/novel' },
-    { id: 'overseas', label: '出海详情页', icon: Globe, href: '/productpage' },
-    { id: 'photo-id', label: 'AI证件照', icon: ImageIcon, href: '/photo-id' },
-  ]},
+  { id: 'ai-tools', label: 'AI工具库', icon: Wand2, href: '/ai-tools' },
+  { id: 'own-tools', label: '自建工具', icon: Star, href: '/own-tools' },
   { id: 'prompts', label: '提示词', icon: Sparkles, href: '/prompts' },
   { id: 'tutorials', label: '教程', icon: BookOpen, href: '/tutorials' },
 ];
