@@ -185,6 +185,23 @@ export default function UtilityToolsPage() {
   const [selectedToolSlug, setSelectedToolSlug] = useState<string | null>(null);
   const [expandedStats, setExpandedStats] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [fourSModels, setFourSModels] = useState<any[]>([]);
+  
+  // 获取 4S API 模型列表
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const res = await fetch('/api/4sapi/models');
+        const data = await res.json();
+        if (data.success && data.models) {
+          setFourSModels(data.models);
+        }
+      } catch (error) {
+        console.error('获取 4S 模型列表失败:', error);
+      }
+    };
+    fetchModels();
+  }, []);
   
   // DnD 传感器配置
   const sensors = useSensors(
@@ -1129,15 +1146,20 @@ export default function UtilityToolsPage() {
                       </>
                     ) : (
                       <>
-                        <option value="gpt-4o">GPT-4o ($0.0025/1K)</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini ($0.00015/1K)</option>
-                        <option value="gpt-4-turbo">GPT-4 Turbo ($0.01/1K)</option>
-                        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet ($0.003/1K)</option>
-                        <option value="claude-3-opus">Claude 3 Opus ($0.015/1K)</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro ($0.00125/1K)</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash ($0.000075/1K)</option>
-                        <option value="dall-e-3">DALL-E 3 ($0.04/图)</option>
-                        <option value="gpt-image-1">GPT-Image 1 ($0.01/图)</option>
+                        {fourSModels.length > 0 ? (
+                          fourSModels.map((m: any) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name} {m.price ? `($${m.price}/1K)` : ''}
+                            </option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="gpt-4o">GPT-4o</option>
+                            <option value="gpt-4o-mini">GPT-4o Mini</option>
+                            <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                          </>
+                        )}
                       </>
                     )}
                   </select>
