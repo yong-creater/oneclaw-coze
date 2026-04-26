@@ -424,6 +424,12 @@ const TEMPLATES_DATA = [
 
 // POST - 批量初始化模板
 export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabaseClient();
 
@@ -477,7 +483,13 @@ export async function POST(request: NextRequest) {
 }
 
 // DELETE - 清空所有模板
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabaseClient();
 

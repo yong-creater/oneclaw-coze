@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdminAuth } from '@/lib/auth';
 
 // 获取 Supabase 客户端（在函数内部创建，避免构建时错误）
 function getSupabase() {
@@ -15,6 +16,12 @@ function getSupabase() {
 
 // GET - 获取模板列表（管理端，含所有状态）
 export async function GET(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabase();
     const { searchParams } = new URL(request.url);
@@ -61,6 +68,12 @@ export async function GET(request: NextRequest) {
 
 // POST - 创建模板
 export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabase();
     const body = await request.json();

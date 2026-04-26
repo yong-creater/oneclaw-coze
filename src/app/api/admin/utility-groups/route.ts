@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAdminAuth } from '@/lib/auth';
 
-// 获取分组列表（无需认证）
+// 获取分组列表
 export async function GET(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabaseClient();
 
@@ -23,8 +30,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// 创建分组（无需认证 - 分组是公开配置）
+// 创建分组
 export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabaseClient();
 
@@ -55,8 +68,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 更新分组（无需认证 - 分组是公开配置）
+// 更新分组
 export async function PUT(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabaseClient();
 
@@ -85,8 +104,14 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// 删除分组（无需认证 - 分组是公开配置）
+// 删除分组
 export async function DELETE(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabaseClient();
 
@@ -129,6 +154,12 @@ export async function DELETE(request: NextRequest) {
 
 // 批量更新排序
 export async function PATCH(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
     const supabase = getSupabaseClient();
 
