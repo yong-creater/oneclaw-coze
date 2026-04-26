@@ -5,7 +5,7 @@ const isEdgeRuntime = typeof window === 'undefined' && !process.env.NODE_ENV;
 
 // 延迟加载 child_process（仅 Node.js 环境）
 let envLoaded = false;
-const loadEnvFn: (() => void) | null = null;
+let loadEnvFn: (() => void) | null = null;
 
 interface SupabaseCredentials {
   url: string;
@@ -83,12 +83,9 @@ function getSupabaseCredentials(): SupabaseCredentials {
   const url = process.env.COZE_SUPABASE_URL;
   const anonKey = process.env.COZE_SUPABASE_ANON_KEY;
 
-  // 在构建时，如果环境变量不存在，返回占位符（不会实际使用）
+  // 在构建时，如果环境变量不存在，返回 null（不在模块级别创建客户端）
   if (!url || !anonKey) {
-    return { 
-      url: 'https://placeholder.supabase.co', 
-      anonKey: 'placeholder-key' 
-    };
+    return null as unknown as SupabaseCredentials;
   }
 
   return { url, anonKey };
@@ -99,8 +96,46 @@ function getSupabaseServiceRoleKey(): string | undefined {
   return process.env.COZE_SUPABASE_SERVICE_ROLE_KEY;
 }
 
+// 单例模式 - 延迟初始化客户端
+let supabaseClient: SupabaseClient | null = null;
+
 export function getSupabaseClient(token?: string): SupabaseClient {
-  const { url, anonKey } = getSupabaseCredentials();
+  // 检查是否在构建时环境
+  const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV === undefined;
+  
+  // 在构建时返回空客户端（避免构建错误）
+  if (isBuildTime) {
+    return {
+      from: () => ({
+        select: () => Promise.resolve({ data: [], error: null }),
+        insert: () => Promise.resolve({ data: null, error: null }),
+        update: () => Promise.resolve({ data: null, error: null }),
+        delete: () => Promise.resolve({ data: null, error: null }),
+      }),
+    } as unknown as SupabaseClient;
+  }
+
+  // 正常运行时创建客户端
+  const credentials = getSupabaseCredentials();
+  
+  if (!credentials) {
+    // 环境变量未配置，返回空客户端
+    return {
+      from: () => ({
+        select: () => Promise.resolve({ data: [], error: null }),
+        insert: () => Promise.resolve({ data: null, error: null }),
+        update: () => Promise.resolve({ data: null, error: null }),
+        delete: () => Promise.resolve({ data: null, error: null }),
+      }),
+    } as unknown as SupabaseClient;
+  }
+
+  // 如果已经有缓存的客户端且没有 token，复用缓存
+  if (supabaseClient && !token) {
+    return supabaseClient;
+  }
+
+  const { url, anonKey } = credentials;
 
   let key: string;
   if (token) {
@@ -110,22 +145,7 @@ export function getSupabaseClient(token?: string): SupabaseClient {
     key = serviceRoleKey ?? anonKey;
   }
 
-  if (token) {
-    return createClient(url, key, {
-      global: {
-        headers: { Authorization: `Bearer ${token}` },
-      },
-      db: {
-        timeout: 60000,
-      },
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    });
-  }
-
-  return createClient(url, key, {
+  const client = createClient(url, key, {
     db: {
       timeout: 60000,
     },
@@ -134,6 +154,13 @@ export function getSupabaseClient(token?: string): SupabaseClient {
       persistSession: false,
     },
   });
+
+  // 缓存无 token 的客户端
+  if (!token) {
+    supabaseClient = client;
+  }
+
+  return client;
 }
 
 export { loadEnv, getSupabaseCredentials, getSupabaseServiceRoleKey };

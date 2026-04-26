@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// 使用Coze内置的环境变量
-const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 模板类型映射
 const TEMPLATE_TYPE_MAP: Record<string, { name: string; slug: string }> = {
@@ -24,6 +19,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const supabase = getSupabaseClient();
 
     const { data, error } = await supabase
       .from('templates')
@@ -64,6 +60,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
+    const supabase = getSupabaseClient();
 
     const { data, error } = await supabase
       .from('templates')
@@ -93,6 +90,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
+    const supabase = getSupabaseClient();
 
     // 软删除
     const { error } = await supabase

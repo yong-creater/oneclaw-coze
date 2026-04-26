@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // 使用Coze内置的环境变量
 const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+
+// 延迟创建客户端
+let supabaseClient: SupabaseClient | null = null;
+function getSupabase(): SupabaseClient | null {
+  if (!supabaseClient && supabaseUrl && supabaseKey) {
+    supabaseClient = createClient(supabaseUrl, supabaseKey);
+  }
+  return supabaseClient;
+}
 
 // 模型选项（前端获取可用模型列表）
 export const AVAILABLE_MODELS = {
@@ -33,10 +41,26 @@ export const AVAILABLE_MODELS = {
   ]
 };
 
+interface ToolModelConfig {
+  tool_id: string;
+  tool_name?: string;
+  tool_type?: string;
+  model_source?: string;
+  default_model?: string;
+  is_free?: boolean;
+  config_params?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 // GET - 获取模型配置列表
 export async function GET(request: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
+    }
+    
+    const { data, error } = await db
       .from('tool_model_configs')
       .select('*')
       .order('tool_id');
@@ -47,7 +71,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 附加模型选项信息
-    const configs = (data || []).map(config => {
+    const configs = (data || []).map((config: ToolModelConfig) => {
       const source = config.model_source;
       const modelOptions = source === '4sapi' ? AVAILABLE_MODELS['4sapi'] : AVAILABLE_MODELS.coze;
       const currentModel = modelOptions.find(m => m.id === config.default_model);
@@ -77,6 +101,11 @@ export async function GET(request: NextRequest) {
 // PUT - 批量更新配置
 export async function PUT(request: NextRequest) {
   try {
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
+    }
+    
     const body = await request.json();
     const { configs } = body;
 
@@ -86,7 +115,7 @@ export async function PUT(request: NextRequest) {
 
     const results = [];
     for (const config of configs) {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('tool_model_configs')
         .update({
           default_model: config.default_model,
@@ -121,6 +150,11 @@ export async function PUT(request: NextRequest) {
 // POST - 获取单个工具的模型配置（供前台调用）
 export async function POST(request: NextRequest) {
   try {
+    const db = getSupabase();
+    if (!db) {
+      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
+    }
+
     const body = await request.json();
     const { tool_id } = body;
 
@@ -128,7 +162,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '请提供工具ID' }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('tool_model_configs')
       .select('*')
       .eq('tool_id', tool_id)
@@ -139,16 +173,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '工具配置不存在' }, { status: 404 });
     }
 
+    const config = data as ToolModelConfig;
+
     return NextResponse.json({
       success: true,
       config: {
-        tool_id: data.tool_id,
-        tool_name: data.tool_name,
-        tool_type: data.tool_type,
-        default_model: data.default_model,
-        model_source: data.model_source,
-        is_free: data.is_free,
-        config_params: data.config_params,
+        tool_id: config.tool_id,
+        tool_name: config.tool_name,
+        tool_type: config.tool_type,
+        default_model: config.default_model,
+        model_source: config.model_source,
+        is_free: config.is_free,
+        config_params: config.config_params,
       }
     });
   } catch (error) {
