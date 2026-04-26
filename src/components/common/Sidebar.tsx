@@ -6,16 +6,15 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
   Bot, Compass, Sparkles, Star, BookOpen,
-  ChevronDown, Menu, X, LogIn, LogOut, User,
+  Menu, X, LogIn, User,
   Layers, ListOrdered, Tags, MessageSquare,
-  Settings, LayoutDashboard
+  LayoutDashboard
 } from 'lucide-react';
 
 interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
-  badge?: string;
 }
 
 // 主导航
@@ -28,13 +27,6 @@ const MAIN_NAV: NavItem[] = [
   { label: '榜单中心', href: '/rankings', icon: Star },
 ];
 
-// 用户导航
-const USER_NAV: NavItem[] = [
-  { label: '我的收藏', href: '/workspace?tab=favorites', icon: Star },
-  { label: '浏览历史', href: '/workspace?tab=history', icon: Clock },
-  { label: '我的评分', href: '/workspace?tab=ratings', icon: Star },
-];
-
 // 后台导航
 const ADMIN_NAV: NavItem[] = [
   { label: '工作台', href: '/admin', icon: LayoutDashboard },
@@ -44,15 +36,6 @@ const ADMIN_NAV: NavItem[] = [
   { label: '评论审核', href: '/admin/reviews', icon: MessageSquare },
 ];
 
-function Clock({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  );
-}
-
 interface SidebarProps {
   collapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
@@ -61,7 +44,6 @@ interface SidebarProps {
 export default function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [user, setUser] = useState<{ nickname: string; avatar: string } | null>(null);
 
   // 检查登录状态
@@ -83,7 +65,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
         })
         .catch(() => {});
     }
-  }, [userMenuOpen]);
+  }, []);
 
   // 监听路由变化关闭移动端菜单
   useEffect(() => {
@@ -98,7 +80,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
   const NavSection = ({ title, items }: { title?: string; items: NavItem[] }) => (
     <div className="space-y-1">
       {title && (
-        <p className="px-3 text-xs text-muted-foreground uppercase tracking-wider mb-2">
+        <p className="px-3 text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-2">
           {title}
         </p>
       )}
@@ -111,7 +93,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
               active
                 ? "bg-accent text-foreground font-medium"
                 : "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -119,11 +101,6 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
           >
             <Icon className="w-4 h-4 flex-shrink-0" />
             {!collapsed && <span>{item.label}</span>}
-            {item.badge && !collapsed && (
-              <span className="ml-auto text-xs bg-primary/10 text-primary px-1.5 py-0.5 rounded">
-                {item.badge}
-              </span>
-            )}
           </Link>
         );
       })}
@@ -143,7 +120,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
       {/* 移动端菜单按钮 */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-background border border-border lg:hidden"
+        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-background border border-border cursor-pointer lg:hidden"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -151,7 +128,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
       {/* 移动端遮罩 */}
       {mobileOpen && <MobileOverlay />}
 
-      {/* 侧边栏 */}
+      {/* 侧边栏 - 简洁设计 */}
       <aside
         className={cn(
           "fixed top-0 left-0 h-screen bg-background border-r border-border flex flex-col z-50 transition-all duration-200",
@@ -159,11 +136,11 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Logo区域 - 极简风格 */}
+        {/* Logo区域 - 简洁风格 */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-border">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-background" />
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+              <Bot className="w-4 h-4 text-primary-foreground" />
             </div>
             {!collapsed && (
               <span className="font-semibold text-foreground tracking-tight">
@@ -174,7 +151,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
           
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-1.5 rounded-lg hover:bg-accent lg:hidden"
+            className="p-1.5 rounded-lg hover:bg-accent cursor-pointer lg:hidden"
           >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
@@ -183,9 +160,6 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
         {/* 导航区域 */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-6">
           <NavSection items={MAIN_NAV} />
-          
-          {user && <NavSection title="工作台" items={USER_NAV} />}
-          
           <NavSection title="系统" items={ADMIN_NAV} />
         </nav>
 
@@ -213,7 +187,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
             <Link
               href="/login"
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors",
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer",
                 collapsed && "justify-center"
               )}
             >

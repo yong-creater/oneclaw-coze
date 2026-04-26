@@ -1,50 +1,52 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/common/Sidebar';
-import Footer from '@/components/common/Footer';
 import { cn } from '@/lib/utils';
 import {
-  FileText, BookOpen, Image as ImageIcon, Globe, Star,
-  ArrowRight
+  Sparkles, ArrowRight,
+  FileText, BookOpen, Image, BarChart3
 } from 'lucide-react';
 
-const OWN_TOOLS = [
+// 自建工具配置
+const TOOLS = [
   {
     id: 'resume',
     name: '简历优化',
-    desc: 'AI智能优化简历，提升求职竞争力',
-    icon: FileText,
-    badge: null,
+    desc: 'AI智能分析并优化简历，提升面试机会',
     href: '/resume',
+    icon: FileText,
+    color: 'bg-blue-500/10 text-blue-600',
   },
   {
     id: 'novel',
     name: '小说创作',
-    desc: 'AI辅助小说创作，激发无限灵感',
-    icon: BookOpen,
-    badge: 'New',
+    desc: '洗稿润色、人物DNA、绘画提示词、场景描写',
     href: '/novel',
+    icon: BookOpen,
+    color: 'bg-purple-500/10 text-purple-600',
   },
   {
-    id: 'overseas',
+    id: 'productpage',
     name: '出海详情页',
-    desc: '一键生成跨境电商产品详情页',
-    icon: Globe,
-    badge: null,
+    desc: '一键生成跨境电商产品详情页，符合亚马逊规范',
     href: '/productpage',
+    icon: BarChart3,
+    color: 'bg-emerald-500/10 text-emerald-600',
   },
   {
     id: 'photo-id',
     name: 'AI证件照',
-    desc: '上传照片智能抠图，生成合规证件照',
-    icon: ImageIcon,
-    badge: 'New',
+    desc: '智能抠图，一键生成合规证件照',
     href: '/photo-id',
+    icon: Image,
+    color: 'bg-orange-500/10 text-orange-600',
   },
 ];
 
 export default function OwnToolsPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
@@ -53,80 +55,59 @@ export default function OwnToolsPage() {
         className="transition-all duration-300"
         style={{ marginLeft: 'var(--sidebar-width, 240px)' }}
       >
-        <div className="max-w-5xl mx-auto px-8 py-12">
-          
-          {/* 页面标题 - 简洁风格 */}
-          <div className="mb-12 animate-fade-in-up">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-foreground flex items-center justify-center">
-                <Star className="w-6 h-6 text-background" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-foreground">
-                  自建工具
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  精心打造，助您效率倍增
-                </p>
-              </div>
-            </div>
+        <div className="max-w-4xl mx-auto px-6 py-8">
+          {/* 页面标题 */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold text-foreground">自建工具</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              一站式AI创作工具集
+            </p>
           </div>
 
-          {/* 工具网格 - 简洁卡片风格 */}
+          {/* 工具网格 - 2x2 苹果风格 */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {OWN_TOOLS.map((tool, index) => {
+            {TOOLS.map((tool) => {
               const Icon = tool.icon;
               return (
-                <Link 
-                  key={tool.id} 
+                <a
+                  key={tool.id}
                   href={tool.href}
-                  className={cn(
-                    "group animate-fade-in-up",
-                    `stagger-${index + 1}`
-                  )}
+                  className="card-minimal p-6 group cursor-pointer"
                 >
-                  <div className="card-minimal p-6 h-full">
-                    <div className="flex items-start gap-5">
-                      {/* 图标 */}
-                      <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-accent transition-colors">
-                        <Icon className="w-6 h-6 text-foreground" />
-                      </div>
-                      
-                      {/* 内容 */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
-                            {tool.name}
-                          </h3>
-                          {tool.badge && (
-                            <span className="px-2 py-0.5 text-[10px] font-medium bg-foreground text-background rounded">
-                              {tool.badge}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          {tool.desc}
-                        </p>
-                      </div>
-                      
-                      {/* 箭头 */}
-                      <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
+                  <div className="flex items-start gap-4">
+                    {/* 图标 */}
+                    <div className={cn(
+                      "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
+                      tool.color
+                    )}>
+                      <Icon className="w-6 h-6" />
                     </div>
+                    
+                    {/* 内容 */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {tool.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {tool.desc}
+                      </p>
+                    </div>
+                    
+                    {/* 箭头 */}
+                    <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1" />
                   </div>
-                </Link>
+                </a>
               );
             })}
           </div>
 
           {/* 底部说明 */}
-          <div className="mt-12 text-center animate-fade-in-up stagger-5">
-            <p className="text-sm text-muted-foreground">
-              更多工具开发中
+          <div className="mt-8 text-center">
+            <p className="text-xs text-muted-foreground">
+              更多工具持续开发中，敬请期待
             </p>
           </div>
         </div>
-
-        <Footer />
       </main>
     </div>
   );

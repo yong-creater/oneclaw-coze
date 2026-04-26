@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import {
   Search, Bot, ArrowRight,
   Video, Image as ImageIcon, MessageSquare, FileText, 
-  Code2, Mic, Users, Music, BookOpen
+  Code2, Mic, Users, Music, BookOpen, Sparkles
 } from 'lucide-react';
 
 // 快捷分类 - 简洁图标风格
@@ -24,12 +24,12 @@ const CATEGORIES = [
   { icon: Music, label: 'AI音频' },
 ];
 
-// 精选工具
-const FEATURED = [
-  { name: '简历优化', desc: 'AI智能优化', href: '/resume' },
-  { name: '小说创作', desc: '激发灵感', href: '/novel' },
-  { name: '出海详情页', desc: '跨境电商', href: '/productpage' },
-  { name: 'AI证件照', desc: '智能抠图', href: '/photo-id' },
+// 自建工具
+const OWN_TOOLS = [
+  { name: '简历优化', desc: 'AI智能优化', href: '/resume', icon: Sparkles },
+  { name: '小说创作', desc: '激发灵感', href: '/novel', icon: BookOpen },
+  { name: '出海详情页', desc: '跨境电商', href: '/productpage', icon: FileText },
+  { name: 'AI证件照', desc: '智能抠图', href: '/photo-id', icon: ImageIcon },
 ];
 
 export default function HomePage() {
@@ -87,15 +87,15 @@ export default function HomePage() {
         className="h-screen flex flex-col transition-all duration-300"
         style={{ marginLeft: 'var(--sidebar-width, 240px)' }}
       >
-        {/* 主内容区 */}
+        {/* 主内容区 - 苹果风格居中 */}
         <div className="flex-1 flex items-center justify-center px-8 py-12">
           <div className="w-full max-w-xl space-y-10">
             
-            {/* Logo区域 - 极简风格 */}
+            {/* Logo区域 - 极简苹果风格 */}
             <div className="text-center space-y-4 animate-fade-in-up">
               <div className="inline-flex items-center justify-center">
-                <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center">
-                  <Bot className="w-7 h-7 text-background" />
+                <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center">
+                  <Bot className="w-7 h-7 text-primary-foreground" />
                 </div>
               </div>
               
@@ -121,13 +121,13 @@ export default function HomePage() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="搜索AI工具..."
-                    className="h-12 pl-11 pr-4 rounded-xl bg-card border-border text-base"
+                    className="h-12 pl-11 pr-4 rounded-lg bg-card border-border text-base focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
                 <Button 
                   onClick={handleSearch}
                   disabled={!input.trim() || isTyping}
-                  className="h-12 px-6 rounded-xl bg-foreground text-background hover:bg-foreground/90"
+                  className="h-12 px-6 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium shadow-sm"
                 >
                   搜索
                 </Button>
@@ -136,7 +136,7 @@ export default function HomePage() {
 
             {/* 快捷分类 - 简洁横向 */}
             <div className="space-y-4 animate-fade-in-up stagger-2">
-              <p className="text-xs text-muted-foreground text-center uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground text-center uppercase tracking-wider font-medium">
                 快捷访问
               </p>
               <div className="flex flex-wrap justify-center gap-2">
@@ -144,7 +144,7 @@ export default function HomePage() {
                   <button
                     key={cat.label}
                     onClick={() => handleCategoryClick(cat.label)}
-                    className="px-4 py-2 rounded-lg bg-muted hover:bg-accent text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="px-4 py-2 rounded-lg bg-muted hover:bg-accent text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer font-medium"
                   >
                     <cat.icon className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
                     {cat.label}
@@ -153,25 +153,30 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 精选工具 - 简洁列表 */}
+            {/* 自建工具 - 简洁卡片 */}
             <div className="space-y-4 animate-fade-in-up stagger-3">
-              <p className="text-xs text-muted-foreground text-center uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground text-center uppercase tracking-wider font-medium">
                 自建工具
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {FEATURED.map((tool) => (
+                {OWN_TOOLS.map((tool) => (
                   <a
                     key={tool.name}
                     href={tool.href}
-                    className="card-minimal p-4 flex items-center gap-3 group"
+                    className="card-minimal p-4 flex items-center gap-3 group cursor-pointer"
                   >
-                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                      {tool.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {tool.desc}
-                    </span>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <tool.icon className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors block">
+                        {tool.name}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {tool.desc}
+                      </span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                   </a>
                 ))}
               </div>

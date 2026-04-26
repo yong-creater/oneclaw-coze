@@ -8,12 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
-  Search, Grid3X3, List, Filter, 
-  ExternalLink, Star, Heart, X,
-  Video, Users, Image, MessageSquare, Code, Mic, FileText, Music, Briefcase, BookOpen, Search as SearchIcon
+  Search, Grid3X3, List, X,
+  Video, Users, Image, MessageSquare, Code, Mic, FileText, Music, Briefcase, Search as SearchIcon
 } from 'lucide-react';
 
-// 分类配置
+// 分类配置 - 简洁图标
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
   '视频生成': Video,
   '数字人': Users,
@@ -135,6 +134,7 @@ export default function AIToolsPage() {
                   variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('grid')}
+                  className="cursor-pointer"
                 >
                   <Grid3X3 className="w-4 h-4" />
                 </Button>
@@ -142,6 +142,7 @@ export default function AIToolsPage() {
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('list')}
+                  className="cursor-pointer"
                 >
                   <List className="w-4 h-4" />
                 </Button>
@@ -157,11 +158,11 @@ export default function AIToolsPage() {
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="搜索工具..."
-                  className="h-9 pl-9 pr-4 rounded-lg"
+                  className="h-9 pl-9 pr-4 rounded-lg bg-card border-border focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
               {(selectedCategory || searchInput) && (
-                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                <Button variant="ghost" size="sm" onClick={clearFilters} className="cursor-pointer">
                   <X className="w-4 h-4 mr-1" />
                   清空
                 </Button>
@@ -173,10 +174,10 @@ export default function AIToolsPage() {
               <button
                 onClick={() => handleCategoryClick('')}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors",
+                  "px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors cursor-pointer font-medium",
                   !selectedCategory 
-                    ? "bg-foreground text-background" 
-                    : "bg-muted hover:bg-accent text-muted-foreground"
+                    ? "bg-primary text-primary-foreground" 
+                    : "bg-muted hover:bg-accent text-muted-foreground hover:text-foreground"
                 )}
               >
                 全部
@@ -188,10 +189,10 @@ export default function AIToolsPage() {
                     key={cat.id}
                     onClick={() => handleCategoryClick(cat.name)}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition-colors flex items-center gap-1.5",
+                      "px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 font-medium",
                       selectedCategory === cat.name 
-                        ? "bg-foreground text-background" 
-                        : "bg-muted hover:bg-accent text-muted-foreground"
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-muted hover:bg-accent text-muted-foreground hover:text-foreground"
                     )}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -226,7 +227,7 @@ export default function AIToolsPage() {
                 <a
                   key={tool.id}
                   href={`/tools/${tool.id}`}
-                  className="card-minimal p-4 group block"
+                  className="card-minimal p-4 group block cursor-pointer"
                 >
                   {/* Logo */}
                   <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 overflow-hidden">
@@ -247,7 +248,7 @@ export default function AIToolsPage() {
                   
                   {/* 标签 */}
                   <div className="flex items-center gap-1 mt-2">
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                    <Badge variant="secondary" className="text-xs px-2 py-0 rounded font-medium">
                       {tool.free_type}
                     </Badge>
                   </div>
@@ -260,7 +261,7 @@ export default function AIToolsPage() {
                 <a
                   key={tool.id}
                   href={`/tools/${tool.id}`}
-                  className="card-minimal p-4 flex items-center gap-4 group"
+                  className="card-minimal p-4 flex items-center gap-4 group cursor-pointer"
                 >
                   {/* Logo */}
                   <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
@@ -287,12 +288,9 @@ export default function AIToolsPage() {
                   </p>
                   
                   {/* 标签 */}
-                  <Badge variant="secondary" className="text-xs hidden sm:flex">
+                  <Badge variant="secondary" className="text-xs hidden sm:flex rounded font-medium">
                     {tool.free_type}
                   </Badge>
-                  
-                  {/* 跳转 */}
-                  <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               ))}
             </div>
