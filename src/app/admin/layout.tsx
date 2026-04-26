@@ -84,16 +84,18 @@ export default function AdminLayout({
         const data = await response.json();
         if (data.success && data.user) {
           setAdminUser(data.user);
+          setIsLoading(false);
+        } else {
+          setIsLoading(false);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-      } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [pathname]); // 当 pathname 变化时重新检查
 
   // 登录页直接显示
   if (isLoginPage) {
