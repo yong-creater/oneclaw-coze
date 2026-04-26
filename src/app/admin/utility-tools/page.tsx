@@ -108,7 +108,8 @@ export default function UtilityToolsPage() {
     slug: '',
     description: '',
     icon: 'Star',
-    color: 'from-orange-500 to-amber-500'
+    color: 'from-orange-500 to-amber-500',
+    sort_order: 0
   });
 
   // 工具表单
@@ -132,14 +133,12 @@ export default function UtilityToolsPage() {
       const adminToken = localStorage.getItem('admin_token') || '';
       
       const [groupsRes, toolsRes, statsRes] = await Promise.all([
-        fetch('/api/admin/utility-groups', {
-          headers: { 'x-admin-token': adminToken }
-        }),
+        fetch('/api/admin/utility-groups'),
         fetch('/api/admin/utility-tools?include_all=true', {
-          headers: { 'x-admin-token': adminToken }
+          headers: adminToken ? { 'x-admin-token': adminToken } : {}
         }),
         fetch('/api/admin/utilities/stats', {
-          headers: { 'x-admin-token': adminToken }
+          headers: adminToken ? { 'x-admin-token': adminToken } : {}
         })
       ]);
 
@@ -231,7 +230,7 @@ export default function UtilityToolsPage() {
 
   const resetGroupForm = () => {
     setEditingGroup(null);
-    setGroupForm({ name: '', slug: '', description: '', icon: 'Star', color: 'from-orange-500 to-amber-500' });
+    setGroupForm({ name: '', slug: '', description: '', icon: 'Star', color: 'from-orange-500 to-amber-500', sort_order: groups.length });
   };
 
   const resetToolForm = () => {
@@ -249,15 +248,20 @@ export default function UtilityToolsPage() {
     });
   };
 
-  const openGroupDialog = (group: UtilityGroup) => {
-    setEditingGroup(group);
-    setGroupForm({
-      name: group.name,
-      slug: group.slug,
-      description: group.description || '',
-      icon: group.icon || 'Star',
-      color: group.color
-    });
+  const openGroupDialog = (group?: UtilityGroup) => {
+    if (group) {
+      setEditingGroup(group);
+      setGroupForm({
+        name: group.name,
+        slug: group.slug,
+        description: group.description || '',
+        icon: group.icon || 'Star',
+        color: group.color
+      });
+    } else {
+      setEditingGroup(null);
+      setGroupForm({ name: '', slug: '', description: '', icon: 'Star', color: 'from-orange-500 to-amber-500' });
+    }
     setGroupDialogOpen(true);
   };
 
@@ -461,10 +465,16 @@ export default function UtilityToolsPage() {
         <TabsContent value="groups" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-orange-500" />
-                分组列表
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="w-5 h-5 text-orange-500" />
+                  分组列表
+                </CardTitle>
+                <Button onClick={() => openGroupDialog()} className="bg-orange-500 hover:bg-orange-600">
+                  <Plus className="w-4 h-4 mr-2" />
+                  新增分组
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
