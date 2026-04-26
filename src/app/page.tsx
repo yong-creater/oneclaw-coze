@@ -12,7 +12,8 @@ import {
   ChevronLeft, ChevronRight, Eye, ThumbsUp,
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
-  FileText, Globe, TrendingUp
+  FileText, Globe, TrendingUp, Scissors, Layout,
+  Camera, Palette, Sparkle
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -246,6 +247,71 @@ const UTILITY_TOOLS = [
       { title: '亚马逊Listing', desc: '符合亚马逊规范的多语言详情页' },
       { title: '独立站详情', desc: 'Shopify/WooCommerce适配版本' },
       { title: '多平台分发', desc: '速卖通/eBay/Shopee统一模板' },
+    ]
+  },
+  { 
+    key: 'product-photo', 
+    name: '商品图精修', 
+    icon: Sparkle,
+    description: 'AI智能识别品类，一键精修电商商品图，去褶皱/提亮度/去瑕疵/优化背景',
+    color: 'from-amber-500 to-orange-500',
+    tags: ['一键精修', '批量处理', '电商级标准'],
+    useCases: [
+      { title: '服饰精修', desc: '抚平褶皱、提亮色彩、突出面料质感' },
+      { title: '美妆优化', desc: '提亮色彩、修正肤色、优化产品细节' },
+      { title: '批量处理', desc: '支持20张同时精修，提升上新效率' },
+    ]
+  },
+  { 
+    key: 'background-removal', 
+    name: 'AI智能抠图', 
+    icon: Scissors,
+    description: '发丝级精准抠图，一键生成纯白底图，支持批量处理',
+    color: 'from-cyan-500 to-blue-500',
+    tags: ['精准抠图', '白底生成', '批量处理'],
+    useCases: [
+      { title: '电商白底图', desc: '淘宝/京东规范纯白底，快速制作' },
+      { title: '证件照处理', desc: '一寸/二寸证件照背景替换' },
+      { title: '多图批量', desc: '20张同时抠图，一键下载压缩包' },
+    ]
+  },
+  { 
+    key: 'cover-generator', 
+    name: '封面生成器', 
+    icon: Layout,
+    description: '输入主题关键词，AI生成小红书/抖音/公众号等多平台封面图',
+    color: 'from-pink-500 to-rose-500',
+    tags: ['多平台适配', '商用字体', '一键生成'],
+    useCases: [
+      { title: '小红书封面', desc: '1:1尺寸，吸睛风格适配' },
+      { title: '抖音封面', desc: '9:16竖版，自动适配平台规范' },
+      { title: '批量生成', desc: '一次生成5套封面，快速发稿' },
+    ]
+  },
+  { 
+    key: 'photo-editor', 
+    name: '照片美化', 
+    icon: Camera,
+    description: 'AI一键磨皮/调色/滤镜，自然美颜不假白，支持批量处理',
+    color: 'from-violet-500 to-purple-500',
+    tags: ['自然美颜', '滤镜推荐', '快速修复'],
+    useCases: [
+      { title: '人像美化', desc: '磨皮提亮，保留真实质感' },
+      { title: '风景调色', desc: '自动优化色彩、对比度、通透感' },
+      { title: '批量美化', desc: '10张照片一键优化，快速出片' },
+    ]
+  },
+  { 
+    key: 'layout-design', 
+    name: '图文排版', 
+    icon: Palette,
+    description: '小红书笔记/公众号推文/PPT配图，AI自动排版，一键导出',
+    color: 'from-green-500 to-emerald-500',
+    tags: ['模板适配', 'AI排版', '批量制作'],
+    useCases: [
+      { title: '小红书排版', desc: '活泼风格，自动对齐图文' },
+      { title: '公众号推文', desc: '简洁风格，适合长图文排版' },
+      { title: '批量排版', desc: '5套内容同时排版，高效创作' },
     ]
   },
 ] as const;
