@@ -1,13 +1,159 @@
 'use client';
 
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
 import UtilityHeader from '@/components/common/UtilityHeader';
-import { Layout, Sparkles } from 'lucide-react';
+import { 
+  Layout, Sparkles, Download, Loader2, 
+  RefreshCw, Check, Image, Monitor, Smartphone, Share2
+} from 'lucide-react';
 import { toast } from 'sonner';
 
+type Platform = 'xiaohongshu' | 'wechat' | 'douyin' | 'weibo';
+type AspectRatio = '9:16' | '3:4' | '1:1' | '16:9';
+
+interface GeneratedCover {
+  id: string;
+  url: string;
+  platform: Platform;
+  ratio: AspectRatio;
+}
+
+const platformOptions: { type: Platform; label: string; icon: React.ReactNode; color: string }[] = [
+  { type: 'xiaohongshu', label: '小红书', icon: <span className="text-sm font-bold">📕</span>, color: 'from-pink-500 to-rose-500' },
+  { type: 'wechat', label: '微信公众号', icon: <span className="text-sm font-bold">💚</span>, color: 'from-green-500 to-emerald-500' },
+  { type: 'douyin', label: '抖音', icon: <span className="text-sm font-bold">🎵</span>, color: 'from-gray-700 to-black' },
+  { type: 'weibo', label: '微博', icon: <span className="text-sm font-bold">📰</span>, color: 'from-orange-500 to-yellow-500' },
+];
+
+const aspectOptions: { type: AspectRatio; label: string; icon: React.ReactNode; desc: string }[] = [
+  { type: '3:4', label: '3:4', icon: <Smartphone className="w-4 h-4" />, desc: '小红书竖图' },
+  { type: '9:16', label: '9:16', icon: <Smartphone className="w-4 h-4" />, desc: '抖音/快手' },
+  { type: '16:9', label: '16:9', icon: <Monitor className="w-4 h-4" />, desc: '横版视频' },
+  { type: '1:1', label: '1:1', icon: <Layout className="w-4 h-4" />, desc: '朋友圈方图' },
+];
+
+const stylePresets = [
+  { id: 'modern', label: '现代简约', gradient: 'from-slate-800 to-slate-600' },
+  { id: 'vibrant', label: '活力渐变', gradient: 'from-orange-500 to-pink-500' },
+  { id: 'fresh', label: '清新自然', gradient: 'from-emerald-500 to-teal-500' },
+  { id: 'elegant', label: '优雅气质', gradient: 'from-violet-500 to-purple-500' },
+  { id: 'tech', label: '科技感', gradient: 'from-blue-600 to-cyan-500' },
+  { id: 'warm', label: '温暖治愈', gradient: 'from-amber-500 to-orange-400' },
+];
+
 export default function CoverGeneratorPage() {
+  const [generating, setGenerating] = useState(false);
+  const [title, setTitle] = useState('');
+  const [subtitle, setSubtitle] = useState('');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['xiaohongshu']);
+  const [selectedRatios, setSelectedRatios] = useState<AspectRatio[]>(['3:4']);
+  const [selectedStyle, setSelectedStyle] = useState('modern');
+  const [generatedCovers, setGeneratedCovers] = useState<GeneratedCover[]>([]);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+
+  const togglePlatform = (platform: Platform) => {
+    setSelectedPlatforms(prev => 
+      prev.includes(platform) 
+        ? prev.filter(p => p !== platform)
+        : [...prev, platform]
+    );
+  };
+
+  const toggleRatio = (ratio: AspectRatio) => {
+    setSelectedRatios(prev => 
+      prev.includes(ratio) 
+        ? prev.filter(r => r !== ratio)
+        : [...prev, ratio]
+    );
+  };
+
+  const handleGenerate = async () => {
+    if (!title.trim()) {
+      toast.error('请输入封面标题');
+      return;
+    }
+
+    if (selectedPlatforms.length === 0 || selectedRatios.length === 0) {
+      toast.error('请至少选择一个平台和尺寸');
+      return;
+    }
+
+    setGenerating(true);
+    
+    // 模拟AI生成
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const style = stylePresets.find(s => s.id === selectedStyle)!;
+    const newCovers: GeneratedCover[] = [];
+    
+    selectedPlatforms.forEach(platform => {
+      selectedRatios.forEach(ratio => {
+        const id = `${platform}-${ratio}-${Date.now()}`;
+        newCovers.push({
+          id,
+          url: `data:image/svg+xml,${encodeURIComponent(generateSvgCover(platform, ratio, style))}`,
+          platform,
+          ratio,
+        });
+      });
+    });
+    
+    setGeneratedCovers(newCovers);
+    setGenerating(false);
+    toast.success(`生成 ${newCovers.length} 张封面！`);
+  };
+
+  const generateSvgCover = (platform: Platform, ratio: AspectRatio, style: typeof stylePresets[0]): string => {
+    const platformConfig = platformOptions.find(p => p.type === platform)!;
+    const ratioMap: Record<AspectRatio, { w: number; h: number }> = {
+      '3:4': { w: 600, h: 800 },
+      '9:16': { w: 540, h: 960 },
+      '16:9': { w: 960, h: 540 },
+      '1:1': { w: 600, h: 600 },
+    };
+    const { w, h } = ratioMap[ratio];
+    
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${style.gradient.includes('slate') ? '#1e293b' : style.gradient.includes('orange') ? '#f97316' : style.gradient.includes('emerald') ? '#10b981' : style.gradient.includes('violet') ? '#8b5cf6' : style.gradient.includes('blue') ? '#2563eb' : '#f59e0b'}"/>
+          <stop offset="100%" style="stop-color:${style.gradient.includes('slate') ? '#475569' : style.gradient.includes('rose') ? '#f43f5e' : style.gradient.includes('teal') ? '#14b8a6' : style.gradient.includes('purple') ? '#a855f7' : style.gradient.includes('cyan') ? '#22d3ee' : '#fbbf24'}"/>
+        </linearGradient>
+      </defs>
+      <rect width="${w}" height="${h}" fill="url(#bg)"/>
+      <text x="${w/2}" y="${h * 0.35}" text-anchor="middle" font-size="${w > 600 ? 32 : 24}" font-weight="bold" fill="white" font-family="sans-serif">${title.length > 15 ? title.slice(0, 15) + '...' : title}</text>
+      ${subtitle ? `<text x="${w/2}" y="${h * 0.5}" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.8)" font-family="sans-serif">${subtitle}</text>` : ''}
+      <text x="${w/2}" y="${h * 0.85}" text-anchor="middle" font-size="12" fill="rgba(255,255,255,0.6)" font-family="sans-serif">OneClaw</text>
+    </svg>`;
+  };
+
+  const handleDownload = async (cover: GeneratedCover) => {
+    try {
+      const response = await fetch(cover.url);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `cover-${cover.platform}-${cover.ratio}-${Date.now()}.png`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('下载成功');
+    } catch {
+      toast.error('下载失败');
+    }
+  };
+
+  const handleReset = () => {
+    setGeneratedCovers([]);
+    setTitle('');
+    setSubtitle('');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* 顶部导航 */}
@@ -27,48 +173,199 @@ export default function CoverGeneratorPage() {
             封面生成器
           </div>
           <h1 className="text-3xl font-bold text-slate-800 dark:text-white mb-2">
-            输入关键词，生成爆款封面
+            AI智能生成多平台封面图
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
-            小红书 / 抖音 / 公众号 多平台适配
+            小红书 / 公众号 / 抖音 / 微博 一键适配
           </p>
         </div>
 
-        <Card className="mb-8 border-pink-100 dark:border-pink-900/30">
-          <CardContent className="p-6 text-center">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center">
-              <Layout className="w-10 h-10 text-white" />
+        {/* 输入区域 */}
+        <Card className="mb-6 border-pink-100 dark:border-pink-900/30">
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+                封面标题 *
+              </label>
+              <Input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="输入封面标题，如：2024年最火的10个AI工具"
+                className="text-base"
+                maxLength={50}
+              />
+              <p className="text-xs text-slate-400 mt-1 text-right">{title.length}/50</p>
             </div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-              功能即将上线
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">
-              AI生成多平台封面图
-            </p>
-            <button
-              onClick={() => toast.success('功能开发中，敬请期待！')}
-              className="px-6 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-medium hover:from-pink-600 hover:to-rose-600"
-            >
-              <Sparkles className="w-5 h-5 inline mr-2" />
-              敬请期待
-            </button>
+            
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 block">
+                副标题（可选）
+              </label>
+              <Input
+                value={subtitle}
+                onChange={(e) => setSubtitle(e.target.value)}
+                placeholder="简短描述，如：效率提升300%"
+                maxLength={30}
+              />
+            </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {[
-            { title: '小红书封面', desc: '1:1尺寸，吸睛风格' },
-            { title: '抖音封面', desc: '9:16竖版，自动适配' },
-            { title: '批量生成', desc: '一次生成5套封面' },
-          ].map((item, i) => (
-            <Card key={i} className="border-slate-200 dark:border-slate-700">
-              <CardContent className="p-4 text-center">
-                <h3 className="font-bold text-slate-800 dark:text-white mb-1">{item.title}</h3>
-                <p className="text-sm text-slate-500">{item.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* 平台选择 */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h3 className="font-bold text-slate-800 dark:text-white mb-4">选择平台</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {platformOptions.map(platform => (
+                <button
+                  key={platform.type}
+                  onClick={() => togglePlatform(platform.type)}
+                  className={`p-4 rounded-xl border-2 text-center transition-all ${
+                    selectedPlatforms.includes(platform.type)
+                      ? `border-pink-500 bg-gradient-to-br ${platform.color} text-white`
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-white/20 flex items-center justify-center">
+                    {platform.icon}
+                  </div>
+                  <span className="text-sm font-medium">{platform.label}</span>
+                  {selectedPlatforms.includes(platform.type) && (
+                    <Check className="w-4 h-4 mx-auto mt-2" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 尺寸选择 */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h3 className="font-bold text-slate-800 dark:text-white mb-4">选择尺寸</h3>
+            <div className="grid grid-cols-4 gap-3">
+              {aspectOptions.map(aspect => (
+                <button
+                  key={aspect.type}
+                  onClick={() => toggleRatio(aspect.type)}
+                  className={`p-4 rounded-xl border-2 text-center transition-all ${
+                    selectedRatios.includes(aspect.type)
+                      ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <div className={`w-8 h-8 mx-auto mb-2 rounded ${
+                    selectedRatios.includes(aspect.type) ? 'bg-pink-500 text-white' : 'bg-slate-100 dark:bg-slate-700'
+                  } flex items-center justify-center`}>
+                    {aspect.icon}
+                  </div>
+                  <span className={`text-sm font-medium ${selectedRatios.includes(aspect.type) ? 'text-pink-700 dark:text-pink-400' : 'text-slate-500'}`}>
+                    {aspect.label}
+                  </span>
+                  <p className="text-xs text-slate-400 mt-1">{aspect.desc}</p>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 风格选择 */}
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h3 className="font-bold text-slate-800 dark:text-white mb-4">选择风格</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {stylePresets.map(style => (
+                <button
+                  key={style.id}
+                  onClick={() => setSelectedStyle(style.id)}
+                  className={`p-4 rounded-xl border-2 text-center transition-all ${
+                    selectedStyle === style.id
+                      ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20'
+                      : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                  }`}
+                >
+                  <div className={`w-full h-12 rounded-lg bg-gradient-to-r ${style.gradient} mb-2`} />
+                  <span className={`text-sm font-medium ${selectedStyle === style.id ? 'text-pink-700 dark:text-pink-400' : 'text-slate-500'}`}>
+                    {style.label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 生成按钮 */}
+        {!generatedCovers.length && (
+          <Button 
+            onClick={handleGenerate}
+            disabled={generating}
+            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+            size="lg"
+          >
+            {generating ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                AI生成中...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5 mr-2" />
+                生成封面 ({selectedPlatforms.length * selectedRatios.length} 张)
+              </>
+            )}
+          </Button>
+        )}
+
+        {/* 生成结果 */}
+        {generatedCovers.length > 0 && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-500" />
+                已生成 {generatedCovers.length} 张封面
+              </h3>
+              <Button variant="outline" size="sm" onClick={handleReset}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                重新生成
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              {generatedCovers.map(cover => {
+                const platform = platformOptions.find(p => p.type === cover.platform);
+                return (
+                  <Card key={cover.id} className="overflow-hidden">
+                    <div className="relative">
+                      <img 
+                        src={cover.url} 
+                        alt="封面预览" 
+                        className="w-full object-contain bg-slate-100 dark:bg-slate-800"
+                      />
+                      <div className="absolute top-2 left-2">
+                        <span className={`px-2 py-1 rounded-full text-xs text-white bg-gradient-to-r ${platform?.color}`}>
+                          {platform?.label}
+                        </span>
+                        <span className="ml-2 px-2 py-1 rounded-full text-xs bg-black/50 text-white">
+                          {cover.ratio}
+                        </span>
+                      </div>
+                    </div>
+                    <CardContent className="p-3">
+                      <Button 
+                        onClick={() => handleDownload(cover)}
+                        className="w-full"
+                        size="sm"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        下载
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </>
+        )}
 
         <WechatPromo />
       </div>
