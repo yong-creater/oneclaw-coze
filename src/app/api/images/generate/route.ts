@@ -7,6 +7,49 @@ function createClient(customHeaders: Record<string, string> = {}) {
   return new ImageGenerationClient(config, customHeaders);
 }
 
+// 上传图片到 Supabase Storage
+async function uploadToStorage(imageUrl: string): Promise<string> {
+  try {
+    const { getSupabaseClient } = await import('@/storage/database/supabase-client');
+    const supabase = getSupabaseClient();
+    
+    // 下载图片
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`下载图片失败: ${response.status}`);
+    }
+    const blob = await response.blob();
+    
+    // 生成唯一文件名
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    const fileName = `ai-photos/${timestamp}-${random}.png`;
+    
+    // 上传到 Supabase Storage
+    const { data, error } = await supabase.storage
+      .from('images')
+      .upload(fileName, blob, {
+        contentType: 'image/png',
+        upsert: false,
+      });
+
+    if (error) {
+      console.error('上传到Storage失败:', error);
+      throw error;
+    }
+
+    // 获取公开URL
+    const { data: urlData } = supabase.storage
+      .from('images')
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  } catch (error) {
+    console.error('上传失败:', error);
+    throw error;
+  }
+}
+
 // 生成图片
 export async function POST(request: NextRequest) {
   try {
@@ -43,20 +86,45 @@ export async function POST(request: NextRequest) {
       requestParams.image = Array.isArray(image) ? image : [image];
     }
 
+    console.log('开始生成图片，参数:', JSON.stringify({
+      prompt: prompt.substring(0, 100) + '...',
+      size,
+      model,
+      hasImage: !!image,
+    }));
+
     // 生成单张或多张图片
     const response = await client.generate(requestParams);
     const helper = client.getResponseHelper(response);
 
-    if (helper.success) {
+    if (helper.success && helper.imageUrls && helper.imageUrls.length > 0) {
+      console.log('图片生成成功，数量:', helper.imageUrls.length);
+      
+      // 上传所有图片到 Storage 并返回公网URL
+      const publicUrls = await Promise.all(
+        helper.imageUrls.map(async (url: string) => {
+          try {
+            const publicUrl = await uploadToStorage(url);
+            console.log('图片上传成功:', publicUrl.substring(0, 50) + '...');
+            return publicUrl;
+          } catch (error) {
+            console.error('单张图片上传失败，使用原URL:', url);
+            // 如果上传失败，返回原URL（可能是内部代理地址）
+            return url;
+          }
+        })
+      );
+
       return NextResponse.json({
         success: true,
-        imageUrls: helper.imageUrls,
-        count: helper.imageUrls.length,
+        imageUrls: publicUrls,
+        count: publicUrls.length,
       });
     } else {
+      console.error('图片生成失败:', helper.errorMessages);
       return NextResponse.json({
         success: false,
-        error: helper.errorMessages.join(', ') || '生成失败',
+        error: helper.errorMessages?.join(', ') || '生成失败',
       }, { status: 500 });
     }
   } catch (error: any) {
@@ -90,23 +158,37 @@ export async function PUT(request: NextRequest) {
 
     const responses = await client.batchGenerate(limitedRequests);
     
-    const results = responses.map((response, index) => {
+    const results = await Promise.all(responses.map(async (response, index) => {
       const helper = client.getResponseHelper(response);
+      if (helper.success) {
+        // 上传图片到 Storage
+        const publicUrls = await Promise.all(
+          (helper.imageUrls || []).map(async (url: string) => {
+            try {
+              return await uploadToStorage(url);
+            } catch {
+              return url;
+            }
+          })
+        );
+        return {
+          index,
+          success: true,
+          imageUrls: publicUrls,
+          error: null,
+        };
+      }
       return {
         index,
-        success: helper.success,
-        imageUrls: helper.success ? helper.imageUrls : [],
-        error: helper.success ? null : helper.errorMessages.join(', '),
+        success: false,
+        imageUrls: [],
+        error: helper.errorMessages.join(', '),
       };
-    });
+    }));
 
-    return NextResponse.json({
-      success: true,
-      results,
-      totalSuccess: results.filter((r: any) => r.success).length,
-    });
+    return NextResponse.json({ results });
   } catch (error: any) {
-    console.error('Batch image generation error:', error);
+    console.error('批量生成失败:', error);
     return NextResponse.json({
       success: false,
       error: error?.message || '服务器错误'
