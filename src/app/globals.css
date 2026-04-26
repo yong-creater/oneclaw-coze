@@ -1,178 +1,228 @@
 @import "tailwindcss";
 
-/* ========================================
-   OneClaw Design System v3
-   基于苹果/谷歌设计语言
-   ======================================== */
+/* ===========================
+   OneClaw Design System v4
+   精致现代风格 - 参考 designkit.cn
+   =========================== */
 
-@layer base {
-  :root {
-    /* 核心色彩 - 苹果风格 */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 220 95% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 10%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 220 95% 50%;
-    
-    /* 功能色 */
-    --success: 142 71% 36%;
-    --warning: 45 93% 40%;
-    --info: 199 89% 48%;
-    
-    /* 圆角 - 统一规范 */
-    --radius: 8px;
-    
-    /* 侧边栏宽度 */
-    --sidebar-width: 220px;
-  }
+@theme {
+  /* 字体 */
+  --font-sans: "Plus Jakarta Sans", "Noto Sans SC", system-ui, sans-serif;
 
-  .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
-    --primary: 220 95% 60%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 220 95% 60%;
-  }
+  /* 圆角 - 精致圆润 */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+
+  /* 侧边栏宽度 */
+  --sidebar-width: 260px;
 }
 
-/* ========================================
-   Base Styles - 干净基础
-   ======================================== */
-@layer base {
-  * {
-    border-color: hsl(var(--border));
-  }
+/* ===========================
+   CSS 变量 - 精致配色
+   =========================== */
+:root {
+  /* 主色系 - 深邃蓝紫渐变 */
+  --primary: #6366f1;
+  --primary-light: #818cf8;
+  --primary-dark: #4f46e5;
   
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  /* 强调色 - 活力橙 */
+  --accent: #f97316;
+  --accent-light: #fb923c;
   
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    line-height: 1.5;
-  }
+  /* 背景色 - 温暖灰白 */
+  --background: #fafafa;
+  --background-secondary: #f5f5f7;
+  --background-tertiary: #f0f0f3;
   
-  ::selection {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
-  }
+  /* 卡片背景 - 纯白带微妙阴影 */
+  --card: #ffffff;
+  --card-hover: #ffffff;
   
-  :focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
+  /* 文字色 - 深灰层次 */
+  --foreground: #18181b;
+  --foreground-secondary: #52525b;
+  --foreground-muted: #a1a1aa;
+  
+  /* 边框 - 微妙灰色 */
+  --border: #e4e4e7;
+  --border-light: #f4f4f5;
+  
+  /* 功能色 */
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
+  --info: #3b82f6;
+  
+  /* 渐变色 */
+  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  --gradient-accent: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+  --gradient-bg: linear-gradient(180deg, #fafafa 0%, #f5f5f7 100%);
+  --gradient-card: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+  
+  /* 阴影 - 精致柔和 */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  
+  /* 发光效果 */
+  --glow-primary: 0 0 20px rgba(99, 102, 241, 0.15);
+  --glow-accent: 0 0 20px rgba(249, 115, 22, 0.15);
 }
 
-/* ========================================
-   Typography - 字体层级
-   ======================================== */
-@layer base {
-  h1 {
-    font-size: 1.875rem;
-    font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.025em;
-  }
+/* 深色模式 */
+.dark {
+  --primary: #818cf8;
+  --primary-light: #a5b4fc;
+  --primary-dark: #6366f1;
   
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.02em;
-  }
+  --accent: #fb923c;
+  --accent-light: #fdba74;
   
-  h3 {
-    font-size: 1.125rem;
-    font-weight: 600;
-    line-height: 1.4;
-  }
+  --background: #09090b;
+  --background-secondary: #18181b;
+  --background-tertiary: #27272a;
   
-  h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.4;
-  }
+  --card: #18181b;
+  --card-hover: #27272a;
   
-  p {
-    font-size: 0.875rem;
-    line-height: 1.6;
-  }
+  --foreground: #fafafa;
+  --foreground-secondary: #a1a1aa;
+  --foreground-muted: #71717a;
   
-  small {
-    font-size: 0.75rem;
-    line-height: 1.5;
-  }
+  --border: #27272a;
+  --border-light: #3f3f46;
+  
+  --gradient-bg: linear-gradient(180deg, #09090b 0%, #18181b 100%);
+  --gradient-card: linear-gradient(145deg, #18181b 0%, #1f1f23 100%);
 }
 
-/* ========================================
-   Animations - 流畅动效
-   ======================================== */
+/* ===========================
+   全局样式
+   =========================== */
+* {
+  border-color: var(--border);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--gradient-bg);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 精致滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground-muted);
+}
+
+/* 精致选中效果 */
+::selection {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--foreground);
+}
+
+/* ===========================
+   动画
+   =========================== */
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes fade-in-up {
-  from { 
-    opacity: 0; 
-    transform: translateY(8px);
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
-  to { 
-    opacity: 1; 
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes scale-in {
-  from { 
-    opacity: 0; 
-    transform: scale(0.96);
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
   }
-  to { 
-    opacity: 1; 
+  to {
+    opacity: 1;
     transform: scale(1);
   }
 }
 
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+  50% { box-shadow: 0 0 20px 5px rgba(99, 102, 241, 0.1); }
+}
+
+/* 动画类 */
 .animate-fade-in {
-  animation: fade-in 0.2s ease-out;
+  animation: fade-in 0.3s ease-out;
 }
 
 .animate-fade-in-up {
-  animation: fade-in-up 0.3s ease-out;
+  animation: fade-in-up 0.4s ease-out;
 }
 
-.animate-scale-in {
-  animation: scale-in 0.2s ease-out;
+.animate-fade-in-scale {
+  animation: fade-in-scale 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
 /* 延迟动画 */
@@ -180,177 +230,285 @@
 .stagger-2 { animation-delay: 0.1s; }
 .stagger-3 { animation-delay: 0.15s; }
 .stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
 
-/* ========================================
-   Scrollbar - 精致滚动条
-   ======================================== */
-@layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-  
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted)) transparent;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: hsl(var(--muted));
-    border-radius: 3px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(var(--muted-foreground) / 0.3);
-  }
+/* ===========================
+   玻璃态效果
+   =========================== */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* ========================================
-   Card - 卡片样式
-   ======================================== */
-.card-base {
-  background-color: hsl(var(--card));
-  border-radius: var(--radius);
-  transition: all 0.15s ease;
+.dark .glass {
+  background: rgba(24, 24, 27, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.card-hover {
-  transition: all 0.15s ease;
+/* ===========================
+   渐变文字
+   =========================== */
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.card-hover:hover {
-  background-color: hsl(var(--accent));
+/* ===========================
+   精致边框
+   =========================== */
+.border-精致 {
+  border: 1px solid var(--border);
 }
 
-/* ========================================
-   Button States - 按钮状态
-   ======================================== */
-.btn-primary {
+.border-精致-2 {
+  border: 2px solid var(--border);
+}
+
+.border-gradient {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+              var(--gradient-primary) border-box;
+}
+
+/* ===========================
+   卡片样式
+   =========================== */
+.card-精致 {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.card-精致:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--border-light);
+}
+
+.card-精致-悬停 {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+}
+
+/* ===========================
+   按钮样式
+   =========================== */
+.btn-精致 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.25rem;
   font-size: 0.875rem;
   font-weight: 500;
-  border-radius: var(--radius);
-  transition: all 0.15s ease;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
-.btn-primary:not(:disabled):hover {
-  opacity: 0.9;
+.btn-精致-主要 {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-sm), var(--glow-primary);
 }
 
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.btn-精致-主要:hover {
+  box-shadow: var(--shadow-md), 0 0 30px rgba(99, 102, 241, 0.25);
+  transform: translateY(-1px);
 }
 
-/* ========================================
-   Input States - 输入框状态
-   ======================================== */
-.input-base {
+.btn-精致-次要 {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.btn-精致-次要:hover {
+  background: var(--background-secondary);
+  border-color: var(--foreground-muted);
+}
+
+.btn-精致-强调 {
+  background: var(--gradient-accent);
+  color: white;
+  box-shadow: var(--shadow-sm), var(--glow-accent);
+}
+
+.btn-精致-强调:hover {
+  box-shadow: var(--shadow-md), 0 0 30px rgba(249, 115, 22, 0.25);
+  transform: translateY(-1px);
+}
+
+/* ===========================
+   输入框样式
+   =========================== */
+.input-精致 {
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 1rem;
   font-size: 0.875rem;
-  border-radius: var(--radius);
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--input));
-  transition: all 0.15s ease;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
 }
 
-.input-base::placeholder {
-  color: hsl(var(--muted-foreground));
+.input-精致:hover {
+  border-color: var(--foreground-muted);
 }
 
-.input-base:hover {
-  border-color: hsl(var(--muted-foreground) / 0.5);
-}
-
-.input-base:focus {
+.input-精致:focus {
   outline: none;
-  border-color: hsl(var(--ring));
-  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* ========================================
-   Badge - 标签样式
-   ======================================== */
-.badge-base {
+/* ===========================
+   徽章样式
+   =========================== */
+.badge-精致 {
   display: inline-flex;
   align-items: center;
-  padding: 0.125rem 0.5rem;
+  padding: 0.25rem 0.625rem;
   font-size: 0.75rem;
   font-weight: 500;
-  border-radius: calc(var(--radius) - 2px);
-  background-color: hsl(var(--secondary));
-  color: hsl(var(--secondary-foreground));
+  border-radius: var(--radius-sm);
+  background: var(--background-secondary);
+  color: var(--foreground-secondary);
 }
 
-/* ========================================
-   Sidebar - 侧边栏
-   ======================================== */
-.sidebar-item {
+.badge-精致-主要 {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+}
+
+.badge-精致-成功 {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+
+.badge-精致-警告 {
+  background: rgba(234, 179, 8, 0.1);
+  color: var(--warning);
+}
+
+/* ===========================
+   工具卡片悬停效果
+   =========================== */
+.tool-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.tool-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* ===========================
+   分类标签样式
+   =========================== */
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background: var(--background-secondary);
+  color: var(--foreground-secondary);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.category-tag:hover {
+  background: var(--card);
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.category-tag-活跃 {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===========================
+   Logo 样式
+   =========================== */
+.logo-精致 {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--gradient-primary);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  border-radius: var(--radius);
-  transition: all 0.15s ease;
-  cursor: pointer;
-  color: hsl(var(--muted-foreground));
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.125rem;
+  box-shadow: var(--shadow-md), var(--glow-primary);
 }
 
-.sidebar-item:hover {
-  background-color: hsl(var(--accent));
-  color: hsl(var(--foreground));
+/* ===========================
+   分隔线样式
+   =========================== */
+.divider-精致 {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--border) 20%,
+    var(--border) 80%,
+    transparent
+  );
 }
 
-.sidebar-item.active {
-  background-color: hsl(var(--primary) / 0.1);
-  color: hsl(var(--primary));
-  font-weight: 500;
+/* ===========================
+   响应式工具
+   =========================== */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
 }
 
-/* ========================================
-   Tooltip - 工具提示
-   ======================================== */
-[data-tooltip] {
-  position: relative;
+@media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
 }
 
-[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-4px);
-  padding: 0.375rem 0.625rem;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  background-color: hsl(var(--foreground));
-  color: hsl(var(--background));
-  border-radius: calc(var(--radius) - 2px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-}
-
-[data-tooltip]:hover::after {
-  opacity: 1;
+/* ===========================
+   加载骨架屏
+   =========================== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--background-secondary) 25%,
+    var(--background-tertiary) 50%,
+    var(--background-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
 }

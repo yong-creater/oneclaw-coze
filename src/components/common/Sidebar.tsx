@@ -1,162 +1,152 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import {
-  Bot, Compass, Sparkles, Star, BookOpen,
-  Menu, X, LogIn, User,
-  Layers
-} from 'lucide-react';
+import { Bot, Sparkles, Grid3X3, Crown, BookOpen, MessageSquare, Briefcase, Settings } from 'lucide-react';
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-}
-
-// 前台导航 - 精简
-const NAV_ITEMS: NavItem[] = [
-  { label: '首页', href: '/', icon: Compass },
-  { label: 'AI工具库', href: '/ai-tools', icon: Layers },
-  { label: '自建工具', href: '/own-tools', icon: Sparkles },
-  { label: '提示词库', href: '/prompts', icon: Sparkles },
-  { label: '教程库', href: '/tutorials', icon: BookOpen },
-  { label: '榜单中心', href: '/rankings', icon: Star },
+// 导航配置
+const NAV_ITEMS = [
+  {
+    label: 'AI工具库',
+    href: '/ai-tools',
+    icon: Grid3X3,
+  },
+  {
+    label: '自建工具',
+    href: '/own-tools',
+    icon: Sparkles,
+  },
+  {
+    label: '技能库',
+    href: '/skills',
+    icon: Briefcase,
+  },
+  {
+    label: '榜单中心',
+    href: '/rankings',
+    icon: Crown,
+  },
+  {
+    label: '提示词库',
+    href: '/prompts',
+    icon: MessageSquare,
+  },
+  {
+    label: '教程库',
+    href: '/tutorials',
+    icon: BookOpen,
+  },
+  {
+    label: '工作台',
+    href: '/workspace',
+    icon: Settings,
+  },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [user, setUser] = useState<{ nickname: string; avatar: string } | null>(null);
 
-  // 检查登录状态
-  useEffect(() => {
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('user_token='));
-    
-    if (token) {
-      const tokenValue = token.split('=')[1];
-      fetch('/api/auth?action=check', {
-        headers: { Cookie: `user_token=${tokenValue}` }
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.success) {
-            setUser(data.data.user);
-          }
-        })
-        .catch(() => {});
-    }
-  }, []);
-
-  // 监听路由变化
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
+  // 检查是否匹配路径
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   };
 
   return (
-    <>
-      {/* 移动端菜单按钮 */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-background border border-border cursor-pointer lg:hidden"
-      >
-        <Menu className="w-5 h-5" />
-      </button>
-
-      {/* 移动端遮罩 */}
-      {mobileOpen && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
-
-      {/* 侧边栏 - 苹果风格 */}
-      <aside
-        className={cn(
-          "fixed top-0 left-0 h-screen bg-background/80 backdrop-blur-xl border-r border-border flex flex-col z-50 transition-transform duration-300 lg:translate-x-0",
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-        style={{ width: 'var(--sidebar-width, 220px)' }}
-      >
-        {/* Logo区域 - 居中对齐 */}
-        <div className="h-14 flex items-center px-4 border-b border-border">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
-              <Bot className="w-4 h-4 text-white" />
+    <aside
+      className="fixed left-0 top-0 h-screen w-[var(--sidebar-width,260px)] flex flex-col
+                 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl 
+                 border-r border-zinc-200/60 dark:border-zinc-800/60
+                 z-50"
+    >
+      {/* Logo 区域 */}
+      <div className="h-16 flex items-center px-5 border-b border-zinc-200/60 dark:border-zinc-800/60">
+        <Link href="/" className="flex items-center gap-3 group">
+          {/* Logo 图标 */}
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:shadow-xl group-hover:shadow-indigo-500/30 transition-all duration-300">
+              <Bot className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-foreground tracking-tight">
+            {/* 光晕效果 */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-pink-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </div>
+          
+          {/* 标题 */}
+          <div className="flex flex-col">
+            <span className="text-lg font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
               OneClaw
             </span>
-          </Link>
+            <span className="text-[10px] text-zinc-400 -mt-0.5">AI工具导航</span>
+          </div>
+        </Link>
+      </div>
+
+      {/* 导航列表 */}
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.href);
           
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="p-1.5 rounded-md hover:bg-accent cursor-pointer ml-auto lg:hidden"
-          >
-            <X className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-
-        {/* 导航区域 */}
-        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          {NAV_ITEMS.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-            
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150",
-                  active
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                )}
-              >
-                <Icon className="w-[18px] h-[18px] flex-shrink-0" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* 底部用户区域 */}
-        <div className="p-3 border-t border-border">
-          {user ? (
-            <div className="flex items-center gap-3 px-3 py-2">
-              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.nickname} className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-4 h-4 text-muted-foreground" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.nickname}</p>
-              </div>
-            </div>
-          ) : (
+          return (
             <Link
-              href="/login"
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                "hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
+                active && "bg-gradient-to-r from-indigo-500/10 to-purple-500/10 dark:from-indigo-500/20 dark:to-purple-500/20"
+              )}
             >
-              <LogIn className="w-[18px] h-[18px] flex-shrink-0" />
-              <span>登录</span>
+              {/* 选中指示器 */}
+              {active && (
+                <>
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-r-full" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 -ml-px w-0.5 h-4 bg-gradient-to-b from-indigo-400 to-purple-400 rounded-r-full blur-[1px]" />
+                </>
+              )}
+              
+              {/* 图标 */}
+              <div className={cn(
+                "relative flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-200",
+                active 
+                  ? "bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/25"
+                  : "bg-zinc-100 dark:bg-zinc-800 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700"
+              )}>
+                <Icon className={cn(
+                  "w-4 h-4 transition-colors duration-200",
+                  active ? "text-white" : "text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-200"
+                )} />
+              </div>
+              
+              {/* 文字 */}
+              <span className={cn(
+                "text-sm font-medium transition-colors duration-200",
+                active 
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100"
+              )}>
+                {item.label}
+              </span>
+              
+              {/* 悬停渐变 */}
+              {!active && (
+                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-indigo-500/5 via-transparent to-purple-500/5 transition-opacity duration-200 pointer-events-none" />
+              )}
             </Link>
-          )}
+          );
+        })}
+      </nav>
+
+      {/* 底部装饰 */}
+      <div className="h-px mx-4 bg-gradient-to-r from-transparent via-zinc-200 dark:via-zinc-800 to-transparent" />
+      
+      {/* 底部信息 */}
+      <div className="p-4">
+        <div className="text-center">
+          <p className="text-[10px] text-zinc-400">精选238款优质AI工具</p>
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 }
