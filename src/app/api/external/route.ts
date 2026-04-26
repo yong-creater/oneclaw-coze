@@ -61,7 +61,6 @@ export async function GET() {
       { path: '/api/external/tools', method: 'POST', description: 'AI应用导入' },
       { path: '/api/external/prompts', method: 'POST', description: '提示词导入' },
       { path: '/api/external/tutorials', method: 'POST', description: '教程导入' },
-      { path: '/api/external/skills', method: 'POST', description: '技能导入' },
     ],
   });
 }

@@ -71,9 +71,6 @@ export default async function LandingPage() {
               <Link href="/?tab=prompts" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors">
                 提示词
               </Link>
-              <Link href="/?tab=skills" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors">
-                技能
-              </Link>
               <Link href="/?tab=tutorials" className="text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors">
                 教程
               </Link>

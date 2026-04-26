@@ -18,7 +18,6 @@ const navigation = [
   { name: '精选工具', href: '/admin/utility-tools' },
   { name: '模板库', href: '/admin/templates' },
   { name: 'AI应用管理', href: '/admin/tools' },
-  { name: '技能管理', href: '/admin/skills' },
   { name: '分类管理', href: '/admin/categories' },
   { name: '提示词库', href: '/admin/prompts' },
   { name: '教程库', href: '/admin/tutorials' },

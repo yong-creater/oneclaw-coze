@@ -122,38 +122,6 @@ export function useTutorials(params: Record<string, any> = {}) {
   };
 }
 
-// 技能列表
-export function useSkills(params: Record<string, any> = {}) {
-  const queryString = new URLSearchParams(params).toString();
-  const url = `/api/skills${queryString ? `?${queryString}` : ''}`;
-  
-  const { data, error, isLoading, mutate } = useSWR(url, fetcher, {
-    revalidateOnFocus: false,
-    dedupingInterval: 30000,
-  });
-  return {
-    skills: data?.data || [],
-    pagination: data?.pagination || null,
-    isLoading,
-    isError: error,
-    mutate,
-  };
-}
-
-// 技能分类
-export function useSkillCategories() {
-  const { data, error, isLoading, mutate } = useSWR('/api/skills/categories', fetcher, {
-    revalidateOnFocus: false,
-    dedupingInterval: 60000,
-  });
-  return {
-    categories: data?.data || [],
-    isLoading,
-    isError: error,
-    mutate,
-  };
-}
-
 // 数据看板
 export function useDashboard() {
   const { data, error, isLoading, mutate } = useSWR('/api/dashboard', fetcher, {
