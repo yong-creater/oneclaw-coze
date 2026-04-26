@@ -126,3 +126,35 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }
+
+// 批量更新排序
+export async function PATCH(request: NextRequest) {
+  try {
+    const supabase = getSupabaseClient();
+
+    const body = await request.json();
+    const { groups } = body;
+
+    if (!groups || !Array.isArray(groups)) {
+      return NextResponse.json({ error: '缺少分组数据' }, { status: 400 });
+    }
+
+    // 批量更新每个分组的 sort_order
+    for (let i = 0; i < groups.length; i++) {
+      const { id, sort_order } = groups[i];
+      const { error } = await supabase
+        .from('utility_groups')
+        .update({ sort_order: i, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) {
+        return NextResponse.json({ error: '更新排序失败' }, { status: 500 });
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error:', error);
+    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+  }
+}

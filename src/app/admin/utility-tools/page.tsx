@@ -12,9 +12,27 @@ import {
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from '@/components/ui/table';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { 
   Star, Edit2, Image, TrendingUp, Users, Activity, 
-  BarChart3, Clock, ChevronDown, ChevronUp, X, Plus, Upload
+  BarChart3, Clock, ChevronDown, ChevronUp, X, Plus, Upload,
+  GripVertical, Save
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -91,6 +109,64 @@ const ICON_OPTIONS = [
   'Camera', 'Palette', 'Star', 'Wand2', 'Zap', 'Code', 'Lightbulb'
 ];
 
+// 可排序的行组件
+function SortableGroupRow({ group, tools, onEdit }: { 
+  group: UtilityGroup; 
+  tools: UtilityTool[];
+  onEdit: (group: UtilityGroup) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: group.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    backgroundColor: isDragging ? '#f0f0f0' : undefined,
+  };
+
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell>
+        <button 
+          className="cursor-grab active:cursor-grabbing p-1 hover:bg-slate-100 rounded"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="w-4 h-4 text-slate-400" />
+        </button>
+      </TableCell>
+      <TableCell className="font-medium">{group.name}</TableCell>
+      <TableCell className="text-slate-500">{group.slug}</TableCell>
+      <TableCell>
+        <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${group.color} flex items-center justify-center`}>
+          <span className="text-white text-xs font-bold">{group.name[0]}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className={`w-6 h-6 rounded bg-gradient-to-r ${group.color}`} />
+      </TableCell>
+      <TableCell>{tools.filter(t => t.group_id === group.id).length}</TableCell>
+      <TableCell>
+        <Badge variant={group.is_active ? 'default' : 'secondary'}>
+          {group.is_active ? '启用' : '禁用'}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <Button variant="ghost" size="icon" onClick={() => onEdit(group)}>
+          <Edit2 className="w-4 h-4" />
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export default function UtilityToolsPage() {
   const [groups, setGroups] = useState<UtilityGroup[]>([]);
   const [tools, setTools] = useState<UtilityTool[]>([]);
@@ -99,6 +175,60 @@ export default function UtilityToolsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedToolSlug, setSelectedToolSlug] = useState<string | null>(null);
   const [expandedStats, setExpandedStats] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+  
+  // DnD 传感器配置
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // 处理拖拽结束
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setGroups((items) => {
+        const oldIndex = items.findIndex(item => item.id === active.id);
+        const newIndex = items.findIndex(item => item.id === over.id);
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        
+        // 保存新排序到服务器
+        saveGroupOrder(newItems);
+        
+        return newItems;
+      });
+    }
+  };
+
+  // 保存分组排序
+  const saveGroupOrder = async (newGroups: UtilityGroup[]) => {
+    setSavingOrder(true);
+    try {
+      const res = await fetch('/api/admin/utility-groups', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groups: newGroups.map((g, i) => ({ id: g.id, sort_order: i }))
+        })
+      });
+      
+      if (!res.ok) {
+        toast.error('保存排序失败');
+        // 刷新数据
+        fetchData();
+      } else {
+        toast.success('排序已保存');
+      }
+    } catch (error) {
+      toast.error('保存排序失败');
+      console.error(error);
+    } finally {
+      setSavingOrder(false);
+    }
+  };
   
   // 分组表单
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
@@ -518,10 +648,16 @@ export default function UtilityToolsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-orange-500" />
-                  分组列表
-                </CardTitle>
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-orange-500" />
+                    分组列表
+                  </CardTitle>
+                  <p className="text-xs text-slate-500 mt-1">
+                    拖动左侧手柄调整排序，排序自动保存
+                    {savingOrder && <span className="text-orange-500 ml-2">保存中...</span>}
+                  </p>
+                </div>
                 <Button onClick={() => openGroupDialog()} className="bg-orange-500 hover:bg-orange-600">
                   <Plus className="w-4 h-4 mr-2" />
                   新增分组
@@ -529,48 +665,38 @@ export default function UtilityToolsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>排序</TableHead>
-                    <TableHead>名称</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>图标</TableHead>
-                    <TableHead>颜色</TableHead>
-                    <TableHead>工具数</TableHead>
-                    <TableHead>状态</TableHead>
-                    <TableHead>操作</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {groups.map(group => (
-                    <TableRow key={group.id}>
-                      <TableCell>{group.sort_order}</TableCell>
-                      <TableCell className="font-medium">{group.name}</TableCell>
-                      <TableCell className="text-slate-500">{group.slug}</TableCell>
-                      <TableCell>
-                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${group.color} flex items-center justify-center`}>
-                          <span className="text-white text-xs font-bold">{group.name[0]}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className={`w-6 h-6 rounded bg-gradient-to-r ${group.color}`} />
-                      </TableCell>
-                      <TableCell>{tools.filter(t => t.group_id === group.id).length}</TableCell>
-                      <TableCell>
-                        <Badge variant={group.is_active ? 'default' : 'secondary'}>
-                          {group.is_active ? '启用' : '禁用'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => openGroupDialog(group)}>
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext items={groups.map(g => g.id)} strategy={verticalListSortingStrategy}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">拖动</TableHead>
+                        <TableHead>名称</TableHead>
+                        <TableHead>Slug</TableHead>
+                        <TableHead>图标</TableHead>
+                        <TableHead>颜色</TableHead>
+                        <TableHead>工具数</TableHead>
+                        <TableHead>状态</TableHead>
+                        <TableHead>操作</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {groups.map(group => (
+                        <SortableGroupRow 
+                          key={group.id} 
+                          group={group} 
+                          tools={tools}
+                          onEdit={openGroupDialog}
+                        />
+                      ))}
+                    </TableBody>
+                  </Table>
+                </SortableContext>
+              </DndContext>
             </CardContent>
           </Card>
         </TabsContent>
