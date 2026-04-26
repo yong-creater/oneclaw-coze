@@ -45,7 +45,7 @@ const TAGS = [
   { name: '知识科普', type: 'scene' },
 ];
 
-// 精选工具数据
+// 精选工具数据 - 所有精选工具都在这里定义，新增工具只需添加到这里
 const UTILITY_TOOLS = [
   // 精选工具组 (group_id=1)
   { name: 'STAR简历优化', slug: 'resume', group_id: 1, sort_order: 1, tool_path: '/resume', color: 'from-blue-500 to-cyan-500', icon: 'FileText' },
@@ -54,7 +54,69 @@ const UTILITY_TOOLS = [
   { name: 'AI智能抠图', slug: 'background-removal', group_id: 1, sort_order: 4, tool_path: '/background-removal', color: 'from-amber-500 to-orange-500', icon: 'Scissors' },
   { name: '小红书笔记生成器', slug: 'xiaohongshu-generator', group_id: 1, sort_order: 5, tool_path: '/xiaohongshu-generator', color: 'from-pink-500 to-rose-500', icon: 'Heart' },
   { name: '商拍AI', slug: 'shangpai-ai', group_id: 1, sort_order: 6, tool_path: '/tools/shangpai-ai', color: 'from-orange-500 to-red-500', icon: 'ShoppingBag' },
+  // ⚠️ 新增工具只需在这里添加一行即可自动同步到数据库
 ];
+
+// 自动同步工具到数据库
+async function syncUtilityTools(supabase: any) {
+  const results = {
+    added: 0,
+    updated: 0,
+    skipped: 0,
+  };
+
+  for (const tool of UTILITY_TOOLS) {
+    // 检查工具是否存在
+    const { data: existing } = await supabase
+      .from('utility_tools')
+      .select('id, slug')
+      .eq('slug', tool.slug)
+      .single();
+
+    if (existing) {
+      // 存在则更新
+      const { error } = await supabase
+        .from('utility_tools')
+        .update({
+          name: tool.name,
+          group_id: tool.group_id,
+          sort_order: tool.sort_order,
+          tool_path: tool.tool_path,
+          color: tool.color,
+          icon: tool.icon,
+          is_active: true,
+        })
+        .eq('slug', tool.slug);
+      
+      if (!error) results.updated++;
+      else results.skipped++;
+    } else {
+      // 不存在则插入
+      const { error } = await supabase
+        .from('utility_tools')
+        .insert({
+          slug: tool.slug,
+          name: tool.name,
+          description: `${tool.name} - 精选AI工具`,
+          group_id: tool.group_id,
+          sort_order: tool.sort_order,
+          tool_path: tool.tool_path,
+          color: tool.color,
+          icon: tool.icon,
+          is_active: true,
+          use_cases: '[]' as any,
+        });
+
+      if (!error) results.added++;
+      else results.skipped++;
+    }
+  }
+
+  return results;
+}
+
+// 导出工具列表供外部使用
+export { UTILITY_TOOLS, syncUtilityTools };
 
 // GET: 获取当前数据状态
 export async function GET() {
@@ -123,21 +185,8 @@ export async function POST(request: NextRequest) {
         });
     }
 
-    // 插入精选工具（忽略冲突）
-    for (const tool of UTILITY_TOOLS) {
-      await supabase
-        .from('utility_tools')
-        .upsert({ 
-          slug: tool.slug,
-          name: tool.name,
-          group_id: tool.group_id,
-          sort_order: tool.sort_order,
-          tool_path: tool.tool_path,
-          color: tool.color,
-          icon: tool.icon,
-          is_active: true,
-        }, { onConflict: 'slug' });
-    }
+    // 自动同步精选工具（新增/更新/跳过）
+    const toolSyncResult = await syncUtilityTools(supabase);
 
     return NextResponse.json({ 
       success: true, 
@@ -145,7 +194,8 @@ export async function POST(request: NextRequest) {
       data: {
         categories: categoriesCount,
         tags: tagsCount,
-        utility_tools: UTILITY_TOOLS.length,
+        tools: toolSyncResult,
+        total_tools: UTILITY_TOOLS.length,
       }
     });
   } catch (error) {
