@@ -97,7 +97,6 @@ function getToolName(toolSlug: string): string {
     'product-poster': '商品海报生成器',
     'cover-generator': '封面生成器',
     'background-removal': 'AI智能抠图',
-    'photo-editor': '照片美化',
   };
   return names[toolSlug] || toolSlug;
 }
@@ -114,7 +113,6 @@ export function getDefaultModel(toolSlug: string): string {
     'product-compliance': 'ep-20250312145957-p8xpp',
     'product-enhance': 'coze-image',
     'background-removal': 'coze-image',
-    'portrait-enhance': 'coze-image',
     'xhs-generator': 'ep-20250312145957-p8xpp',
     'resume': 'ep-20250312145957-p8xpp',
     // 别名

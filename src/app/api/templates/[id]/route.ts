@@ -13,7 +13,6 @@ const TEMPLATE_TYPE_MAP: Record<string, { name: string; slug: string }> = {
   'portrait': { name: 'AI写真生成器', slug: '/ai-photo' },
   'cover': { name: '封面生成器', slug: '/cover-generator' },
   'background_removal': { name: 'AI智能抠图', slug: '/background-removal' },
-  'photo': { name: '照片美化', slug: '/photo-editor' },
   'resume': { name: '简历优化', slug: '/resume' },
   'novel': { name: '小说创作', slug: '/novel' },
   'script': { name: '推文脚本生成', slug: '/novel' },

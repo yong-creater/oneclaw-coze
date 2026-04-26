@@ -14,7 +14,6 @@ const TOOL_ID_MAP: Record<string, string> = {
   'product-compliance': 'product-compliance',
   'product-enhance': 'product-enhance',
   'background-removal': 'background-removal',
-  'portrait-enhance': 'portrait-enhance',
   'xhs-generator': 'xhs-generator',
   'resume': 'resume',
 };
@@ -28,7 +27,6 @@ const DEFAULT_CONFIGS: Record<string, { model: string; source: string; isFree: b
   'product-compliance': { model: 'doubao-seed-1-6-vision-250815', source: 'coze', isFree: true },
   'product-enhance': { model: 'coze-image', source: 'coze', isFree: true },
   'background-removal': { model: 'coze-image', source: 'coze', isFree: true },
-  'portrait-enhance': { model: 'coze-image', source: 'coze', isFree: true },
   'xhs-generator': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
   'resume': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
 };

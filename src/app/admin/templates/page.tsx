@@ -29,7 +29,6 @@ const TEMPLATE_TYPES = [
   { value: 'portrait', label: 'AI写真' },
   { value: 'cover', label: '封面图' },
   { value: 'background_removal', label: '抠图' },
-  { value: 'photo', label: '照片美化' },
   { value: 'resume', label: '简历优化' },
   { value: 'novel', label: '小说创作' },
   { value: 'script', label: '推文脚本' },

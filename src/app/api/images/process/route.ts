@@ -24,10 +24,6 @@ const PROCESS_PROMPTS: Record<string, { prompt: string; name: string }> = {
   'background-removal': {
     name: 'AI智能抠图',
     prompt: 'Remove background from the product image, transparent background PNG, clean and precise edge cutout, professional product isolation, white or transparent background, maintain original product quality and details'
-  },
-  'portrait-enhance': {
-    name: '照片美化',
-    prompt: 'Professional photo retouching and enhancement, improve lighting and contrast, enhance natural skin tones, add subtle makeup effect, remove blemishes naturally, maintain realistic look, make the portrait more beautiful while keeping natural appearance, high quality portrait photography'
   }
 };
 
@@ -136,9 +132,7 @@ export async function POST(request: NextRequest) {
       saveGeneration(request, {
         tool_id: 6,
         tool_name: PROCESS_PROMPTS[processType].name,
-        tool_type: processType === 'background-removal' ? 'background_removal' : 
-                   processType === 'product-enhance' ? 'goods_image' :
-                   processType === 'portrait-enhance' ? 'photo' : 'layout',
+        tool_type: processType === 'background-removal' ? 'background_removal' : 'other',
         input_params: { processType, imageUrl },
         output_content: { imageUrl: result.imageUrl },
         title: `${PROCESS_PROMPTS[processType].name}结果`,

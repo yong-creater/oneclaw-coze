@@ -315,56 +315,6 @@ const TEMPLATES_DATA = [
     sort_order: 3,
   },
 
-  // ========== 照片美化 (photo) - 3个 ==========
-  {
-    name: '旅行照片美化',
-    description: '旅行照片一键美化，调色增亮，让回忆更美好，自然风光风格',
-    template_type: 'photo',
-    category: '旅行',
-    thumbnail: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      scene: '旅行风光',
-      style: '自然清新',
-      adjustments: ['色彩增强', '对比度优化', '暗部提亮'],
-      preset: '日系小清新'
-    }),
-    tags: ['旅行', '风景', '摄影'],
-    is_featured: true,
-    sort_order: 1,
-  },
-  {
-    name: '人像美颜精修',
-    description: '自然系人像美颜，保留真实感的同时提升肤质和气色',
-    template_type: 'photo',
-    category: '人像',
-    thumbnail: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      scene: '人像',
-      style: '自然美颜',
-      adjustments: ['磨皮美白', '五官立体', '气色提升'],
-      preset: '自然奶油肌'
-    }),
-    tags: ['人像', '美颜', '自拍'],
-    is_featured: true,
-    sort_order: 2,
-  },
-  {
-    name: '美食滤镜调色',
-    description: '让美食照片看起来更诱人，适合朋友圈分享的美食滤镜',
-    template_type: 'photo',
-    category: '美食',
-    thumbnail: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      scene: '美食',
-      style: '暖色食欲',
-      adjustments: ['暖色调', '饱和度提升', '锐化细节'],
-      preset: '美食滤镜'
-    }),
-    tags: ['美食', '滤镜', '朋友圈'],
-    is_featured: false,
-    sort_order: 3,
-  },
-
   // ========== 简历 (resume) - 3个 ==========
   {
     name: '互联网产品经理简历',

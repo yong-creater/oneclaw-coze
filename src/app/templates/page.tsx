@@ -37,7 +37,6 @@ const TYPE_NAMES: Record<string, string> = {
   'portrait': 'AI写真',
   'cover': '封面图',
   'background_removal': '抠图',
-  'photo': '照片美化',
   'resume': '简历',
   'novel': '小说',
   'script': '脚本',
