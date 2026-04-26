@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { generateWithModel } from '@/lib/model-selector';
 
 // 合规规则配置
 const REGULATION_CONFIG: Record<string, {
@@ -87,6 +88,7 @@ export async function POST(request: NextRequest) {
       tone,
       detailOptions,
       extraRequirements,
+      model = 'coze-image',
     } = await request.json();
 
     if (!sellingPoints) {
@@ -100,10 +102,6 @@ export async function POST(request: NextRequest) {
     // Extract forward headers for proper request tracing
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
     
-    // Initialize client with custom headers in constructor
-    const config = new Config();
-    const imageClient = new ImageGenerationClient(config, customHeaders);
-
     // 取第一个地区进行生成
     const primaryRegion = regions[0];
     const regionConfig = REGULATION_CONFIG[primaryRegion] || REGULATION_CONFIG.us;
@@ -146,18 +144,18 @@ ${sellingPoints}
     }
 
     // 调用图片生成API
-    const response = await imageClient.generate({
+    const result = await generateWithModel(
       prompt,
-      size: '2K'
-    });
+      model,
+      '2K',
+      customHeaders
+    );
     
-    const helper = imageClient.getResponseHelper(response);
-    
-    if (!helper.success || !helper.imageUrls[0]) {
-      throw new Error('Image generation failed');
+    if (!result.success || !result.imageUrls?.[0]) {
+      throw new Error(result.error || 'Image generation failed');
     }
 
-    const imageUrl = helper.imageUrls[0];
+    const imageUrl = result.imageUrls[0];
 
     // 生成合规报告
     const complianceReport = {

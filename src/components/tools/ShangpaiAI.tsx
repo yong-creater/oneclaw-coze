@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import WechatPromo from '@/components/common/WechatPromo';
 import UtilityHeader from '@/components/common/UtilityHeader';
 import LoginButton from '@/components/common/LoginButton';
+import { useToolModelConfig } from '@/hooks/useToolModelConfig';
 import {
   Upload, Image, Type, Sparkles, Loader2, Download,
   RefreshCw, X, Check, AlertCircle, Wand2, Sun,
@@ -103,6 +104,9 @@ function downloadImage(url: string, filename: string) {
 
 // ==================== 主组件 ====================
 export default function ShangpaiAIPage() {
+  // 获取模型配置
+  const { config: modelConfig, loading: modelLoading } = useToolModelConfig('shangpai-ai');
+  
   // 输入模式：image | text
   const [inputMode, setInputMode] = useState<'image' | 'text'>('image');
   
@@ -231,6 +235,7 @@ export default function ShangpaiAIPage() {
           size: '2K',
           count: 1,
           image: inputMode === 'image' ? uploadedImage : undefined,
+          model: modelConfig?.default_model || 'coze-image',
         }),
       });
       

@@ -10,6 +10,7 @@ import {
 import UtilityHeader from '../common/UtilityHeader';
 import { PrimaryButton, ActionButton } from '../common/UtilityComponents';
 import LoginButton from '@/components/common/LoginButton';
+import { useToolModelConfig } from '@/hooks/useToolModelConfig';
 import {
   Select,
   SelectContent,
@@ -112,6 +113,9 @@ const TONE_OPTIONS = [
 
 // ==================== 主组件 ====================
 export default function ProductPageGenerator() {
+  // 获取模型配置
+  const { config: modelConfig, loading: modelLoading } = useToolModelConfig('productpage');
+  
   // 配置状态
   const [platform, setPlatform] = useState('amazon');
   const [selectedRegions, setSelectedRegions] = useState<string[]>(['us']);
@@ -236,6 +240,7 @@ export default function ProductPageGenerator() {
           tone,
           detailOptions,
           extraRequirements,
+          model: modelConfig?.default_model || 'coze-image',
         }),
       });
       
