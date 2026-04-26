@@ -143,6 +143,7 @@ function UtilityToolsPage() {
       productpage: '/productpage',
       'xiaohongshu-generator': '/xiaohongshu-generator',
       'product-poster': '/product-poster',
+      'ai-photo': '/ai-photo',
     };
     return urls[slug] || '/';
   };
