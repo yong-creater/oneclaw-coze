@@ -22,6 +22,7 @@ import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
 import NovelCreator from '@/components/tools/NovelCreator';
 import { ToolLogo } from '@/components/common/ToolLogo';
+import WechatPromo from '@/components/common/WechatPromo';
 
 // ==================== 类型定义 ====================
 interface Category {
@@ -128,7 +129,6 @@ function UtilityToolsPage() {
       {/* 工具网格 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {tools.map(tool => {
-          const Icon = tool.icon;
           const getToolUrl = (key: string) => {
             const urls: Record<string, string> = {
               resume: '/resume',
@@ -143,53 +143,52 @@ function UtilityToolsPage() {
               onClick={() => {
                 window.open(getToolUrl(tool.key), '_blank');
               }}
-              className="group relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left overflow-hidden flex flex-col"
+              className="group bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left"
             >
-              {/* 背景渐变装饰 */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity`} />
-              
-              {/* 内容 */}
-              <div className="relative flex-1">
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.color} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                  <Icon className="w-7 h-7 text-white" />
+              {/* 头部：头像 + 名称 + 评分 */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white font-bold text-lg shadow-sm group-hover:scale-105 transition-transform">
+                  {tool.name[0]}
                 </div>
-                
-                <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2 group-hover:text-orange-500 transition-colors">
-                  {tool.name}
-                </h3>
-                
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
-                  {tool.description}
-                </p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-slate-800 dark:text-white text-base group-hover:text-orange-500 transition-colors truncate">
+                    {tool.name}
+                  </h3>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                    <span className="text-xs text-slate-500">4.8</span>
+                  </div>
+                </div>
               </div>
               
-              {/* 底部区域：默认显示开始使用，悬浮时显示标签 */}
-              <div className="relative mt-4">
-                {/* 默认显示 */}
-                <div className="flex items-center gap-2 text-orange-500 text-sm font-medium group-hover:opacity-0 transition-opacity h-6">
-                  <span>开始使用</span>
-                  <ArrowRight className="w-4 h-4" />
-                </div>
-                
-                {/* Hover显示核心卖点标签 */}
-                <div className="absolute inset-0 flex flex-wrap gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity py-1">
-                  {tool.tags?.map((tag, idx) => (
-                    <span key={idx} className={`px-2 py-0.5 text-xs rounded-full bg-gradient-to-r ${tool.color} text-white shadow-sm`}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+              {/* 描述 */}
+              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+                {tool.description}
+              </p>
+              
+              {/* 标签 */}
+              <div className="flex flex-wrap gap-1.5">
+                {tool.tags?.slice(0, 2).map((tag, idx) => (
+                  <span key={idx} className="px-2 py-0.5 text-xs rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                    {tag}
+                  </span>
+                ))}
+                {tool.tags && tool.tags.length > 2 && (
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500">
+                    +{tool.tags.length - 2}
+                  </span>
+                )}
               </div>
             </button>
           );
         })}
         
         {/* 敬请期待卡片 */}
-        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
-          <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4">
-            <Sparkles className="w-7 h-7 text-slate-400" />
+        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
+          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
+            <Sparkles className="w-6 h-6 text-slate-400" />
           </div>
-          <h3 className="text-lg font-bold text-slate-400 dark:text-slate-500 mb-2">
+          <h3 className="font-bold text-slate-400 dark:text-slate-500 mb-1">
             更多工具
           </h3>
           <p className="text-sm text-slate-400">
@@ -1370,66 +1369,26 @@ export default function HomePage() {
       {/* 页脚 */}
       <footer className="bg-gradient-to-t from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
         <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* 公众号推广 - 居中卡片设计 */}
-          <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50 dark:from-orange-900/20 dark:via-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 mb-8 border border-orange-100 dark:border-orange-800/30">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              {/* 二维码区域 */}
-              <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-r from-orange-400 to-amber-400 rounded-2xl blur-lg opacity-30"></div>
-                <div className="relative bg-white dark:bg-slate-800 rounded-xl p-3 shadow-xl">
-                  <Image 
-                    src="/wechat-qrcode.jpg" 
-                    alt="微信公众号" 
-                    width={120}
-                    height={120}
-                    className="w-28 h-28 rounded-lg"
-                  />
-                </div>
-                {/* 装饰龙虾 */}
-                <div className="absolute -top-4 -right-4">
-                  <AnimatedLobster size={32} />
-                </div>
-              </div>
-              
-              {/* 文字区域 */}
-              <div className="text-center md:text-left flex-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                  欢迎关注公众号
-                </h3>
-                <p className="text-slate-600 dark:text-slate-300 mb-1">
-                  获取最新AI工具资讯、技巧与资源
-                </p>
-                <div className="inline-flex items-center gap-2 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-4 py-2 rounded-full text-sm">
-                  <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-                  回复「AI」送你一份AI工具使用指南
-                </div>
-              </div>
-              
-              {/* 右侧品牌 */}
-              <div className="hidden md:flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg">
-                  <AnimatedLobster size={40} />
-                </div>
-                <span className="font-bold text-lg text-slate-700 dark:text-slate-200">OneClaw</span>
-              </div>
-            </div>
-          </div>
+          {/* 公众号推广 - 使用WechatPromo组件 */}
+          <WechatPromo />
           
           {/* 底部导航 */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
-                <AnimatedLobster size={20} />
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                  <AnimatedLobster size={20} />
+                </div>
+                <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+                <span className="text-xs text-slate-400 ml-2">AI工具导航</span>
               </div>
-              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
-              <span className="text-xs text-slate-400 ml-2">AI工具导航</span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
-              <span className="text-slate-300 dark:text-slate-600">|</span>
-              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
-                渝ICP备2026004291号-2
-              </a>
+              <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+                <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+                <span className="text-slate-300 dark:text-slate-600">|</span>
+                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                  渝ICP备2026004291号-2
+                </a>
+              </div>
             </div>
           </div>
         </div>
