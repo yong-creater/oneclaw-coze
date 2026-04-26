@@ -101,34 +101,70 @@ let supabaseClient: SupabaseClient | null = null;
 
 // 创建支持链式调用的 Mock 客户端
 function createMockClient() {
-  const createChainableQuery = (data: unknown, count?: number) => ({
-    select: () => createChainableQuery(data),
-    eq: () => Promise.resolve({ data, error: null, count }),
-    single: () => Promise.resolve({ data, error: null }),
-    then: function(resolve: (value: unknown) => void) {
-      return Promise.resolve({ data, error: null }).then(resolve);
-    },
-  });
+  // 创建一个可链式调用的查询对象
+  const createChainableQuery = (data: unknown = [], count?: number) => {
+    const query = {
+      // select 支持链式调用
+      select: (columns?: string, options?: { count?: string }) => {
+        return createChainableQuery(data, options?.count === 'exact' ? 0 : count);
+      },
+      // eq 支持链式调用
+      eq: (column: string, value: unknown) => {
+        return createChainableQuery(data, count);
+      },
+      // order 支持链式调用
+      order: (column: string, options?: { ascending?: boolean }) => {
+        return createChainableQuery(data, count);
+      },
+      // limit 支持链式调用
+      limit: (n: number) => {
+        return createChainableQuery(data, count);
+      },
+      // range 支持链式调用
+      range: (from: number, to: number) => {
+        return createChainableQuery(data, count);
+      },
+      // single 返回 Promise
+      single: () => {
+        return Promise.resolve({ data, error: null });
+      },
+      // 最终执行返回 Promise
+      then: function(resolve: (value: unknown) => void, reject?: (reason: unknown) => void) {
+        return Promise.resolve({ data, error: null, count }).then(resolve, reject);
+      },
+    };
+    return query;
+  };
 
   return {
-    from: (table: string) => ({
-      select: (columns?: string, options?: { count?: string }) => {
-        return {
-          eq: (column: string, value: unknown) => Promise.resolve({ 
-            data: [], 
-            error: null, 
-            count: options?.count === 'exact' ? 0 : undefined 
-          }),
-          limit: (n: number) => Promise.resolve({ data: [], error: null }),
-          single: () => Promise.resolve({ data: null, error: null }),
-          order: () => Promise.resolve({ data: [], error: null }),
-          range: () => Promise.resolve({ data: [], error: null }),
-        };
-      },
-      insert: () => Promise.resolve({ data: null, error: null }),
-      update: () => Promise.resolve({ data: null, error: null }),
-      delete: () => Promise.resolve({ data: null, error: null }),
-    }),
+    from: (table: string) => {
+      return {
+        select: (columns?: string, options?: { count?: string }) => {
+          return createChainableQuery([], options?.count === 'exact' ? 0 : undefined);
+        },
+        eq: (column: string, value: unknown) => {
+          return createChainableQuery([]);
+        },
+        insert: () => ({
+          select: () => Promise.resolve({ data: null, error: null }),
+          then: function(resolve: (value: unknown) => void) {
+            return Promise.resolve({ data: null, error: null }).then(resolve);
+          },
+        }),
+        update: () => ({
+          eq: () => Promise.resolve({ data: null, error: null }),
+          then: function(resolve: (value: unknown) => void) {
+            return Promise.resolve({ data: null, error: null }).then(resolve);
+          },
+        }),
+        delete: () => ({
+          eq: () => Promise.resolve({ data: null, error: null }),
+          then: function(resolve: (value: unknown) => void) {
+            return Promise.resolve({ data: null, error: null }).then(resolve);
+          },
+        }),
+      };
+    },
     channel: () => ({ subscribe: () => ({}) }),
     removeChannel: () => Promise.resolve(),
   } as unknown as SupabaseClient;
