@@ -6,7 +6,8 @@ import {
   FileText, Copy, Download, Check, X, ChevronDown,
   ChevronRight, Zap, Wand2, Image, FileCode, Package,
   AlertCircle, Plus, Trash2, Eye, Edit3, Save,
-  Settings2, Star, BookOpen, MessageSquare, RefreshCw
+  Settings2, Star, BookOpen, MessageSquare, RefreshCw,
+  Crown
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
 import UtilityHeader from '../common/UtilityHeader';
@@ -25,8 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import ModelPicker from '@/components/ui/ModelPicker';
-import { DEFAULT_MODEL_ID } from '@/lib/models';
+import { useToolModelConfig } from '@/hooks/useToolModelConfig';
 
 // 已删除简化版 ModelGroupSelect，统一使用 ModelSelector 组件
 
@@ -142,7 +142,11 @@ export default function NovelCreator() {
   const [polishing, setPolishing] = useState(false);
   const [polishedContent, setPolishedContent] = useState<StoryContent | null>(null);
   const [showExample, setShowExample] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID);
+  
+  // 从后台配置获取模型
+  const { config: modelConfig, loading: modelLoading } = useToolModelConfig('novel-polish');
+  const activeModel = modelConfig?.default_model || 'doubao-seed-1-8-251228';
+  const isPaidModel = modelConfig?.model_source === '4sapi';
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -189,7 +193,7 @@ export default function NovelCreator() {
           style: polishStyle,
           intensity: polishIntensity,
           extraRequirements,
-          model: selectedModel,
+          model: activeModel,
         }),
       });
       
@@ -282,7 +286,7 @@ export default function NovelCreator() {
           text: sourceText,
           count: panelCount,
           style: panelStyle,
-          model: selectedModel,
+          model: activeModel,
         }),
       });
       
@@ -388,7 +392,7 @@ export default function NovelCreator() {
           prompt,
           quality: imageQuality,
           style: panelStyle,
-          model: selectedModel,
+          model: activeModel,
         }),
       });
       
@@ -472,7 +476,7 @@ export default function NovelCreator() {
           platform: scriptPlatform,
           style: scriptStyle,
           duration: scriptDuration,
-          model: selectedModel,
+          model: activeModel,
         }),
       });
       
@@ -768,14 +772,39 @@ export default function NovelCreator() {
                   </h2>
                   
                   <div className="space-y-4">
-                    {/* AI模型选择 */}
+                    {/* AI模型 - 从后台配置读取 */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-1">
                         <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                         AI模型
-                        <span className="text-xs text-slate-400 ml-1">(按厂商分组选择)</span>
+                        {modelLoading && <span className="text-xs text-slate-400 ml-1">(加载中...)</span>}
                       </label>
-                      <ModelPicker value={selectedModel} onChange={setSelectedModel} />
+                      <div className="p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {isPaidModel ? (
+                              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                付费
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                免费
+                              </Badge>
+                            )}
+                            <span className="font-medium text-slate-800 dark:text-slate-100">
+                              {modelConfig?.config_params?.name || '豆包Seed 1.8'}
+                            </span>
+                          </div>
+                          <a 
+                            href="/admin/tool-models" 
+                            target="_blank" 
+                            className="text-xs text-orange-500 hover:text-orange-600 flex items-center gap-1"
+                          >
+                            <Settings2 className="w-3 h-3" />
+                            后台配置
+                          </a>
+                        </div>
+                      </div>
                     </div>
                     
                     <div>
@@ -878,10 +907,7 @@ export default function NovelCreator() {
                           洗稿完成
                         </h2>
                         <Badge variant="outline" className="text-xs">
-                          {selectedModel.includes('deepseek') ? 'DeepSeek ' + (selectedModel.includes('r1') ? 'R1' : 'V3') : 
-                            selectedModel.includes('doubao') ? '豆包 Seed' : 
-                            selectedModel.includes('glm') ? 'GLM-5' : 
-                            selectedModel.includes('qwen') ? 'Qwen' : '豆包'}
+                          {isPaidModel ? "付费模型" : "免费模型"}
                         </Badge>
                       </div>
                       <div className="flex gap-2">
@@ -966,12 +992,21 @@ export default function NovelCreator() {
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">
-                  <div>
+                  <div className="mb-4">
                     <label className="block text-sm font-medium text-slate-700 mb-1">
                       <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                       AI模型
                     </label>
-                    <ModelPicker value={selectedModel} onChange={setSelectedModel} />
+                    <div className="p-2.5 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={isPaidModel ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-green-50 text-green-700 border-green-200"}>
+                          {isPaidModel ? "付费" : "免费"}
+                        </Badge>
+                        <span className="text-sm text-slate-700 dark:text-slate-200">
+                          扣子图片生成模型
+                        </span>
+                      </div>
+                    </div>
                   </div>
                   
                   <div>
@@ -1112,7 +1147,16 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelPicker value={selectedModel} onChange={setSelectedModel} />
+                  <div className="p-2.5 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
+                        免费
+                      </Badge>
+                      <span className="text-sm text-slate-700 dark:text-slate-200">
+                        扣子图片生成模型
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
                 <div>
@@ -1261,7 +1305,16 @@ export default function NovelCreator() {
                     <Sparkles className="w-4 h-4 inline mr-1 text-orange-500" />
                     AI模型
                   </label>
-                  <ModelPicker value={selectedModel} onChange={setSelectedModel} />
+                  <div className="p-2.5 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 border border-orange-200 dark:border-orange-800 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={isPaidModel ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-green-50 text-green-700 border-green-200"}>
+                        {isPaidModel ? "付费" : "免费"}
+                      </Badge>
+                      <span className="text-sm text-slate-700 dark:text-slate-200">
+                        {modelConfig?.config_params?.name || '豆包Seed 1.8'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-3 gap-4">

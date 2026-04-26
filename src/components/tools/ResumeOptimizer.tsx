@@ -5,15 +5,15 @@ import {
   FileText, Upload, Sparkles, Loader2, Target, 
   Check, AlertCircle, Copy, Download, ArrowLeft,
   Lightbulb, Star, TrendingUp, BookOpen, FileDown,
-  Eye, Palette, X, ChevronDown
+  Eye, Palette, X, ChevronDown, Settings2
 } from 'lucide-react';
 import UtilityHeader from '../common/UtilityHeader';
 import { UtilityCard, FormField, PrimaryButton, ActionButton } from '../common/UtilityComponents';
 import LoginButton from '../common/LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
-import ModelPicker from '../ui/ModelPicker';
-import { DEFAULT_MODEL_ID } from '@/lib/models';
+import { useToolModelConfig } from '@/hooks/useToolModelConfig';
+import { Badge } from '@/components/ui/badge';
 
 export default function ResumeOptimizer() {
   // 简历输入状态
@@ -33,8 +33,12 @@ export default function ResumeOptimizer() {
   const [result, setResult] = useState<any>(null);
   const [matchScore, setMatchScore] = useState(0);
   const [showExample, setShowExample] = useState(false);
-  const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL_ID); // 默认 DeepSeek R1
   const [usedModel, setUsedModel] = useState('');
+  
+  // 从后台配置获取模型
+  const { config: modelConfig, loading: modelLoading } = useToolModelConfig('resume');
+  const activeModel = modelConfig?.default_model || 'doubao-seed-1-8-251228';
+  const isPaidModel = modelConfig?.model_source === '4sapi';
   
   // PDF导出相关状态
   const [selectedTemplate, setSelectedTemplate] = useState<ResumeTemplateType>('modern');
@@ -253,7 +257,7 @@ export default function ResumeOptimizer() {
         body: JSON.stringify({
           resume: resumeText,
           jd: jdText,
-          model: selectedModel,
+          model: activeModel,
         }),
       });
 
@@ -388,7 +392,14 @@ export default function ResumeOptimizer() {
                     <FileText className="w-5 h-5 text-orange-500" />
                     <h2 className="font-semibold text-slate-800 dark:text-white">简历输入</h2>
                   </div>
-                  <ModelPicker value={selectedModel} onChange={setSelectedModel} />
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className={isPaidModel ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-green-50 text-green-700 border-green-200"}>
+                      {isPaidModel ? "付费" : "免费"}
+                    </Badge>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">
+                      {modelConfig?.config_params?.name || '豆包Seed 1.8'}
+                    </span>
+                  </div>
                 </div>
                 
                 {/* 内容区 */}

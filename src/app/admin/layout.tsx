@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 const navigation = [
   { name: '仪表盘', href: '/admin' },
   { name: '精选工具', href: '/admin/utility-tools' },
+  { name: '模型配置', href: '/admin/tool-models' },
   { name: '模板库', href: '/admin/templates' },
   { name: 'AI应用管理', href: '/admin/tools' },
   { name: '技能管理', href: '/admin/skills' },
