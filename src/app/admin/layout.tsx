@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Wrench,
@@ -19,6 +19,7 @@ import {
   LogOut,
   Menu,
   X,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,10 +66,14 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // 检查是否为登录页面
+  const isLoginPage = pathname === '/admin/login';
 
   useEffect(() => {
     // 检查是否已登录
@@ -81,17 +86,72 @@ export default function AdminLayout({
           const data = await response.json();
           if (data.user) {
             setAdminUser(data.user);
+          } else {
+            // 未登录，重定向到登录页面
+            if (!isLoginPage) {
+              router.push('/admin/login');
+              return;
+            }
+          }
+        } else {
+          // 未登录，重定向到登录页面
+          if (!isLoginPage) {
+            router.push('/admin/login');
+            return;
           }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        // 网络错误也重定向到登录页面
+        if (!isLoginPage) {
+          router.push('/admin/login');
+          return;
+        }
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [isLoginPage, router]);
+
+  // 如果是登录页面，直接显示登录页面（不显示布局）
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  // 加载中显示加载状态
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <p className="text-slate-500">正在验证身份...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未登录显示无权限页面（已经被上面的 useEffect 重定向了）
+  if (!adminUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+            请先登录
+          </h1>
+          <p className="text-slate-500 mb-4">
+            您需要登录才能访问管理后台
+          </p>
+          <Link href="/admin/login">
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+              去登录
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -139,55 +199,45 @@ export default function AdminLayout({
 
           {/* 右侧：用户信息 */}
           <div className="flex items-center gap-4">
-            {loading ? (
-              <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse" />
-            ) : adminUser ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium">
-                      {adminUser.username.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="hidden sm:inline text-slate-700 dark:text-slate-200">
-                      {adminUser.username}
-                    </span>
-                    <Badge variant="outline" className="hidden sm:inline text-xs">
-                      {adminUser.role === 'super_admin' ? '超级管理员' : '管理员'}
-                    </Badge>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium">{adminUser.username}</p>
-                      <p className="text-xs text-slate-500">{adminUser.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/" target="_blank">
-                      <LayoutDashboard className="w-4 h-4 mr-2" />
-                      访问前台
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="text-red-600 cursor-pointer"
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    退出登录
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link href="/admin/login">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-                  登录
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium">
+                    {adminUser.username.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden sm:inline text-slate-700 dark:text-slate-200">
+                    {adminUser.username}
+                  </span>
+                  <Badge variant="outline" className="hidden sm:inline text-xs">
+                    {adminUser.role === 'super_admin' ? '超级管理员' : '管理员'}
+                  </Badge>
+                  <ChevronDown className="w-4 h-4 text-slate-400" />
                 </Button>
-              </Link>
-            )}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium">{adminUser.username}</p>
+                    <p className="text-xs text-slate-500">{adminUser.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/" target="_blank">
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    访问前台
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  退出登录
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
