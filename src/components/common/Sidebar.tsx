@@ -113,10 +113,10 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
       {/* 移动端遮罩 */}
       {mobileOpen && <MobileOverlay />}
 
-      {/* 侧边栏 - 简洁设计 */}
+      {/* 侧边栏 - 唯一有分隔线的区域 */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-screen bg-background flex flex-col z-50 transition-all duration-200",
+          "fixed top-0 left-0 h-screen bg-background border-r border-border flex flex-col z-50 transition-all duration-200",
           collapsed ? "w-16" : "w-60",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}

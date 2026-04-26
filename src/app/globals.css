@@ -162,10 +162,6 @@
    Base Styles - Clean Foundation
    ======================================== */
 @layer base {
-  * {
-    border-color: var(--border);
-  }
-  
   html {
     scroll-behavior: smooth;
   }

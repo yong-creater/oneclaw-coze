@@ -1,62 +1,381 @@
-# OneClaw UI Design System
+# OneClaw UI Design System v2
 # 设计规范 - 对标苹果、特斯拉、谷歌
 
-## 设计哲学
-
-参考苹果(Apple)、特斯拉(Tesla)、谷歌(Google)的设计语言：
-- **极简主义**：Less is More，减少视觉噪音
-- **内容优先**：让内容成为焦点，UI退居幕后
-- **精致细节**：每个像素都经过推敲
-- **一致性**：全站统一的视觉语言
+> 基于 ui-ux-pro-max 技能生成的专业设计系统
 
 ---
 
-## 1. 色彩系统
+## 1. 设计哲学
 
-### 主色调 (Primary)
-```
---primary:       #2563EB  /* 谷歌蓝 - 主品牌色 */
---primary-light: #3B82F6  /* 浅蓝 - hover状态 */
---primary-dark:  #1D4ED8  /* 深蓝 - 按下状态 */
-```
+### 核心原则
+- **Minimal & Direct** (最小化直接)
+- **Swiss Modernism 2.0** (瑞士现代主义)
+- **AI-Native UI** (AI原生界面)
 
-###  нейтральные 色调 (Neutral)
-```
---foreground:    #0A0A0A  /* 纯黑 - 主文字 */
---muted:         #71717A  /* 灰色 - 次要文字 */
---muted-light:   #A1A1AA  /* 浅灰 - 占位符 */
---border:        #E4E4E7  /* 边框线 */
---border-light:  #F4F4F5  /* 浅边框 */
---background:    #FFFFFF  /* 纯白背景 */
---card:          #FAFAFA  /* 卡片背景 */
-```
+### 设计语言
+- 大量留白，减少视觉噪音
+- 纯黑文字 (#0A0A0A)，提高对比度
+- 纯白背景 (#FFFFFF)，干净简洁
+- 单一主色调作为点缀
+- 使用间距和层次而非线条来分隔内容
 
-### 功能色 (Functional)
-```
---success:       #16A34A  /* 成功绿 */
---warning:       #CA8A04  /* 警告黄 */
---error:         #DC2626  /* 错误红 */
---info:          #0284C7  /* 信息蓝 */
-```
+---
+
+## 2. 色彩系统
+
+### 核心色板
+
+| 角色 | 变量 | 色值 | 用途 |
+|------|------|------|------|
+| 主色 | `--primary` | `#2563EB` | 品牌色、按钮、链接 |
+| 主色浅 | `--primary-foreground` | `#FFFFFF` | 主色上的文字 |
+| 背景 | `--background` | `#FFFFFF` | 页面背景 |
+| 卡片 | `--card` | `#FFFFFF` | 卡片背景 |
+| 前景 | `--foreground` | `#0A0A0A` | 主要文字 |
+| 次要文字 | `--muted-foreground` | `#71717A` | 次要文字、标签 |
+| 占位符 | `--muted` | `#F4F4F5` | muted背景 |
+| 强调 | `--accent` | `#F4F4F5` | 悬浮态背景 |
+| 边框 | `--border` | `transparent` | **默认无边框** |
+| 输入 | `--input` | `#E4E4E7` | 输入框边框(仅focus) |
+| 破坏 | `--destructive` | `#DC2626` | 错误、删除 |
 
 ### 深色模式
+
+| 角色 | 变量 | 色值 |
+|------|------|------|
+| 背景 | `--background` | `#09090B` |
+| 卡片 | `--card` | `#18181B` |
+| 前景 | `--foreground` | `#FAFAFA` |
+| 次要文字 | `--muted-foreground` | `#A1A1AA` |
+| 强调 | `--accent` | `#27272A` |
+| 边框 | `--border` | `transparent` |
+
+### 功能色
+
+| 用途 | 色值 |
+|------|------|
+| 成功 | `#16A34A` |
+| 警告 | `#CA8A04` |
+| 错误 | `#DC2626` |
+| 信息 | `#0284C7` |
+
+---
+
+## 3. 线条与分隔系统
+
+### 核心原则 ⚠️ 重要
+
+> **线条使用规范** - 这是本设计的核心决策
+
 ```
---foreground-dark:  #FAFAFA  /* 浅色文字 */
---background-dark:  #09090B  /* 深色背景 */
---card-dark:        #18181B  /* 深色卡片 */
---border-dark:     #27272A  /* 深色边框 */
+❌ 错误做法:
+- 默认给所有卡片添加 border
+- 使用线条分隔相关内容
+- 用 border 区分元素
+
+✅ 正确做法:
+- 默认无边框 (border: transparent)
+- 使用间距 (space-y, gap) 分隔内容
+- 使用阴影层级区分元素
+- 使用背景色区分区块
+```
+
+### 线条使用场景
+
+| 场景 | 是否有线条 | 替代方案 |
+|------|------------|----------|
+| 侧边栏与内容区分 | ✅ 有 | 单一分隔线，右侧 |
+| 页面顶部固定导航 | ❌ 无 | 使用阴影 `shadow-sm` |
+| 卡片组件 | ❌ 无 | 仅 hover 时阴影 |
+| 分类筛选区 | ❌ 无 | 背景色区分 |
+| 表单输入框 | ❌ 无 | 仅 focus 时边框 |
+| 按钮 | ❌ 无 | 使用背景色 |
+| 表格行 | ❌ 无 | 使用斑马纹背景 |
+
+### 分隔线样式（仅在必要时使用）
+
+```css
+/* 侧边栏与内容分隔线 */
+border-right: 1px solid var(--border); /* 实际透明 */
+
+/* 仅在需要可见边框时使用 */
+.visible-border {
+  border: 1px solid #E4E4E7;
+}
 ```
 
 ---
 
-## 2. 字体系统
+## 4. 圆角系统
 
-### 字体家族
-```css
-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+### 统一圆角规范
+
+| 组件 | 圆角 | Tailwind |
+|------|------|----------|
+| 按钮 | 8px | `rounded-lg` |
+| 输入框 | 8px | `rounded-lg` |
+| 卡片 | 12px | `rounded-xl` |
+| 弹窗 | 16px | `rounded-2xl` |
+| 头像 | 9999px | `rounded-full` |
+| Logo容器 | 8px | `rounded-lg` |
+| 小标签 | 6px | `rounded-md` |
+| 大卡片 | 12px | `rounded-xl` |
+
+**原则**: 避免过小或过大的圆角，保持精致感
+
+---
+
+## 5. 间距系统
+
+### 基础单位: 4px
+
+| 名称 | 值 | Tailwind | 用途 |
+|------|-----|----------|------|
+| 0 | 0px | `space-0` | 紧密元素 |
+| 1 | 4px | `space-1` | 微调 |
+| 2 | 8px | `space-2` | 小间距 |
+| 3 | 12px | `space-3` | 默认间距 |
+| 4 | 16px | `space-4` | 元素间距 |
+| 6 | 24px | `space-6` | 区块间距 |
+| 8 | 32px | `space-8` | 大区块 |
+| 12 | 48px | `space-12` | 页面间距 |
+| 16 | 64px | `space-16` | 极大间距 |
+
+### 页面布局间距
+
+```tsx
+// 页面容器
+<div className="max-w-7xl mx-auto px-6 py-8">
+
+// 区块间距
+<div className="space-y-6">  // 区块内
+<div className="gap-4">     // 网格
+
+// 元素间距
+<div className="gap-2">     // 紧密
+<div className="gap-3">     // 默认
 ```
 
-### 字号规范
+---
+
+## 6. 阴影系统
+
+### 阴影层级
+
+| 名称 | CSS | 使用场景 |
+|------|-----|----------|
+| `shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | 页面顶部固定元素 |
+| `shadow-md` | `0 4px 6px -1px rgba(0,0,0,0.05)` | 卡片悬浮态 |
+| `shadow-hover` | 自定义 | 交互反馈 |
+| `shadow-lg` | `0 10px 15px -3px rgba(0,0,0,0.1)` | 弹窗 |
+
+### 阴影使用原则
+
+```
+✅ 使用阴影:
+- 页面顶部固定导航栏
+- 悬浮态的卡片
+- 弹窗、下拉菜单
+
+❌ 不使用阴影:
+- 默认状态的卡片
+- 已在视觉上区分的元素
+- 列表项
+```
+
+---
+
+## 7. 组件规范
+
+### 按钮
+
+```tsx
+// 主要按钮 - 使用背景色
+<Button className="h-10 px-4 bg-primary text-primary-foreground 
+                   hover:bg-primary/90 rounded-lg font-medium text-sm 
+                   shadow-sm">
+  按钮文字
+</Button>
+
+// 次要按钮 - 使用背景色
+<Button variant="outline" className="h-10 px-4 bg-accent 
+                                     hover:bg-muted rounded-lg 
+                                     font-medium text-sm">
+  按钮文字
+</Button>
+
+// 危险按钮
+<Button variant="destructive" className="h-10 px-4 rounded-lg 
+                                          font-medium text-sm">
+  删除
+</Button>
+```
+
+### 输入框
+
+```tsx
+// 默认无边框
+<Input className="h-10 px-3 bg-background rounded-lg text-sm 
+                  focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+
+// 带边框的输入框（仅在需要明确边界时）
+<Input className="h-10 px-3 border border-input rounded-lg text-sm" />
+```
+
+### 卡片
+
+```tsx
+// 默认无边框、无阴影
+<Card className="bg-card rounded-xl py-5">
+  {/* 内容 */}
+</Card>
+
+// 悬浮态卡片
+<Card className="bg-card rounded-xl py-5 hover:shadow-md transition-shadow">
+  {/* 内容 */}
+</Card>
+
+// 无边框卡片
+<Card className="bg-card rounded-xl py-5 shadow-sm">
+  {/* 内容 */}
+</Card>
+```
+
+### 标签
+
+```tsx
+<Badge className="px-2.5 py-0.5 text-xs rounded-md font-medium 
+                  bg-muted text-muted-foreground">
+  标签
+</Badge>
+```
+
+---
+
+## 8. 前台页面规范
+
+### 布局原则
+
+```
+┌─────────────────────────────────────────────────────┐
+│  侧边栏 (w-60, 右侧分隔线)                          │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  主内容区                                           │
+│  ├── max-w-7xl (全宽展示)                          │
+│  ├── max-w-4xl (详情页居中)                         │
+│  └── px-6 py-8 (页面内边距)                         │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
+### 页面结构
+
+```tsx
+// 列表页
+<div className="space-y-6">
+  {/* 页面标题 */}
+  <div>
+    <h1 className="text-2xl font-semibold">标题</h1>
+    <p className="text-sm text-muted-foreground">描述</p>
+  </div>
+  
+  {/* 内容区 - 使用间距而非线条 */}
+  <div className="grid grid-cols-2 gap-4">
+    {/* 卡片 - 默认无边框 */}
+  </div>
+</div>
+```
+
+### 详情页
+
+```tsx
+// 详情页居中
+<div className="max-w-4xl mx-auto px-6 py-8">
+  {/* 内容 */}
+</div>
+```
+
+---
+
+## 9. 后台页面规范
+
+### 布局
+
+```
+┌──────────┬────────────────────────────────────────┐
+│          │  页面标题                               │
+│  侧边栏  │─────────────────────────────────────────│
+│  (固定)  │                                         │
+│          │  主内容区                               │
+│          │                                         │
+└──────────┴────────────────────────────────────────┘
+```
+
+### 页面结构
+
+```tsx
+<div className="space-y-6">
+  <div>
+    <h2 className="text-2xl font-semibold">页面标题</h2>
+    <p className="text-sm text-muted-foreground">页面描述</p>
+  </div>
+  
+  <Card>
+    <CardContent className="p-6">
+      {/* 内容 */}
+    </CardContent>
+  </Card>
+</div>
+```
+
+---
+
+## 10. 动效规范
+
+### 时长
+
+| 类型 | 时长 | 用途 |
+|------|------|------|
+| 微交互 | 150ms | hover、点击反馈 |
+| 展开 | 200ms | 下拉、展开 |
+| 弹窗 | 250ms | 弹窗动画 |
+| 页面 | 300ms | 页面切换 |
+
+### 缓动函数
+
+```css
+transition: all 150ms ease-out;
+transition: all 200ms ease-out;
+```
+
+### 动效原则
+
+```
+✅ 使用动效:
+- hover 状态反馈
+- 加载状态
+- 弹窗出现
+
+❌ 不使用动效:
+- 页面布局变化
+- 频繁更新的数据
+- 静态内容
+```
+
+---
+
+## 11. 字体系统
+
+### 字体家族
+
+```css
+font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 
+             'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+```
+
+### 字号
+
 | 元素 | 大小 | 字重 | 行高 |
 |------|------|------|------|
 | H1 | 32px | 600 | 1.2 |
@@ -68,178 +387,44 @@ font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Ro
 
 ---
 
-## 3. 间距系统
-
-### 基础单位：4px
-
-| 名称 | 值 | 用途 |
-|------|-----|------|
-| xs | 4px | 紧凑元素 |
-| sm | 8px | 小间距 |
-| md | 12px | 默认间距 |
-| lg | 16px | 大间距 |
-| xl | 24px | 区块间距 |
-| 2xl | 32px | 区块间距 |
-| 3xl | 48px | 大区块 |
-
----
-
-## 4. 圆角系统
-
-### 统一圆角 - 简洁精致
-
-| 组件 | 圆角 |
-|------|------|
-| 按钮 | 8px |
-| 卡片 | 12px |
-| 输入框 | 8px |
-| 弹窗 | 16px |
-| 头像 | 9999px (圆形) |
-| Logo容器 | 10px |
-
-**原则**：避免过大圆角，保持精致感
-
----
-
-## 5. 阴影系统
-
-### 柔和阴影 - 苹果风格
-
-```css
-/* 浅阴影 - 默认卡片 */
-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-
-/* 中阴影 - 悬浮卡片 */
-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.03);
-
-/* 深阴影 - 弹窗 */
-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
-
-/* 悬浮阴影 - 交互反馈 */
-shadow-hover: 0 8px 25px -5px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
-```
-
----
-
-## 6. 动效规范
-
-### 微交互 - 精致流畅
-
-| 动效类型 | 时长 | 缓动函数 |
-|----------|------|----------|
-| Hover | 150ms | ease-out |
-| 展开 | 200ms | ease-out |
-| 弹窗 | 250ms | ease-out |
-| 页面切换 | 300ms | ease-in-out |
-
-### 动效原则
-- 动效应增强用户体验，不应分散注意力
-- 使用 `transform` 和 `opacity` 实现性能优化
-- 尊重用户偏好设置 `prefers-reduced-motion`
-
----
-
-## 7. 组件规范
-
-### 按钮
-
-```tsx
-// 主要按钮
-<Button className="h-10 px-4 bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 rounded-lg font-medium text-sm shadow-sm">
-  按钮文字
-</Button>
-
-// 次要按钮
-<Button variant="outline" className="h-10 px-4 border-border hover:bg-muted rounded-lg font-medium text-sm">
-  按钮文字
-</Button>
-
-// 危险按钮
-<Button variant="destructive" className="h-10 px-4 rounded-lg font-medium text-sm">
-  删除
-</Button>
-```
-
-### 输入框
-
-```tsx
-<Input className="h-10 px-3 bg-white border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
-```
-
-### 卡片
-
-```tsx
-<Card className="bg-white border border-border rounded-xl p-5 hover:shadow-hover transition-shadow duration-200">
-  {/* 内容 */}
-</Card>
-```
-
-### 标签
-
-```tsx
-<Badge variant="secondary" className="px-2.5 py-0.5 text-xs rounded-md font-medium">
-  标签
-</Badge>
-```
-
----
-
-## 8. 前台页面规范
-
-### 布局
-- 最大宽度: `max-w-7xl`
-- 页面内边距: `px-6`
-- 区块间距: `space-y-8`
-
-### 详情页
-- 最大宽度: `max-w-4xl mx-auto`
-- 内容居中对齐
-
-### 列表页
-- 网格布局: `grid grid-cols-6 gap-3` (AI工具库)
-- 列表布局: 垂直堆叠
-
----
-
-## 9. 后台页面规范
-
-### 布局
-- 侧边栏固定宽度: `w-64`
-- 主内容区无最大宽度限制
-
-### 页面结构
-```tsx
-<div className="space-y-6">
-  <div>
-    <h2 className="text-2xl font-semibold">页面标题</h2>
-    <p className="text-sm text-muted-foreground">页面描述</p>
-  </div>
-  {/* 内容 */}
-</div>
-```
-
----
-
-## 10. 设计检查清单
+## 12. 检查清单
 
 ### 视觉质量
-- [ ] 无表情符号作为图标
-- [ ] 所有图标来自统一图标库 (Lucide)
-- [ ] 悬浮状态不导致布局偏移
-- [ ] 使用主题色而非硬编码颜色
+- [x] 无边框的卡片（默认状态）
+- [x] 仅在必要时使用线条分隔
+- [x] 使用间距而非线条分隔内容
+- [x] 悬浮态使用阴影而非边框
+- [x] 侧边栏仅右侧有分隔线
 
 ### 交互
-- [ ] 所有可点击元素有 `cursor-pointer`
-- [ ] 悬浮状态有清晰的视觉反馈
-- [ ] 过渡动画流畅 (150-300ms)
+- [x] 所有可点击元素有 `cursor-pointer`
+- [x] hover 状态有视觉反馈
+- [x] 过渡动画 150-300ms
 
-### 深色模式
-- [ ] 浅色模式文字对比度 ≥ 4.5:1
-- [ ] 两种模式边框都可见
-- [ ] 两种模式都经过测试
+### 一致性
+- [x] 圆角统一 (8px/12px/16px)
+- [x] 间距使用 4px 倍数
+- [x] 阴影层级清晰
 
-### 响应式
-- [ ] 375px (手机)
-- [ ] 768px (平板)
-- [ ] 1024px (桌面)
-- [ ] 1440px (大屏)
+---
+
+## 13. 核心决策总结
+
+### 线条决策
+
+| 元素 | 决策 | 原因 |
+|------|------|------|
+| 卡片边框 | ❌ 无 | 减少视觉噪音 |
+| 页面分隔 | ❌ 无 | 使用间距 |
+| 侧边栏分隔 | ✅ 有 | 明确区分区域 |
+| 输入框边框 | ❌ 无(默认) | 仅 focus 时显示 |
+| 按钮边框 | ❌ 无 | 使用背景色 |
+| 表格边框 | ❌ 无 | 使用背景色区分 |
+
+### 设计目标
+
+> **像苹果、特斯拉、谷歌一样：**
+> - 大量留白
+> - 极简线条
+> - 精致的阴影
+> - 统一的设计语言
