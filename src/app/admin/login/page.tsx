@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,24 +15,6 @@ export default function AdminLoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-
-  // 检查是否已登录
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/admin/auth", {
-          credentials: "include",
-        });
-        const data = await response.json();
-        if (data.success) {
-          router.push("/admin");
-        }
-      } catch (e) {
-        // 未登录，继续显示登录页面
-      }
-    };
-    checkAuth();
-  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
