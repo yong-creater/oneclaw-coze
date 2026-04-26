@@ -42,22 +42,22 @@ export function useToolModelConfig(toolSlug: string) {
         const res = await fetch(`/api/utility-tools?slug=${toolSlug}`);
         const data = await res.json();
         
-        if (data.tools && data.tools.length > 0) {
-          const tool = data.tools.find((t: any) => t.slug === toolSlug);
-          if (tool && tool.model_config) {
-            setConfig({
-              tool_id: tool.slug,
-              tool_name: tool.name,
-              tool_type: tool.slug,
-              default_model: tool.model_config.default_model || 'ep-20250312145957-p8xpp',
-              model_source: tool.model_config.model_source || 'coze',
-              model_price_per_1k_tokens: tool.model_config.model_price_per_1k_tokens || 0,
-              is_free: tool.model_config.is_free !== false,
-              is_active: tool.model_config.is_active !== false,
-            });
-            setLoading(false);
-            return;
-          }
+        // API返回的是 data.tool（单个对象），不是 data.tools（数组）
+        const tool = data.tool || (data.tools && data.tools.find((t: any) => t.slug === toolSlug));
+        
+        if (tool && tool.model_config) {
+          setConfig({
+            tool_id: tool.slug,
+            tool_name: tool.name,
+            tool_type: tool.slug,
+            default_model: tool.model_config.default_model || 'doubao-seed-1-8-251228',
+            model_source: tool.model_config.model_source || 'coze',
+            model_price_per_1k_tokens: tool.model_config.model_price_per_1k_tokens || 0,
+            is_free: tool.model_config.is_free !== false,
+            is_active: tool.model_config.is_active !== false,
+          });
+          setLoading(false);
+          return;
         }
         
         // 如果没有配置，使用默认配置
@@ -65,7 +65,7 @@ export function useToolModelConfig(toolSlug: string) {
           tool_id: toolSlug,
           tool_name: getToolName(toolSlug),
           tool_type: toolSlug,
-          default_model: 'ep-20250312145957-p8xpp',
+          default_model: 'doubao-seed-1-8-251228',
           model_source: 'coze',
           model_price_per_1k_tokens: 0,
           is_free: true,
