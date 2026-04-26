@@ -687,7 +687,7 @@ export default function NovelCreator() {
         toolIcon={<Feather />}
         toolName="小说创作工坊"
         toolDescription="小说洗稿 · 漫画生图 · 推文脚本"
-        gradient="from-orange-500 to-amber-500"
+        gradient="from-purple-500 to-pink-500"
       />
       
       {/* 标签页导航 */}

@@ -424,7 +424,7 @@ export default function ProductPageGenerator() {
         toolIcon={<Globe />}
         toolName="出海详情页"
         toolDescription="合规适配 · 人文贴合 · 多平台兼容"
-        gradient="from-orange-500 to-amber-500"
+        gradient="from-emerald-500 to-teal-500"
       />
 
       <div className="max-w-7xl mx-auto px-4 py-6">

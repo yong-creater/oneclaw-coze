@@ -392,7 +392,7 @@ export default function ResumeOptimizer() {
         toolIcon={<FileText />}
         toolName="STAR简历优化"
         toolDescription="JD精准匹配 · STAR法则优化"
-        gradient="from-orange-500 to-amber-500"
+        gradient="from-blue-500 to-cyan-500"
       />
       
       {/* 主内容区 */}
