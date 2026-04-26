@@ -78,6 +78,7 @@ export async function PUT(
       limitations: body.limitations || [],
       commercial_license: body.commercial_license,
       launch_date: body.launch_date,
+      model_config: body.model_config,
       updated_at: new Date().toISOString(),
     };
 

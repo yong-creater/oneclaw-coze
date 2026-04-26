@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Save, Trash2, Eye, MousePointer, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 
 interface Category {
   id: number;
@@ -33,6 +34,14 @@ interface ToolFunction {
 interface ToolFAQ {
   question: string;
   answer: string;
+}
+
+interface ToolModelConfig {
+  default_model: string;
+  model_source: string;
+  model_price_per_1k_tokens: number;
+  is_free: boolean;
+  is_active: boolean;
 }
 
 interface Tool {
@@ -64,6 +73,7 @@ interface Tool {
   faqs: ToolFAQ[];
   customer_email: string;
   feedback_link: string;
+  model_config?: ToolModelConfig;
 }
 
 const LICENSE_TYPES = ['可免费商用', '需授权商用', '不可商用'];
@@ -103,6 +113,13 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
     faqs: [{ question: '', answer: '' }] as ToolFAQ[],
     customer_email: '',
     feedback_link: '',
+    model_config: {
+      default_model: 'ep-20250312145957-p8xpp',
+      model_source: 'coze',
+      model_price_per_1k_tokens: 0,
+      is_free: true,
+      is_active: true,
+    },
   });
 
   // 获取工具数据
@@ -144,6 +161,13 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
             faqs: toolData.faqs?.length > 0 ? toolData.faqs : [{ question: '', answer: '' }],
             customer_email: toolData.customer_email || '',
             feedback_link: toolData.feedback_link || '',
+            model_config: toolData.model_config || {
+              default_model: 'ep-20250312145957-p8xpp',
+              model_source: 'coze',
+              model_price_per_1k_tokens: 0,
+              is_free: true,
+              is_active: true,
+            },
           });
         } else {
           alert('工具不存在');
@@ -788,6 +812,118 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* AI 模型配置 */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">AI 模型配置</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            配置该工具调用的 AI 模型。扣子内置模型免费，4sAPI 模型需付费。
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                模型来源
+              </label>
+              <select
+                value={formData.model_config.model_source}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  model_config: { 
+                    ...prev.model_config, 
+                    model_source: e.target.value,
+                    is_free: e.target.value === 'coze',
+                  }
+                }))}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="coze">扣子内置 (免费)</option>
+                <option value="4sapi">4sAPI (付费)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                选择模型
+              </label>
+              <select
+                value={formData.model_config.default_model}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  model_config: { ...prev.model_config, default_model: e.target.value }
+                }))}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                {formData.model_config.model_source === 'coze' ? (
+                  <>
+                    <option value="ep-20250312145957-p8xpp">Doubao-Pro (扣子)</option>
+                    <option value="ep-20250410165509-dtk4n">Doubao-Seed (扣子)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="deepseek-chat">DeepSeek V3</option>
+                    <option value="deepseek-reasoner">DeepSeek R1</option>
+                    <option value="moonshot-v1-8k">Kimi</option>
+                    <option value="gpt-4o">GPT-4o</option>
+                  </>
+                )}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                价格 (元/千token)
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={formData.model_config.model_price_per_1k_tokens}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  model_config: { 
+                    ...prev.model_config, 
+                    model_price_per_1k_tokens: parseFloat(e.target.value) || 0 
+                  }
+                }))}
+                disabled={formData.model_config.model_source === 'coze'}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                  bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500
+                  disabled:bg-slate-100 disabled:text-slate-500"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                状态
+              </label>
+              <div className="flex items-center gap-3 h-[42px]">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.model_config.is_active}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      model_config: { ...prev.model_config, is_active: e.target.checked }
+                    }))}
+                    className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                  />
+                  <span className="text-sm text-slate-700 dark:text-slate-300">启用</span>
+                </label>
+                {formData.model_config.is_free ? (
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                    免费
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                    付费
+                  </Badge>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
