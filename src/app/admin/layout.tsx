@@ -70,40 +70,30 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // 检查是否为登录页面
   const isLoginPage = pathname === '/admin/login';
 
-  // 标记是否已检查过认证
-  const [authChecked, setAuthChecked] = useState(false);
-
   useEffect(() => {
-    // 如果已经检查过，不再重复检查
-    if (authChecked) return;
-    
-    // 检查是否已登录
     const checkAuth = async () => {
       try {
         const response = await fetch('/api/admin/auth', {
           credentials: 'include'
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.user) {
-            setAdminUser(data.user);
-          }
+        const data = await response.json();
+        if (data.success && data.user) {
+          setAdminUser(data.user);
         }
-        // 不管成功失败，都标记为已检查
-        setAuthChecked(true);
       } catch (error) {
         console.error('Auth check failed:', error);
-        setAuthChecked(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkAuth();
-  }, [authChecked]);
+  }, []);
 
   // 登录页直接显示
   if (isLoginPage) {
@@ -111,7 +101,7 @@ export default function AdminLayout({
   }
 
   // 加载中显示加载状态
-  if (!authChecked) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
         <div className="flex flex-col items-center gap-4">
