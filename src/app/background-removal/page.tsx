@@ -63,12 +63,30 @@ export default function BackgroundRemovalPage() {
 
     setProcessing(true);
     
-    // 模拟AI处理
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    setProcessedUrl(imageUrl);
-    setProcessing(false);
-    toast.success('抠图完成！');
+    try {
+      const res = await fetch('/api/images/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl,
+          processType: 'background-removal'
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.success && data.imageUrl) {
+        setProcessedUrl(data.imageUrl);
+        toast.success('抠图完成！');
+      } else {
+        toast.error(data.error || '处理失败，请重试');
+      }
+    } catch (error) {
+      console.error('Processing error:', error);
+      toast.error('处理失败，请重试');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleDownload = async () => {

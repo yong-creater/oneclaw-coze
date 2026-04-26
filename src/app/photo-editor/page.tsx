@@ -326,22 +326,69 @@ export default function PhotoEditorPage() {
 
         {/* 操作按钮 */}
         {imageUrl && (
-          <div className="flex gap-3">
+          <div className="space-y-3">
+            {/* AI智能美化按钮 */}
             <Button 
-              onClick={handleSave}
+              onClick={async () => {
+                if (!imageUrl) return;
+                setProcessing(true);
+                try {
+                  const res = await fetch('/api/images/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      imageUrl,
+                      processType: 'portrait-enhance'
+                    })
+                  });
+                  const data = await res.json();
+                  if (data.success && data.imageUrl) {
+                    setImageUrl(data.imageUrl);
+                    setOriginalUrl(data.imageUrl);
+                    toast.success('AI智能美化完成！');
+                  } else {
+                    toast.error(data.error || '处理失败，请重试');
+                  }
+                } catch {
+                  toast.error('处理失败，请重试');
+                } finally {
+                  setProcessing(false);
+                }
+              }}
               disabled={processing}
-              className="flex-1 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+              size="lg"
             >
-              <Check className="w-4 h-4 mr-2" />
-              保存结果
+              {processing ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  AI处理中...
+                </>
+              ) : (
+                <>
+                  <SparklesIcon className="w-5 h-5 mr-2" />
+                  AI智能美化
+                </>
+              )}
             </Button>
-            <Button 
-              variant="outline"
-              onClick={handleDownload}
-            >
-              <Download className="w-4 h-4 mr-2" />
-              下载
-            </Button>
+            
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleSave}
+                disabled={processing}
+                className="flex-1 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                保存结果
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleDownload}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                下载
+              </Button>
+            </div>
           </div>
         )}
 

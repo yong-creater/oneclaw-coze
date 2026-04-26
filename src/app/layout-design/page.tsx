@@ -67,6 +67,8 @@ export default function LayoutDesignPage() {
     setImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
+
   const handleGenerate = async () => {
     if (images.length === 0) {
       toast.error('请至少上传一张图片');
@@ -80,13 +82,34 @@ export default function LayoutDesignPage() {
 
     setGenerating(true);
     
-    // 模拟AI排版
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const html = generateHtmlPreview();
-    setGeneratedHtml(html);
-    setGenerating(false);
-    toast.success('排版生成成功！');
+    try {
+      // 使用第一张图片作为参考，生成排版好的图片
+      const res = await fetch('/api/images/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageUrl: images[0],
+          processType: 'layout-design'
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.success && data.imageUrl) {
+        setGeneratedImageUrl(data.imageUrl);
+        // 同时生成HTML预览
+        const html = generateHtmlPreview();
+        setGeneratedHtml(html);
+        toast.success('排版生成成功！');
+      } else {
+        toast.error(data.error || '处理失败，请重试');
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      toast.error('处理失败，请重试');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const generateHtmlPreview = (): string => {
@@ -198,6 +221,25 @@ export default function LayoutDesignPage() {
     setTitle('');
     setContent('');
     setGeneratedHtml(null);
+    setGeneratedImageUrl(null);
+  };
+
+  const handleDownloadImage = async () => {
+    if (!generatedImageUrl) return;
+    
+    try {
+      const response = await fetch(generatedImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `layout-design-${Date.now()}.png`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+      toast.success('图片下载成功');
+    } catch {
+      toast.error('下载失败');
+    }
   };
 
   return (
@@ -366,7 +408,7 @@ export default function LayoutDesignPage() {
         </Card>
 
         {/* 生成按钮 */}
-        {!generatedHtml && (
+        {!generatedImageUrl && (
           <Button 
             onClick={handleGenerate}
             disabled={generating || images.length === 0 || !title.trim()}
@@ -388,7 +430,7 @@ export default function LayoutDesignPage() {
         )}
 
         {/* 生成结果 */}
-        {generatedHtml && (
+        {generatedImageUrl && (
           <>
             <Card className="mb-4 border-green-200 dark:border-green-800">
               <CardContent className="p-4">
@@ -410,19 +452,33 @@ export default function LayoutDesignPage() {
               </CardContent>
             </Card>
 
-            {/* 预览 */}
+        {/* 预览 */}
             <Card className="mb-6">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
                     <Eye className="w-5 h-5 text-green-500" />
-                    预览效果
+                    AI生成效果
                   </h3>
+                  {generatedImageUrl && (
+                    <Button variant="outline" size="sm" onClick={handleDownloadImage}>
+                      <Download className="w-4 h-4 mr-2" />
+                      下载图片
+                    </Button>
+                  )}
                 </div>
-                <div 
-                  className="bg-white rounded-xl p-4 max-h-96 overflow-auto border border-slate-200"
-                  dangerouslySetInnerHTML={{ __html: generatedHtml.replace(/<!DOCTYPE html>[\s\S]*?<body>/, '').replace(/<\/body><\/html>/, '') }}
-                />
+                {generatedImageUrl ? (
+                  <img 
+                    src={generatedImageUrl} 
+                    alt="生成的排版图片" 
+                    className="w-full rounded-xl"
+                  />
+                ) : (
+                  <div 
+                    className="bg-white rounded-xl p-4 max-h-96 overflow-auto border border-slate-200"
+                    dangerouslySetInnerHTML={{ __html: generatedHtml.replace(/<!DOCTYPE html>[\s\S]*?<body>/, '').replace(/<\/body><\/html>/, '') }}
+                  />
+                )}
               </CardContent>
             </Card>
 
