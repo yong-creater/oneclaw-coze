@@ -1432,30 +1432,23 @@ export default function HomePage() {
         )}
       </main>
 
-      {/* 页脚 */}
+      {/* 页脚 - 公众号 + 底部信息 */}
       <footer className="bg-gradient-to-t from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
-        <div className="max-w-7xl mx-auto px-4 py-12">
-          {/* 公众号推广 - 使用WechatPromo组件 */}
-          <WechatPromo />
-          
-          {/* 底部导航 */}
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
-                  <AnimatedLobster size={20} />
-                </div>
-                <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
-                <span className="text-xs text-slate-400 ml-2">AI工具导航</span>
+        {/* 公众号推广 + 底部链接 */}
+        <WechatPromo />
+        
+        {/* 版权信息 */}
+        <div className="max-w-7xl mx-auto px-4 pb-6">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3 text-sm text-slate-400 dark:text-slate-500">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
+                <AnimatedLobster size={12} />
               </div>
-              <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-                <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
-                <span className="text-slate-300 dark:text-slate-600">|</span>
-                <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
-                  渝ICP备2026004291号-2
-                </a>
-              </div>
+              <span>OneClaw</span>
+              <span>·</span>
+              <span>AI工具导航</span>
             </div>
+            <span>© {new Date().getFullYear()} All Rights Reserved</span>
           </div>
         </div>
       </footer>

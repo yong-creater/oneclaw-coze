@@ -883,21 +883,13 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200">
-        {/* 公众号推广 */}
+        {/* 公众号推广 + 底部信息 */}
         <WechatPromo />
         
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img src="/oneclaw-logo.png" alt="OneClaw" width={24} height={24} className="object-contain" />
-              <span className="font-bold text-slate-700">OneClaw</span>
-            </div>
-            <div className="flex items-center gap-6 text-sm text-slate-500">
-              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
-              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
-                渝ICP备2026004291号-2
-              </a>
-            </div>
+        {/* 版权信息 */}
+        <div className="max-w-4xl mx-auto px-4 pb-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-3 text-sm text-slate-400">
+            <span>© {new Date().getFullYear()} OneClaw · AI工具导航</span>
           </div>
         </div>
       </footer>
