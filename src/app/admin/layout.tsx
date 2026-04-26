@@ -17,6 +17,7 @@ const navigation = [
   { name: '仪表盘', href: '/admin' },
   { name: '精选工具', href: '/admin/utility-tools' },
   { name: 'AI应用管理', href: '/admin/tools' },
+  { name: '技能管理', href: '/admin/skills' },
   { name: '分类管理', href: '/admin/categories' },
   { name: '提示词库', href: '/admin/prompts' },
   { name: '教程库', href: '/admin/tutorials' },
