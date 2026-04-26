@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,12 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isDev, setIsDev] = useState(false);
+
+  // 检测开发环境
+  useEffect(() => {
+    setIsDev(window.location.hostname === 'localhost' || window.location.hostname.includes('dev.coze'));
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +34,6 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        // 设置 cookie
         document.cookie = `admin_token=${data.token}; path=/; max-age=${30 * 24 * 60 * 60}`;
         router.push('/admin');
       } else {
@@ -87,12 +92,16 @@ export default function AdminLoginPage() {
             <p className="text-red-400 text-sm">{error}</p>
           )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button 
+            type="submit" 
+            className="w-full bg-primary hover:bg-primary/90 text-white" 
+            disabled={loading}
+          >
             {loading ? '登录中...' : '登录'}
           </Button>
 
           {/* 开发环境快速登录 */}
-          {process.env.NODE_ENV === 'development' && (
+          {isDev && (
             <div className="pt-4 border-t border-slate-700">
               <Button
                 type="button"
@@ -100,7 +109,7 @@ export default function AdminLoginPage() {
                 className="w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700"
                 onClick={handleDevLogin}
               >
-                开发环境快速登录
+                快速登录（开发环境）
               </Button>
             </div>
           )}
