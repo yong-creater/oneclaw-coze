@@ -113,6 +113,7 @@ function UtilityToolsPage() {
       'xiaohongshu-generator': '/xiaohongshu-generator',
       'product-poster': '/product-poster',
       'ai-photo': '/ai-photo',
+      'shangpai-ai': '/tools/shangpai-ai',
     };
     return urls[slug] || '/';
   };
