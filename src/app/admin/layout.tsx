@@ -69,85 +69,56 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
-  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // 检查是否为登录页面
   const isLoginPage = pathname === '/admin/login';
 
+  // 标记是否已检查过认证
+  const [authChecked, setAuthChecked] = useState(false);
+
   useEffect(() => {
+    // 如果已经检查过，不再重复检查
+    if (authChecked) return;
+    
     // 检查是否已登录
     const checkAuth = async () => {
       try {
         const response = await fetch('/api/admin/auth', {
           credentials: 'include'
         });
+        
         if (response.ok) {
           const data = await response.json();
-          if (data.user) {
+          if (data.success && data.user) {
             setAdminUser(data.user);
-          } else {
-            // 未登录，重定向到登录页面
-            if (!isLoginPage) {
-              router.push('/admin/login');
-              return;
-            }
-          }
-        } else {
-          // 未登录，重定向到登录页面
-          if (!isLoginPage) {
-            router.push('/admin/login');
-            return;
           }
         }
+        // 不管成功失败，都标记为已检查
+        setAuthChecked(true);
+        setLoading(false);
       } catch (error) {
         console.error('Auth check failed:', error);
-        // 网络错误也重定向到登录页面
-        if (!isLoginPage) {
-          router.push('/admin/login');
-          return;
-        }
-      } finally {
+        setAuthChecked(true);
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, [isLoginPage, router]);
+  }, [authChecked]);
 
-  // 如果是登录页面，直接显示登录页面（不显示布局）
+  // 登录页直接显示
   if (isLoginPage) {
     return <>{children}</>;
   }
 
   // 加载中显示加载状态
-  if (loading) {
+  if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
           <p className="text-slate-500">正在验证身份...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // 未登录显示无权限页面（已经被上面的 useEffect 重定向了）
-  if (!adminUser) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-            请先登录
-          </h1>
-          <p className="text-slate-500 mb-4">
-            您需要登录才能访问管理后台
-          </p>
-          <Link href="/admin/login">
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
-              去登录
-            </Button>
-          </Link>
         </div>
       </div>
     );
