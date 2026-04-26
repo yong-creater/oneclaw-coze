@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
+import UtilityHeader from '@/components/common/UtilityHeader';
 import { Sparkles, Download, Loader2, ChevronDown, ChevronUp, Image, ShoppingBag, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -103,6 +104,14 @@ export default function ProductPosterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white dark:from-slate-900 dark:to-slate-800">
+      {/* 顶部导航 */}
+      <UtilityHeader
+        toolIcon={<ShoppingBag className="w-4 h-4" />}
+        toolName="商品海报生成器"
+        toolDescription="AI驱动的电商海报设计"
+        gradient="from-emerald-500 to-teal-500"
+      />
+      
       <div className="max-w-4xl mx-auto px-4 py-8">
         <BackToHome />
         

@@ -3,12 +3,21 @@
 import { Card, CardContent } from '@/components/ui/card';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
+import UtilityHeader from '@/components/common/UtilityHeader';
 import { Layout, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function CoverGeneratorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-slate-900 dark:to-slate-800">
+      {/* 顶部导航 */}
+      <UtilityHeader
+        toolIcon={<Layout className="w-4 h-4" />}
+        toolName="封面生成器"
+        toolDescription="AI生成多平台封面图"
+        gradient="from-pink-500 to-rose-500"
+      />
+      
       <div className="max-w-4xl mx-auto px-4 py-8">
         <BackToHome />
         

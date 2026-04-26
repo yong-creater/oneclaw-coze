@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
+import UtilityHeader from '@/components/common/UtilityHeader';
 import { Sparkles, Upload, Loader2, Download, Image } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -19,6 +20,14 @@ export default function ProductPhotoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-slate-900 dark:to-slate-800">
+      {/* 顶部导航 */}
+      <UtilityHeader
+        toolIcon={<Image className="w-4 h-4" />}
+        toolName="商品图精修"
+        toolDescription="AI智能电商商品图精修"
+        gradient="from-amber-500 to-orange-500"
+      />
+      
       <div className="max-w-4xl mx-auto px-4 py-8">
         <BackToHome />
         

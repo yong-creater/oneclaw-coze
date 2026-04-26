@@ -3,12 +3,21 @@
 import { Card, CardContent } from '@/components/ui/card';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
+import UtilityHeader from '@/components/common/UtilityHeader';
 import { Camera, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function PhotoEditorPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white dark:from-slate-900 dark:to-slate-800">
+      {/* 顶部导航 */}
+      <UtilityHeader
+        toolIcon={<Camera className="w-4 h-4" />}
+        toolName="照片美化"
+        toolDescription="AI一键磨皮/调色/滤镜"
+        gradient="from-violet-500 to-purple-500"
+      />
+      
       <div className="max-w-4xl mx-auto px-4 py-8">
         <BackToHome />
         

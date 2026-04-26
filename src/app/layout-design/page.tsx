@@ -3,12 +3,21 @@
 import { Card, CardContent } from '@/components/ui/card';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
+import UtilityHeader from '@/components/common/UtilityHeader';
 import { Palette, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function LayoutDesignPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white dark:from-slate-900 dark:to-slate-800">
+      {/* 顶部导航 */}
+      <UtilityHeader
+        toolIcon={<Palette className="w-4 h-4" />}
+        toolName="图文排版"
+        toolDescription="AI自动排版，一键导出"
+        gradient="from-green-500 to-emerald-500"
+      />
+      
       <div className="max-w-4xl mx-auto px-4 py-8">
         <BackToHome />
         
