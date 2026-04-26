@@ -49,6 +49,14 @@ interface UtilityGroup {
   created_at: string;
 }
 
+interface ModelConfig {
+  default_model: string;
+  model_source: string;
+  model_price_per_1k_tokens: number;
+  is_free: boolean;
+  is_active: boolean;
+}
+
 interface UtilityTool {
   id: number;
   group_id: number;
@@ -62,6 +70,7 @@ interface UtilityTool {
   is_active: boolean;
   use_cases: UseCase[];
   utility_groups?: { name: string; slug: string; icon: string; color: string };
+  model_config?: ModelConfig;
 }
 
 interface UseCase {
@@ -254,7 +263,14 @@ export default function UtilityToolsPage() {
     cover_image: '',
     color: 'from-orange-500 to-amber-500',
     sort_order: 0,
-    use_cases: [] as UseCase[]
+    use_cases: [] as UseCase[],
+    model_config: {
+      default_model: 'ep-20250312145957-p8xpp',
+      model_source: 'coze',
+      model_price_per_1k_tokens: 0,
+      is_free: true,
+      is_active: true,
+    } as ModelConfig
   });
 
   // 获取数据
@@ -391,7 +407,8 @@ export default function UtilityToolsPage() {
         body: JSON.stringify({
           ...toolForm,
           id: editingTool?.id,
-          use_cases: toolForm.use_cases
+          use_cases: toolForm.use_cases,
+          model_config: toolForm.model_config
         })
       });
 
@@ -426,7 +443,14 @@ export default function UtilityToolsPage() {
       cover_image: '',
       color: 'from-orange-500 to-amber-500',
       sort_order: 0,
-      use_cases: []
+      use_cases: [],
+      model_config: {
+        default_model: 'ep-20250312145957-p8xpp',
+        model_source: 'coze',
+        model_price_per_1k_tokens: 0,
+        is_free: true,
+        is_active: true,
+      }
     });
   };
 
@@ -459,7 +483,14 @@ export default function UtilityToolsPage() {
       cover_image: tool.cover_image || '',
       color: tool.color,
       sort_order: tool.sort_order,
-      use_cases: tool.use_cases || []
+      use_cases: tool.use_cases || [],
+      model_config: tool.model_config || {
+        default_model: 'ep-20250312145957-p8xpp',
+        model_source: 'coze',
+        model_price_per_1k_tokens: 0,
+        is_free: true,
+        is_active: true,
+      }
     });
     setToolDialogOpen(true);
   };
@@ -1052,6 +1083,110 @@ export default function UtilityToolsPage() {
                 </p>
               </div>
             )}
+
+            {/* AI 模型配置 */}
+            <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
+              <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">AI 模型配置</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">模型来源</label>
+                  <select
+                    value={toolForm.model_config.model_source}
+                    onChange={(e) => setToolForm(prev => ({ 
+                      ...prev, 
+                      model_config: { 
+                        ...prev.model_config, 
+                        model_source: e.target.value,
+                        is_free: e.target.value === 'coze',
+                      }
+                    }))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                      bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="coze">扣子内置 (免费)</option>
+                    <option value="4sapi">4sAPI (付费)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">选择模型</label>
+                  <select
+                    value={toolForm.model_config.default_model}
+                    onChange={(e) => setToolForm(prev => ({ 
+                      ...prev, 
+                      model_config: { ...prev.model_config, default_model: e.target.value }
+                    }))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                      bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    {toolForm.model_config.model_source === 'coze' ? (
+                      <>
+                        <option value="ep-20250312145957-p8xpp">Doubao-Pro (扣子)</option>
+                        <option value="ep-20250410165509-dtk4n">Doubao-Seed (扣子)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="gpt-4o">GPT-4o ($0.0025/1K)</option>
+                        <option value="gpt-4o-mini">GPT-4o Mini ($0.00015/1K)</option>
+                        <option value="gpt-4-turbo">GPT-4 Turbo ($0.01/1K)</option>
+                        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet ($0.003/1K)</option>
+                        <option value="claude-3-opus">Claude 3 Opus ($0.015/1K)</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro ($0.00125/1K)</option>
+                        <option value="gemini-1.5-flash">Gemini 1.5 Flash ($0.000075/1K)</option>
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">价格 (元/千token)</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={toolForm.model_config.model_price_per_1k_tokens}
+                    onChange={(e) => setToolForm(prev => ({ 
+                      ...prev, 
+                      model_config: { 
+                        ...prev.model_config, 
+                        model_price_per_1k_tokens: parseFloat(e.target.value) || 0 
+                      }
+                    }))}
+                    disabled={toolForm.model_config.model_source === 'coze'}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
+                      bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500
+                      disabled:bg-slate-100 disabled:text-slate-500"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">状态</label>
+                  <div className="flex items-center gap-3 h-[42px]">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={toolForm.model_config.is_active}
+                        onChange={(e) => setToolForm(prev => ({ 
+                          ...prev, 
+                          model_config: { ...prev.model_config, is_active: e.target.checked }
+                        }))}
+                        className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
+                      />
+                      <span className="text-sm text-slate-700 dark:text-slate-300">启用</span>
+                    </label>
+                    {toolForm.model_config.is_free ? (
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        免费
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                        付费
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setToolDialogOpen(false)}>取消</Button>
               <Button onClick={handleSaveTool} className="bg-orange-500 hover:bg-orange-600">

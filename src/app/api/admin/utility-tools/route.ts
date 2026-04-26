@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases } = body;
+    const { group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, model_config } = body;
 
     if (!name || !slug) {
       return NextResponse.json({ error: '缺少必填字段' }, { status: 400 });
@@ -78,7 +78,14 @@ export async function POST(request: NextRequest) {
         cover_image,
         color: color || 'from-orange-500 to-amber-500',
         sort_order: sort_order || 0,
-        use_cases: use_cases || []
+        use_cases: use_cases || [],
+        model_config: model_config || {
+          default_model: 'ep-20250312145957-p8xpp',
+          model_source: 'coze',
+          model_price_per_1k_tokens: 0,
+          is_free: true,
+          is_active: true,
+        }
       })
       .select()
       .single();
@@ -118,7 +125,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, is_active } = body;
+    const { id, group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, is_active, model_config } = body;
 
     if (!id) {
       return NextResponse.json({ error: '缺少ID' }, { status: 400 });
@@ -137,6 +144,7 @@ export async function PUT(request: NextRequest) {
         sort_order,
         use_cases,
         is_active,
+        model_config,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)

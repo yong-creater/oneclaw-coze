@@ -78,7 +78,19 @@ export async function POST(request: NextRequest) {
 
     const text = fullContent.join('');
 
-    return NextResponse.json({ text, model: targetModel });
+    // 估算 token 使用量（大约 1 token ≈ 2 个中文字符 ≈ 4 个英文字符）
+    const inputTokens = Math.ceil(prompt.length / 2);
+    const outputTokens = Math.ceil(text.length / 2);
+
+    return NextResponse.json({ 
+      text, 
+      model: targetModel,
+      usage: {
+        input_tokens: inputTokens,
+        output_tokens: outputTokens,
+        total_tokens: inputTokens + outputTokens,
+      }
+    });
   } catch (error: any) {
     console.error('LLM API error:', error);
     return NextResponse.json(

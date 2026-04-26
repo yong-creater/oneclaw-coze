@@ -4,7 +4,26 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 // 获取精选工具分组和工具（公开接口）
 export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug'); // 可选：按slug查询单个工具
+    
     const supabase = getSupabaseClient();
+    
+    // 如果指定了slug，返回单个工具
+    if (slug) {
+      const { data: tool, error } = await supabase
+        .from('utility_tools')
+        .select('*, utility_groups(name, slug, icon, color), model_config')
+        .eq('slug', slug)
+        .eq('is_active', true)
+        .single();
+
+      if (error || !tool) {
+        return NextResponse.json({ error: '工具不存在' }, { status: 404 });
+      }
+
+      return NextResponse.json({ tool });
+    }
     
     // 获取所有活跃分组
     const { data: groups, error: groupError } = await supabase
@@ -20,7 +39,7 @@ export async function GET(request: NextRequest) {
     // 获取所有活跃工具
     const { data: tools, error: toolError } = await supabase
       .from('utility_tools')
-      .select('*, utility_groups(name, slug, icon, color)')
+      .select('*, utility_groups(name, slug, icon, color), model_config')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
 

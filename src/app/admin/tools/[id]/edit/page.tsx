@@ -865,10 +865,13 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                   </>
                 ) : (
                   <>
-                    <option value="deepseek-chat">DeepSeek V3</option>
-                    <option value="deepseek-reasoner">DeepSeek R1</option>
-                    <option value="moonshot-v1-8k">Kimi</option>
-                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="gpt-4o">GPT-4o ($0.0025/1K)</option>
+                    <option value="gpt-4o-mini">GPT-4o Mini ($0.00015/1K)</option>
+                    <option value="gpt-4-turbo">GPT-4 Turbo ($0.01/1K)</option>
+                    <option value="claude-3-5-sonnet">Claude 3.5 Sonnet ($0.003/1K)</option>
+                    <option value="claude-3-opus">Claude 3 Opus ($0.015/1K)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro ($0.00125/1K)</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash ($0.000075/1K)</option>
                   </>
                 )}
               </select>
