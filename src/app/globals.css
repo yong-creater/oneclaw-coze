@@ -280,13 +280,11 @@
    ======================================== */
 .card-minimal {
   background: var(--card);
-  border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: all 0.15s ease;
 }
 
 .card-minimal:hover {
-  border-color: var(--muted-foreground);
   box-shadow: var(--shadow-md);
 }
 

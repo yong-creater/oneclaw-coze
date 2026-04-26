@@ -119,7 +119,7 @@ export default function AIToolsPage() {
         style={{ marginLeft: 'var(--sidebar-width, 240px)' }}
       >
         {/* 顶部区域 - 简洁设计 */}
-        <div className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="bg-background/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-6 py-4">
             {/* 页面标题 */}
             <div className="flex items-center justify-between mb-4">
