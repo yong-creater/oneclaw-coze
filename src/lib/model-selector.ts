@@ -24,8 +24,19 @@ async function generateWith4SAPI(
   image?: string | string[]
 ): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> {
   try {
-    const apiKey = process.env.FOURS_API_KEY || process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    // 检查4sAPI是否启用（ENABLE_4SAPI=true才启用）
+    if (process.env.ENABLE_4SAPI !== 'true') {
+      return { success: false, error: '4sapi功能未启用，请设置 ENABLE_4SAPI=true' };
+    }
+    
+    // 4sAPI密钥 - 支持多种环境变量名称
+    const apiKey = process.env.FOURS_API_KEY 
+      || process.env.OPENAI_API_KEY 
+      || process.env.API4S_KEY 
+      || process.env.API4S_TOKEN
+      || process.env.FOUR_S_API_KEY;
+    
+    if (!apiKey || apiKey === 'your-api-key-here') {
       return { success: false, error: '4sapi API密钥未配置' };
     }
 
