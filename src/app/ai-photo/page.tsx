@@ -17,6 +17,16 @@ interface PhotoStyle {
   prompt: string;
 }
 
+interface ModelConfig {
+  tool_id: string;
+  tool_name: string;
+  default_model: string;
+  model_source: string;
+  is_free: boolean;
+  is_active: boolean;
+  config_params?: any;
+}
+
 const PHOTO_STYLES: PhotoStyle[] = [
   { id: 'portrait', name: '高级写真', label: '高级写真', emoji: '✨', prompt: '高质量人像摄影写真，真实自然，皮肤细腻，光线柔和，专业影棚打光，高级感构图，避免AI痕迹' },
   { id: '证件照', name: '证件照', label: '证件照', emoji: '📋', prompt: '专业证件照，白底或蓝底，五官清晰，妆容自然，高清质感，适合正式场合使用' },
@@ -26,6 +36,16 @@ const PHOTO_STYLES: PhotoStyle[] = [
   { id: '生日', name: '生日氛围', label: '生日氛围', emoji: '🎂', prompt: '生日庆祝氛围照，温馨感人，庆祝氛围，暖色调，精致蛋糕装饰' },
 ];
 
+// 将文件转为 base64
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = (error) => reject(error);
+  });
+}
+
 export default function AIPhotoPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -34,6 +54,8 @@ export default function AIPhotoPage() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [downloading, setDownloading] = useState<number | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [modelConfig, setModelConfig] = useState<ModelConfig | null>(null);
+  const [loadingModel, setLoadingModel] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 从 URL 参数读取模板数据
@@ -64,6 +86,51 @@ export default function AIPhotoPage() {
         console.error('解析模板数据失败:', e);
       }
     }
+  }, []);
+
+  // 获取模型配置
+  useEffect(() => {
+    const fetchModelConfig = async () => {
+      try {
+        const res = await fetch('/api/admin/tool-models');
+        const data = await res.json();
+        if (data.success && data.configs) {
+          // 查找 AI写真 相关的模型配置（通过 portrait-enhance 或 ai-photo）
+          const photoConfig = data.configs.find(
+            (c: ModelConfig) => c.tool_id === 'portrait-enhance' || c.tool_id === 'ai-photo'
+          );
+          if (photoConfig) {
+            setModelConfig(photoConfig);
+            console.log('已加载模型配置:', photoConfig);
+          } else {
+            // 如果没有找到特定配置，使用默认配置
+            setModelConfig({
+              tool_id: 'ai-photo',
+              tool_name: 'AI写真生成',
+              default_model: 'coze-image',
+              model_source: 'coze',
+              is_free: true,
+              is_active: true,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('获取模型配置失败:', error);
+        // 使用默认配置
+        setModelConfig({
+          tool_id: 'ai-photo',
+          tool_name: 'AI写真生成',
+          default_model: 'coze-image',
+          model_source: 'coze',
+          is_free: true,
+          is_active: true,
+        });
+      } finally {
+        setLoadingModel(false);
+      }
+    };
+    
+    fetchModelConfig();
   }, []);
 
   // 选择文件
@@ -103,15 +170,32 @@ export default function AIPhotoPage() {
     const style = PHOTO_STYLES.find(s => s.id === selectedStyle);
     
     try {
+      // 将照片转为 base64
+      const base64Image = await fileToBase64(selectedFile);
+      
+      // 构建 prompt：包含风格描述
+      const prompt = `参考这张照片的人物特征和面部特征，生成一张${style?.label || '现代风格'}的人像写真照片。要求：高清质感，柔和光线，背景虚化，人像摄影风格，保持人物面部特征和五官的相似度，避免过度美颜。`;
+      
       // 调用AI生成写真
+      const requestBody: any = {
+        prompt: prompt,
+        size: '2K',
+        count: 4,
+        // 传递参考图片用于图生图
+        image: base64Image,
+      };
+      
+      // 如果有配置的模型，使用配置的模型
+      if (modelConfig?.default_model) {
+        requestBody.model = modelConfig.default_model;
+      }
+      
+      console.log('调用图像生成API，模型:', requestBody.model);
+      
       const response = await fetch('/api/images/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `专业人像写真照片，${style?.label || '现代风格'}，高清质感，柔和光线，背景虚化，人像摄影，杂志封面风格`,
-          size: '2K',
-          count: 4,
-        })
+        body: JSON.stringify(requestBody)
       });
 
       const data = await response.json();

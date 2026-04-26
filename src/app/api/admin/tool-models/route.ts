@@ -38,6 +38,9 @@ export const AVAILABLE_MODELS = {
     { id: '4s-claude-3-opus', name: 'Claude 3 Opus', price: 0.015, maxTokens: 200000 },
     { id: '4s-gemini-1-5-pro', name: 'Gemini 1.5 Pro', price: 0.00125, maxTokens: 2000000 },
     { id: '4s-gemini-1-5-flash', name: 'Gemini 1.5 Flash', price: 0.000075, maxTokens: 1000000 },
+    { id: 'gpt-image2', name: 'GPT Image 2', price: 0.01, type: 'image' },
+    { id: 'dall-e-3', name: 'DALL-E 3', price: 0.04, type: 'image' },
+    { id: 'stable-diffusion-3', name: 'Stable Diffusion 3', price: 0.005, type: 'image' },
   ]
 };
 
