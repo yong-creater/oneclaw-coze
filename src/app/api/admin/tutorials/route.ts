@@ -1,64 +1,205 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requireAdminAuth } from '@/lib/auth';
 
-// GET - 获取所有教程
+// 获取教程列表（后台）或单个教程详情
 export async function GET(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
-    const supabase = getSupabaseClient();
-
-    const { data, error } = await supabase
-      .from('tutorials')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    const client = getSupabaseClient();
+    const searchParams = request.nextUrl.searchParams;
+    
+    // 如果有 id 参数，返回单个教程
+    const id = searchParams.get('id');
+    if (id) {
+      const { data, error } = await client
+        .from('tutorials')
+        .select('*, tools(id, name, logo)')
+        .eq('id', parseInt(id))
+        .single();
+      
+      if (error) {
+        return NextResponse.json({ success: false, error: '教程不存在' }, { status: 404 });
+      }
+      
+      return NextResponse.json({ success: true, data });
     }
-
-    return NextResponse.json({ success: true, data: data || [] });
+    
+    // 否则返回列表
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = (page - 1) * limit;
+    
+    const category = searchParams.get('category');
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
+    
+    let query = client
+      .from('tutorials')
+      .select('*, tools(id, name, logo)', { count: 'exact' });
+    
+    if (category) {
+      query = query.eq('category', category);
+    }
+    if (status) {
+      query = query.eq('status', status);
+    }
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%`);
+    }
+    
+    query = query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+    
+    const { data, error, count } = await query;
+    
+    if (error) throw new Error(error.message);
+    
+    return NextResponse.json({
+      success: true,
+      data,
+      pagination: {
+        page,
+        limit,
+        total: count || 0,
+        total_pages: Math.ceil((count || 0) / limit),
+      }
+    });
   } catch (error) {
-    console.error('Tutorials API error:', error);
-    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
+    console.error('获取教程失败:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : '获取失败' 
+    }, { status: 500 });
   }
 }
 
-// POST - 创建教程
+// 创建教程
 export async function POST(request: NextRequest) {
+  // 权限验证
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+  
   try {
+    const client = getSupabaseClient();
     const body = await request.json();
-    const { title, slug, description, content, category, type, is_featured, is_active } = body;
-
-    if (!title || !slug || !description || !content) {
-      return NextResponse.json({ success: false, error: '请填写必填字段' }, { status: 400 });
+    
+    if (!body.title || !body.content || !body.category || !body.difficulty) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '缺少必填字段' 
+      }, { status: 400 });
     }
-
-    const supabase = getSupabaseClient();
-
-    const { data, error } = await supabase
+    
+    const { data, error } = await client
       .from('tutorials')
       .insert({
-        title,
-        slug,
-        description,
-        content,
-        category: category || '',
-        type: type || '',
-        is_featured: is_featured || false,
-        is_active: is_active !== false,
+        title: body.title,
+        content: body.content,
+        tool_id: body.tool_id,
+        category: body.category,
+        difficulty: body.difficulty,
+        cover_image: body.cover_image,
+        author: body.author,
+        status: body.status || 'published'
       })
       .select()
       .single();
-
-    if (error) {
-      if (error.code === '23505') {
-        return NextResponse.json({ success: false, error: 'Slug 已存在' }, { status: 400 });
-      }
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-    }
-
+    
+    if (error) throw new Error(error.message);
+    
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error('Create tutorial error:', error);
-    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
+    console.error('创建教程失败:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : '创建失败' 
+    }, { status: 500 });
+  }
+}
+
+// 更新教程
+export async function PUT(request: NextRequest) {
+  try {
+    const client = getSupabaseClient();
+    const body = await request.json();
+    
+    if (!body.id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '缺少教程ID' 
+      }, { status: 400 });
+    }
+    
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    
+    const updatableFields = [
+      'title', 'content', 'tool_id', 'category', 'difficulty', 
+      'cover_image', 'author', 'status', 'views', 'likes'
+    ];
+    
+    for (const field of updatableFields) {
+      if (body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
+    }
+    
+    const { data, error } = await client
+      .from('tutorials')
+      .update(updateData)
+      .eq('id', body.id)
+      .select()
+      .single();
+    
+    if (error) throw new Error(error.message);
+    
+    return NextResponse.json({ success: true, data });
+  } catch (error) {
+    console.error('更新教程失败:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : '更新失败' 
+    }, { status: 500 });
+  }
+}
+
+// 删除教程
+export async function DELETE(request: NextRequest) {
+  try {
+    const client = getSupabaseClient();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '缺少教程ID' 
+      }, { status: 400 });
+    }
+    
+    const { error } = await client
+      .from('tutorials')
+      .delete()
+      .eq('id', parseInt(id));
+    
+    if (error) throw new Error(error.message);
+    
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('删除教程失败:', error);
+    return NextResponse.json({ 
+      success: false, 
+      error: error instanceof Error ? error.message : '删除失败' 
+    }, { status: 500 });
   }
 }

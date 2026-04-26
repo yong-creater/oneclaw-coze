@@ -1,150 +1,212 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  Home, Wand2, Sparkles, BookOpen, Settings, LogOut,
-  ChevronLeft, ChevronRight, Menu
+import { usePathname, useRouter } from 'next/navigation';
+import { 
+  Menu,
+  X,
+  ExternalLink,
+  LogOut,
+  Loader2,
+  Settings
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-const ADMIN_MENU = [
-  { id: 'dashboard', label: '仪表盘', icon: Home, href: '/admin' },
-  { id: 'tools', label: 'AI工具管理', icon: Wand2, href: '/admin/tools' },
-  { id: 'prompts', label: '提示词管理', icon: Sparkles, href: '/admin/prompts' },
-  { id: 'tutorials', label: '教程管理', icon: BookOpen, href: '/admin/tutorials' },
+const navigation = [
+  { name: '仪表盘', href: '/admin' },
+  { name: 'AI应用管理', href: '/admin/tools' },
+  { name: '分类管理', href: '/admin/categories' },
+  { name: '标签管理', href: '/admin/tags' },
+  { name: '提示词管理', href: '/admin/prompts' },
+  { name: '技能管理', href: '/admin/skills' },
+  { name: '教程管理', href: '/admin/tutorials' },
+  { name: '精选工具', href: '/admin/utilities' },
+  { name: '评论审核', href: '/admin/reviews' },
+  { name: '会员管理', href: '/admin/members' },
+  { name: '用户管理', href: '/admin/users' },
+  { name: '订单管理', href: '/admin/orders' },
+  { name: '广告管理', href: '/admin/ads' },
+  { name: 'API Key', href: '/admin/api-keys' },
+  { name: '微信配置', href: '/admin/wechat' },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [user, setUser] = useState<{ username: string } | null>(null);
+  const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
+  // 检查登录状态
   useEffect(() => {
-    // 检查登录状态
-    const adminToken = document.cookie.includes('admin_token=');
-    setIsAuthenticated(adminToken);
-    if (!adminToken) {
-      router.push('/admin/login');
+    // 登录页面和修改密码页面不需要检查
+    if (pathname === '/admin/login' || pathname === '/admin/change-password') {
+      setChecking(false);
+      return;
     }
-  }, [router]);
 
-  if (isAuthenticated === null) {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/admin/auth');
+        const data = await res.json();
+        
+        if (data.success && data.authenticated && data.data) {
+          setUser(data.data);
+          
+          // 检查是否需要修改密码
+          if (data.data.must_change_password) {
+            router.push('/admin/change-password');
+            return;
+          }
+        } else {
+          router.push('/admin/login');
+        }
+      } catch {
+        router.push('/admin/login');
+      } finally {
+        setChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [pathname, router]);
+
+  // 登出
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' });
+      router.push('/admin/login');
+    } catch (error) {
+      console.error('登出失败:', error);
+    }
+  };
+
+  // 登录页面和修改密码页面不显示布局
+  if (pathname === '/admin/login' || pathname === '/admin/change-password') {
+    return <>{children}</>;
+  }
+
+  // 检查中显示加载
+  if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse">加载中...</div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  const handleLogout = () => {
-    document.cookie = 'admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
-    router.push('/admin/login');
-  };
-
   return (
-    <div className="min-h-screen bg-background flex">
-      {/* 侧边栏 */}
-      <aside className={cn(
-        "fixed top-0 left-0 h-full bg-slate-900 text-white z-50 transition-all duration-300 flex flex-col",
-        collapsed ? "w-[72px]" : "w-[240px]",
-        mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-      )}>
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-700">
-          {!collapsed && (
-            <Link href="/admin" className="font-bold text-lg">管理后台</Link>
-          )}
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg hover:bg-slate-800 transition-colors"
-          >
-            {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <ChevronLeft className="w-4 h-4" />
-            )}
-          </button>
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="lg:hidden flex items-center justify-center w-8 h-8"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* 菜单 */}
-        <nav className="flex-1 py-4 px-3 space-y-1">
-          {ADMIN_MENU.map(item => (
-            <Link
-              key={item.id}
-              href={item.href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors"
-            >
-              <item.icon className="w-5 h-5 shrink-0" />
-              {!collapsed && <span className="text-sm">{item.label}</span>}
-            </Link>
-          ))}
-        </nav>
-
-        {/* 底部 */}
-        <div className="border-t border-slate-700 py-4 px-3 space-y-1">
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors"
-          >
-            <Home className="w-5 h-5 shrink-0" />
-            {!collapsed && <span className="text-sm">返回前台</span>}
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-800 transition-colors text-red-400"
-          >
-            <LogOut className="w-5 h-5 shrink-0" />
-            {!collapsed && <span className="text-sm">退出登录</span>}
-          </button>
-        </div>
-      </aside>
-
-      {/* 移动端遮罩 */}
-      {mobileOpen && (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* 移动端侧边栏遮罩 */}
+      {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* 主内容 */}
-      <main className={cn(
-        "flex-1 transition-all duration-300",
-        collapsed ? "lg:ml-[72px]" : "lg:ml-[240px]"
-      )}>
-        {/* 顶部栏 */}
-        <header className="h-16 bg-background border-b border-border flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg hover:bg-muted"
+      {/* 侧边栏 */}
+      <aside className={`
+        fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-800 
+        border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-200
+        lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        {/* Logo */}
+        <div className="flex items-center justify-between h-16 px-4">
+          <Link href="/admin" className="flex items-center gap-2">
+            <img src="/oneclaw-logo.png" alt="OneClaw" className="w-8 h-8 object-contain" />
+            <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+              OneClaw
+            </span>
+            <span className="text-sm text-slate-500">管理后台</span>
+          </Link>
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700"
           >
-            <Menu className="w-5 h-5" />
+            <X className="w-5 h-5" />
           </button>
-          <h1 className="font-semibold">OneClaw 管理后台</h1>
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
+        </div>
+
+        {/* 导航菜单 */}
+        <nav className="p-4 space-y-1">
+          {navigation.map((item) => {
+            const isActive = pathname === item.href || 
+              (item.href !== '/admin' && pathname.startsWith(item.href));
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`
+                  flex items-center px-3 py-2 rounded-lg text-sm font-medium
+                  transition-colors duration-200
+                  ${isActive 
+                    ? 'bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400' 
+                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
+                  }
+                `}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* 返回前台 */}
+        <div className="absolute bottom-4 left-4 right-4">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center justify-center px-3 py-2 rounded-lg 
+              text-sm font-medium text-slate-600 hover:bg-slate-100 
+              dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4 mr-2" />
             返回前台
           </Link>
+        </div>
+      </aside>
+
+      {/* 主内容区 */}
+      <div className="lg:pl-64">
+        {/* 顶部栏 */}
+        <header className="sticky top-0 z-30 h-16 bg-white dark:bg-slate-800 shadow-sm">
+          <div className="flex items-center justify-between h-full px-4">
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <h1 className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+              {navigation.find(n => n.href === pathname || (n.href !== '/admin' && pathname.startsWith(n.href)))?.name || '管理后台'}
+            </h1>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-slate-500">{user?.username || '管理员'}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-slate-600 hover:text-red-600 dark:text-slate-300"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                退出
+              </Button>
+            </div>
+          </div>
         </header>
 
-        {/* 内容区 */}
-        <div className="p-4 lg:p-6">
+        {/* 页面内容 */}
+        <main className="p-6">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

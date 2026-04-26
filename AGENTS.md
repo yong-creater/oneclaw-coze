@@ -57,7 +57,7 @@
 
 - **域名**: oneclaw.shop
 - **联系邮箱**: 1017760688@qq.com
-- **品牌元素**: 龙虾 🦞，专业蓝配色，现代科技风格 Logo
+- **品牌元素**: 龙虾 🦞，红橙渐变配色
 
 ### 分类体系
 
@@ -307,14 +307,14 @@ interface Tool {
 
 ```tsx
 // 标准卡片
-<Card className="bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
+<Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
   <CardContent className="p-4">
     {/* 内容 */}
   </CardContent>
 </Card>
 
 // 列表卡片（带hover效果）
-<Card className="hover:shadow-lg hover:-translate-y-0.5 border border-slate-200/60 dark:border-slate-700/60 transition-all duration-200">
+<Card className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200">
   <CardContent className="p-5">
     {/* 内容 */}
   </CardContent>
@@ -327,19 +327,20 @@ interface Tool {
 
 | 状态 | 边框颜色 | 说明 |
 |------|----------|------|
-| 默认 | `border-2 border-slate-200 dark:border-slate-700/60` | 2px 灰色边框 |
-| Hover | `hover:border-slate-300 dark:hover:border-slate-600` | 灰色边框 |
-| Focus | `focus-visible:border-slate-400 dark:focus-visible:border-slate-500` | 灰色边框（Input 组件内置） |
+| 默认 | `border-2 border-slate-200 dark:border-slate-700` | 2px 灰色边框 |
+| Hover | `hover:border-orange-400 dark:hover:border-orange-500` | 橙色边框 |
+| Focus | `border-orange-500` | 橙色边框（Input 组件内置） |
 
-### ✅ Input 组件全局样式 (已内置)
+### ⚠️ Input 组件全局样式修复 (必须执行)
 
-shadcn/ui 的 Input 组件已内置新的 focus 样式，无需额外修改：
+shadcn/ui 的 Input 组件有默认的 focus 样式，会覆盖自定义样式。**必须修改 `src/components/ui/input.tsx`**：
 
 ```tsx
-// Input 组件已内置样式
-"border border-slate-200 dark:border-slate-700/60"
-"hover:border-slate-300 dark:hover:border-slate-600"
-"focus-visible:border-slate-400 dark:focus-visible:border-slate-500"
+// ❌ 错误：默认的 focus 样式会覆盖自定义样式
+"focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+
+// ✅ 正确：使用橙色边框作为默认 focus 样式
+"focus-visible:border-orange-500"
 ```
 
 ### ✅ 全局输入框样式规范
@@ -349,27 +350,27 @@ shadcn/ui 的 Input 组件已内置新的 focus 样式，无需额外修改：
 ```tsx
 // ========== Input 输入框 ==========
 <Input 
-  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800/80 
-             border-2 border-slate-200 dark:border-slate-700/60 rounded-xl 
-             hover:border-slate-300 dark:hover:border-slate-600 
+  className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
+             border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+             hover:border-orange-400 dark:hover:border-orange-500 
              transition-colors text-sm text-slate-800 dark:text-slate-200"
 />
 
 // ========== Textarea 多行文本框 ==========
 <textarea
-  className="w-full px-4 py-3 bg-white dark:bg-slate-800/80 
-             border-2 border-slate-200 dark:border-slate-700/60 rounded-xl 
-             hover:border-slate-300 dark:hover:border-slate-600 
-             focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 
+  className="w-full px-4 py-3 bg-white dark:bg-slate-800 
+             border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+             hover:border-orange-400 dark:hover:border-orange-500 
+             focus:outline-none focus:border-orange-500 
              transition-colors text-sm text-slate-800 dark:text-slate-200 
              resize-none placeholder:text-slate-400"
 />
 
 // ========== Select 选择器 ==========
-<SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800/80 
-                         border-2 border-slate-200 dark:border-slate-700/60 rounded-xl 
-                         hover:border-slate-300 dark:hover:border-slate-600 
-                         focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 
+<SelectTrigger className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 
+                         border-2 border-slate-200 dark:border-slate-700 rounded-xl 
+                         hover:border-orange-400 dark:hover:border-orange-500 
+                         focus:outline-none focus:border-orange-500 
                          transition-colors text-sm text-slate-800 dark:text-slate-200">
   <SelectValue />
 </SelectTrigger>
@@ -377,7 +378,7 @@ shadcn/ui 的 Input 组件已内置新的 focus 样式，无需额外修改：
 // ========== Outline 按钮 ==========
 <Button variant="outline" className="px-4 py-2.5 
                                     border-2 border-slate-200 dark:border-slate-700 
-                                    hover:border-slate-300 dark:hover:border-slate-600 
+                                    hover:border-orange-400 dark:hover:border-orange-500 
                                     transition-colors">
   按钮文字
 </Button>
@@ -391,10 +392,10 @@ shadcn/ui 的 Input 组件已内置新的 focus 样式，无需额外修改：
 | 边框宽度 | `border-2` | 2px |
 | 内边距-单行 | `px-4 py-2.5` | 16px 10px |
 | 内边距-多行 | `px-4 py-3` | 16px 12px |
-| 背景色 | `bg-white dark:bg-slate-800/80` | 白色/深色 |
-| 边框色-默认 | `border-slate-200 dark:border-slate-700/60` | 灰/深灰 |
-| 边框色-Hover | `hover:border-slate-300` | 灰色 |
-| 边框色-Focus | `focus:border-slate-400` | 深灰色 |
+| 背景色 | `bg-white dark:bg-slate-800` | 白色/深色 |
+| 边框色-默认 | `border-slate-200 dark:border-slate-700` | 灰/深灰 |
+| 边框色-Hover | `hover:border-orange-400` | 橙色 |
+| 边框色-Focus | `focus:border-orange-500` | 深橙色 |
 | 文字大小 | `text-sm` | 14px |
 | 过渡动画 | `transition-colors` | 颜色过渡 |
 
@@ -413,8 +414,8 @@ className="... border ..." // 应该是 border-2
 // 错误4: 背景色不一致
 className="... bg-slate-50 ..." // 应该是 bg-white
 
-// 错误5: hover/focus 颜色不一致（禁止使用橙色）
-className="... hover:border-orange-400 ..."
+// 错误5: hover/focus 颜色不一致
+className="... hover:border-slate-300 ..." // 应该是 hover:border-orange-400
 
 // 错误6: focus 使用 ring（导致双层边框）
 className="... focus:ring-2 focus:ring-orange-500 ..."
@@ -425,12 +426,12 @@ className="..." // 应该加上 transition-colors
 
 ### 规范要点
 
-1. **Input 组件**：已内置 `focus-visible:border-slate-400`，只需添加 hover 样式
-2. **Textarea/Select**：需要手动添加 `focus:outline-none focus:border-slate-400`
+1. **Input 组件**：已内置 `focus-visible:border-orange-500`，只需添加 hover 样式
+2. **Textarea/Select**：需要手动添加 `focus:outline-none focus:border-orange-500`
 3. **圆角统一**：`rounded-xl`（12px）
 4. **边框宽度**：统一使用 `border-2`
-5. **背景色**：统一使用 `bg-white dark:bg-slate-800/80`
-6. **Hover/Focus 颜色**：使用灰色系，禁止使用橙色
+5. **背景色**：统一使用 `bg-white dark:bg-slate-800`
+6. **Hover 颜色**：`hover:border-orange-400`
 7. **禁止 ring**：Focus 时禁止使用 `focus:ring-*`
 
 ---
@@ -540,16 +541,15 @@ import { IconName } from 'lucide-react';
 ## 3.1 按钮样式
 
 ```tsx
-// 主要按钮（蓝色）
-<Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm">
+// 主要按钮（橙色调 - 用于重要操作）
+<Button className="bg-orange-500 hover:bg-orange-600 text-white">
   确认操作
 </Button>
 
-// CTA 按钮（绿色）
-<Button variant="cta">开始使用</Button>
-
 // 次要按钮（outline）
-<Button variant="outline">取消</Button>
+<Button variant="outline" className="border-slate-300 hover:bg-slate-50">
+  取消
+</Button>
 
 // 危险按钮（删除等）
 <Button variant="destructive">删除</Button>
@@ -564,26 +564,12 @@ import { IconName } from 'lucide-react';
 
 | 用途 | 颜色 | Tailwind 类 |
 |------|------|-------------|
-| 主题主色 | 专业蓝 | `primary` (#1E40AF) / `primary-foreground` |
-| CTA | 绿色 | `cta` (#22C55E) |
-| 成功/免费 | 绿色 | `emerald-500` / `emerald-400` |
+| 主题主色 | 橙色 | `orange-500` / `orange-600` |
+| 成功/免费 | 绿色 | `green-500` / `emerald-500` |
 | 警告 | 黄色 | `amber-500` / `yellow-500` |
 | 错误/付费 | 红色 | `red-500` / `rose-500` |
-| 边框 | 灰色 | `border` / `input` |
-
-## 3.3 软阴影 (Soft UI)
-
-```tsx
-// 卡片阴影
-<Card className="shadow-sm hover:shadow-md transition-shadow">
-  ...
-</Card>
-
-// 按钮阴影
-<Button className="shadow-sm">
-  ...
-</Button>
-```
+| 信息 | 蓝色 | `blue-500` / `sky-500` |
+| 边框 | 灰色 | `slate-200` / `slate-700` |
 
 ## 3.3 间距规范
 

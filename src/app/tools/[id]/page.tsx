@@ -380,7 +380,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
       <div className="relative">
         {/* 背景装饰 */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-orange-50" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-primary/20 to-transparent rounded-full blur-3xl" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-orange-100/50 to-transparent rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-100/30 to-transparent rounded-full blur-3xl" />
         
         <div className="relative max-w-4xl mx-auto px-4 py-6 sm:py-10">
@@ -405,7 +405,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               </div>
               {/* 精选徽章 */}
               {tool.is_featured && (
-                <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-gradient-to-r from-primary to-primary/70 text-white text-xs font-semibold rounded-full shadow-lg">
+                <div className="absolute -bottom-2 -right-2 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-semibold rounded-full shadow-lg">
                   精选
                 </div>
               )}
@@ -453,7 +453,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
               <Button
                 onClick={handleVisit}
-                className="flex-1 bg-gradient-to-r from-primary to-primary/70 hover:from-primary/90 hover:to-primary/60 text-white font-semibold px-4 sm:px-6 py-2.5 sm:py-3 shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02]"
+                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold px-4 sm:px-6 py-2.5 sm:py-3 shadow-lg shadow-orange-500/25 transition-all hover:shadow-xl hover:shadow-orange-500/30 hover:scale-[1.02]"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 立即使用
@@ -483,7 +483,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 1. 核心功能 - 最重要 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Wand2 className="w-5 h-5 text-primary" />
+            <Wand2 className="w-5 h-5 text-orange-500" />
             核心功能
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -491,8 +491,8 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               <Card key={i} className="bg-white hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Wand2 className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <Wand2 className="w-5 h-5 text-orange-500" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-slate-800 mb-1">{func.func_name}</h3>
@@ -510,8 +510,8 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               <Card key={i} className="bg-white hover:shadow-md transition-shadow">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <Wand2 className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <Wand2 className="w-5 h-5 text-orange-500" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-slate-800 mb-1">{func.title}</h3>
@@ -527,7 +527,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 2. 价格与权益 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-primary" />
+            <BarChart3 className="w-5 h-5 text-orange-500" />
             价格与权益
           </h2>
           <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 mb-4">
@@ -565,7 +565,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 3. 适用场景 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-primary" />
+            <Layers className="w-5 h-5 text-orange-500" />
             适用场景
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -573,10 +573,10 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               <Card key={i} className="bg-white hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold flex items-center justify-center">
                       {scene.scene_no.replace('#', '')}
                     </span>
-                    <span className="text-sm font-medium text-primary">{scene.user_group}</span>
+                    <span className="text-sm font-medium text-orange-600">{scene.user_group}</span>
                   </div>
                   <p className="text-sm text-slate-600 leading-relaxed">{scene.scene_desc}</p>
                 </CardContent>
@@ -589,10 +589,10 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
               <Card key={i} className="bg-white hover:shadow-md transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-semibold flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs font-semibold flex items-center justify-center">
                       {scene.no}
                     </span>
-                    <span className="text-sm font-medium text-primary">{scene.user_group}</span>
+                    <span className="text-sm font-medium text-orange-600">{scene.user_group}</span>
                   </div>
                   <p className="text-sm text-slate-600 leading-relaxed">{scene.scene_desc}</p>
                 </CardContent>
@@ -604,7 +604,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 4. 关于工具 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
+            <Sparkles className="w-5 h-5 text-orange-500" />
             关于{tool.name}
           </h2>
           <Card className="bg-white">
@@ -619,7 +619,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 5. 快速上手 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-primary" />
+            <BookOpen className="w-5 h-5 text-orange-500" />
             快速上手
           </h2>
           <Card className="bg-white">
@@ -633,7 +633,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                   { step: '5', title: '进阶操作', desc: '使用高级功能' },
                 ].map((item) => (
                   <div key={item.step} className="flex flex-col items-center text-center">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm mb-2">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-semibold text-sm mb-2">
                       {item.step}
                     </div>
                     <h3 className="font-medium text-slate-800 text-sm">{item.title}</h3>
@@ -663,7 +663,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 6. 常见问题 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-primary" />
+            <HelpCircle className="w-5 h-5 text-orange-500" />
             常见问题
           </h2>
           <Card className="bg-white">
@@ -701,7 +701,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         {/* 7. 用户评价 */}
         <section className="mb-8">
           <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-primary" />
+            <MessageSquare className="w-5 h-5 text-orange-500" />
             用户评价
           </h2>
           
@@ -765,7 +765,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
                 <Button
                   onClick={submitReview}
                   disabled={submitting || newReview.length < 10}
-                  className="bg-orange-500 hover:bg-primary/90"
+                  className="bg-orange-500 hover:bg-orange-600"
                 >
                   {submitting ? '提交中...' : '发表评论'}
                 </Button>
@@ -819,7 +819,7 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
           {/* 同类推荐 */}
           <section className="mb-8">
             <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <Bookmark className="w-5 h-5 text-primary" />
+              <Bookmark className="w-5 h-5 text-orange-500" />
               相关推荐
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -889,12 +889,12 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <img src="/favicon.svg" alt="OneClaw" width={24} height={24} className="object-contain" />
+              <img src="/oneclaw-logo.png" alt="OneClaw" width={24} height={24} className="object-contain" />
               <span className="font-bold text-slate-700">OneClaw</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-slate-500">
-              <Link href="/about" className="hover:text-primary transition-colors">关于OneClaw</Link>
-              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
                 渝ICP备2026004291号-2
               </a>
             </div>

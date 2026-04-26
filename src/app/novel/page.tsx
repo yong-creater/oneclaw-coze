@@ -1,6 +1,6 @@
 'use client';
 
-import NovelCreator from '@/components/NovelCreator';
+import NovelCreator from '@/components/tools/NovelCreator';
 
 export default function NovelPage() {
   return <NovelCreator />;

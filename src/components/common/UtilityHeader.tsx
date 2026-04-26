@@ -25,14 +25,14 @@ export default function UtilityHeader({
           {/* 主站Logo - 与主站一致 */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <img 
-              src="/favicon.svg" 
+              src="/oneclaw-logo.png" 
               alt="OneClaw" 
               width={32} 
               height={32}
               className="object-contain"
             />
             <span className="font-bold text-lg text-slate-800 dark:text-white hidden sm:inline">
-              <span className="text-orange-500">OneClaw</span>
+              <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
             </span>
           </Link>
           

@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     // 分别获取用户信息
     const userIds = [...new Set((reviews || []).map((r: any) => r.user_id))];
-    const usersMap: Record<string, any> = {};
+    let usersMap: Record<string, any> = {};
 
     if (userIds.length > 0) {
       const { data: users } = await supabase
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
     // 如果有评论，获取对应的评分数据
     const reviewIds = (reviews || []).map((r: any) => r.id);
-    const ratingsMap: Record<number, any> = {};
+    let ratingsMap: Record<number, any> = {};
 
     if (reviewIds.length > 0) {
       const { data: ratings } = await supabase

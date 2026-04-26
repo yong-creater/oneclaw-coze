@@ -18,28 +18,16 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     
     const supabase = getSupabaseClient();
-
-    // 先获取分类ID（如果需要按分类筛选）
-    let categoryId: number | null = null;
-    if (category_slug && category_slug !== 'all') {
-      const { data: catData } = await supabase
-        .from('categories')
-        .select('id')
-        .or(`slug.ilike.${category_slug},name.ilike.${category_slug}`)
-        .limit(1)
-        .single();
-      categoryId = catData?.id || null;
-    }
-
+    
     // 构建基础查询
     let query = supabase
       .from('tools')
       .select('*, categories(name, slug)', { count: 'exact' })
       .eq('is_active', true);
-
+    
     // 分类筛选
-    if (categoryId) {
-      query = query.eq('category_id', categoryId);
+    if (category_slug && category_slug !== 'all') {
+      query = query.eq('categories.slug', category_slug);
     }
     
     // 免费类型筛选

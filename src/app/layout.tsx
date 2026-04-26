@@ -105,9 +105,9 @@ export const metadata: Metadata = {
     'mobile-agent': 'pc,mobile',
   },
   icons: {
-    icon: '/favicon.svg?v=3',
-    shortcut: '/favicon.svg?v=3',
-    apple: '/apple-touch-icon.png?v=3',
+    icon: '/favicon.png?v=2',
+    shortcut: '/favicon.png?v=2',
+    apple: '/apple-touch-icon.png?v=2',
   },
 };
 
@@ -136,7 +136,7 @@ const organizationJsonLd = {
   name: 'OneClaw',
   alternateName: '钳爪',
   url: siteUrl,
-  logo: `${siteUrl}/favicon.svg`,
+  logo: `${siteUrl}/oneclaw-logo.png`,
   description: '全品类AI工具导航平台',
   contactPoint: {
     '@type': 'ContactPoint',
@@ -204,11 +204,6 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head suppressHydrationWarning>
-        {/* Google Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-        
         {/* 百度站长验证 - 硬编码确保生效 */}
         <meta name="baidu-site-verification" content="codeva-Guh6a5UTE1" />
         

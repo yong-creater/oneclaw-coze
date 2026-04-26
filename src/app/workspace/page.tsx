@@ -1,358 +1,675 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Sidebar from '@/components/common/Sidebar';
+import Image from 'next/image';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
-import { Star, Heart, Clock, Trash2, ExternalLink } from 'lucide-react';
+import { 
+  Heart, History, Star, Trash2, ExternalLink, Video, User,
+  ChevronLeft, ChevronRight, Loader2, Home
+} from 'lucide-react';
+import AnimatedLobster from '@/components/common/AnimatedLobster';
+import LoginModal from '@/components/common/LoginModal';
+import { useUser } from '@/contexts/UserContext';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-interface FavoriteItem {
+// 类型定义
+interface ToolInfo {
+  id: number;
+  name: string;
+  logo: string;
+  producer: string;
+  highlight: string;
+  free_type: string;
+  feature_tags: string[];
+  categories?: { name: string };
+}
+
+interface Favorite {
   id: number;
   tool_id: number;
-  tool_name: string;
-  tool_logo: string;
-  tool_highlight: string;
   created_at: string;
+  tools?: ToolInfo;
 }
 
 interface HistoryItem {
   id: number;
   tool_id: number;
-  tool_name: string;
-  tool_logo: string;
-  tool_highlight: string;
-  visited_at: string;
+  viewed_at: string;
+  tools?: ToolInfo;
 }
 
 interface RatingItem {
   id: number;
   tool_id: number;
-  tool_name: string;
-  tool_logo: string;
   effect_score: number;
   usability_score: number;
   quota_score: number;
   stability_score: number;
+  overall_score: string;
   created_at: string;
+  tools?: ToolInfo;
 }
 
 export default function WorkspacePage() {
-  const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') || 'favorites';
+  const { user, authenticated, loading: authLoading, setShowLoginModal } = useUser();
+  const router = useRouter();
   
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
+  // 收藏
+  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const [favoritesPagination, setFavoritesPagination] = useState({ page: 1, total: 0, total_pages: 0 });
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  
+  // 浏览历史
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [historyPagination, setHistoryPagination] = useState({ page: 1, total: 0, total_pages: 0 });
+  const [historyLoading, setHistoryLoading] = useState(false);
+  
+  // 评分记录
   const [ratings, setRatings] = useState<RatingItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<{ nickname: string } | null>(null);
+  const [ratingsPagination, setRatingsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
+  const [ratingsLoading, setRatingsLoading] = useState(false);
 
-  // 检查登录状态
-  useEffect(() => {
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('user_token='));
-    
-    if (!token) {
-      setLoading(false);
-      return;
+  // 获取收藏
+  const fetchFavorites = async (page: number) => {
+    setFavoritesLoading(true);
+    try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      console.log('[收藏] userId:', userId);
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/favorites?user_id=${userId}&page=${page}&limit=10`, { headers });
+      const data = await res.json();
+      console.log('[收藏] API返回:', data);
+      if (data.success) {
+        // 过滤掉 tools 为空或无效的数据
+        const validFavorites = (data.data || []).filter((fav: any) => 
+          fav.tools && typeof fav.tools === 'object' && fav.tools.id
+        );
+        setFavorites(validFavorites);
+        setFavoritesPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('获取收藏失败:', error);
+    } finally {
+      setFavoritesLoading(false);
     }
+  };
 
-    const tokenValue = token.split('=')[1];
-    fetch('/api/auth?action=check', {
-      headers: { Cookie: `user_token=${tokenValue}` }
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setUser(data.data.user);
-        }
-      })
-      .catch(() => {});
-  }, []);
+  // 获取浏览历史
+  const fetchHistory = async (page: number) => {
+    setHistoryLoading(true);
+    try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      console.log('[历史] userId:', userId);
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/history?user_id=${userId}&page=${page}&limit=10`, { headers });
+      const data = await res.json();
+      console.log('[历史] API返回:', data);
+      if (data.success) {
+        // 过滤掉 tools 为空或无效的数据
+        const validHistory = (data.data || []).filter((item: any) => 
+          item.tools && typeof item.tools === 'object' && item.tools.id
+        );
+        setHistory(validHistory);
+        setHistoryPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('获取历史失败:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
-  // 加载数据
+  // 获取评分记录
+  const fetchRatings = async (page: number) => {
+    setRatingsLoading(true);
+    try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      console.log('[评分] userId:', userId);
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/user-ratings?user_id=${userId}&page=${page}&limit=10`, { headers });
+      const data = await res.json();
+      console.log('[评分] API返回:', data);
+      if (data.success) {
+        // 过滤掉 tools 为空或无效的数据
+        const validRatings = (data.data || []).filter((item: any) => 
+          item.tools && typeof item.tools === 'object' && item.tools.id
+        );
+        setRatings(validRatings);
+        setRatingsPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('获取评分失败:', error);
+    } finally {
+      setRatingsLoading(false);
+    }
+  };
+
+  // 初始化
   useEffect(() => {
-    setLoading(true);
-    
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('user_token='));
-    
-    const headers: HeadersInit = token ? { Authorization: `Bearer ${token.split('=')[1]}` } : {};
+    if (authenticated && user) {
+      fetchFavorites(1);
+      fetchHistory(1);
+      fetchRatings(1);
+    }
+  }, [authenticated, user]);
 
-    Promise.all([
-      fetch('/api/favorites', { headers }).then(r => r.json()),
-      fetch('/api/history', { headers }).then(r => r.json()),
-      fetch('/api/ratings', { headers }).then(r => r.json()),
-    ]).then(([favData, hisData, ratData]) => {
-      if (favData.success) setFavorites(favData.data || []);
-      if (hisData.success) setHistory(hisData.data || []);
-      if (ratData.success) setRatings(ratData.data || []);
-      setLoading(false);
-    }).catch(() => setLoading(false));
-  }, []);
-
-  // 删除收藏
-  const handleDeleteFavorite = async (id: number) => {
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('user_token='));
-    
-    if (!token) return;
-
-    await fetch(`/api/favorites?id=${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token.split('=')[1]}` }
-    });
-    setFavorites(prev => prev.filter(f => f.id !== id));
+  // 取消收藏
+  const removeFavorite = async (toolId: number) => {
+    try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (userId) headers['x-user-id'] = userId;
+      
+      await fetch(`/api/favorites?tool_id=${toolId}`, {
+        method: 'DELETE',
+        headers
+      });
+      fetchFavorites(1);
+    } catch (error) {
+      console.error('取消收藏失败:', error);
+    }
   };
 
-  // 删除历史
-  const handleDeleteHistory = async (id: number) => {
-    const token = document.cookie
-      .split('; ')
-      .find(row => row.startsWith('user_token='));
-    
-    if (!token) return;
-
-    await fetch(`/api/history?id=${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token.split('=')[1]}` }
-    });
-    setHistory(prev => prev.filter(h => h.id !== id));
+  // 清除历史
+  const clearHistory = async () => {
+    if (!confirm('确定要清除所有浏览历史吗？')) return;
+    try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = { 'Content-Type': 'application/json' };
+      if (userId) headers['x-user-id'] = userId;
+      
+      await fetch('/api/history', {
+        method: 'DELETE',
+        headers
+      });
+      setHistory([]);
+      setHistoryPagination({ page: 1, total: 0, total_pages: 0 });
+    } catch (error) {
+      console.error('清除历史失败:', error);
+    }
   };
 
-  // 渲染星级
-  const renderStars = (score: number) => {
+  // 工具卡片
+  const ToolCard = ({ tool, extra }: { tool?: ToolInfo; extra?: React.ReactNode }) => {
+    if (!tool) return null;
     return (
-      <div className="flex gap-0.5">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Star
-            key={star}
-            className={cn(
-              "w-3 h-3",
-              star <= score ? "fill-primary text-primary" : "text-muted-foreground/30"
-            )}
-          />
-        ))}
-      </div>
+      <Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img
+                src={tool.logo || ''}
+                alt={tool.name || '工具'}
+                className="w-10 h-10 object-contain"
+                onError={(e) => {
+                  const name = tool.name || '?';
+                  (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${name[0]}</text></svg>`;
+                }}
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">{tool.name || '未知工具'}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{tool.highlight || ''}</p>
+            </div>
+            {extra}
+          </div>
+        </CardContent>
+      </Card>
     );
   };
 
-  const ItemCard = ({ 
-    id, 
-    tool_id, 
-    tool_name, 
-    tool_logo, 
-    tool_highlight,
-    time,
-    onDelete,
-    showStars,
-    scores
-  }: { 
-    id: number; 
-    tool_id: number; 
-    tool_name: string; 
-    tool_logo: string; 
-    tool_highlight: string;
-    time?: string;
-    onDelete?: () => void;
-    showStars?: boolean;
-    scores?: { effect: number; usability: number; quota: number; stability: number };
-  }) => (
-    <div className="flex items-center gap-4 p-4 bg-card rounded-xl">
-      <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-        {tool_logo ? (
-          <img src={tool_logo} alt={tool_name} className="w-full h-full object-cover" />
-        ) : (
-          <span className="text-lg font-medium">{tool_name[0]}</span>
-        )}
-      </div>
-      
-      <div className="flex-1 min-w-0">
-        <a href={`/tools/${tool_id}`} className="font-medium text-foreground hover:text-primary transition-colors">
-          {tool_name}
-        </a>
-        <p className="text-xs text-muted-foreground truncate">{tool_highlight}</p>
-        {showStars && scores && (
-          <div className="flex gap-3 mt-1">
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground">效果</span>
-              {renderStars(scores.effect)}
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-muted-foreground">易用</span>
-              {renderStars(scores.usability)}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3">
-        {time && <span className="text-xs text-muted-foreground">{time}</span>}
-        {onDelete && (
-          <Button variant="ghost" size="sm" onClick={onDelete} className="cursor-pointer">
-            <Trash2 className="w-4 h-4" />
-          </Button>
-        )}
-        <a href={`/tools/${tool_id}`}>
-          <Button variant="ghost" size="sm" className="cursor-pointer">
-            <ExternalLink className="w-4 h-4" />
-          </Button>
-        </a>
-      </div>
-    </div>
-  );
-
-  if (!user) {
+  // 加载中
+  if (authLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Sidebar />
-        <main className="transition-all duration-300" style={{ marginLeft: 'var(--sidebar-width, 240px)' }}>
-          <div className="max-w-4xl mx-auto px-6 py-8">
-            <div className="text-center py-16">
-              <h2 className="text-xl font-semibold mb-2">请先登录</h2>
-              <p className="text-muted-foreground mb-4">登录后可使用工作台功能</p>
-              <a href="/login">
-                <Button className="cursor-pointer">去登录</Button>
-              </a>
-            </div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  // 未登录
+  if (!authenticated || !user) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <div className="text-center">
+            <AnimatedLobster size={80} />
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-6 mb-2">
+              登录后查看工作台
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">
+              登录后可以管理收藏、查看浏览历史和评分记录
+            </p>
+            <Button
+              onClick={() => setShowLoginModal(true)}
+              className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+            >
+              <User className="w-4 h-4 mr-2" />
+              微信扫码登录
+            </Button>
           </div>
-        </main>
+        </div>
+        <LoginModal
+          open={false}
+          onOpenChange={() => {}}
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar />
-
-      <main
-        className="transition-all duration-300"
-        style={{ marginLeft: 'var(--sidebar-width, 240px)' }}
-      >
-        <div className="max-w-4xl mx-auto px-6 py-8">
-          {/* 页面标题 */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-semibold text-foreground">工作台</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              欢迎回来，{user.nickname}
-            </p>
-          </div>
-
-          <Tabs defaultValue={initialTab}>
-            <TabsList>
-              <TabsTrigger value="favorites" className="cursor-pointer">
-                <Heart className="w-4 h-4 mr-2" />
-                我的收藏
-                {favorites.length > 0 && (
-                  <Badge variant="secondary" className="ml-2">{favorites.length}</Badge>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* 顶部导航 */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <AnimatedLobster size={36} />
+                <div>
+                  <h1 className="text-lg font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
+                    OneClaw
+                  </h1>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">我的工作台</p>
+                </div>
+              </Link>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => router.push('/')}
+                className="gap-2 border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500"
+              >
+                <Home className="w-4 h-4" />
+                返回首页
+              </Button>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt="" className="w-6 h-6 rounded-full" />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                    <span className="text-white text-xs font-medium">
+                      {(user.nickname?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                    </span>
+                  </div>
                 )}
-              </TabsTrigger>
-              <TabsTrigger value="history" className="cursor-pointer">
-                <Clock className="w-4 h-4 mr-2" />
-                浏览历史
-              </TabsTrigger>
-              <TabsTrigger value="ratings" className="cursor-pointer">
-                <Star className="w-4 h-4 mr-2" />
-                我的评分
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="favorites" className="mt-4 space-y-3">
-              {loading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-16 bg-muted rounded-xl animate-pulse" />
-                  ))}
-                </div>
-              ) : favorites.length === 0 ? (
-                <div className="text-center py-12">
-                  <Heart className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
-                  <p className="text-muted-foreground">暂无收藏</p>
-                </div>
-              ) : (
-                favorites.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    id={item.id}
-                    tool_id={item.tool_id}
-                    tool_name={item.tool_name}
-                    tool_logo={item.tool_logo}
-                    tool_highlight={item.tool_highlight}
-                    time={new Date(item.created_at).toLocaleDateString()}
-                    onDelete={() => handleDeleteFavorite(item.id)}
-                  />
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="history" className="mt-4 space-y-3">
-              {loading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-16 bg-muted rounded-xl animate-pulse" />
-                  ))}
-                </div>
-              ) : history.length === 0 ? (
-                <div className="text-center py-12">
-                  <Clock className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
-                  <p className="text-muted-foreground">暂无浏览记录</p>
-                </div>
-              ) : (
-                history.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    id={item.id}
-                    tool_id={item.tool_id}
-                    tool_name={item.tool_name}
-                    tool_logo={item.tool_logo}
-                    tool_highlight={item.tool_highlight}
-                    time={new Date(item.visited_at).toLocaleDateString()}
-                    onDelete={() => handleDeleteHistory(item.id)}
-                  />
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="ratings" className="mt-4 space-y-3">
-              {loading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-20 bg-muted rounded-xl animate-pulse" />
-                  ))}
-                </div>
-              ) : ratings.length === 0 ? (
-                <div className="text-center py-12">
-                  <Star className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
-                  <p className="text-muted-foreground">暂无评分记录</p>
-                </div>
-              ) : (
-                ratings.map((item) => (
-                  <ItemCard
-                    key={item.id}
-                    id={item.id}
-                    tool_id={item.tool_id}
-                    tool_name={item.tool_name}
-                    tool_logo={item.tool_logo}
-                    tool_highlight=""
-                    showStars
-                    scores={{
-                      effect: item.effect_score,
-                      usability: item.usability_score,
-                      quota: item.quota_score,
-                      stability: item.stability_score,
-                    }}
-                  />
-                ))
-              )}
-            </TabsContent>
-          </Tabs>
+                <span>{user.nickname || user.email || '用户'}</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        <Tabs defaultValue="favorites" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="profile" className="gap-2">
+              <User className="w-4 h-4" />
+              个人资料
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="gap-2">
+              <Heart className="w-4 h-4" />
+              我的收藏
+              {favoritesPagination.total > 0 && (
+                <span className="ml-1 text-xs bg-orange-100 text-orange-600 px-1.5 rounded-full">
+                  {favoritesPagination.total}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="history" className="gap-2">
+              <History className="w-4 h-4" />
+              浏览历史
+              {historyPagination.total > 0 && (
+                <span className="ml-1 text-xs bg-blue-100 text-blue-600 px-1.5 rounded-full">
+                  {historyPagination.total}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="ratings" className="gap-2">
+              <Star className="w-4 h-4" />
+              评分记录
+              {ratingsPagination.total > 0 && (
+                <span className="ml-1 text-xs bg-yellow-100 text-yellow-600 px-1.5 rounded-full">
+                  {ratingsPagination.total}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* 个人资料 */}
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">个人资料</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+                    <span className="text-white text-2xl font-medium">
+                      {(user?.nickname?.[0] || user?.email?.[0] || 'U').toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-lg font-medium">{user?.nickname || '未设置昵称'}</p>
+                    <p className="text-sm text-slate-500">{user?.email || '未绑定邮箱'}</p>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-4 mt-4">
+                  <h4 className="text-sm font-medium mb-3">账号信息</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">用户ID</span>
+                      <span className="font-mono text-xs">{user?.user_id || '-'}</span>
+                    </div>
+                    {user?.openid && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">微信</span>
+                        <span className="text-green-600">已绑定</span>
+                      </div>
+                    )}
+                    {user?.email && (
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">邮箱</span>
+                        <span className="text-green-600">已绑定</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {!user?.email && (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                      提示：您使用的是微信登录，建议绑定邮箱以便通过邮箱找回密码。
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2 border-amber-300 hover:border-amber-400"
+                      onClick={() => {/* TODO: 绑定邮箱功能 */}}
+                    >
+                      绑定邮箱
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 收藏 */}
+          <TabsContent value="favorites">
+            <div className="space-y-4">
+              {favoritesLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                </div>
+              ) : favorites.length > 0 ? (
+                <>
+                  {favorites.map((fav) => (
+                    fav.tools && (
+                    <ToolCard
+                      key={fav.id}
+                      tool={fav.tools}
+                      extra={
+                        <div className="flex items-center gap-2">
+                          <Link href={`/?tool=${fav.tool_id}`} target="_blank">
+                            <Button variant="ghost" size="sm">
+                              <ExternalLink className="w-4 h-4" />
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-600"
+                            onClick={() => removeFavorite(fav.tool_id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      }
+                    />
+                    )
+                  ))}
+                  
+                  {favoritesPagination.total_pages > 1 && (
+                    <div className="flex justify-center gap-2 mt-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={favoritesPagination.page === 1}
+                        onClick={() => fetchFavorites(favoritesPagination.page - 1)}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <span className="flex items-center text-sm text-slate-500">
+                        {favoritesPagination.page} / {favoritesPagination.total_pages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={favoritesPagination.page === favoritesPagination.total_pages}
+                        onClick={() => fetchFavorites(favoritesPagination.page + 1)}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <Heart className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                  <p className="text-slate-500 dark:text-slate-400">还没有收藏任何工具</p>
+                  <Link href="/">
+                    <Button variant="link" className="text-orange-500 mt-2">
+                      去发现工具
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* 浏览历史 */}
+          <TabsContent value="history">
+            <div className="space-y-4">
+              {historyLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                </div>
+              ) : history.length > 0 ? (
+                <>
+                  <div className="flex justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-500"
+                      onClick={clearHistory}
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      清除历史
+                    </Button>
+                  </div>
+                  
+                  {history.map((item) => (
+                    item.tools && (
+                    <ToolCard
+                      key={item.id}
+                      tool={item.tools}
+                      extra={
+                        <Link href={`/?tool=${item.tool_id}`} target="_blank">
+                          <Button variant="ghost" size="sm">
+                            <ExternalLink className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                      }
+                    />
+                    )
+                  ))}
+                  
+                  {historyPagination.total_pages > 1 && (
+                    <div className="flex justify-center gap-2 mt-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={historyPagination.page === 1}
+                        onClick={() => fetchHistory(historyPagination.page - 1)}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <span className="flex items-center text-sm text-slate-500">
+                        {historyPagination.page} / {historyPagination.total_pages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={historyPagination.page === historyPagination.total_pages}
+                        onClick={() => fetchHistory(historyPagination.page + 1)}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <History className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                  <p className="text-slate-500 dark:text-slate-400">暂无浏览记录</p>
+                  <Link href="/">
+                    <Button variant="link" className="text-orange-500 mt-2">
+                      去探索工具
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* 评分记录 */}
+          <TabsContent value="ratings">
+            <div className="space-y-4">
+              {ratingsLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                </div>
+              ) : ratings.length > 0 ? (
+                <>
+                  {ratings.map((item) => (
+                    item.tools && (
+                    <Card key={item.id} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <img
+                              src={item.tools?.logo || ''}
+                              alt={item.tools?.name || '工具'}
+                              className="w-10 h-10 object-contain"
+                              onError={(e) => {
+                                const name = item.tools?.name || '?';
+                                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect fill="%23f97316" width="40" height="40"/><text x="50%" y="55%" text-anchor="middle" fill="white" font-size="16" font-weight="bold">${name[0]}</text></svg>`;
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h3 className="font-medium text-slate-800 dark:text-slate-100">{item.tools?.name || '未知工具'}</h3>
+                              <Link href={`/?tool=${item.tool_id}`} target="_blank">
+                                <Button variant="ghost" size="sm">
+                                  <ExternalLink className="w-4 h-4" />
+                                </Button>
+                              </Link>
+                            </div>
+                            <div className="flex items-center gap-4 mt-2 text-sm">
+                              <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                                <span className="font-medium">{item.overall_score}</span>
+                              </div>
+                              <span className="text-slate-400">|</span>
+                              <span className="text-slate-500">效果 {item.effect_score}</span>
+                              <span className="text-slate-500">易用 {item.usability_score}</span>
+                              <span className="text-slate-500">额度 {item.quota_score}</span>
+                              <span className="text-slate-500">稳定 {item.stability_score}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    )
+                  ))}
+                  
+                  {ratingsPagination.total_pages > 1 && (
+                    <div className="flex justify-center gap-2 mt-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={ratingsPagination.page === 1}
+                        onClick={() => fetchRatings(ratingsPagination.page - 1)}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <span className="flex items-center text-sm text-slate-500">
+                        {ratingsPagination.page} / {ratingsPagination.total_pages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={ratingsPagination.page === ratingsPagination.total_pages}
+                        onClick={() => fetchRatings(ratingsPagination.page + 1)}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <Star className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                  <p className="text-slate-500 dark:text-slate-400">还没有评分记录</p>
+                  <Link href="/">
+                    <Button variant="link" className="text-orange-500 mt-2">
+                      去评价工具
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-slate-200 dark:bg-slate-800 dark:border-slate-700 py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Image 
+                src="/oneclaw-logo.png" 
+                alt="OneClaw" 
+                width={28} 
+                height={28}
+                className="object-contain"
+              />
+              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+              <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+              <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+                渝ICP备2026004291号-2
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
