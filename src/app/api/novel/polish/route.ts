@@ -1,101 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Coze API 配置
-const COZE_API_KEY = process.env.COZE_WORKLOAD_IDENTITY_API_KEY || process.env.OPENAI_API_KEY || '';
-const COZE_API_BASE = 'https://integration.coze.cn/api/v3';
-
-// 4sAPI 配置
-const ENABLE_4SAPI = process.env.ENABLE_4SAPI === 'true';
-const API4S_KEY = process.env.API4S_KEY || '';
-const API4S_URL = process.env.API4S_URL || 'https://4sapi.com/v1';
-
-// 4sAPI 专属模型列表
-const API4S_MODELS = [
-  'gpt-4o',
-  'gpt-4o-mini', 
-  'gpt-4-turbo',
-  'claude-3-5-sonnet',
-  'claude-3-5-haiku',
-  'claude-sonnet-4',
-  'gemini-2.0-flash',
-  'gemini-1.5-pro',
-];
-
-// 免费模型列表 (Coze)
-const FREE_MODELS = [
-  'doubao-seed-2-0-pro-260215',
-  'doubao-seed-2-0-lite-260215',
-  'doubao-seed-2-0-mini-260215',
-  'doubao-seed-1-6-251015',
-  'doubao-seed-1-8-251228',
-  'doubao-seed-1-6-vision-250815',
-  'doubao-seed-1-6-thinking-250715',
-  'doubao-pro-4k-240815',
-  'doubao-pro-32k-240815',
-  'doubao-lite-4k-240815',
-  'doubao-lite-32k-240815',
-  'glm-4',
-  'glm-4-flash',
-  'glm-4-plus',
-  'glm-4v',
-  'glm-3-turbo',
-  'characterglm',
-  'qwen-turbo',
-  'qwen-plus',
-  'qwen-max',
-  'qwen2-72b-instruct',
-  'qwen2-7b-instruct',
-  'qwen-coder-turbo',
-  'moonshot-v1-8k',
-  'moonshot-v1-32k',
-  'moonshot-v1-128k',
-  'deepseek-chat',
-  'deepseek-coder',
-  'baichuan4',
-  'baichuan3-turbo',
-  'yi-34b-chat',
-  'minimax-chat',
-];
-
-// 检查是否为免费模型 (Coze)
-function isFreeModel(model: string): boolean {
-  const lowerModel = model?.toLowerCase() || '';
-  return FREE_MODELS.some(m => lowerModel.includes(m.toLowerCase()));
-}
-
-// 检查是否为 4sAPI 模型
-function is4sapiModel(model: string): boolean {
-  const lowerModel = model?.toLowerCase() || '';
-  return API4S_MODELS.some(m => lowerModel.includes(m.toLowerCase()));
-}
-
-// 调用 4sAPI
-async function call4sapiAPI(messages: any[], model: string): Promise<string> {
-  if (!ENABLE_4SAPI || !API4S_KEY) {
-    throw new Error('4sAPI 未启用或未配置密钥');
-  }
-
-  const response = await fetch(`${API4S_URL}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${API4S_KEY}`,
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: messages,
-      stream: false,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`4sAPI error: ${response.status} - ${errorText}`);
-  }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || '';
-}
+import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
 // 洗稿系统提示词
 const SYSTEM_PROMPT = `你是专业的小说洗稿专家，擅长将小说内容进行深度改写，保持剧情人设不变的同时显著提升原创度。
@@ -110,51 +14,18 @@ const SYSTEM_PROMPT = `你是专业的小说洗稿专家，擅长将小说内容
 输出格式：
 直接输出洗稿后的完整小说文本，不要添加其他说明。`;
 
-// 调用 Coze API
-async function callCozeAPI(messages: any[], model: string): Promise<string> {
-  const response = await fetch(`${COZE_API_BASE}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${COZE_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: messages,
-      stream: false,
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Coze API error: ${response.status} - ${errorText}`);
-  }
-
-  // 解析 SSE 格式响应
-  const text = await response.text();
-  const lines = text.split('\n');
-  let content = '';
-  let reasoningContent = '';
-  
-  for (const line of lines) {
-    if (line.startsWith('data: ')) {
-      try {
-        const data = JSON.parse(line.slice(6));
-        if (data.choices?.[0]?.delta?.content) {
-          content += data.choices[0].delta.content;
-        }
-        if (data.choices?.[0]?.delta?.reasoning_content) {
-          reasoningContent += data.choices[0].delta.reasoning_content;
-        }
-      } catch (e) {
-        // 跳过无效的JSON
-      }
-    }
-  }
-  
-  // 返回实际内容或推理内容
-  return content || reasoningContent || '';
-}
+// 支持的模型列表
+const SUPPORTED_MODELS = [
+  'doubao-seed-2-0-pro-260215',
+  'doubao-seed-2-0-lite-260215',
+  'doubao-seed-2-0-mini-260215',
+  'doubao-seed-1-8-251228',
+  'deepseek-r1-250528',
+  'deepseek-v3-2-251201',
+  'kimi-k2-5-260127',
+  'glm-5-0-260211',
+  'qwen3-5-plus-260215',
+];
 
 export async function POST(request: NextRequest) {
   try {
@@ -163,6 +34,11 @@ export async function POST(request: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: '请提供小说内容' }, { status: 400 });
     }
+
+    // 验证模型参数
+    const selectedModel = model && SUPPORTED_MODELS.includes(model) 
+      ? model 
+      : 'doubao-seed-1-8-251228';
 
     let extraText = '';
     if (extraRequirements && extraRequirements.length > 0) {
@@ -178,32 +54,42 @@ export async function POST(request: NextRequest) {
 ${text}`;
 
     const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userPrompt }
+      { role: 'system' as const, content: SYSTEM_PROMPT },
+      { role: 'user' as const, content: userPrompt }
     ];
 
-    const targetModel = model || 'doubao-seed-1-8-251228';
+    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+    const config = new Config();
+    const client = new LLMClient(config, customHeaders);
 
-    let content = '';
+    // 构建消息
+    const fullContent: string[] = [];
+
+    // 使用 stream 方法
+    const llmConfig = {
+      model: selectedModel,
+      temperature: 0.7,
+      streaming: true
+    };
+
+    const aiStream = client.stream(messages as any, llmConfig);
     
-    if (is4sapiModel(targetModel)) {
-      // 使用 4sAPI
-      content = await call4sapiAPI(messages, targetModel);
-    } else if (isFreeModel(targetModel)) {
-      // 使用 Coze API
-      content = await callCozeAPI(messages, targetModel);
-    } else {
-      return NextResponse.json({ error: '不支持的模型，请选择免费模型或4sAPI模型' }, { status: 400 });
+    for await (const chunk of aiStream) {
+      if (chunk.content) {
+        fullContent.push(chunk.content.toString());
+      }
     }
-    
+
+    const content = fullContent.join('');
+
     if (!content) {
       throw new Error('AI未返回有效内容');
     }
-    
-    // 估算原创度分数
+
+    // 估算原创度分数（实际应用中可调用专门的原创度检测API）
     const score = Math.min(95, 85 + Math.floor(Math.random() * 10));
     
-    return NextResponse.json({ content, score });
+    return NextResponse.json({ content, score, model: selectedModel });
 
   } catch (error: any) {
     console.error('Polish error:', error);
