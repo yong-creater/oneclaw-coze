@@ -25,7 +25,7 @@ export default function UtilityHeader({
           {/* 主站Logo - 与主站一致 */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <img 
-              src="/oneclaw-logo-v2.png" 
+              src="/favicon.svg" 
               alt="OneClaw" 
               width={32} 
               height={32}

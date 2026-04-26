@@ -66,7 +66,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
       
       {/* 新版Logo */}
       <img
-        src="/oneclaw-logo-v2.png"
+        src="/favicon.svg"
         alt="OneClaw 龙虾"
         width={size}
         height={size}

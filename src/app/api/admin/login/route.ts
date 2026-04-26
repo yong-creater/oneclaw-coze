@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,7 +25,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 验证密码
-    const bcrypt = require('bcryptjs');
     const validPassword = await bcrypt.compare(password, admin.password_hash);
 
     if (!validPassword) {
