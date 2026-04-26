@@ -45,6 +45,17 @@ const TAGS = [
   { name: '知识科普', type: 'scene' },
 ];
 
+// 精选工具数据
+const UTILITY_TOOLS = [
+  // 精选工具组 (group_id=1)
+  { name: 'STAR简历优化', slug: 'resume', group_id: 1, sort_order: 1, tool_path: '/resume', color: 'from-blue-500 to-cyan-500', icon: 'FileText' },
+  { name: '小说创作工坊', slug: 'novel', group_id: 1, sort_order: 2, tool_path: '/novel', color: 'from-purple-500 to-pink-500', icon: 'BookOpen' },
+  { name: '商品详情页生成器', slug: 'productpage', group_id: 1, sort_order: 3, tool_path: '/productpage', color: 'from-green-500 to-emerald-500', icon: 'ShoppingCart' },
+  { name: 'AI智能抠图', slug: 'background-removal', group_id: 1, sort_order: 4, tool_path: '/background-removal', color: 'from-amber-500 to-orange-500', icon: 'Scissors' },
+  { name: '小红书笔记生成器', slug: 'xiaohongshu-generator', group_id: 1, sort_order: 5, tool_path: '/xiaohongshu-generator', color: 'from-pink-500 to-rose-500', icon: 'Heart' },
+  { name: '商拍AI', slug: 'shangpai-ai', group_id: 1, sort_order: 6, tool_path: '/tools/shangpai-ai', color: 'from-orange-500 to-red-500', icon: 'ShoppingBag' },
+];
+
 // GET: 获取当前数据状态
 export async function GET() {
   try {
@@ -112,12 +123,29 @@ export async function POST(request: NextRequest) {
         });
     }
 
+    // 插入精选工具（忽略冲突）
+    for (const tool of UTILITY_TOOLS) {
+      await supabase
+        .from('utility_tools')
+        .upsert({ 
+          slug: tool.slug,
+          name: tool.name,
+          group_id: tool.group_id,
+          sort_order: tool.sort_order,
+          tool_path: tool.tool_path,
+          color: tool.color,
+          icon: tool.icon,
+          is_active: true,
+        }, { onConflict: 'slug' });
+    }
+
     return NextResponse.json({ 
       success: true, 
       message: '基础数据初始化完成',
       data: {
         categories: categoriesCount,
         tags: tagsCount,
+        utility_tools: UTILITY_TOOLS.length,
       }
     });
   } catch (error) {
