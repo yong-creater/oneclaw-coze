@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BackToHome from '@/components/common/BackToHome';
@@ -34,6 +34,37 @@ export default function AIPhotoPage() {
   const [downloading, setDownloading] = useState<number | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到AI写真模板数据:', data, '模板名称:', templateName);
+        
+        // 如果模板有风格设置，应用风格
+        if (data.style) {
+          const styleId = data.style.toLowerCase();
+          const matchedStyle = PHOTO_STYLES.find(s => 
+            s.id === styleId || s.name.includes(data.style)
+          );
+          if (matchedStyle) {
+            setSelectedStyle(matchedStyle.id);
+          }
+        }
+        
+        if (templateName) {
+          toast.success('已加载模板 "' + templateName + '"，请上传照片后点击生成');
+        }
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
 
   // 选择文件
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

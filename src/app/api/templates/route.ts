@@ -15,7 +15,7 @@ const getSupabaseClient = () => {
 
 // 模板类型映射到工具
 const TEMPLATE_TYPE_MAP: Record<string, { name: string; slug: string }> = {
-  'xhs_post': { name: '小红书爆款生成器', slug: '/xhs-generator' },
+  'xhs_post': { name: '小红书爆款生成器', slug: '/xiaohongshu-generator' },
   'goods_poster': { name: '商品海报生成器', slug: '/product-poster' },
   'portrait': { name: 'AI写真生成器', slug: '/ai-photo' },
   'cover': { name: '封面生成器', slug: '/cover-generator' },

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,38 @@ export default function XiaohongshuGeneratorPage() {
   const [industry, setIndustry] = useState('auto');
   const [content, setContent] = useState<GeneratedContent | null>(null);
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到模板数据:', data);
+        
+        // 根据模板内容填充表单
+        if (data.keyword || data.topic) {
+          setKeyword(data.keyword || data.topic);
+        }
+        if (data.style) {
+          setStyle(data.style);
+        }
+        if (data.industry) {
+          setIndustry(data.industry);
+        }
+        if (data.prompt) {
+          // 如果模板有预设提示词，可以预填到 keyword
+          setKeyword(data.prompt.replace('生成一篇小红书', '').replace('种草文案', '') || keyword);
+        }
+        
+        toast.success('已加载模板参数，可直接点击生成');
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
 
   // 生成文案
   const generateContent = async () => {

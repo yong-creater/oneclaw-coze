@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,6 +49,57 @@ export default function LayoutDesignPage() {
   const [generatedHtml, setGeneratedHtml] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到图文排版模板数据:', data, '模板名称:', templateName);
+        
+        // 如果模板有标题，预填标题
+        if (data.title) {
+          setTitle(data.title);
+        }
+        
+        // 如果模板有内容，预填内容
+        if (data.content) {
+          setContent(data.content);
+        }
+        
+        // 如果模板有布局设置，应用布局
+        if (data.layout) {
+          const matchedLayout = layouts.find(l => 
+            l.type === data.layout || l.label.includes(data.layout)
+          );
+          if (matchedLayout) {
+            setLayout(matchedLayout.type);
+          }
+        }
+        
+        // 如果模板有文字风格设置，应用风格
+        if (data.textStyle || data.style) {
+          const styleName = data.textStyle || data.style;
+          const matchedStyle = textStyles.find(s => 
+            s.type === styleName || s.label.includes(styleName)
+          );
+          if (matchedStyle) {
+            setTextStyle(matchedStyle.type);
+          }
+        }
+        
+        if (templateName) {
+          toast.success('已加载模板 "' + templateName + '"');
+        }
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import BackToHome from '@/components/common/BackToHome';
@@ -34,6 +34,34 @@ export default function ProductPhotoPage() {
     { type: 'color', label: '色彩增强', icon: <Wand2 className="w-4 h-4" />, description: '色彩校正，饱和度优化', enabled: true },
   ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到商品图精修模板数据:', data, '模板名称:', templateName);
+        
+        // 如果模板有增强选项设置，应用设置
+        if (data.enhanceOptions) {
+          setEnhanceOptions(prev => prev.map(opt => ({
+            ...opt,
+            enabled: data.enhanceOptions.includes(opt.type) || data.enhanceOptions.includes(opt.label)
+          })));
+        }
+        
+        if (templateName) {
+          toast.success('已加载模板 "' + templateName + '"，请上传商品图片');
+        }
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

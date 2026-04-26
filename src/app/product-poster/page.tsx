@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,6 +31,36 @@ export default function ProductPosterPage() {
   const [style, setStyle] = useState('auto');
   const [posters, setPosters] = useState<{ type: string; url: string }[]>([]);
   const [downloading, setDownloading] = useState<string | null>(null);
+
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到商品海报模板数据:', data, '模板名称:', templateName);
+        
+        // 如果模板有商品名称，预填表单
+        if (data.productName || data.product_name || data.name) {
+          setProductName(data.productName || data.product_name || data.name);
+        }
+        
+        // 如果模板有风格设置，应用风格
+        if (data.style) {
+          setStyle(data.style);
+        }
+        
+        if (templateName) {
+          toast.success('已加载模板 "' + templateName + '"，请确认信息后点击生成');
+        }
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
 
   // 生成海报
   const generatePosters = async () => {

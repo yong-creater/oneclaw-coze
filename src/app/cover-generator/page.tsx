@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,6 +55,46 @@ export default function CoverGeneratorPage() {
   const [selectedStyle, setSelectedStyle] = useState('modern');
   const [generatedCovers, setGeneratedCovers] = useState<GeneratedCover[]>([]);
   const [generatingId, setGeneratingId] = useState<string | null>(null);
+
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到封面生成模板数据:', data, '模板名称:', templateName);
+        
+        // 如果模板有标题，预填标题
+        if (data.title) {
+          setTitle(data.title);
+        }
+        
+        // 如果模板有副标题，预填副标题
+        if (data.subtitle) {
+          setSubtitle(data.subtitle);
+        }
+        
+        // 如果模板有风格设置，应用风格
+        if (data.style) {
+          const matchedStyle = stylePresets.find(s => 
+            s.id === data.style || s.label.includes(data.style)
+          );
+          if (matchedStyle) {
+            setSelectedStyle(matchedStyle.id);
+          }
+        }
+        
+        if (templateName) {
+          toast.success('已加载模板 "' + templateName + '"');
+        }
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
 
   const togglePlatform = (platform: Platform) => {
     setSelectedPlatforms(prev => 

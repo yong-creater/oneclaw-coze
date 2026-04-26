@@ -50,6 +50,34 @@ export default function ResumeOptimizer() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const resumePreviewRef = useRef<HTMLDivElement>(null);
 
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到模板数据:', data, '模板名称:', templateName);
+        
+        // 根据模板类型填充表单
+        if (data.style || data.templateStyle) {
+          // 可以设置简历模板类型
+        }
+        
+        // 如果模板有预设内容，可以预填
+        if (data.prompt) {
+          setResumeText(data.prompt);
+        }
+        
+        alert('已加载模板 "' + (templateName || '未知') + '"，请补充您的简历信息后点击生成');
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
+
   // 处理PDF上传 - 解析后填入文本框
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

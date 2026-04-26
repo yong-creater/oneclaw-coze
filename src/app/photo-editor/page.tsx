@@ -51,6 +51,42 @@ export default function PhotoEditorPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到照片美化模板数据:', data, '模板名称:', templateName);
+        
+        // 如果模板有滤镜设置，应用滤镜
+        if (data.filter || data.style) {
+          const filterName = data.filter || data.style;
+          const matchedFilter = filters.find(f => 
+            f.type === filterName || f.label.includes(filterName)
+          );
+          if (matchedFilter) {
+            setSelectedFilter(matchedFilter.type);
+          }
+        }
+        
+        // 如果模板有调整参数，应用调整
+        if (data.adjustments) {
+          setAdjustments(prev => ({ ...prev, ...data.adjustments }));
+        }
+        
+        if (templateName) {
+          toast.success('已加载模板 "' + templateName + '"，请上传照片');
+        }
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;

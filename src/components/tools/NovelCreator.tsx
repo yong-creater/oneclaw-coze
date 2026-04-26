@@ -150,6 +150,41 @@ export default function NovelCreator() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  // 从 URL 参数读取模板数据
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateContent = params.get('template_content');
+    const templateName = params.get('template_name');
+    
+    if (templateContent) {
+      try {
+        const data = JSON.parse(decodeURIComponent(templateContent));
+        console.log('收到小说创作模板数据:', data, '模板名称:', templateName);
+        
+        // 如果模板有风格设置，应用风格
+        if (data.style) {
+          const matchedStyle = POLISH_STYLES.find(s => 
+            s.value === data.style || s.label.includes(data.style)
+          );
+          if (matchedStyle) {
+            setPolishStyle(matchedStyle.value);
+          }
+        }
+        
+        // 如果模板有内容，预填文本
+        if (data.content || data.original) {
+          setOriginalText(data.content || data.original);
+        }
+        
+        if (templateName) {
+          alert('已加载模板 "' + templateName + '"');
+        }
+      } catch (e) {
+        console.error('解析模板数据失败:', e);
+      }
+    }
+  }, []);
+  
   // 处理文件上传
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

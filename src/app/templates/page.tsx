@@ -113,6 +113,28 @@ export default function TemplatesPage() {
     // 可以用 toast 提示
   };
 
+  // 使用模板（复刻）
+  const handleUseTemplate = (template: Template) => {
+    if (!template.tool_url) {
+      alert('该模板暂不支持复刻');
+      return;
+    }
+
+    // 将模板参数编码到 URL 中
+    const params = new URLSearchParams();
+    params.set('template_id', String(template.id));
+    params.set('template_name', template.name);
+    
+    // 将模板的 content 字段作为参数传递
+    if (template.content) {
+      params.set('template_content', encodeURIComponent(JSON.stringify(template.content)));
+    }
+    
+    // 跳转到工具页面
+    const targetUrl = `${template.tool_url}?${params.toString()}`;
+    window.location.href = targetUrl;
+  };
+
   // 获取所有类型
   const allTypes = Object.keys(groupedTemplates);
 
@@ -259,15 +281,13 @@ export default function TemplatesPage() {
 
                             {/* 操作按钮 */}
                             <div className="flex items-center gap-2">
-                              <Link 
-                                href={template.tool_url}
-                                className="flex-1"
+                              <Button 
+                                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                                onClick={() => handleUseTemplate(template)}
                               >
-                                <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white">
-                                  复刻使用
-                                  <ArrowRight className="w-4 h-4 ml-2" />
-                                </Button>
-                              </Link>
+                                复刻使用
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </Button>
                               <Button 
                                 variant="outline"
                                 size="icon"
