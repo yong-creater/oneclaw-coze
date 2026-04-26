@@ -34,7 +34,8 @@ export default function AdminLoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        router.push("/admin");
+        // 使用 window.location.href 进行完整页面跳转，确保 cookie 被正确设置
+        window.location.href = "/admin";
       } else {
         setError(data.error || "登录失败");
       }
