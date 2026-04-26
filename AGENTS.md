@@ -299,22 +299,33 @@ interface Tool {
 
 | 组件 | 用途 | 导入路径 |
 |------|------|----------|
-| `BackToHome` | 返回首页按钮 | `@/components/BackToHome` |
-| `WechatPromo` | 公众号推广 | `@/components/WechatPromo` |
-| `LobsterLoading` | 加载状态 | `@/components/LobsterLoading` |
+| `AnimatedLobster` | 龙虾动画（品牌标识） | `@/components/common/AnimatedLobster` |
+| `BackButton` | 返回上一页按钮 | `@/components/common/BackButton` |
+| `BackToHome` | 返回首页按钮（面包屑） | `@/components/common/BackToHome` |
+| `WechatPromo` | 公众号推广 | `@/components/common/WechatPromo` |
+| `LobsterLoading` | 龙虾加载动画 | `@/components/common/LobsterLoading` |
+| `LobsterSkeleton` | 龙虾骨架屏 | `@/components/common/LobsterSkeleton` |
+| `LoginButton` | 登录按钮 | `@/components/common/LoginButton` |
+| `LoginModal` | 登录弹窗 | `@/components/common/LoginModal` |
+| `UtilityHeader` | 工具页头部导航 | `@/components/common/UtilityHeader` |
+| `ToolLogo` | 工具 Logo 组件 | `@/components/common/ToolLogo` |
+| `SponsorBadge` | 赞助商徽章 | `@/components/common/SponsorBadge` |
+| `AdBanner` | 广告横幅组件 | `@/components/common/AdBanner` |
+| `CaseStudyFloatCard` | 案例浮窗卡片 | `@/components/common/CaseStudyFloatCard` |
+| `TutorialLikeButton` | 教程点赞按钮 | `@/components/common/TutorialLikeButton` |
 
 ## 1.6 前台卡片样式
 
 ```tsx
-// 标准卡片
-<Card className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
+// 标准卡片（统一使用 border-2）
+<Card className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors">
   <CardContent className="p-4">
     {/* 内容 */}
   </CardContent>
 </Card>
 
 // 列表卡片（带hover效果）
-<Card className="hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-200">
+<Card className="hover:shadow-lg hover:border-orange-400 transition-all duration-200">
   <CardContent className="p-5">
     {/* 内容 */}
   </CardContent>
@@ -639,10 +650,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
-// 前台专用
-import BackToHome from '@/components/BackToHome';
-import WechatPromo from '@/components/WechatPromo';
-import LobsterLoading from '@/components/LobsterLoading';
+// 前台专用组件
+import AnimatedLobster from '@/components/common/AnimatedLobster';
+import BackButton from '@/components/common/BackButton';
+import BackToHome from '@/components/common/BackToHome';
+import WechatPromo from '@/components/common/WechatPromo';
+import LobsterLoading from '@/components/common/LobsterLoading';
+import LoginButton from '@/components/common/LoginButton';
+import UtilityHeader from '@/components/common/UtilityHeader';
+import { ToolLogo } from '@/components/common/ToolLogo';
+import { SponsorBadge, isSponsorActive } from '@/components/common/SponsorBadge';
+import { HomeBanner, HomeInlineAd, ToolDetailAd } from '@/components/common/AdBanner';
 
 // Lucide 图标
 import { IconName } from 'lucide-react';
