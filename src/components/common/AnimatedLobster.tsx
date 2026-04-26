@@ -27,6 +27,7 @@ export const AnimatedLobster = memo(function AnimatedLobster({
   const [showBubble, setShowBubble] = useState(false);
   const [currentMessage, setCurrentMessage] = useState(INTERACTION_MESSAGES[0]);
   const [isCaught, setIsCaught] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const handleClick = useCallback(() => {
     if (isCaught) return;
@@ -64,15 +65,27 @@ export const AnimatedLobster = memo(function AnimatedLobster({
           bg-white dark:bg-slate-800 border-l border-t border-slate-200 dark:border-slate-700 -rotate-45" />
       </div>
       
-      {/* 敲键盘的酷龙虾 */}
-      <img
-        src="/oneclaw-logo.png"
-        alt="OneClaw 龙虾"
-        width={size}
-        height={size}
-        className={`w-full h-full object-contain transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
-        style={{ filter: 'saturate(1.3) brightness(1.1)' }}
-      />
+      {/* 敲键盘的酷龙虾 - 带 fallback */}
+      {!imageError ? (
+        <img
+          src="/oneclaw-logo.png"
+          alt="OneClaw 龙虾"
+          width={size}
+          height={size}
+          className={`w-full h-full object-contain transition-all duration-200 ${isCaught ? 'animate-bounce' : ''}`}
+          style={{ filter: 'saturate(1.3) brightness(1.1)' }}
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div 
+          className={`w-full h-full rounded-full bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center ${isCaught ? 'animate-bounce' : ''}`}
+          style={{ filter: 'saturate(1.3) brightness(1.1)' }}
+        >
+          <span className="text-white font-bold" style={{ fontSize: size * 0.5 }}>
+            OC
+          </span>
+        </div>
+      )}
     </div>
   );
 });

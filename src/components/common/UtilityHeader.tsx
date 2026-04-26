@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import LoginButton from './LoginButton';
 import Link from 'next/link';
+import { SiteLogo } from './SiteLogo';
 
 interface UtilityHeaderProps {
   toolIcon: ReactNode;
@@ -22,19 +23,8 @@ export default function UtilityHeader({
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* 左侧：主站Logo + 工具信息 */}
         <div className="flex items-center gap-4">
-          {/* 主站Logo - 与主站一致 */}
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img 
-              src="/oneclaw-logo.png" 
-              alt="OneClaw" 
-              width={32} 
-              height={32}
-              className="object-contain"
-            />
-            <span className="font-bold text-lg text-slate-800 dark:text-white hidden sm:inline">
-              <span className="text-red-500">One</span><span className="text-orange-500">Claw</span>
-            </span>
-          </Link>
+          {/* 主站Logo - 使用统一组件 */}
+          <SiteLogo size={32} className="hover:opacity-80 transition-opacity" />
           
           <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 hidden sm:block" />
           

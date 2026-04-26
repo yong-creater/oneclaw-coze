@@ -10,6 +10,7 @@ import {
   Heart, ArrowLeftRight, Bell, Users, Headphones, Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
+import { SiteLogo } from '@/components/common/SiteLogo';
 
 // 会员套餐配置
 const PLANS = [
@@ -334,16 +335,7 @@ export default function MembershipPage() {
       <footer className="bg-white border-t border-slate-200 dark:bg-slate-800 dark:border-slate-700 py-6">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Image 
-                src="/oneclaw-logo.png" 
-                alt="OneClaw" 
-                width={28} 
-                height={28}
-                className="object-contain"
-              />
-              <span className="font-bold text-slate-900 dark:text-white">OneClaw</span>
-            </div>
+            <SiteLogo size={28} showText />
             <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
               <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">

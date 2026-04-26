@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Video, Users, Target, Award, Mail, MessageCircle, Heart, Sparkles, ArrowLeft, Home } from 'lucide-react';
+import { SiteLogo } from '@/components/common/SiteLogo';
 
 export const metadata: Metadata = {
   title: '关于我们 - OneClaw',
@@ -29,18 +30,7 @@ export default function AboutPage() {
                 返回首页
               </Button>
             </Link>
-            <Link href="/">
-              <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                <img 
-                  src="/oneclaw-logo.png" 
-                  alt="OneClaw" 
-                  width={32} 
-                  height={32}
-                  className="object-contain"
-                />
-                <span className="font-medium text-slate-900 dark:text-white text-sm"><span className="text-red-500">One</span><span className="text-orange-500">Claw</span></span>
-              </div>
-            </Link>
+            <SiteLogo size={32} showText />
           </div>
         </div>
       </div>
@@ -280,16 +270,7 @@ export default function AboutPage() {
       <footer className="border-t bg-white/80 backdrop-blur-sm dark:bg-slate-800/80 py-6">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <img 
-                src="/oneclaw-logo.png" 
-                alt="OneClaw" 
-                width={28} 
-                height={28}
-                className="object-contain"
-              />
-              <span className="font-bold text-gray-900 dark:text-white">OneClaw</span>
-            </div>
+            <SiteLogo size={28} showText />
             <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
               <span>关于OneClaw</span>
               <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">

@@ -299,6 +299,7 @@ interface Tool {
 
 | 组件 | 用途 | 导入路径 |
 |------|------|----------|
+| `SiteLogo` | 站点 Logo（含 fallback） | `@/components/common/SiteLogo` |
 | `AnimatedLobster` | 龙虾动画（品牌标识） | `@/components/common/AnimatedLobster` |
 | `BackButton` | 返回上一页按钮 | `@/components/common/BackButton` |
 | `BackToHome` | 返回首页按钮（面包屑） | `@/components/common/BackToHome` |
@@ -313,6 +314,21 @@ interface Tool {
 | `AdBanner` | 广告横幅组件 | `@/components/common/AdBanner` |
 | `CaseStudyFloatCard` | 案例浮窗卡片 | `@/components/common/CaseStudyFloatCard` |
 | `TutorialLikeButton` | 教程点赞按钮 | `@/components/common/TutorialLikeButton` |
+
+## 1.6 Logo 使用规范
+
+**所有站点 Logo 必须使用 `SiteLogo` 组件**，禁止直接使用 `<img>` 标签加载 `/oneclaw-logo.png`。
+
+```tsx
+// ✅ 正确：使用 SiteLogo 组件（含 fallback）
+import { SiteLogo } from '@/components/common/SiteLogo';
+<SiteLogo size={32} showText />
+
+// ❌ 错误：直接使用 img 标签（无 fallback）
+<img src="/oneclaw-logo.png" />
+```
+
+**Fallback 机制**：当 `/oneclaw-logo.png` 加载失败时，自动显示橙红渐变圆形 + "OC" 字母
 
 ## 1.6 前台卡片样式
 
