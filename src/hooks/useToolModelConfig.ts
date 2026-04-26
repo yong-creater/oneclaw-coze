@@ -137,6 +137,8 @@ export const MODEL_OPTIONS = {
     { id: 'claude-3-opus', name: 'Claude 3 Opus', price: 0.015, isFree: false },
     { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', price: 0.00125, isFree: false },
     { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', price: 0.000075, isFree: false },
+    { id: 'dall-e-3', name: 'DALL-E 3', price: 0.04, isFree: false, isImageModel: true },
+    { id: 'gpt-image-1', name: 'GPT-Image 1', price: 0.01, isFree: false, isImageModel: true },
   ],
 };
 

@@ -1136,6 +1136,8 @@ export default function UtilityToolsPage() {
                         <option value="claude-3-opus">Claude 3 Opus ($0.015/1K)</option>
                         <option value="gemini-1.5-pro">Gemini 1.5 Pro ($0.00125/1K)</option>
                         <option value="gemini-1.5-flash">Gemini 1.5 Flash ($0.000075/1K)</option>
+                        <option value="dall-e-3">DALL-E 3 ($0.04/图)</option>
+                        <option value="gpt-image-1">GPT-Image 1 ($0.01/图)</option>
                       </>
                     )}
                   </select>

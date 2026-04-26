@@ -14,6 +14,8 @@ const MODEL_PRICES: Record<string, { input: number; output: number }> = {
   'claude-3-opus': { input: 0.015, output: 0.075 },
   'gemini-1.5-pro': { input: 0.00125, output: 0.005 },
   'gemini-1.5-flash': { input: 0.000075, output: 0.0003 },
+  'dall-e-3': { input: 0.04, output: 0 }, // 按图计费
+  'gpt-image-1': { input: 0.01, output: 0 }, // 按图计费
 };
 
 // 免费模型列表
