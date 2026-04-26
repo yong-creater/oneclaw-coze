@@ -5,15 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger 
+  Dialog, DialogContent, DialogHeader, DialogTitle 
 } from '@/components/ui/dialog';
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from '@/components/ui/table';
 import { 
-  Star, Plus, Edit2, Trash2, Image, Palette, ArrowUp, ArrowDown,
-  GripVertical, X, Check
+  Star, Edit2, Image, TrendingUp, Users, Activity, 
+  BarChart3, Clock, ChevronDown, ChevronUp, X, Plus
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -41,13 +42,35 @@ interface UtilityTool {
   color: string;
   sort_order: number;
   is_active: boolean;
-  use_cases: any[];
+  use_cases: UseCase[];
   utility_groups?: { name: string; slug: string; icon: string; color: string };
 }
 
 interface UseCase {
   title: string;
   desc: string;
+}
+
+interface ToolStats {
+  tool_slug: string;
+  total_usage: number;
+  unique_users: number;
+  opens: number;
+  uses: number;
+  generations: number;
+  first_use: string | null;
+  last_use: string | null;
+}
+
+interface UsageLog {
+  id: number;
+  tool_slug: string;
+  user_id: string | null;
+  action_type: string;
+  input_summary: string | null;
+  output_summary: string | null;
+  duration_ms: number | null;
+  created_at: string;
 }
 
 const COLOR_OPTIONS = [
@@ -71,8 +94,11 @@ const ICON_OPTIONS = [
 export default function UtilityToolsPage() {
   const [groups, setGroups] = useState<UtilityGroup[]>([]);
   const [tools, setTools] = useState<UtilityTool[]>([]);
+  const [toolStats, setToolStats] = useState<ToolStats[]>([]);
+  const [recentLogs, setRecentLogs] = useState<UsageLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedGroup, setSelectedGroup] = useState<number | null>(null);
+  const [selectedToolSlug, setSelectedToolSlug] = useState<string | null>(null);
+  const [expandedStats, setExpandedStats] = useState(false);
   
   // 分组表单
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
@@ -103,20 +129,31 @@ export default function UtilityToolsPage() {
   // 获取数据
   const fetchData = async () => {
     try {
-      const [groupsRes, toolsRes] = await Promise.all([
+      const adminToken = localStorage.getItem('admin_token') || '';
+      
+      const [groupsRes, toolsRes, statsRes] = await Promise.all([
         fetch('/api/admin/utility-groups', {
-          headers: { 'x-admin-token': localStorage.getItem('admin_token') || '' }
+          headers: { 'x-admin-token': adminToken }
         }),
-        fetch('/api/admin/utility-tools', {
-          headers: { 'x-admin-token': localStorage.getItem('admin_token') || '' }
+        fetch('/api/admin/utility-tools?include_all=true', {
+          headers: { 'x-admin-token': adminToken }
+        }),
+        fetch('/api/admin/utilities/stats', {
+          headers: { 'x-admin-token': adminToken }
         })
       ]);
 
       const groupsData = await groupsRes.json();
       const toolsData = await toolsRes.json();
+      const statsData = await statsRes.json();
 
       setGroups(groupsData.groups || []);
       setTools(Array.isArray(toolsData) ? toolsData : []);
+      
+      if (statsData.success && statsData.data) {
+        setToolStats(statsData.data.toolStats || []);
+        setRecentLogs(statsData.data.recentLogs || []);
+      }
     } catch (error) {
       console.error('Failed to fetch data:', error);
       toast.error('获取数据失败');
@@ -132,14 +169,14 @@ export default function UtilityToolsPage() {
   // 保存分组
   const handleSaveGroup = async () => {
     try {
+      const adminToken = localStorage.getItem('admin_token') || '';
       const method = editingGroup ? 'PUT' : 'POST';
-      const url = editingGroup ? '/api/admin/utility-groups' : '/api/admin/utility-groups';
       
-      const res = await fetch(url, {
+      const res = await fetch('/api/admin/utility-groups', {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-token': localStorage.getItem('admin_token') || ''
+          'x-admin-token': adminToken
         },
         body: JSON.stringify(editingGroup ? { ...groupForm, id: editingGroup.id } : groupForm)
       });
@@ -150,7 +187,7 @@ export default function UtilityToolsPage() {
         return;
       }
 
-      toast.success(editingGroup ? '分组已更新' : '分组已创建');
+      toast.success('分组已更新');
       setGroupDialogOpen(false);
       resetGroupForm();
       fetchData();
@@ -159,41 +196,22 @@ export default function UtilityToolsPage() {
     }
   };
 
-  // 删除分组
-  const handleDeleteGroup = async (id: number) => {
-    if (!confirm('确定删除该分组？该分组下的工具也会被删除。')) return;
-
-    try {
-      const res = await fetch(`/api/admin/utility-groups?id=${id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-token': localStorage.getItem('admin_token') || '' }
-      });
-
-      if (!res.ok) {
-        toast.error('删除失败');
-        return;
-      }
-
-      toast.success('分组已删除');
-      fetchData();
-    } catch (error) {
-      toast.error('删除失败');
-    }
-  };
-
   // 保存工具
   const handleSaveTool = async () => {
     try {
-      const method = editingTool ? 'PUT' : 'POST';
-      const url = '/api/admin/utility-tools';
+      const adminToken = localStorage.getItem('admin_token') || '';
       
-      const res = await fetch(url, {
-        method,
+      const res = await fetch('/api/admin/utility-tools', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-token': localStorage.getItem('admin_token') || ''
+          'x-admin-token': adminToken
         },
-        body: JSON.stringify(editingTool ? { ...toolForm, id: editingTool.id } : toolForm)
+        body: JSON.stringify({
+          ...toolForm,
+          id: editingTool?.id,
+          use_cases: toolForm.use_cases
+        })
       });
 
       if (!res.ok) {
@@ -202,34 +220,12 @@ export default function UtilityToolsPage() {
         return;
       }
 
-      toast.success(editingTool ? '工具已更新' : '工具已创建');
+      toast.success('工具已更新');
       setToolDialogOpen(false);
       resetToolForm();
       fetchData();
     } catch (error) {
       toast.error('保存失败');
-    }
-  };
-
-  // 删除工具
-  const handleDeleteTool = async (id: number) => {
-    if (!confirm('确定删除该工具？')) return;
-
-    try {
-      const res = await fetch(`/api/admin/utility-tools?id=${id}`, {
-        method: 'DELETE',
-        headers: { 'x-admin-token': localStorage.getItem('admin_token') || '' }
-      });
-
-      if (!res.ok) {
-        toast.error('删除失败');
-        return;
-      }
-
-      toast.success('工具已删除');
-      fetchData();
-    } catch (error) {
-      toast.error('删除失败');
     }
   };
 
@@ -253,48 +249,80 @@ export default function UtilityToolsPage() {
     });
   };
 
-  const openGroupDialog = (group?: UtilityGroup) => {
-    if (group) {
-      setEditingGroup(group);
-      setGroupForm({
-        name: group.name,
-        slug: group.slug,
-        description: group.description || '',
-        icon: group.icon || 'Star',
-        color: group.color
-      });
-    } else {
-      resetGroupForm();
-    }
+  const openGroupDialog = (group: UtilityGroup) => {
+    setEditingGroup(group);
+    setGroupForm({
+      name: group.name,
+      slug: group.slug,
+      description: group.description || '',
+      icon: group.icon || 'Star',
+      color: group.color
+    });
     setGroupDialogOpen(true);
   };
 
-  const openToolDialog = (tool?: UtilityTool) => {
-    if (tool) {
-      setEditingTool(tool);
-      setToolForm({
-        group_id: tool.group_id,
-        name: tool.name,
-        slug: tool.slug,
-        icon: tool.icon || 'Sparkle',
-        description: tool.description || '',
-        cover_image: tool.cover_image || '',
-        color: tool.color,
-        sort_order: tool.sort_order,
-        use_cases: tool.use_cases || []
-      });
-    } else {
-      resetToolForm();
-      if (selectedGroup) {
-        setToolForm(prev => ({ ...prev, group_id: selectedGroup }));
-      }
-    }
+  const openToolDialog = (tool: UtilityTool) => {
+    setEditingTool(tool);
+    setToolForm({
+      group_id: tool.group_id,
+      name: tool.name,
+      slug: tool.slug,
+      icon: tool.icon || 'Sparkle',
+      description: tool.description || '',
+      cover_image: tool.cover_image || '',
+      color: tool.color,
+      sort_order: tool.sort_order,
+      use_cases: tool.use_cases || []
+    });
     setToolDialogOpen(true);
   };
 
-  const filteredTools = selectedGroup 
-    ? tools.filter(t => t.group_id === selectedGroup)
-    : tools;
+  // 添加产品亮点
+  const addUseCase = () => {
+    setToolForm({
+      ...toolForm,
+      use_cases: [...toolForm.use_cases, { title: '', desc: '' }]
+    });
+  };
+
+  // 移除产品亮点
+  const removeUseCase = (index: number) => {
+    setToolForm({
+      ...toolForm,
+      use_cases: toolForm.use_cases.filter((_, i) => i !== index)
+    });
+  };
+
+  // 更新产品亮点
+  const updateUseCase = (index: number, field: 'title' | 'desc', value: string) => {
+    const newUseCases = [...toolForm.use_cases];
+    newUseCases[index][field] = value;
+    setToolForm({ ...toolForm, use_cases: newUseCases });
+  };
+
+  // 获取工具统计
+  const getToolStats = (slug: string) => {
+    return toolStats.find(s => s.tool_slug === slug);
+  };
+
+  // 获取工具使用记录
+  const getToolLogs = (slug: string) => {
+    return recentLogs.filter(l => l.tool_slug === slug);
+  };
+
+  // 格式化时间
+  const formatTime = (dateStr: string | null) => {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('zh-CN');
+  };
+
+  // 计算总统计
+  const totalStats = {
+    totalUsage: toolStats.reduce((sum, s) => sum + parseInt(String(s.total_usage)), 0),
+    totalUsers: toolStats.reduce((sum, s) => sum + parseInt(String(s.unique_users)), 0),
+    totalGenerations: toolStats.reduce((sum, s) => sum + parseInt(String(s.generations)), 0)
+  };
 
   if (loading) {
     return (
@@ -309,333 +337,503 @@ export default function UtilityToolsPage() {
       {/* 页面标题 */}
       <div>
         <h2 className="text-2xl font-bold">精选工具管理</h2>
-        <p className="text-sm text-slate-500">管理首页精选工具的分组和工具配置</p>
+        <p className="text-sm text-slate-500">管理首页精选工具的分组、配置和查看使用数据</p>
       </div>
 
-      {/* 分组管理 */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-orange-500" />
-            分组管理
-          </CardTitle>
-          <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => openGroupDialog()} className="bg-orange-500 hover:bg-orange-600">
-                <Plus className="w-4 h-4 mr-2" />
-                新增分组
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>{editingGroup ? '编辑分组' : '新增分组'}</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">分组名称</label>
-                  <Input
-                    value={groupForm.name}
-                    onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
-                    placeholder="例如：精选工具"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Slug</label>
-                  <Input
-                    value={groupForm.slug}
-                    onChange={(e) => setGroupForm({ ...groupForm, slug: e.target.value })}
-                    placeholder="例如：featured"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">描述</label>
-                  <Input
-                    value={groupForm.description}
-                    onChange={(e) => setGroupForm({ ...groupForm, description: e.target.value })}
-                    placeholder="分组描述（可选）"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">图标</label>
-                  <div className="flex flex-wrap gap-2">
-                    {ICON_OPTIONS.map(icon => (
-                      <button
-                        key={icon}
-                        onClick={() => setGroupForm({ ...groupForm, icon })}
-                        className={`px-3 py-1.5 text-xs rounded-lg border-2 transition-colors ${
-                          groupForm.icon === icon 
-                            ? 'border-orange-500 bg-orange-50 text-orange-600' 
-                            : 'border-slate-200 hover:border-slate-300'
-                        }`}
-                      >
-                        {icon}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">颜色</label>
-                  <div className="flex flex-wrap gap-2">
-                    {COLOR_OPTIONS.map(color => (
-                      <button
-                        key={color}
-                        onClick={() => setGroupForm({ ...groupForm, color })}
-                        className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} border-2 transition-all ${
-                          groupForm.color === color ? 'border-slate-900 scale-110' : 'border-transparent'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => setGroupDialogOpen(false)}>取消</Button>
-                  <Button onClick={handleSaveGroup} className="bg-orange-500 hover:bg-orange-600">
-                    保存
-                  </Button>
-                </div>
+      {/* 概览统计 */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-orange-500 to-amber-500 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-orange-100 text-sm">总使用次数</p>
+                <p className="text-2xl font-bold">{totalStats.totalUsage}</p>
               </div>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>排序</TableHead>
-                <TableHead>名称</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>图标</TableHead>
-                <TableHead>颜色</TableHead>
-                <TableHead>工具数</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead className="text-right">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {groups.map(group => (
-                <TableRow key={group.id}>
-                  <TableCell>{group.sort_order}</TableCell>
-                  <TableCell className="font-medium">{group.name}</TableCell>
-                  <TableCell className="text-slate-500">{group.slug}</TableCell>
-                  <TableCell>
-                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${group.color} flex items-center justify-center`}>
-                      <span className="text-white text-xs font-bold">{group.name[0]}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className={`w-6 h-6 rounded bg-gradient-to-r ${group.color}`} />
-                  </TableCell>
-                  <TableCell>{tools.filter(t => t.group_id === group.id).length}</TableCell>
-                  <TableCell>
-                    <Badge variant={group.is_active ? 'default' : 'secondary'}>
-                      {group.is_active ? '启用' : '禁用'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openGroupDialog(group)}>
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteGroup(group.id)}>
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              <Activity className="w-8 h-8 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">独立用户</p>
+                <p className="text-2xl font-bold">{totalStats.totalUsers}</p>
+              </div>
+              <Users className="w-8 h-8 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-emerald-100 text-sm">生成次数</p>
+                <p className="text-2xl font-bold">{totalStats.totalGenerations}</p>
+              </div>
+              <TrendingUp className="w-8 h-8 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm">工具总数</p>
+                <p className="text-2xl font-bold">{tools.length}</p>
+              </div>
+              <Star className="w-8 h-8 opacity-80" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* 工具管理 */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <Image className="w-5 h-5 text-orange-500" />
-            工具管理
-          </CardTitle>
-          <div className="flex gap-2">
-            <select
-              value={selectedGroup || ''}
-              onChange={(e) => setSelectedGroup(e.target.value ? parseInt(e.target.value) : null)}
-              className="px-3 py-2 text-sm border border-slate-200 rounded-lg"
-            >
-              <option value="">全部分组</option>
-              {groups.map(g => (
-                <option key={g.id} value={g.id}>{g.name}</option>
-              ))}
-            </select>
-            <Dialog open={toolDialogOpen} onOpenChange={setToolDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => openToolDialog()} className="bg-orange-500 hover:bg-orange-600">
-                  <Plus className="w-4 h-4 mr-2" />
-                  新增工具
+      <Tabs defaultValue="tools" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="tools">工具配置</TabsTrigger>
+          <TabsTrigger value="groups">分组配置</TabsTrigger>
+          <TabsTrigger value="stats">使用统计</TabsTrigger>
+        </TabsList>
+
+        {/* 工具配置 */}
+        <TabsContent value="tools" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Image className="w-5 h-5 text-orange-500" />
+                工具列表
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>封面</TableHead>
+                    <TableHead>名称</TableHead>
+                    <TableHead>分组</TableHead>
+                    <TableHead>亮点数</TableHead>
+                    <TableHead>使用次数</TableHead>
+                    <TableHead>操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tools.map(tool => {
+                    const stats = getToolStats(tool.slug);
+                    return (
+                      <TableRow key={tool.id}>
+                        <TableCell>
+                          {tool.cover_image ? (
+                            <img src={tool.cover_image} alt="" className="w-12 h-12 rounded-lg object-cover" />
+                          ) : (
+                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${tool.color} flex items-center justify-center`}>
+                              <span className="text-white font-bold">{tool.name[0]}</span>
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          <div>
+                            <div>{tool.name}</div>
+                            <div className="text-xs text-slate-500 truncate max-w-[200px]">{tool.description}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{tool.utility_groups?.name || '-'}</Badge>
+                        </TableCell>
+                        <TableCell>{tool.use_cases?.length || 0}</TableCell>
+                        <TableCell>
+                          <span className="text-orange-600 font-medium">{stats?.total_usage || 0}</span>
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon" onClick={() => openToolDialog(tool)}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 分组配置 */}
+        <TabsContent value="groups" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-orange-500" />
+                分组列表
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>排序</TableHead>
+                    <TableHead>名称</TableHead>
+                    <TableHead>Slug</TableHead>
+                    <TableHead>图标</TableHead>
+                    <TableHead>颜色</TableHead>
+                    <TableHead>工具数</TableHead>
+                    <TableHead>状态</TableHead>
+                    <TableHead>操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {groups.map(group => (
+                    <TableRow key={group.id}>
+                      <TableCell>{group.sort_order}</TableCell>
+                      <TableCell className="font-medium">{group.name}</TableCell>
+                      <TableCell className="text-slate-500">{group.slug}</TableCell>
+                      <TableCell>
+                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${group.color} flex items-center justify-center`}>
+                          <span className="text-white text-xs font-bold">{group.name[0]}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className={`w-6 h-6 rounded bg-gradient-to-r ${group.color}`} />
+                      </TableCell>
+                      <TableCell>{tools.filter(t => t.group_id === group.id).length}</TableCell>
+                      <TableCell>
+                        <Badge variant={group.is_active ? 'default' : 'secondary'}>
+                          {group.is_active ? '启用' : '禁用'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => openGroupDialog(group)}>
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 使用统计 */}
+        <TabsContent value="stats" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-orange-500" />
+                各工具使用详情
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>工具</TableHead>
+                    <TableHead>访问次数</TableHead>
+                    <TableHead>使用次数</TableHead>
+                    <TableHead>生成次数</TableHead>
+                    <TableHead>独立用户</TableHead>
+                    <TableHead>最近使用</TableHead>
+                    <TableHead>详情</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tools.map(tool => {
+                    const stats = getToolStats(tool.slug);
+                    const isExpanded = selectedToolSlug === tool.slug;
+                    return (
+                      <>
+                        <TableRow key={tool.id}>
+                          <TableCell className="font-medium">{tool.name}</TableCell>
+                          <TableCell>{stats?.opens || 0}</TableCell>
+                          <TableCell>{stats?.uses || 0}</TableCell>
+                          <TableCell className="text-orange-600 font-medium">{stats?.generations || 0}</TableCell>
+                          <TableCell>{stats?.unique_users || 0}</TableCell>
+                          <TableCell className="text-slate-500 text-sm">
+                            {stats?.last_use ? formatTime(stats.last_use) : '暂无数据'}
+                          </TableCell>
+                          <TableCell>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setSelectedToolSlug(isExpanded ? null : tool.slug)}
+                            >
+                              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                              {isExpanded ? '收起' : '查看'}
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                        {isExpanded && (
+                          <TableRow key={`${tool.id}-detail`}>
+                            <TableCell colSpan={7} className="bg-slate-50 dark:bg-slate-800/50 p-4">
+                              <div className="space-y-3">
+                                <h4 className="font-medium text-sm">最近使用记录</h4>
+                                {getToolLogs(tool.slug).length > 0 ? (
+                                  <div className="space-y-2">
+                                    {getToolLogs(tool.slug).slice(0, 5).map(log => (
+                                      <div key={log.id} className="flex items-center gap-4 text-sm bg-white dark:bg-slate-800 p-3 rounded-lg">
+                                        <Badge variant="outline" className="shrink-0">
+                                          {log.action_type === 'open' ? '打开' : 
+                                           log.action_type === 'use' ? '使用' : '生成'}
+                                        </Badge>
+                                        <span className="flex-1 truncate text-slate-600 dark:text-slate-300">
+                                          {log.input_summary || '-'}
+                                        </span>
+                                        {log.output_summary && (
+                                          <span className="text-slate-500 truncate max-w-[200px]">
+                                            → {log.output_summary}
+                                          </span>
+                                        )}
+                                        {log.duration_ms && (
+                                          <span className="text-slate-400 text-xs shrink-0">
+                                            {log.duration_ms}ms
+                                          </span>
+                                        )}
+                                        <span className="text-slate-400 text-xs shrink-0">
+                                          {formatTime(log.created_at)}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <p className="text-slate-400 text-sm">暂无使用记录</p>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* 编辑分组弹窗 */}
+      <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>编辑分组</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">分组名称</label>
+              <Input
+                value={groupForm.name}
+                onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
+                placeholder="例如：精选工具"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">Slug</label>
+              <Input
+                value={groupForm.slug}
+                onChange={(e) => setGroupForm({ ...groupForm, slug: e.target.value })}
+                placeholder="例如：featured"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">描述</label>
+              <Input
+                value={groupForm.description}
+                onChange={(e) => setGroupForm({ ...groupForm, description: e.target.value })}
+                placeholder="分组描述（可选）"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">图标</label>
+              <div className="flex flex-wrap gap-2">
+                {ICON_OPTIONS.map(icon => (
+                  <button
+                    key={icon}
+                    onClick={() => setGroupForm({ ...groupForm, icon })}
+                    className={`px-3 py-1.5 text-xs rounded-lg border-2 transition-colors ${
+                      groupForm.icon === icon 
+                        ? 'border-orange-500 bg-orange-50 text-orange-600' 
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">颜色</label>
+              <div className="flex flex-wrap gap-2">
+                {COLOR_OPTIONS.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => setGroupForm({ ...groupForm, color })}
+                    className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} border-2 transition-all ${
+                      groupForm.color === color ? 'border-slate-900 scale-110' : 'border-transparent'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setGroupDialogOpen(false)}>取消</Button>
+              <Button onClick={handleSaveGroup} className="bg-orange-500 hover:bg-orange-600">
+                保存
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 编辑工具弹窗 */}
+      <Dialog open={toolDialogOpen} onOpenChange={setToolDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>编辑工具 - {editingTool?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">所属分组</label>
+                <select
+                  value={toolForm.group_id}
+                  onChange={(e) => setToolForm({ ...toolForm, group_id: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl bg-white"
+                >
+                  {groups.map(g => (
+                    <option key={g.id} value={g.id}>{g.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">排序</label>
+                <Input
+                  type="number"
+                  value={toolForm.sort_order}
+                  onChange={(e) => setToolForm({ ...toolForm, sort_order: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">工具名称</label>
+                <Input
+                  value={toolForm.name}
+                  onChange={(e) => setToolForm({ ...toolForm, name: e.target.value })}
+                  placeholder="例如：STAR简历优化"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Slug</label>
+                <Input
+                  value={toolForm.slug}
+                  onChange={(e) => setToolForm({ ...toolForm, slug: e.target.value })}
+                  placeholder="例如：resume"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">描述</label>
+              <textarea
+                value={toolForm.description}
+                onChange={(e) => setToolForm({ ...toolForm, description: e.target.value })}
+                placeholder="工具简短描述"
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl resize-none h-20"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">封面图URL</label>
+              <Input
+                value={toolForm.cover_image}
+                onChange={(e) => setToolForm({ ...toolForm, cover_image: e.target.value })}
+                placeholder="https://example.com/cover.jpg（可选）"
+              />
+              <p className="text-xs text-slate-500 mt-1">支持外部图片URL，如未设置将使用默认渐变背景</p>
+            </div>
+
+            {/* 产品亮点 */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">产品亮点</label>
+                <Button variant="outline" size="sm" onClick={addUseCase}>
+                  <Plus className="w-4 h-4 mr-1" />
+                  添加亮点
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-lg">
-                <DialogHeader>
-                  <DialogTitle>{editingTool ? '编辑工具' : '新增工具'}</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">所属分组</label>
-                    <select
-                      value={toolForm.group_id}
-                      onChange={(e) => setToolForm({ ...toolForm, group_id: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl"
+              </div>
+              <div className="space-y-3">
+                {toolForm.use_cases.map((uc, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={uc.title}
+                        onChange={(e) => updateUseCase(index, 'title', e.target.value)}
+                        placeholder="亮点标题，如：智能优化"
+                        className="text-sm"
+                      />
+                      <Input
+                        value={uc.desc}
+                        onChange={(e) => updateUseCase(index, 'desc', e.target.value)}
+                        placeholder="亮点描述，如：基于GPT-4自动分析简历与JD匹配度"
+                        className="text-sm"
+                      />
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => removeUseCase(index)}
+                      className="shrink-0 text-red-500 hover:text-red-600"
                     >
-                      {groups.map(g => (
-                        <option key={g.id} value={g.id}>{g.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">工具名称</label>
-                      <Input
-                        value={toolForm.name}
-                        onChange={(e) => setToolForm({ ...toolForm, name: e.target.value })}
-                        placeholder="例如：STAR简历优化"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Slug</label>
-                      <Input
-                        value={toolForm.slug}
-                        onChange={(e) => setToolForm({ ...toolForm, slug: e.target.value })}
-                        placeholder="例如：resume"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">描述</label>
-                    <textarea
-                      value={toolForm.description}
-                      onChange={(e) => setToolForm({ ...toolForm, description: e.target.value })}
-                      placeholder="工具简短描述"
-                      className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl resize-none h-20"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">封面图URL</label>
-                    <Input
-                      value={toolForm.cover_image}
-                      onChange={(e) => setToolForm({ ...toolForm, cover_image: e.target.value })}
-                      placeholder="https://example.com/cover.jpg（可选）"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">支持外部图片URL，如未设置将使用默认渐变背景</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">图标</label>
-                    <div className="flex flex-wrap gap-2">
-                      {ICON_OPTIONS.map(icon => (
-                        <button
-                          key={icon}
-                          onClick={() => setToolForm({ ...toolForm, icon })}
-                          className={`px-3 py-1.5 text-xs rounded-lg border-2 transition-colors ${
-                            toolForm.icon === icon 
-                              ? 'border-orange-500 bg-orange-50 text-orange-600' 
-                              : 'border-slate-200 hover:border-slate-300'
-                          }`}
-                        >
-                          {icon}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">颜色</label>
-                    <div className="flex flex-wrap gap-2">
-                      {COLOR_OPTIONS.map(color => (
-                        <button
-                          key={color}
-                          onClick={() => setToolForm({ ...toolForm, color })}
-                          className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} border-2 transition-all ${
-                            toolForm.color === color ? 'border-slate-900 scale-110' : 'border-transparent'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">排序</label>
-                    <Input
-                      type="number"
-                      value={toolForm.sort_order}
-                      onChange={(e) => setToolForm({ ...toolForm, sort_order: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2 pt-4">
-                    <Button variant="outline" onClick={() => setToolDialogOpen(false)}>取消</Button>
-                    <Button onClick={handleSaveTool} className="bg-orange-500 hover:bg-orange-600">
-                      保存
+                      <X className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                ))}
+                {toolForm.use_cases.length === 0 && (
+                  <p className="text-sm text-slate-400 text-center py-4">
+                    暂无亮点配置，点击上方按钮添加
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">图标</label>
+              <div className="flex flex-wrap gap-2">
+                {ICON_OPTIONS.map(icon => (
+                  <button
+                    key={icon}
+                    onClick={() => setToolForm({ ...toolForm, icon })}
+                    className={`px-3 py-1.5 text-xs rounded-lg border-2 transition-colors ${
+                      toolForm.icon === icon 
+                        ? 'border-orange-500 bg-orange-50 text-orange-600' 
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-2 block">颜色</label>
+              <div className="flex flex-wrap gap-2">
+                {COLOR_OPTIONS.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => setToolForm({ ...toolForm, color })}
+                    className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} border-2 transition-all ${
+                      toolForm.color === color ? 'border-slate-900 scale-110' : 'border-transparent'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setToolDialogOpen(false)}>取消</Button>
+              <Button onClick={handleSaveTool} className="bg-orange-500 hover:bg-orange-600">
+                保存
+              </Button>
+            </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>排序</TableHead>
-                <TableHead>封面</TableHead>
-                <TableHead>名称</TableHead>
-                <TableHead>分组</TableHead>
-                <TableHead>颜色</TableHead>
-                <TableHead>状态</TableHead>
-                <TableHead className="text-right">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTools.map(tool => (
-                <TableRow key={tool.id}>
-                  <TableCell>{tool.sort_order}</TableCell>
-                  <TableCell>
-                    {tool.cover_image ? (
-                      <img src={tool.cover_image} alt="" className="w-12 h-12 rounded-lg object-cover" />
-                    ) : (
-                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${tool.color} flex items-center justify-center`}>
-                        <span className="text-white font-bold">{tool.name[0]}</span>
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <div>
-                      <div>{tool.name}</div>
-                      <div className="text-xs text-slate-500 truncate max-w-[200px]">{tool.description}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{tool.utility_groups?.name || '-'}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className={`w-6 h-6 rounded bg-gradient-to-r ${tool.color}`} />
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={tool.is_active ? 'default' : 'secondary'}>
-                      {tool.is_active ? '启用' : '禁用'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openToolDialog(tool)}>
-                        <Edit2 className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteTool(tool.id)}>
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

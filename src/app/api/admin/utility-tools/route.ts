@@ -8,12 +8,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const groupId = searchParams.get('group_id');
     const toolSlug = searchParams.get('slug');
+    const includeAll = searchParams.get('include_all'); // 包含所有工具（包括未激活的）
 
     let query = supabase
       .from('utility_tools')
       .select('*, utility_groups(name, slug, icon, color)')
-      .eq('is_active', true)
       .order('sort_order', { ascending: true });
+
+    if (!includeAll) {
+      query = query.eq('is_active', true);
+    }
 
     if (groupId) {
       query = query.eq('group_id', parseInt(groupId));
