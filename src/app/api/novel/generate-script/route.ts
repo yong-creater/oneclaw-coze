@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { saveGeneration } from '@/lib/save-generation';
 
 // 推文脚本生成系统提示词
 const SYSTEM_PROMPT = `你是专业的短视频脚本策划师，擅长为漫画内容生成适配抖音/小红书平台的推文脚本。
@@ -96,9 +97,18 @@ ${text.substring(0, 2000)}${text.length > 2000 ? '...' : ''}
       throw new Error('AI未返回有效内容');
     }
 
-    return NextResponse.json({ content, model: selectedModel });
+    // 保存生成记录
+    saveGeneration(request, {
+      tool_id: 2,
+      tool_name: '推文脚本生成',
+      tool_type: 'script',
+      input_params: { platform, style, duration, textLength: text.length },
+      output_content: { content, model: selectedModel },
+      title: `${platformMap[platform || 'douyin']}${style || '爽文'}风格脚本`,
+      usage_type: 'script',
+    }).catch(() => {});
 
-  } catch (error: any) {
+    return NextResponse.json({ content, model: selectedModel }); catch (error: any) {
     console.error('Generate script error:', error);
     return NextResponse.json({ error: error.message || '脚本生成失败' }, { status: 500 });
   }

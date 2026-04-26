@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { saveGeneration } from '@/lib/save-generation';
 
 // 洗稿系统提示词
 const SYSTEM_PROMPT = `你是专业的小说洗稿专家，擅长将小说内容进行深度改写，保持剧情人设不变的同时显著提升原创度。
@@ -88,7 +89,18 @@ ${text}`;
 
     // 估算原创度分数（实际应用中可调用专门的原创度检测API）
     const score = Math.min(95, 85 + Math.floor(Math.random() * 10));
-    
+
+    // 保存生成记录（异步，不影响返回）
+    saveGeneration(request, {
+      tool_id: 1,
+      tool_name: '小说洗稿',
+      tool_type: 'novel',
+      input_params: { style, intensity, extraRequirements, textLength: text.length },
+      output_content: { content, score, model: selectedModel },
+      title: `${style || '番茄爽文'}风格洗稿`,
+      usage_type: 'polish',
+    }).catch(() => {});
+
     return NextResponse.json({ content, score, model: selectedModel });
 
   } catch (error: any) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { S3Storage } from 'coze-coding-dev-sdk';
+import { saveGeneration } from '@/lib/save-generation';
 
 // 生图提示词模板
 const SYSTEM_PROMPT = `你是专业的AI漫画图像生成专家，擅长生成高质量的小说风格漫画图片。
@@ -135,6 +136,18 @@ export async function POST(request: NextRequest) {
         // 上传到存储获取可访问的URL
         const resultUrl = await downloadAndUploadImage(helper.imageUrls[0], storage, 'novel');
         
+        // 保存生成记录
+        saveGeneration(request, {
+          tool_id: 4,
+          tool_name: '漫画生图',
+          tool_type: 'portrait',
+          input_params: { style, quality, prompt: fullPrompt },
+          output_content: { prompt: fullPrompt, imageUrl: resultUrl },
+          title: `${style || '古风'}风格漫画`,
+          thumbnail: resultUrl,
+          usage_type: 'generate-image',
+        }).catch(() => {});
+
         return NextResponse.json({
           success: true,
           prompt: fullPrompt,

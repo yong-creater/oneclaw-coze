@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { S3Storage } from 'coze-coding-dev-sdk';
 import { getTokenFromHeader } from '@/lib/auth';
+import { saveGeneration } from '@/lib/save-generation';
 
 // 创建图片生成客户端
 function createImageClient(customHeaders: Record<string, string> = {}) {
@@ -139,6 +140,20 @@ export async function POST(request: NextRequest) {
     const result = await processImage(imageUrl, processType, customHeaders);
     
     if (result.success) {
+      // 保存生成记录
+      saveGeneration(request, {
+        tool_id: 6,
+        tool_name: PROCESS_PROMPTS[processType].name,
+        tool_type: processType === 'background-removal' ? 'background_removal' : 
+                   processType === 'product-enhance' ? 'goods_image' :
+                   processType === 'portrait-enhance' ? 'photo' : 'layout',
+        input_params: { processType, imageUrl },
+        output_content: { imageUrl: result.imageUrl },
+        title: `${PROCESS_PROMPTS[processType].name}结果`,
+        thumbnail: result.imageUrl,
+        usage_type: processType,
+      }).catch(() => {});
+
       return NextResponse.json({
         success: true,
         imageUrl: result.imageUrl,

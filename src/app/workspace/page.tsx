@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Heart, History, Star, Trash2, ExternalLink, Video, User,
-  ChevronLeft, ChevronRight, Loader2, Home
+  ChevronLeft, ChevronRight, Loader2, Home, Wand2, Copy
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import LoginModal from '@/components/common/LoginModal';
@@ -53,6 +53,19 @@ interface RatingItem {
   tools?: ToolInfo;
 }
 
+interface GenerationItem {
+  id: number;
+  tool_id: number;
+  tool_name: string;
+  tool_type: string;
+  input_params: any;
+  output_content: any;
+  title: string;
+  thumbnail: string;
+  usage_type: string;
+  created_at: string;
+}
+
 export default function WorkspacePage() {
   const { user, authenticated, loading: authLoading, setShowLoginModal } = useUser();
   const router = useRouter();
@@ -71,6 +84,11 @@ export default function WorkspacePage() {
   const [ratings, setRatings] = useState<RatingItem[]>([]);
   const [ratingsPagination, setRatingsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
   const [ratingsLoading, setRatingsLoading] = useState(false);
+
+  // 生成记录
+  const [generations, setGenerations] = useState<GenerationItem[]>([]);
+  const [generationsPagination, setGenerationsPagination] = useState({ page: 1, total: 0, total_pages: 0 });
+  const [generationsLoading, setGenerationsLoading] = useState(false);
 
   // 获取收藏
   const fetchFavorites = async (page: number) => {
@@ -153,12 +171,36 @@ export default function WorkspacePage() {
     }
   };
 
+  // 获取生成记录
+  const fetchGenerations = async (page: number) => {
+    setGenerationsLoading(true);
+    try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      console.log('[生成记录] userId:', userId);
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/generations?page=${page}&limit=10`, { headers });
+      const data = await res.json();
+      console.log('[生成记录] API返回:', data);
+      if (data.success) {
+        setGenerations(data.generations || []);
+        setGenerationsPagination(data.pagination);
+      }
+    } catch (error) {
+      console.error('获取生成记录失败:', error);
+    } finally {
+      setGenerationsLoading(false);
+    }
+  };
+
   // 初始化
   useEffect(() => {
     if (authenticated && user) {
       fetchFavorites(1);
       fetchHistory(1);
       fetchRatings(1);
+      fetchGenerations(1);
     }
   }, [authenticated, user]);
 
@@ -195,6 +237,28 @@ export default function WorkspacePage() {
       setHistoryPagination({ page: 1, total: 0, total_pages: 0 });
     } catch (error) {
       console.error('清除历史失败:', error);
+    }
+  };
+
+  // 删除生成记录
+  const handleDeleteGeneration = async (id: number) => {
+    if (!confirm('确定要删除这条生成记录吗？')) return;
+    
+    try {
+      const userId = localStorage.getItem('oneclaw_user_id');
+      const headers: HeadersInit = {};
+      if (userId) headers['x-user-id'] = userId;
+      
+      const res = await fetch(`/api/generations/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+      
+      if (res.ok) {
+        setGenerations(generations.filter(g => g.id !== id));
+      }
+    } catch (error) {
+      console.error('删除生成记录失败:', error);
     }
   };
 
@@ -312,11 +376,20 @@ export default function WorkspacePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <Tabs defaultValue="favorites" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+        <Tabs defaultValue="profile" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="profile" className="gap-2">
               <User className="w-4 h-4" />
               个人资料
+            </TabsTrigger>
+            <TabsTrigger value="generations" className="gap-2">
+              <Wand2 className="w-4 h-4" />
+              我的生成
+              {generationsPagination.total > 0 && (
+                <span className="ml-1 text-xs bg-purple-100 text-purple-600 px-1.5 rounded-full">
+                  {generationsPagination.total}
+                </span>
+              )}
             </TabsTrigger>
             <TabsTrigger value="favorites" className="gap-2">
               <Heart className="w-4 h-4" />
@@ -405,6 +478,130 @@ export default function WorkspacePage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* 我的生成 */}
+          <TabsContent value="generations">
+            <div className="space-y-4">
+              {generationsLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                </div>
+              ) : generations.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {generations.map((item) => (
+                      <Card 
+                        key={item.id} 
+                        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-orange-400 transition-colors"
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex gap-4">
+                            {/* 缩略图 */}
+                            {item.thumbnail && (
+                              <div className="w-24 h-24 rounded-lg bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+                                <img
+                                  src={item.thumbnail}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              {/* 标题和工具名 */}
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <h3 className="font-medium text-slate-800 dark:text-slate-100 truncate">
+                                    {item.title || '未命名'}
+                                  </h3>
+                                  <p className="text-xs text-orange-500 mt-0.5">
+                                    {item.tool_name}
+                                  </p>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleDeleteGeneration(item.id)}
+                                  className="text-slate-400 hover:text-red-500"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                              
+                              {/* 内容预览 */}
+                              <div className="mt-2">
+                                {item.output_content?.content && (
+                                  <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                                    {item.output_content.content}
+                                  </p>
+                                )}
+                                {item.output_content?.imageUrl && !item.output_content?.content && (
+                                  <p className="text-sm text-slate-500">
+                                    图片生成成功
+                                  </p>
+                                )}
+                                {item.output_content?.report && (
+                                  <div className="text-sm">
+                                    <span className={`font-medium ${item.output_content.report.passed ? 'text-green-600' : 'text-red-600'}`}>
+                                      合规评分: {item.output_content.report.score}分
+                                    </span>
+                                    {item.output_content.report.passed && (
+                                      <Badge className="ml-2 bg-green-100 text-green-600">通过</Badge>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* 时间 */}
+                              <p className="text-xs text-slate-400 mt-2">
+                                {new Date(item.created_at).toLocaleString('zh-CN')}
+                              </p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  {generationsPagination.total_pages > 1 && (
+                    <div className="flex justify-center gap-2 mt-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={generationsPagination.page === 1}
+                        onClick={() => fetchGenerations(generationsPagination.page - 1)}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <span className="flex items-center text-sm text-slate-500">
+                        {generationsPagination.page} / {generationsPagination.total_pages}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={generationsPagination.page === generationsPagination.total_pages}
+                        onClick={() => fetchGenerations(generationsPagination.page + 1)}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-12">
+                  <Wand2 className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-600 mb-4" />
+                  <p className="text-slate-500 dark:text-slate-400">还没有生成记录</p>
+                  <Link href="/">
+                    <Button variant="link" className="text-orange-500 mt-2">
+                      去使用AI工具
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {/* 收藏 */}

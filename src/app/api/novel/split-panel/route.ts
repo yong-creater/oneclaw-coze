@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { saveGeneration } from '@/lib/save-generation';
 
 // 分镜拆解系统提示词
 const SYSTEM_PROMPT = `你是专业的漫画分镜师，擅长将小说内容拆解为适合漫画表现的生动分镜脚本。
@@ -87,9 +88,18 @@ ${text}`;
       throw new Error('AI未返回有效内容');
     }
 
-    return NextResponse.json({ content, model: selectedModel });
+    // 保存生成记录
+    saveGeneration(request, {
+      tool_id: 3,
+      tool_name: '漫画分镜生成',
+      tool_type: 'layout',
+      input_params: { style, panelCount, textLength: text.length },
+      output_content: { content, model: selectedModel },
+      title: `${style || '写实'}风格漫画分镜`,
+      usage_type: 'split-panel',
+    }).catch(() => {});
 
-  } catch (error: any) {
+    return NextResponse.json({ content, model: selectedModel });
     console.error('Split panel error:', error);
     return NextResponse.json({ error: error.message || '分镜拆解失败' }, { status: 500 });
   }

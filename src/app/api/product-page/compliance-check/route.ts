@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { saveGeneration } from '@/lib/save-generation';
 
 // 合规规则
 const COMPLIANCE_RULES: Record<string, {
@@ -215,6 +216,18 @@ export async function POST(request: NextRequest) {
     if (!report.suggestions && report.violations) {
       report.suggestions = report.violations.map((v: any) => v.suggestion);
     }
+
+    // 保存生成记录
+    saveGeneration(request, {
+      tool_id: 5,
+      tool_name: '商品合规检测',
+      tool_type: 'goods_image',
+      input_params: { region, platform, imageUrl },
+      output_content: { report },
+      title: `${region?.toUpperCase() || 'US'}市场${platform}平台合规检测`,
+      thumbnail: imageUrl,
+      usage_type: 'compliance-check',
+    }).catch(() => {});
 
     return NextResponse.json(report);
 
