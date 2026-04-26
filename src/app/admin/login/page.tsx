@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,12 +12,6 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isDev, setIsDev] = useState(false);
-
-  // 检测开发环境
-  useEffect(() => {
-    setIsDev(window.location.hostname === 'localhost' || window.location.hostname.includes('dev.coze'));
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,19 +94,16 @@ export default function AdminLoginPage() {
             {loading ? '登录中...' : '登录'}
           </Button>
 
-          {/* 开发环境快速登录 */}
-          {isDev && (
-            <div className="pt-4 border-t border-slate-700">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700"
-                onClick={handleDevLogin}
-              >
-                快速登录（开发环境）
-              </Button>
-            </div>
-          )}
+          {/* 快速登录 */}
+          <div className="pt-4 border-t border-slate-700">
+            <button
+              type="button"
+              className="w-full px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
+              onClick={handleDevLogin}
+            >
+              快速登录
+            </button>
+          </div>
         </form>
       </div>
     </div>
