@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/table';
 import { 
   Star, Edit2, Image, TrendingUp, Users, Activity, 
-  BarChart3, Clock, ChevronDown, ChevronUp, X, Plus
+  BarChart3, Clock, ChevronDown, ChevronUp, X, Plus, Upload
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -193,6 +193,41 @@ export default function UtilityToolsPage() {
     } catch (error) {
       toast.error('保存失败');
     }
+  };
+
+  // 上传封面图
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>, toolSlug: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('图片大小不能超过 5MB');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('tool_slug', toolSlug);
+
+    try {
+      const res = await fetch('/api/admin/utility-covers/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setToolForm(prev => ({ ...prev, cover_image: data.url }));
+        toast.success('封面上传成功');
+      } else {
+        toast.error(data.error || '上传失败');
+      }
+    } catch {
+      toast.error('上传失败');
+    }
+
+    // 清空input
+    e.target.value = '';
   };
 
   // 保存工具
@@ -750,13 +785,39 @@ export default function UtilityToolsPage() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium mb-2 block">封面图URL</label>
-              <Input
-                value={toolForm.cover_image}
-                onChange={(e) => setToolForm({ ...toolForm, cover_image: e.target.value })}
-                placeholder="https://example.com/cover.jpg（可选）"
-              />
-              <p className="text-xs text-slate-500 mt-1">支持外部图片URL，如未设置将使用默认渐变背景</p>
+              <label className="text-sm font-medium mb-2 block">封面图</label>
+              <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-4">
+                {toolForm.cover_image ? (
+                  <div className="relative">
+                    <img 
+                      src={toolForm.cover_image} 
+                      alt="封面预览" 
+                      className="w-full h-32 object-contain rounded-lg"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => setToolForm({ ...toolForm, cover_image: '' })}
+                    >
+                      删除
+                    </Button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center cursor-pointer py-4">
+                    <Upload className="w-8 h-8 text-slate-400 mb-2" />
+                    <span className="text-sm text-slate-500">点击上传封面图</span>
+                    <span className="text-xs text-slate-400 mt-1">支持 JPG、PNG，最大 5MB</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleCoverUpload(e, toolForm.slug)}
+                    />
+                  </label>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 mt-1">建议尺寸 600x400 像素，如未设置将使用默认渐变背景</p>
             </div>
 
             {/* 产品亮点 */}
