@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
-    const toolSlug = searchParams.get('tool_slug'); // 可选：获取特定工具统计
+    const toolSlug = searchParams.get('tool_slug');
 
     // 获取所有工具的使用统计（从视图）
     let query = supabase
@@ -24,15 +24,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '获取统计数据失败' }, { status: 500 });
     }
 
-    // 获取详细的调用记录
+    // 获取详细的调用记录（从utility_usage_logs）
     let logsQuery = supabase
-      .from('utility_usage_stats')
+      .from('utility_usage_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(50);
+      .limit(100);
 
     if (toolSlug) {
-      logsQuery = logsQuery.eq('tool_slug', toolSlug);
+      logsQuery = logsQuery.eq('tool_type', toolSlug);
     }
 
     const { data: recentLogs, error: logsError } = await logsQuery;
@@ -45,25 +45,35 @@ export async function GET(request: NextRequest) {
     const totalStats = {
       total_usage: 0,
       unique_users: 0,
-      total_opens: 0,
-      total_uses: 0,
-      total_generations: 0
+      total_successes: 0,
+      total_failures: 0
     };
 
     toolStats?.forEach((tool: any) => {
       totalStats.total_usage += parseInt(tool.total_usage) || 0;
       totalStats.unique_users += parseInt(tool.unique_users) || 0;
-      totalStats.total_opens += parseInt(tool.opens) || 0;
-      totalStats.total_uses += parseInt(tool.uses) || 0;
-      totalStats.total_generations += parseInt(tool.generations) || 0;
+      totalStats.total_successes += parseInt(tool.successes) || 0;
+      totalStats.total_failures += parseInt(tool.failures) || 0;
     });
+
+    // 转换日志格式以保持前端兼容
+    const formattedLogs = (recentLogs || []).map((log: any) => ({
+      id: log.id,
+      tool_slug: log.tool_type,
+      user_id: log.user_id,
+      action_type: log.status === 'success' ? 'use' : 'failed',
+      input_summary: log.input_data ? JSON.stringify(log.input_data).slice(0, 100) : null,
+      output_summary: log.output_data ? JSON.stringify(log.output_data).slice(0, 100) : null,
+      duration_ms: null,
+      created_at: log.created_at
+    }));
 
     return NextResponse.json({
       success: true,
       data: {
         summary: totalStats,
         toolStats: toolStats || [],
-        recentLogs: recentLogs || []
+        recentLogs: formattedLogs
       }
     });
   } catch (error) {
