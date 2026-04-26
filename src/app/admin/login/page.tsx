@@ -60,8 +60,21 @@ export default function AdminLoginPage() {
         <CardHeader className="space-y-4 text-center pb-8">
           {/* Logo */}
           <div className="flex justify-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-3xl">🦞</span>
+            <div className="w-16 h-16 rounded-2xl overflow-hidden shadow-lg">
+              <img
+                src="/oneclaw-logo.png"
+                alt="OneClaw"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="hidden w-full h-full bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center">
+                <span className="text-white font-bold text-xl">OC</span>
+              </div>
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-slate-800 dark:text-slate-100">
