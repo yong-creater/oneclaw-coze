@@ -162,7 +162,24 @@ export default function UtilityToolsPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    // 检查登录状态并同步 token
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/admin/auth');
+        const data = await res.json();
+        if (data.success && data.data?.token) {
+          localStorage.setItem('admin_token', data.data.token);
+        } else {
+          // 未登录，跳转到登录页
+          window.location.href = '/admin/login';
+          return;
+        }
+      } catch {
+        // 忽略错误，继续加载
+      }
+      fetchData();
+    };
+    checkAuth();
   }, []);
 
   // 保存分组
@@ -864,38 +881,50 @@ export default function UtilityToolsPage() {
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">图标</label>
-              <div className="flex flex-wrap gap-2">
-                {ICON_OPTIONS.map(icon => (
-                  <button
-                    key={icon}
-                    onClick={() => setToolForm({ ...toolForm, icon })}
-                    className={`px-3 py-1.5 text-xs rounded-lg border-2 transition-colors ${
-                      toolForm.icon === icon 
-                        ? 'border-orange-500 bg-orange-50 text-orange-600' 
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    {icon}
-                  </button>
-                ))}
+            {/* 图标和颜色设置 - 仅在无封面图时显示 */}
+            {!toolForm.cover_image && (
+              <>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">图标</label>
+                  <div className="flex flex-wrap gap-2">
+                    {ICON_OPTIONS.map(icon => (
+                      <button
+                        key={icon}
+                        onClick={() => setToolForm({ ...toolForm, icon })}
+                        className={`px-3 py-1.5 text-xs rounded-lg border-2 transition-colors ${
+                          toolForm.icon === icon 
+                            ? 'border-orange-500 bg-orange-50 text-orange-600' 
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        {icon}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">颜色</label>
+                  <div className="flex flex-wrap gap-2">
+                    {COLOR_OPTIONS.map(color => (
+                      <button
+                        key={color}
+                        onClick={() => setToolForm({ ...toolForm, color })}
+                        className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} border-2 transition-all ${
+                          toolForm.color === color ? 'border-slate-900 scale-110' : 'border-transparent'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+            {toolForm.cover_image && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  <span className="font-medium">封面图已设置</span>，将优先显示封面图，不再使用图标和颜色背景
+                </p>
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-2 block">颜色</label>
-              <div className="flex flex-wrap gap-2">
-                {COLOR_OPTIONS.map(color => (
-                  <button
-                    key={color}
-                    onClick={() => setToolForm({ ...toolForm, color })}
-                    className={`w-10 h-10 rounded-lg bg-gradient-to-r ${color} border-2 transition-all ${
-                      toolForm.color === color ? 'border-slate-900 scale-110' : 'border-transparent'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
+            )}
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setToolDialogOpen(false)}>取消</Button>
               <Button onClick={handleSaveTool} className="bg-orange-500 hover:bg-orange-600">

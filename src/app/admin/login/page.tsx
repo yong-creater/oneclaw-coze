@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,24 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // 检查是否已登录，如果已登录则同步 token 到 localStorage
+  useEffect(() => {
+    const checkAndSyncToken = async () => {
+      try {
+        const res = await fetch('/api/admin/auth');
+        const data = await res.json();
+        if (data.success && data.data?.token) {
+          localStorage.setItem('admin_token', data.data.token);
+          // 已登录，跳转到首页
+          window.location.href = '/admin';
+        }
+      } catch {
+        // 忽略错误，继续显示登录页面
+      }
+    };
+    checkAndSyncToken();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +47,11 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (data.success) {
+        // 同时存储到 localStorage（供其他页面使用）
+        if (data.data?.token) {
+          localStorage.setItem('admin_token', data.data.token);
+        }
+        
         // 检查是否需要修改密码
         if (data.data?.user?.must_change_password) {
           window.location.href = '/admin/change-password';
