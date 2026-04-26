@@ -16,8 +16,8 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-// 前台导航
-const MAIN_NAV: NavItem[] = [
+// 前台导航 - 精简
+const NAV_ITEMS: NavItem[] = [
   { label: '首页', href: '/', icon: Compass },
   { label: 'AI工具库', href: '/ai-tools', icon: Layers },
   { label: '自建工具', href: '/own-tools', icon: Sparkles },
@@ -26,12 +26,7 @@ const MAIN_NAV: NavItem[] = [
   { label: '榜单中心', href: '/rankings', icon: Star },
 ];
 
-interface SidebarProps {
-  collapsed?: boolean;
-  onCollapsedChange?: (collapsed: boolean) => void;
-}
-
-export default function Sidebar({ collapsed = false, onCollapsedChange }: SidebarProps) {
+export default function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [user, setUser] = useState<{ nickname: string; avatar: string } | null>(null);
@@ -57,7 +52,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
     }
   }, []);
 
-  // 监听路由变化关闭移动端菜单
+  // 监听路由变化
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
@@ -66,39 +61,6 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
   };
-
-  const NavSection = ({ items }: { items: NavItem[] }) => (
-    <div className="space-y-1">
-      {items.map((item) => {
-        const Icon = item.icon;
-        const active = isActive(item.href);
-        
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors cursor-pointer",
-              active
-                ? "bg-accent text-foreground font-medium"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground"
-            )}
-          >
-            <Icon className="w-4 h-4 flex-shrink-0" />
-            {!collapsed && <span>{item.label}</span>}
-          </Link>
-        );
-      })}
-    </div>
-  );
-
-  // 移动端遮罩
-  const MobileOverlay = () => (
-    <div 
-      className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 lg:hidden"
-      onClick={() => setMobileOpen(false)}
-    />
-  );
 
   return (
     <>
@@ -111,72 +73,86 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
       </button>
 
       {/* 移动端遮罩 */}
-      {mobileOpen && <MobileOverlay />}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 lg:hidden backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-      {/* 侧边栏 - 唯一有分隔线的区域 */}
+      {/* 侧边栏 - 苹果风格 */}
       <aside
         className={cn(
-          "fixed top-0 left-0 h-screen bg-background border-r border-border flex flex-col z-50 transition-all duration-200",
-          collapsed ? "w-16" : "w-60",
-          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          "fixed top-0 left-0 h-screen bg-background/80 backdrop-blur-xl border-r border-border flex flex-col z-50 transition-transform duration-300 lg:translate-x-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{ width: 'var(--sidebar-width, 220px)' }}
       >
-        {/* Logo区域 */}
-        <div className="h-16 flex items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-primary-foreground" />
+        {/* Logo区域 - 居中对齐 */}
+        <div className="h-14 flex items-center px-4 border-b border-border">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
+              <Bot className="w-4 h-4 text-white" />
             </div>
-            {!collapsed && (
-              <span className="font-semibold text-foreground tracking-tight">
-                OneClaw
-              </span>
-            )}
+            <span className="font-semibold text-foreground tracking-tight">
+              OneClaw
+            </span>
           </Link>
           
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-1.5 rounded-lg hover:bg-accent cursor-pointer lg:hidden"
+            className="p-1.5 rounded-md hover:bg-accent cursor-pointer ml-auto lg:hidden"
           >
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         </div>
 
         {/* 导航区域 */}
-        <nav className="flex-1 overflow-y-auto p-3">
-          <NavSection items={MAIN_NAV} />
+        <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.href);
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150",
+                  active
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                )}
+              >
+                <Icon className="w-[18px] h-[18px] flex-shrink-0" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* 底部用户区域 */}
-        <div className="p-3">
+        <div className="p-3 border-t border-border">
           {user ? (
-            <div className={cn(
-              "flex items-center gap-3 px-3 py-2",
-              collapsed && "justify-center"
-            )}>
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
+            <div className="flex items-center gap-3 px-3 py-2">
+              <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
                 {user.avatar ? (
                   <img src={user.avatar} alt={user.nickname} className="w-full h-full object-cover" />
                 ) : (
                   <User className="w-4 h-4 text-muted-foreground" />
                 )}
               </div>
-              {!collapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user.nickname}</p>
-                </div>
-              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{user.nickname}</p>
+              </div>
             </div>
           ) : (
             <Link
               href="/login"
-              className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer",
-                collapsed && "justify-center"
-              )}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
             >
-              <LogIn className="w-4 h-4 flex-shrink-0" />
-              {!collapsed && <span>登录</span>}
+              <LogIn className="w-[18px] h-[18px] flex-shrink-0" />
+              <span>登录</span>
             </Link>
           )}
         </div>

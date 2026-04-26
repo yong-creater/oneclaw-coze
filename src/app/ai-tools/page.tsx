@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/common/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -8,23 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import {
-  Search, Grid3X3, List, X,
-  Video, Users, Image, MessageSquare, Code, Mic, FileText, Music, Briefcase, Search as SearchIcon
+  Search, Filter, Grid3X3, LayoutGrid, ExternalLink, Star,
+  Crown, Zap, Shield
 } from 'lucide-react';
-
-// 分类配置 - 简洁图标
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  '视频生成': Video,
-  '数字人': Users,
-  'AI绘画': Image,
-  'AI聊天': MessageSquare,
-  'AI编程': Code,
-  'AI配音': Mic,
-  'AI写作': FileText,
-  'AI音频': Music,
-  'AI办公': Briefcase,
-  'AI搜索': SearchIcon,
-};
 
 interface Tool {
   id: number;
@@ -33,81 +19,111 @@ interface Tool {
   producer: string;
   highlight: string;
   category: string;
+  category_id: number;
   free_type: string;
-  feature_tags: string[];
   official_url: string;
   is_featured: boolean;
+  is_official: boolean;
+  rating: number;
+  rating_count: number;
 }
 
 interface Category {
   id: number;
   name: string;
-  count?: number;
+  slug: string;
 }
 
 export default function AIToolsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
   const [tools, setTools] = useState<Tool[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // 加载分类
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
+  // 从URL同步筛选状态
   useEffect(() => {
-    fetch('/api/categories')
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setCategories(Array.isArray(data.data) ? data.data : (data.data.categories || []));
-        }
-      })
-      .catch(() => {});
+    const category = searchParams.get('category');
+    const searchQuery = searchParams.get('search');
+    
+    if (category) {
+      setActiveCategory(decodeURIComponent(category));
+    } else {
+      setActiveCategory('');
+    }
+    
+    if (searchQuery) {
+      setSearch(decodeURIComponent(searchQuery));
+    }
+  }, [searchParams]);
+
+  // 加载数据
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [toolsRes, catsRes] = await Promise.all([
+        fetch('/api/tools?limit=100'),
+        fetch('/api/categories'),
+      ]);
+      
+      const toolsData = await toolsRes.json();
+      const catsData = await catsRes.json();
+      
+      // 兼容多种数据格式
+      const toolsList = toolsData.tools || toolsData.data || toolsData || [];
+      setTools(toolsList);
+      setCategories(catsData.categories || catsData.data || catsData || []);
+    } catch (err) {
+      console.error('加载失败:', err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // 加载工具
   useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (searchInput) params.set('search', searchInput);
-    if (selectedCategory) params.set('category', selectedCategory);
-    
-    fetch(`/api/tools?${params.toString()}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.success) {
-          setTools(Array.isArray(data.data) ? data.data : (data.data.tools || []));
-        }
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [searchInput, selectedCategory]);
+    loadData();
+  }, [loadData]);
+
+  // 筛选工具
+  const filteredTools = tools.filter(tool => {
+    const matchCategory = !activeCategory || tool.category === activeCategory;
+    const matchSearch = !search || 
+      tool.name.toLowerCase().includes(search.toLowerCase()) ||
+      tool.producer.toLowerCase().includes(search.toLowerCase()) ||
+      tool.highlight.toLowerCase().includes(search.toLowerCase());
+    return matchCategory && matchSearch;
+  });
 
   // 搜索处理
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (searchInput) params.set('search', searchInput);
-    if (selectedCategory) params.set('category', selectedCategory);
-    router.push(`/ai-tools${params.toString() ? '?' + params.toString() : ''}`);
+    if (search) params.set('search', search);
+    if (activeCategory) params.set('category', activeCategory);
+    
+    const query = params.toString();
+    router.push(`/ai-tools${query ? `?${query}` : ''}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
   };
 
   // 分类点击
-  const handleCategoryClick = (cat: string) => {
-    setSelectedCategory(cat === selectedCategory ? '' : cat);
-    setSearchInput('');
-  };
-
-  // 清空筛选
-  const clearFilters = () => {
-    setSelectedCategory('');
-    setSearchInput('');
+  const handleCategoryClick = (catName: string) => {
+    if (activeCategory === catName) {
+      setActiveCategory('');
+      router.push('/ai-tools');
+    } else {
+      setActiveCategory(catName);
+      router.push(`/ai-tools?category=${encodeURIComponent(catName)}`);
+    }
   };
 
   return (
@@ -116,185 +132,217 @@ export default function AIToolsPage() {
 
       <main
         className="transition-all duration-300"
-        style={{ marginLeft: 'var(--sidebar-width, 240px)' }}
+        style={{ marginLeft: 'var(--sidebar-width, 220px)' }}
       >
-        {/* 顶部区域 - 简洁设计 */}
-        <div className="bg-background/80 backdrop-blur-sm sticky top-0 z-10">
-          <div className="max-w-6xl mx-auto px-6 py-4">
-            {/* 页面标题 */}
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-xl font-semibold text-foreground">AI工具库</h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  {selectedCategory || '全部工具'} · {tools.length} 个工具
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="cursor-pointer"
-                >
-                  <Grid3X3 className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="cursor-pointer"
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
+        <div className="px-6 py-8 max-w-7xl mx-auto">
+          {/* 页面标题 */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-semibold">AI工具库</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              精选238款优质AI工具
+            </p>
+          </div>
 
-            {/* 搜索栏 */}
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="搜索工具..."
-                  className="h-9 pl-9 pr-4 rounded-lg bg-card border-border focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                />
-              </div>
-              {(selectedCategory || searchInput) && (
-                <Button variant="ghost" size="sm" onClick={clearFilters} className="cursor-pointer">
-                  <X className="w-4 h-4 mr-1" />
-                  清空
-                </Button>
-              )}
+          {/* 搜索和筛选栏 */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            {/* 搜索框 */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="搜索工具名称、出品方..."
+                className="pl-9 h-10"
+              />
             </div>
-
-            {/* 分类筛选 - 简洁横向滚动 */}
-            <div className="flex items-center gap-2 mt-4 -mx-2 px-2 overflow-x-auto pb-2 scrollbar-hide">
+            
+            {/* 视图切换 */}
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary">
               <button
-                onClick={() => handleCategoryClick('')}
+                onClick={() => setViewMode('grid')}
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors cursor-pointer font-medium",
-                  !selectedCategory 
-                    ? "bg-primary text-primary-foreground" 
-                    : "bg-muted hover:bg-accent text-muted-foreground hover:text-foreground"
+                  'p-2 rounded-md transition-colors',
+                  viewMode === 'grid' ? 'bg-background shadow-sm' : 'hover:bg-accent'
                 )}
               >
-                全部
+                <Grid3X3 className="w-4 h-4" />
               </button>
-              {categories.map((cat) => {
-                const Icon = CATEGORY_ICONS[cat.name] || Grid3X3;
-                return (
-                  <button
-                    key={cat.id}
-                    onClick={() => handleCategoryClick(cat.name)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors cursor-pointer flex items-center gap-1.5 font-medium",
-                      selectedCategory === cat.name 
-                        ? "bg-primary text-primary-foreground" 
-                        : "bg-muted hover:bg-accent text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    {cat.name}
-                  </button>
-                );
-              })}
+              <button
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  'p-2 rounded-md transition-colors',
+                  viewMode === 'list' ? 'bg-background shadow-sm' : 'hover:bg-accent'
+                )}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
             </div>
           </div>
-        </div>
 
-        {/* 工具列表 */}
-        <div className="max-w-6xl mx-auto px-6 py-6">
+          {/* 分类筛选 */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            <button
+              onClick={() => {
+                setActiveCategory('');
+                router.push('/ai-tools');
+              }}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-sm transition-colors',
+                !activeCategory
+                  ? 'bg-black text-white'
+                  : 'bg-secondary hover:bg-accent'
+              )}
+            >
+              全部
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat.name)}
+                className={cn(
+                  'px-3 py-1.5 rounded-lg text-sm transition-colors',
+                  activeCategory === cat.name
+                    ? 'bg-black text-white'
+                    : 'bg-secondary hover:bg-accent'
+                )}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* 工具列表 */}
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="card-minimal p-4 animate-pulse">
-                  <div className="w-10 h-10 rounded-lg bg-muted mb-3" />
-                  <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-muted rounded w-1/2" />
-                </div>
-              ))}
+            <div className="text-center py-12 text-muted-foreground">
+              加载中...
             </div>
-          ) : tools.length === 0 ? (
-            <div className="text-center py-16">
-              <Search className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground">未找到匹配的工具</p>
+          ) : filteredTools.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">未找到相关工具</p>
+              <Button 
+                variant="link" 
+                onClick={() => {
+                  setSearch('');
+                  setActiveCategory('');
+                  router.push('/ai-tools');
+                }}
+              >
+                清除筛选
+              </Button>
             </div>
           ) : viewMode === 'grid' ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-              {tools.map((tool) => (
+            /* 网格视图 */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredTools.map((tool) => (
                 <a
                   key={tool.id}
                   href={`/tools/${tool.id}`}
-                  className="card-minimal p-4 group block cursor-pointer"
+                  className="group block p-5 rounded-xl bg-secondary hover:bg-accent transition-colors"
                 >
-                  {/* Logo */}
-                  <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-3 overflow-hidden">
-                    {tool.logo ? (
-                      <img src={tool.logo} alt={tool.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-lg font-medium">{tool.name[0]}</span>
-                    )}
+                  {/* Logo和名称 */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <img
+                      src={tool.logo}
+                      alt={tool.name}
+                      className="w-10 h-10 rounded-lg object-cover bg-background"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                          {tool.name}
+                        </h3>
+                        {tool.is_featured && (
+                          <Crown className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {tool.producer}
+                      </p>
+                    </div>
                   </div>
-                  
-                  {/* 信息 */}
-                  <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">
-                    {tool.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+
+                  {/* 亮点 */}
+                  <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                     {tool.highlight}
                   </p>
-                  
-                  {/* 标签 */}
-                  <div className="flex items-center gap-1 mt-2">
-                    <Badge variant="secondary" className="text-xs px-2 py-0 rounded font-medium">
+
+                  {/* 底部标签 */}
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline" className="text-xs">
                       {tool.free_type}
                     </Badge>
+                    {tool.rating > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        {tool.rating.toFixed(1)}
+                      </div>
+                    )}
                   </div>
                 </a>
               ))}
             </div>
           ) : (
+            /* 列表视图 */
             <div className="space-y-2">
-              {tools.map((tool) => (
+              {filteredTools.map((tool) => (
                 <a
                   key={tool.id}
                   href={`/tools/${tool.id}`}
-                  className="card-minimal p-4 flex items-center gap-4 group cursor-pointer"
+                  className="group flex items-center gap-4 p-4 rounded-xl bg-secondary hover:bg-accent transition-colors"
                 >
-                  {/* Logo */}
-                  <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {tool.logo ? (
-                      <img src={tool.logo} alt={tool.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-lg font-medium">{tool.name[0]}</span>
-                    )}
-                  </div>
-                  
-                  {/* 信息 */}
+                  <img
+                    src={tool.logo}
+                    alt={tool.name}
+                    className="w-10 h-10 rounded-lg object-cover bg-background"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
-                      {tool.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        {tool.name}
+                      </h3>
+                      {tool.is_featured && (
+                        <Crown className="w-3.5 h-3.5 text-amber-500" />
+                      )}
+                      {tool.is_official && (
+                        <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
                       {tool.producer}
                     </p>
                   </div>
-                  
-                  {/* 亮点 */}
-                  <p className="text-xs text-muted-foreground hidden md:block w-48 truncate">
+                  <p className="text-sm text-muted-foreground hidden sm:block flex-1 truncate">
                     {tool.highlight}
                   </p>
-                  
-                  {/* 标签 */}
-                  <Badge variant="secondary" className="text-xs hidden sm:flex rounded font-medium">
-                    {tool.free_type}
-                  </Badge>
+                  <div className="flex items-center gap-4">
+                    <Badge variant="outline">
+                      {tool.free_type}
+                    </Badge>
+                    {tool.rating > 0 && (
+                      <div className="flex items-center gap-1 text-sm">
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        <span className="font-medium">{tool.rating.toFixed(1)}</span>
+                      </div>
+                    )}
+                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                  </div>
                 </a>
               ))}
             </div>
           )}
+
+          {/* 统计信息 */}
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            共 {filteredTools.length} 个工具
+          </div>
         </div>
       </main>
     </div>

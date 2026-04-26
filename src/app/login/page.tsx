@@ -17,13 +17,14 @@ export default function LoginPage() {
 
   // 检查是否已登录
   useEffect(() => {
-    const token = document.cookie
+    const tokenCookie = document.cookie
       .split('; ')
       .find(row => row.startsWith('user_token='));
     
-    if (token) {
+    if (tokenCookie) {
+      const token = tokenCookie.split('=')[1];
       fetch('/api/auth?action=check', {
-        headers: { Cookie: `user_token=${token.value}` }
+        headers: { Cookie: `user_token=${token}` }
       })
         .then(r => r.json())
         .then(data => {

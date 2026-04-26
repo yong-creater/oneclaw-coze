@@ -157,12 +157,12 @@ export default function TutorialsPage() {
                           {tutorial.likes}
                         </span>
                       </div>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/tutorials/${tutorial.slug}`} target="_blank">
+                      <Link href={`/tutorials/${tutorial.slug}`} target="_blank">
+                        <Button variant="ghost" size="sm">
                           查看详情
                           <ExternalLink className="w-3 h-3 ml-1" />
-                        </Link>
-                      </Button>
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>

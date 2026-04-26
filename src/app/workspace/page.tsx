@@ -81,7 +81,7 @@ export default function WorkspacePage() {
       .split('; ')
       .find(row => row.startsWith('user_token='));
     
-    const headers = token ? { Authorization: `Bearer ${token.split('=')[1]}` } : {};
+    const headers: HeadersInit = token ? { Authorization: `Bearer ${token.split('=')[1]}` } : {};
 
     Promise.all([
       fetch('/api/favorites', { headers }).then(r => r.json()),
@@ -216,9 +216,9 @@ export default function WorkspacePage() {
             <div className="text-center py-16">
               <h2 className="text-xl font-semibold mb-2">请先登录</h2>
               <p className="text-muted-foreground mb-4">登录后可使用工作台功能</p>
-              <Button asChild className="cursor-pointer">
-                <a href="/login">去登录</a>
-              </Button>
+              <a href="/login">
+                <Button className="cursor-pointer">去登录</Button>
+              </a>
             </div>
           </div>
         </main>
