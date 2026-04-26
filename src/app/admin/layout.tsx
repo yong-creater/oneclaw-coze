@@ -20,6 +20,8 @@ import {
   Menu,
   X,
   Loader2,
+  Grid3X3,
+  Hash,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,7 +53,7 @@ const menuItems: MenuItem[] = [
   { name: '精选工具', href: '/admin/utility-tools', icon: Wrench },
   { name: '模板库', href: '/admin/templates', icon: FileText },
   { name: 'AI应用', href: '/admin/tools', icon: FolderTree },
-  { name: '分类管理', href: '/admin/categories', icon: LayoutDashboard },
+  { name: '分类管理', href: '/admin/categories', icon: Hash },
   { name: '提示词库', href: '/admin/prompts', icon: Lightbulb },
   { name: '教程库', href: '/admin/tutorials', icon: BookOpen },
   { name: '会员管理', href: '/admin/members', icon: Users },
