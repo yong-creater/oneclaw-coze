@@ -62,7 +62,7 @@ export default function AIToolsPage() {
       .then(r => r.json())
       .then(data => {
         if (data.success) {
-          setCategories(data.data.categories || []);
+          setCategories(Array.isArray(data.data) ? data.data : (data.data.categories || []));
         }
       })
       .catch(() => {});
@@ -79,7 +79,7 @@ export default function AIToolsPage() {
       .then(r => r.json())
       .then(data => {
         if (data.success) {
-          setTools(data.data.tools || []);
+          setTools(Array.isArray(data.data) ? data.data : (data.data.tools || []));
         }
         setLoading(false);
       })
