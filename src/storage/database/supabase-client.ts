@@ -99,20 +99,48 @@ function getSupabaseServiceRoleKey(): string | undefined {
 // 单例模式 - 延迟初始化客户端
 let supabaseClient: SupabaseClient | null = null;
 
+// 创建支持链式调用的 Mock 客户端
+function createMockClient() {
+  const createChainableQuery = (data: unknown, count?: number) => ({
+    select: () => createChainableQuery(data),
+    eq: () => Promise.resolve({ data, error: null, count }),
+    single: () => Promise.resolve({ data, error: null }),
+    then: function(resolve: (value: unknown) => void) {
+      return Promise.resolve({ data, error: null }).then(resolve);
+    },
+  });
+
+  return {
+    from: (table: string) => ({
+      select: (columns?: string, options?: { count?: string }) => {
+        return {
+          eq: (column: string, value: unknown) => Promise.resolve({ 
+            data: [], 
+            error: null, 
+            count: options?.count === 'exact' ? 0 : undefined 
+          }),
+          limit: (n: number) => Promise.resolve({ data: [], error: null }),
+          single: () => Promise.resolve({ data: null, error: null }),
+          order: () => Promise.resolve({ data: [], error: null }),
+          range: () => Promise.resolve({ data: [], error: null }),
+        };
+      },
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ data: null, error: null }),
+    }),
+    channel: () => ({ subscribe: () => ({}) }),
+    removeChannel: () => Promise.resolve(),
+  } as unknown as SupabaseClient;
+}
+
 export function getSupabaseClient(token?: string): SupabaseClient {
   // 检查是否在构建时环境
   const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV === undefined;
   
   // 在构建时返回空客户端（避免构建错误）
   if (isBuildTime) {
-    return {
-      from: () => ({
-        select: () => Promise.resolve({ data: [], error: null }),
-        insert: () => Promise.resolve({ data: null, error: null }),
-        update: () => Promise.resolve({ data: null, error: null }),
-        delete: () => Promise.resolve({ data: null, error: null }),
-      }),
-    } as unknown as SupabaseClient;
+    return createMockClient();
   }
 
   // 正常运行时创建客户端
@@ -120,14 +148,7 @@ export function getSupabaseClient(token?: string): SupabaseClient {
   
   if (!credentials) {
     // 环境变量未配置，返回空客户端
-    return {
-      from: () => ({
-        select: () => Promise.resolve({ data: [], error: null }),
-        insert: () => Promise.resolve({ data: null, error: null }),
-        update: () => Promise.resolve({ data: null, error: null }),
-        delete: () => Promise.resolve({ data: null, error: null }),
-      }),
-    } as unknown as SupabaseClient;
+    return createMockClient();
   }
 
   // 如果已经有缓存的客户端且没有 token，复用缓存
