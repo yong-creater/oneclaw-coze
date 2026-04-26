@@ -115,7 +115,6 @@ export function getDefaultModel(toolSlug: string): string {
     'product-enhance': 'coze-image',
     'background-removal': 'coze-image',
     'portrait-enhance': 'coze-image',
-    'layout-design': 'coze-image',
     'xhs-generator': 'ep-20250312145957-p8xpp',
     'resume': 'ep-20250312145957-p8xpp',
     // 别名
