@@ -431,6 +431,62 @@ export default function HomePage() {
   const [tutorialCategory, setTutorialCategory] = useState('全部');
   const [tutorialSearch, setTutorialSearch] = useState('');
 
+  // ==================== 模板状态 ====================
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState('');
+  const [templateType, setTemplateType] = useState<string | null>(null);
+  const [allTemplates, setAllTemplates] = useState<any[]>([]);
+
+  // 模板类型配置
+  const TEMPLATE_TYPES = [
+    { key: 'xhs_post', label: '小红书' },
+    { key: 'goods_poster', label: '商品海报' },
+    { key: 'portrait', label: 'AI写真' },
+    { key: 'cover', label: '封面图' },
+    { key: 'goods_image', label: '商品图' },
+    { key: 'background_removal', label: '抠图' },
+    { key: 'photo', label: '照片美化' },
+    { key: 'layout', label: '图文排版' },
+    { key: 'resume', label: '简历' },
+    { key: 'novel', label: '小说' },
+    { key: 'script', label: '脚本' },
+  ];
+
+  // 加载模板
+  useEffect(() => {
+    if (mainTab === 'templates') {
+      const loadTemplates = async () => {
+        setTemplatesLoading(true);
+        try {
+          const res = await fetch('/api/templates');
+          const data = await res.json();
+          if (data.success) {
+            setAllTemplates(data.templates || []);
+          }
+        } catch (error) {
+          console.error('加载模板失败:', error);
+        } finally {
+          setTemplatesLoading(false);
+        }
+      };
+      loadTemplates();
+    }
+  }, [mainTab]);
+
+  // 过滤模板
+  const filteredTemplates = allTemplates.filter(t => {
+    const matchSearch = !templateSearch || 
+      t.name.toLowerCase().includes(templateSearch.toLowerCase()) ||
+      t.description?.toLowerCase().includes(templateSearch.toLowerCase());
+    const matchType = !templateType || t.template_type === templateType;
+    return matchSearch && matchType;
+  });
+
+  // 使用模板
+  const handleTemplateUse = (template: any) => {
+    window.location.href = template.tool_url;
+  };
+
   // ==================== Skill 状态 ====================
   const [skillCategories, setSkillCategories] = useState<SkillCategory[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -1271,16 +1327,123 @@ export default function HomePage() {
 
         {/* ==================== 模板库 ==================== */}
         {mainTab === 'templates' && (
-          <div className="text-center py-20">
-            <LayoutTemplate className="w-16 h-16 mx-auto text-slate-300 mb-4" />
-            <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">模板库</h2>
-            <p className="text-slate-500 mb-6">海量精选模板，一键复刻生成</p>
-            <Link href="/templates">
-              <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-                前往模板库
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+          <div className="space-y-6">
+            {/* 搜索和筛选 */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="搜索模板..."
+                  value={templateSearch}
+                  onChange={(e) => setTemplateSearch(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 
+                             bg-white dark:bg-slate-800 focus:border-orange-500 outline-none transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* 类型筛选 */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setTemplateType(null)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  !templateType
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                全部
+              </button>
+              {TEMPLATE_TYPES.map(type => (
+                <button
+                  key={type.key}
+                  onClick={() => setTemplateType(templateType === type.key ? null : type.key)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-1.5 ${
+                    templateType === type.key
+                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {type.icon}
+                  {type.label}
+                </button>
+              ))}
+            </div>
+
+            {/* 加载状态 */}
+            {templatesLoading ? (
+              <div className="flex justify-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+              </div>
+            ) : filteredTemplates.length === 0 ? (
+              <div className="text-center py-20">
+                <LayoutTemplate className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+                <p className="text-slate-500">暂无模板</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTemplates.map((template) => (
+                  <div 
+                    key={template.id}
+                    className="group bg-white dark:bg-slate-800 rounded-xl shadow-sm overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    onClick={() => handleTemplateUse(template)}
+                  >
+                    {/* 缩略图 */}
+                    <div className="relative h-40 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden">
+                      {template.thumbnail ? (
+                        <img
+                          src={template.thumbnail}
+                          alt={template.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <LayoutTemplate className="w-12 h-12 text-slate-300" />
+                        </div>
+                      )}
+                      {/* 工具来源标签 */}
+                      <div className="absolute top-2 left-2 px-2 py-1 rounded-full bg-white/90 dark:bg-slate-800/90 text-xs font-medium text-slate-700 dark:text-slate-200">
+                        {template.tool_name}
+                      </div>
+                    </div>
+
+                    <div className="p-4">
+                      <h3 className="font-bold text-slate-800 dark:text-white mb-2 group-hover:text-orange-500 transition-colors">
+                        {template.name}
+                      </h3>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
+                        {template.description || '暂无描述'}
+                      </p>
+
+                      {/* 标签 */}
+                      {template.tags && template.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {template.tags.slice(0, 3).map((tag: string, i: number) => (
+                            <span key={i} className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-xs text-slate-600 dark:text-slate-300">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-400">
+                          已使用 {template.usage_count || 0} 次
+                        </span>
+                        <Button 
+                          size="sm" 
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                        >
+                          复刻使用
+                          <ArrowRight className="w-3 h-3 ml-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
