@@ -166,9 +166,11 @@ export default function AdminLayout({
               )}
             </button>
             <Link href="/admin" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-orange-500">🦞</span>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">OC</span>
+              </div>
               <span className="text-lg font-bold text-slate-800 dark:text-white">
-                OneClaw 管理后台
+                OneClaw
               </span>
             </Link>
           </div>
