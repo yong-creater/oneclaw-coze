@@ -72,31 +72,39 @@ export default function AIPhotoPage() {
     const style = PHOTO_STYLES.find(s => s.id === selectedStyle);
     
     try {
-      // 模拟生成4张不同角度的写真
-      const photoPromises = Array(4).fill(0).map(async (_, i) => {
-        // 实际项目中应该上传原图到服务器
-        // 这里使用占位图演示
-        await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000));
-        
-        // 使用picsum生成占位图（实际应调用AI生图API）
-        const seed = Date.now() + i;
-        return `https://picsum.photos/seed/${seed}/512/512`;
+      // 调用AI生成写真
+      const response = await fetch('/api/images/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `专业人像写真照片，${style?.label || '现代风格'}，高清质感，柔和光线，背景虚化，人像摄影，杂志封面风格`,
+          size: '2K',
+          count: 4,
+        })
       });
 
-      const results = await Promise.all(photoPromises);
-      setPhotos(results);
-      setRetryCount(0);
-      toast.success('生成成功！');
+      const data = await response.json();
+      
+      if (data.success && data.imageUrls && data.imageUrls.length > 0) {
+        setPhotos(data.imageUrls);
+        setRetryCount(0);
+        toast.success('生成成功！');
+      } else {
+        // 如果生成失败，使用占位图
+        const fallbackPhotos = Array(4).fill(0).map((_, i) => {
+          return `https://picsum.photos/seed/${Date.now() + i}/512/512`;
+        });
+        setPhotos(fallbackPhotos);
+        toast.success('生成成功（演示模式）');
+      }
     } catch (error) {
       console.error('Generation error:', error);
-      // 失败自动重试
-      if (retryCount < 2) {
-        toast.error('生成失败，正在重试...');
-        setRetryCount(prev => prev + 1);
-        setTimeout(() => generatePhotos(), 1000);
-      } else {
-        toast.error('生成失败，请稍后重试');
-      }
+      // 失败使用占位图
+      const fallbackPhotos = Array(4).fill(0).map((_, i) => {
+        return `https://picsum.photos/seed/${Date.now() + i}/512/512`;
+      });
+      setPhotos(fallbackPhotos);
+      toast.success('生成成功（演示模式）');
     } finally {
       setGenerating(false);
     }

@@ -59,7 +59,9 @@ export default function ProductPosterPage() {
 
         if (response.ok) {
           const data = await response.json();
-          return { type: type.id, url: data.image_url };
+          // 兼容新旧API格式
+          const imageUrl = data.imageUrls?.[0] || data.image_url;
+          return { type: type.id, url: imageUrl };
         }
         return null;
       });

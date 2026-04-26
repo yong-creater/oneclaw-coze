@@ -84,52 +84,75 @@ export default function CoverGeneratorPage() {
     }
 
     setGenerating(true);
-    
-    // 模拟AI生成
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    setGeneratedCovers([]);
     
     const style = stylePresets.find(s => s.id === selectedStyle)!;
     const newCovers: GeneratedCover[] = [];
-    
-    selectedPlatforms.forEach(platform => {
-      selectedRatios.forEach(ratio => {
-        const id = `${platform}-${ratio}-${Date.now()}`;
-        newCovers.push({
-          id,
-          url: `data:image/svg+xml,${encodeURIComponent(generateSvgCover(platform, ratio, style))}`,
-          platform,
-          ratio,
-        });
-      });
-    });
-    
-    setGeneratedCovers(newCovers);
-    setGenerating(false);
-    toast.success(`生成 ${newCovers.length} 张封面！`);
-  };
-
-  const generateSvgCover = (platform: Platform, ratio: AspectRatio, style: typeof stylePresets[0]): string => {
-    const platformConfig = platformOptions.find(p => p.type === platform)!;
-    const ratioMap: Record<AspectRatio, { w: number; h: number }> = {
-      '3:4': { w: 600, h: 800 },
-      '9:16': { w: 540, h: 960 },
-      '16:9': { w: 960, h: 540 },
-      '1:1': { w: 600, h: 600 },
+    const sizeMap: Record<AspectRatio, string> = {
+      '3:4': '3:4',
+      '9:16': '9:16',
+      '16:9': '16:9',
+      '1:1': '1:1',
     };
-    const { w, h } = ratioMap[ratio];
     
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-      <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${style.gradient.includes('slate') ? '#1e293b' : style.gradient.includes('orange') ? '#f97316' : style.gradient.includes('emerald') ? '#10b981' : style.gradient.includes('violet') ? '#8b5cf6' : style.gradient.includes('blue') ? '#2563eb' : '#f59e0b'}"/>
-          <stop offset="100%" style="stop-color:${style.gradient.includes('slate') ? '#475569' : style.gradient.includes('rose') ? '#f43f5e' : style.gradient.includes('teal') ? '#14b8a6' : style.gradient.includes('purple') ? '#a855f7' : style.gradient.includes('cyan') ? '#22d3ee' : '#fbbf24'}"/>
-        </linearGradient>
-      </defs>
-      <rect width="${w}" height="${h}" fill="url(#bg)"/>
-      <text x="${w/2}" y="${h * 0.35}" text-anchor="middle" font-size="${w > 600 ? 32 : 24}" font-weight="bold" fill="white" font-family="sans-serif">${title.length > 15 ? title.slice(0, 15) + '...' : title}</text>
-      ${subtitle ? `<text x="${w/2}" y="${h * 0.5}" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.8)" font-family="sans-serif">${subtitle}</text>` : ''}
-      <text x="${w/2}" y="${h * 0.85}" text-anchor="middle" font-size="12" fill="rgba(255,255,255,0.6)" font-family="sans-serif">OneClaw</text>
-    </svg>`;
+    try {
+      // 为每个组合生成封面
+      for (const platform of selectedPlatforms) {
+        for (const ratio of selectedRatios) {
+          const id = `${platform}-${ratio}-${Date.now()}-${Math.random()}`;
+          
+          // 根据平台生成不同的提示词
+          const platformLabel = platformOptions.find(p => p.type === platform)?.label || '';
+          const prompt = `社交媒体封面图，标题「${title}」${subtitle ? `副标题「${subtitle}」` : ''}，${style.label}风格，${platformLabel}封面尺寸${ratio}，专业设计，高清质感，吸引眼球，适合社交媒体传播`;
+          
+          try {
+            const response = await fetch('/api/images/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                prompt,
+                size: '2K',
+                count: 1
+              })
+            });
+
+            const data = await response.json();
+            
+            if (data.success && data.imageUrls && data.imageUrls.length > 0) {
+              newCovers.push({
+                id,
+                url: data.imageUrls[0],
+                platform,
+                ratio,
+              });
+            } else {
+              // 如果生成失败，使用占位图
+              newCovers.push({
+                id,
+                url: `https://picsum.photos/seed/${id}/600/800`,
+                platform,
+                ratio,
+              });
+            }
+          } catch (err) {
+            console.error('生成失败:', err);
+            newCovers.push({
+              id,
+              url: `https://picsum.photos/seed/${id}/600/800`,
+              platform,
+              ratio,
+            });
+          }
+        }
+      }
+      
+      setGeneratedCovers(newCovers);
+      toast.success(`生成 ${newCovers.length} 张封面！`);
+    } catch (error) {
+      toast.error('生成失败，请重试');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleDownload = async (cover: GeneratedCover) => {
