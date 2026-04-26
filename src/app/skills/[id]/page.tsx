@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, BookOpen, List, Clock, CheckCircle, Download, Heart, ExternalLink, FileText, Code, Zap, Star, Shield } from 'lucide-react';
+import { ArrowLeft, BookOpen, List, Clock, CheckCircle, Download, Heart, ExternalLink, FileText, Code, Zap, Star, Shield, Home } from 'lucide-react';
 import BackButton from '@/components/common/BackButton';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
@@ -133,12 +133,19 @@ export default async function SkillDetailPage({ params }: { params: Promise<{ id
   
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* 顶部导航 */}
-      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+      {/* 顶部导航 - 和首页一致的风格 */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-4xl mx-auto px-4 py-3">
-          <BackToHome label="技能详情" />
+          <div className="flex items-center justify-between">
+            <BackToHome label={skill?.name || '技能详情'} showLogo />
+            <Link href="/">
+              <button className="p-2 text-slate-500 hover:text-orange-500 transition-colors">
+                <Home className="w-5 h-5" />
+              </button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </header>
       
       {/* 主内容 */}
       <div className="max-w-4xl mx-auto px-4 py-8">

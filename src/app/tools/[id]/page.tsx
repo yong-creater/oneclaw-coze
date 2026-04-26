@@ -16,7 +16,7 @@ import {
   HelpCircle, ArrowRight, Sparkles, Wand2, Layers, Settings, Eye,
   Search, Filter, Phone, Mail, Link2, ChevronDown,
   Globe2, Smartphone, Laptop, FileText, Download, Code, Share,
-  BarChart, PieChart, MapPin, User, ArrowUpRight
+  BarChart, PieChart, MapPin, User, ArrowUpRight, Home
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -369,10 +369,21 @@ export default function ToolDetailPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* 顶部导航 */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <BackToHome label="AI 工具详情" />
+      {/* 顶部导航 - 和首页一致的风格 */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <BackToHome label={tool?.name || 'AI 工具详情'} showLogo />
+            
+            {/* 右侧操作 */}
+            <div className="flex items-center gap-2">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="text-slate-500 hover:text-orange-500">
+                  <Home className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </header>
 

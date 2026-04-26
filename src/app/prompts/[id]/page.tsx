@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
-import { Copy, Check } from 'lucide-react';
+import {
+  Copy, Check, Home
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -104,10 +107,17 @@ export default function PromptDetailPage({ params }: { params: Promise<{ id: str
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <BackToHome label="提示词详情" />
+      {/* Header - 和首页一致的风格 */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div className="max-w-4xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <BackToHome label={prompt?.title || '提示词详情'} showLogo />
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="text-slate-500 hover:text-orange-500">
+                <Home className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
