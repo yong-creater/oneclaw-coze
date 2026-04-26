@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '仪表盘 - OneClaw管理后台',
-  description: 'OneClaw管理后台仪表盘',
+  title: '微信配置 - OneClaw管理后台',
+  description: '配置微信公众号',
 };
 
-export default function DashboardLayout({
+export default function AdminWechatLayout({
   children,
 }: {
   children: React.ReactNode;

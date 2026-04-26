@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: '仪表盘 - OneClaw管理后台',
-  description: 'OneClaw管理后台仪表盘',
+  title: 'AI应用管理 - OneClaw管理后台',
+  description: '管理AI工具应用',
 };
 
-export default function DashboardLayout({
+export default function AdminToolsLayout({
   children,
 }: {
   children: React.ReactNode;
