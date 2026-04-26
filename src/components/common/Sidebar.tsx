@@ -167,6 +167,12 @@ export default function Sidebar({ className }: SidebarProps) {
 
         {/* 用户菜单 */}
         <div className="border-t border-border/40 py-4 px-3">
+          {/* 分组标题 */}
+          {!collapsed && (
+            <p className="px-3 mb-2 text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">
+              我的
+            </p>
+          )}
           <div className="space-y-1">
             {USER_MENU.map((item) => (
               <Link

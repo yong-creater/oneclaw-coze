@@ -6,7 +6,7 @@ import Footer from '@/components/common/Footer';
 import { cn } from '@/lib/utils';
 import {
   FileText, BookOpen, Image as ImageIcon, Globe, Star,
-  ArrowRight, Sparkles, Zap
+  ArrowRight, Sparkles, Wand2
 } from 'lucide-react';
 
 const OWN_TOOLS = [
@@ -16,9 +16,10 @@ const OWN_TOOLS = [
     desc: 'AI智能优化简历，提升求职竞争力',
     icon: FileText,
     badge: '热门',
-    gradient: 'from-orange-400 via-orange-500 to-amber-500',
-    iconBg: 'bg-white/20 backdrop-blur',
-    tag: '效率提升'
+    gradient: 'from-orange-500 via-orange-400 to-amber-400',
+    hoverGradient: 'hover:from-orange-600 hover:via-orange-500 hover:to-amber-500',
+    shadowColor: 'shadow-orange-500/20',
+    shadowHover: 'hover:shadow-orange-500/30',
   },
   {
     id: 'novel',
@@ -26,9 +27,10 @@ const OWN_TOOLS = [
     desc: 'AI辅助小说创作，激发无限灵感',
     icon: BookOpen,
     badge: '新功能',
-    gradient: 'from-purple-400 via-violet-500 to-indigo-500',
-    iconBg: 'bg-white/20 backdrop-blur',
-    tag: '创意写作'
+    gradient: 'from-violet-500 via-purple-500 to-indigo-400',
+    hoverGradient: 'hover:from-violet-600 hover:via-purple-600 hover:to-indigo-500',
+    shadowColor: 'shadow-violet-500/20',
+    shadowHover: 'hover:shadow-violet-500/30',
   },
   {
     id: 'overseas',
@@ -36,9 +38,10 @@ const OWN_TOOLS = [
     desc: '一键生成跨境电商产品详情页，高转化可适配多平台',
     icon: Globe,
     badge: null,
-    gradient: 'from-blue-400 via-cyan-500 to-teal-500',
-    iconBg: 'bg-white/20 backdrop-blur',
-    tag: '电商必备'
+    gradient: 'from-cyan-500 via-blue-500 to-indigo-400',
+    hoverGradient: 'hover:from-cyan-600 hover:via-blue-600 hover:to-indigo-500',
+    shadowColor: 'shadow-cyan-500/20',
+    shadowHover: 'hover:shadow-cyan-500/30',
   },
   {
     id: 'photo-id',
@@ -46,9 +49,10 @@ const OWN_TOOLS = [
     desc: '上传照片智能抠图，一键生成合规证件照',
     icon: ImageIcon,
     badge: '新功能',
-    gradient: 'from-emerald-400 via-green-500 to-teal-500',
-    iconBg: 'bg-white/20 backdrop-blur',
-    tag: '便捷生活'
+    gradient: 'from-emerald-500 via-green-500 to-teal-400',
+    hoverGradient: 'hover:from-emerald-600 hover:via-green-600 hover:to-teal-500',
+    shadowColor: 'shadow-emerald-500/20',
+    shadowHover: 'hover:shadow-emerald-500/30',
   },
 ];
 
@@ -61,86 +65,101 @@ export default function OwnToolsPage() {
         className="transition-all duration-300"
         style={{ marginLeft: 'var(--sidebar-width, 240px)' }}
       >
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          {/* 标题区域 */}
-          <div className="mb-10">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <Star className="w-6 h-6 text-white" />
+        <div className="max-w-6xl mx-auto px-6 py-10">
+          
+          {/* 页面标题 - 居左对齐 */}
+          <div className="mb-10 animate-fade-in-up">
+            <div className="flex items-center gap-4">
+              {/* 图标 */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl blur-xl opacity-30" />
+                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                  <Star className="w-7 h-7 text-white" />
+                </div>
               </div>
+              
+              {/* 文字 */}
               <div>
-                <h1 className="text-3xl font-bold text-foreground">
-                  自建工具
+                <h1 className="text-3xl font-bold tracking-tight">
+                  <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                    自建工具
+                  </span>
                 </h1>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mt-0.5">
                   精心打造，助您效率倍增
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 工具卡片 - 大卡片风格 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-            {OWN_TOOLS.map((tool) => {
+          {/* 工具卡片网格 - 2x2布局 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {OWN_TOOLS.map((tool, index) => {
               const Icon = tool.icon;
               const href = tool.id === 'overseas' ? '/productpage' : `/${tool.id}`;
 
               return (
-                <Link key={tool.id} href={href}>
-                  <div className="group relative bg-card rounded-3xl overflow-hidden border border-border hover:border-transparent hover:shadow-2xl transition-all duration-500 cursor-pointer h-[280px]">
-                    {/* 渐变背景 */}
-                    <div className={cn(
-                      "absolute inset-0 bg-gradient-to-br",
-                      tool.gradient
-                    )} />
-
-                    {/* 装饰元素 */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-
-                    {/* 内容 */}
-                    <div className="relative h-full p-8 flex flex-col justify-between">
-                      {/* 顶部 */}
+                <Link 
+                  key={tool.id} 
+                  href={href}
+                  className={cn(
+                    "group block animate-fade-in-up",
+                    `stagger-${index + 1}`
+                  )}
+                >
+                  <div className={cn(
+                    "relative h-[260px] rounded-2xl overflow-hidden",
+                    "bg-gradient-to-br",
+                    tool.gradient,
+                    tool.hoverGradient,
+                    "shadow-lg",
+                    tool.shadowColor,
+                    tool.shadowHover,
+                    "transition-all duration-300",
+                    "hover:scale-[1.02] hover:-translate-y-1"
+                  )}>
+                    {/* 装饰光斑 */}
+                    <div className="absolute -top-20 -right-20 w-60 h-60 bg-white/10 rounded-full blur-3xl" />
+                    <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
+                    
+                    {/* 内容层 */}
+                    <div className="relative h-full p-7 flex flex-col justify-between">
+                      {/* 顶部区域 */}
                       <div className="flex items-start justify-between">
-                        {/* 大图标 */}
-                        <div className={cn(
-                          "w-20 h-20 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-xl",
-                          tool.iconBg
-                        )}>
-                          <Icon className="w-10 h-10 text-white" />
+                        {/* 图标容器 */}
+                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
+                          <Icon className="w-8 h-8 text-white" />
                         </div>
-
-                        {/* Badge */}
+                        
+                        {/* Badge - 统一样式 */}
                         {tool.badge && (
-                          <div className="px-3 py-1.5 bg-white/90 backdrop-blur-sm text-xs font-bold text-slate-800 rounded-full shadow-lg">
-                            {tool.badge}
+                          <div className="px-3.5 py-1.5 bg-white rounded-full shadow-md">
+                            <span className={cn(
+                              "text-xs font-semibold",
+                              tool.badge === '热门' ? "text-orange-500" : "text-violet-500"
+                            )}>
+                              {tool.badge}
+                            </span>
                           </div>
                         )}
                       </div>
 
-                      {/* 底部 */}
-                      <div className="space-y-3">
-                        {/* 标签 */}
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 bg-white/20 backdrop-blur-sm text-xs font-medium text-white rounded-full">
-                            {tool.tag}
-                          </span>
-                        </div>
-
-                        {/* 标题和描述 */}
+                      {/* 底部区域 */}
+                      <div className="space-y-4">
+                        {/* 标题 */}
                         <div>
-                          <h3 className="text-2xl font-bold text-white mb-2 group-hover:translate-x-2 transition-transform">
+                          <h3 className="text-2xl font-bold text-white tracking-tight group-hover:translate-x-1 transition-transform">
                             {tool.name}
                           </h3>
-                          <p className="text-white/80 text-sm leading-relaxed">
+                          <p className="text-white/80 text-sm mt-1.5 leading-relaxed">
                             {tool.desc}
                           </p>
                         </div>
-
-                        {/* 使用按钮 */}
-                        <div className="flex items-center gap-2 text-white font-medium group-hover:gap-3 transition-all">
-                          <span>立即体验</span>
-                          <ArrowRight className="w-5 h-5" />
+                        
+                        {/* 行动按钮 */}
+                        <div className="flex items-center gap-2 text-white/90">
+                          <span className="text-sm font-medium">立即体验</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </div>
                     </div>
@@ -150,18 +169,16 @@ export default function OwnToolsPage() {
             })}
           </div>
 
-          {/* 更多工具提示 */}
-          <div className="mt-12 text-center">
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-full">
-              <Zap className="w-5 h-5 text-amber-500" />
-              <span className="text-sm text-muted-foreground">更多精品工具开发中...</span>
-              <Sparkles className="w-5 h-5 text-purple-500" />
-            </div>
+          {/* 底部说明 */}
+          <div className="mt-10 text-center animate-fade-in-up stagger-5">
+            <p className="text-xs text-muted-foreground/60">
+              更多自建工具开发中 · 敬请期待
+            </p>
           </div>
         </div>
-      </main>
 
-      <Footer />
+        <Footer />
+      </main>
     </div>
   );
 }
