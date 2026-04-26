@@ -113,8 +113,138 @@ interface Skill {
 // ==================== 精选工具页面 ====================
 function UtilityToolsPage() {
   const router = useRouter();
-  const [tools, setTools] = useState(UTILITY_TOOLS);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [tools, setTools] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // 获取精选工具数据
+  useEffect(() => {
+    async function fetchUtilityTools() {
+      try {
+        const res = await fetch('/api/utility-tools');
+        if (res.ok) {
+          const data = await res.json();
+          setGroups(data.groups || []);
+          setTools(data.tools || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch utility tools:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUtilityTools();
+  }, []);
+
+  const getToolUrl = (slug: string) => {
+    const urls: Record<string, string> = {
+      resume: '/resume',
+      novel: '/novel',
+      productpage: '/productpage',
+    };
+    return urls[slug] || '/';
+  };
+
+  // 工具卡片组件
+  const ToolCard = ({ tool }: { tool: any }) => (
+    <button
+      onClick={() => window.open(getToolUrl(tool.slug), '_blank')}
+      className="group bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left"
+    >
+      {/* 封面图或渐变背景 */}
+      <div className={`h-28 relative ${tool.cover_image ? '' : `bg-gradient-to-br ${tool.color || 'from-orange-500 to-amber-500'}`}`}>
+        {tool.cover_image ? (
+          <img 
+            src={tool.cover_image} 
+            alt={tool.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-5xl font-bold text-white/30">
+              {tool.name[0]}
+            </span>
+          </div>
+        )}
+        {/* 角标 */}
+        <div className="absolute top-2 right-2">
+          <div className={`px-2 py-1 rounded-md bg-gradient-to-r ${tool.color || 'from-orange-500 to-amber-500'} text-white text-xs font-medium shadow-sm`}>
+            AI工具
+          </div>
+        </div>
+      </div>
+      
+      {/* 内容区 */}
+      <div className="p-4">
+        <h3 className="font-semibold text-slate-800 dark:text-white text-base group-hover:text-orange-500 transition-colors mb-1">
+          {tool.name}
+        </h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+          {tool.description}
+        </p>
+      </div>
+    </button>
+  );
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-6">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">精选工具</h1>
+          <p className="text-slate-500 dark:text-slate-400">AI驱动的精选工具，提升您的工作效率</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden animate-pulse">
+              <div className="h-28 bg-slate-200 dark:bg-slate-700" />
+              <div className="p-4 space-y-2">
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 如果有分组，按分组展示
+  if (groups.length > 0) {
+    return (
+      <div className="space-y-8">
+        {groups.map(group => {
+          const groupTools = tools.filter(t => t.group_id === group.id);
+          if (groupTools.length === 0) return null;
+          
+          return (
+            <div key={group.id} className="space-y-4">
+              {/* 分组标题 */}
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${group.color || 'from-orange-500 to-amber-500'} flex items-center justify-center`}>
+                  <span className="text-white font-bold">{group.name[0]}</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-white">{group.name}</h2>
+                  {group.description && (
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{group.description}</p>
+                  )}
+                </div>
+              </div>
+              
+              {/* 工具网格 */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {groupTools.map(tool => (
+                  <ToolCard key={tool.id} tool={tool} />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // 无分组时的展示
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
@@ -129,60 +259,9 @@ function UtilityToolsPage() {
 
       {/* 工具网格 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {tools.map(tool => {
-          const getToolUrl = (key: string) => {
-            const urls: Record<string, string> = {
-              resume: '/resume',
-              novel: '/novel',
-              productpage: '/productpage',
-            };
-            return urls[key] || '/';
-          };
-          return (
-            <button
-              key={tool.key}
-              onClick={() => {
-                window.open(getToolUrl(tool.key), '_blank');
-              }}
-              className="group bg-white dark:bg-slate-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-slate-100 dark:border-slate-700 hover:border-orange-200 dark:hover:border-orange-800 text-left"
-            >
-              {/* 头部：头像 + 名称 + 评分 */}
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-white font-bold text-lg shadow-sm group-hover:scale-105 transition-transform">
-                  {tool.name[0]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-slate-800 dark:text-white text-base group-hover:text-orange-500 transition-colors truncate">
-                    {tool.name}
-                  </h3>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                    <span className="text-xs text-slate-500">4.8</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* 描述 */}
-              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">
-                {tool.description}
-              </p>
-              
-              {/* 标签 */}
-              <div className="flex flex-wrap gap-1.5">
-                {tool.tags?.slice(0, 2).map((tag, idx) => (
-                  <span key={idx} className="px-2 py-0.5 text-xs rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-                    {tag}
-                  </span>
-                ))}
-                {tool.tags && tool.tags.length > 2 && (
-                  <span className="px-2 py-0.5 text-xs rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500">
-                    +{tool.tags.length - 2}
-                  </span>
-                )}
-              </div>
-            </button>
-          );
-        })}
+        {tools.map(tool => (
+          <ToolCard key={tool.id} tool={tool} />
+        ))}
         
         {/* 敬请期待卡片 */}
         <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center text-center">
@@ -208,115 +287,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   '高级': 'bg-red-100 text-red-700',
 };
 
-// 精选工具列表
-const UTILITY_TOOLS = [
-  { 
-    key: 'resume', 
-    name: 'STAR简历优化', 
-    icon: FileText,
-    description: '上传简历+粘贴JD，一键生成STAR法则优化版简历，精准匹配岗位',
-    color: 'from-blue-500 to-cyan-500',
-    tags: ['PDF上传', 'JD精准匹配', '量化成果'],
-    useCases: [
-      { title: '校招求职', desc: '应届生简历优化，突出项目经验' },
-      { title: '社招跳槽', desc: '量化工作成果，提升面试邀约率' },
-      { title: '简历升级', desc: 'STAR法则重构，让经历更有说服力' },
-    ]
-  },
-  { 
-    key: 'novel', 
-    name: '小说创作工坊', 
-    icon: Feather,
-    description: '小说→深度洗稿→漫画生图→推文脚本，全流程创作一键导出',
-    color: 'from-purple-500 to-pink-500',
-    tags: ['深度洗稿', '漫画生图', '推文脚本'],
-    useCases: [
-      { title: '小说改编', desc: '番茄小说爆款文改编为漫画脚本' },
-      { title: 'IP孵化', desc: '原创故事快速生成多形式内容' },
-      { title: '短剧创作', desc: '小说改短剧，批量产出推文素材' },
-    ]
-  },
-  { 
-    key: 'productpage', 
-    name: '出海详情页', 
-    icon: Globe,
-    description: '一键生成符合海外法规、人文风情的商品详情页，适配多平台',
-    color: 'from-emerald-500 to-teal-500',
-    tags: ['多语言', '海外合规', '批量分发'],
-    useCases: [
-      { title: '亚马逊Listing', desc: '符合亚马逊规范的多语言详情页' },
-      { title: '独立站详情', desc: 'Shopify/WooCommerce适配版本' },
-      { title: '多平台分发', desc: '速卖通/eBay/Shopee统一模板' },
-    ]
-  },
-  { 
-    key: 'product-photo', 
-    name: '商品图精修', 
-    icon: Sparkle,
-    description: 'AI智能识别品类，一键精修电商商品图，去褶皱/提亮度/去瑕疵/优化背景',
-    color: 'from-amber-500 to-orange-500',
-    tags: ['一键精修', '批量处理', '电商级标准'],
-    useCases: [
-      { title: '服饰精修', desc: '抚平褶皱、提亮色彩、突出面料质感' },
-      { title: '美妆优化', desc: '提亮色彩、修正肤色、优化产品细节' },
-      { title: '批量处理', desc: '支持20张同时精修，提升上新效率' },
-    ]
-  },
-  { 
-    key: 'background-removal', 
-    name: 'AI智能抠图', 
-    icon: Scissors,
-    description: '发丝级精准抠图，一键生成纯白底图，支持批量处理',
-    color: 'from-cyan-500 to-blue-500',
-    tags: ['精准抠图', '白底生成', '批量处理'],
-    useCases: [
-      { title: '电商白底图', desc: '淘宝/京东规范纯白底，快速制作' },
-      { title: '证件照处理', desc: '一寸/二寸证件照背景替换' },
-      { title: '多图批量', desc: '20张同时抠图，一键下载压缩包' },
-    ]
-  },
-  { 
-    key: 'cover-generator', 
-    name: '封面生成器', 
-    icon: Layout,
-    description: '输入主题关键词，AI生成小红书/抖音/公众号等多平台封面图',
-    color: 'from-pink-500 to-rose-500',
-    tags: ['多平台适配', '商用字体', '一键生成'],
-    useCases: [
-      { title: '小红书封面', desc: '1:1尺寸，吸睛风格适配' },
-      { title: '抖音封面', desc: '9:16竖版，自动适配平台规范' },
-      { title: '批量生成', desc: '一次生成5套封面，快速发稿' },
-    ]
-  },
-  { 
-    key: 'photo-editor', 
-    name: '照片美化', 
-    icon: Camera,
-    description: 'AI一键磨皮/调色/滤镜，自然美颜不假白，支持批量处理',
-    color: 'from-violet-500 to-purple-500',
-    tags: ['自然美颜', '滤镜推荐', '快速修复'],
-    useCases: [
-      { title: '人像美化', desc: '磨皮提亮，保留真实质感' },
-      { title: '风景调色', desc: '自动优化色彩、对比度、通透感' },
-      { title: '批量美化', desc: '10张照片一键优化，快速出片' },
-    ]
-  },
-  { 
-    key: 'layout-design', 
-    name: '图文排版', 
-    icon: Palette,
-    description: '小红书笔记/公众号推文/PPT配图，AI自动排版，一键导出',
-    color: 'from-green-500 to-emerald-500',
-    tags: ['模板适配', 'AI排版', '批量制作'],
-    useCases: [
-      { title: '小红书排版', desc: '活泼风格，自动对齐图文' },
-      { title: '公众号推文', desc: '简洁风格，适合长图文排版' },
-      { title: '批量排版', desc: '5套内容同时排版，高效创作' },
-    ]
-  },
-] as const;
 
-type UtilityTool = typeof UTILITY_TOOLS[number]['key'];
 
 const MAIN_TABS = [
   { key: 'utilities', label: '精选工具', icon: Star },
