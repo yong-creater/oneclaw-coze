@@ -96,11 +96,9 @@ export default function AdminLayout({
         }
         // 不管成功失败，都标记为已检查
         setAuthChecked(true);
-        setLoading(false);
       } catch (error) {
         console.error('Auth check failed:', error);
         setAuthChecked(true);
-        setLoading(false);
       }
     };
 
@@ -119,6 +117,27 @@ export default function AdminLayout({
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
           <p className="text-slate-500">正在验证身份...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 未登录显示登录提示
+  if (!adminUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+            请先登录
+          </h1>
+          <p className="text-slate-500 mb-4">
+            您需要登录才能访问管理后台
+          </p>
+          <Link href="/admin/login">
+            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+              去登录
+            </Button>
+          </Link>
         </div>
       </div>
     );
