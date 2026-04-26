@@ -13,7 +13,7 @@ import {
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
   FileText, Globe, TrendingUp, Scissors, Layout,
-  Camera, Palette, Sparkle
+  Camera, Palette, Sparkle, LayoutTemplate
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -293,6 +293,7 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 const MAIN_TABS = [
   { key: 'utilities', label: '精选工具', icon: Star },
+  { key: 'templates', label: '模板库', icon: LayoutTemplate },
   { key: 'tools', label: 'AI应用', icon: Wand2 },
   { key: 'prompts', label: '提示词', icon: Lightbulb },
   { key: 'skills', label: '技能', icon: Sparkles },
@@ -1266,6 +1267,21 @@ export default function HomePage() {
         {/* ==================== 精选工具 ==================== */}
         {mainTab === 'utilities' && (
           <UtilityToolsPage />
+        )}
+
+        {/* ==================== 模板库 ==================== */}
+        {mainTab === 'templates' && (
+          <div className="text-center py-20">
+            <LayoutTemplate className="w-16 h-16 mx-auto text-slate-300 mb-4" />
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">模板库</h2>
+            <p className="text-slate-500 mb-6">海量精选模板，一键复刻生成</p>
+            <Link href="/templates">
+              <Button className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+                前往模板库
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
         )}
 
         {/* ==================== Skill ==================== */}
