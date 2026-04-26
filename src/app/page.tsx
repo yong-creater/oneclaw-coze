@@ -174,12 +174,6 @@ function UtilityToolsPage() {
             </span>
           </div>
         )}
-        {/* 角标 */}
-        <div className="absolute top-2 right-2">
-          <div className={`px-2 py-1 rounded-md bg-gradient-to-r ${tool.color || 'from-orange-500 to-amber-500'} text-white text-xs font-medium shadow-sm`}>
-            AI工具
-          </div>
-        </div>
       </div>
       
       {/* 内容区 */}
