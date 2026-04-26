@@ -5,7 +5,7 @@ const isEdgeRuntime = typeof window === 'undefined' && !process.env.NODE_ENV;
 
 // 延迟加载 child_process（仅 Node.js 环境）
 let envLoaded = false;
-let loadEnvFn: (() => void) | null = null;
+const loadEnvFn: (() => void) | null = null;
 
 interface SupabaseCredentials {
   url: string;
