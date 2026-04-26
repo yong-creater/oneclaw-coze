@@ -141,6 +141,7 @@ function UtilityToolsPage() {
       resume: '/resume',
       novel: '/novel',
       productpage: '/productpage',
+      'xiaohongshu-generator': '/xiaohongshu-generator',
     };
     return urls[slug] || '/';
   };
