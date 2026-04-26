@@ -33,13 +33,13 @@ async function generateWith4SAPI(
     // 4sAPI密钥 - 支持多种环境变量名称
     const apiKey = process.env.FOURS_API_KEY 
       || process.env.OPENAI_API_KEY 
-      || process.env.API4S_KEY 
-      || process.env.API4S_TOKEN
-      || process.env.FOUR_S_API_KEY;
+      || process.env.API4S_KEY;
     
     if (!apiKey || apiKey === 'your-api-key-here') {
-      return { success: false, error: '4sapi API密钥未配置，请联系管理员配置 API4S_KEY 环境变量' };
+      return { success: false, error: '4sapi API密钥未配置' };
     }
+    
+    const apiUrl = process.env.API4S_URL || 'https://api.4sapi.cn/v1';
 
     // 构建请求体（OpenAI兼容格式）
     const requestBody: any = {
@@ -68,7 +68,7 @@ async function generateWith4SAPI(
     }
 
     // 调用4sapi
-    const response = await fetch('https://api.4sapi.cn/v1/images/generations', {
+    const response = await fetch(`${apiUrl}/images/generations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
