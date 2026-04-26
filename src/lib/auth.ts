@@ -21,10 +21,7 @@ export interface AdminUser {
 
 // 验证密码
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  // 简单密码比较（实际生产环境应使用bcrypt）
-  if (hash === password) return true;
-  
-  // 尝试bcrypt比较
+  // 严格使用 bcrypt 比较，禁止明文比较
   try {
     const result = await bcrypt.compare(password, hash);
     return result;

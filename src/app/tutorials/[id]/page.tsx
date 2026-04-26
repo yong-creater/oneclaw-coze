@@ -27,14 +27,29 @@ const DIFFICULTY_COLORS: Record<string, string> = {
   '高级': 'bg-red-100 text-red-700 border-red-200',
 };
 
+// HTML 转义函数，防止 XSS
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
 // 简单的 Markdown 转 HTML 函数
 function renderMarkdown(content: string): string {
   if (!content) return '';
   
-  let html = content;
+  // 先对原始内容进行 HTML 转义
+  let html = escapeHtml(content);
   
-  // 代码块
-  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-slate-900 text-slate-100 p-4 rounded-lg my-4 overflow-x-auto"><code>$2</code></pre>');
+  // 代码块（保留原始内容用于代码显示）
+  html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
+    return `<pre class="bg-slate-900 text-slate-100 p-4 rounded-lg my-4 overflow-x-auto"><code>${code}</code></pre>`;
+  });
   
   // 标题
   html = html.replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-6 mb-3 text-slate-900 dark:text-white">$1</h3>');
@@ -44,8 +59,14 @@ function renderMarkdown(content: string): string {
   // 粗体
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-slate-900 dark:text-white">$1</strong>');
   
-  // 链接
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-orange-500 hover:text-orange-600 underline" target="_blank" rel="noopener noreferrer">$1</a>');
+  // 链接（使用安全的 URL 验证）
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+    // 仅允许 http/https 协议
+    if (/^https?:\/\//i.test(url)) {
+      return `<a href="${url}" class="text-orange-500 hover:text-orange-600 underline" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    }
+    return text;
+  });
   
   // 行内代码
   html = html.replace(/`([^`]+)`/g, '<code class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-sm font-mono text-orange-600 dark:text-orange-400">$1</code>');

@@ -293,16 +293,10 @@ export default function UtilityToolsPage() {
   // 获取数据
   const fetchData = async () => {
     try {
-      const adminToken = localStorage.getItem('admin_token') || '';
-      
       const [groupsRes, toolsRes, statsRes] = await Promise.all([
-        fetch('/api/admin/utility-groups'),
-        fetch('/api/admin/utility-tools?include_all=true', {
-          headers: adminToken ? { 'x-admin-token': adminToken } : {}
-        }),
-        fetch('/api/admin/utilities/stats', {
-          headers: adminToken ? { 'x-admin-token': adminToken } : {}
-        })
+        fetch('/api/admin/utility-groups', { credentials: 'include' }),
+        fetch('/api/admin/utility-tools?include_all=true', { credentials: 'include' }),
+        fetch('/api/admin/utilities/stats', { credentials: 'include' })
       ]);
 
       const groupsData = await groupsRes.json();
@@ -325,14 +319,12 @@ export default function UtilityToolsPage() {
   };
 
   useEffect(() => {
-    // 检查登录状态并同步 token
+    // 检查登录状态
     const checkAuth = async () => {
       try {
-        const res = await fetch('/api/admin/auth');
+        const res = await fetch('/api/admin/auth', { credentials: 'include' });
         const data = await res.json();
-        if (data.success && data.data?.token) {
-          localStorage.setItem('admin_token', data.data.token);
-        } else {
+        if (!data.success || !data.user) {
           // 未登录，跳转到登录页
           window.location.href = '/admin/login';
           return;
@@ -348,15 +340,14 @@ export default function UtilityToolsPage() {
   // 保存分组
   const handleSaveGroup = async () => {
     try {
-      const adminToken = localStorage.getItem('admin_token') || '';
       const method = editingGroup ? 'PUT' : 'POST';
       
       const res = await fetch('/api/admin/utility-groups', {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-token': adminToken
         },
+        credentials: 'include',
         body: JSON.stringify(editingGroup ? { ...groupForm, id: editingGroup.id } : groupForm)
       });
 
@@ -393,6 +384,7 @@ export default function UtilityToolsPage() {
       const res = await fetch('/api/admin/utility-covers/upload', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const data = await res.json();
@@ -413,14 +405,12 @@ export default function UtilityToolsPage() {
   // 保存工具
   const handleSaveTool = async () => {
     try {
-      const adminToken = localStorage.getItem('admin_token') || '';
-      
       const res = await fetch('/api/admin/utility-tools', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-token': adminToken
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...toolForm,
           id: editingTool?.id,
