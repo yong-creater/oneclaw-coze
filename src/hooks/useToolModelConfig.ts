@@ -96,10 +96,8 @@ function getToolName(toolSlug: string): string {
     'ai-photo': 'AI写真生成器',
     'product-poster': '商品海报生成器',
     'cover-generator': '封面生成器',
-    'product-photo': '商品图精修',
     'background-removal': 'AI智能抠图',
     'photo-editor': '照片美化',
-    'layout-design': '图文排版',
   };
   return names[toolSlug] || toolSlug;
 }

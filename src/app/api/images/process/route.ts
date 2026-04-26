@@ -21,10 +21,6 @@ function createStorage() {
 
 // 处理类型对应的提示词
 const PROCESS_PROMPTS: Record<string, { prompt: string; name: string }> = {
-  'product-enhance': {
-    name: '商品图精修',
-    prompt: 'Professional product photography enhancement, improve lighting and brightness, remove wrinkles and creases, enhance colors and saturation, add natural shadow, make the product look more appealing and professional, high quality commercial photography, clean white background'
-  },
   'background-removal': {
     name: 'AI智能抠图',
     prompt: 'Remove background from the product image, transparent background PNG, clean and precise edge cutout, professional product isolation, white or transparent background, maintain original product quality and details'
@@ -32,10 +28,6 @@ const PROCESS_PROMPTS: Record<string, { prompt: string; name: string }> = {
   'portrait-enhance': {
     name: '照片美化',
     prompt: 'Professional photo retouching and enhancement, improve lighting and contrast, enhance natural skin tones, add subtle makeup effect, remove blemishes naturally, maintain realistic look, make the portrait more beautiful while keeping natural appearance, high quality portrait photography'
-  },
-  'layout-design': {
-    name: '图文排版',
-    prompt: 'Professional social media graphic design, combining product image with elegant text layout, modern minimalist style, clean typography, balanced composition, high quality marketing material, suitable for Instagram or WeChat content'
   }
 };
 

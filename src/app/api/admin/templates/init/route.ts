@@ -365,56 +365,6 @@ const TEMPLATES_DATA = [
     sort_order: 3,
   },
 
-  // ========== 图文排版 (layout) - 3个 ==========
-  {
-    name: '产品详情页排版',
-    description: '适合电商详情页的产品图文混排模板，信息清晰有层次',
-    template_type: 'layout',
-    category: '电商',
-    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      type: '电商详情页',
-      layout: '左图右文',
-      elements: ['产品图', '卖点图标', '参数表格', '买家秀'],
-      style: '简洁专业'
-    }),
-    tags: ['电商', '排版', '详情页'],
-    is_featured: true,
-    sort_order: 1,
-  },
-  {
-    name: '小红书图文笔记',
-    description: '适合小红书图文笔记的排版模板，吸睛又易读',
-    template_type: 'layout',
-    category: '小红书',
-    thumbnail: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      type: '小红书图文',
-      layout: '上下图文',
-      elements: ['封面图', '分段落', '配图', '话题标签'],
-      style: '清新活泼'
-    }),
-    tags: ['小红书', '图文', '笔记'],
-    is_featured: false,
-    sort_order: 2,
-  },
-  {
-    name: '朋友圈九宫格',
-    description: '适合朋友圈九宫格发布的图文排版模板，整齐又吸睛',
-    template_type: 'layout',
-    category: '朋友圈',
-    thumbnail: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      type: '朋友圈九宫格',
-      layout: '3x3网格',
-      elements: ['主图', '辅图', '风格统一'],
-      style: '统一色调'
-    }),
-    tags: ['朋友圈', '九宫格', '分享'],
-    is_featured: false,
-    sort_order: 3,
-  },
-
   // ========== 简历 (resume) - 3个 ==========
   {
     name: '互联网产品经理简历',
