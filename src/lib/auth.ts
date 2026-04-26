@@ -40,10 +40,14 @@ export async function hashPassword(password: string): Promise<string> {
 export async function generateToken(user: AdminUser): Promise<string> {
   const secret = new TextEncoder().encode(JWT_SECRET);
   
+  // 添加环境标识，防止跨环境token滥用
+  const envId = process.env.COZE_PROJECT_ENV || process.env.NODE_ENV || 'development';
+  
   return await new SignJWT({
     id: user.id,
     username: user.username,
     role: user.role,
+    env: envId, // 环境标识
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -55,11 +59,11 @@ export async function generateToken(user: AdminUser): Promise<string> {
 export const createToken = generateToken;
 
 // 验证JWT Token（使用jose，Edge Runtime兼容）
-export async function verifyToken(token: string): Promise<{ id: number; username: string; role: string } | null> {
+export async function verifyToken(token: string): Promise<{ id: number; username: string; role: string; env?: string } | null> {
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
-    return payload as { id: number; username: string; role: string };
+    return payload as { id: number; username: string; role: string; env?: string };
   } catch {
     return null;
   }
@@ -158,6 +162,13 @@ export async function validateSession(token: string): Promise<AdminUser | null> 
   const decoded = await verifyToken(token);
   if (!decoded) {
     console.log('[Auth] Token verification failed');
+    return null;
+  }
+  
+  // 检查环境标识是否匹配（防止跨环境token滥用）
+  const currentEnv = process.env.COZE_PROJECT_ENV || process.env.NODE_ENV || 'development';
+  if (decoded.env && decoded.env !== currentEnv) {
+    console.log(`[Auth] Environment mismatch: token=${decoded.env}, current=${currentEnv}`);
     return null;
   }
   

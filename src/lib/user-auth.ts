@@ -46,10 +46,14 @@ export function generateUserId(): string {
 export async function generateUserToken(user: User): Promise<string> {
   const secret = new TextEncoder().encode(JWT_SECRET);
   
+  // 添加环境标识，防止跨环境token滥用
+  const envId = process.env.COZE_PROJECT_ENV || process.env.NODE_ENV || 'development';
+  
   return await new SignJWT({
     user_id: user.user_id,
     openid: user.openid,
     nickname: user.nickname,
+    env: envId, // 环境标识
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -57,11 +61,19 @@ export async function generateUserToken(user: User): Promise<string> {
     .sign(secret);
 }
 
-// 验证JWT Token
+// 验证JWT Token（包含环境检查）
 export async function verifyUserToken(token: string): Promise<User | null> {
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
+    
+    // 检查环境标识
+    const currentEnv = process.env.COZE_PROJECT_ENV || process.env.NODE_ENV || 'development';
+    if ((payload as any).env && (payload as any).env !== currentEnv) {
+      console.log(`[UserAuth] Environment mismatch: token=${(payload as any).env}, current=${currentEnv}`);
+      return null;
+    }
+    
     return payload as unknown as User;
   } catch {
     return null;

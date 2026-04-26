@@ -141,13 +141,16 @@ export async function POST(request: NextRequest) {
       },
     });
     
-    // 设置 cookie
+    // 设置 cookie - 使用正确的domain隔离环境
+    const cookieDomain = process.env.COZE_PROJECT_DOMAIN_DEFAULT?.replace(/^https?:\/\//, '').split(':')[0] || undefined;
+    
     response.cookies.set("admin_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict", // 改为 strict 更安全
       maxAge: 7 * 24 * 60 * 60, // 7天
       path: "/",
+      ...(cookieDomain && { domain: cookieDomain }), // 设置domain隔离环境
     });
     
     return response;

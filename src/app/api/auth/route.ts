@@ -15,6 +15,19 @@ import {
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyCode } from '@/lib/verify-code-db';
 
+// 统一的cookie配置
+function getCookieConfig() {
+  const cookieDomain = process.env.COZE_PROJECT_DOMAIN_DEFAULT?.replace(/^https?:\/\//, '').split(':')[0] || undefined;
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict' as const,
+    maxAge: 30 * 24 * 60 * 60,
+    path: '/',
+    ...(cookieDomain && { domain: cookieDomain }),
+  };
+}
+
 // 获取登录二维码 / 检查登录状态
 export async function GET(request: NextRequest) {
   try {
@@ -52,13 +65,10 @@ export async function GET(request: NextRequest) {
           data: { user: result.user, token: result.token }
         });
         
-        response.cookies.set('user_token', result.token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 30 * 24 * 60 * 60,
-          path: '/'
-        });
+        // 设置 cookie - 使用正确的domain隔离环境
+        const cookieDomain = process.env.COZE_PROJECT_DOMAIN_DEFAULT?.replace(/^https?:\/\//, '').split(':')[0] || undefined;
+        
+        response.cookies.set('user_token', result.token, getCookieConfig());
         
         return response;
       }
@@ -122,13 +132,7 @@ export async function POST(request: NextRequest) {
         data: { user, token }
       });
       
-      response.cookies.set('user_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/'
-      });
+      response.cookies.set('user_token', token, getCookieConfig());
       
       return response;
     }
@@ -174,13 +178,7 @@ export async function POST(request: NextRequest) {
         }
       });
       
-      response.cookies.set('user_token', result.token!, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/'
-      });
+      response.cookies.set('user_token', result.token!, getCookieConfig());
       
       return response;
     }
@@ -275,13 +273,7 @@ export async function POST(request: NextRequest) {
           isNewUser: !currentUser?.password_hash
         });
         
-        response.cookies.set('user_token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 30 * 24 * 60 * 60,
-          path: '/'
-        });
+        response.cookies.set('user_token', token, getCookieConfig());
         
         return response;
       } catch (sessionError) {
@@ -421,13 +413,7 @@ export async function POST(request: NextRequest) {
           }
         });
         
-        response.cookies.set('user_token', result.token!, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 30 * 24 * 60 * 60,
-          path: '/'
-        });
+        response.cookies.set('user_token', result.token!, getCookieConfig());
         
         return response;
       }
@@ -489,13 +475,7 @@ export async function POST(request: NextRequest) {
         }
       });
       
-      response.cookies.set('user_token', result.token!, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/'
-      });
+      response.cookies.set('user_token', result.token!, getCookieConfig());
       
       return response;
     }
@@ -511,13 +491,7 @@ export async function POST(request: NextRequest) {
         data: { user, token }
       });
       
-      response.cookies.set('user_token', token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'lax',
-        maxAge: 30 * 24 * 60 * 60,
-        path: '/'
-      });
+      response.cookies.set('user_token', token, getCookieConfig());
       
       return response;
     }
