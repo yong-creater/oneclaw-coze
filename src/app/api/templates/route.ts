@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
+// 使用Coze内置的环境变量
+const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
 
 // 只有在有环境变量时才创建客户端
 const getSupabaseClient = () => {
   if (supabaseUrl && supabaseKey) {
-    const { createClient } = require('@supabase/supabase-js');
     return createClient(supabaseUrl, supabaseKey);
   }
   return null;
