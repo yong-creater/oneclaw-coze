@@ -1,129 +1,181 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { authenticateAdmin, getTokenFromHeader, validateSession, logout } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseClient } from "@/storage/database/supabase-client";
+import { verifyToken, createToken } from "@/lib/auth";
+import { RolePermissions } from "@/lib/permissions";
+import { logLogin } from "@/lib/audit";
 
-// 登录
+// 根据角色获取权限列表
+function getPermissionsByRole(role: string): string[] {
+  const permissions = RolePermissions[role as keyof typeof RolePermissions];
+  if (!permissions) {
+    return [];
+  }
+  return permissions as string[];
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const token = request.cookies.get("admin_token")?.value;
+    
+    if (!token) {
+      return NextResponse.json({ success: false, error: "未登录" }, { status: 401 });
+    }
+    
+    const decoded = await verifyToken(token);
+    if (!decoded) {
+      return NextResponse.json({ success: false, error: "Token无效" }, { status: 401 });
+    }
+    
+    const client = getSupabaseClient();
+    const { data: user, error } = await client
+      .from("admin_users")
+      .select("id, username, email, role, is_active")
+      .eq("id", decoded.id)
+      .single();
+    
+    if (error || !user) {
+      return NextResponse.json({ success: false, error: "用户不存在" }, { status: 401 });
+    }
+    
+    if (!user.is_active) {
+      return NextResponse.json({ success: false, error: "账号已被禁用" }, { status: 403 });
+    }
+    
+    // 获取用户的权限列表
+    const permissions = getPermissionsByRole(user.role);
+    
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        permissions,
+      },
+    });
+  } catch (error) {
+    console.error("Auth check error:", error);
+    return NextResponse.json({ success: false, error: "认证检查失败" }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { username, password } = body;
-
-    console.log('[Auth API] Login attempt for user:', username);
-
+    
     if (!username || !password) {
       return NextResponse.json(
-        { success: false, error: '请输入用户名和密码' },
+        { success: false, error: "用户名和密码不能为空" },
         { status: 400 }
       );
     }
-
-    const result = await authenticateAdmin(username, password);
     
-    if (!result) {
-      console.log('[Auth API] Authentication failed for user:', username);
+    const client = getSupabaseClient();
+    const { data: user, error } = await client
+      .from("admin_users")
+      .select("id, username, password_hash, email, role, is_active")
+      .eq("username", username)
+      .single();
+    
+    if (error || !user) {
+      await logLogin(username, false, "用户不存在", request);
       return NextResponse.json(
-        { success: false, error: '用户名或密码错误' },
+        { success: false, error: "用户名或密码错误" },
         { status: 401 }
       );
     }
-
-    console.log('[Auth API] Authentication successful for user:', username);
-
-    // 设置HTTP-only Cookie
+    
+    if (!user.is_active) {
+      await logLogin(username, false, "账号已被禁用", request);
+      return NextResponse.json(
+        { success: false, error: "账号已被禁用" },
+        { status: 403 }
+      );
+    }
+    
+    // 验证密码
+    const bcrypt = await import("bcryptjs");
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    
+    if (!isValidPassword) {
+      await logLogin(username, false, "密码错误", request);
+      return NextResponse.json(
+        { success: false, error: "用户名或密码错误" },
+        { status: 401 }
+      );
+    }
+    
+    // 生成新 token
+    const token = await createToken({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      is_active: true,
+    });
+    
+    // 创建会话
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7天
+    await client.from("admin_sessions").insert({
+      user_id: user.id,
+      token: token,
+      expires_at: expiresAt.toISOString(),
+    });
+    
+    // 获取权限
+    const permissions = getPermissionsByRole(user.role);
+    
+    // 记录登录日志
+    await logLogin(username, true, "登录成功", request);
+    
     const response = NextResponse.json({
       success: true,
-      data: {
-        user: result.user,
-        token: result.token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        permissions,
       },
     });
-
-    // 设置cookie - 开发和生产环境都需要正确设置
-    // 注意：生产环境必须通过 HTTPS 访问才能设置 secure cookie
-    const isProduction = process.env.NODE_ENV === 'production';
     
-    response.cookies.set('admin_token', result.token, {
+    // 设置 cookie
+    response.cookies.set("admin_token", token, {
       httpOnly: true,
-      secure: false, // 暂时禁用 secure，兼容 HTTP/HTTPS
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60, // 24小时
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60, // 7天
+      path: "/",
     });
-
-    console.log('[Auth API] Cookie set for user:', username);
+    
     return response;
-  } catch (error: any) {
-    console.error('登录失败:', error?.message || error?.code || error);
-    console.error('登录错误堆栈:', error?.stack);
+  } catch (error) {
+    console.error("Login error:", error);
     return NextResponse.json(
-      { success: false, error: '服务器错误: ' + (error?.message || '未知错误') },
+      { success: false, error: "登录失败" },
       { status: 500 }
     );
   }
 }
 
-// 验证登录状态
-export async function GET(request: NextRequest) {
-  try {
-    const token = request.cookies.get('admin_token')?.value || 
-                  getTokenFromHeader(request.headers.get('authorization'));
-
-    console.log('[Auth API] GET /api/admin/auth - token exists:', !!token);
-
-    if (!token) {
-      console.log('[Auth API] No token found in cookies or header');
-      return NextResponse.json({
-        success: false,
-        authenticated: false,
-        error: '未登录',
-      }, { status: 401 });
-    }
-
-    const user = await validateSession(token);
-    
-    if (!user) {
-      console.log('[Auth API] Token validation failed');
-      return NextResponse.json({
-        success: false,
-        authenticated: false,
-        error: '会话已过期',
-      }, { status: 401 });
-    }
-
-    console.log('[Auth API] User authenticated:', user.username);
-    return NextResponse.json({
-      success: true,
-      authenticated: true,
-      data: {
-        user,
-        token,  // 返回 token 供前端使用
-      },
-    });
-  } catch (error) {
-    console.error('验证登录状态失败:', error);
-    return NextResponse.json({
-      success: false,
-      authenticated: false,
-      error: '服务器错误',
-    }, { status: 500 });
-  }
-}
-
-// 登出
 export async function DELETE(request: NextRequest) {
   try {
-    const token = request.cookies.get('admin_token')?.value || 
-                  getTokenFromHeader(request.headers.get('authorization'));
-
+    const token = request.cookies.get("admin_token")?.value;
+    
     if (token) {
-      await logout(token);
+      const client = getSupabaseClient();
+      // 删除会话
+      await client.from("admin_sessions").delete().eq("token", token);
     }
-
+    
     const response = NextResponse.json({ success: true });
-    response.cookies.delete('admin_token');
+    response.cookies.delete("admin_token");
     
     return response;
   } catch (error) {
-    console.error('登出失败:', error);
-    return NextResponse.json({ success: false, error: '服务器错误' }, { status: 500 });
+    console.error("Logout error:", error);
+    return NextResponse.json({ success: false, error: "登出失败" }, { status: 500 });
   }
 }

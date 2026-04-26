@@ -54,6 +54,9 @@ export async function generateToken(user: AdminUser): Promise<string> {
     .sign(secret);
 }
 
+// 兼容 createToken 别名
+export const createToken = generateToken;
+
 // 验证JWT Token（使用jose，Edge Runtime兼容）
 export async function verifyToken(token: string): Promise<{ id: number; username: string; role: string } | null> {
   try {
@@ -282,6 +285,112 @@ export async function requireAdminAuth(request: NextRequest): Promise<{ user?: A
     return { user: result.user };
   } catch (error) {
     console.error('[Auth] 权限验证异常:', error);
+    return { error: '验证失败' };
+  }
+}
+
+// ========== 增强版权限验证 ==========
+
+import { Permission, Role, hasPermission, hasAnyPermission, hasAllPermissions, Roles } from './permissions';
+
+// 权限验证选项
+interface RequirePermissionOptions {
+  requireAll?: boolean; // 是否需要所有权限，默认为 false（只需要任一权限）
+}
+
+// 增强版权限验证 - 检查用户是否拥有指定权限
+export async function requirePermission(
+  request: NextRequest,
+  permission: Permission | Permission[],
+  options: RequirePermissionOptions = {}
+): Promise<{ user?: AdminUser; error?: string }> {
+  try {
+    // 首先进行基本认证
+    const result = await verifyAdminToken(request);
+    if (!result.success || !result.user) {
+      return { error: result.error || '未授权' };
+    }
+
+    const { user } = result;
+    const userRole = user.role as Role;
+
+    // 超级管理员拥有所有权限
+    if (userRole === Roles.SUPER_ADMIN) {
+      return { user };
+    }
+
+    // 检查权限
+    const permissions = Array.isArray(permission) ? permission : [permission];
+    
+    if (options.requireAll) {
+      if (!hasAllPermissions(userRole, permissions)) {
+        console.warn(`[Auth] User ${user.username} lacks required permissions: ${permissions.join(', ')}`);
+        return { error: '权限不足' };
+      }
+    } else {
+      if (!hasAnyPermission(userRole, permissions)) {
+        console.warn(`[Auth] User ${user.username} lacks any of required permissions: ${permissions.join(', ')}`);
+        return { error: '权限不足' };
+      }
+    }
+
+    return { user };
+  } catch (error) {
+    console.error('[Auth] 权限验证异常:', error);
+    return { error: '验证失败' };
+  }
+}
+
+// 角色验证 - 检查用户是否拥有指定角色
+export async function requireRole(
+  request: NextRequest,
+  allowedRoles: Role | Role[]
+): Promise<{ user?: AdminUser; error?: string }> {
+  try {
+    const result = await verifyAdminToken(request);
+    if (!result.success || !result.user) {
+      return { error: result.error || '未授权' };
+    }
+
+    const { user } = result;
+    const userRole = user.role as Role;
+    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+
+    if (!roles.includes(userRole)) {
+      console.warn(`[Auth] User ${user.username} with role ${userRole} is not in allowed roles: ${roles.join(', ')}`);
+      return { error: '角色权限不足' };
+    }
+
+    return { user };
+  } catch (error) {
+    console.error('[Auth] 角色验证异常:', error);
+    return { error: '验证失败' };
+  }
+}
+
+// 验证用户状态 - 检查用户是否被禁用或需要修改密码
+export async function requireActiveUser(
+  request: NextRequest
+): Promise<{ user?: AdminUser; error?: string; needsPasswordChange?: boolean }> {
+  try {
+    const result = await verifyAdminToken(request);
+    if (!result.success || !result.user) {
+      return { error: result.error || '未授权' };
+    }
+
+    const { user } = result;
+
+    if (!user.is_active) {
+      return { error: '账户已被禁用' };
+    }
+
+    if (user.must_change_password) {
+      return { user, needsPasswordChange: true };
+    }
+
+    return { user };
+  } catch (error) {
+    console.error('[Auth] 用户状态验证异常:', error);
     return { error: '验证失败' };
   }
 }

@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { requireAdminAuth } from '@/lib/auth';
+import { requirePermission } from '@/lib/auth';
+import { Permissions } from '@/lib/permissions';
+import { logSuccess, logFailure } from '@/lib/audit';
+import { containsXss, containsSqlInjection } from '@/lib/validation';
 
-// 获取工具列表（需管理员权限）
+// 获取工具列表
 export async function GET(request: NextRequest) {
-  // 权限验证
-  const auth = await requireAdminAuth(request);
+  const auth = await requirePermission(request, Permissions.UTILITIES_VIEW);
   if (auth.error) {
-    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
   }
   
   try {
@@ -15,7 +17,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const groupId = searchParams.get('group_id');
     const toolSlug = searchParams.get('slug');
-    const includeAll = searchParams.get('include_all'); // 包含所有工具（包括未激活的）
+    const includeAll = searchParams.get('include_all');
 
     let query = supabase
       .from('utility_tools')
@@ -47,31 +49,28 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// 创建工具（需管理员权限）
+// 创建工具
 export async function POST(request: NextRequest) {
+  const auth = await requirePermission(request, Permissions.UTILITIES_CREATE);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
-    const adminToken = request.headers.get('x-admin-token');
-    if (!adminToken) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
-    }
-
     const supabase = getSupabaseClient();
-    const { data: session } = await supabase
-      .from('admin_sessions')
-      .select('user_id')
-      .eq('token', adminToken)
-      .gt('expires_at', new Date().toISOString())
-      .single();
-
-    if (!session) {
-      return NextResponse.json({ error: '会话无效' }, { status: 401 });
-    }
-
     const body = await request.json();
     const { group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, model_config } = body;
 
+    // 输入安全检查
+    if (name && (containsXss(name) || containsSqlInjection(name))) {
+      return NextResponse.json({ success: false, error: '输入包含非法字符' }, { status: 400 });
+    }
+    if (slug && (containsXss(slug) || containsSqlInjection(slug) || !/^[a-z0-9-]+$/.test(slug))) {
+      return NextResponse.json({ success: false, error: 'Slug格式不正确' }, { status: 400 });
+    }
+
     if (!name || !slug) {
-      return NextResponse.json({ error: '缺少必填字段' }, { status: 400 });
+      return NextResponse.json({ success: false, error: '缺少必填字段' }, { status: 400 });
     }
 
     const { data, error } = await supabase
@@ -99,44 +98,48 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       if (error.code === '23505') {
-        return NextResponse.json({ error: '工具slug已存在' }, { status: 400 });
+        return NextResponse.json({ success: false, error: '工具slug已存在' }, { status: 400 });
       }
-      return NextResponse.json({ error: '创建失败' }, { status: 500 });
+      await logFailure(auth.user, 'CREATE', 'UTILITY_TOOL', error.message, request);
+      return NextResponse.json({ success: false, error: '创建失败' }, { status: 500 });
     }
 
+    await logSuccess(auth.user, 'CREATE', 'UTILITY_TOOL', data.id, name, { slug }, request);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error:', error);
+    await logFailure(auth.user, 'CREATE', 'UTILITY_TOOL', 'Unknown error', request);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }
 
 // 更新工具
 export async function PUT(request: NextRequest) {
+  const auth = await requirePermission(request, Permissions.UTILITIES_EDIT);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
-    const adminToken = request.headers.get('x-admin-token');
-    if (!adminToken) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
-    }
-
     const supabase = getSupabaseClient();
-    const { data: session } = await supabase
-      .from('admin_sessions')
-      .select('user_id')
-      .eq('token', adminToken)
-      .gt('expires_at', new Date().toISOString())
-      .single();
-
-    if (!session) {
-      return NextResponse.json({ error: '会话无效' }, { status: 401 });
-    }
-
     const body = await request.json();
     const { id, group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, is_active, model_config } = body;
 
     if (!id) {
-      return NextResponse.json({ error: '缺少ID' }, { status: 400 });
+      return NextResponse.json({ success: false, error: '缺少ID' }, { status: 400 });
     }
+
+    // 输入安全检查
+    if (name && (containsXss(name) || containsSqlInjection(name))) {
+      return NextResponse.json({ success: false, error: '输入包含非法字符' }, { status: 400 });
+    }
+
+    // 获取更新前的数据用于日志
+    const { data: oldData } = await supabase
+      .from('utility_tools')
+      .select('name')
+      .eq('id', id)
+      .single();
 
     const { data, error } = await supabase
       .from('utility_tools')
@@ -159,55 +162,57 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) {
-      return NextResponse.json({ error: '更新失败' }, { status: 500 });
+      await logFailure(auth.user, 'UPDATE', 'UTILITY_TOOL', error.message, request);
+      return NextResponse.json({ success: false, error: '更新失败' }, { status: 500 });
     }
 
+    await logSuccess(auth.user, 'UPDATE', 'UTILITY_TOOL', id, oldData?.name || name, { changes: ['name', 'is_active', 'sort_order'] }, request);
     return NextResponse.json(data);
   } catch (error) {
     console.error('Error:', error);
+    await logFailure(auth.user, 'UPDATE', 'UTILITY_TOOL', 'Unknown error', request);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }
 
 // 删除工具
 export async function DELETE(request: NextRequest) {
+  const auth = await requirePermission(request, Permissions.UTILITIES_DELETE);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
-    const adminToken = request.headers.get('x-admin-token');
-    if (!adminToken) {
-      return NextResponse.json({ error: '未授权' }, { status: 401 });
-    }
-
     const supabase = getSupabaseClient();
-    const { data: session } = await supabase
-      .from('admin_sessions')
-      .select('user_id')
-      .eq('token', adminToken)
-      .gt('expires_at', new Date().toISOString())
-      .single();
-
-    if (!session) {
-      return NextResponse.json({ error: '会话无效' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json({ error: '缺少ID' }, { status: 400 });
+      return NextResponse.json({ success: false, error: '缺少ID' }, { status: 400 });
     }
+
+    // 获取删除前的数据用于日志
+    const { data: toolData } = await supabase
+      .from('utility_tools')
+      .select('name')
+      .eq('id', parseInt(id))
+      .single();
 
     const { error } = await supabase
       .from('utility_tools')
       .delete()
-      .eq('id', id);
+      .eq('id', parseInt(id));
 
     if (error) {
-      return NextResponse.json({ error: '删除失败' }, { status: 500 });
+      await logFailure(auth.user, 'DELETE', 'UTILITY_TOOL', error.message, request);
+      return NextResponse.json({ success: false, error: '删除失败' }, { status: 500 });
     }
 
+    await logSuccess(auth.user, 'DELETE', 'UTILITY_TOOL', parseInt(id), toolData?.name || 'Unknown', {}, request);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error:', error);
+    await logFailure(auth.user, 'DELETE', 'UTILITY_TOOL', 'Unknown error', request);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }

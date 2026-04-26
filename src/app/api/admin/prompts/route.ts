@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { requireAdminAuth } from '@/lib/auth';
+import { requirePermission } from '@/lib/auth';
+import { Permissions } from '@/lib/permissions';
+import { logSuccess, logFailure } from '@/lib/audit';
+import { containsXss, containsSqlInjection } from '@/lib/validation';
 
 // 获取Prompt列表（后台）
 export async function GET(request: NextRequest) {
-  // 权限验证
-  const auth = await requireAdminAuth(request);
+  const auth = await requirePermission(request, Permissions.PROMPTS_VIEW);
   if (auth.error) {
-    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
   }
   
   try {
@@ -65,16 +67,23 @@ export async function GET(request: NextRequest) {
 
 // 创建Prompt
 export async function POST(request: NextRequest) {
-  // 权限验证
-  const auth = await requireAdminAuth(request);
+  const auth = await requirePermission(request, Permissions.PROMPTS_CREATE);
   if (auth.error) {
-    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
   }
   
   try {
     const client = getSupabaseClient();
     const body = await request.json();
     
+    // 输入安全检查
+    if (body.title && (containsXss(body.title) || containsSqlInjection(body.title))) {
+      return NextResponse.json({ success: false, error: '输入包含非法字符' }, { status: 400 });
+    }
+    if (body.content && (containsXss(body.content) || containsSqlInjection(body.content))) {
+      return NextResponse.json({ success: false, error: '输入包含非法字符' }, { status: 400 });
+    }
+
     if (!body.title || !body.content || !body.category) {
       return NextResponse.json({ 
         success: false, 
@@ -96,11 +105,16 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
     
-    if (error) throw new Error(error.message);
+    if (error) {
+      await logFailure(auth.user, 'CREATE', 'PROMPT', error.message, request);
+      throw error;
+    }
     
+    await logSuccess(auth.user, 'CREATE', 'PROMPT', data.id, body.title, { category: body.category }, request);
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('创建Prompt失败:', error);
+    await logFailure(auth.user, 'CREATE', 'PROMPT', error instanceof Error ? error.message : 'Unknown', request);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : '创建失败' 
@@ -110,6 +124,11 @@ export async function POST(request: NextRequest) {
 
 // 更新Prompt
 export async function PUT(request: NextRequest) {
+  const auth = await requirePermission(request, Permissions.PROMPTS_EDIT);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const body = await request.json();
@@ -121,6 +140,18 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
     
+    // 输入安全检查
+    if (body.title && (containsXss(body.title) || containsSqlInjection(body.title))) {
+      return NextResponse.json({ success: false, error: '输入包含非法字符' }, { status: 400 });
+    }
+
+    // 获取更新前的数据用于日志
+    const { data: oldData } = await client
+      .from('prompts')
+      .select('title')
+      .eq('id', body.id)
+      .single();
+
     const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
@@ -143,11 +174,16 @@ export async function PUT(request: NextRequest) {
       .select()
       .single();
     
-    if (error) throw new Error(error.message);
+    if (error) {
+      await logFailure(auth.user, 'UPDATE', 'PROMPT', error.message, request);
+      throw error;
+    }
     
+    await logSuccess(auth.user, 'UPDATE', 'PROMPT', body.id, oldData?.title || body.title, { changes: Object.keys(updateData) }, request);
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('更新Prompt失败:', error);
+    await logFailure(auth.user, 'UPDATE', 'PROMPT', error instanceof Error ? error.message : 'Unknown', request);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : '更新失败' 
@@ -157,6 +193,11 @@ export async function PUT(request: NextRequest) {
 
 // 删除Prompt
 export async function DELETE(request: NextRequest) {
+  const auth = await requirePermission(request, Permissions.PROMPTS_DELETE);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const { searchParams } = new URL(request.url);
@@ -169,16 +210,28 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
     
+    // 获取删除前的数据用于日志
+    const { data: promptData } = await client
+      .from('prompts')
+      .select('title')
+      .eq('id', parseInt(id))
+      .single();
+
     const { error } = await client
       .from('prompts')
       .delete()
       .eq('id', parseInt(id));
     
-    if (error) throw new Error(error.message);
+    if (error) {
+      await logFailure(auth.user, 'DELETE', 'PROMPT', error.message, request);
+      throw error;
+    }
     
+    await logSuccess(auth.user, 'DELETE', 'PROMPT', parseInt(id), promptData?.title || 'Unknown', {}, request);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('删除Prompt失败:', error);
+    await logFailure(auth.user, 'DELETE', 'PROMPT', error instanceof Error ? error.message : 'Unknown', request);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : '删除失败' 

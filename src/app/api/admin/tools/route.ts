@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
-import { requireAdminAuth } from '@/lib/auth';
+import { requireAdminAuth, requirePermission } from '@/lib/auth';
+import { Permissions } from '@/lib/permissions';
+import { logSuccess, logFailure } from '@/lib/audit';
+import { containsSqlInjection, containsXss, sanitizeInput } from '@/lib/validation';
 
 // 获取工具列表
 export async function GET(request: NextRequest) {
@@ -82,15 +85,23 @@ export async function GET(request: NextRequest) {
 
 // 创建工具
 export async function POST(request: NextRequest) {
-  // 权限验证
-  const auth = await requireAdminAuth(request);
+  // 权限验证 - 需要 tools:create 权限
+  const auth = await requirePermission(request, Permissions.TOOLS_CREATE);
   if (auth.error) {
-    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
   }
   
   try {
     const client = getSupabaseClient();
     const body = await request.json();
+    
+    // 输入安全检查
+    if (body.name && (containsXss(body.name) || containsSqlInjection(body.name))) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '输入包含非法字符' 
+      }, { status: 400 });
+    }
     
     // 验证必填字段
     const requiredFields = ['name', 'logo', 'producer', 'highlight', 'category_id', 'free_type', 'max_duration', 'official_url', 'commercial_license'];
@@ -106,10 +117,10 @@ export async function POST(request: NextRequest) {
     const { data, error } = await client
       .from('tools')
       .insert({
-        name: body.name,
+        name: sanitizeInput(body.name),
         logo: body.logo,
-        producer: body.producer,
-        highlight: body.highlight,
+        producer: sanitizeInput(body.producer),
+        highlight: sanitizeInput(body.highlight),
         short_desc: body.short_desc,
         full_desc: body.full_desc,
         use_guide: body.use_guide,
@@ -139,9 +150,13 @@ export async function POST(request: NextRequest) {
     
     if (error) throw new Error(error.message);
     
+    // 记录操作日志
+    await logSuccess(auth.user!, 'CREATE', 'TOOL', data.id, data.name, { category_id: body.category_id }, request);
+    
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('创建工具失败:', error);
+    await logFailure(auth.user, 'CREATE', 'TOOL', error instanceof Error ? error.message : '创建失败', request);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : '创建失败' 
@@ -151,6 +166,12 @@ export async function POST(request: NextRequest) {
 
 // 更新工具
 export async function PUT(request: NextRequest) {
+  // 权限验证 - 需要 tools:edit 权限
+  const auth = await requirePermission(request, Permissions.TOOLS_EDIT);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const body = await request.json();
@@ -159,6 +180,14 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ 
         success: false, 
         error: '缺少工具ID' 
+      }, { status: 400 });
+    }
+    
+    // 输入安全检查
+    if (body.name && (containsXss(body.name) || containsSqlInjection(body.name))) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '输入包含非法字符' 
       }, { status: 400 });
     }
     
@@ -182,6 +211,13 @@ export async function PUT(request: NextRequest) {
       }
     }
     
+    // 获取更新前的数据用于日志
+    const { data: oldData } = await client
+      .from('tools')
+      .select('name')
+      .eq('id', body.id)
+      .single();
+    
     const { data, error } = await client
       .from('tools')
       .update(updateData)
@@ -191,9 +227,13 @@ export async function PUT(request: NextRequest) {
     
     if (error) throw new Error(error.message);
     
+    // 记录操作日志
+    await logSuccess(auth.user!, 'UPDATE', 'TOOL', data.id, oldData?.name || data.name, { changes: Object.keys(updateData) }, request);
+    
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error('更新工具失败:', error);
+    await logFailure(auth.user, 'UPDATE', 'TOOL', error instanceof Error ? error.message : '更新失败', request);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : '更新失败' 
@@ -203,6 +243,12 @@ export async function PUT(request: NextRequest) {
 
 // 删除工具
 export async function DELETE(request: NextRequest) {
+  // 权限验证 - 需要 tools:delete 权限
+  const auth = await requirePermission(request, Permissions.TOOLS_DELETE);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
@@ -215,6 +261,13 @@ export async function DELETE(request: NextRequest) {
       }, { status: 400 });
     }
     
+    // 获取删除前的数据用于日志
+    const { data: toolData } = await client
+      .from('tools')
+      .select('name')
+      .eq('id', parseInt(id))
+      .single();
+    
     const { error } = await client
       .from('tools')
       .delete()
@@ -222,9 +275,13 @@ export async function DELETE(request: NextRequest) {
     
     if (error) throw new Error(error.message);
     
+    // 记录操作日志
+    await logSuccess(auth.user!, 'DELETE', 'TOOL', parseInt(id), toolData?.name || 'Unknown', {}, request);
+    
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('删除工具失败:', error);
+    await logFailure(auth.user, 'DELETE', 'TOOL', error instanceof Error ? error.message : '删除失败', request);
     return NextResponse.json({ 
       success: false, 
       error: error instanceof Error ? error.message : '删除失败' 

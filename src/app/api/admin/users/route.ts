@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdminToken } from '@/lib/auth';
+import { requirePermission } from '@/lib/auth';
+import { Permissions } from '@/lib/permissions';
 import { getAllUsers } from '@/lib/user-auth';
 
 // 获取用户列表
 export async function GET(request: NextRequest) {
-  try {
-    // 验证管理员身份
-    const authResult = await verifyAdminToken(request);
-    if (!authResult.success) {
-      return NextResponse.json(
-        { success: false, error: '未授权访问' },
-        { status: 401 }
-      );
-    }
+  const auth = await requirePermission(request, Permissions.USERS_VIEW);
+  if (auth.error) {
+    return NextResponse.json(
+      { success: false, error: auth.error },
+      { status: 403 }
+    );
+  }
 
+  try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
