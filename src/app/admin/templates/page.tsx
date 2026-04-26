@@ -27,7 +27,6 @@ const TEMPLATE_TYPES = [
   { value: 'xhs_post', label: '小红书帖子' },
   { value: 'goods_poster', label: '商品海报' },
   { value: 'portrait', label: 'AI写真' },
-  { value: 'cover', label: '封面图' },
   { value: 'background_removal', label: '抠图' },
   { value: 'resume', label: '简历优化' },
   { value: 'novel', label: '小说创作' },

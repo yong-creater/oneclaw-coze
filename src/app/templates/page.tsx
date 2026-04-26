@@ -35,7 +35,6 @@ const TYPE_NAMES: Record<string, string> = {
   'xhs_post': '小红书',
   'goods_poster': '商品海报',
   'portrait': 'AI写真',
-  'cover': '封面图',
   'background_removal': '抠图',
   'resume': '简历',
   'novel': '小说',

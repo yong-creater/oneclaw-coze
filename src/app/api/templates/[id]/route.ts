@@ -11,7 +11,6 @@ const TEMPLATE_TYPE_MAP: Record<string, { name: string; slug: string }> = {
   'xhs_post': { name: '小红书爆款生成器', slug: '/xhs-generator' },
   'goods_poster': { name: '商品海报生成器', slug: '/product-poster' },
   'portrait': { name: 'AI写真生成器', slug: '/ai-photo' },
-  'cover': { name: '封面生成器', slug: '/cover-generator' },
   'background_removal': { name: 'AI智能抠图', slug: '/background-removal' },
   'resume': { name: '简历优化', slug: '/resume' },
   'novel': { name: '小说创作', slug: '/novel' },

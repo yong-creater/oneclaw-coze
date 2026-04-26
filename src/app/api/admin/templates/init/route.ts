@@ -167,57 +167,7 @@ const TEMPLATES_DATA = [
     sort_order: 3,
   },
 
-  // ========== 封面图 (cover) - 3个 ==========
-  {
-    name: '小红书爆款封面',
-    description: '高点击率的小红书笔记封面模板，标题醒目、配图吸睛',
-    template_type: 'cover',
-    category: '小红书',
-    thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      platform: '小红书',
-      style: '爆款风格',
-      elements: ['大标题', '副标题', '吸睛图', '装饰元素'],
-      layout: '图文结合'
-    }),
-    tags: ['小红书', '封面', '爆款'],
-    is_featured: true,
-    sort_order: 1,
-  },
-  {
-    name: '公众号文章封面',
-    description: '适合微信公众号文章的头图模板，简洁大方、内容聚焦',
-    template_type: 'cover',
-    category: '公众号',
-    thumbnail: 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      platform: '微信公众号',
-      style: '简约文艺',
-      elements: ['主标题', '副标题', '背景图'],
-      layout: '居中排版'
-    }),
-    tags: ['公众号', '文章', '新媒体'],
-    is_featured: false,
-    sort_order: 2,
-  },
-  {
-    name: '短视频封面',
-    description: '适合抖音、快手等短视频平台的封面模板，第一眼抓住观众',
-    template_type: 'cover',
-    category: '短视频',
-    thumbnail: 'https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=400&h=300&fit=crop',
-    content: JSON.stringify({
-      platform: '抖音/快手',
-      style: '冲击力强',
-      elements: ['人物/产品', '文字标题', '高对比度'],
-      layout: '人物居中'
-    }),
-    tags: ['短视频', '抖音', '封面'],
-    is_featured: false,
-    sort_order: 3,
-  },
-
-  // ========== 商品图 (goods_image) - 3个 ==========
+  // ========== 简历 (resume) - 3个 ==========
   {
     name: '服装商品图优化',
     description: '提升服装商品图的视觉效果，增加买家购买欲望，专业的电商摄影风格',

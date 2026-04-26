@@ -95,7 +95,6 @@ function getToolName(toolSlug: string): string {
     'novel-polish': '小说创作',
     'ai-photo': 'AI写真生成器',
     'product-poster': '商品海报生成器',
-    'cover-generator': '封面生成器',
     'background-removal': 'AI智能抠图',
   };
   return names[toolSlug] || toolSlug;
