@@ -32,7 +32,6 @@ const USER_MENU = [
 export default function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>(['tools']);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // 从 localStorage 读取折叠状态
@@ -49,15 +48,6 @@ export default function Sidebar({ className }: SidebarProps) {
   useEffect(() => {
     localStorage.setItem('sidebar-collapsed', String(collapsed));
   }, [collapsed]);
-
-  // 切换子菜单展开
-  const toggleExpand = (id: string) => {
-    setExpandedItems(prev => 
-      prev.includes(id) 
-        ? prev.filter(item => item !== id)
-        : [...prev, id]
-    );
-  };
 
   // 切换折叠状态
   const toggleCollapsed = () => {
@@ -90,9 +80,60 @@ export default function Sidebar({ className }: SidebarProps) {
       )}>
         {/* Logo 区域 */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-border">
-          {!collapsed && (
-            <Link href="/" className="flex items-center gap-2">
-              <span className="text-lg font-bold text-foreground">OneClaw</span>
+          {!collapsed ? (
+            <Link href="/" className="flex items-center gap-2.5">
+              {/* Logo图标 - 钳爪简化图形 */}
+              <svg viewBox="0 0 36 36" className="w-8 h-8 flex-shrink-0">
+                <defs>
+                  <linearGradient id="sidebarLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ef4444"/>
+                    <stop offset="50%" stopColor="#f97316"/>
+                    <stop offset="100%" stopColor="#fb923c"/>
+                  </linearGradient>
+                </defs>
+                {/* 左钳臂 */}
+                <path d="M8 14 L4 8 Q2 4 6 3 Q10 2 11 6 L13 14" 
+                      fill="none" stroke="url(#sidebarLogoGrad)" strokeWidth="2" strokeLinecap="round"/>
+                {/* 右钳臂 */}
+                <path d="M28 14 L32 8 Q34 4 30 3 Q26 2 25 6 L23 14" 
+                      fill="none" stroke="url(#sidebarLogoGrad)" strokeWidth="2" strokeLinecap="round"/>
+                {/* 身体 */}
+                <ellipse cx="18" cy="22" rx="9" ry="8" fill="url(#sidebarLogoGrad)"/>
+                {/* 眼睛 */}
+                <circle cx="14" cy="20" r="1.5" fill="white"/>
+                <circle cx="22" cy="20" r="1.5" fill="white"/>
+                {/* 触须 */}
+                <path d="M12 14 Q9 10 6 9" fill="none" stroke="url(#sidebarLogoGrad)" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M24 14 Q27 10 30 9" fill="none" stroke="url(#sidebarLogoGrad)" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+              {/* 品牌名称 */}
+              <div className="flex flex-col">
+                <span className="text-base font-bold leading-tight">
+                  <span className="text-[#ef4444]">One</span><span className="text-foreground">Claw</span>
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <Link href="/" className="mx-auto">
+              {/* 折叠时只显示钳爪图标 */}
+              <svg viewBox="0 0 36 36" className="w-9 h-9">
+                <defs>
+                  <linearGradient id="sidebarLogoGradCollapsed" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ef4444"/>
+                    <stop offset="50%" stopColor="#f97316"/>
+                    <stop offset="100%" stopColor="#fb923c"/>
+                  </linearGradient>
+                </defs>
+                <path d="M8 14 L4 8 Q2 4 6 3 Q10 2 11 6 L13 14" 
+                      fill="none" stroke="url(#sidebarLogoGradCollapsed)" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M28 14 L32 8 Q34 4 30 3 Q26 2 25 6 L23 14" 
+                      fill="none" stroke="url(#sidebarLogoGradCollapsed)" strokeWidth="2" strokeLinecap="round"/>
+                <ellipse cx="18" cy="22" rx="9" ry="8" fill="url(#sidebarLogoGradCollapsed)"/>
+                <circle cx="14" cy="20" r="1.5" fill="white"/>
+                <circle cx="22" cy="20" r="1.5" fill="white"/>
+                <path d="M12 14 Q9 10 6 9" fill="none" stroke="url(#sidebarLogoGradCollapsed)" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M24 14 Q27 10 30 9" fill="none" stroke="url(#sidebarLogoGradCollapsed)" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
             </Link>
           )}
           <button
@@ -117,65 +158,19 @@ export default function Sidebar({ className }: SidebarProps) {
         <nav className="flex-1 overflow-y-auto py-4 px-3">
           <div className="space-y-1">
             {MENU_ITEMS.map(item => (
-              <div key={item.id}>
-                {item.children ? (
-                  <div>
-                    <button
-                      onClick={() => toggleExpand(item.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                        isActive(item.href) || expandedItems.includes(item.id)
-                          ? "bg-primary/10 text-primary"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                      )}
-                    >
-                      <item.icon className="w-5 h-5 shrink-0" />
-                      {!collapsed && (
-                        <>
-                          <span className="flex-1 text-left">{item.label}</span>
-                          <ChevronRight className={cn(
-                            "w-4 h-4 transition-transform",
-                            expandedItems.includes(item.id) && "rotate-90"
-                          )} />
-                        </>
-                      )}
-                    </button>
-                    {/* 子菜单 */}
-                    {!collapsed && expandedItems.includes(item.id) && (
-                      <div className="ml-4 mt-1 space-y-0.5">
-                        {item.children.map(child => (
-                          <Link
-                            key={child.id}
-                            href={child.href}
-                            className={cn(
-                              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all",
-                              isActive(child.href)
-                                ? "bg-primary/10 text-primary"
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                            )}
-                          >
-                            <child.icon className="w-4 h-4 shrink-0" />
-                            <span>{child.label}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                      isActive(item.href)
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                  >
-                    <item.icon className="w-5 h-5 shrink-0" />
-                    {!collapsed && <span>{item.label}</span>}
-                  </Link>
+              <Link
+                key={item.id}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  isActive(item.href)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
-              </div>
+              >
+                <item.icon className="w-5 h-5 shrink-0" />
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
             ))}
           </div>
         </nav>

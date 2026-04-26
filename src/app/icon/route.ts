@@ -1,19 +1,19 @@
 import { NextResponse } from 'next/server';
 
-// Favicon - 浏览器标签页图标 (龙虾emoji配合红橙渐变)
+// Favicon - 浏览器标签页图标 (OC圆形图标，橙红色渐变)
 export async function GET() {
-  // 龙虾emoji配合红橙渐变背景的SVG
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#ef4444"/>
       <stop offset="50%" style="stop-color:#f97316"/>
-      <stop offset="100%" style="stop-color:#fbbf24"/>
+      <stop offset="100%" style="stop-color:#fb923c"/>
     </linearGradient>
   </defs>
-  <rect width="32" height="32" rx="6" fill="url(#grad)"/>
-  <text x="16" y="23" font-size="20" text-anchor="middle" dominant-baseline="middle">🦞</text>
+  <circle cx="16" cy="16" r="14" fill="url(#grad)"/>
+  <text x="16" y="21" font-family="system-ui, -apple-system, sans-serif" 
+        font-size="14" font-weight="700" text-anchor="middle" fill="white">OC</text>
 </svg>`;
 
   return new NextResponse(svgContent, {
