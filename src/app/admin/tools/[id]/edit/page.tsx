@@ -822,9 +822,9 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
             配置该工具调用的 AI 模型。扣子内置模型免费，4sAPI 模型需付费。
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 模型来源
               </label>
               <select
@@ -846,7 +846,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 选择模型
               </label>
               <select
@@ -878,7 +878,7 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 价格 (元/千token)
               </label>
               <input
@@ -899,11 +899,11 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                状态
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                启用状态
               </label>
-              <div className="flex items-center gap-3 h-[42px]">
+              <div className="flex items-center gap-3 h-[38px]">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
@@ -917,11 +917,11 @@ export default function EditToolPage({ params }: { params: Promise<{ id: string 
                   <span className="text-sm text-slate-700 dark:text-slate-300">启用</span>
                 </label>
                 {formData.model_config.is_free ? (
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
                     免费
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
                     付费
                   </Badge>
                 )}

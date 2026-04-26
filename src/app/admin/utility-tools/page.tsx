@@ -905,11 +905,11 @@ export default function UtilityToolsPage() {
 
       {/* 编辑工具弹窗 */}
       <Dialog open={toolDialogOpen} onOpenChange={setToolDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>编辑工具 - {editingTool?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto">
+          <div className="space-y-4 py-4 max-h-[calc(85vh-80px)] overflow-y-auto pr-2">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-2 block">所属分组</label>
@@ -1087,9 +1087,12 @@ export default function UtilityToolsPage() {
             {/* AI 模型配置 */}
             <div className="border-t border-slate-200 dark:border-slate-700 pt-4 mt-4">
               <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 mb-3">AI 模型配置</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <p className="text-xs text-slate-500 mb-4">
+                配置该工具调用的 AI 模型。扣子内置模型免费，4sAPI 模型需付费。
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">模型来源</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">模型来源</label>
                   <select
                     value={toolForm.model_config.model_source}
                     onChange={(e) => setToolForm(prev => ({ 
@@ -1109,7 +1112,7 @@ export default function UtilityToolsPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">选择模型</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">选择模型</label>
                   <select
                     value={toolForm.model_config.default_model}
                     onChange={(e) => setToolForm(prev => ({ 
@@ -1139,7 +1142,7 @@ export default function UtilityToolsPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">价格 (元/千token)</label>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">价格 (元/千token)</label>
                   <input
                     type="number"
                     step="0.0001"
@@ -1158,9 +1161,9 @@ export default function UtilityToolsPage() {
                   />
                 </div>
 
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">状态</label>
-                  <div className="flex items-center gap-3 h-[42px]">
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">启用状态</label>
+                  <div className="flex items-center gap-3 h-[38px]">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -1174,11 +1177,11 @@ export default function UtilityToolsPage() {
                       <span className="text-sm text-slate-700 dark:text-slate-300">启用</span>
                     </label>
                     {toolForm.model_config.is_free ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
                         免费
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
                         付费
                       </Badge>
                     )}
@@ -1187,7 +1190,7 @@ export default function UtilityToolsPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
               <Button variant="outline" onClick={() => setToolDialogOpen(false)}>取消</Button>
               <Button onClick={handleSaveTool} className="bg-orange-500 hover:bg-orange-600">
                 保存
