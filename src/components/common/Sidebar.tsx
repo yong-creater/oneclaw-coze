@@ -7,8 +7,7 @@ import { cn } from '@/lib/utils';
 import {
   Bot, Compass, Sparkles, Star, BookOpen,
   Menu, X, LogIn, User,
-  Layers, ListOrdered, Tags, MessageSquare,
-  LayoutDashboard
+  Layers
 } from 'lucide-react';
 
 interface NavItem {
@@ -17,7 +16,7 @@ interface NavItem {
   icon: React.ElementType;
 }
 
-// 主导航
+// 前台导航
 const MAIN_NAV: NavItem[] = [
   { label: '首页', href: '/', icon: Compass },
   { label: 'AI工具库', href: '/ai-tools', icon: Layers },
@@ -25,15 +24,6 @@ const MAIN_NAV: NavItem[] = [
   { label: '提示词库', href: '/prompts', icon: Sparkles },
   { label: '教程库', href: '/tutorials', icon: BookOpen },
   { label: '榜单中心', href: '/rankings', icon: Star },
-];
-
-// 后台导航
-const ADMIN_NAV: NavItem[] = [
-  { label: '工作台', href: '/admin', icon: LayoutDashboard },
-  { label: '工具管理', href: '/admin/tools', icon: Layers },
-  { label: '分类管理', href: '/admin/categories', icon: ListOrdered },
-  { label: '标签管理', href: '/admin/tags', icon: Tags },
-  { label: '评论审核', href: '/admin/reviews', icon: MessageSquare },
 ];
 
 interface SidebarProps {
@@ -77,13 +67,8 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
     return pathname.startsWith(href);
   };
 
-  const NavSection = ({ title, items }: { title?: string; items: NavItem[] }) => (
+  const NavSection = ({ items }: { items: NavItem[] }) => (
     <div className="space-y-1">
-      {title && (
-        <p className="px-3 text-xs text-muted-foreground uppercase tracking-wider font-semibold mb-2">
-          {title}
-        </p>
-      )}
       {items.map((item) => {
         const Icon = item.icon;
         const active = isActive(item.href);
@@ -128,7 +113,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
       {/* 移动端遮罩 */}
       {mobileOpen && <MobileOverlay />}
 
-      {/* 侧边栏 - 简洁设计 */}
+      {/* 侧边栏 - 前台简洁设计 */}
       <aside
         className={cn(
           "fixed top-0 left-0 h-screen bg-background border-r border-border flex flex-col z-50 transition-all duration-200",
@@ -136,7 +121,7 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        {/* Logo区域 - 简洁风格 */}
+        {/* Logo区域 */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-border">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
@@ -158,9 +143,21 @@ export default function Sidebar({ collapsed = false, onCollapsedChange }: Sideba
         </div>
 
         {/* 导航区域 */}
-        <nav className="flex-1 overflow-y-auto p-3 space-y-6">
+        <nav className="flex-1 overflow-y-auto p-3">
           <NavSection items={MAIN_NAV} />
-          <NavSection title="系统" items={ADMIN_NAV} />
+          
+          {/* 后台入口 - 仅图标 */}
+          {!collapsed && (
+            <div className="mt-6 pt-4 border-t border-border">
+              <Link
+                href="/admin"
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
+              >
+                <Star className="w-4 h-4 flex-shrink-0" />
+                <span>后台管理</span>
+              </Link>
+            </div>
+          )}
         </nav>
 
         {/* 底部用户区域 */}
