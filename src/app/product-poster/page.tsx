@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
 import UtilityHeader from '@/components/common/UtilityHeader';
 import { Sparkles, Download, Loader2, ChevronDown, ChevronUp, Image, ShoppingBag, Check } from 'lucide-react';
@@ -144,8 +143,6 @@ export default function ProductPosterPage() {
       />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <BackToHome />
-        
         {/* 标题区 */}
         <div className="text-center py-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-sm font-medium mb-4">

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
 import UtilityHeader from '@/components/common/UtilityHeader';
 import { Sparkles, Copy, Check, Image, Download, Loader2, RefreshCw, ThumbsUp, Star } from 'lucide-react';
@@ -197,8 +196,6 @@ export default function XiaohongshuGeneratorPage() {
       />
       
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <BackToHome />
-        
         {/* 页面标题 */}
         <div className="text-center py-4 mb-6">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-1">

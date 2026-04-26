@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
 import UtilityHeader from '@/components/common/UtilityHeader';
 import { Camera, Upload, Loader2, Download, Sparkles, RotateCcw, Check, X, Image } from 'lucide-react';
@@ -265,8 +264,6 @@ export default function AIPhotoPage() {
       />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <BackToHome />
-        
         {/* 标题区 */}
         <div className="text-center py-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-full text-sm font-medium mb-4">

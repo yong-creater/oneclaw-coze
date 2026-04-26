@@ -4,7 +4,6 @@ import { useState, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import BackToHome from '@/components/common/BackToHome';
 import WechatPromo from '@/components/common/WechatPromo';
 import UtilityHeader from '@/components/common/UtilityHeader';
 import LoginButton from '@/components/common/LoginButton';
@@ -310,13 +309,11 @@ export default function ShangpaiAIPage() {
       <UtilityHeader
         toolIcon={<ShoppingBag className="w-4 h-4" />}
         toolName="商拍AI"
-        toolDescription="15秒生成专业商品图"
+        toolDescription="合规适配 · 多场景 · 多平台"
         gradient="from-orange-500 to-red-500"
       />
       
       <div className="max-w-6xl mx-auto px-4 py-6">
-        <BackToHome />
-        
         {/* 页面标题 */}
         <div className="text-center py-6">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full text-sm font-medium mb-4">
