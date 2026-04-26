@@ -41,7 +41,6 @@ export default function ProductPosterPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到商品海报模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有商品名称，预填表单
         if (data.productName || data.product_name || data.name) {

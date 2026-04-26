@@ -35,7 +35,6 @@ export default function BackgroundRemovalPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到抠图模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有背景类型设置，应用设置
         if (data.bgType || data.backgroundType) {

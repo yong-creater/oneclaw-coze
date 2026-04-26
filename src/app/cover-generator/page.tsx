@@ -65,7 +65,6 @@ export default function CoverGeneratorPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到封面生成模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有标题，预填标题
         if (data.title) {

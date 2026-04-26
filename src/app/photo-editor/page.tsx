@@ -60,7 +60,6 @@ export default function PhotoEditorPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到照片美化模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有滤镜设置，应用滤镜
         if (data.filter || data.style) {

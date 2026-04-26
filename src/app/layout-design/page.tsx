@@ -59,7 +59,6 @@ export default function LayoutDesignPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到图文排版模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有标题，预填标题
         if (data.title) {
@@ -527,7 +526,7 @@ export default function LayoutDesignPage() {
                 ) : (
                   <div 
                     className="bg-white rounded-xl p-4 max-h-96 overflow-auto border border-slate-200"
-                    dangerouslySetInnerHTML={{ __html: generatedHtml.replace(/<!DOCTYPE html>[\s\S]*?<body>/, '').replace(/<\/body><\/html>/, '') }}
+                    dangerouslySetInnerHTML={{ __html: (generatedHtml || '').replace(/<!DOCTYPE html>[\s\S]*?<body>/, '').replace(/<\/body><\/html>/, '') }}
                   />
                 )}
               </CardContent>

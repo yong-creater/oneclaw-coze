@@ -27,6 +27,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToolModelConfig } from '@/hooks/useToolModelConfig';
+import { toast } from 'sonner';
 
 // 已删除简化版 ModelGroupSelect，统一使用 ModelSelector 组件
 
@@ -159,7 +160,6 @@ export default function NovelCreator() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到小说创作模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有风格设置，应用风格
         if (data.style) {
@@ -177,7 +177,7 @@ export default function NovelCreator() {
         }
         
         if (templateName) {
-          alert('已加载模板 "' + templateName + '"');
+          toast.success('已加载模板 "' + templateName + '"');
         }
       } catch (e) {
         console.error('解析模板数据失败:', e);

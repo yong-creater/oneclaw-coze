@@ -13,6 +13,7 @@ import LoginButton from '../common/LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
 import { useToolModelConfig } from '@/hooks/useToolModelConfig';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
 export default function ResumeOptimizer() {
@@ -59,7 +60,6 @@ export default function ResumeOptimizer() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到模板数据:', data, '模板名称:', templateName);
         
         // 根据模板类型填充表单
         if (data.style || data.templateStyle) {
@@ -71,7 +71,7 @@ export default function ResumeOptimizer() {
           setResumeText(data.prompt);
         }
         
-        alert('已加载模板 "' + (templateName || '未知') + '"，请补充您的简历信息后点击生成');
+        toast.success('已加载模板 "' + (templateName || '未知') + '"，请补充您的简历信息后点击生成');
       } catch (e) {
         console.error('解析模板数据失败:', e);
       }
@@ -297,7 +297,7 @@ export default function ResumeOptimizer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tool_type: 'resume',
-          input_data: { resume_length: resumeText.length, jd_length: jdText.length, model: selectedModel },
+          input_data: { resume_length: resumeText.length, jd_length: jdText.length, model: activeModel },
           output_data: data.success ? { result_length: data.data?.length || 0 } : null,
           status: data.success ? 'success' : 'failed',
           error_message: data.error || null,

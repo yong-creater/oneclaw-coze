@@ -285,6 +285,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '名称和类型不能为空' }, { status: 400 });
     }
 
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
+    }
+
     const { data, error } = await supabase
       .from('templates')
       .insert({

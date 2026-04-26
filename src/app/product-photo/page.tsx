@@ -44,7 +44,6 @@ export default function ProductPhotoPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到商品图精修模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有增强选项设置，应用设置
         if (data.enhanceOptions) {

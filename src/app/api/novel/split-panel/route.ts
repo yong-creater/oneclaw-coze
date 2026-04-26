@@ -100,6 +100,7 @@ ${text}`;
     }).catch(() => {});
 
     return NextResponse.json({ content, model: selectedModel });
+  } catch (error: any) {
     console.error('Split panel error:', error);
     return NextResponse.json({ error: error.message || '分镜拆解失败' }, { status: 500 });
   }

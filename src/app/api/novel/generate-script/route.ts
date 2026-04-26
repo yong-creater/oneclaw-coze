@@ -108,7 +108,8 @@ ${text.substring(0, 2000)}${text.length > 2000 ? '...' : ''}
       usage_type: 'script',
     }).catch(() => {});
 
-    return NextResponse.json({ content, model: selectedModel }); catch (error: any) {
+    return NextResponse.json({ content, model: selectedModel });
+  } catch (error: any) {
     console.error('Generate script error:', error);
     return NextResponse.json({ error: error.message || '脚本生成失败' }, { status: 500 });
   }

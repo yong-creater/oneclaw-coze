@@ -12,17 +12,18 @@ import { toast } from 'sonner';
 interface PhotoStyle {
   id: string;
   name: string;
+  label: string;
   emoji: string;
   prompt: string;
 }
 
 const PHOTO_STYLES: PhotoStyle[] = [
-  { id: 'portrait', name: '高级写真', emoji: '✨', prompt: '高质量人像摄影写真，真实自然，皮肤细腻，光线柔和，专业影棚打光，高级感构图，避免AI痕迹' },
-  { id: '证件照', name: '证件照', emoji: '📋', prompt: '专业证件照，白底或蓝底，五官清晰，妆容自然，高清质感，适合正式场合使用' },
-  { id: '时尚', name: '时尚大片', emoji: '🔥', prompt: '时尚杂志大片风格，高级感，光影艺术，明星既视感，潮流时尚，年轻活力' },
-  { id: '文艺', name: '文艺清新', emoji: '🌿', prompt: '文艺小清新风格，自然光线，森系氛围，电影感，温柔色调，适合文艺青年' },
-  { id: '商务', name: '商务形象', emoji: '💼', prompt: '商务职业照，专业形象，西装正装，干练气质，适合LinkedIn或简历使用' },
-  { id: '生日', name: '生日氛围', emoji: '🎂', prompt: '生日庆祝氛围照，温馨感人，庆祝氛围，暖色调，精致蛋糕装饰' },
+  { id: 'portrait', name: '高级写真', label: '高级写真', emoji: '✨', prompt: '高质量人像摄影写真，真实自然，皮肤细腻，光线柔和，专业影棚打光，高级感构图，避免AI痕迹' },
+  { id: '证件照', name: '证件照', label: '证件照', emoji: '📋', prompt: '专业证件照，白底或蓝底，五官清晰，妆容自然，高清质感，适合正式场合使用' },
+  { id: '时尚', name: '时尚大片', label: '时尚大片', emoji: '🔥', prompt: '时尚杂志大片风格，高级感，光影艺术，明星既视感，潮流时尚，年轻活力' },
+  { id: '文艺', name: '文艺清新', label: '文艺清新', emoji: '🌿', prompt: '文艺小清新风格，自然光线，森系氛围，电影感，温柔色调，适合文艺青年' },
+  { id: '商务', name: '商务形象', label: '商务形象', emoji: '💼', prompt: '商务职业照，专业形象，西装正装，干练气质，适合LinkedIn或简历使用' },
+  { id: '生日', name: '生日氛围', label: '生日氛围', emoji: '🎂', prompt: '生日庆祝氛围照，温馨感人，庆祝氛围，暖色调，精致蛋糕装饰' },
 ];
 
 export default function AIPhotoPage() {
@@ -44,7 +45,6 @@ export default function AIPhotoPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到AI写真模板数据:', data, '模板名称:', templateName);
         
         // 如果模板有风格设置，应用风格
         if (data.style) {

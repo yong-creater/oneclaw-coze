@@ -35,7 +35,6 @@ export default function XiaohongshuGeneratorPage() {
     if (templateContent) {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
-        console.log('收到模板数据:', data);
         
         // 根据模板内容填充表单
         if (data.keyword || data.topic) {

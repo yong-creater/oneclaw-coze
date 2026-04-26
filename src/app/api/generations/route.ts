@@ -5,6 +5,9 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
 
+// 创建 supabase 客户端
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
 // 获取用户ID的辅助函数
 function getUserId(request: NextRequest): string | null {
   // 优先从Cookie获取
@@ -27,6 +30,10 @@ export async function GET(request: NextRequest) {
     
     if (!userId) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 });
+    }
+
+    if (!supabase) {
+      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -81,6 +88,10 @@ export async function POST(request: NextRequest) {
     
     if (!userId) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 });
+    }
+
+    if (!supabase) {
+      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
     }
 
     const body = await request.json();

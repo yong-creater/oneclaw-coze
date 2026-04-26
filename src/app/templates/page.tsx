@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,7 @@ import LobsterLoading from '@/components/common/LobsterLoading';
 import { 
   LayoutTemplate, Search, Copy, ArrowRight, 
   FileText, Feather, Globe, Sparkle, Scissors, Layout,
-  Camera, Palette, Star, Wand2, Zap, Code, Lightbulb
+  Camera, Palette, Star, Wand2, Zap, Code, Lightbulb, Image as LucideImage
 } from 'lucide-react';
 
 // 图标映射
@@ -20,7 +21,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   'goods_poster': <Layout className="w-5 h-5" />,
   'portrait': <Camera className="w-5 h-5" />,
   'cover': <Sparkle className="w-5 h-5" />,
-  'goods_image': <Image className="w-5 h-5" />,
+  'goods_image': <LucideImage className="w-5 h-5" />,
   'background_removal': <Scissors className="w-5 h-5" />,
   'photo': <Palette className="w-5 h-5" />,
   'layout': <LayoutTemplate className="w-5 h-5" />,
@@ -54,6 +55,7 @@ interface Template {
   usage_count: number;
   tool_name: string;
   tool_url: string;
+  content?: Record<string, any>;
 }
 
 export default function TemplatesPage() {

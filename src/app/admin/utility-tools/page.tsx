@@ -438,11 +438,12 @@ export default function UtilityToolsPage() {
         slug: group.slug,
         description: group.description || '',
         icon: group.icon || 'Star',
-        color: group.color
+        color: group.color,
+        sort_order: group.sort_order,
       });
     } else {
       setEditingGroup(null);
-      setGroupForm({ name: '', slug: '', description: '', icon: 'Star', color: 'from-orange-500 to-amber-500' });
+      setGroupForm({ name: '', slug: '', description: '', icon: 'Star', color: 'from-orange-500 to-amber-500', sort_order: groups.length });
     }
     setGroupDialogOpen(true);
   };

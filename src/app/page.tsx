@@ -439,17 +439,17 @@ export default function HomePage() {
 
   // 模板类型配置
   const TEMPLATE_TYPES = [
-    { key: 'xhs_post', label: '小红书' },
-    { key: 'goods_poster', label: '商品海报' },
-    { key: 'portrait', label: 'AI写真' },
-    { key: 'cover', label: '封面图' },
-    { key: 'goods_image', label: '商品图' },
-    { key: 'background_removal', label: '抠图' },
-    { key: 'photo', label: '照片美化' },
-    { key: 'layout', label: '图文排版' },
-    { key: 'resume', label: '简历' },
-    { key: 'novel', label: '小说' },
-    { key: 'script', label: '脚本' },
+    { key: 'xhs_post', label: '小红书', icon: '📕' },
+    { key: 'goods_poster', label: '商品海报', icon: '🛒' },
+    { key: 'portrait', label: 'AI写真', icon: '📷' },
+    { key: 'cover', label: '封面图', icon: '✨' },
+    { key: 'goods_image', label: '商品图', icon: '🖼️' },
+    { key: 'background_removal', label: '抠图', icon: '✂️' },
+    { key: 'photo', label: '照片美化', icon: '🎨' },
+    { key: 'layout', label: '图文排版', icon: '📝' },
+    { key: 'resume', label: '简历', icon: '📄' },
+    { key: 'novel', label: '小说', icon: '📚' },
+    { key: 'script', label: '脚本', icon: '⚡' },
   ];
 
   // 加载模板
