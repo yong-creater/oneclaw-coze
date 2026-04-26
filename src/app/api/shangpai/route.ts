@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
 // 合规检测
 function checkCompliance(imageUrl: string, platform: string, scene: string) {
   const details: string[] = [];
-  let isCompliant = true;
+  const isCompliant = true;
 
   // 尺寸检测
   const size = PLATFORM_SIZES[platform];
