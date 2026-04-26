@@ -66,7 +66,6 @@ export default function AdminDashboardPage() {
     { name: '模板库', href: '/admin/templates', icon: FileText, color: 'text-blue-500' },
     { name: 'AI应用管理', href: '/admin/tools', icon: FolderTree, color: 'text-green-500' },
     { name: '分类管理', href: '/admin/categories', icon: LayoutDashboard, color: 'text-purple-500' },
-    { name: '标签管理', href: '/admin/tags', icon: Tags, color: 'text-pink-500' },
     { name: '提示词库', href: '/admin/prompts', icon: Lightbulb, color: 'text-yellow-500' },
     { name: '教程库', href: '/admin/tutorials', icon: BookOpen, color: 'text-cyan-500' },
     { name: '会员管理', href: '/admin/members', icon: Users, color: 'text-indigo-500' },
