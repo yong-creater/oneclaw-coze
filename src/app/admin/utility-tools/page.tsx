@@ -451,7 +451,7 @@ export default function UtilityToolsPage() {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('path', `covers/${toolSlug}-${Date.now()}.jpg`);
+    formData.append('type', 'covers');
 
     try {
       const res = await fetch('/api/admin/upload', {
@@ -460,14 +460,17 @@ export default function UtilityToolsPage() {
         body: formData,
       });
       const data = await res.json();
-      if (data.url) {
-        setToolForm({ ...toolForm, cover_image: data.url });
+      console.log('[封面上传] 返回数据:', data);
+      
+      // 后端返回 { success: true, data: { url, path, ... } }
+      if (data.success && data.data?.url) {
+        setToolForm({ ...toolForm, cover_image: data.data.url });
         toast.success('封面上传成功');
       } else {
         toast.error(data.error || '上传失败');
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('[封面上传] 错误:', error);
       toast.error('上传失败');
     }
     // 清空input
