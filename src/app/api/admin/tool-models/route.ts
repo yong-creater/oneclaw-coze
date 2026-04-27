@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { requirePermission } from '@/lib/auth';
+import { Permissions } from '@/lib/permissions';
 
 // GET - 获取所有工具的模型配置
 export async function GET(request: NextRequest) {
+  const auth = await requirePermission(request, Permissions.UTILITIES_VIEW);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
     const client = getSupabaseClient();
     
@@ -80,6 +87,11 @@ export async function GET(request: NextRequest) {
 
 // PUT - 更新工具的模型配置
 export async function PUT(request: NextRequest) {
+  const auth = await requirePermission(request, Permissions.UTILITIES_EDIT);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+  }
+  
   try {
     const client = getSupabaseClient();
     const body = await request.json();
