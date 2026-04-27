@@ -131,7 +131,6 @@ export function getToolName(toolSlug: string): string {
     'ai-photo': 'AI写真生成器',
     'product-poster': '商品海报生成器',
     'background-removal': 'AI智能抠图',
-    'shangpai-ai': '商拍AI',
     'product-page-generator': '商品主图生成器',
   };
   return names[toolSlug] || toolSlug;

@@ -53,7 +53,6 @@ const UTILITY_TOOLS = [
   { name: '商品详情页生成器', slug: 'productpage', group_id: 1, sort_order: 3, tool_path: '/productpage', color: 'from-green-500 to-emerald-500', icon: 'ShoppingCart' },
   { name: 'AI智能抠图', slug: 'background-removal', group_id: 1, sort_order: 4, tool_path: '/background-removal', color: 'from-amber-500 to-orange-500', icon: 'Scissors' },
   { name: '小红书笔记生成器', slug: 'xiaohongshu-generator', group_id: 1, sort_order: 5, tool_path: '/xiaohongshu-generator', color: 'from-pink-500 to-rose-500', icon: 'Heart' },
-  { name: '商拍AI', slug: 'shangpai-ai', group_id: 1, sort_order: 6, tool_path: '/tools/shangpai-ai', color: 'from-orange-500 to-red-500', icon: 'ShoppingBag' },
   // ⚠️ 新增工具只需在这里添加一行即可自动同步到数据库
 ];
 
