@@ -434,14 +434,18 @@ export default function UtilityToolsPage() {
     try {
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
+        credentials: 'include', // 包含认证 cookie
         body: formData,
       });
       const data = await res.json();
       if (data.url) {
         setToolForm({ ...toolForm, cover_image: data.url });
         toast.success('封面上传成功');
+      } else {
+        toast.error(data.error || '上传失败');
       }
     } catch (error) {
+      console.error('Upload error:', error);
       toast.error('上传失败');
     }
     // 清空input
