@@ -182,8 +182,8 @@ export function ModelSelector({
             </div>
           </div>
 
-          {/* 类型选择标签 - 使用 flex-1 确保均匀分布 */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full">
+          {/* 类型选择标签 - 均匀分布 */}
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full select-none">
             {Object.entries(TYPE_CONFIG).map(([type, config]) => {
               const TypeIcon = config.icon;
               const count = (providers[type] || []).reduce((sum, p) => sum + p.models.length, 0);
@@ -195,15 +195,15 @@ export function ModelSelector({
                   key={type}
                   type="button"
                   onClick={() => {
-                    console.log('[ModelSelector] Tab clicked:', type);
+                    console.log('[ModelSelector] Tab clicked:', type, 'hasData:', hasData);
                     setSelectedType(type);
                   }}
-                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-2 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
+                      ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm ring-2 ring-orange-500/30'
                       : hasData
-                        ? 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50'
-                        : 'text-slate-400 dark:text-slate-500'
+                        ? 'text-slate-600 dark:text-slate-400 hover:bg-white hover:shadow-sm dark:hover:bg-slate-700'
+                        : 'text-slate-400 dark:text-slate-500 cursor-not-allowed'
                   }`}
                 >
                   <TypeIcon className={`w-4 h-4 shrink-0 ${isSelected ? config.color.replace('bg-', 'text-') : ''}`} />
@@ -218,7 +218,7 @@ export function ModelSelector({
                     </span>
                   )}
                   {!hasData && (
-                    <span className="text-[10px] text-slate-400 shrink-0">(暂无)</span>
+                    <span className="text-[10px] shrink-0">(暂无)</span>
                   )}
                 </button>
               );
@@ -245,14 +245,15 @@ export function ModelSelector({
                   <button
                     key={`${provider.id}-${model.name}`}
                     onClick={() => {
+                      console.log('[ModelSelector] Card clicked:', model.name);
                       setSelectedProviderId(provider.id);
                       setSelectedModel(model.name);
                     }}
                     disabled={!model.is_available}
-                    className={`relative w-full p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                    className={`relative w-full p-4 rounded-xl border-2 text-left transition-all duration-200 cursor-pointer ${
                       isSelected
                         ? 'border-orange-500 bg-orange-50/70 dark:bg-orange-900/20 shadow-lg shadow-orange-500/10 scale-[1.02]'
-                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800'
+                        : 'border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-md bg-white dark:bg-slate-800'
                     } ${!model.is_available ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {/* 选中标记 */}
