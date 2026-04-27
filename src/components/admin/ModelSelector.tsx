@@ -157,7 +157,6 @@ export function ModelSelector({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className="max-w-[900px] max-h-[85vh] p-0 overflow-hidden flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-[100]"
-        onPointerDown={(e) => e.stopPropagation()}
       >
         {/* 头部 */}
         <div className="px-6 pt-5 pb-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
@@ -184,54 +183,42 @@ export function ModelSelector({
           </div>
 
           {/* 类型选择标签 */}
-          <div className="relative">
-            <div 
-              className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {Object.entries(TYPE_CONFIG).map(([type, config]) => {
-                const TypeIcon = config.icon;
-                const count = (providers[type] || []).reduce((sum, p) => sum + p.models.length, 0);
-                const isSelected = selectedType === type;
-                const hasData = count > 0;
-                
-                return (
-                  <button
-                    key={type}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedType(type);
-                    }}
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                    }}
-                    className={`relative flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isSelected
-                        ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
-                        : hasData
-                          ? 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                          : 'text-slate-400 dark:text-slate-500'
-                    }`}
-                  >
-                    <TypeIcon className={`w-4 h-4 ${isSelected ? config.color.replace('bg-', 'text-') : ''}`} />
-                    <span>{config.label}</span>
-                    {count > 0 && (
-                      <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
-                        isSelected 
-                          ? 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300' 
-                          : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
-                      }`}>
-                        {count}
-                      </span>
-                    )}
-                    {!hasData && (
-                      <span className="text-[10px] text-slate-400">(暂无)</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+            {Object.entries(TYPE_CONFIG).map(([type, config]) => {
+              const TypeIcon = config.icon;
+              const count = (providers[type] || []).reduce((sum, p) => sum + p.models.length, 0);
+              const isSelected = selectedType === type;
+              const hasData = count > 0;
+              
+              return (
+                <button
+                  key={type}
+                  onClick={() => setSelectedType(type)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                    isSelected
+                      ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
+                      : hasData
+                        ? 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        : 'text-slate-400 dark:text-slate-500'
+                  }`}
+                >
+                  <TypeIcon className={`w-4 h-4 ${isSelected ? config.color.replace('bg-', 'text-') : ''}`} />
+                  <span>{config.label}</span>
+                  {count > 0 && (
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                      isSelected 
+                        ? 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300' 
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                    }`}>
+                      {count}
+                    </span>
+                  )}
+                  {!hasData && (
+                    <span className="text-[10px] text-slate-400">(暂无)</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
 
