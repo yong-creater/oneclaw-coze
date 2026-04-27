@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { spawn } from 'child_process';
 
 // 图片生成模型映射
 const IMAGE_MODELS = {
@@ -67,23 +68,33 @@ async function generateWith4SAPI(
       }
     }
 
-    // 调用4sapi
-    const response = await fetch(`${apiUrl}/images/generations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
+    // 使用bash -c执行curl命令
+    const curlCmd = `curl -s --connect-timeout 60 -X POST "${apiUrl}/images/generations" -H "Content-Type: application/json" -H "Authorization: Bearer ${apiKey}" -d '${JSON.stringify(requestBody)}'`;
+    
+    const result = await new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+      const child = spawn('bash', ['-c', curlCmd]);
+      let stdout = '';
+      let stderr = '';
+      
+      child.stdout.on('data', (data) => { stdout += data.toString(); });
+      child.stderr.on('data', (data) => { stderr += data.toString(); });
+      
+      child.on('error', reject);
+      child.on('close', (code) => {
+        if (code === 0) resolve({ stdout, stderr });
+        else reject(new Error(`bash exited with code ${code}`));
+      });
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('4sapi图片生成失败:', response.status, errorText);
-      return { success: false, error: `API错误: ${response.status}` };
+    
+    const responseText = result.stdout;
+    
+    // 检查响应是否是HTML错误页
+    if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<!doctype')) {
+      console.error('[4sAPI] Error: Got HTML response');
+      return { success: false, error: '4sAPI返回了错误页面，可能是IP被限制' };
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
     
     if (data.data && data.data.length > 0) {
       return {
