@@ -61,6 +61,7 @@ const menuItems: MenuItem[] = [
   { name: '订单管理', href: '/admin/orders', icon: ShoppingCart },
   { name: '广告管理', href: '/admin/ads', icon: Settings },
   { name: 'API Key', href: '/admin/api-keys', icon: Shield },
+  { name: '模型提供商', href: '/admin/model-providers', icon: Grid3X3 },
 ];
 
 export default function AdminLayout({
