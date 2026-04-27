@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Bot, Globe, Check, Image, MessageSquare, Video, Music, Sparkles } from 'lucide-react';
+import { Search, Bot, Globe, Check, Image, MessageSquare, Video, Music, Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Model {
@@ -56,6 +56,12 @@ export function ModelSelector({
   const [selectedProviderId, setSelectedProviderId] = useState<number | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // 调试：监控 providers 和 selectedType 变化
+  useEffect(() => {
+    console.log('[ModelSelector] providers changed:', Object.keys(providers));
+    console.log('[ModelSelector] current selectedType:', selectedType);
+  }, [providers, selectedType]);
 
   // 扁平化所有提供商
   const allProviders = useMemo(() => {
@@ -157,11 +163,21 @@ export function ModelSelector({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className="max-w-[900px] max-h-[85vh] p-0 overflow-hidden flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-2xl z-[100]"
+        showCloseButton={false}
       >
-        {/* 头部 */}
-        <div className="px-6 pt-5 pb-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
+        {/* 头部 - 包含关闭按钮 */}
+        <div className="px-6 pt-5 pb-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-800 relative">
+          {/* 关闭按钮 - 固定在右上角 */}
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+          >
+            <X className="w-5 h-5 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200" />
+          </button>
+          
           {/* 标题行 */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between pr-12 mb-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl">
                 <Sparkles className="w-5 h-5 text-white" />
@@ -171,19 +187,21 @@ export function ModelSelector({
                 <p className="text-xs text-slate-500 dark:text-slate-400">选择一个适合的模型来驱动您的工具</p>
               </div>
             </div>
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <Input
-                placeholder="搜索模型..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl"
-              />
-            </div>
+          </div>
+
+          {/* 搜索框 */}
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="搜索模型..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl"
+            />
           </div>
 
           {/* 类型选择标签 - 均匀分布 */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full select-none">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full select-none mt-4">
             {Object.entries(TYPE_CONFIG).map(([type, config]) => {
               const TypeIcon = config.icon;
               const count = (providers[type] || []).reduce((sum, p) => sum + p.models.length, 0);
