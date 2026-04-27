@@ -44,8 +44,6 @@ async function generateWith4SAPI(
 
     // 使用Node.js原生fetch调用
     const fullUrl = `${apiUrl}/images/generations`;
-    console.log('[4SAPI] 请求URL:', fullUrl);
-    console.log('[4SAPI] 请求体:', JSON.stringify(requestBody));
     
     const response = await fetch(fullUrl, {
       method: 'POST',
@@ -57,8 +55,6 @@ async function generateWith4SAPI(
     });
 
     const responseText = await response.text();
-    console.log('[4SAPI] 响应状态:', response.status);
-    console.log('[4SAPI] 响应内容:', responseText.substring(0, 500));
     
     // 检查响应是否是HTML错误页
     if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<!doctype')) {
@@ -66,7 +62,7 @@ async function generateWith4SAPI(
     }
 
     if (!response.ok) {
-      return { success: false, error: `4sAPI返回错误: ${response.status} - ${responseText.substring(0, 200)}` };
+      return { success: false, error: `4sAPI返回错误: ${response.status}` };
     }
 
     const data = JSON.parse(responseText);
