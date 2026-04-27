@@ -56,6 +56,7 @@ export default function AIPhotoPage() {
   const [retryCount, setRetryCount] = useState(0);
   const [modelConfig, setModelConfig] = useState<ModelConfig | null>(null);
   const [loadingModel, setLoadingModel] = useState(true);
+  const [modelError, setModelError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 从 URL 参数读取模板数据
@@ -97,36 +98,31 @@ export default function AIPhotoPage() {
         if (data.success && data.data) {
           // 查找 AI写真 相关的模型配置
           const photoConfig = data.data.find(
-            (c: ModelConfig) => c.tool_id === 'portrait-enhance'
+            (c: ModelConfig) => c.tool_id === 'ai-photo'
           );
           if (photoConfig) {
-            setModelConfig(photoConfig);
-            console.log('已加载模型配置:', photoConfig);
+            // 检查是否有可用的模型
+            if (!photoConfig.model_provider_id || !photoConfig.model_name) {
+              setModelError('该工具尚未配置AI模型，请联系管理员');
+              setModelConfig(null);
+            } else {
+              setModelConfig(photoConfig);
+              setModelError(null);
+              console.log('已加载模型配置:', photoConfig);
+            }
           } else {
-            // 如果没有找到特定配置，使用默认配置
-            setModelConfig({
-              tool_id: 'ai-photo',
-              tool_name: 'AI写真生成',
-              model_name: 'coze-image',
-              model_provider_id: 1,
-	              model_source: 'coze',
-              is_free: true,
-              is_active: true,
-            });
+            // 如果没有找到配置，报错
+            setModelError('该工具尚未配置AI模型，请联系管理员');
+            setModelConfig(null);
           }
+        } else {
+          setModelError('获取模型配置失败，请刷新重试');
+          setModelConfig(null);
         }
       } catch (error) {
         console.error('获取模型配置失败:', error);
-        // 使用默认配置
-        setModelConfig({
-          tool_id: 'ai-photo',
-          tool_name: 'AI写真生成',
-          model_name: 'coze-image',
-          model_provider_id: 1,
-	              model_source: 'coze',
-          is_free: true,
-          is_active: true,
-        });
+        setModelError('获取模型配置失败，请刷新重试');
+        setModelConfig(null);
       } finally {
         setLoadingModel(false);
       }
@@ -283,6 +279,30 @@ export default function AIPhotoPage() {
           </p>
         </div>
 
+        {/* 模型配置错误提示 */}
+        {loadingModel ? (
+          <Card className="mb-8 border-violet-100 dark:border-violet-900/30">
+            <CardContent className="p-8 flex flex-col items-center">
+              <Loader2 className="w-8 h-8 animate-spin text-violet-500 mb-3" />
+              <p className="text-slate-500">加载中...</p>
+            </CardContent>
+          </Card>
+        ) : modelError ? (
+          <Card className="mb-8 border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20">
+            <CardContent className="p-8 flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center mb-4">
+                <X className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">
+                服务暂不可用
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 text-center max-w-md">
+                {modelError}
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
+
         {/* 上传区 */}
         <Card className="mb-8 border-violet-100 dark:border-violet-900/30">
           <CardContent className="p-6">
@@ -351,8 +371,8 @@ export default function AIPhotoPage() {
                 {/* 生成按钮 */}
                 <Button
                   onClick={generatePhotos}
-                  disabled={generating}
-                  className="w-full h-12 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg shadow-violet-500/25"
+                  disabled={generating || !modelConfig}
+                  className="w-full h-12 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {generating ? (
                     <>

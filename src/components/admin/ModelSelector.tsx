@@ -159,12 +159,44 @@ export function ModelSelector({
 
         {/* 模型列表 */}
         <div className="flex-1 overflow-y-auto p-4">
-          {filteredModels.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-slate-400">
-              <Image className="w-12 h-12 mb-3 opacity-50" />
-              <p>暂无模型</p>
-            </div>
-          ) : (
+          {/* 检查是否有可用的模型 */}
+          {(() => {
+            const totalModels = Object.values(providers).reduce((sum, proList) => 
+              sum + proList.reduce((s, p) => s + (p.models?.length || 0), 0), 0);
+            
+            if (totalModels === 0) {
+              return (
+                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                  <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
+                    <X className="w-12 h-12 text-red-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">
+                    未配置模型
+                  </h3>
+                  <p className="text-sm text-slate-500 text-center max-w-xs">
+                    该工具尚未配置任何AI模型，请先在「模型配置」中添加模型
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    关闭
+                  </Button>
+                </div>
+              );
+            }
+            
+            if (filteredModels.length === 0) {
+              return (
+                <div className="flex flex-col items-center justify-center h-48 text-slate-400">
+                  <Image className="w-12 h-12 mb-3 opacity-50" />
+                  <p>暂无模型</p>
+                </div>
+              );
+            }
+            
+            return (
             <div className="grid grid-cols-2 gap-3">
               {filteredModels.map(({ provider, model }) => {
                 const isSelected = selectedProviderId === provider.id && selectedModel === model.name;
@@ -232,7 +264,8 @@ export function ModelSelector({
                 );
               })}
             </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* 底部 */}

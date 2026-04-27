@@ -32,6 +32,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '获取工具失败' }, { status: 500 });
     }
 
+    // 获取 tool_model_configs 作为备选数据源
+    const { data: modelConfigs } = await client
+      .from('tool_model_configs')
+      .select('tool_id, model_source, default_model')
+      .eq('is_active', true);
+
+    // 创建一个 tool_id -> config 的 Map
+    const configMap: Record<string, any> = {};
+    (modelConfigs || []).forEach(c => {
+      configMap[c.tool_id] = c;
+    });
+
     // 获取所有提供商和模型
     const { data: providers } = await client
       .from('model_providers')
@@ -61,18 +73,84 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {} as Record<string, any[]>);
 
-    // 组合数据
-    const configs = (tools || []).map((tool: any) => ({
-      id: tool.id,
-      tool_id: tool.slug,
-      tool_name: tool.name,
-      tool_icon: tool.icon,
-      tool_description: tool.description,
-      tool_group: tool.utility_groups?.name,
-      model_provider_id: tool.model_provider_id,
-      model_name: tool.model_name,
-      available_providers: providersByType,
-    }));
+    // 创建一个按 slug 和 id 索引的提供商 Map，方便查找
+    const providerMapBySlug = (providers || []).reduce((acc, p) => {
+      acc[p.slug] = p;
+      return acc;
+    }, {} as Record<string, any>);
+    
+    const providerMapById = (providers || []).reduce((acc, p) => {
+      acc[p.id] = p;
+      return acc;
+    }, {} as Record<number, any>);
+    
+    // 根据模型名称推断提供商
+    const inferProviderByModelName = (modelName: string) => {
+      if (!modelName) return null;
+      // LLM 模型
+      if (modelName.includes('doubao-seed') || modelName.includes('doubao-pro') || modelName.includes('doubao-lite')) {
+        return providerMapBySlug['coze-llm'] || providerMapById[2];
+      }
+      // 图片模型 - coze
+      if (modelName === 'coze-image') {
+        return providerMapBySlug['coze'] || providerMapById[1];
+      }
+      // 图片模型 - 4sapi
+      if (modelName.includes('gpt-image')) {
+        return providerMapBySlug['4sapi'] || providerMapById[3];
+      }
+      return null;
+    };
+
+    // 过滤出已配置模型的工具，并只为每个工具返回其对应的提供商
+    const toolsWithModels = (tools || []).filter((tool: any) => {
+      // 优先从 tool_model_configs 获取配置
+      const config = configMap[tool.slug];
+      // 检查是否有模型配置
+      return tool.model_provider_id || tool.model_name || (config?.model_source && config?.default_model);
+    });
+
+    // 组合数据 - 只包含有模型配置的工具，且只返回该工具对应的提供商
+    const configs = toolsWithModels.map((tool: any) => {
+      // 优先从 tool_model_configs 获取配置
+      const config = configMap[tool.slug];
+      
+      // 确定模型名称
+      const modelName = config?.default_model || tool.model_name;
+      
+      // 确定提供商：优先使用 config.model_source，其次用 providerMapById[tool.model_provider_id]，最后根据模型名推断
+      let configuredProvider = config?.model_source ? providerMapBySlug[config.model_source] : null;
+      if (!configuredProvider) {
+        configuredProvider = tool.model_provider_id ? providerMapById[tool.model_provider_id] : null;
+      }
+      if (!configuredProvider && modelName) {
+        configuredProvider = inferProviderByModelName(modelName);
+      }
+      
+      // 只返回该提供商相关的模型（按类型分组）
+      const availableProviders: Record<string, any[]> = {};
+      if (configuredProvider) {
+        const normalized = normalizeProviders([configuredProvider]);
+        for (const p of normalized) {
+          if (!availableProviders[p.provider_type]) {
+            availableProviders[p.provider_type] = [];
+          }
+          availableProviders[p.provider_type].push(p);
+        }
+      }
+      
+      return {
+        id: tool.id,
+        tool_id: tool.slug,
+        tool_name: tool.name,
+        tool_icon: tool.icon,
+        tool_description: tool.description,
+        tool_group: tool.utility_groups?.name,
+        model_provider_id: configuredProvider?.id || tool.model_provider_id,
+        model_name: modelName,
+        available_providers: availableProviders,
+      };
+    });
 
     return NextResponse.json({ 
       success: true,
