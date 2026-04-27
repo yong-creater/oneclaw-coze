@@ -185,6 +185,8 @@ export default function AIPhotoPage() {
         count: 4,
         // 传递参考图片用于图生图
         image: base64Image,
+        // 传递 tool_id 让 API 知道使用哪个模型配置
+        tool_id: modelConfig?.tool_id || 'ai-photo',
       };
       
       // 如果有配置的模型，使用配置的模型

@@ -82,7 +82,11 @@ export default function ProductPosterPage() {
         const response = await fetch('/api/images/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify({ 
+            prompt,
+            tool_id: 'product-poster',
+            size: '1024x1024'
+          })
         });
 
         if (response.ok) {

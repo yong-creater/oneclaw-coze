@@ -133,7 +133,9 @@ export default function XiaohongshuGeneratorPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `小红书爆款封面，超大字体标题「${title}」，高对比配色，视觉冲击强，极简排版，社交媒体点击率高风格，白底或纯色背景`
+          prompt: `小红书爆款封面，超大字体标题「${title}」，高对比配色，视觉冲击强，极简排版，社交媒体点击率高风格，白底或纯色背景`,
+          tool_id: 'xiaohongshu-generator',
+          size: '1024x1024'
         })
       });
 
