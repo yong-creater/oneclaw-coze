@@ -32,12 +32,27 @@ export async function GET(request: NextRequest) {
       .eq('is_active', true)
       .order('is_system', { ascending: false });
 
+    // 转换PostgreSQL numeric类型为普通数字
+    const normalizeProviders = (providers: any[]) => {
+      return providers?.map(p => ({
+        ...p,
+        models: p.models?.map((m: any) => ({
+          ...m,
+          price_per_1k_tokens: m.price_per_1k_tokens != null 
+            ? (typeof m.price_per_1k_tokens === 'object' 
+                ? parseFloat(m.price_per_1k_tokens.toString()) || 0 
+                : Number(m.price_per_1k_tokens) || 0)
+            : null,
+        })) || [],
+      })) || [];
+    };
+
     // 按类型分组
-    const providersByType = providers?.reduce((acc, p) => {
+    const providersByType = normalizeProviders(providers).reduce((acc, p) => {
       if (!acc[p.provider_type]) acc[p.provider_type] = [];
       acc[p.provider_type].push(p);
       return acc;
-    }, {} as Record<string, any[]>) || {};
+    }, {} as Record<string, any[]>);
 
     // 组合数据
     const configs = (tools || []).map((tool: any) => ({
