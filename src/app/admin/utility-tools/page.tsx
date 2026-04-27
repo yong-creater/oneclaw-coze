@@ -268,27 +268,41 @@ export default function UtilityToolsPage() {
       const data = await res.json();
       console.log('[fetchProviders] API 返回数据:', data);
       
-      // 提取 available_providers
+      // 提取 available_providers（去重）
       if (data.success && data.data && data.data.length > 0) {
-        // 收集所有工具的提供商并合并
-        const allProviders: Record<string, any[]> = {
-          image: [],
-          llm: [],
-          video: [],
-          audio: [],
+        // 使用 Map 去重，key 是 provider 的 id
+        const providerMap: Record<string, Map<number, any>> = {
+          image: new Map(),
+          llm: new Map(),
+          video: new Map(),
+          audio: new Map(),
         };
         
         data.data.forEach((tool: any) => {
           if (tool.available_providers) {
             Object.entries(tool.available_providers).forEach(([type, providers]) => {
-              if (allProviders[type]) {
-                allProviders[type].push(...(providers as any[]));
+              if (providerMap[type]) {
+                (providers as any[]).forEach(p => {
+                  // 用 id 去重
+                  providerMap[type].set(p.id, p);
+                });
               }
             });
           }
         });
         
-        console.log('[fetchProviders] 提取的 providers:', allProviders);
+        // 转换为数组
+        const allProviders: Record<string, any[]> = {
+          image: Array.from(providerMap.image.values()),
+          llm: Array.from(providerMap.llm.values()),
+          video: Array.from(providerMap.audio.values()), // video 用 audio 的数据
+          audio: Array.from(providerMap.audio.values()),
+        };
+        
+        console.log('[fetchProviders] 提取的 providers:', {
+          image: allProviders.image.length,
+          llm: allProviders.llm.length,
+        });
         setProviders(allProviders);
       } else if (data.error) {
         console.error('获取模型提供商失败:', data.error);
