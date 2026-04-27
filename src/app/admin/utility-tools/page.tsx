@@ -304,7 +304,7 @@ export default function UtilityToolsPage() {
       const statsData = await statsRes.json();
 
       setGroups(groupsData.groups || []);
-      setTools(Array.isArray(toolsData) ? toolsData : []);
+      setTools(toolsData.tools || []);
       
       if (statsData.success && statsData.data) {
         setToolStats(statsData.data.toolStats || []);

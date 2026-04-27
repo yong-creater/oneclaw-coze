@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('utility_tools')
-      .select('*, utility_groups(name, slug, icon, color), model_providers(name, slug), models(display_name, name)')
+      .select('*')
       .order('sort_order', { ascending: true });
 
     if (!includeAll) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '获取工具失败' }, { status: 500 });
     }
 
-    return NextResponse.json(data || []);
+    return NextResponse.json({ tools: data || [] });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
