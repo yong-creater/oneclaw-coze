@@ -6,12 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle 
-} from '@/components/ui/dialog';
-import { 
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
-} from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
   DndContext,
   closestCenter,
@@ -32,9 +28,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { 
   Star, Edit2, Image, TrendingUp, Users, Activity, 
   BarChart3, Clock, ChevronDown, ChevronUp, X, Plus, Upload,
-  GripVertical, Save
+  GripVertical, Save, Settings2, Bot, Globe, DollarSign
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ModelSelector } from '@/components/admin/ModelSelector';
 
 // 类型定义
 interface UtilityGroup {
@@ -71,6 +68,8 @@ interface UtilityTool {
   use_cases: UseCase[];
   utility_groups?: { name: string; slug: string; icon: string; color: string };
   model_config?: ModelConfig;
+  model_provider_id?: number | null;
+  model_name?: string | null;
 }
 
 interface UseCase {
@@ -98,6 +97,25 @@ interface UsageLog {
   output_summary: string | null;
   duration_ms: number | null;
   created_at: string;
+}
+
+interface Model {
+  id: number;
+  name: string;
+  display_name: string;
+  description: string;
+  model_type: string;
+  price_per_1k_tokens: number | null;
+  is_available: boolean;
+}
+
+interface ModelProvider {
+  id: number;
+  name: string;
+  slug: string;
+  provider_type: string;
+  is_system: boolean;
+  models: Model[];
 }
 
 const COLOR_OPTIONS = [
@@ -154,12 +172,10 @@ function SortableGroupRow({ group, tools, onEdit }: {
       <TableCell className="font-medium">{group.name}</TableCell>
       <TableCell className="text-slate-500">{group.slug}</TableCell>
       <TableCell>
-        <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${group.color} flex items-center justify-center`}>
-          <span className="text-white text-xs font-bold">{group.name[0]}</span>
-        </div>
+        <Badge variant="outline">{group.icon || 'Star'}</Badge>
       </TableCell>
       <TableCell>
-        <div className={`w-6 h-6 rounded bg-gradient-to-r ${group.color}`} />
+        <div className={`w-8 h-8 rounded bg-gradient-to-r ${group.color}`} />
       </TableCell>
       <TableCell>{tools.filter(t => t.group_id === group.id).length}</TableCell>
       <TableCell>
@@ -182,27 +198,14 @@ export default function UtilityToolsPage() {
   const [toolStats, setToolStats] = useState<ToolStats[]>([]);
   const [recentLogs, setRecentLogs] = useState<UsageLog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedToolSlug, setSelectedToolSlug] = useState<string | null>(null);
-  const [expandedStats, setExpandedStats] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
-  const [fourSModels, setFourSModels] = useState<any[]>([]);
+  const [selectedToolSlug, setSelectedToolSlug] = useState<string | null>(null);
   
-  // 获取 4S API 模型列表
-  useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const res = await fetch('/api/4sapi/models');
-        const data = await res.json();
-        if (data.success && data.models) {
-          setFourSModels(data.models);
-        }
-      } catch (error) {
-        console.error('获取 4S 模型列表失败:', error);
-      }
-    };
-    fetchModels();
-  }, []);
-  
+  // 模型提供商数据
+  const [providers, setProviders] = useState<Record<string, ModelProvider[]>>({});
+  const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
+  const [modelSelectorTool, setModelSelectorTool] = useState<UtilityTool | null>(null);
+
   // DnD 传感器配置
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -243,7 +246,6 @@ export default function UtilityToolsPage() {
       
       if (!res.ok) {
         toast.error('保存排序失败');
-        // 刷新数据
         fetchData();
       } else {
         toast.success('排序已保存');
@@ -256,6 +258,19 @@ export default function UtilityToolsPage() {
     }
   };
   
+  // 获取模型提供商数据
+  const fetchProviders = async () => {
+    try {
+      const res = await fetch('/api/admin/tool-models');
+      const data = await res.json();
+      if (data.providers) {
+        setProviders(data.providers);
+      }
+    } catch (error) {
+      console.error('获取模型提供商失败:', error);
+    }
+  };
+
   // 分组表单
   const [groupDialogOpen, setGroupDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<UtilityGroup | null>(null);
@@ -281,13 +296,8 @@ export default function UtilityToolsPage() {
     color: 'from-orange-500 to-amber-500',
     sort_order: 0,
     use_cases: [] as UseCase[],
-    model_config: {
-      default_model: 'ep-20250312145957-p8xpp',
-      model_source: 'coze',
-      model_price_per_1k_tokens: 0,
-      is_free: true,
-      is_active: true,
-    } as ModelConfig
+    model_provider_id: null as number | null,
+    model_name: null as string | null,
   });
 
   // 获取数据
@@ -333,9 +343,50 @@ export default function UtilityToolsPage() {
         // 忽略错误，继续加载
       }
       fetchData();
+      fetchProviders();
     };
     checkAuth();
   }, []);
+
+  // 打开模型选择器
+  const openModelSelector = (tool: UtilityTool) => {
+    setModelSelectorTool(tool);
+    setModelSelectorOpen(true);
+  };
+
+  // 处理模型选择
+  const handleModelSelect = (providerId: number, modelName: string) => {
+    // 更新工具列表中的显示
+    setTools(prev => prev.map(t => {
+      if (t.id === modelSelectorTool?.id) {
+        return { ...t, model_provider_id: providerId, model_name: modelName };
+      }
+      return t;
+    }));
+    
+    // 如果编辑弹窗已打开，也更新表单
+    if (toolDialogOpen && editingTool?.id === modelSelectorTool?.id) {
+      setToolForm(prev => ({
+        ...prev,
+        model_provider_id: providerId,
+        model_name: modelName,
+      }));
+    }
+    
+    setModelSelectorOpen(false);
+    setModelSelectorTool(null);
+  };
+
+  // 获取工具当前的模型提供商信息
+  const getToolModelInfo = (tool: UtilityTool) => {
+    const allProviders = Object.values(providers).flat();
+    const provider = allProviders.find(p => p.id === tool.model_provider_id);
+    return {
+      provider,
+      modelName: tool.model_name,
+      isCoze: provider?.slug?.includes('coze'),
+    };
+  };
 
   // 保存分组
   const handleSaveGroup = async () => {
@@ -371,33 +422,23 @@ export default function UtilityToolsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('图片大小不能超过 5MB');
-      return;
-    }
-
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('tool_slug', toolSlug);
+    formData.append('path', `covers/${toolSlug}-${Date.now()}.jpg`);
 
     try {
-      const res = await fetch('/api/admin/utility-covers/upload', {
+      const res = await fetch('/api/admin/upload', {
         method: 'POST',
         body: formData,
-        credentials: 'include',
       });
-
       const data = await res.json();
-      if (data.success) {
-        setToolForm(prev => ({ ...prev, cover_image: data.url }));
+      if (data.url) {
+        setToolForm({ ...toolForm, cover_image: data.url });
         toast.success('封面上传成功');
-      } else {
-        toast.error(data.error || '上传失败');
       }
-    } catch {
+    } catch (error) {
       toast.error('上传失败');
     }
-
     // 清空input
     e.target.value = '';
   };
@@ -415,7 +456,8 @@ export default function UtilityToolsPage() {
           ...toolForm,
           id: editingTool?.id,
           use_cases: toolForm.use_cases,
-          model_config: toolForm.model_config
+          model_provider_id: toolForm.model_provider_id,
+          model_name: toolForm.model_name,
         })
       });
 
@@ -451,13 +493,8 @@ export default function UtilityToolsPage() {
       color: 'from-orange-500 to-amber-500',
       sort_order: 0,
       use_cases: [],
-      model_config: {
-        default_model: 'ep-20250312145957-p8xpp',
-        model_source: 'coze',
-        model_price_per_1k_tokens: 0,
-        is_free: true,
-        is_active: true,
-      }
+      model_provider_id: null,
+      model_name: null,
     });
   };
 
@@ -491,13 +528,8 @@ export default function UtilityToolsPage() {
       color: tool.color,
       sort_order: tool.sort_order,
       use_cases: tool.use_cases || [],
-      model_config: tool.model_config || {
-        default_model: 'ep-20250312145957-p8xpp',
-        model_source: 'coze',
-        model_price_per_1k_tokens: 0,
-        is_free: true,
-        is_active: true,
-      }
+      model_provider_id: tool.model_provider_id || null,
+      model_name: tool.model_name || null,
     });
     setToolDialogOpen(true);
   };
@@ -636,6 +668,7 @@ export default function UtilityToolsPage() {
                     <TableHead>封面</TableHead>
                     <TableHead>名称</TableHead>
                     <TableHead>分组</TableHead>
+                    <TableHead>AI模型</TableHead>
                     <TableHead>亮点数</TableHead>
                     <TableHead>使用次数</TableHead>
                     <TableHead>操作</TableHead>
@@ -644,6 +677,7 @@ export default function UtilityToolsPage() {
                 <TableBody>
                   {tools.map(tool => {
                     const stats = getToolStats(tool.slug);
+                    const modelInfo = getToolModelInfo(tool);
                     return (
                       <TableRow key={tool.id}>
                         <TableCell>
@@ -663,6 +697,36 @@ export default function UtilityToolsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline">{tool.utility_groups?.name || '-'}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          {modelInfo.provider ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openModelSelector(tool)}
+                              className="gap-2"
+                            >
+                              {modelInfo.isCoze ? (
+                                <Bot className="w-3 h-3 text-green-600" />
+                              ) : (
+                                <Globe className="w-3 h-3 text-amber-600" />
+                              )}
+                              <span className="max-w-[120px] truncate">
+                                {modelInfo.provider.name} / {tool.model_name || '未选择'}
+                              </span>
+                              <Settings2 className="w-3 h-3 text-slate-400" />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openModelSelector(tool)}
+                              className="gap-2 text-slate-500"
+                            >
+                              <Settings2 className="w-3 h-3" />
+                              选择模型
+                            </Button>
+                          )}
                         </TableCell>
                         <TableCell>{tool.use_cases?.length || 0}</TableCell>
                         <TableCell>
@@ -797,31 +861,17 @@ export default function UtilityToolsPage() {
                                   <div className="space-y-2">
                                     {getToolLogs(tool.slug).slice(0, 5).map(log => (
                                       <div key={log.id} className="flex items-center gap-4 text-sm bg-white dark:bg-slate-800 p-3 rounded-lg">
-                                        <Badge variant="outline" className="shrink-0">
-                                          {log.action_type === 'open' ? '打开' : 
-                                           log.action_type === 'use' ? '使用' : '生成'}
-                                        </Badge>
-                                        <span className="flex-1 truncate text-slate-600 dark:text-slate-300">
-                                          {log.input_summary || '-'}
-                                        </span>
-                                        {log.output_summary && (
-                                          <span className="text-slate-500 truncate max-w-[200px]">
-                                            → {log.output_summary}
-                                          </span>
-                                        )}
-                                        {log.duration_ms && (
-                                          <span className="text-slate-400 text-xs shrink-0">
-                                            {log.duration_ms}ms
-                                          </span>
-                                        )}
-                                        <span className="text-slate-400 text-xs shrink-0">
-                                          {formatTime(log.created_at)}
-                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="truncate">{log.input_summary || '无输入摘要'}</div>
+                                          <div className="text-xs text-slate-500 mt-1">
+                                            {formatTime(log.created_at)} · {log.duration_ms ? `${(log.duration_ms / 1000).toFixed(1)}s` : '-'}
+                                          </div>
+                                        </div>
                                       </div>
                                     ))}
                                   </div>
                                 ) : (
-                                  <p className="text-slate-400 text-sm">暂无使用记录</p>
+                                  <p className="text-sm text-slate-400 text-center py-4">暂无使用记录</p>
                                 )}
                               </div>
                             </TableCell>
@@ -837,15 +887,25 @@ export default function UtilityToolsPage() {
         </TabsContent>
       </Tabs>
 
-      {/* 编辑分组弹窗 */}
+      {/* 模型选择弹框 */}
+      <ModelSelector
+        open={modelSelectorOpen}
+        onOpenChange={setModelSelectorOpen}
+        onSelect={handleModelSelect}
+        currentProviderId={modelSelectorTool?.model_provider_id}
+        currentModelName={modelSelectorTool?.model_name}
+        providers={providers}
+      />
+
+      {/* 分组编辑弹窗 */}
       <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>编辑分组</DialogTitle>
+            <DialogTitle>{editingGroup ? '编辑分组' : '新增分组'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">分组名称</label>
+              <label className="text-sm font-medium mb-2 block">名称</label>
               <Input
                 value={groupForm.name}
                 onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
@@ -1097,111 +1157,47 @@ export default function UtilityToolsPage() {
               <p className="text-xs text-slate-500 mb-4">
                 配置该工具调用的 AI 模型。扣子内置模型免费，4sAPI 模型需付费。
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-4">
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">模型来源</label>
-                  <select
-                    value={toolForm.model_config.model_source}
-                    onChange={(e) => setToolForm(prev => ({ 
-                      ...prev, 
-                      model_config: { 
-                        ...prev.model_config, 
-                        model_source: e.target.value,
-                        is_free: e.target.value === 'coze',
+              
+              <Button
+                variant="outline"
+                onClick={() => {
+                  // 传递当前表单中的模型配置
+                  const fakeTool: UtilityTool = {
+                    ...editingTool!,
+                    model_provider_id: toolForm.model_provider_id,
+                    model_name: toolForm.model_name,
+                  };
+                  setModelSelectorTool(fakeTool);
+                  setModelSelectorOpen(true);
+                }}
+                className="w-full justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const allProviders = Object.values(providers).flat();
+                    const provider = allProviders.find(p => p.id === toolForm.model_provider_id);
+                    if (provider) {
+                      return provider.slug?.includes('coze') ? (
+                        <Bot className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Globe className="w-4 h-4 text-amber-600" />
+                      );
+                    }
+                    return <Settings2 className="w-4 h-4 text-slate-400" />;
+                  })()}
+                  <span className="truncate">
+                    {(() => {
+                      const allProviders = Object.values(providers).flat();
+                      const provider = allProviders.find(p => p.id === toolForm.model_provider_id);
+                      if (provider) {
+                        return <>{provider.name} / {toolForm.model_name || '未选择'}</>;
                       }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                      bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    <option value="coze">扣子内置 (免费)</option>
-                    <option value="4sapi">4sAPI (付费)</option>
-                  </select>
+                      return '点击选择模型';
+                    })()}
+                  </span>
                 </div>
-
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">选择模型</label>
-                  <select
-                    value={toolForm.model_config.default_model}
-                    onChange={(e) => setToolForm(prev => ({ 
-                      ...prev, 
-                      model_config: { ...prev.model_config, default_model: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                      bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  >
-                    {toolForm.model_config.model_source === 'coze' ? (
-                      <>
-                        <option value="ep-20250312145957-p8xpp">Doubao-Pro (扣子)</option>
-                        <option value="ep-20250410165509-dtk4n">Doubao-Seed (扣子)</option>
-                      </>
-                    ) : (
-                      <>
-                        {fourSModels.length > 0 ? (
-                          fourSModels.map((m: any) => (
-                            <option key={m.id} value={m.id}>
-                              {m.name} {m.price ? `($${m.price}/1K)` : ''}
-                            </option>
-                          ))
-                        ) : (
-                          <>
-                            <option value="gpt-4o">GPT-4o</option>
-                            <option value="gpt-4o-mini">GPT-4o Mini</option>
-                            <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">价格 (元/千token)</label>
-                  <input
-                    type="number"
-                    step="0.0001"
-                    value={toolForm.model_config.model_price_per_1k_tokens}
-                    onChange={(e) => setToolForm(prev => ({ 
-                      ...prev, 
-                      model_config: { 
-                        ...prev.model_config, 
-                        model_price_per_1k_tokens: parseFloat(e.target.value) || 0 
-                      }
-                    }))}
-                    disabled={toolForm.model_config.model_source === 'coze'}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 
-                      bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500
-                      disabled:bg-slate-100 disabled:text-slate-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">启用状态</label>
-                  <div className="flex items-center gap-3 h-[38px]">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={toolForm.model_config.is_active}
-                        onChange={(e) => setToolForm(prev => ({ 
-                          ...prev, 
-                          model_config: { ...prev.model_config, is_active: e.target.checked }
-                        }))}
-                        className="w-4 h-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500"
-                      />
-                      <span className="text-sm text-slate-700 dark:text-slate-300">启用</span>
-                    </label>
-                    {toolForm.model_config.is_free ? (
-                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-xs">
-                        免费
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 text-xs">
-                        付费
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
+                <Settings2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
+              </Button>
             </div>
 
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-700">
