@@ -19,7 +19,8 @@ interface PhotoStyle {
 interface ModelConfig {
   tool_id: string;
   tool_name: string;
-  default_model: string;
+  model_name: string | null;
+  model_provider_id: number | null;
   model_source: string;
   is_free: boolean;
   is_active: boolean;
@@ -93,10 +94,10 @@ export default function AIPhotoPage() {
       try {
         const res = await fetch('/api/admin/tool-models');
         const data = await res.json();
-        if (data.success && data.configs) {
-          // 查找 AI写真 相关的模型配置（通过 portrait-enhance 或 ai-photo）
-          const photoConfig = data.configs.find(
-            (c: ModelConfig) => c.tool_id === 'portrait-enhance' || c.tool_id === 'ai-photo'
+        if (data.success && data.data) {
+          // 查找 AI写真 相关的模型配置
+          const photoConfig = data.data.find(
+            (c: ModelConfig) => c.tool_id === 'portrait-enhance'
           );
           if (photoConfig) {
             setModelConfig(photoConfig);
@@ -106,8 +107,9 @@ export default function AIPhotoPage() {
             setModelConfig({
               tool_id: 'ai-photo',
               tool_name: 'AI写真生成',
-              default_model: 'coze-image',
-              model_source: 'coze',
+              model_name: 'coze-image',
+              model_provider_id: 1,
+	              model_source: 'coze',
               is_free: true,
               is_active: true,
             });
@@ -119,8 +121,9 @@ export default function AIPhotoPage() {
         setModelConfig({
           tool_id: 'ai-photo',
           tool_name: 'AI写真生成',
-          default_model: 'coze-image',
-          model_source: 'coze',
+          model_name: 'coze-image',
+          model_provider_id: 1,
+	              model_source: 'coze',
           is_free: true,
           is_active: true,
         });
@@ -185,8 +188,8 @@ export default function AIPhotoPage() {
       };
       
       // 如果有配置的模型，使用配置的模型
-      if (modelConfig?.default_model) {
-        requestBody.model = modelConfig.default_model;
+      if (modelConfig?.model_name) {
+        requestBody.model = modelConfig.model_name;
       }
       
       console.log('调用图像生成API，模型:', requestBody.model);

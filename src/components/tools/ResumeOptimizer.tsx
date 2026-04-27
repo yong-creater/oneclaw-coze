@@ -38,7 +38,7 @@ export default function ResumeOptimizer() {
   
   // 从后台配置获取模型
   const { config: modelConfig, loading: modelLoading } = useToolModelConfig('resume');
-  const activeModel = modelConfig?.default_model || 'doubao-seed-1-8-251228';
+  const activeModel = modelConfig?.model_name || 'doubao-seed-1-8-251228';
   const isPaidModel = modelConfig?.model_source === '4sapi';
   
   // PDF导出相关状态

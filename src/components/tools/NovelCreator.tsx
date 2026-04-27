@@ -146,7 +146,7 @@ export default function NovelCreator() {
   
   // 从后台配置获取模型
   const { config: modelConfig, loading: modelLoading } = useToolModelConfig('novel-polish');
-  const activeModel = modelConfig?.default_model || 'doubao-seed-1-8-251228';
+  const activeModel = modelConfig?.model_name || 'doubao-seed-1-8-251228';
   const isPaidModel = modelConfig?.model_source === '4sapi';
   
   const fileInputRef = useRef<HTMLInputElement>(null);
