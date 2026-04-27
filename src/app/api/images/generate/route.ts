@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ImageGenerationClient, Config } from 'coze-coding-dev-sdk';
+import { ImageGenerationClient, ImageGenerationResponseHelper, Config } from 'coze-coding-dev-sdk';
 import { spawn } from 'child_process';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
@@ -107,14 +107,16 @@ async function generateWithCoze(
     
     const result = await client.generate(request);
     
-    if (result.code === 0 && result.data) {
+    const helper = new ImageGenerationResponseHelper(result);
+    
+    if (helper.success && helper.imageUrls.length > 0) {
       return {
         success: true,
-        imageUrls: [result.data.image_url],
+        imageUrls: helper.imageUrls,
       };
     }
     
-    return { success: false, error: result.msg || '扣子图片生成失败' };
+    return { success: false, error: helper.errorMessages[0] || '扣子图片生成失败' };
   } catch (error: any) {
     console.error('扣子调用失败:', error);
     return { success: false, error: error.message };
