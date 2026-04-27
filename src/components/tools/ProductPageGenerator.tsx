@@ -114,7 +114,7 @@ const TONE_OPTIONS = [
 // ==================== 主组件 ====================
 export default function ProductPageGenerator() {
   // 获取模型配置
-  const { config: modelConfig, loading: modelLoading } = useToolModelConfig('productpage');
+  const { config: modelConfig, loading: modelLoading, error: modelError, isConfigured } = useToolModelConfig('productpage');
   
   // 配置状态
   const [platform, setPlatform] = useState('amazon');
@@ -434,6 +434,26 @@ export default function ProductPageGenerator() {
       />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* 模型未配置错误提示 */}
+        {modelLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+            <span className="ml-3 text-slate-500">加载中...</span>
+          </div>
+        ) : !isConfigured ? (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center mx-auto mb-4">
+              <X className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">
+              服务暂不可用
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400">
+              {modelError || '该工具尚未配置AI模型，请联系管理员'}
+            </p>
+          </div>
+        ) : (
+          <>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* 左侧配置区域 */}
           <div className="lg:col-span-2 space-y-6">
@@ -923,6 +943,8 @@ export default function ProductPageGenerator() {
             </div>
           </div>
         </div>
+          </>
+        )}
       </div>
     </div>
   );

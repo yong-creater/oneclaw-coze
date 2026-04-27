@@ -37,7 +37,7 @@ export default function ResumeOptimizer() {
   const [usedModel, setUsedModel] = useState('');
   
   // 从后台配置获取模型
-  const { config: modelConfig, loading: modelLoading } = useToolModelConfig('resume');
+  const { config: modelConfig, loading: modelLoading, error: modelError, isConfigured } = useToolModelConfig('resume');
   const activeModel = modelConfig?.model_name || 'doubao-seed-1-8-251228';
   const isPaidModel = modelConfig?.model_source === '4sapi';
   
@@ -398,7 +398,25 @@ export default function ResumeOptimizer() {
       {/* 主内容区 */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         
-        {!result ? (
+        {/* 模型未配置错误提示 */}
+        {modelLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            <span className="ml-3 text-slate-500">加载中...</span>
+          </div>
+        ) : !isConfigured ? (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center mx-auto mb-4">
+              <X className="w-8 h-8 text-red-500" />
+            </div>
+            <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">
+              服务暂不可用
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400">
+              {modelError || '该工具尚未配置AI模型，请联系管理员'}
+            </p>
+          </div>
+        ) : !result ? (
           /* 输入区域 */
           <div className="space-y-6">
             {/* 标题区 */}

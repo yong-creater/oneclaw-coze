@@ -31,6 +31,7 @@ export function useToolModelConfig(toolSlug: string) {
   const [config, setConfig] = useState<ToolModelConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isConfigured, setIsConfigured] = useState(true); // 是否已配置模型
 
   useEffect(() => {
     if (!toolSlug) {
@@ -63,9 +64,10 @@ export function useToolModelConfig(toolSlug: string) {
               is_active: true,
               config_params: tool.model_config?.config_params,
             });
+            setIsConfigured(true);
           }
           // 兼容旧的 model_config 方式
-          else if (tool.model_config) {
+          else if (tool.model_config && tool.model_config.default_model) {
             setConfig({
               tool_id: tool.slug,
               tool_name: tool.name,
@@ -77,39 +79,28 @@ export function useToolModelConfig(toolSlug: string) {
               is_active: tool.model_config.is_active !== false,
               config_params: tool.model_config.config_params,
             });
+            setIsConfigured(true);
           }
-          // 如果没有配置，使用默认配置
+          // 如果没有配置，设置错误状态
           else {
-            setConfig({
-              tool_id: tool.slug,
-              tool_name: tool.name,
-              tool_type: tool.slug,
-              default_model: 'coze-image',
-              model_source: 'coze',
-              model_price_per_1k_tokens: 0,
-              is_free: true,
-              is_active: true,
-            });
+            setConfig(null);
+            setIsConfigured(false);
+            setError('该工具尚未配置AI模型，请联系管理员');
           }
           setLoading(false);
           return;
         }
         
-        // 工具不存在，使用默认配置
-        setConfig({
-          tool_id: toolSlug,
-          tool_name: getToolName(toolSlug),
-          tool_type: toolSlug,
-          default_model: 'coze-image',
-          model_source: 'coze',
-          model_price_per_1k_tokens: 0,
-          is_free: true,
-          is_active: true,
-        });
+        // 工具不存在，设置错误状态
+        setConfig(null);
+        setIsConfigured(false);
+        setError('该工具不存在');
         setLoading(false);
       } catch (err) {
         console.error('获取模型配置失败:', err);
-        setError('网络错误');
+        setError('网络错误，请刷新重试');
+        setConfig(null);
+        setIsConfigured(false);
         setLoading(false);
       }
     };
@@ -117,7 +108,7 @@ export function useToolModelConfig(toolSlug: string) {
     fetchConfig();
   }, [toolSlug]);
 
-  return { config, loading, error };
+  return { config, loading, error, isConfigured };
 }
 
 /**
