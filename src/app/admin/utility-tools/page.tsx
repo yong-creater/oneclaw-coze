@@ -262,10 +262,14 @@ export default function UtilityToolsPage() {
   // 获取模型提供商数据
   const fetchProviders = async () => {
     try {
-      const res = await fetch('/api/admin/tool-models');
+      const res = await fetch('/api/admin/tool-models', {
+        credentials: 'include', // 包含 cookie
+      });
       const data = await res.json();
       if (data.providers) {
         setProviders(data.providers);
+      } else if (data.error) {
+        console.error('获取模型提供商失败:', data.error);
       }
     } catch (error) {
       console.error('获取模型提供商失败:', error);

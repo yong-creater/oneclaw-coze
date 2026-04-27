@@ -182,8 +182,8 @@ export function ModelSelector({
             </div>
           </div>
 
-          {/* 类型选择标签 */}
-          <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+          {/* 类型选择标签 - 使用 flex-1 确保均匀分布 */}
+          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-full">
             {Object.entries(TYPE_CONFIG).map(([type, config]) => {
               const TypeIcon = config.icon;
               const count = (providers[type] || []).reduce((sum, p) => sum + p.models.length, 0);
@@ -193,19 +193,23 @@ export function ModelSelector({
               return (
                 <button
                   key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  type="button"
+                  onClick={() => {
+                    console.log('[ModelSelector] Tab clicked:', type);
+                    setSelectedType(type);
+                  }}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isSelected
                       ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
                       : hasData
-                        ? 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-700/50'
                         : 'text-slate-400 dark:text-slate-500'
                   }`}
                 >
-                  <TypeIcon className={`w-4 h-4 ${isSelected ? config.color.replace('bg-', 'text-') : ''}`} />
-                  <span>{config.label}</span>
+                  <TypeIcon className={`w-4 h-4 shrink-0 ${isSelected ? config.color.replace('bg-', 'text-') : ''}`} />
+                  <span className="whitespace-nowrap">{config.label}</span>
                   {count > 0 && (
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium shrink-0 ${
                       isSelected 
                         ? 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300' 
                         : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
@@ -214,7 +218,7 @@ export function ModelSelector({
                     </span>
                   )}
                   {!hasData && (
-                    <span className="text-[10px] text-slate-400">(暂无)</span>
+                    <span className="text-[10px] text-slate-400 shrink-0">(暂无)</span>
                   )}
                 </button>
               );
