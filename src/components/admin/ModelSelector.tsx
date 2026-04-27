@@ -113,19 +113,11 @@ export function ModelSelector({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-[900px] max-h-[85vh] !p-0 !rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl z-[100]"
+        className="max-w-[900px] !max-h-[80vh] !h-[80vh] !p-0 !rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl z-[100] flex flex-col"
         showCloseButton={false}
       >
         {/* 头部 */}
-        <div className="px-6 pt-5 pb-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 relative">
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-          >
-            <X className="w-5 h-5 text-slate-500" />
-          </button>
-          
+        <div className="px-6 pt-5 pb-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shrink-0">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl">
               <Sparkles className="w-5 h-5 text-white" />
@@ -244,8 +236,8 @@ export function ModelSelector({
         </div>
 
         {/* 底部 */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shrink-0">
+          <div className="flex items-center gap-2 text-sm">
             {selectedDetails ? (
               <>
                 <Badge>{selectedDetails.provider.name}</Badge>
@@ -253,15 +245,15 @@ export function ModelSelector({
                 <Badge variant="outline">{selectedDetails.model.display_name || selectedDetails.model.name}</Badge>
               </>
             ) : (
-              <span className="text-sm text-slate-400">请选择模型</span>
+              <span className="text-slate-400">请选择模型</span>
             )}
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="min-w-[80px]">取消</Button>
             <Button
               onClick={handleConfirm}
               disabled={!selectedProviderId || !selectedModel || loading}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="min-w-[80px] bg-orange-500 hover:bg-orange-600"
             >
               确认
             </Button>
