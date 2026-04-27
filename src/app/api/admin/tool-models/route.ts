@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       .order('is_system', { ascending: false });
 
     // 转换PostgreSQL numeric类型为普通数字
-    const normalizeProviders = (providers: any[]) => {
+    const normalizeProviders = (providers: any[]): any[] => {
       return providers?.map(p => ({
         ...p,
         models: p.models?.map((m: any) => ({
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     };
 
     // 按类型分组
-    const providersByType = normalizeProviders(providers).reduce((acc, p) => {
+    const providersByType = (normalizeProviders(providers || []) || []).reduce((acc, p) => {
       if (!acc[p.provider_type]) acc[p.provider_type] = [];
       acc[p.provider_type].push(p);
       return acc;
