@@ -1004,135 +1004,146 @@ export default function UtilityToolsPage() {
         </DialogContent>
       </Dialog>
 
-	      {/* 编辑工具弹框 - 简洁2列布局 */}
-      <Dialog open={toolDialogOpen} onOpenChange={setToolDialogOpen}>
-        <DialogContent className="w-[95vw] max-w-4xl max-h-[90vh] overflow-hidden p-0 flex flex-col">
-          {/* 头部 */}
-          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-lg bg-gradient-to-r ${editingTool?.color || 'from-orange-500 to-amber-500'} flex items-center justify-center`}>
-                <span className="text-white font-bold text-sm">{editingTool?.name?.[0] || 'T'}</span>
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-800 dark:text-white">编辑工具</h2>
-                <p className="text-xs text-slate-500">{editingTool?.name}</p>
-              </div>
-            </div>
-          </div>
+	      {/* 编辑工具弹框 - 简洁布局 */}
+	      <Dialog open={toolDialogOpen} onOpenChange={setToolDialogOpen}>
+	        <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] overflow-hidden p-0 flex flex-col">
+	          {/* 头部 */}
+	          <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0">
+	            <div className="flex items-center justify-between">
+	              <div className="flex items-center gap-3">
+	                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${editingTool?.color || 'from-orange-500 to-amber-500'} flex items-center justify-center shadow-md`}>
+	                  <span className="text-white font-bold text-lg">{editingTool?.name?.[0] || 'T'}</span>
+	                </div>
+	                <div>
+	                  <h2 className="text-lg font-bold text-slate-800 dark:text-white">编辑工具</h2>
+	                  <p className="text-xs text-slate-500">{editingTool?.name}</p>
+	                </div>
+	              </div>
+	              <Button variant="ghost" size="icon" onClick={() => setToolDialogOpen(false)} className="text-slate-400 hover:text-slate-600">
+	                <X className="w-5 h-5" />
+	              </Button>
+	            </div>
+	          </div>
 
-          {/* 主体内容 */}
-          <div className="flex-1 overflow-y-auto p-5">
-            <div className="grid grid-cols-2 gap-5">
-              {/* 左侧：基础信息 */}
-              <div className="space-y-4">
-                {/* 基本信息 */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
-                  <h3 className="text-sm font-semibold text-slate-800 dark:text-white mb-3">基本信息</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs font-medium text-slate-500 mb-1 block">工具名称 <span className="text-red-500">*</span></label>
-                      <Input value={toolForm.name} onChange={(e) => setToolForm({ ...toolForm, name: e.target.value })} placeholder="例如：STAR简历优化" className="h-9 text-sm" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-slate-500 mb-1 block">Slug标识</label>
-                      <Input value={toolForm.slug} onChange={(e) => setToolForm({ ...toolForm, slug: e.target.value })} placeholder="例如：resume" className="h-9 text-sm font-mono" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-slate-500 mb-1 block">简短描述</label>
-                      <textarea value={toolForm.description} onChange={(e) => setToolForm({ ...toolForm, description: e.target.value })} placeholder="一句话介绍..." className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg resize-none h-16 text-sm bg-white dark:bg-slate-900" />
-                    </div>
-                  </div>
-                </div>
+	          {/* 主体内容 - 单列简洁布局 */}
+	          <div className="flex-1 overflow-y-auto p-5 space-y-5">
+	            {/* 基础信息 */}
+	            <div className="space-y-3">
+	              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wide">基础信息</h3>
+	              <div className="grid grid-cols-2 gap-4">
+	                <div>
+	                  <label className="text-xs font-medium text-slate-500 mb-1.5 block">工具名称 <span className="text-red-500">*</span></label>
+	                  <Input value={toolForm.name} onChange={(e) => setToolForm({ ...toolForm, name: e.target.value })} placeholder="例如：STAR简历优化" />
+	                </div>
+	                <div>
+	                  <label className="text-xs font-medium text-slate-500 mb-1.5 block">Slug标识</label>
+	                  <Input value={toolForm.slug} onChange={(e) => setToolForm({ ...toolForm, slug: e.target.value })} placeholder="例如：resume" className="font-mono" />
+	                </div>
+	              </div>
+	              <div>
+	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">简短描述</label>
+	                <textarea value={toolForm.description} onChange={(e) => setToolForm({ ...toolForm, description: e.target.value })} placeholder="一句话介绍..." className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl resize-none h-20 text-sm bg-white dark:bg-slate-800 hover:border-orange-400 focus:border-orange-500 focus:outline-none transition-colors" />
+	              </div>
+	            </div>
 
-                {/* 分组和排序 */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
-                  <h3 className="text-sm font-semibold text-slate-800 dark:text-white mb-3">分组与排序</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-medium text-slate-500 mb-1 block">所属分组</label>
-                      <select value={toolForm.group_id} onChange={(e) => setToolForm({ ...toolForm, group_id: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-900 text-sm h-9">
-                        {groups.map(g => (<option key={g.id} value={g.id}>{g.name}</option>))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-slate-500 mb-1 block">排序值</label>
-                      <Input type="number" value={toolForm.sort_order} onChange={(e) => setToolForm({ ...toolForm, sort_order: parseInt(e.target.value) || 0 })} className="h-9 text-sm" />
-                    </div>
-                  </div>
-                </div>
-              </div>
+	            {/* 分组和排序 */}
+	            <div className="grid grid-cols-2 gap-4">
+	              <div>
+	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">所属分组</label>
+	                <select value={toolForm.group_id} onChange={(e) => setToolForm({ ...toolForm, group_id: parseInt(e.target.value) })} className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-sm hover:border-orange-400 focus:border-orange-500 focus:outline-none transition-colors">
+	                  {groups.map(g => (<option key={g.id} value={g.id}>{g.name}</option>))}
+	                </select>
+	              </div>
+	              <div>
+	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">排序值</label>
+	                <Input type="number" value={toolForm.sort_order} onChange={(e) => setToolForm({ ...toolForm, sort_order: parseInt(e.target.value) || 0 })} />
+	              </div>
+	            </div>
 
-              {/* 右侧：封面图和亮点 */}
-              <div className="space-y-4">
-                {/* 封面图 */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-slate-800 dark:text-white">封面图</h3>
-                    {toolForm.cover_image && (
-                      <Button variant="ghost" size="sm" onClick={() => setToolForm({ ...toolForm, cover_image: '' })} className="text-red-500 hover:text-red-600 h-6 text-xs">移除</Button>
-                    )}
-                  </div>
-                  {toolForm.cover_image ? (
-                    <div className="space-y-2">
-                      <img src={toolForm.cover_image} alt="" className="w-full h-28 object-cover rounded-lg bg-slate-100" />
-                      <label className="flex items-center justify-center gap-1 px-3 py-1.5 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-orange-400 text-xs text-slate-500">
-                        <Upload className="w-3 h-3" />替换
-                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverUpload(e, toolForm.slug)} />
-                      </label>
-                    </div>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-lg py-5 cursor-pointer hover:border-orange-400">
-                      <Upload className="w-6 h-6 text-slate-400 mb-1" />
-                      <span className="text-xs text-slate-500">点击上传</span>
-                      <span className="text-[10px] text-slate-400">600x400</span>
-                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverUpload(e, toolForm.slug)} />
-                    </label>
-                  )}
-                </div>
+	            {/* 封面图 */}
+	            <div>
+	              <label className="text-xs font-medium text-slate-500 mb-1.5 block">封面图</label>
+	              {toolForm.cover_image ? (
+	                <div className="relative group">
+	                  <img src={toolForm.cover_image} alt="" className="w-full h-36 object-cover rounded-xl" />
+	                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+	                    <label className="px-4 py-2 bg-white rounded-lg cursor-pointer text-sm font-medium hover:bg-slate-100">
+	                      替换图片
+	                      <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverUpload(e, toolForm.slug)} />
+	                    </label>
+	                    <Button variant="ghost" size="icon" onClick={() => setToolForm({ ...toolForm, cover_image: '' })} className="absolute top-2 right-2 bg-white/90 hover:bg-white text-red-500">
+	                      <X className="w-4 h-4" />
+	                    </Button>
+	                  </div>
+	                </div>
+	              ) : (
+	                <label className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl py-8 cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
+	                  <Upload className="w-8 h-8 text-slate-400 mb-2" />
+	                  <span className="text-sm text-slate-500">点击上传封面图</span>
+	                  <span className="text-xs text-slate-400 mt-1">推荐尺寸 600x400</span>
+	                  <input type="file" accept="image/*" className="hidden" onChange={(e) => handleCoverUpload(e, toolForm.slug)} />
+	                </label>
+	              )}
+	            </div>
 
-                {/* 产品亮点 */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-slate-800 dark:text-white">产品亮点</h3>
-                    <Button variant="outline" size="sm" onClick={addUseCase} className="h-7 text-xs border-orange-200 text-orange-600">+ 添加</Button>
-                  </div>
-                  <div className="space-y-2">
-                    {toolForm.use_cases.map((uc, index) => (
-                      <div key={index} className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-2">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="w-4 h-4 rounded-full bg-orange-100 text-orange-600 text-[10px] flex items-center justify-center font-medium">{index + 1}</span>
-                          <Input value={uc.title} onChange={(e) => updateUseCase(index, 'title', e.target.value)} placeholder="标题" className="h-7 text-xs flex-1" />
-                          <Button variant="ghost" size="icon" onClick={() => removeUseCase(index)} className="h-6 w-6 text-red-400"><X className="w-3 h-3" /></Button>
-                        </div>
-                        <Input value={uc.desc} onChange={(e) => updateUseCase(index, 'desc', e.target.value)} placeholder="描述..." className="h-7 text-xs" />
-                      </div>
-                    ))}
-                    {toolForm.use_cases.length === 0 && <p className="text-xs text-slate-400 text-center py-3">暂无亮点</p>}
-                  </div>
-                </div>
+	            {/* 产品亮点 */}
+	            <div>
+	              <div className="flex items-center justify-between mb-2">
+	                <label className="text-xs font-medium text-slate-500">产品亮点</label>
+	                <Button variant="outline" size="sm" onClick={addUseCase} className="h-7 text-xs border-orange-200 text-orange-600 hover:bg-orange-50">
+	                  + 添加亮点
+	                </Button>
+	              </div>
+	              <div className="space-y-2">
+	                {toolForm.use_cases.map((uc, index) => (
+	                  <div key={index} className="flex items-start gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+	                    <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs flex items-center justify-center font-medium shrink-0 mt-0.5">{index + 1}</span>
+	                    <div className="flex-1 space-y-1">
+	                      <Input value={uc.title} onChange={(e) => updateUseCase(index, 'title', e.target.value)} placeholder="亮点标题" className="h-7 text-xs" />
+	                      <Input value={uc.desc} onChange={(e) => updateUseCase(index, 'desc', e.target.value)} placeholder="亮点描述" className="h-7 text-xs" />
+	                    </div>
+	                    <Button variant="ghost" size="icon" onClick={() => removeUseCase(index)} className="h-7 w-7 text-slate-400 hover:text-red-500 shrink-0">
+	                      <X className="w-3.5 h-3.5" />
+	                    </Button>
+	                  </div>
+	                ))}
+	                {toolForm.use_cases.length === 0 && (
+	                  <p className="text-xs text-slate-400 text-center py-4">暂无亮点，点击上方按钮添加</p>
+	                )}
+	              </div>
+	            </div>
 
-                {/* 图标颜色 */}
-                {!toolForm.cover_image && (
-                  <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
-                    <h3 className="text-sm font-semibold text-slate-800 dark:text-white mb-2">图标颜色</h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {COLOR_OPTIONS.map(color => (
-                        <button key={color} onClick={() => setToolForm({ ...toolForm, color })} className={`w-7 h-7 rounded-md bg-gradient-to-r ${color} border-2 transition-all ${toolForm.color === color ? 'border-slate-900 ring-2 ring-orange-500' : 'border-transparent'}`} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+	            {/* 图标颜色 */}
+	            {!toolForm.cover_image && (
+	              <div>
+	                <label className="text-xs font-medium text-slate-500 mb-2 block">图标颜色</label>
+	                <div className="flex flex-wrap gap-2">
+	                  {COLOR_OPTIONS.map(color => (
+	                    <button
+	                      key={color}
+	                      onClick={() => setToolForm({ ...toolForm, color })}
+	                      className={`w-8 h-8 rounded-lg bg-gradient-to-r ${color} border-2 transition-all hover:scale-110 ${
+	                        toolForm.color === color ? 'border-slate-900 ring-2 ring-orange-400' : 'border-transparent'
+	                      }`}
+	                    />
+	                  ))}
+	                </div>
+	              </div>
+	            )}
+	          </div>
 
-          {/* 底部操作栏 */}
-          <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shrink-0">
-            <Button variant="outline" onClick={() => { setToolDialogOpen(false); resetToolForm(); }} className="h-8 text-xs px-4">取消</Button>
-            <Button onClick={handleSaveTool} className="h-8 text-xs px-4 bg-orange-500 hover:bg-orange-600">保存</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+	          {/* 底部操作栏 */}
+	          <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 shrink-0">
+	            <Button variant="outline" onClick={() => { setToolDialogOpen(false); resetToolForm(); }} className="px-6">
+	              取消
+	            </Button>
+	            <Button onClick={handleSaveTool} className="px-6 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600">
+	              保存修改
+	            </Button>
+	          </div>
+	        </DialogContent>
+	      </Dialog>
+
 
     </div>
   );
