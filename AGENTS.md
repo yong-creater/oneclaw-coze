@@ -155,6 +155,14 @@ props 传递给子组件
 - [ ] 功能正常可用
 - [ ] 多轮测试确认稳定
 
+#### API 数据结构验证 [NEW - CRITICAL]
+- [ ] 确认 API 返回的实际数据结构（可能与文档/期望不同）
+- [ ] 父组件正确提取 API 数据（检查 `data.success`、`data.data`、`data.providers` 等字段）
+- [ ] 验证数据格式转换逻辑
+- [ ] 使用 `console.log` 打印 API 返回数据确认格式
+
+**常见坑**：API 返回 `{ success, data }` 包装，但父组件期望直接是 `{ providers }`
+
 ---
 
 ## 项目概述

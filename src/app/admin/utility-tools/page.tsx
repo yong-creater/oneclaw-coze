@@ -266,8 +266,30 @@ export default function UtilityToolsPage() {
         credentials: 'include', // 包含 cookie
       });
       const data = await res.json();
-      if (data.providers) {
-        setProviders(data.providers);
+      console.log('[fetchProviders] API 返回数据:', data);
+      
+      // 提取 available_providers
+      if (data.success && data.data && data.data.length > 0) {
+        // 收集所有工具的提供商并合并
+        const allProviders: Record<string, any[]> = {
+          image: [],
+          llm: [],
+          video: [],
+          audio: [],
+        };
+        
+        data.data.forEach((tool: any) => {
+          if (tool.available_providers) {
+            Object.entries(tool.available_providers).forEach(([type, providers]) => {
+              if (allProviders[type]) {
+                allProviders[type].push(...(providers as any[]));
+              }
+            });
+          }
+        });
+        
+        console.log('[fetchProviders] 提取的 providers:', allProviders);
+        setProviders(allProviders);
       } else if (data.error) {
         console.error('获取模型提供商失败:', data.error);
       }
