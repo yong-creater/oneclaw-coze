@@ -831,7 +831,7 @@ export default function NovelCreator() {
                             </span>
                           </div>
                           <a 
-                            href="/admin/tool-models" 
+                            href="/admin/utility-tools" 
                             target="_blank" 
                             className="text-xs text-orange-500 hover:text-orange-600 flex items-center gap-1"
                           >
