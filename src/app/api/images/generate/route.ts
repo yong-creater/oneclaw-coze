@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { ImageGenerationClient, Config } from 'coze-coding-dev-sdk';
 import { spawn } from 'child_process';
-
-// 图片生成模型映射
-const IMAGE_MODELS = {
-  // 扣子内置模型（豆包SeeDream）
-  'coze-image': { provider: 'coze', model: 'coze-image' },
-  // 4sapi图片生成模型
-  'gpt-image2': { provider: '4sapi', model: 'gpt-image-2' },
-  'dall-e-3': { provider: '4sapi', model: 'dall-e-3' },
-  'stable-diffusion-3': { provider: '4sapi', model: 'stable-diffusion-3' },
-};
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 创建图片生成客户端（扣子）
 function createCozeClient(customHeaders: Record<string, string> = {}) {
@@ -23,25 +14,11 @@ async function generateWith4SAPI(
   prompt: string,
   model: string,
   size: string,
+  apiUrl: string,
+  apiKey: string,
   image?: string | string[]
 ): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> {
   try {
-    // 检查4sAPI是否启用（ENABLE_4SAPI=true才启用）
-    if (process.env.ENABLE_4SAPI !== 'true') {
-      return { success: false, error: '4sapi功能未启用，请联系管理员设置 ENABLE_4SAPI=true' };
-    }
-    
-    // 4sAPI密钥 - 支持多种环境变量名称
-    const apiKey = process.env.FOURS_API_KEY 
-      || process.env.OPENAI_API_KEY 
-      || process.env.API4S_KEY;
-    
-    if (!apiKey || apiKey === 'your-api-key-here') {
-      return { success: false, error: '4sapi API密钥未配置' };
-    }
-    
-    const apiUrl = process.env.API4S_URL || 'https://4sapi.com/v1';
-
     // 构建请求体（OpenAI兼容格式）
     const requestBody: any = {
       model: model,
@@ -63,7 +40,6 @@ async function generateWith4SAPI(
     if (image) {
       const images = Array.isArray(image) ? image : [image];
       if (images.length > 0 && images[0]) {
-        // GPT-image2 支持参考图片
         requestBody.image = images[0];
       }
     }
@@ -90,11 +66,14 @@ async function generateWith4SAPI(
     
     // 检查响应是否是HTML错误页
     if (responseText.trim().startsWith('<!DOCTYPE') || responseText.trim().startsWith('<!doctype')) {
-      console.error('[4sAPI] Error: Got HTML response');
-      return { success: false, error: '4sAPI返回了错误页面，可能是IP被限制' };
+      return { success: false, error: '4sAPI返回了错误页面，可能是IP被限制或余额不足' };
     }
 
     const data = JSON.parse(responseText);
+    
+    if (data.error) {
+      return { success: false, error: data.error.message || '4sAPI调用失败' };
+    }
     
     if (data.data && data.data.length > 0) {
       return {
@@ -110,10 +89,41 @@ async function generateWith4SAPI(
   }
 }
 
+// 通过扣子生成图片
+async function generateWithCoze(
+  prompt: string,
+  model: string,
+  size: string,
+  image?: string | string[]
+): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> {
+  try {
+    const client = createCozeClient();
+    
+    const request = {
+      model,
+      prompt,
+      size: size || '1024x1024',
+    };
+    
+    const result = await client.generate(request);
+    
+    if (result.code === 0 && result.data) {
+      return {
+        success: true,
+        imageUrls: [result.data.image_url],
+      };
+    }
+    
+    return { success: false, error: result.msg || '扣子图片生成失败' };
+  } catch (error: any) {
+    console.error('扣子调用失败:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // 上传图片到 Supabase Storage
 async function uploadToStorage(imageUrl: string): Promise<string> {
   try {
-    const { getSupabaseClient } = await import('@/storage/database/supabase-client');
     const supabase = getSupabaseClient();
     
     // 下载图片
@@ -153,173 +163,91 @@ async function uploadToStorage(imageUrl: string): Promise<string> {
   }
 }
 
-// 生成图片
 export async function POST(request: NextRequest) {
   try {
-    // 提取转发头
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-
     const body = await request.json();
-    const { 
-      prompt, 
-      size = '2K', 
-      count = 1,
-      image, // 可选：参考图片，用于图生图
-      model 
-    } = body;
+    const { tool_id, prompt, size, model, image } = body;
 
     if (!prompt) {
-      return NextResponse.json({ error: '请提供图片描述' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: '缺少prompt参数' },
+        { status: 400 }
+      );
     }
 
-    // 确定使用哪个模型
-    const modelKey = model || 'coze-image';
-    const modelConfig = IMAGE_MODELS[modelKey as keyof typeof IMAGE_MODELS] || IMAGE_MODELS['coze-image'];
+    // 获取工具的模型配置
+    let providerConfig: any = null;
+    let modelName = model || 'coze-image';
+    
+    if (tool_id) {
+      const supabase = getSupabaseClient();
+      
+      // 查询工具的模型配置 - 支持 id 或 slug
+      const query = supabase
+        .from('utility_tools')
+        .select('id, model_provider_id, model_name, model_config')
+        .eq(isNaN(Number(tool_id)) ? 'slug' : 'id', tool_id);
+      
+      const { data: tool } = await query.single();
+      
+      if (tool?.model_provider_id) {
+        // 获取 provider 配置
+        const { data: provider } = await supabase
+          .from('model_providers')
+          .select('*')
+          .eq('id', tool.model_provider_id)
+          .single();
+        
+        if (provider) {
+          providerConfig = provider;
+          modelName = tool.model_name || modelName;
+        }
+      }
+    }
 
-    console.log('开始生成图片，参数:', JSON.stringify({
-      prompt: prompt.substring(0, 100) + '...',
-      size,
-      model: modelKey,
-      modelProvider: modelConfig.provider,
-      hasImage: !!image,
-    }));
-
-    let imageUrls: string[] = [];
-
-    if (modelConfig.provider === '4sapi') {
-      // 使用4sapi生成图片
-      const result = await generateWith4SAPI(
+    // 根据 provider 类型选择生成方式
+    let result: { success: boolean; imageUrls?: string[]; error?: string };
+    
+    if (providerConfig?.api_url && providerConfig?.api_key) {
+      // 使用 4SAPI 或其他外部 API
+      result = await generateWith4SAPI(
         prompt,
-        modelConfig.model,
+        modelName,
         size,
+        providerConfig.api_url,
+        providerConfig.api_key,
         image
       );
-
-      if (!result.success || !result.imageUrls) {
-        return NextResponse.json({
-          success: false,
-          error: result.error || '生成失败',
-        }, { status: 500 });
-      }
-
-      imageUrls = result.imageUrls;
     } else {
-      // 使用扣子SDK生成图片
-      const client = createCozeClient(customHeaders);
-
-      // 构造请求参数
-      const requestParams: any = {
-        prompt,
-        size,
-        watermark: false,
-      };
-
-      // 如果有参考图片，添加图生图参数
-      if (image) {
-        requestParams.image = Array.isArray(image) ? image : [image];
-      }
-
-      const response = await client.generate(requestParams);
-      const helper = client.getResponseHelper(response);
-
-      if (!helper.success || !helper.imageUrls || helper.imageUrls.length === 0) {
-        console.error('图片生成失败:', helper.errorMessages);
-        return NextResponse.json({
-          success: false,
-          error: helper.errorMessages?.join(', ') || '生成失败',
-        }, { status: 500 });
-      }
-
-      imageUrls = helper.imageUrls;
+      // 使用扣子内置模型
+      result = await generateWithCoze(prompt, modelName, size, image);
     }
 
-    console.log('图片生成成功，数量:', imageUrls.length);
-    
-    // 上传所有图片到 Storage 并返回公网URL
-    const publicUrls = await Promise.all(
-      imageUrls.map(async (url: string) => {
-        try {
-          const publicUrl = await uploadToStorage(url);
-          console.log('图片上传成功:', publicUrl.substring(0, 50) + '...');
-          return publicUrl;
-        } catch (error) {
-          console.error('单张图片上传失败，使用原URL:', url);
-          // 如果上传失败，返回原URL
-          return url;
-        }
-      })
-    );
+    if (!result.success) {
+      return NextResponse.json(result, { status: 500 });
+    }
+
+    // 上传图片到 Storage
+    const uploadedUrls: string[] = [];
+    for (const imageUrl of result.imageUrls || []) {
+      try {
+        const uploadedUrl = await uploadToStorage(imageUrl);
+        uploadedUrls.push(uploadedUrl);
+      } catch (error) {
+        // 如果上传失败，使用原始 URL
+        uploadedUrls.push(imageUrl);
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      imageUrls: publicUrls,
-      count: publicUrls.length,
+      imageUrls: uploadedUrls,
     });
   } catch (error: any) {
-    console.error('Image generation error:', error);
-    return NextResponse.json({
-      success: false,
-      error: error?.message || '服务器错误'
-    }, { status: 500 });
-  }
-}
-
-// 批量生成图片（默认使用扣子SDK）
-export async function PUT(request: NextRequest) {
-  try {
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const client = createCozeClient(customHeaders);
-
-    const body = await request.json();
-    const { requests } = body;
-
-    if (!requests || !Array.isArray(requests) || requests.length === 0) {
-      return NextResponse.json({ error: '请提供生成请求数组' }, { status: 400 });
-    }
-
-    // 限制批量数量
-    const limitedRequests = requests.slice(0, 5).map((req: any) => ({
-      prompt: req.prompt,
-      size: req.size || '2K',
-      watermark: false,
-    }));
-
-    const responses = await client.batchGenerate(limitedRequests);
-    
-    const results = await Promise.all(responses.map(async (response, index) => {
-      const helper = client.getResponseHelper(response);
-      if (helper.success) {
-        // 上传图片到 Storage
-        const publicUrls = await Promise.all(
-          (helper.imageUrls || []).map(async (url: string) => {
-            try {
-              return await uploadToStorage(url);
-            } catch {
-              return url;
-            }
-          })
-        );
-        return {
-          index,
-          success: true,
-          imageUrls: publicUrls,
-          error: null,
-        };
-      }
-      return {
-        index,
-        success: false,
-        imageUrls: [],
-        error: helper.errorMessages.join(', '),
-      };
-    }));
-
-    return NextResponse.json({ results });
-  } catch (error: any) {
-    console.error('批量生成失败:', error);
-    return NextResponse.json({
-      success: false,
-      error: error?.message || '服务器错误'
-    }, { status: 500 });
+    console.error('图片生成失败:', error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }

@@ -1,197 +1,96 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 使用Coze内置的环境变量
-const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
-
-// 延迟创建客户端
-let supabaseClient: SupabaseClient | null = null;
-function getSupabase(): SupabaseClient | null {
-  if (!supabaseClient && supabaseUrl && supabaseKey) {
-    supabaseClient = createClient(supabaseUrl, supabaseKey);
-  }
-  return supabaseClient;
-}
-
-// 模型选项（前端获取可用模型列表）
-export const AVAILABLE_MODELS = {
-  coze: [
-    { id: 'doubao-seed-2-0-pro-260215', name: '豆包Seed 2.0 Pro', isFree: true, maxTokens: 64000 },
-    { id: 'doubao-seed-2-0-lite-260215', name: '豆包Seed 2.0 Lite', isFree: true, maxTokens: 32000 },
-    { id: 'doubao-seed-2-0-mini-260215', name: '豆包Seed 2.0 Mini', isFree: true, maxTokens: 16000 },
-    { id: 'doubao-seed-1-8-251228', name: '豆包Seed 1.8', isFree: true, maxTokens: 32000 },
-    { id: 'deepseek-r1-250528', name: 'DeepSeek R1', isFree: true, maxTokens: 64000 },
-    { id: 'deepseek-v3-2-251201', name: 'DeepSeek V3', isFree: true, maxTokens: 64000 },
-    { id: 'kimi-k2-5-260127', name: 'Kimi K2.5', isFree: true, maxTokens: 32000 },
-    { id: 'glm-5-0-260211', name: 'GLM-5.0', isFree: true, maxTokens: 32000 },
-    { id: 'qwen3-5-plus-260215', name: 'Qwen3.5 Plus', isFree: true, maxTokens: 32000 },
-    { id: 'doubao-seed-1-6-vision-250815', name: '豆包视觉模型', isFree: true, maxTokens: 16000, isVision: true },
-    { id: 'coze-image', name: '扣子图片生成', isFree: true, type: 'image' },
-  ],
-  // 4sapi模型（付费）
-  '4sapi': [
-    { id: '4s-gpt-4o', name: 'GPT-4o', price: 0.0025, maxTokens: 128000 },
-    { id: '4s-gpt-4o-mini', name: 'GPT-4o Mini', price: 0.00015, maxTokens: 128000 },
-    { id: '4s-gpt-4-turbo', name: 'GPT-4 Turbo', price: 0.01, maxTokens: 128000 },
-    { id: '4s-claude-3-5-sonnet', name: 'Claude 3.5 Sonnet', price: 0.003, maxTokens: 200000 },
-    { id: '4s-claude-3-opus', name: 'Claude 3 Opus', price: 0.015, maxTokens: 200000 },
-    { id: '4s-gemini-1-5-pro', name: 'Gemini 1.5 Pro', price: 0.00125, maxTokens: 2000000 },
-    { id: '4s-gemini-1-5-flash', name: 'Gemini 1.5 Flash', price: 0.000075, maxTokens: 1000000 },
-    { id: 'gpt-image2', name: 'GPT Image 2', price: 0.01, type: 'image' },
-    { id: 'dall-e-3', name: 'DALL-E 3', price: 0.04, type: 'image' },
-    { id: 'stable-diffusion-3', name: 'Stable Diffusion 3', price: 0.005, type: 'image' },
-  ]
-};
-
-interface ToolModelConfig {
-  tool_id: string;
-  tool_name?: string;
-  tool_type?: string;
-  model_source?: string;
-  default_model?: string;
-  is_free?: boolean;
-  config_params?: Record<string, unknown>;
-  [key: string]: unknown;
-}
-
-// GET - 获取模型配置列表
+// GET - 获取所有工具的模型配置
 export async function GET(request: NextRequest) {
   try {
-    const db = getSupabase();
-    if (!db) {
-      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
-    }
+    const client = getSupabaseClient();
     
-    const { data, error } = await db
-      .from('tool_model_configs')
-      .select('*')
-      .order('tool_id');
+    // 获取所有工具及其模型配置
+    const { data: tools, error: toolsError } = await client
+      .from('utility_tools')
+      .select(`
+        id,
+        name,
+        slug,
+        icon,
+        description,
+        model_provider_id,
+        model_name,
+        utility_groups(name, slug)
+      `)
+      .order('name');
 
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: '获取配置失败' }, { status: 500 });
+    if (toolsError) {
+      return NextResponse.json({ error: '获取工具失败' }, { status: 500 });
     }
 
-    // 附加模型选项信息
-    const configs = (data || []).map((config: ToolModelConfig) => {
-      const source = config.model_source;
-      const modelOptions = source === '4sapi' ? AVAILABLE_MODELS['4sapi'] : AVAILABLE_MODELS.coze;
-      const currentModel = modelOptions.find(m => m.id === config.default_model);
-      
-      return {
-        ...config,
-        model_info: currentModel,
-        model_options: modelOptions,
-        available_sources: [
-          { id: 'coze', name: '扣子免费模型', models: AVAILABLE_MODELS.coze },
-          { id: '4sapi', name: '4sAPI付费模型', models: AVAILABLE_MODELS['4sapi'] },
-        ]
-      };
-    });
+    // 获取所有提供商和模型
+    const { data: providers } = await client
+      .from('model_providers')
+      .select('*, models(*)')
+      .eq('is_active', true)
+      .order('is_system', { ascending: false });
 
-    return NextResponse.json({
-      success: true,
-      configs: configs || [],
-      available_models: AVAILABLE_MODELS,
+    // 按类型分组
+    const providersByType = providers?.reduce((acc, p) => {
+      if (!acc[p.provider_type]) acc[p.provider_type] = [];
+      acc[p.provider_type].push(p);
+      return acc;
+    }, {} as Record<string, any[]>) || {};
+
+    // 组合数据
+    const configs = (tools || []).map((tool: any) => ({
+      id: tool.id,
+      tool_id: tool.slug,
+      tool_name: tool.name,
+      tool_icon: tool.icon,
+      tool_description: tool.description,
+      tool_group: tool.utility_groups?.name,
+      model_provider_id: tool.model_provider_id,
+      model_name: tool.model_name,
+      available_providers: providersByType,
+    }));
+
+    return NextResponse.json({ 
+      data: configs,
+      providers: providersByType,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error:', error);
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-// PUT - 批量更新配置
+// PUT - 更新工具的模型配置
 export async function PUT(request: NextRequest) {
   try {
-    const db = getSupabase();
-    if (!db) {
-      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
-    }
-    
+    const client = getSupabaseClient();
     const body = await request.json();
-    const { configs } = body;
-
-    if (!configs || !Array.isArray(configs)) {
-      return NextResponse.json({ error: '无效的配置数据' }, { status: 400 });
-    }
-
-    const results = [];
-    for (const config of configs) {
-      const { data, error } = await db
-        .from('tool_model_configs')
-        .update({
-          default_model: config.default_model,
-          model_source: config.model_source,
-          model_price_per_1k_tokens: config.model_price_per_1k_tokens || 0,
-          is_free: config.is_free ?? true,
-          is_active: config.is_active ?? true,
-          config_params: config.config_params ? JSON.stringify(config.config_params) : null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('tool_id', config.tool_id)
-        .select()
-        .single();
-
-      if (error) {
-        results.push({ tool_id: config.tool_id, success: false, error: error.message });
-      } else {
-        results.push({ tool_id: config.tool_id, success: true, data });
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      results,
-    });
-  } catch (error) {
-    console.error('Error:', error);
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
-  }
-}
-
-// POST - 获取单个工具的模型配置（供前台调用）
-export async function POST(request: NextRequest) {
-  try {
-    const db = getSupabase();
-    if (!db) {
-      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
-    }
-
-    const body = await request.json();
-    const { tool_id } = body;
+    const { tool_id, model_provider_id, model_name } = body;
 
     if (!tool_id) {
-      return NextResponse.json({ error: '请提供工具ID' }, { status: 400 });
+      return NextResponse.json({ error: '缺少工具ID' }, { status: 400 });
     }
 
-    const { data, error } = await db
-      .from('tool_model_configs')
-      .select('*')
-      .eq('tool_id', tool_id)
-      .eq('is_active', true)
+    const { data, error } = await client
+      .from('utility_tools')
+      .update({
+        model_provider_id,
+        model_name,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', tool_id)
+      .select()
       .single();
 
-    if (error || !data) {
-      return NextResponse.json({ error: '工具配置不存在' }, { status: 404 });
+    if (error) {
+      return NextResponse.json({ error: '更新失败' }, { status: 500 });
     }
 
-    const config = data as ToolModelConfig;
-
-    return NextResponse.json({
-      success: true,
-      config: {
-        tool_id: config.tool_id,
-        tool_name: config.tool_name,
-        tool_type: config.tool_type,
-        default_model: config.default_model,
-        model_source: config.model_source,
-        is_free: config.is_free,
-        config_params: config.config_params,
-      }
-    });
-  } catch (error) {
+    return NextResponse.json({ data });
+  } catch (error: any) {
     console.error('Error:', error);
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -5,43 +5,42 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, Save, RefreshCw, AlertTriangle, Check, DollarSign } from 'lucide-react';
+import { Loader2, Save, RefreshCw, AlertTriangle, DollarSign, Globe, Bot } from 'lucide-react';
 
-interface ModelConfig {
+interface ModelProvider {
   id: number;
-  tool_id: string;
-  tool_name: string;
-  tool_type: string;
-  default_model: string;
-  model_source: string;
-  model_price_per_1k_tokens: number;
-  is_free: boolean;
-  is_active: boolean;
-  config_params: any;
-  model_info?: any;
-  available_sources: Array<{
-    id: string;
+  name: string;
+  slug: string;
+  provider_type: string;
+  is_system: boolean;
+  models: Array<{
+    id: number;
     name: string;
-    models: Array<{
-      id: string;
-      name: string;
-      isFree?: boolean;
-      price?: number;
-      maxTokens?: number;
-      type?: string;
-    }>;
+    display_name: string;
+    description: string;
+    is_available: boolean;
   }>;
 }
 
+interface ToolConfig {
+  id: number;
+  tool_id: string;
+  tool_name: string;
+  tool_icon?: string;
+  tool_description?: string;
+  tool_group?: string;
+  model_provider_id: number | null;
+  model_name: string | null;
+}
+
 export default function ToolModelsPage() {
-  const [configs, setConfigs] = useState<ModelConfig[]>([]);
+  const [configs, setConfigs] = useState<ToolConfig[]>([]);
+  const [providers, setProviders] = useState<Record<string, ModelProvider[]>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<string>('all');
 
   // 获取配置
   const fetchConfigs = async () => {
@@ -49,8 +48,11 @@ export default function ToolModelsPage() {
     try {
       const res = await fetch('/api/admin/tool-models');
       const data = await res.json();
-      if (data.success) {
-        setConfigs(data.configs);
+      if (data.data) {
+        setConfigs(data.data);
+      }
+      if (data.providers) {
+        setProviders(data.providers);
       }
     } catch (error) {
       console.error('获取配置失败:', error);
@@ -64,21 +66,10 @@ export default function ToolModelsPage() {
   }, []);
 
   // 更新单个配置
-  const updateConfig = (toolId: string, field: string, value: any) => {
+  const updateConfig = (toolId: number, field: string, value: any) => {
     setConfigs(prev => prev.map(c => {
-      if (c.tool_id === toolId) {
-        const updated = { ...c, [field]: value };
-        // 如果切换了模型来源，重置相关字段
-        if (field === 'model_source') {
-          const sourceModels = value === '4sapi' 
-            ? c.available_sources?.find(s => s.id === '4sapi')?.models
-            : c.available_sources?.find(s => s.id === 'coze')?.models;
-          if (sourceModels && sourceModels.length > 0) {
-            updated.default_model = sourceModels[0].id;
-            updated.is_free = value !== '4sapi';
-          }
-        }
-        return updated;
+      if (c.id === toolId) {
+        return { ...c, [field]: value };
       }
       return c;
     }));
@@ -89,26 +80,20 @@ export default function ToolModelsPage() {
   const saveConfigs = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/admin/tool-models', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          configs: configs.map(c => ({
-            tool_id: c.tool_id,
-            default_model: c.default_model,
-            model_source: c.model_source,
-            model_price_per_1k_tokens: c.model_price_per_1k_tokens,
-            is_free: c.is_free,
-            is_active: c.is_active,
-            config_params: c.model_info,
-          }))
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        setHasChanges(false);
-        setLastSaved(new Date().toLocaleTimeString('zh-CN'));
+      // 保存所有配置
+      for (const config of configs) {
+        await fetch('/api/admin/tool-models', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tool_id: config.id,
+            model_provider_id: config.model_provider_id,
+            model_name: config.model_name,
+          })
+        });
       }
+      setHasChanges(false);
+      setLastSaved(new Date().toLocaleTimeString('zh-CN'));
     } catch (error) {
       console.error('保存失败:', error);
     } finally {
@@ -116,11 +101,36 @@ export default function ToolModelsPage() {
     }
   };
 
-  // 获取当前工具选中的模型信息
-  const getSelectedModelInfo = (config: ModelConfig) => {
-    const source = config.available_sources?.find(s => s.id === config.model_source);
-    return source?.models.find(m => m.id === config.default_model);
+  // 获取工具的当前提供商
+  const getToolProvider = (config: ToolConfig) => {
+    const allProviders = Object.values(providers).flat();
+    return allProviders.find(p => p.id === config.model_provider_id);
   };
+
+  // 获取提供商的所有模型
+  const getProviderModels = (providerId: number) => {
+    const allProviders = Object.values(providers).flat();
+    const provider = allProviders.find(p => p.id === providerId);
+    return provider?.models || [];
+  };
+
+  // 获取提供商的类型标签
+  const getProviderTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
+      image: '图片生成',
+      llm: '大语言模型',
+      video: '视频生成',
+      audio: '音频处理',
+    };
+    return labels[type] || type;
+  };
+
+  // 过滤工具
+  const filteredConfigs = configs.filter(c => {
+    if (filterType === 'all') return true;
+    const provider = getToolProvider(c);
+    return provider?.provider_type === filterType;
+  });
 
   if (loading) {
     return (
@@ -137,7 +147,7 @@ export default function ToolModelsPage() {
         <div>
           <h2 className="text-2xl font-bold">模型配置</h2>
           <p className="text-sm text-slate-500 mt-1">
-            配置精选工具调用的AI模型，扣子内置模型免费，4sAPI模型需付费
+            配置精选工具调用的AI模型，支持扣子内置模型（免费）和4SAPI模型（付费）
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -146,11 +156,7 @@ export default function ToolModelsPage() {
               上次保存: {lastSaved}
             </span>
           )}
-          <Button
-            onClick={fetchConfigs}
-            variant="outline"
-            disabled={loading}
-          >
+          <Button onClick={fetchConfigs} variant="outline" disabled={loading}>
             <RefreshCw className="w-4 h-4 mr-2" />
             刷新
           </Button>
@@ -169,170 +175,184 @@ export default function ToolModelsPage() {
         </div>
       </div>
 
-      {/* 图例 */}
+      {/* 提供商概览 */}
       <Card className="bg-slate-50 dark:bg-slate-800/50">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                免费
-              </Badge>
-              <span className="text-slate-600">扣子内置模型，完全免费</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                <DollarSign className="w-3 h-3 mr-1" />
-                付费
-              </Badge>
-              <span className="text-slate-600">4sAPI模型，按量计费</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-                <AlertTriangle className="w-3 h-3 mr-1" />
-                停用
-              </Badge>
-              <span className="text-slate-600">该工具将暂停使用</span>
-            </div>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">模型提供商</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(providers).map(([type, typeProviders]) => (
+              typeProviders.map(provider => (
+                <div key={provider.id} className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-700 rounded-lg border">
+                  {provider.slug === 'coze' || provider.slug === 'coze-llm' ? (
+                    <Bot className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <Globe className="w-4 h-4 text-amber-600" />
+                  )}
+                  <div>
+                    <div className="font-medium text-sm">{provider.name}</div>
+                    <div className="text-xs text-slate-500">
+                      {getProviderTypeLabel(provider.provider_type)} · {provider.models.length} 个模型
+                    </div>
+                  </div>
+                  {provider.is_system && (
+                    <Badge variant="outline" className="ml-2 text-xs">系统</Badge>
+                  )}
+                </div>
+              ))
+            ))}
           </div>
         </CardContent>
       </Card>
 
+      {/* 类型筛选 */}
+      <div className="flex gap-2">
+        <Button
+          variant={filterType === 'all' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterType('all')}
+          className={filterType === 'all' ? 'bg-orange-500' : ''}
+        >
+          全部
+        </Button>
+        <Button
+          variant={filterType === 'image' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterType('image')}
+          className={filterType === 'image' ? 'bg-orange-500' : ''}
+        >
+          图片生成
+        </Button>
+        <Button
+          variant={filterType === 'llm' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setFilterType('llm')}
+          className={filterType === 'llm' ? 'bg-orange-500' : ''}
+        >
+          大语言模型
+        </Button>
+      </div>
+
       {/* 配置列表 */}
       <div className="space-y-4">
-        {configs.map(config => {
-          const selectedModel = getSelectedModelInfo(config);
-          const isPaidModel = config.model_source === '4sapi';
+        {filteredConfigs.map(config => {
+          const currentProvider = getToolProvider(config);
+          const currentModels = getProviderModels(config.model_provider_id || 0);
+          const isCoze = currentProvider?.slug?.includes('coze');
           
           return (
-            <Card key={config.id} className={!config.is_active ? 'opacity-60' : ''}>
+            <Card key={config.id}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <CardTitle className="text-lg">{config.tool_name}</CardTitle>
-                    <Badge variant="outline" className="text-xs">
-                      {config.tool_type}
-                    </Badge>
-                    {isPaidModel ? (
+                    {config.tool_icon ? (
+                      <span className="text-2xl">{config.tool_icon}</span>
+                    ) : (
+                      <Bot className="w-6 h-6 text-slate-400" />
+                    )}
+                    <div>
+                      <CardTitle className="text-lg">{config.tool_name}</CardTitle>
+                      {config.tool_description && (
+                        <p className="text-sm text-slate-500 mt-1 line-clamp-1">
+                          {config.tool_description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {isCoze ? (
+                      <Badge className="bg-green-100 text-green-700 border-green-200">
+                        免费
+                      </Badge>
+                    ) : (
                       <Badge className="bg-amber-100 text-amber-700 border-amber-200">
                         <DollarSign className="w-3 h-3 mr-1" />
                         付费
                       </Badge>
-                    ) : (
-                      <Badge className="bg-green-100 text-green-700 border-green-200">
-                        免费
-                      </Badge>
                     )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500">
-                      {config.is_active ? '启用' : '停用'}
-                    </span>
-                    <Switch
-                      checked={config.is_active}
-                      onCheckedChange={(checked) => updateConfig(config.tool_id, 'is_active', checked)}
-                    />
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* 模型来源 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 选择提供商 */}
                   <div className="space-y-2">
-                    <Label>模型来源</Label>
+                    <Label className="text-sm font-medium">模型提供商</Label>
                     <Select
-                      value={config.model_source}
-                      onValueChange={(value) => updateConfig(config.tool_id, 'model_source', value)}
-                      disabled={!config.is_active}
+                      value={String(config.model_provider_id || '')}
+                      onValueChange={(value) => {
+                        const providerId = parseInt(value);
+                        const models = getProviderModels(providerId);
+                        const firstModel = models[0];
+                        updateConfig(config.id, 'model_provider_id', providerId);
+                        updateConfig(config.id, 'model_name', firstModel?.name || '');
+                      }}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="选择提供商" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="coze">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-green-500" />
-                            扣子免费模型
+                        {Object.entries(providers).map(([type, typeProviders]) => (
+                          <div key={type}>
+                            <div className="px-2 py-1.5 text-xs font-medium text-slate-500">
+                              {getProviderTypeLabel(type)}
+                            </div>
+                            {typeProviders.map(provider => (
+                              <SelectItem key={provider.id} value={String(provider.id)}>
+                                <div className="flex items-center gap-2">
+                                  {provider.slug?.includes('coze') ? (
+                                    <Bot className="w-4 h-4 text-green-600" />
+                                  ) : (
+                                    <Globe className="w-4 h-4 text-amber-600" />
+                                  )}
+                                  <span>{provider.name}</span>
+                                  {provider.is_system && (
+                                    <Badge variant="outline" className="ml-2 text-xs">免费</Badge>
+                                  )}
+                                </div>
+                              </SelectItem>
+                            ))}
                           </div>
-                        </SelectItem>
-                        <SelectItem value="4sapi">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-amber-500" />
-                            4sAPI付费模型
-                          </div>
-                        </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
 
                   {/* 选择模型 */}
                   <div className="space-y-2">
-                    <Label>选择模型</Label>
+                    <Label className="text-sm font-medium">选择模型</Label>
                     <Select
-                      value={config.default_model}
-                      onValueChange={(value) => updateConfig(config.tool_id, 'default_model', value)}
-                      disabled={!config.is_active}
+                      value={config.model_name || ''}
+                      onValueChange={(value) => updateConfig(config.id, 'model_name', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="选择模型" />
                       </SelectTrigger>
                       <SelectContent>
-                        {config.available_sources?.find(s => s.id === config.model_source)?.models.map(model => (
-                          <SelectItem key={model.id} value={model.id}>
+                        {currentModels.map(model => (
+                          <SelectItem key={model.id} value={model.name} disabled={!model.is_available}>
                             <div className="flex items-center justify-between w-full">
-                              <span>{model.name}</span>
-                              {isPaidModel && model.price && (
-                                <Badge variant="outline" className="ml-2 text-xs">
-                                  ${model.price}/1K
-                                </Badge>
-                              )}
+                              <span>
+                                {model.display_name || model.name}
+                                {!model.is_available && ' (不可用)'}
+                              </span>
                             </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-
-                  {/* 当前配置信息 */}
-                  <div className="space-y-2">
-                    <Label>当前配置</Label>
-                    <div className="p-3 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm">
-                      {selectedModel ? (
-                        <div className="space-y-1">
-                          <div className="font-medium">{selectedModel.name}</div>
-                          <div className="text-slate-500">
-                            {isPaidModel ? (
-                              <span className="text-amber-600">
-                                ${selectedModel.price || 0}/1K tokens
-                              </span>
-                            ) : (
-                              <span className="text-green-600">免费使用</span>
-                            )}
-                          </div>
-                          {selectedModel.maxTokens && (
-                            <div className="text-slate-400 text-xs">
-                              最大 {selectedModel.maxTokens.toLocaleString()} tokens
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">未选择模型</span>
-                      )}
-                    </div>
-                  </div>
                 </div>
 
-                {/* 4sapi价格说明 */}
-                {isPaidModel && selectedModel?.price && (
-                  <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
-                    <div className="flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5" />
-                      <div className="text-sm text-amber-800 dark:text-amber-200">
-                        <p className="font-medium">付费模型说明</p>
-                        <p className="mt-1">
-                          当前选择的是4sAPI付费模型，每次调用将消耗账户余额。
-                          单次调用预估费用：约 ¥{((selectedModel.price * 1000) * 0.03).toFixed(4)}（按1000 tokens估算）
-                        </p>
-                      </div>
+                {/* 当前配置信息 */}
+                {currentProvider && config.model_name && (
+                  <div className="mt-4 p-3 bg-slate-100 dark:bg-slate-700 rounded-lg">
+                    <div className="text-sm">
+                      <span className="text-slate-500">当前配置：</span>
+                      <span className="font-medium">{currentProvider.name}</span>
+                      <span className="text-slate-400 mx-1">/</span>
+                      <span className="font-medium">{config.model_name}</span>
                     </div>
                   </div>
                 )}
@@ -342,29 +362,23 @@ export default function ToolModelsPage() {
         })}
       </div>
 
-      {/* 保存按钮（底部固定） */}
-      {hasChanges && (
-        <div className="fixed bottom-6 right-6 left-72">
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-4 flex items-center justify-between">
-            <span className="text-sm text-slate-600 dark:text-slate-300">
-              有未保存的更改
-            </span>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => setHasChanges(false)}>
-                取消
-              </Button>
-              <Button
-                onClick={saveConfigs}
-                disabled={saving}
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-                保存更改
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* 无工具提示 */}
+      {filteredConfigs.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center text-slate-500">
+            暂无工具配置
+          </CardContent>
+        </Card>
       )}
     </div>
+  );
+}
+
+// 添加 Label 组件
+function Label({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <label className={className}>
+      {children}
+    </label>
   );
 }

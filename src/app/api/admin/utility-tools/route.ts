@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('utility_tools')
-      .select('*, utility_groups(name, slug, icon, color)')
+      .select('*, utility_groups(name, slug, icon, color), model_providers(name, slug), models(display_name, name)')
       .order('sort_order', { ascending: true });
 
     if (!includeAll) {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = getSupabaseClient();
     const body = await request.json();
-    const { group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, model_config } = body;
+    const { group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, model_config, model_provider_id, model_name } = body;
 
     // 输入安全检查
     if (name && (containsXss(name) || containsSqlInjection(name))) {
@@ -91,7 +91,9 @@ export async function POST(request: NextRequest) {
           model_price_per_1k_tokens: 0,
           is_free: true,
           is_active: true,
-        }
+        },
+        model_provider_id: model_provider_id || 1,  // 默认使用扣子
+        model_name: model_name || 'coze-image',
       })
       .select()
       .single();
@@ -123,7 +125,7 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = getSupabaseClient();
     const body = await request.json();
-    const { id, group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, is_active, model_config } = body;
+    const { id, group_id, name, slug, icon, description, cover_image, color, sort_order, use_cases, is_active, model_config, model_provider_id, model_name } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: '缺少ID' }, { status: 400 });
@@ -155,6 +157,8 @@ export async function PUT(request: NextRequest) {
         use_cases,
         is_active,
         model_config,
+        model_provider_id,
+        model_name,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
