@@ -973,7 +973,7 @@ export default function UtilityToolsPage() {
 
       {/* 编辑工具弹框 - 宽敞布局 */}
       <Dialog open={toolDialogOpen} onOpenChange={setToolDialogOpen}>
-        <DialogContent className="w-[90vw] max-w-6xl max-h-[92vh] overflow-hidden p-0 flex flex-col">
+        <DialogContent className="w-[90vw] max-w-6xl max-h-[92vh] overflow-hidden p-0 flex flex-col z-[90]">
           {/* 头部 */}
           <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 shrink-0">
             <div className="flex items-center justify-between">
