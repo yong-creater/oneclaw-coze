@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('utility_tools')
-      .select('*')
+      .select('*, utility_groups(name, slug, icon, color), model_config')
       .order('sort_order', { ascending: true });
 
     if (!includeAll) {
