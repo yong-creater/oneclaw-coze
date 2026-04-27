@@ -49,7 +49,7 @@ export function ModelSelector({
   onSelect,
   currentProviderId,
   currentModelName,
-  providers,
+  providers = {},
 }: ModelSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('image');
