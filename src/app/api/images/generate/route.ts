@@ -39,7 +39,7 @@ async function generateWith4SAPI(
       return { success: false, error: '4sapi API密钥未配置' };
     }
     
-    const apiUrl = process.env.API4S_URL || 'https://api.4sapi.cn/v1';
+    const apiUrl = process.env.API4S_URL || 'https://4sapi.com/v1';
 
     // 构建请求体（OpenAI兼容格式）
     const requestBody: any = {
