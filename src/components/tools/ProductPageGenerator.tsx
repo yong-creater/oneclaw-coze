@@ -229,6 +229,7 @@ export default function ProductPageGenerator() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          tool_id: 'product-page-generator',
           platform,
           regions: selectedRegions,
           category,
@@ -240,7 +241,6 @@ export default function ProductPageGenerator() {
           tone,
           detailOptions,
           extraRequirements,
-          model: modelConfig?.default_model || 'coze-image',
         }),
       });
       
@@ -386,6 +386,7 @@ export default function ProductPageGenerator() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          tool_id: 'product-page-generator',
           platform,
           region: selectedRegions[0],
           category,

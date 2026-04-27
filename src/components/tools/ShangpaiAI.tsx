@@ -226,16 +226,16 @@ export default function ShangpaiAIPage() {
       
       setProgress('正在生成商品图...');
       
-      // 调用图像生成API
+      // 调用图像生成API - 传递tool_id以获取模型配置
       const response = await fetch('/api/images/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          tool_id: 'shangpai-ai',  // 传递工具ID以获取模型配置
           prompt,
           size: '2K',
           count: 1,
           image: inputMode === 'image' ? uploadedImage : undefined,
-          model: modelConfig?.default_model || 'coze-image',
         }),
       });
       

@@ -3,6 +3,57 @@
  */
 
 import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
+
+// 获取工具的模型配置
+export async function getToolModelConfig(toolId: string): Promise<{providerId: number; modelName: string; provider: string} | null> {
+  try {
+    const client = getSupabaseClient();
+    
+    // 支持 id 或 slug 查询
+    const query = client
+      .from('utility_tools')
+      .select('id, slug, model_provider_id, model_name, model_config')
+      .eq(isNaN(Number(toolId)) ? 'slug' : 'id', toolId);
+    
+    const { data: tool, error } = await query.single();
+    
+    if (error || !tool) {
+      console.error('查询工具失败:', error);
+      return null;
+    }
+    
+    // 如果有 provider_id 和 model_name，使用新配置方式
+    if (tool.model_provider_id && tool.model_name) {
+      // 获取 provider 信息
+      const { data: provider } = await client
+        .from('model_providers')
+        .select('slug')
+        .eq('id', tool.model_provider_id)
+        .single();
+      
+      return {
+        providerId: tool.model_provider_id,
+        modelName: tool.model_name,
+        provider: provider?.slug || 'unknown',
+      };
+    }
+    
+    // 兼容旧的 model_config 方式
+    if (tool.model_config) {
+      return {
+        providerId: tool.model_config.provider_id || 1,
+        modelName: tool.model_config.default_model || 'coze-image',
+        provider: tool.model_config.model_source || 'coze',
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('获取工具模型配置失败:', error);
+    return null;
+  }
+}
 
 // 图片生成模型映射
 const IMAGE_MODELS = {
@@ -107,6 +158,7 @@ function createCozeClient(customHeaders: Record<string, string> = {}) {
  * @param model 模型名称（如 'coze-image', 'gpt-image2'）
  * @param size 图片尺寸
  * @param customHeaders 自定义请求头
+ * @param toolId 可选的工具ID，用于获取模型配置
  * @param image 可选的参考图片（base64或URL）
  * @returns 图片URL数组或错误
  */
@@ -115,8 +167,22 @@ export async function generateWithModel(
   model: string = 'coze-image',
   size: string = '2K',
   customHeaders: Record<string, string> = {},
+  toolId?: string,
   image?: string | string[]
 ): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> {
+  // 如果传入了 toolId，优先从工具配置获取模型
+  if (toolId) {
+    try {
+      const modelInfo = await getToolModelConfig(toolId);
+      if (modelInfo) {
+        model = modelInfo.modelName || model;
+        console.log(`工具 ${toolId} 使用模型:`, model);
+      }
+    } catch (error) {
+      console.error('获取工具模型配置失败，使用默认模型:', error);
+    }
+  }
+
   const modelKey = model as ImageModel;
   const modelConfig = IMAGE_MODELS[modelKey] || IMAGE_MODELS['coze-image'];
 

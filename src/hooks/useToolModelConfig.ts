@@ -6,6 +6,8 @@ interface ToolModelConfig {
   tool_type: string;
   default_model: string;
   model_source: string;
+  model_provider_id?: number;
+  model_name?: string;
   model_price_per_1k_tokens: number;
   is_free: boolean;
   is_active: boolean;
@@ -21,7 +23,7 @@ interface ModelInfo {
 }
 
 /**
- * 获取工具的模型配置
+ * 获取工具的模型配置（支持新旧两种配置方式）
  * @param toolSlug 工具slug (如 'novel', 'resume', 'xhs-generator')
  * @returns 模型配置和加载状态
  */
@@ -42,30 +44,63 @@ export function useToolModelConfig(toolSlug: string) {
         const res = await fetch(`/api/utility-tools?slug=${toolSlug}`);
         const data = await res.json();
         
-        // API返回的是 data.tool（单个对象），不是 data.tools（数组）
-        const tool = data.tool || (data.tools && data.tools.find((t: any) => t.slug === toolSlug));
+        // API返回的是 data.tool（单个对象）
+        const tool = data.tool;
         
-        if (tool && tool.model_config) {
-          setConfig({
-            tool_id: tool.slug,
-            tool_name: tool.name,
-            tool_type: tool.slug,
-            default_model: tool.model_config.default_model || 'doubao-seed-1-8-251228',
-            model_source: tool.model_config.model_source || 'coze',
-            model_price_per_1k_tokens: tool.model_config.model_price_per_1k_tokens || 0,
-            is_free: tool.model_config.is_free !== false,
-            is_active: tool.model_config.is_active !== false,
-          });
+        if (tool) {
+          // 优先使用新的 provider + model_name 方式
+          if (tool.model_provider_id && tool.model_name) {
+            setConfig({
+              tool_id: tool.slug,
+              tool_name: tool.name,
+              tool_type: tool.slug,
+              default_model: tool.model_name,  // 使用数据库中的模型名
+              model_source: tool.model_provider_id === 1 || tool.model_provider_id === 2 ? 'coze' : '4sapi',
+              model_provider_id: tool.model_provider_id,
+              model_name: tool.model_name,
+              model_price_per_1k_tokens: tool.model_config?.model_price_per_1k_tokens || 0,
+              is_free: tool.model_config?.is_free !== false,
+              is_active: true,
+              config_params: tool.model_config?.config_params,
+            });
+          }
+          // 兼容旧的 model_config 方式
+          else if (tool.model_config) {
+            setConfig({
+              tool_id: tool.slug,
+              tool_name: tool.name,
+              tool_type: tool.slug,
+              default_model: tool.model_config.default_model || 'coze-image',
+              model_source: tool.model_config.model_source || 'coze',
+              model_price_per_1k_tokens: tool.model_config.model_price_per_1k_tokens || 0,
+              is_free: tool.model_config.is_free !== false,
+              is_active: tool.model_config.is_active !== false,
+              config_params: tool.model_config.config_params,
+            });
+          }
+          // 如果没有配置，使用默认配置
+          else {
+            setConfig({
+              tool_id: tool.slug,
+              tool_name: tool.name,
+              tool_type: tool.slug,
+              default_model: 'coze-image',
+              model_source: 'coze',
+              model_price_per_1k_tokens: 0,
+              is_free: true,
+              is_active: true,
+            });
+          }
           setLoading(false);
           return;
         }
         
-        // 如果没有配置，使用默认配置
+        // 工具不存在，使用默认配置
         setConfig({
           tool_id: toolSlug,
           tool_name: getToolName(toolSlug),
           tool_type: toolSlug,
-          default_model: 'doubao-seed-1-8-251228',
+          default_model: 'coze-image',
           model_source: 'coze',
           model_price_per_1k_tokens: 0,
           is_free: true,
@@ -88,7 +123,7 @@ export function useToolModelConfig(toolSlug: string) {
 /**
  * 获取工具名称
  */
-function getToolName(toolSlug: string): string {
+export function getToolName(toolSlug: string): string {
   const names: Record<string, string> = {
     'xhs-generator': '小红书爆款生成器',
     'resume': '简历优化器',
@@ -96,94 +131,8 @@ function getToolName(toolSlug: string): string {
     'ai-photo': 'AI写真生成器',
     'product-poster': '商品海报生成器',
     'background-removal': 'AI智能抠图',
+    'shangpai-ai': '商拍AI',
+    'product-page-generator': '商品主图生成器',
   };
   return names[toolSlug] || toolSlug;
-}
-
-/**
- * 获取默认模型ID
- */
-export function getDefaultModel(toolSlug: string): string {
-  const DEFAULT_MODELS: Record<string, string> = {
-    'novel-polish': 'ep-20250312145957-p8xpp',
-    'novel-script': 'ep-20250312145957-p8xpp',
-    'novel-split-panel': 'ep-20250312145957-p8xpp',
-    'novel-generate-image': 'coze-image',
-    'product-compliance': 'ep-20250312145957-p8xpp',
-    'product-enhance': 'coze-image',
-    'background-removal': 'coze-image',
-    'xhs-generator': 'ep-20250312145957-p8xpp',
-    'resume': 'ep-20250312145957-p8xpp',
-    // 别名
-    'novel': 'ep-20250312145957-p8xpp',
-    'script': 'ep-20250312145957-p8xpp',
-    'polish': 'ep-20250312145957-p8xpp',
-  };
-  
-  return DEFAULT_MODELS[toolSlug] || 'ep-20250312145957-p8xpp';
-}
-
-/**
- * 获取 4S API 模型列表（从 API 动态获取）
- */
-export async function fetch4SModels(): Promise<ModelInfo[]> {
-  try {
-    const res = await fetch('/api/4sapi/models');
-    const data = await res.json();
-    
-    if (data.success && data.models) {
-      return data.models.map((m: any) => ({
-        id: m.id,
-        name: m.name,
-        type: m.type,
-        price: m.input_price || m.output_price || 0,
-        isFree: false,
-      }));
-    }
-    return [];
-  } catch (error) {
-    console.error('获取 4S 模型列表失败:', error);
-    return [];
-  }
-}
-
-/**
- * 模型列表（用于前端展示和选择）
- * 扣子模型是固定的，4S API 模型动态获取
- */
-export const COZE_MODELS: ModelInfo[] = [
-  { id: 'ep-20250312145957-p8xpp', name: 'Doubao-Pro (扣子)', type: 'chat', price: 0, isFree: true },
-  { id: 'ep-20250410165509-dtk4n', name: 'Doubao-Seed (扣子)', type: 'chat', price: 0, isFree: true },
-];
-
-export const IMAGE_MODELS: ModelInfo[] = [
-  { id: 'coze-image', name: '扣子图像模型', type: 'image', price: 0, isFree: true },
-];
-
-/**
- * 根据模型ID获取模型信息
- */
-export function getModelInfo(modelId: string): ModelInfo {
-  // 检查扣子模型
-  const cozeModel = COZE_MODELS.find(m => m.id === modelId);
-  if (cozeModel) return cozeModel;
-  
-  // 检查图像模型
-  const imageModel = IMAGE_MODELS.find(m => m.id === modelId);
-  if (imageModel) return imageModel;
-  
-  // 默认返回扣子模型
-  return COZE_MODELS[0];
-}
-
-/**
- * 计算费用
- */
-export function calculateCost(inputTokens: number, outputTokens: number, modelId: string): number {
-  const model = getModelInfo(modelId);
-  if (model.isFree) return 0;
-  
-  // 假设输入和输出 token 价格相同
-  const totalTokens = inputTokens + outputTokens;
-  return (totalTokens / 1000) * model.price;
 }

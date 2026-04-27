@@ -77,6 +77,7 @@ const CULTURE_CONFIG: Record<string, {
 export async function POST(request: NextRequest) {
   try {
     const {
+      tool_id,
       platform,
       regions,
       category,
@@ -88,7 +89,6 @@ export async function POST(request: NextRequest) {
       tone,
       detailOptions,
       extraRequirements,
-      model = 'coze-image',
     } = await request.json();
 
     if (!sellingPoints) {
@@ -146,9 +146,10 @@ ${sellingPoints}
     // 调用图片生成API
     const result = await generateWithModel(
       prompt,
-      model,
+      'coze-image',  // 默认模型，API会通过tool_id获取实际配置
       '2K',
-      customHeaders
+      customHeaders,
+      tool_id  // 传递工具ID
     );
     
     if (!result.success || !result.imageUrls?.[0]) {
