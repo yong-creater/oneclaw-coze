@@ -327,7 +327,7 @@ export default function HomePage() {
   const router = useRouter();
   
   // 主Tab状态 - 默认精选工具
-  const [mainTab, setMainTab] = = useState<MainTab>('utilities');
+  const [mainTab, setMainTab] = useState<MainTab>('utilities');
 
   // 页面加载时，从 sessionStorage 读取返回的 tab
   useEffect(() => {
