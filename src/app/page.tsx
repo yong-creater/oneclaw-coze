@@ -112,6 +112,7 @@ function UtilityToolsPage() {
       'background-removal': '/background-removal',
       'xiaohongshu-generator': '/xiaohongshu-generator',
       'product-poster': '/product-poster',
+      'product-set': '/product-set',
       'ai-photo': '/ai-photo',
     };
     return urls[slug] || '/';
