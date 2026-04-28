@@ -263,42 +263,16 @@ export default function UtilityToolsPage() {
       const data = await res.json();
       console.log('[fetchProviders] API 返回数据:', data);
       
-      // 提取 available_providers（去重）
-      if (data.success && data.data && data.data.length > 0) {
-        // 使用 Map 去重，key 是 provider 的 id
-        const providerMap: Record<string, Map<number, any>> = {
-          image: new Map(),
-          llm: new Map(),
-          video: new Map(),
-          audio: new Map(),
-        };
-        
-        data.data.forEach((tool: any) => {
-          if (tool.available_providers) {
-            Object.entries(tool.available_providers).forEach(([type, providers]) => {
-              if (providerMap[type]) {
-                (providers as any[]).forEach(p => {
-                  // 用 id 去重
-                  providerMap[type].set(p.id, p);
-                });
-              }
-            });
-          }
+      // 直接使用 API 返回的 providers（所有已配置的模型提供商）
+      // API 已经按类型分组：image, llm, video, audio
+      if (data.success && data.providers) {
+        console.log('[fetchProviders] 使用 API 返回的 providers:', {
+          image: data.providers.image?.length || 0,
+          llm: data.providers.llm?.length || 0,
+          video: data.providers.video?.length || 0,
+          audio: data.providers.audio?.length || 0,
         });
-        
-        // 转换为数组
-        const allProviders: Record<string, any[]> = {
-          image: Array.from(providerMap.image.values()),
-          llm: Array.from(providerMap.llm.values()),
-          video: Array.from(providerMap.audio.values()), // video 用 audio 的数据
-          audio: Array.from(providerMap.audio.values()),
-        };
-        
-        console.log('[fetchProviders] 提取的 providers:', {
-          image: allProviders.image.length,
-          llm: allProviders.llm.length,
-        });
-        setProviders(allProviders);
+        setProviders(data.providers);
       } else if (data.error) {
         console.error('获取模型提供商失败:', data.error);
       }
