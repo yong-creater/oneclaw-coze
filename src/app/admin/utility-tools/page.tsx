@@ -1016,7 +1016,7 @@ export default function UtilityToolsPage() {
 	              </div>
 	              <div>
 	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">排序值</label>
-	                <Input type="number" value={toolForm.sort_order} onChange={(e) => setToolForm({ ...toolForm, sort_order: parseInt(e.target.value) || 0 })} />
+	                <Input type="number" value={toolForm.sort_order} onChange={(e) => setToolForm({ ...toolForm, sort_order: parseInt(e.target.value) || 0 })} className="rounded-xl" />
 	              </div>
 	            </div>
 
