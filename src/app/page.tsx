@@ -13,7 +13,8 @@ import {
   BookOpen, Lightbulb, Copy, Check, ArrowRight,
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
   FileText, Globe, TrendingUp, Scissors, Layout,
-  Camera, Palette, Sparkle, LayoutTemplate
+  Camera, Palette, Sparkle, LayoutTemplate,
+  Package, Layers, Shirt, ShoppingBag, Heart
 } from 'lucide-react';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
@@ -118,6 +119,18 @@ function UtilityToolsPage() {
     return urls[slug] || '/';
   };
 
+  // 图标映射
+  const iconMap: Record<string, any> = {
+    FileText, Feather, Scissors, Camera, Heart, Package, Layers, 
+    Shirt: Shirt, ShoppingBag, Palette, Globe, Star, Wand2, Sparkles
+  };
+
+  const getIcon = (iconName: string | null) => {
+    if (!iconName || !iconMap[iconName]) return null;
+    const Icon = iconMap[iconName];
+    return <Icon className="w-12 h-12 text-white" />;
+  };
+
   // 工具卡片组件
   const ToolCard = ({ tool }: { tool: any }) => (
     <button
@@ -134,9 +147,13 @@ function UtilityToolsPage() {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-5xl font-bold text-white/30">
-              {tool.name[0]}
-            </span>
+            {tool.icon && getIcon(tool.icon) ? (
+              <div className="opacity-40">{getIcon(tool.icon)}</div>
+            ) : (
+              <span className="text-5xl font-bold text-white/30">
+                {tool.name[0]}
+              </span>
+            )}
           </div>
         )}
       </div>
