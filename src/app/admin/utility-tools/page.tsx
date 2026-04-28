@@ -1004,7 +1004,8 @@ export default function UtilityToolsPage() {
 	            {/* 分组和排序 */}
 	            <div className="grid grid-cols-2 gap-4">
 	              <div>
-	                <Select value={toolForm.group_id.toString()} onValueChange={(value) => setToolForm({ ...toolForm, group_id: parseInt(value) })}>
+	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">所属分组</label>
+                <Select value={toolForm.group_id.toString()} onValueChange={(value) => setToolForm({ ...toolForm, group_id: parseInt(value) })}>
 	                  <SelectTrigger className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-transparent dark:bg-input/30 text-slate-800 dark:text-slate-200 text-sm hover:border-orange-400 dark:hover:border-orange-500 focus:border-orange-500 focus:outline-none transition-colors">
 	                    <SelectValue placeholder="选择分组" />
 	                  </SelectTrigger>
