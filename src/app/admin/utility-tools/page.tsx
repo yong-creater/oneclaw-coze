@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -1029,10 +1030,14 @@ export default function UtilityToolsPage() {
 	            {/* 分组和排序 */}
 	            <div className="grid grid-cols-2 gap-4">
 	              <div>
-	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">所属分组</label>
-	                <select value={toolForm.group_id} onChange={(e) => setToolForm({ ...toolForm, group_id: parseInt(e.target.value) })} className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-transparent dark:bg-input/30 text-slate-800 dark:text-slate-200 text-sm hover:border-orange-400 dark:hover:border-orange-500 focus:border-orange-500 focus:outline-none transition-colors">
-	                  {groups.map(g => (<option key={g.id} value={g.id}>{g.name}</option>))}
-	                </select>
+	                <Select value={toolForm.group_id.toString()} onValueChange={(value) => setToolForm({ ...toolForm, group_id: parseInt(value) })}>
+	                  <SelectTrigger className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-transparent dark:bg-input/30 text-slate-800 dark:text-slate-200 text-sm hover:border-orange-400 dark:hover:border-orange-500 focus:border-orange-500 focus:outline-none transition-colors">
+	                    <SelectValue placeholder="选择分组" />
+	                  </SelectTrigger>
+	                  <SelectContent>
+	                    {groups.map(g => (<SelectItem key={g.id} value={g.id.toString()}>{g.name}</SelectItem>))}
+	                  </SelectContent>
+	                </Select>
 	              </div>
 	              <div>
 	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">排序值</label>
