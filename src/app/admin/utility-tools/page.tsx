@@ -66,16 +66,10 @@ interface UtilityTool {
   color: string;
   sort_order: number;
   is_active: boolean;
-  use_cases: UseCase[];
   utility_groups?: { name: string; slug: string; icon: string; color: string };
   model_config?: ModelConfig;
   model_provider_id?: number | null;
   model_name?: string | null;
-}
-
-interface UseCase {
-  title: string;
-  desc: string;
 }
 
 interface ToolStats {
@@ -336,7 +330,6 @@ export default function UtilityToolsPage() {
     cover_image: '',
     color: 'from-orange-500 to-amber-500',
     sort_order: 0,
-    use_cases: [] as UseCase[],
     model_provider_id: null as number | null,
     model_name: null as string | null,
   });
@@ -503,7 +496,6 @@ export default function UtilityToolsPage() {
         body: JSON.stringify({
           ...toolForm,
           id: editingTool?.id,
-          use_cases: toolForm.use_cases,
           model_provider_id: toolForm.model_provider_id,
           model_name: toolForm.model_name,
         })
@@ -540,7 +532,6 @@ export default function UtilityToolsPage() {
       cover_image: '',
       color: 'from-orange-500 to-amber-500',
       sort_order: 0,
-      use_cases: [],
       model_provider_id: null,
       model_name: null,
     });
@@ -575,35 +566,12 @@ export default function UtilityToolsPage() {
       cover_image: tool.cover_image || '',
       color: tool.color,
       sort_order: tool.sort_order,
-      use_cases: tool.use_cases || [],
       model_provider_id: tool.model_provider_id || null,
       model_name: tool.model_name || null,
     });
     setToolDialogOpen(true);
   };
 
-  // 添加产品亮点
-  const addUseCase = () => {
-    setToolForm({
-      ...toolForm,
-      use_cases: [...toolForm.use_cases, { title: '', desc: '' }]
-    });
-  };
-
-  // 移除产品亮点
-  const removeUseCase = (index: number) => {
-    setToolForm({
-      ...toolForm,
-      use_cases: toolForm.use_cases.filter((_, i) => i !== index)
-    });
-  };
-
-  // 更新产品亮点
-  const updateUseCase = (index: number, field: 'title' | 'desc', value: string) => {
-    const newUseCases = [...toolForm.use_cases];
-    newUseCases[index][field] = value;
-    setToolForm({ ...toolForm, use_cases: newUseCases });
-  };
 
   // 获取工具统计
   const getToolStats = (slug: string) => {
@@ -717,7 +685,6 @@ export default function UtilityToolsPage() {
                     <TableHead>名称</TableHead>
                     <TableHead>分组</TableHead>
                     <TableHead>AI模型</TableHead>
-                    <TableHead>亮点数</TableHead>
                     <TableHead>使用次数</TableHead>
                     <TableHead>操作</TableHead>
                   </TableRow>
@@ -776,7 +743,6 @@ export default function UtilityToolsPage() {
                             </Button>
                           )}
                         </TableCell>
-                        <TableCell>{tool.use_cases?.length || 0}</TableCell>
                         <TableCell>
                           <span className="text-orange-600 font-medium">{stats?.total_usage || 0}</span>
                         </TableCell>
@@ -1064,7 +1030,7 @@ export default function UtilityToolsPage() {
 	            <div className="grid grid-cols-2 gap-4">
 	              <div>
 	                <label className="text-xs font-medium text-slate-500 mb-1.5 block">所属分组</label>
-	                <select value={toolForm.group_id} onChange={(e) => setToolForm({ ...toolForm, group_id: parseInt(e.target.value) })} className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-sm hover:border-orange-400 focus:border-orange-500 focus:outline-none transition-colors">
+	                <select value={toolForm.group_id} onChange={(e) => setToolForm({ ...toolForm, group_id: parseInt(e.target.value) })} className="w-full px-4 py-2.5 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-transparent dark:bg-input/30 text-slate-800 dark:text-slate-200 text-sm hover:border-orange-400 dark:hover:border-orange-500 focus:border-orange-500 focus:outline-none transition-colors">
 	                  {groups.map(g => (<option key={g.id} value={g.id}>{g.name}</option>))}
 	                </select>
 	              </div>
@@ -1100,32 +1066,6 @@ export default function UtilityToolsPage() {
 	              )}
 	            </div>
 
-	            {/* 产品亮点 */}
-	            <div>
-	              <div className="flex items-center justify-between mb-2">
-	                <label className="text-xs font-medium text-slate-500">产品亮点</label>
-	                <Button variant="outline" size="sm" onClick={addUseCase} className="h-7 text-xs border-orange-200 text-orange-600 hover:bg-orange-50">
-	                  + 添加亮点
-	                </Button>
-	              </div>
-	              <div className="space-y-2">
-	                {toolForm.use_cases.map((uc, index) => (
-	                  <div key={index} className="flex items-start gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-	                    <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 text-xs flex items-center justify-center font-medium shrink-0 mt-0.5">{index + 1}</span>
-	                    <div className="flex-1 space-y-1">
-	                      <Input value={uc.title} onChange={(e) => updateUseCase(index, 'title', e.target.value)} placeholder="亮点标题" className="h-7 text-xs" />
-	                      <Input value={uc.desc} onChange={(e) => updateUseCase(index, 'desc', e.target.value)} placeholder="亮点描述" className="h-7 text-xs" />
-	                    </div>
-	                    <Button variant="ghost" size="icon" onClick={() => removeUseCase(index)} className="h-7 w-7 text-slate-400 hover:text-red-500 shrink-0">
-	                      <X className="w-3.5 h-3.5" />
-	                    </Button>
-	                  </div>
-	                ))}
-	                {toolForm.use_cases.length === 0 && (
-	                  <p className="text-xs text-slate-400 text-center py-4">暂无亮点，点击上方按钮添加</p>
-	                )}
-	              </div>
-	            </div>
 
 	            {/* 图标颜色 */}
 	            {!toolForm.cover_image && (
