@@ -106,6 +106,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '创建失败' }, { status: 500 });
     }
 
+    // 同步创建 tool_model_configs 表记录（工具与模型的关联）
+    if (data && model_provider_id && model_name) {
+      const { data: provider } = await supabase
+        .from('model_providers')
+        .select('slug, provider_type')
+        .eq('id', model_provider_id)
+        .single();
+      
+      if (provider) {
+        await supabase
+          .from('tool_model_configs')
+          .insert({
+            tool_slug: slug,
+            model_source: provider.slug,
+            default_model: model_name,
+            model_type: provider.provider_type,
+            is_active: true
+          });
+      }
+    }
+
     await logSuccess(auth.user, 'CREATE', 'UTILITY_TOOL', data.id, name, { slug }, request);
     return NextResponse.json(data);
   } catch (error) {
@@ -168,6 +189,56 @@ export async function PUT(request: NextRequest) {
     if (error) {
       await logFailure(auth.user, 'UPDATE', 'UTILITY_TOOL', error.message, request);
       return NextResponse.json({ success: false, error: '更新失败' }, { status: 500 });
+    }
+
+    // 同步更新 tool_model_configs 表（工具与模型的关联）
+    if (model_provider_id && model_name) {
+      // 获取提供商信息以推断 model_source
+      const { data: provider } = await supabase
+        .from('model_providers')
+        .select('slug, provider_type')
+        .eq('id', model_provider_id)
+        .single();
+      
+      if (provider) {
+        // 检查是否已存在配置
+        const { data: existingConfig } = await supabase
+          .from('tool_model_configs')
+          .select('id')
+          .eq('tool_slug', slug)
+          .single();
+        
+        if (existingConfig) {
+          // 更新现有配置
+          await supabase
+            .from('tool_model_configs')
+            .update({
+              model_source: provider.slug,
+              default_model: model_name,
+              model_type: provider.provider_type,
+              is_active: true,
+              updated_at: new Date().toISOString()
+            })
+            .eq('tool_slug', slug);
+        } else {
+          // 创建新配置
+          await supabase
+            .from('tool_model_configs')
+            .insert({
+              tool_slug: slug,
+              model_source: provider.slug,
+              default_model: model_name,
+              model_type: provider.provider_type,
+              is_active: true
+            });
+        }
+      }
+    } else if (!model_provider_id || !model_name) {
+      // 如果清空了模型配置，也删除 tool_model_configs 中的记录
+      await supabase
+        .from('tool_model_configs')
+        .delete()
+        .eq('tool_slug', slug);
     }
 
     await logSuccess(auth.user, 'UPDATE', 'UTILITY_TOOL', id, oldData?.name || name, { changes: ['name', 'is_active', 'sort_order'] }, request);
