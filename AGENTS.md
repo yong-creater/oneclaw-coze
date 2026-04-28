@@ -959,3 +959,18 @@ curl -X POST http://localhost:5000/api/admin/tools/migrate
 - 已配置完整的 metadata
 - 支持 sitemap.xml 和 robots.txt
 - 包含 JSON-LD 结构化数据
+
+---
+
+## 代码规范
+
+详细规范请参考 [CODE_STANDARDS.md](./CODE_STANDARDS.md)，包括：
+
+- **目录结构**：app/components/hooks/lib 组织方式
+- **API 命名**：URL 命名、返回格式、RESTful 规范
+- **组件规范**：分类、命名、拆分原则
+- **认证规范**：admin/user 分离
+- **类型定义**：命名、内联/外置规范
+- **禁止事项**：重复代码、孤立代码、硬编码
+- **Git 规范**：提交信息格式
+- **代码审查**：自检清单
