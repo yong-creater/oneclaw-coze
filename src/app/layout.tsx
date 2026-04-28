@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next';
-import { Inspector } from 'react-dev-inspector';
 import Script from 'next/script';
 import { Providers } from '@/components/common/Providers';
 import './globals.css';
@@ -303,7 +302,6 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased" suppressHydrationWarning>
-        {isDev && <Inspector />}
         <Providers>{children}</Providers>
 
         {/* Google AdSense (暂时禁用，待配置好 ID 后启用)
