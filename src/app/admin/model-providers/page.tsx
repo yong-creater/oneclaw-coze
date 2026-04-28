@@ -172,6 +172,12 @@ export default function ModelProvidersPage() {
   };
 
   const fetchModelsFromAPI = async (provider: ModelProvider) => {
+    // 内置提供商不允许通过 API 获取
+    if (provider.is_system) {
+      alert('内置模型无法通过 API 获取，请联系系统管理员');
+      return;
+    }
+    
     if (!provider.api_key) {
       alert('该提供商未配置 API Key');
       return;
@@ -193,14 +199,8 @@ export default function ModelProvidersPage() {
       
       const data = await res.json();
       if (data.success) {
-        setProviderModels(prev => ({
-          ...prev,
-          [provider.id]: {
-            provider_id: provider.id,
-            models: data.models,
-            fetched_at: new Date().toISOString(),
-          }
-        }));
+        // 保存成功后，刷新模型列表
+        await loadProviderModels(provider.id);
       } else {
         alert(`获取失败: ${data.error}`);
       }
@@ -209,6 +209,45 @@ export default function ModelProvidersPage() {
       alert('获取模型失败');
     } finally {
       setFetchingModels(null);
+    }
+  };
+
+  // 从 tool-models API 加载单个提供商的模型
+  const loadProviderModels = async (providerId: number) => {
+    try {
+      const res = await fetch('/api/admin/tool-models', {
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (data.success && data.providers) {
+        // 从 providers 中提取该提供商的模型
+        const allModels: any[] = [];
+        Object.entries(data.providers).forEach(([type, typeModels]) => {
+          (typeModels as any[]).forEach((item) => {
+            if (item.provider?.id === providerId) {
+              allModels.push({
+                id: item.model.id,
+                name: item.model.name,
+                display_name: item.model.display_name || item.model.name,
+                description: item.model.description || '',
+                pricing: item.model.pricing || {},
+                is_available: item.model.is_available,
+              });
+            }
+          });
+        });
+        
+        setProviderModels(prev => ({
+          ...prev,
+          [providerId]: {
+            provider_id: providerId,
+            models: allModels,
+            fetched_at: new Date().toISOString(),
+          }
+        }));
+      }
+    } catch (error) {
+      console.error('加载模型列表失败:', error);
     }
   };
 
@@ -286,7 +325,13 @@ export default function ModelProvidersPage() {
               {providers.map((provider) => (
                 <div
                   key={provider.id}
-                  onClick={() => setSelectedProvider(provider)}
+                  onClick={async () => {
+                    setSelectedProvider(provider);
+                    // 自动加载模型列表
+                    if (!providerModels[provider.id]) {
+                      await loadProviderModels(provider.id);
+                    }
+                  }}
                   className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                     selectedProvider?.id === provider.id
                       ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
@@ -362,10 +407,12 @@ export default function ModelProvidersPage() {
               {selectedProvider && (
                 <p className="text-xs text-slate-500 mt-2">
                   {providerModels[selectedProvider.id]?.fetched_at 
-                    ? `最后更新: ${new Date(providerModels[selectedProvider.id].fetched_at!).toLocaleString()}`
-                    : selectedProvider.has_api_key 
-                      ? '点击"刷新模型"通过 API 获取最新数据'
-                      : '该提供商未配置 API Key，无法获取模型列表'
+                    ? `模型数量: ${providerModels[selectedProvider.id].models?.length || 0}`
+                    : selectedProvider.is_system
+                      ? '内置模型，数据来自系统'
+                      : selectedProvider.has_api_key 
+                        ? '点击"刷新模型"通过 API 获取最新数据'
+                        : '该提供商未配置 API Key'
                   }
                 </p>
               )}
@@ -378,15 +425,25 @@ export default function ModelProvidersPage() {
                   </div>
                   <p>请选择左侧的提供商</p>
                 </div>
-              ) : !selectedProvider.has_api_key ? (
+              ) : !providerModels[selectedProvider.id]?.models?.length && !selectedProvider.is_system ? (
                 <div className="text-center py-12 text-slate-400">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
                     <EyeOff className="w-8 h-8" />
                   </div>
-                  <p>该提供商未配置 API Key</p>
-                  <p className="text-sm mt-1">编辑提供商并填写 API Key</p>
+                  <p>暂无模型数据</p>
+                  {selectedProvider.has_api_key && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-4"
+                      onClick={() => fetchModelsFromAPI(selectedProvider)}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      刷新模型
+                    </Button>
+                  )}
                 </div>
-              ) : providerModels[selectedProvider.id]?.error ? (
+              ) : providerModels[selectedProvider.id]?.models?.length === 0 && selectedProvider.is_system ? (
                 <div className="text-center py-12 text-red-400">
                   <p>获取失败: {providerModels[selectedProvider.id]?.error}</p>
                 </div>
