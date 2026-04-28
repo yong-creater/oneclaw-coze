@@ -3,12 +3,15 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, ArrowRight, Check, ShoppingBag, Settings, Image as ImageIcon, Zap, Layers, Globe } from 'lucide-react';
-import { ProductCase } from '@/data/caseStudies';
+import { ProductCase, PRODUCT_CASES } from '@/data/caseStudies';
+import BackToHome from '@/components/common/BackToHome';
+import WechatPromo from '@/components/common/WechatPromo';
 
 // ============================================================
 // 配置常量
@@ -48,6 +51,33 @@ const RATIO_OPTIONS = [
 ];
 
 // ============================================================
+// 页面组件
+// ============================================================
+
+export default function CaseDetailPage() {
+  const params = useParams();
+  const key = params.key as string;
+  
+  // 查找匹配的案例
+  const productCase = PRODUCT_CASES.find(c => c.id === key);
+  
+  if (!productCase) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">案例不存在</h1>
+          <Link href="/">
+            <Button>返回首页</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+  
+  return <ProductCaseStudy caseData={productCase} />;
+}
+
+// ============================================================
 // 案例详情页组件
 // ============================================================
 
@@ -55,7 +85,7 @@ interface ProductCaseStudyProps {
   caseData: ProductCase;
 }
 
-export default function ProductCaseStudy({ caseData }: ProductCaseStudyProps) {
+function ProductCaseStudy({ caseData }: ProductCaseStudyProps) {
   const [activeRegion, setActiveRegion] = useState<string>('eu');
   const [showOriginal, setShowOriginal] = useState(false);
   const [config, setConfig] = useState({
@@ -96,17 +126,20 @@ export default function ProductCaseStudy({ caseData }: ProductCaseStudyProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto px-4">
       {/* ==================== 顶部标题 ==================== */}
       <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-            <Globe className="w-6 h-6" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+              <Globe className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">电商AI商品套图</h2>
+              <p className="text-sm text-white/80">一键生成全套电商视觉素材</p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-bold">电商AI商品套图</h2>
-            <p className="text-sm text-white/80">一键生成全套电商视觉素材</p>
-          </div>
+          <BackToHome />
         </div>
       </div>
 
@@ -511,6 +544,9 @@ export default function ProductCaseStudy({ caseData }: ProductCaseStudyProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* 公众号推广 */}
+      <WechatPromo />
     </div>
   );
 }
