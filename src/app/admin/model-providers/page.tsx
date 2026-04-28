@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, Check, ChevronDown, ChevronRight, Bot } from 'lucide-react';
 
 interface ModelProvider {
   id: number;
@@ -21,6 +21,15 @@ interface ModelProvider {
   is_active: boolean;
   is_system: boolean;
   created_at: string;
+}
+
+interface ProviderModel {
+  id: number;
+  name: string;
+  display_name: string | null;
+  provider_id: number;
+  is_available: boolean;
+  price_per_1k_tokens: number | null;
 }
 
 const PROVIDER_TYPES = [
@@ -37,6 +46,8 @@ export default function ModelProvidersPage() {
   const [editingProvider, setEditingProvider] = useState<ModelProvider | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [expandedProviders, setExpandedProviders] = useState<Set<number>>(new Set());
+  const [providerModels, setProviderModels] = useState<Record<number, ProviderModel[]>>({});
   
   // 表单数据
   const [formData, setFormData] = useState({
@@ -65,6 +76,51 @@ export default function ModelProvidersPage() {
       console.error('获取失败:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleExpand = async (providerId: number) => {
+    const newExpanded = new Set(expandedProviders);
+    if (newExpanded.has(providerId)) {
+      newExpanded.delete(providerId);
+    } else {
+      newExpanded.add(providerId);
+      // 如果还没加载过模型列表，则获取
+      if (!providerModels[providerId]) {
+        await fetchProviderModels(providerId);
+      }
+    }
+    setExpandedProviders(newExpanded);
+  };
+
+  const fetchProviderModels = async (providerId: number) => {
+    try {
+      const res = await fetch('/api/admin/tool-models', {
+        credentials: 'include'
+      });
+      const data = await res.json();
+      if (data.success && data.providers) {
+        // 找出该提供商下的所有模型
+        const allModels: ProviderModel[] = [];
+        const providersByType = data.providers as Record<string, any[]>;
+        Object.values(providersByType).forEach((typeModels) => {
+          typeModels.forEach((p) => {
+            if (p.provider && p.provider.id === providerId) {
+              allModels.push({
+                id: p.model.id,
+                name: p.model.name,
+                display_name: p.model.display_name,
+                provider_id: providerId,
+                is_available: p.model.is_available,
+                price_per_1k_tokens: p.model.price_per_1k_tokens,
+              });
+            }
+          });
+        });
+        setProviderModels(prev => ({ ...prev, [providerId]: allModels }));
+      }
+    } catch (error) {
+      console.error('获取模型列表失败:', error);
     }
   };
 
@@ -274,6 +330,18 @@ export default function ModelProvidersPage() {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => toggleExpand(provider.id)}
+                  >
+                    {expandedProviders.has(provider.id) ? (
+                      <ChevronDown className="w-4 h-4 mr-1" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4 mr-1" />
+                    )}
+                    模型
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => openEditDialog(provider)}
                   >
                     <Pencil className="w-4 h-4 mr-1" />
@@ -292,6 +360,44 @@ export default function ModelProvidersPage() {
                   )}
                 </div>
               </div>
+
+              {/* 模型列表 */}
+              {expandedProviders.has(provider.id) && (
+                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Bot className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      包含模型 ({providerModels[provider.id]?.length || 0})
+                    </span>
+                  </div>
+                  {providerModels[provider.id]?.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {providerModels[provider.id].map((model) => (
+                        <div
+                          key={model.id}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                        >
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            {model.display_name || model.name}
+                          </span>
+                          <code className="text-xs text-slate-500">{model.name}</code>
+                          {model.price_per_1k_tokens ? (
+                            <Badge variant="outline" className="text-xs">
+                              ${model.price_per_1k_tokens}/1M
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs text-green-600">
+                              免费
+                            </Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">暂无模型</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -336,9 +442,14 @@ export default function ModelProvidersPage() {
                 <Input
                   id="slug"
                   value={formData.slug}
+                  disabled={editingProvider?.is_system}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   placeholder="如：4sapi"
+                  className={editingProvider?.is_system ? 'bg-slate-100 dark:bg-slate-800' : ''}
                 />
+                {editingProvider?.is_system && (
+                  <p className="text-xs text-slate-400">系统内置不可修改</p>
+                )}
               </div>
             </div>
             
@@ -347,9 +458,14 @@ export default function ModelProvidersPage() {
               <Input
                 id="api_url"
                 value={formData.api_url}
+                disabled={editingProvider?.is_system}
                 onChange={(e) => setFormData({ ...formData, api_url: e.target.value })}
                 placeholder="如：https://api.4s.ai/v1"
+                className={editingProvider?.is_system ? 'bg-slate-100 dark:bg-slate-800' : ''}
               />
+              {editingProvider?.is_system && (
+                <p className="text-xs text-slate-400">系统内置不可修改</p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -371,9 +487,10 @@ export default function ModelProvidersPage() {
                 <Label>类型</Label>
                 <Select 
                   value={formData.provider_type}
+                  disabled={editingProvider?.is_system}
                   onValueChange={(v) => setFormData({ ...formData, provider_type: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={editingProvider?.is_system ? 'bg-slate-100 dark:bg-slate-800' : ''}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -384,14 +501,18 @@ export default function ModelProvidersPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                {editingProvider?.is_system && (
+                  <p className="text-xs text-slate-400">系统内置不可修改</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>状态</Label>
                 <Select 
                   value={formData.is_active ? 'true' : 'false'}
+                  disabled={editingProvider?.is_system}
                   onValueChange={(v) => setFormData({ ...formData, is_active: v === 'true' })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={editingProvider?.is_system ? 'bg-slate-100 dark:bg-slate-800' : ''}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
