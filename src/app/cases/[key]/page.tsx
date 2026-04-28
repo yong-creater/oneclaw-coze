@@ -1,590 +1,496 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  ArrowLeft, 
-  ArrowRight, 
-  Sparkles, 
-  FileText,
-  Feather,
-  Globe,
-  Check,
-  Copy,
-  Target,
-  Zap,
-  ChevronDown,
-  ChevronUp,
-  Shield,
-  Image as ImageIcon,
-  AlertTriangle
-} from 'lucide-react';
-import { ALL_CASES, ResumeCase, NovelCase, ProductCase } from '@/data/caseStudies';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, ArrowRight, Check, ShoppingBag, Settings, Image as ImageIcon, Zap, Layers, Globe } from 'lucide-react';
+import { ProductCase } from '@/data/caseStudies';
 
-const ICON_MAP: Record<string, React.ElementType> = {
-  FileText,
-  Feather,
-  Globe
-};
+// ============================================================
+// 配置常量
+// ============================================================
 
-export default function CaseStudyPage() {
-  const params = useParams();
-  const router = useRouter();
-  const key = params.key as string;
-  const [activeTab, setActiveTab] = useState<'before' | 'jd' | 'after'>('before');
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  
-  const caseData = ALL_CASES.find(c => c.key === key);
-  
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [key]);
-  
-  const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-  
-  if (!caseData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">案例不存在</h1>
-          <Link href="/" className="text-orange-500 hover:text-orange-600">
-            返回首页
-          </Link>
-        </div>
-      </div>
-    );
-  }
-  
-  const Icon = ICON_MAP[caseData.icon] || FileText;
-  
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* 顶部导航 */}
-      <div className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:text-orange-500 transition-colors">
-            <ArrowLeft className="w-5 h-5" />
-            <span>返回首页</span>
-          </Link>
-          <Link 
-            href={`/${key}`}
-            className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-md"
-          >
-            立即使用
-          </Link>
-        </div>
-      </div>
-      
-      {/* 案例头部 */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-700 text-white py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex items-center gap-4 mb-4">
-            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${caseData.color} flex items-center justify-center shadow-lg`}>
-              <Icon className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <Badge variant="outline" className="border-orange-400 text-orange-400 mb-2">
-                真实案例
-              </Badge>
-              <h1 className="text-3xl font-bold">{caseData.case.title}</h1>
-              <p className="text-slate-400 mt-1">{caseData.case.subtitle}</p>
-            </div>
-          </div>
-          
-          {/* 结果展示 */}
-          {key === 'resume' && (
-            <ResultShowcase 
-              data={{
-                interviewRate: (caseData.case as ResumeCase).result.interviewRate,
-                salary: (caseData.case as ResumeCase).result.salary,
-                company: (caseData.case as ResumeCase).result.company
-              }}
-            />
-          )}
-          {key === 'novel' && (
-            <ResultShowcase 
-              data={{
-                views: (caseData.case as NovelCase).result.views,
-                revenue: (caseData.case as NovelCase).result.revenue,
-                company: (caseData.case as NovelCase).result.platform
-              }}
-            />
-          )}
-          {key === 'product-page' && (
-            <ResultShowcase 
-              data={{
-                conversion: (caseData.case as ProductCase).result.conversion,
-                platforms: (caseData.case as ProductCase).result.platforms,
-                regions: (caseData.case as ProductCase).result.regions
-              }}
-            />
-          )}
-        </div>
-      </div>
-      
-      {/* 内容区域 */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {key === 'resume' && (
-          <ResumeCaseStudy 
-            caseData={caseData.case as ResumeCase} 
-            onCopy={handleCopy}
-            copiedId={copiedId}
-          />
-        )}
-        {key === 'novel' && (
-          <NovelCaseStudy 
-            caseData={caseData.case as NovelCase} 
-            onCopy={handleCopy}
-            copiedId={copiedId}
-          />
-        )}
-        {key === 'product-page' && (
-          <ProductCaseStudy caseData={caseData.case as ProductCase} />
-        )}
-      </div>
-      
-      {/* CTA区域 */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 py-12">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            准备好创造你的成功故事了吗？
-          </h2>
-          <p className="text-white/80 mb-6">
-            立即体验 OneClaw {caseData.name}，下一个成功案例就是你
-          </p>
-          <Link 
-            href={`/${key}`}
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white text-orange-500 font-bold text-lg rounded-xl hover:bg-orange-50 transition-all shadow-xl"
-          >
-            立即开始
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+const PLATFORM_OPTIONS = [
+  { id: 'amazon', name: '亚马逊', icon: '📦' },
+  { id: 'taobao', name: '淘宝', icon: '🛒' },
+  { id: 'jd', name: '京东', icon: '📱' },
+  { id: 'pdd', name: '拼多多', icon: '💰' },
+  { id: 'shein', name: 'SHEIN', icon: '👗' },
+  { id: 'tiktok', name: 'TikTok', icon: '🎵' },
+];
+
+const IMAGE_TYPE_OPTIONS = [
+  { id: 'main', name: '主图+辅图', desc: '标准电商套图' },
+  { id: 'scene', name: '场景图', desc: '带环境氛围' },
+  { id: 'detail', name: '详情图', desc: '细节特写展示' },
+];
+
+const MODE_OPTIONS = [
+  { id: 'standard', name: '标准模式', tag: '性价比', icon: '💡' },
+  { id: 'premium', name: '高级模式', tag: '效果好', icon: '✨' },
+  { id: 'vip', name: '会员模式', tag: '会员', icon: '👑' },
+];
+
+const QUALITY_OPTIONS = [
+  { id: '1k', name: '1K', desc: '标清' },
+  { id: '2k', name: '2K', desc: '高清' },
+  { id: '4k', name: '4K', desc: '超清' },
+];
+
+const RATIO_OPTIONS = [
+  { id: '1:1', name: '1:1' },
+  { id: '3:4', name: '3:4' },
+  { id: '4:3', name: '4:3' },
+];
+
+// ============================================================
+// 案例详情页组件
+// ============================================================
+
+interface ProductCaseStudyProps {
+  caseData: ProductCase;
 }
 
-// 结果展示组件
-function ResultShowcase({ data }: { data: Record<string, string> }) {
-  const entries = Object.entries(data);
-  
-  return (
-    <div className="grid grid-cols-3 gap-4 mt-8">
-      {entries.map(([k, value]) => (
-        <div key={k} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-          <p className="text-3xl font-bold text-white mb-1">{value}</p>
-          <p className="text-slate-400 text-sm">
-            {k === 'interviewRate' && '面试邀约率'}
-            {k === 'salary' && '入职薪资'}
-            {k === 'company' && '入职公司'}
-            {k === 'views' && '播放量'}
-            {k === 'revenue' && '月收入'}
-            {k === 'coverage' && '测试覆盖率'}
-            {k === 'timeSaved' && '节省时间'}
-            {k === 'efficiency' && '生成效率'}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// 简历案例展示
-function ResumeCaseStudy({ caseData, onCopy, copiedId }: { 
-  caseData: ResumeCase; 
-  onCopy: (text: string, id: string) => void;
-  copiedId: string | null;
-}) {
-  const [activeTab, setActiveTab] = useState<'after' | 'before'>('after');
-  
-  return (
-    <div className="space-y-6">
-      {/* Tab切换 */}
-      <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
-        <button
-          onClick={() => setActiveTab('after')}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'after'
-              ? 'bg-white dark:bg-slate-700 text-green-500 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          优化后
-        </button>
-        <button
-          onClick={() => setActiveTab('before')}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'before'
-              ? 'bg-white dark:bg-slate-700 text-red-500 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          优化前
-        </button>
-      </div>
-      
-      {activeTab === 'before' ? (
-        <Card className="bg-white dark:bg-slate-800 border-red-200 dark:border-red-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <Badge variant="destructive" className="bg-red-100 text-red-600">原始简历</Badge>
-              <button 
-                onClick={() => onCopy(caseData.before.resume, 'before-resume')}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                {copiedId === 'before-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-4">
-              <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-2">存在问题：</p>
-              <ul className="space-y-1">
-                {caseData.before.highlight.map((item, i) => (
-                  <li key={i} className="text-sm text-red-500/80 flex items-start gap-2">
-                    <span className="text-red-400 mt-0.5">•</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl leading-relaxed">
-              {caseData.before.resume}
-            </pre>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          <Card className="bg-white dark:bg-slate-800 border-green-200 dark:border-green-800">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <Badge className="bg-green-100 text-green-600">优化后简历</Badge>
-                <button 
-                  onClick={() => onCopy(caseData.after.resume, 'after-resume')}
-                  className="text-slate-400 hover:text-slate-600"
-                >
-                  {copiedId === 'after-resume' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                </button>
-              </div>
-              <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl leading-relaxed">
-                {caseData.after.resume}
-              </pre>
-            </CardContent>
-          </Card>
-          
-          {/* 关键优化 */}
-          <Card className="bg-slate-50 dark:bg-slate-800/50">
-            <CardContent className="p-6">
-              <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2 mb-4">
-                <Zap className="w-4 h-4 text-orange-500" />
-                关键优化
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {caseData.after.changes.map((change, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 bg-white dark:bg-slate-900 rounded-xl">
-                    <div className="w-6 h-6 rounded-full bg-orange-100 dark:bg-orange-900/50 flex items-center justify-center text-orange-500 font-bold text-xs flex-shrink-0">
-                      {i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-slate-400 line-through">{change.before}</p>
-                      <p className="text-sm text-green-600 dark:text-green-400 font-medium mt-1">{change.after}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// 小说案例展示
-function NovelCaseStudy({ caseData, onCopy, copiedId }: { 
-  caseData: NovelCase; 
-  onCopy: (text: string, id: string) => void;
-  copiedId: string | null;
-}) {
-  const [showOriginal, setShowOriginal] = useState(false);
-  
-  return (
-    <div className="space-y-8">
-      {/* 切换 */}
-      <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
-        <button
-          onClick={() => setShowOriginal(false)}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            !showOriginal
-              ? 'bg-white dark:bg-slate-700 text-purple-500 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
-          }`}
-        >
-          优化后内容
-        </button>
-        <button
-          onClick={() => setShowOriginal(true)}
-          className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
-            showOriginal
-              ? 'bg-white dark:bg-slate-700 text-slate-600 shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800'
-          }`}
-        >
-          原始内容
-        </button>
-      </div>
-      
-      {showOriginal ? (
-        <Card className="bg-white dark:bg-slate-800 border-slate-200">
-          <CardContent className="p-6">
-            <Badge variant="outline" className="mb-4">原始小说内容</Badge>
-            <pre className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              {caseData.before.content}
-            </pre>
-            <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-              <p className="text-sm text-amber-600 dark:text-amber-400">
-                <span className="font-medium">问题分析：</span>
-                {caseData.before.style}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="bg-white dark:bg-slate-800 border-purple-200 dark:border-purple-800">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <Badge className="bg-purple-100 text-purple-600">优化后短剧脚本</Badge>
-              <button 
-                onClick={() => onCopy(caseData.after.content, 'novel-after')}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                {copiedId === 'novel-after' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-            <pre className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans">
-              {caseData.after.content}
-            </pre>
-            <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-xl">
-              <p className="text-sm text-green-600 dark:text-green-400">
-                <span className="font-medium">优化亮点：</span>
-                {caseData.after.style}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-}
-
-// 出海详情页案例展示 - 展示原始图和各地区优化后的详情图
-function ProductCaseStudy({ caseData }: { caseData: ProductCase }) {
+export default function ProductCaseStudy({ caseData }: ProductCaseStudyProps) {
   const [activeRegion, setActiveRegion] = useState<string>('eu');
   const [showOriginal, setShowOriginal] = useState(false);
-  
+  const [config, setConfig] = useState({
+    platform: 'amazon',
+    imageType: 'main',
+    smartCopy: '',
+    extraDesc: '',
+    mode: 'standard',
+    quality: '1k',
+    ratio: '1:1',
+    count: 4,
+  });
+
   const regionColors: Record<string, string> = {
     eu: 'from-blue-500 to-indigo-500',
     us: 'from-green-500 to-emerald-500',
     jp: 'from-rose-500 to-pink-500',
     sea: 'from-yellow-500 to-orange-500'
   };
-  
+
   const currentRegion = caseData.regions.find(r => r.id === activeRegion);
-  
+
+  const updateConfig = <K extends keyof typeof config>(key: K, value: typeof config[K]) => {
+    setConfig(prev => ({ ...prev, [key]: value }));
+  };
+
+  // 获取平台信息
+  const getPlatformInfo = (platformId: string) => {
+    const platforms: Record<string, { name: string; specs: string }> = {
+      amazon: { name: '亚马逊', specs: '主图: 1000×1000px | 辅图: 1000×1000px | 场景图: 1464×987px' },
+      taobao: { name: '淘宝', specs: '主图: 800×800px | 详情图: 750×高度不限' },
+      jd: { name: '京东', specs: '主图: 800×800px | 详情图: 790×高度不限' },
+      pdd: { name: '拼多多', specs: '主图: 800×800px | 详情图: 750×高度不限' },
+      shein: { name: 'SHEIN', specs: '主图: 1000×1333px | 辅图: 1000×1333px' },
+      tiktok: { name: 'TikTok', specs: '主图: 1080×1080px | 视频封面: 1080×1920px' },
+    };
+    return platforms[platformId] || { name: platformId, specs: '' };
+  };
+
   return (
-    <div className="space-y-8">
-      {/* 商品信息 */}
-      <Card className="bg-white dark:bg-slate-800">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-900/50 dark:to-teal-900/50 flex items-center justify-center">
-              <Globe className="w-6 h-6 text-emerald-500" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-800 dark:text-white">{caseData.product}</h3>
-              <p className="text-sm text-slate-500">{caseData.subtitle}</p>
-            </div>
+    <div className="space-y-6">
+      {/* ==================== 顶部标题 ==================== */}
+      <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+            <Globe className="w-6 h-6" />
           </div>
-        </CardContent>
-      </Card>
-      
-      {/* 原始图 vs 优化后图 对比展示 */}
-      <Card className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 border-slate-200 dark:border-slate-700">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-800 dark:text-white">AI详情图生成效果</h3>
-              <p className="text-xs text-slate-500">一键生成各地区合规详情图</p>
-            </div>
+          <div>
+            <h2 className="text-xl font-bold">电商AI商品套图</h2>
+            <p className="text-sm text-white/80">一键生成全套电商视觉素材</p>
           </div>
-          
-          {/* 地区切换 */}
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-            <button
-              onClick={() => setShowOriginal(true)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                showOriginal
-                  ? 'bg-gradient-to-r from-slate-500 to-slate-600 text-white shadow-md'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-              }`}
-            >
-              原始图
-            </button>
-            {caseData.regions.map(region => (
-              <button
-                key={region.id}
-                onClick={() => { setActiveRegion(region.id); setShowOriginal(false); }}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                  !showOriginal && activeRegion === region.id
-                    ? `bg-gradient-to-r ${regionColors[region.id]} text-white shadow-md`
-                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                }`}
-              >
-                {region.name}
-              </button>
-            ))}
-          </div>
-          
-          {/* 图片展示 */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-lg">
-            {showOriginal ? (
-              /* 原始图 */
-              <div className="relative">
-                <div className="relative h-[400px] bg-gradient-to-br from-red-100 to-orange-100 dark:from-red-900/20 dark:to-orange-900/20">
-                  <Image 
-                    src={caseData.originalImage} 
-                    alt="原始详情图"
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                  <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    原始版本
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 bg-black/60 text-white p-3 rounded-xl">
-                    <p className="text-sm font-medium mb-1">存在的问题</p>
-                    <ul className="text-xs space-y-0.5 opacity-90">
-                      <li>• 无合规标识（CE/FCC/PSE）</li>
-                      <li>• 中文素材，不符合海外市场</li>
-                      <li>• 夸大宣传用语</li>
-                      <li>• 无本地化语言</li>
-                    </ul>
+        </div>
+      </div>
+
+      {/* ==================== 左右分栏主内容 ==================== */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* ==================== 左侧：预览区 (5份) ==================== */}
+        <div className="lg:col-span-5 space-y-4">
+          {/* 商品套图卡片 */}
+          <Card className="bg-white dark:bg-slate-800 overflow-hidden">
+            <CardContent className="p-0">
+              {/* 标题栏 */}
+              <div className="py-3 px-4 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-slate-800 dark:to-slate-800 border-b border-slate-100 dark:border-slate-700">
+                <h3 className="text-base font-bold text-slate-800 dark:text-white text-center">
+                  商品套图
+                </h3>
+              </div>
+
+              {/* 商品图预览 */}
+              <div className="p-4">
+                <div className="relative aspect-square bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800 rounded-xl overflow-hidden">
+                  {showOriginal ? (
+                    <Image 
+                      src={caseData.originalImage} 
+                      alt="原始详情图"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  ) : currentRegion && (
+                    <Image 
+                      src={currentRegion.image} 
+                      alt={`${currentRegion.name}详情图`}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  )}
+                  {/* 标签 */}
+                  <div className="absolute top-3 left-3">
+                    {showOriginal ? (
+                      <Badge className="bg-red-500 text-white">原始版本</Badge>
+                    ) : currentRegion && (
+                      <Badge className={`bg-gradient-to-r ${regionColors[currentRegion.id]} text-white`}>
+                        {currentRegion.name}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
-            ) : currentRegion && (
-              /* 各地区优化后的图 */
-              <div className="relative">
-                <div className="relative h-[400px]">
-                  <Image 
-                    src={currentRegion.image} 
-                    alt={`${currentRegion.name}详情图`}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                  />
-                  <div className="absolute top-4 left-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                    {currentRegion.name}
-                  </div>
+
+              {/* 图标区 */}
+              <div className="px-4 pb-3">
+                <div className="flex items-center justify-center gap-6">
+                  {[
+                    { icon: '🎯', text: '精准打光' },
+                    { icon: '✨', text: '高清质感' },
+                    { icon: '📐', text: '规范尺寸' },
+                    { icon: '⚡', text: '快速出图' },
+                  ].map((item, index) => (
+                    <div key={index} className="flex flex-col items-center gap-1">
+                      <span className="text-lg">{item.icon}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{item.text}</span>
+                    </div>
+                  ))}
                 </div>
-                
-                {/* 合规信息 */}
-                <div className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-5 h-5 text-green-500" />
-                      <span className="font-medium text-slate-800 dark:text-white">合规评分</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-32 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full"
-                          style={{ width: `${currentRegion.complianceScore}%` }}
-                        />
-                      </div>
-                      <span className="text-xl font-bold text-green-600">{currentRegion.complianceScore}%</span>
-                    </div>
+              </div>
+
+              {/* 地区/版本切换 */}
+              <div className="px-4 pb-3">
+                <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  <button
+                    onClick={() => setShowOriginal(true)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                      showOriginal
+                        ? 'bg-slate-500 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                    }`}
+                  >
+                    原始图
+                  </button>
+                  {caseData.regions.map(region => (
+                    <button
+                      key={region.id}
+                      onClick={() => { setActiveRegion(region.id); setShowOriginal(false); }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                        !showOriginal && activeRegion === region.id
+                          ? `bg-gradient-to-r ${regionColors[region.id]} text-white`
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                      }`}
+                    >
+                      {region.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 套图标签 */}
+              <div className="px-4 pb-4">
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {currentRegion?.marks.map((mark, i) => (
+                    <Badge
+                      key={i}
+                      variant="outline"
+                      className="text-xs bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800"
+                    >
+                      <Check className="w-3 h-3 mr-1" />
+                      {mark}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 适用场景卡片 */}
+          <Card className="bg-white dark:bg-slate-800">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                <Layers className="w-4 h-4 text-orange-500" />
+                适用场景
+              </h3>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {['主图', '辅图', '首屏海报', '详情页', '静物场景图', '材质细节图'].map((scene, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                    <Check className="w-3 h-3 text-green-500" />
+                    {scene}
                   </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {currentRegion.marks.map((mark, i) => (
-                      <Badge 
-                        key={i}
-                        className="bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* ==================== 右侧：配置区 (7份) ==================== */}
+        <div className="lg:col-span-7 space-y-4">
+          {/* 生成配置卡片 */}
+          <Card className="bg-white dark:bg-slate-800">
+            <CardContent className="p-5 space-y-5">
+              <h3 className="text-base font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                <Settings className="w-5 h-5 text-orange-500" />
+                生成配置
+              </h3>
+
+              {/* 目标平台 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                  <ShoppingBag className="w-4 h-4" />
+                  目标平台
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {PLATFORM_OPTIONS.map((platform) => (
+                    <button
+                      key={platform.id}
+                      onClick={() => updateConfig('platform', platform.id)}
+                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                        config.platform === platform.id
+                          ? 'bg-orange-500 text-white shadow-md'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      <span className="mr-1">{platform.icon}</span>
+                      {platform.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 生图类型 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                  <ImageIcon className="w-4 h-4" />
+                  生图类型
+                </label>
+                <div className="flex gap-2">
+                  {IMAGE_TYPE_OPTIONS.map((type) => (
+                    <button
+                      key={type.id}
+                      onClick={() => updateConfig('imageType', type.id)}
+                      className={`flex-1 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                        config.imageType === type.id
+                          ? 'bg-orange-500 text-white shadow-md'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      <div className="font-medium">{type.name}</div>
+                      <div className={`text-xs ${config.imageType === type.id ? 'text-orange-100' : 'text-slate-400'}`}>
+                        {type.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 智能文案 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  智能文案
+                </label>
+                <textarea
+                  value={config.smartCopy}
+                  onChange={(e) => updateConfig('smartCopy', e.target.value)}
+                  placeholder="输入商品卖点，如：头层牛皮、复古风格、柔软舒适..."
+                  className="w-full h-20 px-4 py-3 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-sm resize-none hover:border-orange-400 dark:hover:border-orange-500 focus:border-orange-500 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* 额外描述 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  额外描述 <span className="text-xs text-slate-400">(非必填)</span>
+                </label>
+                <Input
+                  value={config.extraDesc}
+                  onChange={(e) => updateConfig('extraDesc', e.target.value)}
+                  placeholder="补充说明，如：需要展示五金配件"
+                  className="h-11 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-orange-400 dark:hover:border-orange-500"
+                />
+              </div>
+
+              {/* 生成模式 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                  <Zap className="w-4 h-4" />
+                  生成模式
+                </label>
+                <div className="space-y-2">
+                  {MODE_OPTIONS.map((mode) => (
+                    <button
+                      key={mode.id}
+                      onClick={() => updateConfig('mode', mode.id)}
+                      className={`w-full px-4 py-3 rounded-xl text-left transition-all flex items-center justify-between ${
+                        config.mode === mode.id
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{mode.icon}</span>
+                        <div className="font-medium">{mode.name}</div>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={
+                          config.mode === mode.id
+                            ? 'bg-white/20 text-white border-white/40'
+                            : 'bg-slate-200 dark:bg-slate-600 text-slate-500 dark:text-slate-400'
+                        }
                       >
-                        <Check className="w-3 h-3 mr-1" />
-                        {mark}
+                        {mode.tag}
                       </Badge>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 清晰度 */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  清晰度
+                </label>
+                <div className="flex gap-2">
+                  {QUALITY_OPTIONS.map((quality) => (
+                    <button
+                      key={quality.id}
+                      onClick={() => updateConfig('quality', quality.id)}
+                      className={`flex-1 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                        config.quality === quality.id
+                          ? 'bg-orange-500 text-white shadow-md'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      <div className="font-medium">{quality.name}</div>
+                      <div className={`text-xs ${config.quality === quality.id ? 'text-orange-100' : 'text-slate-400'}`}>
+                        {quality.desc}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 比例 & 张数 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    图像比例
+                  </label>
+                  <div className="flex gap-1">
+                    {RATIO_OPTIONS.map((ratio) => (
+                      <button
+                        key={ratio.id}
+                        onClick={() => updateConfig('ratio', ratio.id)}
+                        className={`flex-1 px-2 py-2 rounded-lg text-sm transition-all ${
+                          config.ratio === ratio.id
+                            ? 'bg-orange-500 text-white'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+                        }`}
+                      >
+                        {ratio.name}
+                      </button>
                     ))}
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    生成张数
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={config.count}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1;
+                        if (val >= 1 && val <= 10) {
+                          updateConfig('count', val);
+                        }
+                      }}
+                      className="h-10 text-center bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl hover:border-orange-400 dark:hover:border-orange-500"
+                    />
+                    <span className="text-sm text-slate-500">张</span>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-          
-          {/* 效果数据 */}
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-500">{caseData.regions.length}</p>
-              <p className="text-xs text-slate-500 mt-1">地区版本</p>
+
+              {/* 按钮 */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setConfig({
+                    platform: 'amazon',
+                    imageType: 'main',
+                    smartCopy: '',
+                    extraDesc: '',
+                    mode: 'standard',
+                    quality: '1k',
+                    ratio: '1:1',
+                    count: 4,
+                  })}
+                  className="flex-1 border-2 border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500"
+                >
+                  重置
+                </Button>
+                <Button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white">
+                  确认配置
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* ==================== 底部平台适配信息 ==================== */}
+      <Card className="bg-gradient-to-r from-slate-800 to-slate-900 dark:from-slate-800 dark:to-slate-700 border-slate-700">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-orange-500" />
+              </div>
+              <div>
+                <h4 className="font-bold text-white">{getPlatformInfo(config.platform).name}平台适配</h4>
+                <p className="text-xs text-slate-400">{getPlatformInfo(config.platform).specs}</p>
+              </div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-green-500">98%+</p>
-              <p className="text-xs text-slate-500 mt-1">合规通过率</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-violet-500">{caseData.result.conversion}</p>
-              <p className="text-xs text-slate-500 mt-1">转化率提升</p>
+            <div className="flex items-center gap-2">
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                <Check className="w-3 h-3 mr-1" />
+                合规通过率 98%+
+              </Badge>
+              <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30">
+                {config.quality} · {config.ratio} · {config.count}张
+              </Badge>
             </div>
           </div>
         </CardContent>
       </Card>
-      
-      {/* 合规问题修复 */}
-      <Card className="bg-white dark:bg-slate-800">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="w-5 h-5 text-amber-500" />
-            <h3 className="font-bold text-slate-800 dark:text-white">合规问题修复</h3>
-          </div>
-          
-          <div className="space-y-3">
-            {caseData.complianceSummary.issues.map((issue, i) => (
-              <div 
-                key={i}
-                className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl"
-              >
-                <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center flex-shrink-0">
-                  <span className="text-red-500 text-sm">✕</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-500 line-through truncate">{issue.original}</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-green-600 dark:text-green-400 font-medium truncate">{issue.fixed}</p>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
-                  <Check className="w-4 h-4 text-green-500" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* 效果数据卡 */}
+
+      {/* ==================== 底部slogan ==================== */}
+      <div className="text-center text-slate-500 dark:text-slate-400 text-sm">
+        告别繁琐拍摄，一键生成全套电商视觉，适配多种电商平台
+      </div>
+
+      {/* 效果数据卡片 */}
       <div className="grid grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-emerald-500 to-teal-500 border-emerald-200">
           <CardContent className="p-6 text-center text-white">
