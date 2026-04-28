@@ -295,16 +295,33 @@ export default function ModelProvidersPage() {
       if (data.success && data.providers) {
         // 从 providers 中提取该提供商的模型
         const allModels: any[] = [];
-        Object.entries(data.providers).forEach(([type, typeModels]) => {
-          (typeModels as any[]).forEach((item) => {
-            if (item.provider?.id === providerId) {
-              allModels.push({
-                id: item.model.id,
-                name: item.model.name,
-                display_name: item.model.display_name || item.model.name,
-                description: item.model.description || '',
-                pricing: item.model.pricing || {},
-                is_available: item.model.is_available,
+        
+        // API 返回格式: { image: [{ id, name, models: [...] }], llm: [...] }
+        Object.entries(data.providers).forEach(([type, typeProviders]) => {
+          (typeProviders as any[]).forEach((provider) => {
+            if (provider.id === providerId) {
+              // 该提供商的模型
+              (provider.models || []).forEach((model: any) => {
+                // 解析价格
+                let pricing: Record<string, number> = {};
+                try {
+                  if (typeof model.price_per_1k_tokens === 'object') {
+                    pricing = model.price_per_1k_tokens || {};
+                  } else if (typeof model.price_per_1k_tokens === 'string') {
+                    pricing = JSON.parse(model.price_per_1k_tokens) || {};
+                  }
+                } catch (e) {
+                  pricing = {};
+                }
+                
+                allModels.push({
+                  id: model.id,
+                  name: model.name,
+                  display_name: model.display_name || model.name,
+                  description: model.description || '',
+                  pricing,
+                  is_available: model.is_available,
+                });
               });
             }
           });
