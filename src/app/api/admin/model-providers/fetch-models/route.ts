@@ -20,22 +20,36 @@ export async function POST(request: NextRequest) {
     }
 
     let models: any[] = [];
-    let error = '';
+    let lastError = '';
 
-    // 根据提供商类型调用不同的 API
-    if (provider_type === 'llm' || provider_type === 'image') {
+    // 尝试多种 API 端点格式
+    const endpoints = [
+      { url: `${api_url}/models`, desc: 'OpenAI 兼容格式' },
+      { url: `${api_url}/v1/models`, desc: 'OpenAI v1 格式' },
+      { url: `${api_url}/images/models`, desc: '4SAPI 图片模型' },
+    ];
+
+    for (const endpoint of endpoints) {
       try {
-        // 尝试 OpenAI 兼容格式
-        const response = await fetch(`${api_url}/models`, {
+        console.log(`[fetch-models] 尝试端点: ${endpoint.url}`);
+        
+        const response = await fetch(endpoint.url, {
           headers: {
             'Authorization': `Bearer ${api_key}`,
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
           },
           signal: AbortSignal.timeout(10000),
         });
 
+        console.log(`[fetch-models] ${endpoint.url} 返回: ${response.status}`);
+
         if (response.ok) {
           const data = await response.json();
+          console.log(`[fetch-models] 数据格式:`, JSON.stringify(data).substring(0, 500));
+
+          // 解析不同格式的响应
+          // 格式1: OpenAI 格式 { "data": [...] }
           if (data.data && Array.isArray(data.data)) {
             models = data.data.map((model: any) => ({
               id: model.id,
@@ -46,29 +60,12 @@ export async function POST(request: NextRequest) {
               pricing: model.pricing || {},
               is_available: model.ready ?? model.status !== 'deprecated',
             }));
+            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (OpenAI格式)`);
+            break;
           }
-        } else {
-          throw new Error(`API 返回 ${response.status}`);
-        }
-      } catch (apiError: any) {
-        error = apiError.message || 'API 调用失败';
-      }
-    }
 
-    // 4SAPI 特殊处理
-    if (api_url.includes('4s.ai') || api_url.includes('4sapi')) {
-      try {
-        const response = await fetch(`${api_url}/images/models`, {
-          headers: {
-            'Authorization': `Bearer ${api_key}`,
-            'Content-Type': 'application/json',
-          },
-          signal: AbortSignal.timeout(10000),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.models) {
+          // 格式2: 4SAPI 格式 { "models": [...] }
+          if (data.models && Array.isArray(data.models)) {
             models = data.models.map((model: any) => ({
               id: model.id || model.model_id,
               name: model.id || model.model_id,
@@ -77,10 +74,51 @@ export async function POST(request: NextRequest) {
               pricing: { image: model.price || 0 },
               is_available: model.available !== false,
             }));
+            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (4SAPI格式)`);
+            break;
+          }
+
+          // 格式3: 直接数组
+          if (Array.isArray(data)) {
+            models = data.map((model: any) => ({
+              id: model.id || model,
+              name: model.id || model,
+              display_name: model.name || model.id || model,
+              description: model.description || '',
+              pricing: model.pricing || {},
+              is_available: model.available !== false,
+            }));
+            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (数组格式)`);
+            break;
+          }
+
+          // 格式4: { "object": "list", "data": [...] }
+          if (data.object === 'list' && data.data) {
+            models = data.data.map((model: any) => ({
+              id: model.id,
+              name: model.id,
+              display_name: model.id,
+              description: '',
+              pricing: {},
+              is_available: true,
+            }));
+            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (list格式)`);
+            break;
+          }
+        } else {
+          lastError = `API 返回 ${response.status}`;
+          // 读取错误信息
+          try {
+            const errorText = await response.text();
+            console.log(`[fetch-models] 错误响应: ${errorText.substring(0, 200)}`);
+            lastError += `: ${errorText.substring(0, 100)}`;
+          } catch (e) {
+            // 忽略
           }
         }
-      } catch (e) {
-        console.log('[fetch-models] 4SAPI 特定接口失败');
+      } catch (e: any) {
+        lastError = e.message || '请求失败';
+        console.log(`[fetch-models] 端点 ${endpoint.url} 请求失败:`, e.message);
       }
     }
 
@@ -88,7 +126,7 @@ export async function POST(request: NextRequest) {
     if (models.length === 0) {
       return NextResponse.json({ 
         success: false, 
-        error: error || '无法获取模型列表，请检查 API 配置' 
+        error: `无法获取模型列表。${lastError}。请检查 API URL 和 Key 是否正确，或手动添加模型。` 
       }, { status: 400 });
     }
 
@@ -106,11 +144,7 @@ export async function POST(request: NextRequest) {
       display_name: m.display_name,
       model_type: provider_type,
       description: m.description || '',
-      price_per_1k_tokens: JSON.stringify({
-        input: m.pricing?.input || 0,
-        output: m.pricing?.output || 0,
-        image: m.pricing?.image || 0,
-      }),
+      price_per_1k_tokens: JSON.stringify(m.pricing || {}),
       is_available: m.is_available !== false,
       config: JSON.stringify({}),
     }));
@@ -123,7 +157,7 @@ export async function POST(request: NextRequest) {
       console.error('[fetch-models] 保存模型失败:', insertError);
       return NextResponse.json({ 
         success: false, 
-        error: '保存模型失败' 
+        error: '保存模型失败: ' + insertError.message 
       }, { status: 500 });
     }
 

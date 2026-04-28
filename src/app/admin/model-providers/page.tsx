@@ -60,6 +60,7 @@ export default function ModelProvidersPage() {
   const [providers, setProviders] = useState<ModelProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [addModelDialogOpen, setAddModelDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<ModelProvider | null>(null);
   const [showApiKey, setShowApiKey] = useState(false);
   const [copiedId, setCopiedId] = useState<number | null>(null);
@@ -74,6 +75,15 @@ export default function ModelProvidersPage() {
     api_key: '',
     provider_type: 'llm',
     is_active: true,
+  });
+
+  const [modelFormData, setModelFormData] = useState({
+    name: '',
+    display_name: '',
+    description: '',
+    price_input: '',
+    price_output: '',
+    price_image: '',
   });
 
   useEffect(() => {
@@ -209,6 +219,69 @@ export default function ModelProvidersPage() {
       alert('获取模型失败');
     } finally {
       setFetchingModels(null);
+    }
+  };
+
+  // 手动添加模型
+  const handleAddModel = async () => {
+    if (!selectedProvider || !modelFormData.name) {
+      alert('请填写模型名称');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/models', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          provider_id: selectedProvider.id,
+          name: modelFormData.name,
+          display_name: modelFormData.display_name || modelFormData.name,
+          description: modelFormData.description,
+          model_type: selectedProvider.provider_type,
+          price_input: modelFormData.price_input ? parseFloat(modelFormData.price_input) : null,
+          price_output: modelFormData.price_output ? parseFloat(modelFormData.price_output) : null,
+          price_image: modelFormData.price_image ? parseFloat(modelFormData.price_image) : null,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setAddModelDialogOpen(false);
+        setModelFormData({
+          name: '',
+          display_name: '',
+          description: '',
+          price_input: '',
+          price_output: '',
+          price_image: '',
+        });
+        await loadProviderModels(selectedProvider.id);
+      } else {
+        alert(`添加失败: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('添加模型失败:', error);
+      alert('添加模型失败');
+    }
+  };
+
+  // 删除模型
+  const handleDeleteModel = async (modelId: string) => {
+    if (!confirm('确定要删除该模型吗？')) return;
+
+    try {
+      const res = await fetch(`/api/admin/models?id=${modelId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (res.ok) {
+        await loadProviderModels(selectedProvider!.id);
+      }
+    } catch (error) {
+      console.error('删除模型失败:', error);
     }
   };
 
@@ -388,20 +461,32 @@ export default function ModelProvidersPage() {
                 <CardTitle className="text-lg">
                   {selectedProvider ? `${selectedProvider.name} - 模型列表` : '选择左侧提供商查看模型'}
                 </CardTitle>
-                {selectedProvider && selectedProvider.has_api_key && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fetchModelsFromAPI(selectedProvider)}
-                    disabled={fetchingModels === selectedProvider.id}
-                  >
-                    {fetchingModels === selectedProvider.id ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <RefreshCw className="w-4 h-4 mr-2" />
+                {selectedProvider && !selectedProvider.is_system && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setAddModelDialogOpen(true)}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      手动添加
+                    </Button>
+                    {selectedProvider.has_api_key && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fetchModelsFromAPI(selectedProvider)}
+                        disabled={fetchingModels === selectedProvider.id}
+                      >
+                        {fetchingModels === selectedProvider.id ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                        )}
+                        API 刷新
+                      </Button>
                     )}
-                    刷新模型
-                  </Button>
+                  </div>
                 )}
               </div>
               {selectedProvider && (
@@ -411,8 +496,8 @@ export default function ModelProvidersPage() {
                     : selectedProvider.is_system
                       ? '内置模型，数据来自系统'
                       : selectedProvider.has_api_key 
-                        ? '点击"刷新模型"通过 API 获取最新数据'
-                        : '该提供商未配置 API Key'
+                        ? '点击"API 刷新"通过 API 获取最新数据，或手动添加模型'
+                        : '请先配置 API Key 或手动添加模型'
                   }
                 </p>
               )}
@@ -425,29 +510,36 @@ export default function ModelProvidersPage() {
                   </div>
                   <p>请选择左侧的提供商</p>
                 </div>
-              ) : !providerModels[selectedProvider.id]?.models?.length && !selectedProvider.is_system ? (
+              ) : !providerModels[selectedProvider.id]?.models?.length ? (
                 <div className="text-center py-12 text-slate-400">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
                     <EyeOff className="w-8 h-8" />
                   </div>
                   <p>暂无模型数据</p>
-                  {selectedProvider.has_api_key && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-4"
-                      onClick={() => fetchModelsFromAPI(selectedProvider)}
-                    >
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      刷新模型
-                    </Button>
+                  {!selectedProvider.is_system && (
+                    <div className="flex items-center justify-center gap-2 mt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setAddModelDialogOpen(true)}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        手动添加
+                      </Button>
+                      {selectedProvider.has_api_key && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fetchModelsFromAPI(selectedProvider)}
+                        >
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          API 刷新
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
-              ) : providerModels[selectedProvider.id]?.models?.length === 0 && selectedProvider.is_system ? (
-                <div className="text-center py-12 text-red-400">
-                  <p>获取失败: {providerModels[selectedProvider.id]?.error}</p>
-                </div>
-              ) : providerModels[selectedProvider.id]?.models?.length > 0 ? (
+              ) : (
                 <div className="space-y-3 max-h-[500px] overflow-y-auto">
                   {providerModels[selectedProvider.id].models.map((model) => (
                     <div
@@ -467,6 +559,15 @@ export default function ModelProvidersPage() {
                             <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">{model.description}</p>
                           )}
                         </div>
+                        {!selectedProvider.is_system && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleDeleteModel(model.id)}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        )}
                       </div>
                       
                       {/* 模型规格信息 */}
@@ -505,20 +606,13 @@ export default function ModelProvidersPage() {
                     </div>
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-12 text-slate-400">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                    <RefreshCw className="w-8 h-8" />
-                  </div>
-                  <p>点击右上角"刷新模型"获取数据</p>
-                </div>
               )}
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* 添加/编辑弹窗 */}
+      {/* 添加/编辑提供商弹窗 */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -643,6 +737,92 @@ export default function ModelProvidersPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
             <Button onClick={handleSubmit} className="bg-orange-500 hover:bg-orange-600">
               {editingProvider ? '保存' : '添加'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 手动添加模型弹窗 */}
+      <Dialog open={addModelDialogOpen} onOpenChange={setAddModelDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>手动添加模型</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="model_name">模型名称 *</Label>
+              <Input
+                id="model_name"
+                value={modelFormData.name}
+                onChange={(e) => setModelFormData({ ...modelFormData, name: e.target.value })}
+                placeholder="如：flux-pro"
+              />
+              <p className="text-xs text-slate-400">API 调用时使用的模型 ID</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="model_display_name">显示名称</Label>
+              <Input
+                id="model_display_name"
+                value={modelFormData.display_name}
+                onChange={(e) => setModelFormData({ ...modelFormData, display_name: e.target.value })}
+                placeholder="如：FLUX Pro"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="model_description">描述</Label>
+              <Input
+                id="model_description"
+                value={modelFormData.description}
+                onChange={(e) => setModelFormData({ ...modelFormData, description: e.target.value })}
+                placeholder="简要描述该模型的能力"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>价格设置</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">输入价格</Label>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    value={modelFormData.price_input}
+                    onChange={(e) => setModelFormData({ ...modelFormData, price_input: e.target.value })}
+                    placeholder="0.0001"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">输出价格</Label>
+                  <Input
+                    type="number"
+                    step="0.0001"
+                    value={modelFormData.price_output}
+                    onChange={(e) => setModelFormData({ ...modelFormData, price_output: e.target.value })}
+                    placeholder="0.0001"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">图片价格</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={modelFormData.price_image}
+                    onChange={(e) => setModelFormData({ ...modelFormData, price_image: e.target.value })}
+                    placeholder="0.05"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-slate-400">每 1000 tokens 的价格，图片为每张的价格</p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddModelDialogOpen(false)}>取消</Button>
+            <Button onClick={handleAddModel} className="bg-orange-500 hover:bg-orange-600">
+              添加
             </Button>
           </DialogFooter>
         </DialogContent>
