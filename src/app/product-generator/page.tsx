@@ -96,43 +96,52 @@ export default function ProductGeneratorPage() {
           </p>
         </div>
 
-        {/* 示例展示行 */}
-        <div className="bg-gradient-to-r from-slate-50 to-orange-50 dark:from-slate-800 dark:to-orange-900/20 rounded-2xl p-6 mb-8">
-          <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-4">
-            示例：普通商品图 → AI优化后可直接用于电商主图
+        {/* 示例展示 */}
+        <div className="bg-gradient-to-r from-slate-100 to-orange-50 dark:from-slate-800 dark:to-orange-900/20 rounded-2xl p-8 mb-8">
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">
+            普通商品图 → AI主图（提升点击率） → 卖点图（突出优势） → 场景图（提升转化）
           </p>
-          <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap">
+          <div className="flex items-center justify-center gap-6 md:gap-10 flex-wrap">
             <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600">
-                <span className="text-slate-400 text-xs">原图<br/>(白底)</span>
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl bg-white dark:bg-slate-700 overflow-hidden mb-3 flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 shadow-inner">
+                <div className="text-center">
+                  <Upload className="w-8 h-8 mx-auto mb-1 text-slate-400" />
+                  <span className="text-xs text-slate-400">原图(白底)</span>
+                </div>
               </div>
-              <p className="text-xs text-slate-500">上传图片</p>
+              <p className="text-sm font-medium text-slate-600 dark:text-slate-300">上传图片</p>
             </div>
-            <ArrowRight className="w-6 h-6 text-orange-400 flex-shrink-0" />
-            <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2 shadow-md">
-                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop" alt="主图" className="w-full h-full object-cover" />
-              </div>
-              <p className="text-xs text-orange-600 font-medium">主图（提升点击率）</p>
+            
+            <div className="flex items-center gap-2 text-slate-400">
+              <ArrowRight className="w-8 h-8" />
             </div>
+            
             <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2 shadow-md">
-                <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=200&h=200&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden mb-3 shadow-lg ring-2 ring-orange-300">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop" alt="主图" className="w-full h-full object-cover" />
               </div>
-              <p className="text-xs text-orange-600 font-medium">卖点图（突出优势）</p>
+              <p className="text-sm font-semibold text-orange-600">主图（提升点击率）</p>
             </div>
+            
             <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2 shadow-md">
-                <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&h=200&fit=crop" alt="场景图" className="w-full h-full object-cover" />
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden mb-3 shadow-lg">
+                <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300&h=300&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
               </div>
-              <p className="text-xs text-orange-600 font-medium">使用场景（提升转化）</p>
+              <p className="text-sm font-semibold text-orange-600">卖点图（突出优势）</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden mb-3 shadow-lg">
+                <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=300&h=300&fit=crop" alt="场景图" className="w-full h-full object-cover" />
+              </div>
+              <p className="text-sm font-semibold text-orange-600">场景图（提升转化）</p>
             </div>
           </div>
         </div>
 
         {!showResults ? (
           /* 输入表单 */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="max-w-xl mx-auto">
             {/* 左侧：输入 */}
             <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">配置信息</h2>
@@ -242,57 +251,6 @@ export default function ProductGeneratorPage() {
                       </>
                     )}
                   </button>
-                </div>
-              </div>
-            </div>
-
-            {/* 右侧：示例 */}
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-800 dark:to-orange-900/20 rounded-2xl p-6 border border-orange-100 dark:border-orange-900">
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-6 text-center">生成效果示例</h2>
-              
-              <div className="space-y-6">
-                {/* 原图 vs 生成图对比 */}
-                <div className="flex items-center justify-center gap-3">
-                  <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center border-2 border-dashed border-slate-300">
-                      <span className="text-slate-400 text-xs">原图<br/>(白底)</span>
-                    </div>
-                    <p className="text-xs text-slate-500">上传图片</p>
-                  </div>
-                  <ArrowRight className="w-5 h-5 text-orange-400 flex-shrink-0" />
-                  <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 shadow-md ring-2 ring-orange-300">
-                      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&h=150&fit=crop" alt="生成图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-orange-600 font-medium">主图</p>
-                  </div>
-                </div>
-                
-                {/* 生成的多种图 */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="text-center">
-                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
-                      <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=100&h=100&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">卖点图</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
-                      <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100&h=100&fit=crop" alt="场景图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">使用场景</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
-                      <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?w=100&h=100&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">卖点图</p>
-                  </div>
-                </div>
-
-                {/* 提示文字 */}
-                <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-orange-100 dark:border-orange-900">
-                  <p>点击上方按钮，立即体验</p>
                 </div>
               </div>
             </div>
