@@ -126,10 +126,10 @@ export default function ProductGeneratorPage() {
                 <>
                   <Upload className="w-10 h-10 mx-auto mb-2 text-slate-400" />
                   <p className="text-slate-600 dark:text-slate-400 font-medium">
-                    点击上传商品图
+                    上传你的商品图（支持一键生成电商主图）
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
-                    支持 JPG、PNG，建议 800x800
+                    支持 JPG / PNG，建议 800x800
                   </p>
                 </>
               )}
@@ -148,20 +148,29 @@ export default function ProductGeneratorPage() {
                 type="text"
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
-                placeholder="商品名称（选填）"
+                placeholder="商品名称（可选，用于优化图片文案）"
                 className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm"
               />
             </div>
 
             {/* 商品卖点 */}
             <div className="mb-4">
-              <textarea
-                value={productBenefit}
-                onChange={(e) => setProductBenefit(e.target.value)}
-                placeholder="商品卖点（选填），如：降噪、续航、舒适"
-                rows={2}
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm"
-              />
+              <div className="flex gap-2">
+                <textarea
+                  value={productBenefit}
+                  onChange={(e) => setProductBenefit(e.target.value)}
+                  placeholder={"商品卖点（强烈建议填写）\n例如：\n降噪黑科技｜30小时续航｜佩戴舒适不压耳"}
+                  rows={3}
+                  className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm"
+                />
+                <button
+                  onClick={() => setProductBenefit('高音质沉浸体验｜主动降噪｜超长续航｜轻量舒适')}
+                  className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-medium rounded-xl transition-colors whitespace-nowrap flex items-center gap-1"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  帮我生成
+                </button>
+              </div>
             </div>
 
             {/* 生成按钮区域 */}
