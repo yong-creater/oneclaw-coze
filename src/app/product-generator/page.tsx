@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, Sparkles, Loader2, Download, RefreshCw, X, Check } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, RefreshCw, X, Check, ArrowRight, Zap } from 'lucide-react';
 import UtilityHeader from '@/components/common/UtilityHeader';
 import { Button } from '@/components/ui/button';
 
@@ -87,13 +87,45 @@ export default function ProductGeneratorPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* 标题 */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white mb-2">
             上传商品图，AI一键生成能卖货的商品图片
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
             简单几步，告别繁琐设计，让你的商品图更具吸引力
           </p>
+        </div>
+
+        {/* 示例展示行 */}
+        <div className="bg-gradient-to-r from-slate-50 to-orange-50 dark:from-slate-800 dark:to-orange-900/20 rounded-2xl p-6 mb-8">
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-4">示例效果</p>
+          <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap">
+            <div className="text-center">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center">
+                <span className="text-slate-400 text-xs">原图</span>
+              </div>
+              <p className="text-xs text-slate-500">普通商品图</p>
+            </div>
+            <ArrowRight className="w-6 h-6 text-orange-400 flex-shrink-0" />
+            <div className="text-center">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2">
+                <img src="https://picsum.photos/seed/example1/200/200" alt="主图" className="w-full h-full object-cover" />
+              </div>
+              <p className="text-xs text-orange-600 font-medium">AI主图</p>
+            </div>
+            <div className="text-center">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2">
+                <img src="https://picsum.photos/seed/example2/200/200" alt="场景图" className="w-full h-full object-cover" />
+              </div>
+              <p className="text-xs text-orange-600 font-medium">场景图</p>
+            </div>
+            <div className="text-center">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2">
+                <img src="https://picsum.photos/seed/example3/200/200" alt="卖点图" className="w-full h-full object-cover" />
+              </div>
+              <p className="text-xs text-orange-600 font-medium">卖点图</p>
+            </div>
+          </div>
         </div>
 
         {!showResults ? (
@@ -180,47 +212,85 @@ export default function ProductGeneratorPage() {
                 </div>
 
                 {/* 生成按钮 */}
-                <button
-                  onClick={handleGenerate}
-                  disabled={isGenerating}
-                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      正在生成...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5" />
-                      开始生成
-                    </>
-                  )}
-                </button>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Zap className="w-3 h-3 text-orange-500" />
+                      免费体验3次
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span>无需写Prompt</span>
+                    <span className="text-slate-300">|</span>
+                    <span>适用于淘宝/小红书</span>
+                  </div>
+                  <button
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        正在生成...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-5 h-5" />
+                        免费生成商品图
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* 右侧：示例 */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">生成效果预览</h2>
+            <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-800 dark:to-orange-900/20 rounded-2xl p-6 border border-orange-100 dark:border-orange-900">
+              <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-6 text-center">生成效果示例</h2>
               
-              <div className="space-y-4">
-                <div className="text-center text-slate-500 dark:text-slate-400 py-12">
-                  <Sparkles className="w-16 h-16 mx-auto mb-4 text-orange-400 opacity-50" />
-                  <p>配置左侧信息</p>
-                  <p className="text-sm mt-1">点击"开始生成"查看效果</p>
+              <div className="space-y-6">
+                {/* 原图 vs 生成图对比 */}
+                <div className="flex items-center justify-center gap-3">
+                  <div className="text-center">
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center">
+                      <span className="text-slate-400 text-xs">原图</span>
+                    </div>
+                    <p className="text-xs text-slate-500">上传图片</p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-orange-400 flex-shrink-0" />
+                  <div className="text-center">
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 ring-2 ring-orange-300">
+                      <img src="https://picsum.photos/seed/preview1/150/150" alt="生成图" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="text-xs text-orange-600 font-medium">AI主图</p>
+                  </div>
                 </div>
                 
-                {/* 示例展示 */}
-                <div className="grid grid-cols-3 gap-3">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div 
-                      key={i}
-                      className="aspect-square bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center"
-                    >
-                      <span className="text-slate-400 text-xs">示例图 {i}</span>
+                {/* 生成的多种图 */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center">
+                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
+                      <img src="https://picsum.photos/seed/preview2/100/100" alt="场景图" className="w-full h-full object-cover" />
                     </div>
-                  ))}
+                    <p className="text-xs text-slate-600 dark:text-slate-400">场景图</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
+                      <img src="https://picsum.photos/seed/preview3/100/100" alt="卖点图" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">卖点图</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
+                      <img src="https://picsum.photos/seed/preview4/100/100" alt="细节图" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">细节图</p>
+                  </div>
+                </div>
+
+                {/* 提示文字 */}
+                <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-orange-100 dark:border-orange-900">
+                  <p>点击上方按钮，立即体验</p>
                 </div>
               </div>
             </div>
