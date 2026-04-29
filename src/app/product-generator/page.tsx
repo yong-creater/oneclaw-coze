@@ -280,10 +280,10 @@ export default function ProductGeneratorPage() {
                   
                   {/* 卖点图 - 突出优势 */}
                   <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 shadow-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
+                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 shadow-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
                       <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop&q=85" alt="卖点图" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-[8px] text-slate-600 bg-white/80 px-1 rounded">降噪黑科技</span>
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2">
+                        <span className="text-[6px] text-slate-600 bg-white/90 px-1 py-0.5 rounded whitespace-nowrap">降噪</span>
                       </div>
                     </div>
                     <p className="text-xs text-orange-600 font-medium">突出优势</p>
