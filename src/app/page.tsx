@@ -196,34 +196,34 @@ function UtilityToolsPage() {
   if (groups.length > 0) {
     return (
       <div className="space-y-8">
-        {/* Hero 区域 */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-amber-500 to-orange-400 rounded-2xl p-8 md:p-12">
-          {/* 背景装饰 */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
-          </div>
-          
-          <div className="relative z-10 max-w-2xl">
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              AI一键生成商品图片
-            </h1>
-            <p className="text-lg text-white/90 mb-6">
-              上传商品图，自动生成主图 / 卖点图 / 场景图，不懂设计也能做图
-            </p>
-            <div className="flex flex-wrap gap-3">
+        {/* 置顶大卡片 */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-amber-500 to-orange-400 rounded-2xl p-6 md:p-8">
+          <div className="flex flex-col lg:flex-row items-center gap-6">
+            {/* 左侧文字区 */}
+            <div className="flex-1">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                AI商品图片一键生成
+              </h2>
+              <p className="text-white/90 text-base md:text-lg mb-4">
+                上传商品图，一键生成主图、卖点图、场景图
+              </p>
               <button
                 onClick={() => router.push('/product-generator')}
                 className="px-6 py-3 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors shadow-lg"
               >
                 立即生成商品图
               </button>
-              <button
-                onClick={() => window.scrollTo({ top: 300, behavior: 'smooth' })}
-                className="px-6 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-colors border border-white/30"
-              >
-                浏览精选工具
-              </button>
+            </div>
+            
+            {/* 右侧对比视觉 */}
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 backdrop-blur rounded-xl p-4 w-32 h-32 flex items-center justify-center">
+                <div className="text-white/60 text-sm">原图</div>
+              </div>
+              <div className="text-white text-2xl">→</div>
+              <div className="bg-white rounded-xl p-4 w-32 h-32 flex items-center justify-center">
+                <div className="text-orange-500 text-sm">生成图</div>
+              </div>
             </div>
           </div>
         </div>
