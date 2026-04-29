@@ -12,10 +12,10 @@ interface GeneratedImage {
 
 // 示例使用耳机商品图（电商风格）
 const EXAMPLE_IMAGES: GeneratedImage[] = [
-  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop', label: '主图（提升点击率）' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=600&fit=crop', label: '卖点图（突出优势）' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&h=600&fit=crop', label: '卖点图（降噪续航）' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&h=600&fit=crop', label: '场景图（提升转化）' },
+  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop&q=90', label: '主图' },
+  { id: 2, url: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&h=800&fit=crop&q=90', label: '场景图' },
+  { id: 3, url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=800&fit=crop&q=90', label: '卖点图' },
+  { id: 4, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=800&fit=crop&q=90', label: '场景图' },
 ];
 
 export default function ProductGeneratorPage() {
@@ -228,7 +228,7 @@ export default function ProductGeneratorPage() {
               /* 默认示例展示 */
               <div>
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3 text-center">
-                  生成效果示例
+                  生成效果（电商级）
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-center">
@@ -241,22 +241,22 @@ export default function ProductGeneratorPage() {
                     <p className="text-xs text-slate-500">上传图片</p>
                   </div>
                   <div className="text-center">
-                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-md ring-2 ring-orange-200">
-                      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop" alt="主图" className="w-full h-full object-cover" />
+                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-lg ring-2 ring-orange-200">
+                      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop&q=90" alt="主图" className="w-full h-full object-cover" />
                     </div>
                     <p className="text-xs text-orange-600 font-medium">主图</p>
                   </div>
                   <div className="text-center">
-                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-md">
-                      <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=200&h=200&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-orange-600 font-medium">卖点图</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-md">
-                      <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&h=200&fit=crop" alt="场景图" className="w-full h-full object-cover" />
+                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-lg">
+                      <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&h=300&fit=crop&q=90" alt="场景图" className="w-full h-full object-cover" />
                     </div>
                     <p className="text-xs text-orange-600 font-medium">场景图</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-lg">
+                      <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300&h=300&fit=crop&q=90" alt="卖点图" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="text-xs text-orange-600 font-medium">卖点图</p>
                   </div>
                 </div>
               </div>
@@ -279,21 +279,21 @@ export default function ProductGeneratorPage() {
                 <div className="grid grid-cols-2 gap-3">
                   {generatedImages.map((img) => (
                     <div key={img.id} className="relative group">
-                      <div className="aspect-square rounded-xl overflow-hidden">
+                      <div className="aspect-square rounded-xl overflow-hidden shadow-lg">
                         <img 
                           src={img.url} 
                           alt={img.label}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/60 text-white text-xs rounded">
+                      <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/70 text-white text-xs rounded backdrop-blur-sm">
                         {img.label}
                       </div>
                       <button
                         onClick={() => window.open(img.url, '_blank')}
                         className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
                       >
-                        <span className="px-3 py-1.5 bg-white text-slate-800 text-sm rounded-lg flex items-center gap-1">
+                        <span className="px-3 py-1.5 bg-white text-slate-800 text-sm rounded-lg flex items-center gap-1 shadow-lg">
                           <Download className="w-4 h-4" />
                           下载
                         </span>
