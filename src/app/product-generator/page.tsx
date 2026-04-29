@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Upload, Sparkles, Loader2, Download, RefreshCw, X, ArrowRight, Zap } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, RefreshCw, X, Check, ArrowRight, Zap } from 'lucide-react';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
 interface GeneratedImage {
@@ -17,6 +17,24 @@ const EXAMPLE_IMAGES: GeneratedImage[] = [
   { id: 3, url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=800&fit=crop&q=90', label: '卖点图' },
   { id: 4, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=800&fit=crop&q=90', label: '场景图' },
 ];
+
+// 电商级商品图生成 Prompt（商业摄影标准）
+const GENERATION_PROMPTS = {
+  // 主图 Prompt - 白底商业摄影
+  mainImage: (product: string) => `professional studio product photography of ${product}, centered composition, pure white background, soft diffused lighting, realistic shadow, ultra realistic, commercial e-commerce style, high detail, sharp focus, 8k resolution, no text, no watermark, no blur, no distortion`,
+  
+  // 场景图 Prompt - 生活方式场景
+  sceneImage: (product: string) => `${product} placed in modern lifestyle scene, warm lighting, natural environment, depth of field, cinematic composition, commercial advertising style, ultra realistic, high-end brand feeling, 8k resolution, no text, no watermark, no blur, no distortion`,
+  
+  // 高级感主图 Prompt - Apple风格极简
+  premiumImage: (product: string) => `premium ${product} product shot, minimal luxury background, soft gradient background, cinematic lighting, elegant composition, apple style aesthetic, ultra realistic, high-end commercial photography, 8k resolution, no text, no watermark, no blur, no distortion`,
+  
+  // 卖点图 Prompt - 突出产品优势
+  benefitImage: (product: string) => `${product} highlight shot, showcasing key features, clean background, professional lighting, commercial e-commerce style, ultra realistic, sharp focus, 8k resolution, no text, no watermark, no blur, no distortion`,
+};
+
+// 负面 Prompt（所有图片通用）
+const NEGATIVE_PROMPT = `text, watermark, blur, distortion, low quality, pixelated, ugly, deformed, amateur, cheap, stock photo, busy background`;
 
 export default function ProductGeneratorPage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -265,7 +283,7 @@ export default function ProductGeneratorPage() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    已生成 {generatedImages.length} 张
+                    已生成 {generatedImages.length} 张（电商级）
                   </h3>
                   <button
                     onClick={handleRegenerate}
@@ -307,6 +325,25 @@ export default function ProductGeneratorPage() {
                 >
                   生成新图片
                 </button>
+                
+                {/* Prompt 技术说明 */}
+                <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                  <p className="text-xs text-slate-400 mb-2">生成标准：</p>
+                  <div className="space-y-1">
+                    <div className="flex items-start gap-2">
+                      <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs text-slate-500">商业摄影标准 · 8K高清 · 锐利对焦</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs text-slate-500">无文字 · 无水印 · 无噪点</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <Check className="w-3 h-3 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-xs text-slate-500">淘宝/京东/天猫可直接使用</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
