@@ -8,17 +8,27 @@ interface GeneratedImage {
   id: number;
   url: string;
   label: string;
+  type: 'mainImage' | 'benefitImage' | 'sceneImage';
 }
 
 // 示例使用耳机商品图（电商风格）
 // 统一使用无线耳机，三种风格：白底主图 / 高级感卖点图 / 场景图
 const EXAMPLE_IMAGES: GeneratedImage[] = [
   // 1️⃣ 主图（白底电商）- commercial studio photography
-  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop&q=90', label: '主图（白底）' },
+  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop&q=90', label: '电商主图', type: 'mainImage' },
   // 2️⃣ 卖点图（高级感）- premium product shot  
-  { id: 2, url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=800&fit=crop&q=90', label: '卖点图（高级感）' },
+  { id: 2, url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=800&fit=crop&q=90', label: '卖点图', type: 'benefitImage' },
   // 3️⃣ 场景图（生活场景）- lifestyle scene
-  { id: 3, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=800&fit=crop&q=90', label: '场景图（卖货）' },
+  { id: 3, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=800&fit=crop&q=90', label: '场景图', type: 'sceneImage' },
+];
+
+// 加载状态文案
+const LOADING_STEPS = [
+  '正在分析商品特征...',
+  '正在优化商品卖点...',
+  '正在生成电商主图...',
+  '正在生成卖点图...',
+  '正在生成场景图...',
 ];
 
 // 电商级商品图生成 Prompt（商业摄影标准）
@@ -45,6 +55,7 @@ export default function ProductGeneratorPage() {
   const [productName, setProductName] = useState('');
   const [productBenefit, setProductBenefit] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingStep, setGeneratingStep] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   
@@ -68,10 +79,76 @@ export default function ProductGeneratorPage() {
     }
     
     setIsGenerating(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setGeneratedImages(EXAMPLE_IMAGES);
-    setShowResults(true);
-    setIsGenerating(false);
+    
+    // 模拟加载状态切换（实际进度由 AI 生成）
+    let stepIndex = 0;
+    const stepInterval = setInterval(() => {
+      stepIndex = (stepIndex + 1) % LOADING_STEPS.length;
+      setGeneratingStep(LOADING_STEPS[stepIndex]);
+    }, 1500);
+
+    try {
+      const response = await fetch('/api/product-generator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: uploadedImage,
+          productName: productName || undefined,
+          productBenefit: productBenefit || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || '生成失败');
+      }
+
+      // 转换 API 返回结果为图片列表
+      const images: GeneratedImage[] = [];
+      let id = 1;
+
+      if (data.images.mainImage) {
+        images.push({
+          id: id++,
+          url: data.images.mainImage,
+          label: '电商主图',
+          type: 'mainImage'
+        });
+      }
+      if (data.images.benefitImage) {
+        images.push({
+          id: id++,
+          url: data.images.benefitImage,
+          label: '卖点图',
+          type: 'benefitImage'
+        });
+      }
+      if (data.images.sceneImage) {
+        images.push({
+          id: id++,
+          url: data.images.sceneImage,
+          label: '场景图',
+          type: 'sceneImage'
+        });
+      }
+
+      if (images.length === 0) {
+        throw new Error('未能生成任何图片');
+      }
+
+      setGeneratedImages(images);
+      setShowResults(true);
+    } catch (error) {
+      console.error('生成失败:', error);
+      alert(error instanceof Error ? error.message : '生成失败，请稍后重试');
+    } finally {
+      clearInterval(stepInterval);
+      setGeneratingStep('');
+      setIsGenerating(false);
+    }
   };
 
   const handleReset = () => {
@@ -84,10 +161,77 @@ export default function ProductGeneratorPage() {
 
   const handleRegenerate = async () => {
     setIsGenerating(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    const shuffled = [...EXAMPLE_IMAGES].sort(() => Math.random() - 0.5);
-    setGeneratedImages(shuffled);
-    setIsGenerating(false);
+
+    // 模拟加载状态切换
+    let stepIndex = 0;
+    const stepInterval = setInterval(() => {
+      stepIndex = (stepIndex + 1) % LOADING_STEPS.length;
+      setGeneratingStep(LOADING_STEPS[stepIndex]);
+    }, 1500);
+
+    try {
+      const response = await fetch('/api/product-generator', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: uploadedImage,
+          productName: productName || undefined,
+          productBenefit: productBenefit || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || '生成失败');
+      }
+
+      // 转换 API 返回结果为图片列表
+      const images: GeneratedImage[] = [];
+      let id = 1;
+
+      if (data.images.mainImage) {
+        images.push({
+          id: id++,
+          url: data.images.mainImage,
+          label: '电商主图',
+          type: 'mainImage'
+        });
+      }
+      if (data.images.benefitImage) {
+        images.push({
+          id: id++,
+          url: data.images.benefitImage,
+          label: '卖点图',
+          type: 'benefitImage'
+        });
+      }
+      if (data.images.sceneImage) {
+        images.push({
+          id: id++,
+          url: data.images.sceneImage,
+          label: '场景图',
+          type: 'sceneImage'
+        });
+      }
+
+      if (images.length === 0) {
+        throw new Error('未能生成任何图片');
+      }
+
+      // 随机打乱顺序
+      const shuffled = images.sort(() => Math.random() - 0.5);
+      setGeneratedImages(shuffled);
+    } catch (error) {
+      console.error('重新生成失败:', error);
+      alert(error instanceof Error ? error.message : '重新生成失败，请稍后重试');
+    } finally {
+      clearInterval(stepInterval);
+      setGeneratingStep('');
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -225,7 +369,7 @@ export default function ProductGeneratorPage() {
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    正在生成...
+                    {generatingStep || '正在生成...'}
                   </>
                 ) : (
                   <>
