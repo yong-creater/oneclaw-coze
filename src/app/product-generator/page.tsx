@@ -11,15 +11,14 @@ interface GeneratedImage {
   type: 'mainImage' | 'benefitImage' | 'sceneImage';
 }
 
-// 示例使用耳机商品图（电商风格）
-// 统一使用无线耳机，三种风格：白底主图 / 高级感卖点图 / 场景图
+// AI生成的电商级耳机商品图（商业摄影标准）
 const EXAMPLE_IMAGES: GeneratedImage[] = [
-  // 1️⃣ 主图（白底电商）- commercial studio photography
-  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop&q=90', label: '电商主图', type: 'mainImage' },
-  // 2️⃣ 卖点图（高级感）- premium product shot  
-  { id: 2, url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=800&fit=crop&q=90', label: '卖点图', type: 'benefitImage' },
-  // 3️⃣ 场景图（生活场景）- lifestyle scene
-  { id: 3, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=800&fit=crop&q=90', label: '场景图', type: 'sceneImage' },
+  // 1️⃣ 主图（白底电商）- 商业摄影棚纯白背景
+  { id: 1, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a71cc71b-dbe8-4e6f-aae1-fd6249f27ff7.jpeg', label: '电商主图', type: 'mainImage' },
+  // 2️⃣ 卖点图（高级感）- 简约奢华背景，高级商业摄影
+  { id: 2, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_4088395c-34f2-4834-8a89-a3a4993a5b23.jpeg', label: '卖点图', type: 'benefitImage' },
+  // 3️⃣ 场景图（生活氛围）- 现代办公桌场景，商业广告风格
+  { id: 3, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_55f1b776-3bb0-4a55-bf86-c73626241895.jpeg', label: '场景图', type: 'sceneImage' },
 ];
 
 // 加载状态文案

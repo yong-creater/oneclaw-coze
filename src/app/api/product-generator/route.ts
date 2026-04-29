@@ -1,26 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 
-// Prompt 模板
+// 电商级商品图生成 Prompt（商业摄影标准）
+// 所有Prompt必须包含：ultra realistic, commercial photography, studio lighting 等关键质量词
 const PROMPT_TEMPLATES = {
-  // 电商主图：干净背景、高级光影、商品突出
+  // 1️⃣ 主图（白底电商）- 商业摄影棚纯白背景
   mainImage: (productName?: string, benefits?: string) => {
-    const base = 'Professional e-commerce product photography, clean white background, studio lighting, high-end commercial visual, product stands out prominently, sharp focus, 4K quality';
+    const base = 'professional studio product photography of wireless headphones, centered composition, pure white background, soft diffused lighting, realistic shadow underneath, ultra realistic, commercial e-commerce style, ultra high detail, sharp focus, 8k, no text, no watermark, no logo, no blur, no distortion';
     const namePart = productName ? `, featuring ${productName}` : '';
     const benefitPart = benefits ? `, ${benefits}` : '';
     return `${base}${namePart}${benefitPart}`;
   },
 
-  // 卖点图：突出优势、商业视觉
+  // 2️⃣ 卖点图（高级感）- 简约奢华背景，高级商业摄影
   benefitImage: (benefits?: string) => {
-    const base = 'Premium product shot with benefit highlights, clean composition, commercial photography style, elegant lighting, professional e-commerce visual';
+    const base = 'premium wireless headphones product shot, minimal luxury background, soft beige or light gray gradient background, cinematic soft lighting, subtle shadow, elegant composition, apple style aesthetic, high-end commercial photography, ultra realistic, ultra high detail, sharp focus, 8k, no text, no watermark, no logo, no blur, no distortion';
     const benefitPart = benefits ? `, showcasing: ${benefits}` : '';
     return `${base}${benefitPart}`;
   },
 
-  // 场景图：真实使用场景、自然光、生活化
+  // 3️⃣ 场景图（生活氛围）- 现代办公桌场景，商业广告风格
   sceneImage: (productName?: string) => {
-    const base = 'Realistic lifestyle scene, natural lighting, professional photography, high-end visual, relatable daily use scenario, warm atmosphere';
+    const base = 'wireless headphones placed on modern desk setup, warm natural lighting, laptop, coffee cup, cozy lifestyle scene, shallow depth of field, cinematic composition, soft shadows, commercial advertising photography, high-end brand feeling, ultra realistic, ultra high detail, sharp focus, 8k, no text, no watermark, no logo, no blur, no distortion';
     const namePart = productName ? `, featuring ${productName}` : '';
     return `${base}${namePart}`;
   }
