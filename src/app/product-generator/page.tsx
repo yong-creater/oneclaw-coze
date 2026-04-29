@@ -11,14 +11,15 @@ interface GeneratedImage {
   label: string;
 }
 
+// 示例使用耳机商品图（电商风格）
 const EXAMPLE_IMAGES: GeneratedImage[] = [
-  { id: 1, url: 'https://picsum.photos/seed/prod1/600/600', label: '主图风格' },
-  { id: 2, url: 'https://picsum.photos/seed/prod2/600/600', label: '场景图' },
-  { id: 3, url: 'https://picsum.photos/seed/prod3/600/600', label: '卖点图' },
-  { id: 4, url: 'https://picsum.photos/seed/prod4/600/600', label: '细节图' },
-  { id: 5, url: 'https://picsum.photos/seed/prod5/600/600', label: '对比图' },
-  { id: 6, url: 'https://picsum.photos/seed/prod6/600/600', label: '氛围图' },
-  { id: 7, url: 'https://picsum.photos/seed/prod7/600/600', label: '模特图' },
+  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop', label: '主图（提升点击率）' },
+  { id: 2, url: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&h=600&fit=crop', label: '卖点图（突出优势）' },
+  { id: 3, url: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=600&h=600&fit=crop', label: '卖点图（降噪续航）' },
+  { id: 4, url: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&h=600&fit=crop', label: '使用场景（提升转化）' },
+  { id: 5, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=600&h=600&fit=crop', label: '主图（高级背景）' },
+  { id: 6, url: 'https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?w=600&h=600&fit=crop', label: '使用场景（生活方式）' },
+  { id: 7, url: 'https://images.unsplash.com/photo-1598331668826-20cecc596b86?w=600&h=600&fit=crop', label: '主图（白底图）' },
 ];
 
 export default function ProductGeneratorPage() {
@@ -69,10 +70,9 @@ export default function ProductGeneratorPage() {
   const handleRegenerate = async () => {
     setIsGenerating(true);
     await new Promise(resolve => setTimeout(resolve, 2000));
-    setGeneratedImages(EXAMPLE_IMAGES.map(img => ({
-      ...img,
-      url: `https://picsum.photos/seed/prod${img.id}_${Date.now()}/600/600`,
-    })));
+    // 随机打乱图片顺序，模拟重新生成
+    const shuffled = [...EXAMPLE_IMAGES].sort(() => Math.random() - 0.5);
+    setGeneratedImages(shuffled);
     setIsGenerating(false);
   };
 
@@ -98,32 +98,34 @@ export default function ProductGeneratorPage() {
 
         {/* 示例展示行 */}
         <div className="bg-gradient-to-r from-slate-50 to-orange-50 dark:from-slate-800 dark:to-orange-900/20 rounded-2xl p-6 mb-8">
-          <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-4">示例效果</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 text-center mb-4">
+            示例：普通商品图 → AI优化后可直接用于电商主图
+          </p>
           <div className="flex items-center justify-center gap-4 md:gap-8 flex-wrap">
             <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center">
-                <span className="text-slate-400 text-xs">原图</span>
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600">
+                <span className="text-slate-400 text-xs">原图<br/>(白底)</span>
               </div>
-              <p className="text-xs text-slate-500">普通商品图</p>
+              <p className="text-xs text-slate-500">上传图片</p>
             </div>
             <ArrowRight className="w-6 h-6 text-orange-400 flex-shrink-0" />
             <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2">
-                <img src="https://picsum.photos/seed/example1/200/200" alt="主图" className="w-full h-full object-cover" />
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2 shadow-md">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop" alt="主图" className="w-full h-full object-cover" />
               </div>
-              <p className="text-xs text-orange-600 font-medium">AI主图</p>
+              <p className="text-xs text-orange-600 font-medium">主图（提升点击率）</p>
             </div>
             <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2">
-                <img src="https://picsum.photos/seed/example2/200/200" alt="场景图" className="w-full h-full object-cover" />
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2 shadow-md">
+                <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=200&h=200&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
               </div>
-              <p className="text-xs text-orange-600 font-medium">场景图</p>
+              <p className="text-xs text-orange-600 font-medium">卖点图（突出优势）</p>
             </div>
             <div className="text-center">
-              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2">
-                <img src="https://picsum.photos/seed/example3/200/200" alt="卖点图" className="w-full h-full object-cover" />
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden mb-2 shadow-md">
+                <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&h=200&fit=crop" alt="场景图" className="w-full h-full object-cover" />
               </div>
-              <p className="text-xs text-orange-600 font-medium">卖点图</p>
+              <p className="text-xs text-orange-600 font-medium">使用场景（提升转化）</p>
             </div>
           </div>
         </div>
@@ -252,17 +254,17 @@ export default function ProductGeneratorPage() {
                 {/* 原图 vs 生成图对比 */}
                 <div className="flex items-center justify-center gap-3">
                   <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-slate-200 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center">
-                      <span className="text-slate-400 text-xs">原图</span>
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-slate-100 dark:bg-slate-700 overflow-hidden mb-2 flex items-center justify-center border-2 border-dashed border-slate-300">
+                      <span className="text-slate-400 text-xs">原图<br/>(白底)</span>
                     </div>
                     <p className="text-xs text-slate-500">上传图片</p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-orange-400 flex-shrink-0" />
                   <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 ring-2 ring-orange-300">
-                      <img src="https://picsum.photos/seed/preview1/150/150" alt="生成图" className="w-full h-full object-cover" />
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 shadow-md ring-2 ring-orange-300">
+                      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=150&h=150&fit=crop" alt="生成图" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-xs text-orange-600 font-medium">AI主图</p>
+                    <p className="text-xs text-orange-600 font-medium">主图</p>
                   </div>
                 </div>
                 
@@ -270,21 +272,21 @@ export default function ProductGeneratorPage() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="text-center">
                     <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
-                      <img src="https://picsum.photos/seed/preview2/100/100" alt="场景图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">场景图</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
-                      <img src="https://picsum.photos/seed/preview3/100/100" alt="卖点图" className="w-full h-full object-cover" />
+                      <img src="https://images.unsplash.com/photo-1583394838336-acd977736f90?w=100&h=100&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
                     </div>
                     <p className="text-xs text-slate-600 dark:text-slate-400">卖点图</p>
                   </div>
                   <div className="text-center">
                     <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
-                      <img src="https://picsum.photos/seed/preview4/100/100" alt="细节图" className="w-full h-full object-cover" />
+                      <img src="https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100&h=100&fit=crop" alt="场景图" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">细节图</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">使用场景</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="aspect-square rounded-lg overflow-hidden mb-1 shadow-sm">
+                      <img src="https://images.unsplash.com/photo-1484704849700-f032a568e944?w=100&h=100&fit=crop" alt="卖点图" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-400">卖点图</p>
                   </div>
                 </div>
 
