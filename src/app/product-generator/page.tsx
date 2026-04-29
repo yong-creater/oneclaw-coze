@@ -11,30 +11,34 @@ interface GeneratedImage {
 }
 
 // 示例使用耳机商品图（电商风格）
+// 统一使用无线耳机，三种风格：白底主图 / 高级感卖点图 / 场景图
 const EXAMPLE_IMAGES: GeneratedImage[] = [
-  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop&q=90', label: '主图' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&h=800&fit=crop&q=90', label: '场景图' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=800&fit=crop&q=90', label: '卖点图' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=800&fit=crop&q=90', label: '场景图' },
+  // 1️⃣ 主图（白底电商）- commercial studio photography
+  { id: 1, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop&q=90', label: '主图（白底）' },
+  // 2️⃣ 卖点图（高级感）- premium product shot  
+  { id: 2, url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=800&h=800&fit=crop&q=90', label: '卖点图（高级感）' },
+  // 3️⃣ 场景图（生活场景）- lifestyle scene
+  { id: 3, url: 'https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=800&h=800&fit=crop&q=90', label: '场景图（卖货）' },
 ];
 
 // 电商级商品图生成 Prompt（商业摄影标准）
+// 统一使用无线耳机作为示例产品
 const GENERATION_PROMPTS = {
-  // 主图 Prompt - 白底商业摄影
-  mainImage: (product: string) => `professional studio product photography of ${product}, centered composition, pure white background, soft diffused lighting, realistic shadow, ultra realistic, commercial e-commerce style, high detail, sharp focus, 8k resolution, no text, no watermark, no blur, no distortion`,
+  // 1️⃣ 主图 Prompt - 白底商业摄影
+  // commercial studio photography, white background, e-commerce standard
+  mainImage: (product: string) => `professional studio product photography of ${product}, centered composition, pure white background, soft diffused lighting, realistic shadow underneath, ultra realistic, commercial e-commerce style, ultra high detail, sharp focus, 8k, no text, no watermark, no blur, no distortion`,
   
-  // 场景图 Prompt - 生活方式场景
-  sceneImage: (product: string) => `${product} placed in modern lifestyle scene, warm lighting, natural environment, depth of field, cinematic composition, commercial advertising style, ultra realistic, high-end brand feeling, 8k resolution, no text, no watermark, no blur, no distortion`,
+  // 2️⃣ 卖点图 Prompt - 高级感Apple风格
+  // premium product shot, minimal luxury background, apple aesthetic
+  premiumImage: (product: string) => `premium ${product} product shot, minimal luxury background, soft beige or light gray gradient background, cinematic soft lighting, subtle shadow, elegant composition, high-end commercial photography style, apple style aesthetic, ultra realistic, ultra high detail, sharp focus, 8k, no text, no watermark, no blur, no distortion`,
   
-  // 高级感主图 Prompt - Apple风格极简
-  premiumImage: (product: string) => `premium ${product} product shot, minimal luxury background, soft gradient background, cinematic lighting, elegant composition, apple style aesthetic, ultra realistic, high-end commercial photography, 8k resolution, no text, no watermark, no blur, no distortion`,
-  
-  // 卖点图 Prompt - 突出产品优势
-  benefitImage: (product: string) => `${product} highlight shot, showcasing key features, clean background, professional lighting, commercial e-commerce style, ultra realistic, sharp focus, 8k resolution, no text, no watermark, no blur, no distortion`,
+  // 3️⃣ 场景图 Prompt - 生活方式场景
+  // lifestyle scene, modern desk, commercial advertising style
+  sceneImage: (product: string) => `${product} placed on modern desk setup, warm natural lighting, laptop, coffee cup, cozy lifestyle scene, shallow depth of field, cinematic composition, soft shadows, commercial advertising photography, high-end brand feeling, ultra realistic, ultra high detail, sharp focus, 8k, no text, no watermark, no blur, no distortion`,
 };
 
-// 负面 Prompt（所有图片通用）
-const NEGATIVE_PROMPT = `text, watermark, blur, distortion, low quality, pixelated, ugly, deformed, amateur, cheap, stock photo, busy background`;
+// 负面 Prompt（所有图片通用限制词）
+const NEGATIVE_PROMPT = `text, watermark, logo, blur, distortion, low quality, pixelated, ugly, deformed, amateur, cheap, stock photo, busy background, AI generated, synthetic`;
 
 export default function ProductGeneratorPage() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -248,33 +252,27 @@ export default function ProductGeneratorPage() {
                 <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3 text-center">
                   生成效果（电商级）
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center">
-                    <div className="aspect-square rounded-xl overflow-hidden mb-2 bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                      <div className="text-center p-2">
-                        <Upload className="w-6 h-6 mx-auto mb-1 text-slate-400" />
-                        <span className="text-xs text-slate-400">原图</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">上传图片</p>
-                  </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {/* 主图（白底电商） */}
                   <div className="text-center">
                     <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-lg ring-2 ring-orange-200">
                       <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop&q=90" alt="主图" className="w-full h-full object-cover" />
                     </div>
-                    <p className="text-xs text-orange-600 font-medium">主图</p>
+                    <p className="text-xs text-orange-600 font-medium">主图（白底）</p>
                   </div>
-                  <div className="text-center">
-                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-lg">
-                      <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&h=300&fit=crop&q=90" alt="场景图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-orange-600 font-medium">场景图</p>
-                  </div>
+                  {/* 卖点图（高级感） */}
                   <div className="text-center">
                     <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-lg">
                       <img src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300&h=300&fit=crop&q=90" alt="卖点图" className="w-full h-full object-cover" />
                     </div>
                     <p className="text-xs text-orange-600 font-medium">卖点图</p>
+                  </div>
+                  {/* 场景图（卖货） */}
+                  <div className="text-center">
+                    <div className="aspect-square rounded-xl overflow-hidden mb-2 shadow-lg">
+                      <img src="https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=300&h=300&fit=crop&q=90" alt="场景图" className="w-full h-full object-cover" />
+                    </div>
+                    <p className="text-xs text-orange-600 font-medium">场景图</p>
                   </div>
                 </div>
               </div>
