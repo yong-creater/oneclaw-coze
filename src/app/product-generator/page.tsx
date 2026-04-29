@@ -164,22 +164,32 @@ export default function ProductGeneratorPage() {
               />
             </div>
 
-            {/* 生成按钮 */}
-            <div className="space-y-2">
+            {/* 生成按钮区域 */}
+            <div className="space-y-3">
+              {/* 卖点标签 */}
               <div className="flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                 <span className="flex items-center gap-1">
                   <Zap className="w-3 h-3 text-orange-500" />
                   免费体验
                 </span>
-                <span>|</span>
+                <span className="text-slate-300">|</span>
                 <span>无需Prompt</span>
-                <span>|</span>
+                <span className="text-slate-300">|</span>
                 <span>淘宝/小红书</span>
               </div>
+              
+              {/* 紧迫感提示 */}
+              <div className="text-center">
+                <span className="text-sm text-orange-600 dark:text-orange-400 font-medium">
+                  ⚡ 今日免费生成次数还剩 2 次
+                </span>
+              </div>
+              
+              {/* 主按钮 */}
               <button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="w-full py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-[14px] bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-base rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>
@@ -189,10 +199,17 @@ export default function ProductGeneratorPage() {
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    免费生成商品图
+                    一键生成商品图（免费预览）
                   </>
                 )}
               </button>
+              
+              {/* 收费预期提示 */}
+              <div className="text-center">
+                <span className="text-[13px] text-slate-400">
+                  高清无水印下载需解锁
+                </span>
+              </div>
             </div>
           </div>
 
