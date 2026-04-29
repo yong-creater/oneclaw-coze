@@ -196,6 +196,38 @@ function UtilityToolsPage() {
   if (groups.length > 0) {
     return (
       <div className="space-y-8">
+        {/* Hero 区域 */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-amber-500 to-orange-400 rounded-2xl p-8 md:p-12">
+          {/* 背景装饰 */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
+          </div>
+          
+          <div className="relative z-10 max-w-2xl">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              AI一键生成商品图片
+            </h1>
+            <p className="text-lg text-white/90 mb-6">
+              上传商品图，自动生成主图 / 卖点图 / 场景图，不懂设计也能做图
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={() => router.push('/product-generator')}
+                className="px-6 py-3 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors shadow-lg"
+              >
+                立即生成商品图
+              </button>
+              <button
+                onClick={() => window.scrollTo({ top: 300, behavior: 'smooth' })}
+                className="px-6 py-3 bg-white/20 text-white font-semibold rounded-xl hover:bg-white/30 transition-colors border border-white/30"
+              >
+                浏览精选工具
+              </button>
+            </div>
+          </div>
+        </div>
+
         {groups.map(group => {
           const groupTools = tools.filter(t => t.group_id === group.id);
           if (groupTools.length === 0) return null;
