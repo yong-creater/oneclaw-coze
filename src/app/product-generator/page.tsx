@@ -181,7 +181,7 @@ export default function ProductGeneratorPage() {
                 <textarea
                   value={productBenefit}
                   onChange={(e) => setProductBenefit(e.target.value)}
-                  placeholder={"商品卖点（强烈建议填写）\n例如：\n降噪黑科技｜30小时续航｜佩戴舒适不压耳"}
+                  placeholder="商品卖点（强烈建议填写，用于优化图片文案）"
                   rows={3}
                   className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm"
                 />
