@@ -510,7 +510,7 @@ export default function ProductDetailGeneratorPage() {
             )}
 
             {/* 商品名称 */}
-            <div className="mb-3">
+            <div className="mt-4 mb-3">
               <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：蓝牙降噪耳机）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
             </div>
 
