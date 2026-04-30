@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateWithModel } from '@/lib/model-selector';
 
-// ============ Prompt 体系：7 张商品详情图 ============
+// ============ Prompt 体系：4 张商品视觉素材 ============
 
 type ProductCategory = 'shoes' | 'clothing' | 'electronics' | 'beauty' | 'food' | 'general';
 
 // 图片类型定义（顺序即展示顺序）
-export type ImageSlot = 'cover' | 'selling1' | 'selling2' | 'scene1' | 'scene2' | 'feature' | 'specs';
+export type ImageSlot = 'cover' | 'selling' | 'scene1' | 'scene2';
 
 export const IMAGE_SLOTS: { slot: ImageSlot; label: string; order: number }[] = [
-  { slot: 'cover', label: '封面图', order: 1 },
-  { slot: 'selling1', label: '卖点图 1', order: 2 },
-  { slot: 'selling2', label: '卖点图 2', order: 3 },
-  { slot: 'scene1', label: '场景图 1', order: 4 },
-  { slot: 'scene2', label: '场景图 2', order: 5 },
-  { slot: 'feature', label: '功能拆解图', order: 6 },
-  { slot: 'specs', label: '参数图', order: 7 },
+  { slot: 'cover', label: '主图', order: 1 },
+  { slot: 'selling', label: '卖点图', order: 2 },
+  { slot: 'scene1', label: '场景图 1', order: 3 },
+  { slot: 'scene2', label: '场景图 2', order: 4 },
 ];
 
 // ---- Base quality (apply to all images) ----
@@ -58,9 +55,9 @@ const CATEGORY_SCENE_2: Record<ProductCategory, string> = {
 // ---- Per-slot Prompt generators ----
 export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string, category?: ProductCategory) => string> = {
 
-  // 1) 封面图（吸引点击）—— 最强视觉冲击
+  // 1) 主图（吸引点击）—— 最强视觉冲击
   cover: (productName, benefits, _category) => {
-    return `Create a stunning e-commerce cover image that drives clicks and conversions.
+    return `Create a stunning e-commerce main image that drives clicks and conversions.
 
 Base quality (apply to all images):
 ${BASE_QUALITY}
@@ -72,7 +69,7 @@ ${benefs(benefits)}
 
 Generate 1 DISTINCT image:
 
-COVER IMAGE (click-driving, attention-grabbing):
+MAIN IMAGE (click-driving, attention-grabbing):
 - Dramatic studio lighting with rim light accent
 - Pure white or subtle gradient background
 - Product centered, slightly larger than life
@@ -85,8 +82,8 @@ CRITICAL: NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
 
   },
 
-  // 2) 卖点图 1（核心卖点/情感冲击）
-  selling1: (_productName, benefits, _category) => {
+  // 2) 卖点图（核心卖点/情感冲击）
+  selling: (_productName, benefits, _category) => {
     return `Create a premium selling-point image with strong emotional impact.
 
 Base quality:
@@ -99,7 +96,7 @@ ${benefs(benefits)}
 
 Generate 1 DISTINCT image:
 
-SELLING POINT IMAGE 1 (emotional / core benefit):
+SELLING POINT IMAGE (emotional / core benefit):
 - Close-up product shot, premium advertising style
 - Cinematic lighting, strong contrast but soft highlights
 - Dark or gradient background for drama
@@ -107,6 +104,7 @@ SELLING POINT IMAGE 1 (emotional / core benefit):
 - Suggest product function visually
 - Create emotional appeal: comfort, safety, premium, effectiveness
 - Must look like a high-end advertisement poster
+- Show product texture, material, and build quality
 
 STRICT:
 - No fake reflections, no mirror-like unrealistic surfaces
@@ -115,35 +113,7 @@ STRICT:
 
   },
 
-  // 3) 卖点图 2（细节/质感展示）
-  selling2: (_productName, benefits, _category) => {
-    return `Create a detail/texture selling-point image showing product quality.
-
-Base quality:
-${BASE_QUALITY}
-
-STRICT product preservation:
-${PRODUCT_PRESERVATION}
-
-${benefs(benefits)}
-
-Generate 1 DISTINCT image:
-
-SELLING POINT IMAGE 2 (detail / texture / quality showcase):
-- Macro-style close-up of product texture and material
-- Emphasize build quality, stitching, surface finish, or material
-- Soft directional lighting highlighting texture
-- Clean, minimal background (light gray or soft gradient)
-- Make the viewer feel the quality through the image
-- Premium catalog style photography
-
-STRICT:
-- No fake reflections
-- NO text, NO watermark, NO logo`;
-
-  },
-
-  // 4) 场景图 1（真实使用场景）
+  // 3) 场景图 1（真实使用场景）
   scene1: (_productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
@@ -173,7 +143,7 @@ STRICT:
 
   },
 
-  // 5) 场景图 2（另一种使用场景/氛围）
+  // 4) 场景图 2（另一种使用场景/氛围）
   scene2: (_productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE_2[cat];
@@ -200,63 +170,6 @@ STRICT:
 - No incorrect usage
 - NO text, NO watermark, NO logo`;
 
-  },
-
-  // 6) 功能拆解图
-  feature: (_productName, benefits, _category) => {
-    return `Create a feature breakdown image showing product components or functions.
-
-Base quality:
-${BASE_QUALITY}
-
-STRICT product preservation:
-${PRODUCT_PRESERVATION}
-
-${benefs(benefits)}
-
-Generate 1 DISTINCT image:
-
-FEATURE BREAKDOWN IMAGE (product anatomy / exploded view):
-- Clean, technical illustration style
-- Show product from a 3/4 angle to reveal structure
-- If applicable: subtle visual hints of internal components or layers
-- Clean white or very light gray background
-- Precision lighting showing every detail
-- Engineering-meets-premium-catalog aesthetic
-- Make the product feel well-designed and trustworthy
-
-STRICT:
-- Do NOT add imaginary components
-- Only show what is visible or logically implied
-- NO text labels, NO callout lines, NO diagrams with text
-- NO watermark, NO logo`;
-
-  },
-
-  // 7) 参数图
-  specs: (productName, _benefits, _category) => {
-    return `Create a product specification display image.
-
-Base quality:
-${BASE_QUALITY}
-
-STRICT product preservation:
-${PRODUCT_PRESERVATION}
-
-Generate 1 DISTINCT image:
-
-SPECIFICATION IMAGE (product spec showcase):
-- Product displayed with dimensional precision
-- Clean, minimal white background
-- Product shown from a clear, informative angle
-- Studio lighting with even illumination
-- Professional catalog style
-- The image should feel like a high-end product datasheet visual${productName ? `\n- Product: ${productName}` : ''}
-
-STRICT:
-- NO text, NO specification numbers, NO measurement lines
-- NO watermark, NO logo
-- Just the product in its most informative, clean presentation`;
   },
 };
 
@@ -308,7 +221,7 @@ export async function POST(request: NextRequest) {
     const category = detectCategory(productName || '');
     const imageInput = image;
 
-    // 并行生成 7 张图片
+    // 并行生成 4 张图片
     const results: Partial<Record<ImageSlot, string>> = {};
     const errors: string[] = [];
 
