@@ -181,7 +181,24 @@ async function generateWithOpenAICompatible(
       if (!response.ok) {
         const errorText = await response.text();
         console.error('[ModelSelector] /images/generations 失败:', response.status, errorText?.substring(0, 200));
-        return { success: false, error: `API错误(${response.status}): ${errorText?.substring(0, 100)}` };
+        // 解析错误信息，给用户更有用的提示
+        let userMsg = `API错误(${response.status})`;
+        try {
+          const errJson = JSON.parse(errorText);
+          const apiMsg = errJson?.error?.message || errJson?.message || '';
+          if (apiMsg.includes('Model disabled') || apiMsg.includes('disabled')) {
+            userMsg = `模型 ${model} 在服务端已禁用，请切换其他模型或联系服务商`;
+          } else if (apiMsg.includes('No available channel') || apiMsg.includes('无可用渠道')) {
+            userMsg = `模型 ${model} 当前无可用渠道，请切换其他模型`;
+          } else if (apiMsg.includes('负载已饱和')) {
+            userMsg = `模型 ${model} 当前负载饱和，请稍后重试或切换其他模型`;
+          } else if (apiMsg.includes('Invalid') || apiMsg.includes('invalid')) {
+            userMsg = `模型 ${model} 验证失败，请检查API Key是否有效`;
+          } else if (apiMsg) {
+            userMsg = `${model} 生成失败: ${apiMsg.substring(0, 80)}`;
+          }
+        } catch {}
+        return { success: false, error: userMsg };
       }
 
       const data = await response.json();
