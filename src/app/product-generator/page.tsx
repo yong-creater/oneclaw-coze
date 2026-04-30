@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, RefreshCw, X, Check, ArrowRight, Zap, RotateCw, Package, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, Maximize2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -16,14 +16,14 @@ interface GeneratedImage {
 }
 
 // 槽位配置（顺序即展示顺序）
-const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number; color: string; bgColor: string; icon: string }[] = [
-  { slot: 'cover', label: '封面图', order: 1, color: 'text-rose-600', bgColor: 'bg-rose-50 border-rose-200', icon: '📷' },
-  { slot: 'selling1', label: '卖点图 1', order: 2, color: 'text-amber-600', bgColor: 'bg-amber-50 border-amber-200', icon: '💡' },
-  { slot: 'selling2', label: '卖点图 2', order: 3, color: 'text-amber-600', bgColor: 'bg-amber-50 border-amber-200', icon: '💡' },
-  { slot: 'scene1', label: '场景图 1', order: 4, color: 'text-emerald-600', bgColor: 'bg-emerald-50 border-emerald-200', icon: '🏡' },
-  { slot: 'scene2', label: '场景图 2', order: 5, color: 'text-emerald-600', bgColor: 'bg-emerald-50 border-emerald-200', icon: '🏡' },
-  { slot: 'feature', label: '功能拆解图', order: 6, color: 'text-blue-600', bgColor: 'bg-blue-50 border-blue-200', icon: '🔧' },
-  { slot: 'specs', label: '参数图', order: 7, color: 'text-violet-600', bgColor: 'bg-violet-50 border-violet-200', icon: '📊' },
+const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number; icon: string }[] = [
+  { slot: 'cover', label: '封面图', order: 1, icon: '📷' },
+  { slot: 'selling1', label: '卖点图 1', order: 2, icon: '💡' },
+  { slot: 'selling2', label: '卖点图 2', order: 3, icon: '💡' },
+  { slot: 'scene1', label: '场景图 1', order: 4, icon: '🏡' },
+  { slot: 'scene2', label: '场景图 2', order: 5, icon: '🏡' },
+  { slot: 'feature', label: '功能拆解图', order: 6, icon: '🔧' },
+  { slot: 'specs', label: '参数图', order: 7, icon: '📊' },
 ];
 
 // 加载状态文案
@@ -34,7 +34,7 @@ const LOADING_STEPS = [
   '正在生成场景图...',
   '正在生成功能拆解图...',
   '正在生成参数图...',
-  '即将完成...',
+  '正在合成详情页...',
 ];
 
 export default function ProductDetailGeneratorPage() {
@@ -46,16 +46,18 @@ export default function ProductDetailGeneratorPage() {
   const [generatingStep, setGeneratingStep] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
-  const [regeneratingSlot, setRegeneratingSlot] = useState<ImageSlot | null>(null);
   const [showUnlockDialog, setShowUnlockDialog] = useState(false);
+
+  // 拼合长图状态
+  const [mergedImageUrl, setMergedImageUrl] = useState<string | null>(null);
+  const [isMerging, setIsMerging] = useState(false);
 
   // 全屏预览状态
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewIndex, setPreviewIndex] = useState(0);
   const [previewScale, setPreviewScale] = useState(1);
-  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -118,6 +120,61 @@ export default function ProductDetailGeneratorPage() {
     return result;
   }, []);
 
+  // 将多张图片拼合成一张长图
+  const mergeImagesToLongImage = useCallback(async (images: GeneratedImage[]): Promise<string> => {
+    const TARGET_WIDTH = 800; // 目标宽度
+
+    // 加载所有图片
+    const loadedImages: HTMLImageElement[] = [];
+    for (const img of images) {
+      const el = new Image();
+      el.crossOrigin = 'anonymous';
+      el.src = img.url;
+      await new Promise<void>((resolve, reject) => {
+        el.onload = () => resolve();
+        el.onerror = () => reject(new Error(`图片加载失败: ${img.label}`));
+      });
+      loadedImages.push(el);
+    }
+
+    // 计算总高度（统一宽度，按比例缩放）
+    let totalHeight = 0;
+    const scaledHeights: number[] = [];
+    for (const el of loadedImages) {
+      const scale = TARGET_WIDTH / el.naturalWidth;
+      const scaledHeight = Math.round(el.naturalHeight * scale);
+      scaledHeights.push(scaledHeight);
+      totalHeight += scaledHeight;
+    }
+
+    // 创建画布并绘制
+    const canvas = document.createElement('canvas');
+    canvas.width = TARGET_WIDTH;
+    canvas.height = totalHeight;
+    const ctx = canvas.getContext('2d')!;
+
+    // 白色背景
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    let currentY = 0;
+    for (let i = 0; i < loadedImages.length; i++) {
+      ctx.drawImage(loadedImages[i], 0, currentY, TARGET_WIDTH, scaledHeights[i]);
+      currentY += scaledHeights[i];
+    }
+
+    // 转为 blob URL
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) {
+          resolve(URL.createObjectURL(blob));
+        } else {
+          reject(new Error('拼合图片失败'));
+        }
+      }, 'image/png');
+    });
+  }, []);
+
   const handleGenerate = async () => {
     if (!uploadedImage && !productName) {
       alert('请上传商品图或输入商品名称');
@@ -125,6 +182,8 @@ export default function ProductDetailGeneratorPage() {
     }
 
     setIsGenerating(true);
+    setShowResults(false);
+    setMergedImageUrl(null);
 
     let stepIndex = 0;
     const stepInterval = setInterval(() => {
@@ -155,6 +214,20 @@ export default function ProductDetailGeneratorPage() {
       }
 
       setGeneratedImages(images);
+
+      // 拼合长图
+      setIsMerging(true);
+      try {
+        const merged = await mergeImagesToLongImage(images);
+        setMergedImageUrl(merged);
+      } catch (mergeErr) {
+        console.error('拼合长图失败:', mergeErr);
+        // 拼合失败不影响展示，降级为单图展示
+        setMergedImageUrl(null);
+      } finally {
+        setIsMerging(false);
+      }
+
       setShowResults(true);
     } catch (error) {
       console.error('生成失败:', error);
@@ -166,58 +239,33 @@ export default function ProductDetailGeneratorPage() {
     }
   };
 
-  // 单张重新生成
-  const handleRegenerateSlot = async (slot: ImageSlot) => {
-    if (!uploadedImage) return;
-
-    setRegeneratingSlot(slot);
-    try {
-      const response = await fetch('/api/product-generator/regenerate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slot,
-          image: uploadedImage,
-          productName: productName || undefined,
-          productBenefit: productBenefit || undefined,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || '重新生成失败');
-      }
-
-      // 更新单张图片
-      setGeneratedImages(prev => {
-        const existing = prev.find(img => img.slot === slot);
-        if (existing) {
-          return prev.map(img =>
-            img.slot === slot ? { ...img, url: data.url } : img
-          );
-        }
-        const config = SLOT_CONFIG.find(c => c.slot === slot);
-        if (config) {
-          return [...prev, { slot, url: data.url, label: config.label, order: config.order }]
-            .sort((a, b) => a.order - b.order);
-        }
-        return prev;
-      });
-    } catch (error) {
-      console.error('重新生成失败:', error);
-      alert(error instanceof Error ? error.message : '重新生成失败，请稍后重试');
-    } finally {
-      setRegeneratingSlot(null);
-    }
-  };
-
   const handleReset = () => {
     setUploadedImage(null);
     setProductName('');
     setProductBenefit('');
     setShowResults(false);
     setGeneratedImages([]);
+    if (mergedImageUrl) {
+      URL.revokeObjectURL(mergedImageUrl);
+      setMergedImageUrl(null);
+    }
+  };
+
+  // 下载详情页长图
+  const handleDownloadDetailPage = async () => {
+    if (!mergedImageUrl) return;
+    try {
+      const response = await fetch(mergedImageUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${productName || '商品详情页'}_完整详情页.png`;
+      link.click();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(mergedImageUrl, '_blank');
+    }
   };
 
   // 下载单张图片
@@ -236,50 +284,24 @@ export default function ProductDetailGeneratorPage() {
     }
   };
 
-  // 下载整套图片
-  const handleDownloadAll = async () => {
-    for (let i = 0; i < generatedImages.length; i++) {
-      const img = generatedImages[i];
-      const filename = `${productName || '商品详情'}_${img.label}.png`;
-      await handleDownloadImage(img.url, filename);
-      await new Promise(resolve => setTimeout(resolve, 300));
-    }
-  };
-
-  // 获取槽位配置
-  const getSlotConfig = (slot: ImageSlot) => SLOT_CONFIG.find(c => c.slot === slot);
-
-  // 全屏预览：打开
-  const openPreview = (index: number) => {
-    setPreviewIndex(index);
-    setPreviewScale(1);
-    setPreviewOpen(true);
-  };
-
-  // 全屏预览：导航
-  const goToPrev = useCallback(() => {
-    setPreviewIndex(prev => (prev > 0 ? prev - 1 : generatedImages.length - 1));
-    setPreviewScale(1);
-  }, [generatedImages.length]);
-
-  const goToNext = useCallback(() => {
-    setPreviewIndex(prev => (prev < generatedImages.length - 1 ? prev + 1 : 0));
-    setPreviewScale(1);
-  }, [generatedImages.length]);
-
-  // 键盘导航
+  // 全屏预览：键盘缩放
   useEffect(() => {
     if (!previewOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') goToPrev();
-      else if (e.key === 'ArrowRight') goToNext();
-      else if (e.key === 'Escape') setPreviewOpen(false);
-      else if (e.key === '+' || e.key === '=') setPreviewScale(s => Math.min(s + 0.25, 3));
+      if (e.key === 'Escape') setPreviewOpen(false);
+      else if (e.key === '+' || e.key === '=') setPreviewScale(s => Math.min(s + 0.25, 5));
       else if (e.key === '-') setPreviewScale(s => Math.max(s - 0.25, 0.5));
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [previewOpen, goToPrev, goToNext]);
+  }, [previewOpen]);
+
+  // 清理 blob URL
+  useEffect(() => {
+    return () => {
+      if (mergedImageUrl) URL.revokeObjectURL(mergedImageUrl);
+    };
+  }, [mergedImageUrl]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -302,17 +324,7 @@ export default function ProductDetailGeneratorPage() {
         <div className="flex items-center justify-center gap-1.5 mb-6 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
           <span>普通商品图</span>
           <ArrowRight className="w-4 h-4 text-orange-400" />
-          <span className="text-rose-600 font-medium">封面</span>
-          <span className="text-slate-300">+</span>
-          <span className="text-amber-600 font-medium">卖点</span>
-          <span className="text-slate-300">+</span>
-          <span className="text-emerald-600 font-medium">场景</span>
-          <span className="text-slate-300">+</span>
-          <span className="text-blue-600 font-medium">功能</span>
-          <span className="text-slate-300">+</span>
-          <span className="text-violet-600 font-medium">参数</span>
-          <span className="text-slate-300">=</span>
-          <span className="text-orange-600 font-bold">完整详情页</span>
+          <span className="text-orange-600 font-bold">完整商品详情页</span>
         </div>
 
         {/* 左右布局主体区 */}
@@ -401,7 +413,7 @@ export default function ProductDetailGeneratorPage() {
                   免费体验
                 </span>
                 <span className="text-slate-300">|</span>
-                <span>7张详情图</span>
+                <span>完整详情页</span>
                 <span className="text-slate-300">|</span>
                 <span>淘宝/小红书</span>
               </div>
@@ -432,14 +444,14 @@ export default function ProductDetailGeneratorPage() {
 
               <div className="text-center">
                 <span className="text-[13px] text-slate-400">
-                  生成 7 张可直接用于详情页的图片
+                  生成完整商品详情页长图
                 </span>
               </div>
             </div>
           </div>
 
-          {/* 右侧：结果/预览 - 沉浸式商品详情页 */}
-          <div className={!showResults ? 'bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm' : ''}>
+          {/* 右侧：结果/预览 */}
+          <div ref={resultRef} className={!showResults ? 'bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm' : ''}>
             {!showResults ? (
               /* 未生成时的示例说明 */
               <div>
@@ -448,22 +460,28 @@ export default function ProductDetailGeneratorPage() {
                     生成效果预览
                   </h3>
                   <p className="text-xs text-slate-400 mt-1">
-                    一键生成 7 张电商详情页图片
+                    一键生成完整商品详情页长图
                   </p>
                 </div>
 
-                {/* 模拟详情页流 - 单列大图预览 */}
-                <div className="max-w-sm mx-auto space-y-1">
-                  {SLOT_CONFIG.map((config) => (
-                    <div key={config.slot} className="relative">
-                      <div className="w-full aspect-[3/4] bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center">
-                        <div className="text-center">
-                          <span className="text-2xl">{config.icon}</span>
-                          <p className={`text-sm font-medium mt-1 ${config.color}`}>{config.label}</p>
+                {/* 模拟详情页 - 长图预览 */}
+                <div className="max-w-xs mx-auto">
+                  <div className="bg-gradient-to-b from-orange-50 via-amber-50/50 to-slate-50 dark:from-slate-700 dark:to-slate-800 rounded-lg overflow-hidden">
+                    {SLOT_CONFIG.map((config, index) => (
+                      <div key={config.slot} className="border-b border-slate-200/50 dark:border-slate-600/30 last:border-b-0">
+                        <div className="w-full aspect-[3/4] flex items-center justify-center bg-white/40 dark:bg-slate-600/20">
+                          <div className="text-center">
+                            <span className="text-xl">{config.icon}</span>
+                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">{config.label}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+                    <span>👆 自动拼合为</span>
+                    <span className="text-orange-600 font-bold">一张完整详情页</span>
+                  </div>
                 </div>
 
                 <div className="mt-4 flex items-center justify-between">
@@ -471,12 +489,12 @@ export default function ProductDetailGeneratorPage() {
                     👉 上传商品图试一下
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    7 张详情图一键生成
+                    7 张图自动拼合
                   </span>
                 </div>
               </div>
             ) : (
-              /* 沉浸式商品详情页展示 */
+              /* 生成结果：一张完整详情页长图 */
               <div>
                 {/* 顶部操作栏 */}
                 <div className="sticky top-0 z-10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-100 dark:border-slate-800 -mx-4 px-4 py-2.5 mb-1 flex items-center justify-between">
@@ -485,10 +503,17 @@ export default function ProductDetailGeneratorPage() {
                       {productName || '商品详情页'}
                     </span>
                     <span className="text-xs text-slate-400">
-                      {generatedImages.length} 张图片
+                      {generatedImages.length} 张图拼合
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setPreviewOpen(true)}
+                      className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      查看大图
+                    </button>
                     <button
                       onClick={handleGenerate}
                       disabled={isGenerating}
@@ -500,124 +525,119 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 </div>
 
-                {/* 单列大图流 - 沉浸式详情页 */}
-                <div className="max-w-lg mx-auto">
-                  {generatedImages.map((img, index) => {
-                    const config = getSlotConfig(img.slot);
-                    const isRegenerating = regeneratingSlot === img.slot;
+                {/* 拼合中状态 */}
+                {isMerging && (
+                  <div className="py-20 text-center">
+                    <Loader2 className="w-10 h-10 text-orange-500 animate-spin mx-auto mb-3" />
+                    <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">正在合成详情页长图...</p>
+                    <p className="text-xs text-slate-400 mt-1">将 {generatedImages.length} 张图片拼合为完整详情页</p>
+                  </div>
+                )}
 
-                    return (
-                      <div key={img.slot} className="relative group">
-                        {/* 类型标签 - 左上角半透明 */}
-                        <div className="absolute top-3 left-3 z-10">
-                          <span className={`${config?.bgColor || 'bg-slate-100 border-slate-300'} border ${config?.color || 'text-slate-600'} text-xs font-medium px-2.5 py-1 rounded-full backdrop-blur-sm shadow-sm`}>
-                            {config?.icon} {img.label}
-                          </span>
-                        </div>
+                {/* 完整详情页长图 */}
+                {!isMerging && mergedImageUrl && (
+                  <div
+                    className="cursor-pointer"
+                    onClick={() => setPreviewOpen(true)}
+                  >
+                    <img
+                      src={mergedImageUrl}
+                      alt="商品详情页"
+                      className="w-full h-auto block rounded-sm"
+                    />
+                  </div>
+                )}
 
-                        {/* 重新生成按钮 - 右上角 */}
-                        <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleRegenerateSlot(img.slot); }}
-                            disabled={isRegenerating}
-                            className="w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-colors disabled:opacity-50"
-                            title="重新生成此图"
-                          >
-                            <RotateCw className={`w-4 h-4 ${isRegenerating ? 'animate-spin' : ''}`} />
-                          </button>
-                        </div>
-
-                        {/* 图片 - 全宽不裁切 */}
-                        <div
-                          className="relative cursor-pointer"
-                          onClick={() => openPreview(index)}
-                        >
-                          <img
-                            src={img.url}
-                            alt={img.label}
-                            className="w-full h-auto block"
-                            loading={index < 2 ? 'eager' : 'lazy'}
-                          />
-
-                          {/* 重新生成时的遮罩 */}
-                          {isRegenerating && (
-                            <div className="absolute inset-0 bg-white/80 dark:bg-slate-900/80 flex flex-col items-center justify-center z-20">
-                              <Loader2 className="w-8 h-8 text-orange-500 animate-spin mb-2" />
-                              <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">重新生成中...</span>
-                            </div>
-                          )}
-
-                          {/* 点击查看大图提示 */}
-                          <div className="absolute bottom-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="flex items-center gap-1 text-xs text-white bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full">
-                              <Maximize2 className="w-3 h-3" />
-                              查看大图
-                            </span>
-                          </div>
-                        </div>
+                {/* 拼合失败降级：单图展示 */}
+                {!isMerging && !mergedImageUrl && generatedImages.length > 0 && (
+                  <div>
+                    {generatedImages.map((img) => (
+                      <div key={img.slot}>
+                        <img
+                          src={img.url}
+                          alt={img.label}
+                          className="w-full h-auto block"
+                          loading="lazy"
+                        />
                       </div>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* 底部固定操作区 */}
-                <div className="sticky bottom-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-100 dark:border-slate-800 mt-2 -mx-4 px-4 py-3">
-                  {/* 主CTA：下载整套图片 */}
-                  <button
-                    onClick={handleDownloadAll}
-                    disabled={generatedImages.length === 0}
-                    className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    下载整套图片
-                  </button>
+                {!isMerging && (
+                  <div className="sticky bottom-0 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-t border-slate-100 dark:border-slate-800 mt-2 -mx-4 px-4 py-3">
+                    <div className="flex gap-3">
+                      {/* 主CTA：下载详情页 */}
+                      <button
+                        onClick={handleDownloadDetailPage}
+                        disabled={!mergedImageUrl}
+                        className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        下载详情页
+                      </button>
+                      {/* 次要：下载单张 */}
+                      <button
+                        onClick={async () => {
+                          for (let i = 0; i < generatedImages.length; i++) {
+                            const img = generatedImages[i];
+                            await handleDownloadImage(img.url, `${productName || '商品'}_${img.label}.png`);
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                          }
+                        }}
+                        disabled={generatedImages.length === 0}
+                        className="px-4 py-3 border-2 border-slate-200 dark:border-slate-700 hover:border-orange-400 text-slate-600 dark:text-slate-300 text-sm rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        分张下载
+                      </button>
+                    </div>
 
-                  <div className="flex items-center justify-between mt-2">
-                    <button
-                      onClick={handleReset}
-                      className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      生成新图片
-                    </button>
+                    <div className="flex items-center justify-between mt-2">
+                      <button
+                        onClick={handleReset}
+                        className="text-xs text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        生成新图片
+                      </button>
 
-                    <div className="flex items-center gap-3 text-[10px] text-slate-400">
-                      <span className="flex items-center gap-0.5">
-                        <Check className="w-3 h-3 text-green-500" />
-                        可直接用于详情页
-                      </span>
-                      <span className="flex items-center gap-0.5">
-                        <Check className="w-3 h-3 text-green-500" />
-                        淘宝/小红书
-                      </span>
+                      <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                        <span className="flex items-center gap-0.5">
+                          <Check className="w-3 h-3 text-green-500" />
+                          可直接用于详情页
+                        </span>
+                        <span className="flex items-center gap-0.5">
+                          <Check className="w-3 h-3 text-green-500" />
+                          淘宝/小红书
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* 全屏图片预览弹窗 */}
-      {previewOpen && generatedImages.length > 0 && (
+      {/* 全屏预览 - 详情页长图 */}
+      {previewOpen && mergedImageUrl && (
         <div
           className="fixed inset-0 z-50 bg-black/95 flex flex-col"
-          onClick={() => setPreviewOpen(false)}
+          onClick={() => { setPreviewOpen(false); setPreviewScale(1); }}
         >
           {/* 顶部栏 */}
           <div className="flex items-center justify-between px-4 py-3 text-white/90">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">
-                {generatedImages[previewIndex]?.label}
-              </span>
-              <span className="text-xs text-white/50">
-                {previewIndex + 1} / {generatedImages.length}
+                {productName || '商品详情页'}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={(e) => { e.stopPropagation(); setPreviewScale(s => Math.min(s + 0.25, 3)); }}
+                onClick={(e) => { e.stopPropagation(); setPreviewScale(s => Math.min(s + 0.25, 5)); }}
                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors text-lg"
                 title="放大"
               >
@@ -633,8 +653,7 @@ export default function ProductDetailGeneratorPage() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  const img = generatedImages[previewIndex];
-                  if (img) handleDownloadImage(img.url, `${productName || '商品'}_${img.label}.png`);
+                  handleDownloadDetailPage();
                 }}
                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
                 title="下载"
@@ -642,7 +661,7 @@ export default function ProductDetailGeneratorPage() {
                 <Download className="w-4 h-4" />
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); setPreviewOpen(false); }}
+                onClick={(e) => { e.stopPropagation(); setPreviewOpen(false); setPreviewScale(1); }}
                 className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
                 title="关闭"
               >
@@ -651,56 +670,19 @@ export default function ProductDetailGeneratorPage() {
             </div>
           </div>
 
-          {/* 图片区域 */}
+          {/* 图片区域 - 可滚动查看长图 */}
           <div
-            ref={previewContainerRef}
-            className="flex-1 overflow-auto flex items-center justify-center"
+            className="flex-1 overflow-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={generatedImages[previewIndex]?.url}
-              alt={generatedImages[previewIndex]?.label}
-              className="max-w-full max-h-full object-contain transition-transform duration-200"
-              style={{ transform: `scale(${previewScale})` }}
-            />
-          </div>
-
-          {/* 左右导航 */}
-          {generatedImages.length > 1 && (
-            <>
-              <button
-                onClick={(e) => { e.stopPropagation(); goToPrev(); }}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); goToNext(); }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center backdrop-blur-sm transition-colors"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </>
-          )}
-
-          {/* 底部缩略图导航 */}
-          <div className="px-4 py-3 flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-            {generatedImages.map((img, i) => {
-              const config = getSlotConfig(img.slot);
-              return (
-                <button
-                  key={img.slot}
-                  onClick={() => { setPreviewIndex(i); setPreviewScale(1); }}
-                  className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                    i === previewIndex
-                      ? 'border-orange-400 scale-110 shadow-lg'
-                      : 'border-white/20 opacity-60 hover:opacity-80'
-                  }`}
-                >
-                  <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
-                </button>
-              );
-            })}
+            <div className="min-h-full flex items-start justify-center p-4">
+              <img
+                src={mergedImageUrl}
+                alt="商品详情页"
+                className="max-w-full object-contain transition-transform duration-200"
+                style={{ transform: `scale(${previewScale})`, transformOrigin: 'top center' }}
+              />
+            </div>
           </div>
         </div>
       )}
