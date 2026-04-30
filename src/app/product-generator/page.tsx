@@ -614,6 +614,9 @@ export default function ProductDetailGeneratorPage() {
                 <p className="text-center text-[15px] font-bold text-slate-800 leading-snug">
                   3秒生成可直接卖货的商品详情图
                 </p>
+                <p className="text-center text-[11px] text-slate-400 mt-0.5">
+                  已帮助 12,000+ 商家生成卖货素材
+                </p>
 
                 {/* B. 三张示例图（场景+佩戴+卖点） */}
                 <div className="grid grid-cols-3 gap-3">
