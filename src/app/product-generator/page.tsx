@@ -352,7 +352,7 @@ export default function ProductGeneratorPage() {
               {/* 紧迫感提示 */}
               <div className="text-center">
                 <span className="text-sm text-orange-600 dark:text-orange-400 font-medium">
-                  ⚡ 今日免费生成次数还剩 2 次
+                  🔥 今日免费名额仅剩 2 次
                 </span>
               </div>
               
@@ -370,7 +370,7 @@ export default function ProductGeneratorPage() {
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    一键生成商品图（免费预览）
+                    ✨ 3秒生成商品图（免费体验）
                   </>
                 )}
               </button>
@@ -413,9 +413,12 @@ export default function ProductGeneratorPage() {
                   <span className="absolute top-2.5 left-2.5 text-[10px] text-white/70 font-medium bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded leading-none">
                     AI生成效果
                   </span>
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/30 to-transparent pt-8 pb-2.5 px-3">
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/40 to-transparent pt-10 pb-2.5 px-3">
                     <span className="text-xs font-bold text-white">
                       高级感主图
+                    </span>
+                    <span className="block text-[10px] text-white/60 mt-0.5">
+                      更清晰 · 更高级 · 可直接卖货
                     </span>
                   </div>
                 </div>
@@ -446,6 +449,13 @@ export default function ProductGeneratorPage() {
                       场景图
                     </p>
                   </div>
+                </div>
+
+                {/* 视觉引导 */}
+                <div className="mt-3 flex items-center">
+                  <span className="text-xs text-orange-500 font-medium">
+                    试一下 →
+                  </span>
                 </div>
               </div>
             ) : (
