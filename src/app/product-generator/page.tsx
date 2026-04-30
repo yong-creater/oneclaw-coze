@@ -70,7 +70,7 @@ export default function ProductDetailGeneratorPage() {
   const convertHeicToJpeg = async (file: File): Promise<File> => {
     const ext = file.name.toLowerCase().split('.').pop() || '';
     const type = file.type.toLowerCase();
-    const isHeic = ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif' || type === 'image/heic-sequence';
+    const isHeic = ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif' || type === 'image/heic-sequence' || type === 'application/octet-stream' && (ext === 'heic' || ext === 'heif');
     if (!isHeic) return file;
 
     try {
@@ -128,10 +128,21 @@ export default function ProductDetailGeneratorPage() {
     setIsUploading(true);
     setUploadError(null);
     try {
-      // Step 1: HEIC先转JPEG（并行）
-      const convertedFiles = await Promise.all(
-        filesToProcess.map(f => convertHeicToJpeg(f))
-      );
+      // Step 1: HEIC先转JPEG（顺序处理，避免heic2any并行崩溃）
+      const convertedFiles: File[] = [];
+      for (const f of filesToProcess) {
+        try {
+          const converted = await convertHeicToJpeg(f);
+          convertedFiles.push(converted);
+        } catch (err) {
+          console.error('单张HEIC转换失败:', f.name, err);
+          // HEIC转换失败的文件跳过，不阻塞其他文件
+        }
+      }
+      if (convertedFiles.length === 0) {
+        setUploadError('所有图片处理失败，请尝试JPG/PNG格式');
+        return;
+      }
       // Step 2: 所有图片转base64 JPEG（并行）
       const results = await Promise.allSettled(
         convertedFiles.map(f => convertToJpeg(f))
@@ -383,7 +394,7 @@ export default function ProductDetailGeneratorPage() {
                 </div>
                 <p className="text-slate-800 dark:text-white font-bold text-base mb-1">上传商品图片</p>
                 <p className="text-slate-400 text-sm">推荐上传 3 张，最多 {MAX_IMAGES} 张</p>
-                <p className="text-[11px] text-slate-300 dark:text-slate-500 mt-3">JPG / PNG · 最多{MAX_IMAGES}张</p>
+                <p className="text-[11px] text-slate-300 dark:text-slate-500 mt-3">JPG / PNG / HEIC · 最多{MAX_IMAGES}张</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -458,7 +469,7 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 </div>
             )}
-            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+            <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif" multiple onChange={handleImageUpload} className="hidden" />
 
             {/* 分隔线 */}
             <div className="my-5 border-t border-slate-100 dark:border-slate-700/50" />
