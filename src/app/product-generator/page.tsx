@@ -38,7 +38,7 @@ const MAX_IMAGES = 5;
 const DEMO_IMAGES = [
   { slot: 'main' as ImageSlot, url: '/demo-main.jpg', label: '商品主图', order: 1 },
   { slot: 'scene' as ImageSlot, url: '/demo-scene.jpg', label: '使用场景', order: 2 },
-  { slot: 'lifestyle' as ImageSlot, url: '/demo-lifestyle.jpg', label: '生活场景', order: 3 },
+  { slot: 'lifestyle' as ImageSlot, url: '/demo-main.jpg', label: '卖点图', order: 3, isSellingPoint: true },
 ];
 
 export default function ProductDetailGeneratorPage() {
@@ -540,6 +540,16 @@ export default function ProductDetailGeneratorPage() {
                         alt={img.label}
                         className="w-full h-[150px] object-cover"
                       />
+                      {/* 卖点图叠加层 */}
+                      {'isSellingPoint' in img && img.isSellingPoint && (
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/40 to-white/70 flex flex-col items-center justify-center">
+                          <div className="text-center space-y-1.5">
+                            <p className="text-[11px] font-bold text-slate-800 bg-white/90 px-3 py-1 rounded-full shadow-sm">24小时保温</p>
+                            <p className="text-[11px] font-bold text-slate-800 bg-white/90 px-3 py-1 rounded-full shadow-sm">食品级不锈钢</p>
+                            <p className="text-[11px] font-bold text-slate-800 bg-white/90 px-3 py-1 rounded-full shadow-sm">便携防漏</p>
+                          </div>
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
                           点击查看大图
