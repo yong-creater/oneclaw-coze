@@ -618,37 +618,27 @@ export default function ProductDetailGeneratorPage() {
                   一键生成<span className="text-orange-500">能卖货</span>的商品详情页
                 </p>
 
-                {/* B. 三图卡片区 - 三种电商图风格 */}
+                {/* B. 三张示例图（场景+佩戴+卖点） */}
                 <div className="grid grid-cols-3 gap-3">
-
-                  {/* 场景图 */}
+                  {/* 场景图1：桌面 */}
                   <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
-                    <img src={DEMO_IMAGES[1].url} alt="使用场景" className="w-full h-[130px] object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    <span className="absolute bottom-2 left-2 text-[10px] text-white/90 font-medium">使用场景</span>
+                    <img src={DEMO_IMAGES[1].url} alt="桌面场景" className="w-full h-[130px] object-cover" />
                   </div>
-
-                  {/* 卖点图 */}
-                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                    <div className="w-full h-[130px] bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-20 h-20 bg-orange-300/20 rounded-full blur-2xl" />
-                      <div className="absolute left-1 top-1/2 -translate-y-1/2">
-                        <img src={DEMO_IMAGES[0].url} alt="卖点图" className="h-[90px] w-auto object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.08)]" />
-                      </div>
-                      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-right">
-                        <p className="text-[10px] text-orange-700 font-semibold leading-relaxed">🎧 40小时<br/>超长续航</p>
+                  {/* 场景图2：佩戴 */}
+                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url)}>
+                    <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="佩戴场景" className="w-full h-[130px] object-cover" />
+                  </div>
+                  {/* 卖点图：场景+文案 */}
+                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
+                    <div className="w-full h-[130px] relative overflow-hidden">
+                      <img src={DEMO_IMAGES[1].url} alt="卖点" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                      <div className="absolute bottom-2 left-2 right-2 space-y-0.5">
+                        <p className="text-[10px] text-white/95 font-semibold">🎧 沉浸式音质</p>
+                        <p className="text-[10px] text-white/70 font-medium">🔋 30小时续航</p>
                       </div>
                     </div>
-                    <span className="absolute top-2 left-2 bg-orange-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">卖点图</span>
                   </div>
-
-                  {/* 生活图 */}
-                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url)}>
-                    <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="生活场景" className="w-full h-[130px] object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    <span className="absolute bottom-2 left-2 text-[10px] text-white/90 font-medium">生活场景</span>
-                  </div>
-
                 </div>
 
                 {/* 信任条 */}
