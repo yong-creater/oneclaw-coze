@@ -443,8 +443,15 @@ export default function ProductDetailGeneratorPage() {
               {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 3秒生成卖货详情页</>)}
             </button>
 
+            {/* 信任提示 */}
+            <div className="flex items-center justify-center gap-2 mt-2.5 text-[11px] text-slate-400">
+              <span>👉 已有 12,000+ 商家用它生成商品图</span>
+              <span className="text-slate-200 dark:text-slate-700">·</span>
+              <span>平均节省 90% 设计成本</span>
+            </div>
+
             {/* 底部标签行 */}
-            <div className="flex items-center justify-center gap-3 mt-3 text-[11px] text-slate-400">
+            <div className="flex items-center justify-center gap-3 mt-1.5 text-[11px] text-slate-400">
               <span className="flex items-center gap-0.5"><Zap className="w-3 h-3 text-orange-400" />免费体验</span>
               <span className="text-slate-200 dark:text-slate-700">·</span>
               <span>3张商品图</span>
