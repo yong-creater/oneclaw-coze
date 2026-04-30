@@ -8,9 +8,18 @@
  * 禁止硬编码 API Key、API URL、模型名
  */
 
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { LLMClient, Config, HeaderUtils, Message, ContentPart } from 'coze-coding-dev-sdk';
 import { NextRequest } from 'next/server';
 import { getToolModelConfig, ToolModelConfig } from './model-selector';
+
+// 统一的消息内容类型：支持纯文字和多模态（图片+文字）
+export type MessageContent = string | ContentPart[];
+
+// 统一的消息格式
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: MessageContent;
+}
 
 // 创建扣子 LLM 客户端
 function createCozeLLMClient(customHeaders: Record<string, string> = {}) {
@@ -23,7 +32,7 @@ function createCozeLLMClient(customHeaders: Record<string, string> = {}) {
  * api_url 和 api_key 从数据库 model_providers 表读取
  */
 async function streamWithOpenAICompatible(
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+  messages: ChatMessage[],
   model: string,
   apiUrl: string,
   apiKey: string,
@@ -110,7 +119,7 @@ async function streamWithOpenAICompatible(
  * 通过 OpenAI 兼容 API 调用 LLM（4sapi 等，非流式）
  */
 async function invokeWithOpenAICompatible(
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+  messages: ChatMessage[],
   model: string,
   apiUrl: string,
   apiKey: string,
@@ -160,7 +169,7 @@ async function invokeWithOpenAICompatible(
  */
 export async function streamWithModel(
   request: NextRequest,
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+  messages: ChatMessage[],
   options: {
     model?: string;         // fallback 模型名
     toolId?: string;        // 工具ID，走数据库配置
@@ -191,7 +200,7 @@ export async function streamWithModel(
           return new ReadableStream({
             async start(controller) {
               try {
-                const aiStream = client.stream(messages, llmConfig);
+                const aiStream = client.stream(messages as Message[], llmConfig);
                 for await (const chunk of aiStream) {
                   if (chunk.content) {
                     controller.enqueue(encoder.encode(chunk.content.toString()));
@@ -228,7 +237,7 @@ export async function streamWithModel(
   return new ReadableStream({
     async start(controller) {
       try {
-        const aiStream = client.stream(messages, llmConfig);
+        const aiStream = client.stream(messages as Message[], llmConfig);
         for await (const chunk of aiStream) {
           if (chunk.content) {
             controller.enqueue(encoder.encode(chunk.content.toString()));
@@ -253,7 +262,7 @@ export async function streamWithModel(
  */
 export async function invokeWithModel(
   request: NextRequest,
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
+  messages: ChatMessage[],
   options: {
     model?: string;         // fallback 模型名
     toolId?: string;        // 工具ID，走数据库配置
@@ -274,7 +283,7 @@ export async function invokeWithModel(
         if (isCoze) {
           // 走扣子 SDK
           const client = createCozeLLMClient(customHeaders);
-          const response = await client.invoke(messages, {
+          const response = await client.invoke(messages as Message[], {
             model: config.modelName,
             temperature,
           });
@@ -300,7 +309,7 @@ export async function invokeWithModel(
   // 无 toolId 时的 fallback
   console.log(`[LLMSelector] 无 toolId，使用默认模型: ${fallbackModel}`);
   const client = createCozeLLMClient(customHeaders);
-  const response = await client.invoke(messages, {
+  const response = await client.invoke(messages as Message[], {
     model: fallbackModel,
     temperature,
   });

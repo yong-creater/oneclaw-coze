@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ImageGenerationClient, ImageGenerationResponseHelper, ImageGenerationRequest, Config } from 'coze-coding-dev-sdk';
-import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { generateWithModel } from '@/lib/model-selector';
 
 // ============ 商品类别识别与场景 Prompt 体系 ============
 
@@ -74,162 +73,12 @@ const PROMPTS = {
   },
 };
 
-// ============ 模型配置与调度 ============
+// ============ 工具标识 ============
 
-// 获取工具的模型配置（从数据库读取）
-async function getToolModelConfig(): Promise<{
-  apiUrl: string;
-  apiKey: string;
-  modelName: string;
-  providerSlug: string;
-} | null> {
-  try {
-    const supabase = getSupabaseClient();
-
-    const { data: toolData } = await supabase
-      .from('utility_tools')
-      .select('id, tool_id, name, model_provider_id, model_name')
-      .eq('slug', 'product-generator')
-      .single();
-
-    if (!toolData || !toolData.model_provider_id) {
-      console.warn('[Product Generator] 工具未配置模型提供商');
-      return null;
-    }
-
-    const { data: providerData } = await supabase
-      .from('model_providers')
-      .select('id, name, slug, api_url, api_key')
-      .eq('id', toolData.model_provider_id)
-      .single();
-
-    if (!providerData) {
-      console.warn('[Product Generator] 未找到模型提供商');
-      return null;
-    }
-
-    return {
-      apiUrl: providerData.api_url,
-      apiKey: providerData.api_key,
-      modelName: toolData.model_name || 'gpt-image-2',
-      providerSlug: providerData.slug,
-    };
-  } catch (err) {
-    console.error('[Product Generator] 获取模型配置失败:', err);
-    return null;
-  }
-}
-
-// 创建扣子图片生成客户端
-function createCozeClient(customHeaders: Record<string, string> = {}) {
-  const config = new Config();
-  return new ImageGenerationClient(config, customHeaders);
-}
-
-// 通过扣子API生成图片（图生图）
-async function generateWithCoze(
-  prompt: string,
-  imageBase64: string,
-  modelName?: string
-): Promise<string[]> {
-  const client = createCozeClient();
-
-  const request: ImageGenerationRequest = {
-    prompt,
-    size: '2K',
-    image: `data:image/jpeg;base64,${imageBase64}`,
-  };
-
-  if (modelName) {
-    request.model = modelName;
-  }
-
-  const result = await client.generate(request);
-  const helper = new ImageGenerationResponseHelper(result);
-
-  if (helper.success && helper.imageUrls.length > 0) {
-    return helper.imageUrls;
-  }
-
-  throw new Error(helper.errorMessages[0] || '扣子图片生成失败');
-}
-
-// 通过4sapi /images/generations 端点（JSON + image字段图生图）
-async function generateWith4sApi(
-  prompt: string,
-  imageBase64: string,
-  apiUrl: string,
-  apiKey: string,
-  modelName: string
-): Promise<string[]> {
-  const requestBody: Record<string, any> = {
-    model: modelName,
-    prompt,
-    n: 1,
-    size: '1024x1024',
-    image: `data:image/jpeg;base64,${imageBase64}`,
-  };
-
-  const response = await fetch(`${apiUrl}/images/generations`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`4sapi请求失败 (${response.status}): ${errorText.substring(0, 200)}`);
-  }
-
-  const data = await response.json();
-  const urls: string[] = [];
-  if (data.data && Array.isArray(data.data)) {
-    for (const item of data.data) {
-      if (item.url) {
-        urls.push(item.url);
-      } else if (item.b64_json) {
-        urls.push(`data:image/png;base64,${item.b64_json}`);
-      }
-    }
-  }
-  return urls;
-}
-
-// 统一生成函数：根据 providerSlug 分发到不同的生成方式
-async function generateImage(
-  prompt: string,
-  imageBase64: string,
-  config: {
-    apiUrl: string;
-    apiKey: string;
-    modelName: string;
-    providerSlug: string;
-  }
-): Promise<string[]> {
-  const isCoze = config.providerSlug.includes('coze');
-
-  if (isCoze) {
-    return generateWithCoze(prompt, imageBase64, config.modelName);
-  } else {
-    return generateWith4sApi(prompt, imageBase64, config.apiUrl, config.apiKey, config.modelName);
-  }
-}
+const TOOL_SLUG = 'product-generator';
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. 从数据库读取模型配置
-    const config = await getToolModelConfig();
-
-    if (!config) {
-      return NextResponse.json(
-        { error: '模型未配置，请在后台精选工具管理中选择模型' },
-        { status: 500 }
-      );
-    }
-
     const body = await request.json();
     const { image, productName, productBenefit } = body;
 
@@ -240,17 +89,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 提取 base64 数据（去掉 data:image/xxx;base64, 前缀）
-    let imageBase64 = image;
-    if (image.startsWith('data:')) {
-      imageBase64 = image.split(',')[1] || image;
-    }
-
-    // 2. 识别商品品类
+    // 1. 识别商品品类
     const category = detectCategory(productName || '');
-    console.log(`[Product Generator] 商品: ${productName}, 品类: ${category}, 模型: ${config.providerSlug} / ${config.modelName}`);
 
-    // 3. 并行生成三张图片（带品类感知的 Prompt）
+    // 2. 提取参考图片（用于图生图）
+    const imageInput = image;
+
+    // 3. 并行生成三张图片（带品类感知的 Prompt），走统一模型调度
     const results: {
       mainImage?: string;
       benefitImage?: string;
@@ -259,27 +104,57 @@ export async function POST(request: NextRequest) {
     } = { errors: [] };
 
     const [mainResult, benefitResult, sceneResult] = await Promise.allSettled([
-      generateImage(PROMPTS.mainImage(productName, productBenefit, category), imageBase64, config),
-      generateImage(PROMPTS.benefitImage(productName, productBenefit, category), imageBase64, config),
-      generateImage(PROMPTS.sceneImage(productName, productBenefit, category), imageBase64, config),
+      generateWithModel(
+        PROMPTS.mainImage(productName, productBenefit, category),
+        undefined, // model 由数据库配置决定
+        '2K',
+        {}, // customHeaders
+        TOOL_SLUG,
+        imageInput
+      ),
+      generateWithModel(
+        PROMPTS.benefitImage(productName, productBenefit, category),
+        undefined,
+        '2K',
+        {},
+        TOOL_SLUG,
+        imageInput
+      ),
+      generateWithModel(
+        PROMPTS.sceneImage(productName, productBenefit, category),
+        undefined,
+        '2K',
+        {},
+        TOOL_SLUG,
+        imageInput
+      ),
     ]);
 
-    if (mainResult.status === 'fulfilled' && mainResult.value[0]) {
-      results.mainImage = mainResult.value[0];
+    if (mainResult.status === 'fulfilled' && mainResult.value.success && mainResult.value.imageUrls?.[0]) {
+      results.mainImage = mainResult.value.imageUrls[0];
     } else {
-      results.errors.push(`主图生成失败: ${mainResult.status === 'rejected' ? mainResult.reason?.message || '未知错误' : '返回为空'}`);
+      const errMsg = mainResult.status === 'rejected'
+        ? mainResult.reason?.message || '未知错误'
+        : mainResult.value.error || '返回为空';
+      results.errors.push(`主图生成失败: ${errMsg}`);
     }
 
-    if (benefitResult.status === 'fulfilled' && benefitResult.value[0]) {
-      results.benefitImage = benefitResult.value[0];
+    if (benefitResult.status === 'fulfilled' && benefitResult.value.success && benefitResult.value.imageUrls?.[0]) {
+      results.benefitImage = benefitResult.value.imageUrls[0];
     } else {
-      results.errors.push(`高级感主图生成失败: ${benefitResult.status === 'rejected' ? benefitResult.reason?.message || '未知错误' : '返回为空'}`);
+      const errMsg = benefitResult.status === 'rejected'
+        ? benefitResult.reason?.message || '未知错误'
+        : benefitResult.value.error || '返回为空';
+      results.errors.push(`高级感主图生成失败: ${errMsg}`);
     }
 
-    if (sceneResult.status === 'fulfilled' && sceneResult.value[0]) {
-      results.sceneImage = sceneResult.value[0];
+    if (sceneResult.status === 'fulfilled' && sceneResult.value.success && sceneResult.value.imageUrls?.[0]) {
+      results.sceneImage = sceneResult.value.imageUrls[0];
     } else {
-      results.errors.push(`场景图生成失败: ${sceneResult.status === 'rejected' ? sceneResult.reason?.message || '未知错误' : '返回为空'}`);
+      const errMsg = sceneResult.status === 'rejected'
+        ? sceneResult.reason?.message || '未知错误'
+        : sceneResult.value.error || '返回为空';
+      results.errors.push(`场景图生成失败: ${errMsg}`);
     }
 
     // 检查是否至少生成了一张图片

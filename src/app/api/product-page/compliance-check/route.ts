@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { invokeWithModel, ChatMessage } from '@/lib/llm-selector';
 import { saveGeneration } from '@/lib/save-generation';
 
 // 合规规则
@@ -103,10 +103,11 @@ function buildCompliancePrompt(region: string, platform: string, imageUrl: strin
   ],
   "warnings": ["警告信息数组"],
   "analysis": "详细分析说明"
+}`;
 }
 
-图片URL：${imageUrl}`;
-}
+// 工具标识（对应 utility_tools 表的 slug）
+const TOOL_SLUG = 'compliance-check';
 
 export async function POST(request: NextRequest) {
   try {
@@ -119,50 +120,41 @@ export async function POST(request: NextRequest) {
     const regionRules = COMPLIANCE_RULES[region] || COMPLIANCE_RULES.us;
     const platformRules = PLATFORM_RULES[platform] || PLATFORM_RULES.independent;
 
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
-
     const prompt = buildCompliancePrompt(region, platform, imageUrl);
 
-    const messages = [
-      { role: 'system' as const, content: '你是一个专业的电商合规检测专家。请仔细分析图片并返回准确的JSON格式检测结果。' },
-      { role: 'user' as const, content: [{ type: 'text', text: prompt }] }
-    ];
-
-    // 构建消息时需要支持图片格式
-    const imageMessages = [
-      { role: 'system' as const, content: '你是一个专业的电商合规检测专家。请仔细分析图片并返回准确的JSON格式检测结果。' },
-      { role: 'user' as const, content: [
+    // 构建多模态消息（图片 + 文字）
+    const messages: ChatMessage[] = [
+      { role: 'system', content: '你是一个专业的电商合规检测专家。请仔细分析图片并返回准确的JSON格式检测结果。' },
+      { role: 'user', content: [
         { type: 'image_url', image_url: { url: imageUrl } },
-        { type: 'text', text: prompt.replace('图片URL：' + imageUrl, '') }
+        { type: 'text', text: prompt }
       ] }
     ];
 
+    // 走统一模型调度（从数据库读取配置）
     let resultText = '';
+    let usedModel = '';
 
-    // 尝试使用带图片的消息格式
     try {
-      const llmConfig = {
-        model: 'doubao-seed-1-6-vision-250815', // 使用vision模型
+      const result = await invokeWithModel(request, messages, {
+        toolId: TOOL_SLUG,
         temperature: 0.3,
-        streaming: false
-      };
-
-      const response = await client.invoke(imageMessages as any, llmConfig);
-      resultText = response?.content || '';
-    } catch (visionError) {
-      // 如果vision模型失败，尝试使用普通模型
-      console.log('Vision model failed, trying text-only model');
-      
-      const llmConfig = {
-        model: 'doubao-seed-1-8-251228',
+      });
+      resultText = result.content || '';
+      usedModel = result.model || '';
+    } catch (firstError) {
+      // 如果多模态失败，fallback 到纯文字消息
+      console.log('[ComplianceCheck] 多模态调用失败，尝试纯文字模式');
+      const textMessages: ChatMessage[] = [
+        { role: 'system', content: '你是一个专业的电商合规检测专家。请仔细分析图片并返回准确的JSON格式检测结果。' },
+        { role: 'user', content: prompt + '\n\n图片URL：' + imageUrl }
+      ];
+      const result = await invokeWithModel(request, textMessages, {
+        toolId: TOOL_SLUG,
         temperature: 0.3,
-        streaming: false
-      };
-
-      const response = await client.invoke(messages as any, llmConfig);
-      resultText = response?.content || '';
+      });
+      resultText = result.content || '';
+      usedModel = result.model || '';
     }
 
     // 解析JSON结果
