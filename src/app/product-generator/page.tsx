@@ -548,10 +548,7 @@ export default function ProductDetailGeneratorPage() {
               {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 一键生成能卖货的详情页</>)}
             </button>
 
-            {/* 信任提示 */}
-            <div className="flex items-center justify-center gap-1.5 mt-2.5 text-[11px] text-slate-400">
-              <span>🚀 无需PS · 免费体验</span>
-            </div>
+
           </div>
 
           {/* ==================== 右侧：电商详情页预览 ==================== */}
@@ -615,7 +612,7 @@ export default function ProductDetailGeneratorPage() {
 
                 {/* 价值文案（精简：一句话） */}
                 <p className="text-center text-[15px] font-bold text-slate-800 leading-snug">
-                  一键生成<span className="text-orange-500">能卖货</span>的商品详情页
+                  3秒生成可直接卖货的商品详情图
                 </p>
 
                 {/* B. 三张示例图（场景+佩戴+卖点） */}
@@ -641,12 +638,7 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 </div>
 
-                {/* 信任条 */}
-                <div className="flex items-center justify-center gap-3 text-[11px] text-slate-400">
-                  <span>📈 提升30%+点击率</span>
-                  <span className="text-slate-200">|</span>
-                  <span>🏪 12,000+商家在用</span>
-                </div>
+
               </div>
             ) : (
               /* ====== 生成结果：三层结构 ====== */
