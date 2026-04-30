@@ -84,7 +84,7 @@ export default function ProductGeneratorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productName: productName || undefined,
-          productImage: uploadedImage ? true : undefined,
+          productImage: uploadedImage || undefined,
         }),
       });
 

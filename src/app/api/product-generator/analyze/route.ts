@@ -3,12 +3,13 @@ import { LLMClient, Config } from 'coze-coding-dev-sdk';
 
 const SYSTEM_PROMPT = `你是电商文案专家，擅长根据商品图片和名称提炼卖点。
 
-用户会给你商品名称（可能还有商品图片描述），你需要：
-1. 分析商品的核心卖点
-2. 生成3-5个简洁有力的卖点文案
-3. 用 ｜ 分隔
-4. 每个卖点不超过8个字
-5. 只输出卖点，不要其他解释
+用户会给你商品名称和/或商品图片，你需要：
+1. 仔细观察商品图片，识别商品类型、外观特征、设计亮点
+2. 分析商品的核心卖点
+3. 生成3-5个简洁有力的卖点文案
+4. 用 ｜ 分隔
+5. 每个卖点不超过8个字
+6. 只输出卖点，不要其他解释
 
 示例格式：
 高音质沉浸体验｜主动降噪｜超长续航｜轻量舒适
@@ -28,19 +29,42 @@ export async function POST(request: NextRequest) {
     const config = new Config();
     const client = new LLMClient(config);
 
-    const userContent: string[] = [];
+    // 构建多模态消息内容
+    const messageContent: Array<{ type: string; text?: string; image_url?: { url: string } }> = [];
 
     if (productName) {
-      userContent.push(`商品名称：${productName}`);
+      messageContent.push({
+        type: 'text',
+        text: `商品名称：${productName}`
+      });
     }
 
     if (productImage) {
-      userContent.push('已上传商品图片，请根据图片内容分析商品卖点');
+      // 支持 base64 和 URL 两种格式
+      const imageUrl = productImage.startsWith('data:') 
+        ? productImage 
+        : `data:image/jpeg;base64,${productImage}`;
+      
+      messageContent.push({
+        type: 'image_url',
+        image_url: { url: imageUrl }
+      });
+      messageContent.push({
+        type: 'text',
+        text: '请根据这张商品图片分析商品卖点'
+      });
+    }
+
+    if (!productName && productImage) {
+      messageContent.push({
+        type: 'text',
+        text: '请识别图片中的商品并分析其卖点'
+      });
     }
 
     const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userContent.join('\n') }
+      { role: 'user', content: messageContent as any }
     ];
 
     const llmConfig = {
