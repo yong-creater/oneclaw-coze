@@ -34,7 +34,7 @@ const LOADING_STEPS = [
 // 最大上传数量
 const MAX_IMAGES = 5;
 
-// 示例生成结果（默认展示）— 同一商品（白色保温杯）的不同效果
+// 示例生成结果（默认展示）— 同一商品（白色蓝牙耳机）的不同效果
 const DEMO_IMAGES = [
   { slot: 'main' as ImageSlot, url: '/demo-main.jpg', label: '商品主图', order: 1 },
   { slot: 'scene' as ImageSlot, url: '/demo-scene.jpg', label: '使用场景', order: 2 },
@@ -530,13 +530,13 @@ export default function ProductDetailGeneratorPage() {
 
             {/* 商品名称 */}
             <div className="mb-3">
-              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：智能保温水杯）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
+              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：蓝牙降噪耳机）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
             </div>
 
             {/* 商品卖点 */}
             <div className="mb-5">
               <div className="flex gap-2">
-                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：316不锈钢 24小时保温）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
+                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：主动降噪 40小时续航）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
                 <button onClick={handleAnalyzeBenefit} disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)} className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-600 dark:disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-all whitespace-nowrap flex items-center gap-1 self-end">
                   <Sparkles className="w-3 h-3" />{isAnalyzing ? '分析中...' : 'AI写卖点'}
                 </button>
@@ -640,7 +640,7 @@ export default function ProductDetailGeneratorPage() {
                         <img src={DEMO_IMAGES[0].url} alt="卖点图" className="h-[90px] w-auto object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.08)]" />
                       </div>
                       <div className="absolute right-2 top-1/2 -translate-y-1/2 text-right">
-                        <p className="text-[10px] text-orange-700 font-semibold leading-relaxed">🔥 24小时<br/>依然保温</p>
+                        <p className="text-[10px] text-orange-700 font-semibold leading-relaxed">🎧 40小时<br/>超长续航</p>
                       </div>
                     </div>
                     <span className="absolute top-2 left-2 bg-orange-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">卖点图</span>
