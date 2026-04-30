@@ -208,7 +208,7 @@ function UtilityToolsPage() {
                 上传商品图，一键生成主图、卖点图、场景图
               </p>
               <button
-                onClick={() => router.push('/product-generator')}
+                onClick={() => window.open('/product-generator', '_blank')}
                 className="px-6 py-3 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors shadow-lg"
               >
                 立即生成商品图
