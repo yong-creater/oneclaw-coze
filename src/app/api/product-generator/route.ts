@@ -10,18 +10,29 @@ const BASE_QUALITY = `ultra realistic, commercial photography, high detail, shar
 soft controlled lighting, realistic shadows, natural color,
 clean composition, product-centered`;
 
-// ---- Global rules ----
-const GLOBAL_RULES = `Keep the product exactly the same (no change in shape, color, structure)
-No text, No watermark, No logo, No distortion, No blur, No low quality`;
+// ---- Strict product preservation ----
+const PRODUCT_PRESERVATION = `CRITICAL: Preserve the exact product structure from the original image.
+
+- Do NOT redesign, modify, or reinterpret the product
+- Do NOT change shape, size, proportions, or components
+- All parts (e.g. plug, cap, body, details) must remain exactly the same
+- The product must look identical to the original input image
+
+For functional products:
+- Maintain correct real-world usage structure
+- Do NOT generate incorrect connections (e.g. wrong plug/socket alignment)
+- Do NOT invent new parts or change product design
+
+This is a strict constraint.`;
 
 // ---- Scene logic for lifestyle image ----
 const CATEGORY_SCENE: Record<ProductCategory, string> = {
-  shoes: 'being worn on feet, walking or sitting naturally',
-  clothing: 'being worn by a model, fashion lookbook style, clean background',
-  electronics: 'worn on head or being used (headphones), or on a modern clean desk',
-  beauty: 'being used or placed on vanity, soft elegant lighting',
-  food: 'being served or eaten, natural light, appetizing presentation',
-  general: 'in a clean modern setting, warm natural lighting',
+  shoes: 'being worn on feet',
+  clothing: 'being worn by a model, fashion lookbook style',
+  electronics: 'worn on head or being used (headphones), or correctly installed or used',
+  beauty: 'being applied or used, vanity scene',
+  food: 'being served or eaten',
+  general: 'in a clean modern setting, naturally used',
 };
 
 const PROMPTS = {
@@ -32,8 +43,8 @@ const PROMPTS = {
 Base quality (apply to all images):
 ${BASE_QUALITY}
 
-Rules:
-${GLOBAL_RULES}
+STRICT product preservation (CRITICAL):
+${PRODUCT_PRESERVATION}
 
 Generate 1 DISTINCT image:
 
@@ -48,33 +59,39 @@ Requirements:
 - NO props`;
   },
 
-  // 2) Marketing image (strong visual / click attraction)
+  // 2) Marketing image (strong visual / advertising)
   benefitImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
     return `Enhance this product image into high-quality e-commerce visuals.
 
 Base quality (apply to all images):
 ${BASE_QUALITY}
 
-Rules:
-${GLOBAL_RULES}
+STRICT product preservation (CRITICAL):
+${PRODUCT_PRESERVATION}
 
 Generate 1 DISTINCT image:
 
-2) Marketing image (strong visual / click attraction):
+2) Marketing image (strong visual / advertising):
 close-up detail, dramatic lighting, strong contrast lighting,
 dark or gradient background, spotlight effect,
 premium glossy texture, high-end commercial advertising style,
-floating or isolated product, subtle reflection surface
+floating or isolated product
+
+Lighting rules:
+- realistic lighting only
+- optional subtle reflection ONLY if physically plausible
+- no fake reflections
+- no mirror-like unrealistic surface
 
 Rules:
 - NOT a real-life scene
 - NO table
 - NO environment objects
-- Focus on product + lighting + texture
-- Must look like an advertisement poster`;
+- focus on product + lighting + texture
+- must look like an advertisement poster`;
   },
 
-  // 3) Lifestyle image (conversion / real usage)
+  // 3) Lifestyle image (real usage / conversion)
   sceneImage: (_productName?: string, _benefits?: string, category?: ProductCategory) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
@@ -83,24 +100,27 @@ Rules:
 Base quality (apply to all images):
 ${BASE_QUALITY}
 
-Rules:
-${GLOBAL_RULES}
+STRICT product preservation (CRITICAL):
+${PRODUCT_PRESERVATION}
 
 Generate 1 DISTINCT image:
 
-3) Lifestyle image (conversion / real usage):
+3) Lifestyle image (real usage / conversion):
 realistic lifestyle scene, product being actively used,
 ${sceneDesc}
 
-Rules:
-- MUST show real usage
-- MUST feel natural and realistic
-- NO static product display
-- NO incorrect scenes
+Usage rules:
+- MUST reflect real-world usage
+- MUST be physically correct
+- MUST feel natural and believable
+
+Global restrictions:
 - no unrelated objects
 - no messy background
-- no random environment
-- no incorrect usage context`;
+- no incorrect usage
+- no unrealistic reflections
+- no fake mirror effects
+- no physically impossible lighting`;
   },
 };
 
