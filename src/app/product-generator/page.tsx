@@ -25,16 +25,6 @@ const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number }[] = [
   { slot: 'parameter', label: '参数图', order: 6 },
 ];
 
-// 每个模块的描述文案
-const SECTION_DESC: Record<ImageSlot, { title: string; subtitle: string }> = {
-  cover: { title: '封面', subtitle: '强视觉冲击，高端主图风格' },
-  selling: { title: '核心卖点', subtitle: '聚焦一个关键卖点，广告级呈现' },
-  feature: { title: '功能拆解', subtitle: '结构透视，清晰展示产品原理' },
-  scene: { title: '使用场景', subtitle: '真实使用场景，代入感强' },
-  comparison: { title: '优势对比', subtitle: '直观对比，凸显产品优势' },
-  parameter: { title: '规格参数', subtitle: '专业参数展示，增强信任感' },
-};
-
 // 加载状态文案
 const LOADING_STEPS = [
   '正在分析商品特征...',
@@ -227,34 +217,6 @@ export default function ProductDetailGeneratorPage() {
     setPreviewOpen(true);
   };
 
-  // 渲染单个图片模块
-  const renderImageSection = (slot: ImageSlot) => {
-    const url = getImage(slot);
-    if (!url) return null;
-    const desc = SECTION_DESC[slot];
-
-    return (
-      <div className="mb-4">
-        {/* 模块标题 */}
-        <div className="flex items-center gap-2 mb-2 px-1">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            {desc.title}
-          </span>
-          <span className="text-[10px] text-slate-300 dark:text-slate-500">
-            {desc.subtitle}
-          </span>
-        </div>
-        {/* 图片 */}
-        <img
-          src={url}
-          alt={desc.title}
-          className="w-full h-auto rounded-2xl cursor-pointer hover:opacity-95 transition-opacity"
-          onClick={() => openPreview(url)}
-        />
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <UtilityHeader
@@ -402,74 +364,59 @@ export default function ProductDetailGeneratorPage() {
             </div>
           </div>
 
-          {/* ==================== 右侧：商品详情页预览 ==================== */}
+          {/* ==================== 右侧：电商详情页预览 ==================== */}
           <div>
-            {/* 标题区 */}
-            <div className="text-center mb-4">
-              <h3 className="text-base font-bold text-slate-800 dark:text-white">
-                商品详情页预览
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                一键生成完整商品详情页图片
-              </p>
-            </div>
-
             {!showResults ? (
               /* ====== 未生成时的占位 ====== */
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 flex items-center justify-center mb-4">
-                    <Package className="w-9 h-9 text-orange-400" />
-                  </div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                    上传商品图后，将生成可直接用于电商的商品详情页素材
-                  </p>
-                  <p className="text-[11px] text-slate-300 dark:text-slate-600 mt-2">
-                    封面图 · 卖点图 · 功能拆解 · 使用场景 · 对比图 · 参数图
-                  </p>
+              <div className="bg-white dark:bg-slate-800/50 rounded-2xl flex flex-col items-center justify-center py-24 text-center border border-slate-100 dark:border-slate-700/50">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center mb-4">
+                  <Package className="w-8 h-8 text-orange-400" />
                 </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                  上传商品图后，将生成可直接用于电商的商品详情页素材
+                </p>
+                <p className="text-[11px] text-slate-300 dark:text-slate-600 mt-2">
+                  封面图 · 卖点图 · 功能拆解 · 使用场景 · 对比图 · 参数图
+                </p>
               </div>
             ) : (
-              /* ====== 生成结果：商品详情页预览 ====== */
-              <div>
-                {/* 封面模块 */}
-                {getImage('cover') && (
-                  <div className="mb-4">
-                    <img
-                      src={getImage('cover')!}
-                      alt="封面图"
-                      className="w-full h-auto rounded-2xl cursor-pointer hover:opacity-95 transition-opacity"
-                      onClick={() => openPreview(getImage('cover')!)}
-                    />
-                    {/* 标题占位 */}
-                    <div className="px-1 pt-3 pb-1">
-                      <h2 className="text-lg font-bold text-slate-800 dark:text-white leading-snug">
-                        {productName || '商品标题'}
-                      </h2>
-                      <p className="text-sm text-orange-600 dark:text-orange-400 mt-1 font-medium">
-                        {productBenefit || '核心卖点短句'}
-                      </p>
-                    </div>
-                  </div>
-                )}
+              /* ====== 生成结果：沉浸式详情页 ====== */
+              <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
+                {/* 详情页顶部商品信息条 */}
+                <div className="px-5 pt-5 pb-3">
+                  <h2 className="text-lg font-bold text-slate-800 leading-snug">
+                    {productName || '商品标题'}
+                  </h2>
+                  <p className="text-sm text-orange-600 mt-1 font-medium">
+                    {productBenefit || '核心卖点短句'}
+                  </p>
+                </div>
 
-                {/* 卖点模块 */}
-                {renderImageSection('selling')}
+                {/* 单列大图流：封面 → 卖点 → 功能 → 场景 → 对比 → 参数 */}
+                <div className="px-0">
+                  {SLOT_CONFIG.map(({ slot }) => {
+                    const url = getImage(slot);
+                    if (!url) return null;
+                    return (
+                      <div key={slot} className="relative group cursor-pointer" onClick={() => openPreview(url)}>
+                        <img
+                          src={url}
+                          alt={SLOT_CONFIG.find(s => s.slot === slot)?.label || ''}
+                          className="w-full h-auto block"
+                        />
+                        {/* hover遮罩：点击查看大图 */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
+                            点击查看大图
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
 
-                {/* 功能拆解模块 */}
-                {renderImageSection('feature')}
-
-                {/* 使用场景模块 */}
-                {renderImageSection('scene')}
-
-                {/* 对比模块 */}
-                {renderImageSection('comparison')}
-
-                {/* 参数模块 */}
-                {renderImageSection('parameter')}
-
-                {/* --- 底部操作区 --- */}
-                <div className="mt-2 space-y-3">
+                {/* 底部操作区 */}
+                <div className="sticky bottom-0 bg-white border-t border-slate-100 px-5 py-4">
                   <div className="flex gap-3">
                     <button
                       onClick={handleDownloadAll}
@@ -481,13 +428,13 @@ export default function ProductDetailGeneratorPage() {
                     </button>
                     <button
                       onClick={handleReset}
-                      className="px-4 py-3 border-2 border-slate-200 dark:border-slate-700 hover:border-orange-400 text-slate-600 dark:text-slate-300 text-sm rounded-xl transition-colors flex items-center gap-1.5"
+                      className="px-5 py-3 border-2 border-slate-200 hover:border-orange-400 text-slate-600 text-sm rounded-xl transition-colors flex items-center gap-1.5"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
                       重新生成
                     </button>
                   </div>
-                  <div className="flex items-center justify-center gap-3 text-[10px] text-slate-400">
+                  <div className="flex items-center justify-center gap-4 mt-2.5 text-[10px] text-slate-400">
                     <span className="flex items-center gap-0.5">
                       <Check className="w-3 h-3 text-green-500" />
                       可直接用于详情页
@@ -495,6 +442,10 @@ export default function ProductDetailGeneratorPage() {
                     <span className="flex items-center gap-0.5">
                       <Check className="w-3 h-3 text-green-500" />
                       淘宝/小红书
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                      <Check className="w-3 h-3 text-green-500" />
+                      可截图使用
                     </span>
                   </div>
                 </div>
