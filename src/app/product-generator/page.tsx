@@ -545,7 +545,7 @@ export default function ProductGeneratorPage() {
 
       {/* 解锁高清弹窗 */}
       <Dialog open={showUnlockDialog} onOpenChange={setShowUnlockDialog}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm [&>[data-slot=dialog-close]]:opacity-30 [&>[data-slot=dialog-close]]:w-6 [&>[data-slot=dialog-close]]:h-6 [&>[data-slot=dialog-close]]:hover:opacity-50">
           <DialogHeader>
             <DialogTitle className="text-center text-lg">解锁高清商品图</DialogTitle>
           </DialogHeader>
@@ -553,26 +553,27 @@ export default function ProductGeneratorPage() {
             <div className="space-y-3">
               <div className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">更高清晰度</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">更清晰细节（适合电商主图）</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">商用可用</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">可直接用于淘宝/京东</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm text-slate-700 dark:text-slate-300">无水印</span>
+                <span className="text-sm text-slate-700 dark:text-slate-300">无水印下载</span>
               </div>
             </div>
             <div className="text-center py-2">
-              <span className="text-2xl font-bold text-orange-600">￥9.9</span>
+              <span className="text-sm text-slate-400 line-through mr-2">原价 ¥29</span>
+              <span className="text-2xl font-bold text-orange-600">限时 ¥9.9</span>
               <span className="text-sm text-slate-400 ml-1">/ 10次</span>
             </div>
             <button
               onClick={() => setShowUnlockDialog(false)}
               className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium hover:from-orange-600 hover:to-orange-700 transition-all"
             >
-              立即解锁
+              🔥 立即解锁高清图
             </button>
             <p className="text-[10px] text-center text-slate-400">解锁后可下载高清无水印商品图，支持商用</p>
           </div>
