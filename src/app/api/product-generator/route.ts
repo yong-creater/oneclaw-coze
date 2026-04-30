@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateWithModel } from '@/lib/model-selector';
 
-// ============ Prompt 体系：4 张商品视觉素材 ============
+// ============ Prompt 体系：6 张商品详情页素材 ============
 
 type ProductCategory = 'shoes' | 'clothing' | 'electronics' | 'beauty' | 'food' | 'general';
 
 // 图片类型定义（顺序即展示顺序）
-export type ImageSlot = 'cover' | 'selling' | 'scene1' | 'scene2';
+export type ImageSlot = 'cover' | 'selling' | 'feature' | 'scene' | 'comparison' | 'parameter';
 
 export const IMAGE_SLOTS: { slot: ImageSlot; label: string; order: number }[] = [
-  { slot: 'cover', label: '主图', order: 1 },
+  { slot: 'cover', label: '封面图', order: 1 },
   { slot: 'selling', label: '卖点图', order: 2 },
-  { slot: 'scene1', label: '场景图 1', order: 3 },
-  { slot: 'scene2', label: '场景图 2', order: 4 },
+  { slot: 'feature', label: '功能拆解图', order: 3 },
+  { slot: 'scene', label: '使用场景图', order: 4 },
+  { slot: 'comparison', label: '对比图', order: 5 },
+  { slot: 'parameter', label: '参数图', order: 6 },
 ];
 
 // ---- Scene logic (used by lifestyle images) ----
@@ -25,152 +27,186 @@ const CATEGORY_SCENE: Record<ProductCategory, string> = {
   general: 'in a clean modern setting, naturally used',
 };
 
-const CATEGORY_SCENE_2: Record<ProductCategory, string> = {
-  shoes: 'running or active lifestyle, outdoor scene',
-  clothing: 'casual outing, street photography style',
-  electronics: 'home entertainment or work setup, cozy atmosphere',
-  beauty: 'morning routine, bathroom vanity, natural light',
-  food: 'shared meal, social gathering',
-  general: 'lifestyle close-up, aesthetic flat lay',
-};
-
 // ---- Per-slot Prompt generators ----
 export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string, category?: ProductCategory) => string> = {
 
-  // 1) MAIN PRODUCT IMAGE
+  // 1) COVER IMAGE
   cover: (_productName, _benefits, _category) => {
-    return `Create high-conversion e-commerce product images.
+    return `You are generating images for an e-commerce product detail page.
+This is NOT normal image generation. This is for SELLING products.
 
-CORE GOAL: This image must be used for SELLING, not just looking good.
-It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
-
-IMAGE TYPE: MAIN PRODUCT IMAGE
-- clean background
-- centered product
+IMAGE TYPE: COVER IMAGE
+- strong visual impact
 - premium lighting
-- sharp details
+- product centered
+- background clean but stylish
+- looks like Taobao high-end main image
 
 STYLE:
-- Taobao premium product photography
-- Chinese e-commerce advertising style
-- strong studio lighting
-- clean composition
-- commercial quality
+- Chinese e-commerce (Taobao / Xiaohongshu style)
+- premium commercial photography
+- strong selling intention
+- not generic lifestyle photos
 
-REALISM (IMPORTANT):
+REALISM:
 - correct proportions
 - no distortion
-- no floating objects
-- physically realistic placement
+- no floating
+- physically correct usage
 
-CRITICAL RULE:
-DO NOT generate generic photos.
-This image must look like an advertisement and clearly show why user should buy.
+IMPORTANT: Do NOT generate random nice images.
+This image must clearly answer: Why should user buy this product?
 
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 2) SELLING POINT IMAGE (VERY IMPORTANT)
+  // 2) SELLING POINT IMAGE (CRITICAL)
   selling: (_productName, benefits, _category) => {
-    return `Create high-conversion e-commerce product images.
+    return `You are generating images for an e-commerce product detail page.
+This is NOT normal image generation. This is for SELLING products.
 
-CORE GOAL: This image must be used for SELLING, not just looking good.
-It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
-
-IMAGE TYPE: SELLING POINT IMAGE (VERY IMPORTANT)
-- strong lighting contrast
-- close-up or dramatic angle
-- highlight ONE key feature
-- advertising style
-- product should look powerful and premium${benefits ? `\n- Key feature to highlight: ${benefits}` : ''}
+IMAGE TYPE: SELLING POINT IMAGE (CRITICAL)
+- focus on ONE key feature
+- use dramatic lighting
+- close-up or macro angle
+- must visually show the feature (e.g. open lid, leak-proof, straw)
+- must feel like advertisement${benefits ? `\n- Key feature to highlight: ${benefits}` : ''}
 
 STYLE:
-- Taobao premium product photography
-- Chinese e-commerce advertising style
-- strong lighting for selling image
-- clean composition
-- commercial quality
+- Chinese e-commerce (Taobao / Xiaohongshu style)
+- premium commercial photography
+- strong selling intention
+- not generic lifestyle photos
 
-REALISM (IMPORTANT):
+REALISM:
 - correct proportions
 - no distortion
-- no floating objects
-- physically realistic placement
+- no floating
+- physically correct usage
 
-CRITICAL RULE:
-DO NOT generate generic photos.
-This image must look like an advertisement and clearly show why user should buy.
+IMPORTANT: Do NOT generate random nice images.
+This image must clearly answer: Why should user buy this product?
 
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 3) LIFESTYLE IMAGE 1
-  scene1: (_productName, _benefits, category) => {
+  // 3) FEATURE BREAKDOWN IMAGE
+  feature: (_productName, _benefits, _category) => {
+    return `You are generating images for an e-commerce product detail page.
+This is NOT normal image generation. This is for SELLING products.
+
+IMAGE TYPE: FEATURE BREAKDOWN IMAGE
+- show product structure
+- exploded view or transparent parts
+- clearly show how it works
+- technical illustration style
+- each part visible and distinguishable
+
+STYLE:
+- Chinese e-commerce (Taobao / Xiaohongshu style)
+- premium commercial photography
+- strong selling intention
+- not generic lifestyle photos
+
+REALISM:
+- correct proportions
+- no distortion
+- no floating
+- physically correct usage
+
+IMPORTANT: Do NOT generate random nice images.
+This image must clearly answer: Why should user buy this product?
+
+NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+  },
+
+  // 4) USAGE SCENE IMAGE
+  scene: (_productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    return `Create high-conversion e-commerce product images.
+    return `You are generating images for an e-commerce product detail page.
+This is NOT normal image generation. This is for SELLING products.
 
-CORE GOAL: This image must be used for SELLING, not just looking good.
-It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
-
-IMAGE TYPE: LIFESTYLE IMAGE 1
-- real usage scene
+IMAGE TYPE: USAGE SCENE IMAGE
+- real life usage
+- natural context
+- believable scenario (desk, gym, outdoor)
 - ${sceneDesc}
-- natural environment
-- believable context
 - warm natural lighting
 
 STYLE:
-- Taobao premium product photography
-- Chinese e-commerce advertising style
-- warm natural lighting for lifestyle
-- clean composition
-- commercial quality
+- Chinese e-commerce (Taobao / Xiaohongshu style)
+- premium commercial photography
+- strong selling intention
+- not generic lifestyle photos
 
-REALISM (IMPORTANT):
+REALISM:
 - correct proportions
 - no distortion
-- no floating objects
-- physically realistic placement
+- no floating
+- physically correct usage
 
-CRITICAL RULE:
-DO NOT generate generic photos.
-This image must look like an advertisement and clearly show why user should buy.
+IMPORTANT: Do NOT generate random nice images.
+This image must clearly answer: Why should user buy this product?
 
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 4) LIFESTYLE IMAGE 2
-  scene2: (_productName, _benefits, category) => {
-    const cat = category || 'general';
-    const sceneDesc = CATEGORY_SCENE_2[cat];
-    return `Create high-conversion e-commerce product images.
+  // 5) COMPARISON IMAGE
+  comparison: (_productName, _benefits, _category) => {
+    return `You are generating images for an e-commerce product detail page.
+This is NOT normal image generation. This is for SELLING products.
 
-CORE GOAL: This image must be used for SELLING, not just looking good.
-It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
-
-IMAGE TYPE: LIFESTYLE IMAGE 2
-- different real-life scenario from the first lifestyle image
-- ${sceneDesc}
-- emotional feeling
-- different time of day or lighting mood
+IMAGE TYPE: COMPARISON IMAGE
+- compare with normal product
+- highlight advantage (e.g. leak-proof vs leaking, thin vs thick, before vs after)
+- split composition showing the difference
+- the product must appear superior and more desirable
 
 STYLE:
-- Taobao premium product photography
-- Chinese e-commerce advertising style
-- warm natural lighting for lifestyle
-- clean composition
-- commercial quality
+- Chinese e-commerce (Taobao / Xiaohongshu style)
+- premium commercial photography
+- strong selling intention
+- not generic lifestyle photos
 
-REALISM (IMPORTANT):
+REALISM:
 - correct proportions
 - no distortion
-- no floating objects
-- physically realistic placement
+- no floating
+- physically correct usage
 
-CRITICAL RULE:
-DO NOT generate generic photos.
-This image must look like an advertisement and clearly show why user should buy.
+IMPORTANT: Do NOT generate random nice images.
+This image must clearly answer: Why should user buy this product?
+
+NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+  },
+
+  // 6) PARAMETER IMAGE
+  parameter: (_productName, _benefits, _category) => {
+    return `You are generating images for an e-commerce product detail page.
+This is NOT normal image generation. This is for SELLING products.
+
+IMAGE TYPE: PARAMETER IMAGE
+- clean layout
+- show size, capacity, material
+- minimalistic style
+- product with measurement indicators or dimension lines
+- professional and technical appearance
+
+STYLE:
+- Chinese e-commerce (Taobao / Xiaohongshu style)
+- premium commercial photography
+- strong selling intention
+- not generic lifestyle photos
+
+REALISM:
+- correct proportions
+- no distortion
+- no floating
+- physically correct usage
+
+IMPORTANT: Do NOT generate random nice images.
+This image must clearly answer: Why should user buy this product?
 
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
@@ -219,7 +255,7 @@ export async function POST(request: NextRequest) {
     const category = detectCategory(productName || '');
     const imageInput = image;
 
-    // 并行生成 4 张图片
+    // 并行生成 6 张图片
     const results: Partial<Record<ImageSlot, string>> = {};
     const errors: string[] = [];
 

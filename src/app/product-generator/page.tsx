@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import UtilityHeader from '@/components/common/UtilityHeader';
 
 // 图片槽位类型（与后端对齐）
-type ImageSlot = 'main' | 'selling' | 'scene1' | 'scene2';
+type ImageSlot = 'cover' | 'selling' | 'feature' | 'scene' | 'comparison' | 'parameter';
 
 interface GeneratedImage {
   slot: ImageSlot;
@@ -17,18 +17,33 @@ interface GeneratedImage {
 
 // 槽位配置
 const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number }[] = [
-  { slot: 'main', label: '主图', order: 1 },
+  { slot: 'cover', label: '封面图', order: 1 },
   { slot: 'selling', label: '卖点图', order: 2 },
-  { slot: 'scene1', label: '场景图 1', order: 3 },
-  { slot: 'scene2', label: '场景图 2', order: 4 },
+  { slot: 'feature', label: '功能拆解图', order: 3 },
+  { slot: 'scene', label: '使用场景图', order: 4 },
+  { slot: 'comparison', label: '对比图', order: 5 },
+  { slot: 'parameter', label: '参数图', order: 6 },
 ];
+
+// 每个模块的描述文案
+const SECTION_DESC: Record<ImageSlot, { title: string; subtitle: string }> = {
+  cover: { title: '封面', subtitle: '强视觉冲击，高端主图风格' },
+  selling: { title: '核心卖点', subtitle: '聚焦一个关键卖点，广告级呈现' },
+  feature: { title: '功能拆解', subtitle: '结构透视，清晰展示产品原理' },
+  scene: { title: '使用场景', subtitle: '真实使用场景，代入感强' },
+  comparison: { title: '优势对比', subtitle: '直观对比，凸显产品优势' },
+  parameter: { title: '规格参数', subtitle: '专业参数展示，增强信任感' },
+};
 
 // 加载状态文案
 const LOADING_STEPS = [
   '正在分析商品特征...',
-  '正在生成主图...',
+  '正在生成封面图...',
   '正在生成卖点图...',
-  '正在生成场景图...',
+  '正在生成功能拆解图...',
+  '正在生成使用场景图...',
+  '正在生成对比图...',
+  '正在生成参数图...',
   '正在拼合详情页...',
 ];
 
@@ -212,6 +227,34 @@ export default function ProductDetailGeneratorPage() {
     setPreviewOpen(true);
   };
 
+  // 渲染单个图片模块
+  const renderImageSection = (slot: ImageSlot) => {
+    const url = getImage(slot);
+    if (!url) return null;
+    const desc = SECTION_DESC[slot];
+
+    return (
+      <div className="mb-4">
+        {/* 模块标题 */}
+        <div className="flex items-center gap-2 mb-2 px-1">
+          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+            {desc.title}
+          </span>
+          <span className="text-[10px] text-slate-300 dark:text-slate-500">
+            {desc.subtitle}
+          </span>
+        </div>
+        {/* 图片 */}
+        <img
+          src={url}
+          alt={desc.title}
+          className="w-full h-auto rounded-2xl cursor-pointer hover:opacity-95 transition-opacity"
+          onClick={() => openPreview(url)}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <UtilityHeader
@@ -322,7 +365,7 @@ export default function ProductDetailGeneratorPage() {
                   免费体验
                 </span>
                 <span className="text-slate-300">|</span>
-                <span>完整详情页</span>
+                <span>6张详情图</span>
                 <span className="text-slate-300">|</span>
                 <span>淘宝/小红书</span>
               </div>
@@ -353,7 +396,7 @@ export default function ProductDetailGeneratorPage() {
 
               <div className="text-center">
                 <span className="text-[13px] text-slate-400">
-                  生成完整商品详情页长图
+                  生成6张完整商品详情页素材
                 </span>
               </div>
             </div>
@@ -367,7 +410,7 @@ export default function ProductDetailGeneratorPage() {
                 商品详情页预览
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                一键生成完整商品详情页长图
+                一键生成完整商品详情页图片
               </p>
             </div>
 
@@ -381,19 +424,22 @@ export default function ProductDetailGeneratorPage() {
                   <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
                     上传商品图后，将生成可直接用于电商的商品详情页素材
                   </p>
+                  <p className="text-[11px] text-slate-300 dark:text-slate-600 mt-2">
+                    封面图 · 卖点图 · 功能拆解 · 使用场景 · 对比图 · 参数图
+                  </p>
                 </div>
               </div>
             ) : (
               /* ====== 生成结果：商品详情页预览 ====== */
               <div>
-                {/* --- 封面模块 --- */}
-                {getImage('main') && (
+                {/* 封面模块 */}
+                {getImage('cover') && (
                   <div className="mb-4">
                     <img
-                      src={getImage('main')!}
-                      alt="主图"
+                      src={getImage('cover')!}
+                      alt="封面图"
                       className="w-full h-auto rounded-2xl cursor-pointer hover:opacity-95 transition-opacity"
-                      onClick={() => openPreview(getImage('main')!)}
+                      onClick={() => openPreview(getImage('cover')!)}
                     />
                     {/* 标题占位 */}
                     <div className="px-1 pt-3 pb-1">
@@ -407,56 +453,20 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 )}
 
-                {/* --- 卖点模块 --- */}
-                {getImage('selling') && (
-                  <div className="mb-4">
-                    <img
-                      src={getImage('selling')!}
-                      alt="卖点图"
-                      className="w-full h-auto rounded-2xl cursor-pointer hover:opacity-95 transition-opacity"
-                      onClick={() => openPreview(getImage('selling')!)}
-                    />
-                    {/* 卖点文案占位 */}
-                    <div className="px-1 pt-3 pb-1 space-y-2">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="flex items-start gap-2">
-                          <span className="w-5 h-5 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
-                            {i}
-                          </span>
-                          <span className="text-sm text-slate-600 dark:text-slate-300">
-                            {i === 1 && (productBenefit ? productBenefit.split(/[，,；;]/)[0] : '卖点文案 1')}
-                            {i === 2 && (productBenefit && productBenefit.split(/[，,；;]/).length > 1 ? productBenefit.split(/[，,；;]/)[1] : '卖点文案 2')}
-                            {i === 3 && '卖点文案 3'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* 卖点模块 */}
+                {renderImageSection('selling')}
 
-                {/* --- 场景模块 1 --- */}
-                {getImage('scene1') && (
-                  <div className="mb-4">
-                    <img
-                      src={getImage('scene1')!}
-                      alt="场景图 1"
-                      className="w-full h-auto rounded-2xl cursor-pointer hover:opacity-95 transition-opacity"
-                      onClick={() => openPreview(getImage('scene1')!)}
-                    />
-                  </div>
-                )}
+                {/* 功能拆解模块 */}
+                {renderImageSection('feature')}
 
-                {/* --- 场景模块 2 --- */}
-                {getImage('scene2') && (
-                  <div className="mb-4">
-                    <img
-                      src={getImage('scene2')!}
-                      alt="场景图 2"
-                      className="w-full h-auto rounded-2xl cursor-pointer hover:opacity-95 transition-opacity"
-                      onClick={() => openPreview(getImage('scene2')!)}
-                    />
-                  </div>
-                )}
+                {/* 使用场景模块 */}
+                {renderImageSection('scene')}
+
+                {/* 对比模块 */}
+                {renderImageSection('comparison')}
+
+                {/* 参数模块 */}
+                {renderImageSection('parameter')}
 
                 {/* --- 底部操作区 --- */}
                 <div className="mt-2 space-y-3">
