@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
       imageBase64 = image.split(',')[1] || image;
     }
 
-    // 串行生成三张图片
+    // 并行生成三张图片（大幅缩短等待时间）
     const results: {
       mainImage?: string;
       benefitImage?: string;
@@ -155,49 +155,28 @@ export async function POST(request: NextRequest) {
       errors: string[];
     } = { errors: [] };
 
-    // 1. 生成白底主图
-    try {
-      const mainUrls = await generateImage(
-        PROMPTS.mainImage(productName, productBenefit),
-        imageBase64
-      );
-      if (mainUrls[0]) {
-        results.mainImage = mainUrls[0];
-      } else {
-        results.errors.push('主图生成返回为空');
-      }
-    } catch (err) {
-      results.errors.push(`主图生成失败: ${err instanceof Error ? err.message : '未知错误'}`);
+    const [mainResult, benefitResult, sceneResult] = await Promise.allSettled([
+      generateImage(PROMPTS.mainImage(productName, productBenefit), imageBase64),
+      generateImage(PROMPTS.benefitImage(productName, productBenefit), imageBase64),
+      generateImage(PROMPTS.sceneImage(productName, productBenefit), imageBase64),
+    ]);
+
+    if (mainResult.status === 'fulfilled' && mainResult.value[0]) {
+      results.mainImage = mainResult.value[0];
+    } else {
+      results.errors.push(`主图生成失败: ${mainResult.status === 'rejected' ? mainResult.reason?.message || '未知错误' : '返回为空'}`);
     }
 
-    // 2. 生成高级感主图
-    try {
-      const benefitUrls = await generateImage(
-        PROMPTS.benefitImage(productName, productBenefit),
-        imageBase64
-      );
-      if (benefitUrls[0]) {
-        results.benefitImage = benefitUrls[0];
-      } else {
-        results.errors.push('高级感主图生成返回为空');
-      }
-    } catch (err) {
-      results.errors.push(`高级感主图生成失败: ${err instanceof Error ? err.message : '未知错误'}`);
+    if (benefitResult.status === 'fulfilled' && benefitResult.value[0]) {
+      results.benefitImage = benefitResult.value[0];
+    } else {
+      results.errors.push(`高级感主图生成失败: ${benefitResult.status === 'rejected' ? benefitResult.reason?.message || '未知错误' : '返回为空'}`);
     }
 
-    // 3. 生成场景图
-    try {
-      const sceneUrls = await generateImage(
-        PROMPTS.sceneImage(productName, productBenefit),
-        imageBase64
-      );
-      if (sceneUrls[0]) {
-        results.sceneImage = sceneUrls[0];
-      } else {
-        results.errors.push('场景图生成返回为空');
-      }
-    } catch (err) {
-      results.errors.push(`场景图生成失败: ${err instanceof Error ? err.message : '未知错误'}`);
+    if (sceneResult.status === 'fulfilled' && sceneResult.value[0]) {
+      results.sceneImage = sceneResult.value[0];
+    } else {
+      results.errors.push(`场景图生成失败: ${sceneResult.status === 'rejected' ? sceneResult.reason?.message || '未知错误' : '返回为空'}`);
     }
 
     // 检查是否至少生成了一张图片
