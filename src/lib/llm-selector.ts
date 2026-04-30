@@ -10,7 +10,7 @@
 
 import { LLMClient, Config, HeaderUtils, Message, ContentPart } from 'coze-coding-dev-sdk';
 import { NextRequest } from 'next/server';
-import { getToolModelConfig, getProviderConfig, ToolModelConfig } from './model-selector';
+import { getToolModelConfig, getProviderConfig, ToolModelConfig, buildApiBaseUrl } from './model-selector';
 
 // 统一的消息内容类型：支持纯文字和多模态（图片+文字）
 export type MessageContent = string | ContentPart[];
@@ -40,6 +40,7 @@ async function streamWithOpenAICompatible(
   customHeaders: Record<string, string> = {}
 ): Promise<ReadableStream> {
   const encoder = new TextEncoder();
+  const fullApiUrl = buildApiBaseUrl(apiUrl);
 
   return new ReadableStream({
     async start(controller) {
@@ -50,7 +51,7 @@ async function streamWithOpenAICompatible(
           return;
         }
 
-        const response = await fetch(`${apiUrl}/chat/completions`, {
+        const response = await fetch(`${fullApiUrl}/chat/completions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -130,7 +131,8 @@ async function invokeWithOpenAICompatible(
       return { content: '', error: 'API密钥未配置，请在后台模型提供商中配置' };
     }
 
-    const response = await fetch(`${apiUrl}/chat/completions`, {
+    const fullApiUrl = buildApiBaseUrl(apiUrl);
+    const response = await fetch(`${fullApiUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

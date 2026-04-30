@@ -11,6 +11,18 @@
 import { ImageGenerationClient, ImageGenerationResponseHelper, ImageGenerationRequest, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
+/**
+ * 构建完整的 API Base URL
+ * 数据库存储不含 /v1 的 base URL（如 https://4sapi.com），此函数自动补全 /v1
+ * 如果 base 已包含 /v1 则不再重复添加
+ */
+export function buildApiBaseUrl(base: string): string {
+  if (!base) return '';
+  const trimmed = base.replace(/\/+$/, ''); // 去掉末尾斜杠
+  if (trimmed.endsWith('/v1')) return trimmed;
+  return `${trimmed}/v1`;
+}
+
 // 完整的工具模型配置（从数据库获取）
 export interface ToolModelConfig {
   providerId: number;
@@ -72,7 +84,7 @@ export async function getToolModelConfig(toolId: string): Promise<ToolModelConfi
         providerId: tool.model_config.provider_id || 1,
         modelName: tool.model_config.default_model || 'coze-image',
         providerSlug: source,
-        apiUrl: isCoze ? '' : (process.env.API4S_URL || 'https://4sapi.com/v1'),
+        apiUrl: isCoze ? '' : (process.env.API4S_URL || 'https://4sapi.com'),
         apiKey: isCoze ? '' : (process.env.API4S_KEY || ''),
       };
     }
@@ -133,6 +145,9 @@ async function generateWithOpenAICompatible(
       return { success: false, error: 'API地址未配置，请在后台模型提供商中配置' };
     }
 
+    // 构建完整的 API base URL（自动补 /v1）
+    const fullApiUrl = buildApiBaseUrl(apiUrl);
+
     // 解析尺寸
     let imageSize = '1024x1024';
     if (size === '2K') {
@@ -173,7 +188,7 @@ async function generateWithOpenAICompatible(
       const imageBlob = new Blob([imageBuffer], { type: mimeType });
       formData.append('image', imageBlob, 'image.png');
 
-      const response = await fetch(`${apiUrl}/images/edits`, {
+      const response = await fetch(`${fullApiUrl}/images/edits`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${apiKey}`,
@@ -207,7 +222,7 @@ async function generateWithOpenAICompatible(
         size: imageSize,
       };
 
-      const response = await fetch(`${apiUrl}/images/generations`, {
+      const response = await fetch(`${fullApiUrl}/images/generations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -340,7 +355,7 @@ export async function generateWithModel(
   } else {
     // 非 coze 模型，尝试从环境变量读取 4sapi 配置
     const apiKey = process.env.API4S_KEY || '';
-    const apiUrl = process.env.API4S_URL || 'https://4sapi.com/v1';
+    const apiUrl = process.env.API4S_URL || 'https://4sapi.com';
     return await generateWithOpenAICompatible(prompt, model, size, apiUrl, apiKey, image);
   }
 }

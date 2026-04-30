@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { requirePermission } from '@/lib/auth';
 import { Permissions } from '@/lib/permissions';
+import { buildApiBaseUrl } from '@/lib/model-selector';
 
 // 常见图片生成模型列表（当 API 不支持列举图片模型时作为建议）
 const KNOWN_IMAGE_MODELS = [
@@ -11,26 +12,12 @@ const KNOWN_IMAGE_MODELS = [
   { id: 'flux-1', name: 'Flux 1', display_name: 'Flux 1', description: 'Black Forest Labs 图片生成模型' },
 ];
 
-// 规范化 API URL，避免路径拼接问题
-function normalizeApiUrl(url: string): string {
-  return url.replace(/\/+$/, ''); // 去掉末尾的斜杠
-}
-
-// 智能构建模型列表端点
-function buildEndpoints(apiUrl: string, providerType: string): Array<{ url: string; desc: string }> {
-  const base = normalizeApiUrl(apiUrl);
-  const endpoints: Array<{ url: string; desc: string }> = [];
-
-  // 如果 URL 已经包含 /v1，直接拼接 /models
-  if (base.endsWith('/v1')) {
-    endpoints.push({ url: `${base}/models`, desc: 'OpenAI v1 格式' });
-  } else {
-    // 否则先尝试 /v1/models，再尝试 /models
-    endpoints.push({ url: `${base}/v1/models`, desc: 'OpenAI v1 格式' });
-    endpoints.push({ url: `${base}/models`, desc: 'OpenAI 兼容格式' });
-  }
-
-  return endpoints;
+// 构建模型列表端点（基于 buildApiBaseUrl 统一处理 /v1 前缀）
+function buildEndpoints(apiUrl: string, _providerType: string): Array<{ url: string; desc: string }> {
+  const fullApiUrl = buildApiBaseUrl(apiUrl);
+  return [
+    { url: `${fullApiUrl}/models`, desc: 'OpenAI v1 格式' },
+  ];
 }
 
 // 获取模型列表（通过提供商的 API）并保存到数据库
