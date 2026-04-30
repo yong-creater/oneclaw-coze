@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, RefreshCw, Package, ImageIcon } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, RefreshCw, Package, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -405,18 +405,14 @@ export default function ProductDetailGeneratorPage() {
       />
 
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* 标题 */}
-        <div className="text-center mb-4">
-          <h1 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-1">
-            上传商品图，AI一键生成完整详情页
+        {/* 核心价值标题 */}
+        <div className="text-center mb-6">
+          <h1 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">
+            让商品图帮你<span className="text-orange-500">卖货</span>
           </h1>
-        </div>
-
-        {/* 示例说明行 */}
-        <div className="flex items-center justify-center gap-1.5 mb-6 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
-          <span>普通商品图</span>
-          <ArrowRight className="w-4 h-4 text-orange-400" />
-          <span className="text-orange-600 font-bold">完整商品详情页</span>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            普通商品照 <span className="text-orange-400 mx-0.5">→</span> 能上架的电商详情页
+          </p>
         </div>
 
         {/* 左右布局主体区 */}
@@ -435,7 +431,7 @@ export default function ProductDetailGeneratorPage() {
                 </div>
                 <p className="text-slate-800 dark:text-white font-bold text-base mb-1">上传商品图片</p>
                 <p className="text-slate-400 text-sm">推荐上传 3 张，最多 {MAX_IMAGES} 张</p>
-                <p className="text-[11px] text-slate-300 dark:text-slate-500 mt-3">JPG / PNG / HEIC · 最多{MAX_IMAGES}张</p>
+                <p className="text-[11px] text-slate-300 dark:text-slate-500 mt-2">支持 JPG / PNG / HEIC</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -505,7 +501,7 @@ export default function ProductDetailGeneratorPage() {
                       </button>
                     )}
                     <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                      {uploadedImages.length}/{MAX_IMAGES}张 · 建议上传：正面 / 侧面 / 细节
+                      {uploadedImages.length}/{MAX_IMAGES}张 · 正面 / 侧面 / 细节
                     </span>
                   </div>
                 </div>
@@ -549,12 +545,12 @@ export default function ProductDetailGeneratorPage() {
 
             {/* ===== 生成按钮 ===== */}
             <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 hover:from-orange-600 hover:via-orange-600 hover:to-amber-600 text-white font-bold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(249,115,22,0.35)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.45)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(249,115,22,0.35)] flex items-center justify-center gap-2">
-              {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 立即生成可上架的商品详情页</>)}
+              {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 一键生成能卖货的详情页</>)}
             </button>
 
-            {/* 简洁提示 */}
-            <div className="flex items-center justify-center gap-2 mt-2.5 text-[11px] text-slate-400">
-              <span>🚀 无需设计 · 无需PS</span>
+            {/* 信任提示 */}
+            <div className="flex items-center justify-center gap-1.5 mt-2.5 text-[11px] text-slate-400">
+              <span>🚀 无需PS · 免费体验</span>
             </div>
           </div>
 
@@ -589,20 +585,12 @@ export default function ProductDetailGeneratorPage() {
                 </div>
               </div>
             ) : !showResults ? (
-              /* ====== 示例效果展示：三层结构（电商转化感） ====== */
+              /* ====== 示例效果展示：电商卖货感 ====== */
               <div className="space-y-5">
-
-                {/* 区域标题 - 商业氛围 */}
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-semibold px-2.5 py-1 rounded-md">
-                    🔥 商家正在使用的卖货效果
-                  </span>
-                </div>
 
                 {/* A. 主视觉区（Hero） - 高对比广告主图 */}
                 <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                  {/* 深色高对比背景 */}
-                  <div className="w-full h-[280px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+                  <div className="w-full h-[300px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
                     {/* 氛围光效 */}
                     <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/15 rounded-full blur-3xl" />
                     <div className="absolute bottom-0 left-0 w-36 h-36 bg-amber-400/10 rounded-full blur-3xl" />
@@ -611,116 +599,67 @@ export default function ProductDetailGeneratorPage() {
                       <img
                         src={DEMO_IMAGES[0].url}
                         alt="示例主图"
-                        className="h-[220px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                        className="h-[240px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                       />
                     </div>
                     {/* 主图标签 */}
                     <div className="absolute top-3 left-3 bg-orange-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-lg">
                       主图
                     </div>
-                  </div>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
-                      点击查看大图
-                    </span>
-                  </div>
-                  {/* 前后转化感文案 - 悬浮在主图左下角 */}
-                  <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm px-3.5 py-2 rounded-lg">
-                    <p className="text-xs text-white/95 font-semibold tracking-wide">
-                      上传商品图 <span className="text-orange-400 mx-1">→</span> 自动生成电商主图+详情页
-                    </p>
-                  </div>
-                </div>
-
-                {/* 转化引导文案（三层：价值 / 数据 / 成本） */}
-                <div className="text-center space-y-2.5">
-                  {/* 强价值 - 结果导向 */}
-                  <p className="text-base font-bold text-slate-800">
-                    👇 一键生成"能卖货"的商品详情页
-                  </p>
-                  {/* 数据刺激 - 信任+赚钱 */}
-                  <div className="flex items-center justify-center gap-3 text-[11px]">
-                    <span className="text-orange-600 font-semibold">📈 平均提升点击率 30%+</span>
-                    <span className="text-slate-300">|</span>
-                    <span className="text-orange-600 font-semibold">🏪 12,000+ 商家已在用</span>
-                  </div>
-                  {/* 成本对比 - 降低门槛 */}
-                  <p className="text-[11px] text-slate-400">
-                    省90%设计成本 · 无需PS · 无需写Prompt
-                  </p>
-                </div>
-
-                {/* B. 三图卡片区（Cards） - 三种电商图风格 */}
-                <div className="grid grid-cols-3 gap-4">
-
-                  {/* 卡片1：场景图 - 生活化使用场景 */}
-                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
-                    <div className="w-full h-[150px] relative overflow-hidden">
-                      <img
-                        src={DEMO_IMAGES[1].url}
-                        alt="使用场景"
-                        className="w-full h-full object-cover"
-                      />
-                      {/* 场景氛围叠加 */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                      {/* 手部交互提示 */}
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <span className="inline-block bg-white/90 backdrop-blur-sm text-[10px] text-slate-700 font-medium px-2 py-0.5 rounded-md">
-                          使用场景
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 卡片2：卖点图 - 环境+卖点文案 */}
-                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
-                    <div className="w-full h-[150px] bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 relative overflow-hidden">
-                      {/* 暖色光效 */}
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-orange-300/20 rounded-full blur-2xl" />
-                      <div className="absolute bottom-0 left-0 w-20 h-20 bg-amber-200/25 rounded-full blur-2xl" />
-                      {/* 产品 */}
-                      <div className="absolute left-2 top-1/2 -translate-y-1/2">
-                        <img
-                          src={DEMO_IMAGES[0].url}
-                          alt="卖点图"
-                          className="h-[100px] w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.1)]"
-                        />
-                      </div>
-                      {/* 卖点文案 - 1条，有冲击力 */}
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-end gap-1">
-                        <div className="w-5 h-[1px] bg-orange-400/50" />
-                        <p className="text-[11px] text-orange-700 font-semibold tracking-wide leading-relaxed text-right">
-                          🔥 24小时<br/>依然保温
+                    {/* 底部转化文案 */}
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                      <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                        <p className="text-[11px] text-white/90 font-semibold">
+                          你的商品图 <span className="text-orange-400 mx-0.5">→</span> 卖货详情页
                         </p>
-                        <div className="w-5 h-[1px] bg-orange-400/50" />
-                      </div>
-                      {/* 标签 */}
-                      <div className="absolute top-2 left-2">
-                        <span className="inline-block bg-orange-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                          卖点图
-                        </span>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* 卡片3：生活图 - 户外/日常携带 */}
-                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url)}>
-                    <div className="w-full h-[150px] relative overflow-hidden">
-                      <img
-                        src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url}
-                        alt="生活场景"
-                        className="w-full h-full object-cover"
-                      />
-                      {/* 氛围叠加 */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <span className="inline-block bg-white/90 backdrop-blur-sm text-[10px] text-slate-700 font-medium px-2 py-0.5 rounded-md">
-                          生活场景
-                        </span>
-                      </div>
-                    </div>
+                {/* 价值文案（精简：一句话） */}
+                <p className="text-center text-[15px] font-bold text-slate-800 leading-snug">
+                  一键生成<span className="text-orange-500">能卖货</span>的商品详情页
+                </p>
+
+                {/* B. 三图卡片区 - 三种电商图风格 */}
+                <div className="grid grid-cols-3 gap-3">
+
+                  {/* 场景图 */}
+                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
+                    <img src={DEMO_IMAGES[1].url} alt="使用场景" className="w-full h-[130px] object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    <span className="absolute bottom-2 left-2 text-[10px] text-white/90 font-medium">使用场景</span>
                   </div>
 
+                  {/* 卖点图 */}
+                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
+                    <div className="w-full h-[130px] bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-orange-300/20 rounded-full blur-2xl" />
+                      <div className="absolute left-1 top-1/2 -translate-y-1/2">
+                        <img src={DEMO_IMAGES[0].url} alt="卖点图" className="h-[90px] w-auto object-contain drop-shadow-[0_6px_16px_rgba(0,0,0,0.08)]" />
+                      </div>
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-right">
+                        <p className="text-[10px] text-orange-700 font-semibold leading-relaxed">🔥 24小时<br/>依然保温</p>
+                      </div>
+                    </div>
+                    <span className="absolute top-2 left-2 bg-orange-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">卖点图</span>
+                  </div>
+
+                  {/* 生活图 */}
+                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url)}>
+                    <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="生活场景" className="w-full h-[130px] object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    <span className="absolute bottom-2 left-2 text-[10px] text-white/90 font-medium">生活场景</span>
+                  </div>
+
+                </div>
+
+                {/* 信任条 */}
+                <div className="flex items-center justify-center gap-3 text-[11px] text-slate-400">
+                  <span>📈 提升30%+点击率</span>
+                  <span className="text-slate-200">|</span>
+                  <span>🏪 12,000+商家在用</span>
                 </div>
               </div>
             ) : (
@@ -775,9 +714,9 @@ export default function ProductDetailGeneratorPage() {
                 </div>
 
                 {/* C. 详情页缩略提示 */}
-                <div className="rounded-xl border border-dashed border-orange-200 bg-orange-50/30 px-4 py-5 text-center">
+                <div className="rounded-xl border border-dashed border-orange-200 bg-orange-50/30 px-4 py-4 text-center">
                   <p className="text-xs font-medium text-orange-500">完整电商详情页长图</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">可截图直接用于淘宝 / 小红书 / 拼多多</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">可截图用于淘宝 / 小红书 / 拼多多</p>
                 </div>
 
                 {/* 底部操作区 */}
@@ -788,29 +727,20 @@ export default function ProductDetailGeneratorPage() {
                     className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     <Download className="w-4 h-4" />
-                    下载整套图片
+                    下载全部图片
                   </button>
                   <button
                     onClick={handleReset}
                     className="px-5 py-3 border-2 border-slate-200 hover:border-orange-400 text-slate-600 text-sm rounded-xl transition-colors flex items-center gap-1.5"
                   >
                     <RefreshCw className="w-3.5 h-3.5" />
-                    重新生成
+                    换一张
                   </button>
                 </div>
-                <div className="flex items-center justify-center gap-4 text-[10px] text-slate-400">
-                  <span className="flex items-center gap-0.5">
-                    <Check className="w-3 h-3 text-green-500" />
-                    可直接用于详情页
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <Check className="w-3 h-3 text-green-500" />
-                    淘宝/小红书
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <Check className="w-3 h-3 text-green-500" />
-                    可截图使用
-                  </span>
+                <div className="flex items-center justify-center gap-3 text-[10px] text-slate-400">
+                  <span className="flex items-center gap-0.5"><Check className="w-3 h-3 text-green-500" />可上架</span>
+                  <span className="flex items-center gap-0.5"><Check className="w-3 h-3 text-green-500" />可截图</span>
+                  <span className="flex items-center gap-0.5"><Check className="w-3 h-3 text-green-500" />免费</span>
                 </div>
               </div>
             )}
