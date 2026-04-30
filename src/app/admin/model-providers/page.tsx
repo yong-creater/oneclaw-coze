@@ -130,7 +130,7 @@ export default function ModelProvidersPage() {
       name: provider.name,
       slug: provider.slug,
       api_url: provider.api_url || '',
-      api_key: provider.api_key || '',
+      api_key: '', // 编辑时不回填脱敏的 key，留空表示不修改
       provider_type: provider.provider_type,
       is_active: provider.is_active,
     });
@@ -139,24 +139,36 @@ export default function ModelProvidersPage() {
 
   const handleSubmit = async () => {
     try {
-      const url = editingProvider 
-        ? `/api/admin/model-providers?id=${editingProvider.id}` 
-        : '/api/admin/model-providers';
+      const url = '/api/admin/model-providers';
       const method = editingProvider ? 'PUT' : 'POST';
+      
+      // 构建 body，编辑时包含 id
+      const body: any = { ...formData };
+      if (editingProvider) {
+        body.id = editingProvider.id;
+        // 编辑时如果 api_key 为空，不传该字段（保持数据库原值不变）
+        if (!body.api_key) {
+          delete body.api_key;
+        }
+      }
       
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(body),
       });
       
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         setDialogOpen(false);
         fetchProviders();
+      } else {
+        alert(`保存失败: ${data.error || '未知错误'}`);
       }
     } catch (error) {
       console.error('保存失败:', error);
+      alert('保存失败，请重试');
     }
   };
 

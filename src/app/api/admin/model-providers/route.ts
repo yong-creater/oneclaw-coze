@@ -97,10 +97,10 @@ export async function PUT(request: NextRequest) {
   const updateData: any = {};
   if (name !== undefined) updateData.name = name;
   if (slug !== undefined) updateData.slug = slug;
-  if (api_url !== undefined) updateData.api_url = api_url;
+  if (api_url !== undefined) updateData.api_url = api_url || null;
   if (provider_type !== undefined) updateData.provider_type = provider_type;
   if (is_active !== undefined) updateData.is_active = is_active;
-  if (api_key !== undefined) updateData.api_key = api_key; // 空字符串表示清除
+  if (api_key !== undefined) updateData.api_key = api_key || null; // 空字符串清除
 
   const { data, error } = await supabase
     .from('model_providers')
