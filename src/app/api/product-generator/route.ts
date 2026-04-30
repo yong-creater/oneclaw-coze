@@ -1,23 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ImageGenerationClient, ImageGenerationResponseHelper, Config } from 'coze-coding-dev-sdk';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 三种电商图生成 Prompt
 const PROMPTS = {
-  // 1️⃣ 主图（白底电商）
   mainImage: (productName?: string, benefits?: string) => {
     const product = productName || 'product';
     const benefitPart = benefits ? `, highlighting: ${benefits}` : '';
     return `Enhance this ${product} image into a professional e-commerce product photo with clean white background. Requirements: Keep the product exactly the same (do not change shape, color, or structure). Improve lighting, sharpness, and texture. Make it look like high-end commercial photography. Pure white background, centered composition, soft diffused lighting, realistic shadow underneath${benefitPart}. Style: ultra realistic, commercial photography, studio lighting, soft diffused light, realistic shadow, ultra high detail, sharp focus, 8k. Avoid: text, watermark, logo, blur, distortion.`;
   },
-
-  // 2️⃣ 高级感主图（Apple风格）
   benefitImage: (productName?: string, benefits?: string) => {
     const product = productName || 'product';
     const benefitPart = benefits ? `, showcasing: ${benefits}` : '';
     return `Enhance this ${product} image into a premium product photo with minimal luxury background. Requirements: Keep the product exactly the same (do not change shape, color, or structure). Soft beige or light gray gradient background, cinematic soft lighting, subtle shadow, elegant composition, apple style aesthetic${benefitPart}. Style: ultra realistic, commercial photography, studio lighting, soft diffused light, realistic shadow, ultra high detail, sharp focus, 8k. Avoid: text, watermark, logo, blur, distortion.`;
   },
-
-  // 3️⃣ 场景图（生活氛围）
   sceneImage: (productName?: string, benefits?: string) => {
     const product = productName || 'product';
     return `Enhance this ${product} image by placing it in a realistic lifestyle scene. Requirements: Keep the product exactly the same (do not change shape, color, or structure). Modern desk setup, warm natural lighting, laptop nearby, coffee cup, cozy lifestyle scene, shallow depth of field, cinematic composition, soft shadows, commercial advertising photography, high-end brand feeling. Style: ultra realistic, commercial photography, studio lighting, soft diffused light, realistic shadow, ultra high detail, sharp focus, 8k. Avoid: text, watermark, logo, blur, distortion.`;
@@ -34,7 +30,6 @@ async function getToolModelConfig(): Promise<{
   try {
     const supabase = getSupabaseClient();
 
-    // 查询 AI商品图生成器 的模型配置
     const { data: toolData } = await supabase
       .from('utility_tools')
       .select('id, tool_id, name, model_provider_id, model_name')
@@ -46,7 +41,6 @@ async function getToolModelConfig(): Promise<{
       return null;
     }
 
-    // 查询提供商数据
     const { data: providerData } = await supabase
       .from('model_providers')
       .select('id, name, slug, api_url, api_key')
@@ -70,82 +64,68 @@ async function getToolModelConfig(): Promise<{
   }
 }
 
-// Base64 转 Buffer
-function base64ToBuffer(base64: string): Buffer {
-  return Buffer.from(base64, 'base64');
+// 创建扣子图片生成客户端
+function createCozeClient(customHeaders: Record<string, string> = {}) {
+  const config = new Config();
+  return new ImageGenerationClient(config, customHeaders);
 }
 
-// 通过 /images/edits 端点（multipart/form-data）图生图
-async function generateWithEdits(
+// 通过扣子API生成图片（图生图）
+async function generateWithCoze(
+  prompt: string,
+  imageBase64: string,
+  modelName?: string
+): Promise<string[]> {
+  const client = createCozeClient();
+
+  const request: Record<string, any> = {
+    prompt,
+    size: '2K',
+    image: `data:image/jpeg;base64,${imageBase64}`,
+  };
+
+  if (modelName) {
+    request.model = modelName;
+  }
+
+  const result = await client.generate(request);
+  const helper = new ImageGenerationResponseHelper(result);
+
+  if (helper.success && helper.imageUrls.length > 0) {
+    return helper.imageUrls;
+  }
+
+  throw new Error(helper.errorMessages[0] || '扣子图片生成失败');
+}
+
+// 通过4sapi /images/generations 端点（JSON + image字段图生图）
+async function generateWith4sApi(
   prompt: string,
   imageBase64: string,
   apiUrl: string,
   apiKey: string,
   modelName: string
 ): Promise<string[]> {
-  const imageBuffer = base64ToBuffer(imageBase64);
+  const requestBody: Record<string, any> = {
+    model: modelName,
+    prompt,
+    n: 1,
+    size: '1024x1024',
+    image: `data:image/jpeg;base64,${imageBase64}`,
+  };
 
-  const formData = new FormData();
-  formData.append('model', modelName);
-  formData.append('prompt', prompt);
-  formData.append('n', '1');
-  formData.append('size', '1024x1024');
-
-  // 将 base64 图片作为文件上传
-  const imageBlob = new Blob([imageBuffer], { type: 'image/png' });
-  formData.append('image', imageBlob, 'image.png');
-
-  const response = await fetch(`${apiUrl}/images/edits`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`edits 请求失败 (${response.status}): ${errorText}`);
-  }
-
-  const data = await response.json();
-  const urls: string[] = [];
-  if (data.data && Array.isArray(data.data)) {
-    for (const item of data.data) {
-      if (item.url) {
-        urls.push(item.url);
-      } else if (item.b64_json) {
-        urls.push(`data:image/png;base64,${item.b64_json}`);
-      }
-    }
-  }
-  return urls;
-}
-
-// 通过 /images/generations 端点（JSON）文生图（兜底方案）
-async function generateWithGenerations(
-  prompt: string,
-  apiUrl: string,
-  apiKey: string,
-  modelName: string
-): Promise<string[]> {
   const response = await fetch(`${apiUrl}/images/generations`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: modelName,
-      prompt,
-      n: 1,
-      size: '1024x1024',
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`generations 请求失败 (${response.status}): ${errorText}`);
+    throw new Error(`4sapi请求失败 (${response.status}): ${errorText.substring(0, 200)}`);
   }
 
   const data = await response.json();
@@ -162,23 +142,24 @@ async function generateWithGenerations(
   return urls;
 }
 
-// 统一生成函数：优先用 edits（图生图），失败则回退到 generations（文生图）
+// 统一生成函数：根据 providerSlug 分发到不同的生成方式
 async function generateImage(
   prompt: string,
   imageBase64: string,
-  apiUrl: string,
-  apiKey: string,
-  modelName: string
-): Promise<string[]> {
-  try {
-    const result = await generateWithEdits(prompt, imageBase64, apiUrl, apiKey, modelName);
-    if (result.length > 0) return result;
-  } catch (err) {
-    console.warn('[Product Generator] edits 端点失败，回退到 generations:', err instanceof Error ? err.message : err);
+  config: {
+    apiUrl: string;
+    apiKey: string;
+    modelName: string;
+    providerSlug: string;
   }
+): Promise<string[]> {
+  const isCoze = config.providerSlug.includes('coze');
 
-  // 回退：文生图
-  return generateWithGenerations(prompt, apiUrl, apiKey, modelName);
+  if (isCoze) {
+    return generateWithCoze(prompt, imageBase64, config.modelName);
+  } else {
+    return generateWith4sApi(prompt, imageBase64, config.apiUrl, config.apiKey, config.modelName);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -209,7 +190,9 @@ export async function POST(request: NextRequest) {
       imageBase64 = image.split(',')[1] || image;
     }
 
-    // 2. 并行生成三张图片（大幅缩短等待时间）
+    console.log(`[Product Generator] 使用模型: ${config.providerSlug} / ${config.modelName}`);
+
+    // 2. 并行生成三张图片
     const results: {
       mainImage?: string;
       benefitImage?: string;
@@ -218,9 +201,9 @@ export async function POST(request: NextRequest) {
     } = { errors: [] };
 
     const [mainResult, benefitResult, sceneResult] = await Promise.allSettled([
-      generateImage(PROMPTS.mainImage(productName, productBenefit), imageBase64, config.apiUrl, config.apiKey, config.modelName),
-      generateImage(PROMPTS.benefitImage(productName, productBenefit), imageBase64, config.apiUrl, config.apiKey, config.modelName),
-      generateImage(PROMPTS.sceneImage(productName, productBenefit), imageBase64, config.apiUrl, config.apiKey, config.modelName),
+      generateImage(PROMPTS.mainImage(productName, productBenefit), imageBase64, config),
+      generateImage(PROMPTS.benefitImage(productName, productBenefit), imageBase64, config),
+      generateImage(PROMPTS.sceneImage(productName, productBenefit), imageBase64, config),
     ]);
 
     if (mainResult.status === 'fulfilled' && mainResult.value[0]) {
