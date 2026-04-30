@@ -30,184 +30,218 @@ const CATEGORY_SCENE: Record<ProductCategory, string> = {
 // ---- Per-slot Prompt generators ----
 export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string, category?: ProductCategory) => string> = {
 
-  // 1) COVER IMAGE
-  cover: (_productName, _benefits, _category) => {
+  // 1) COVER IMAGE — 吸引点击的高品质主图
+  cover: (productName, _benefits, _category) => {
     return `You are generating images for an e-commerce product detail page.
 This is NOT normal image generation. This is for SELLING products.
 
-IMAGE TYPE: COVER IMAGE
-- strong visual impact
-- premium lighting
-- product centered
-- background clean but stylish
+IMAGE TYPE: COVER IMAGE (for attracting clicks)
+- strong visual impact — the first thing users see
+- product centered, large and prominent
+- background clean but stylish (gradient, soft texture, or subtle geometric)
+- premium studio lighting with highlights on product surface
 - looks like Taobao high-end main image
+- must make users want to click and learn more${productName ? `\n- Product: ${productName}` : ''}
 
 STYLE:
-- Chinese e-commerce (Taobao / Xiaohongshu style)
-- premium commercial photography
-- strong selling intention
-- not generic lifestyle photos
+- Chinese e-commerce (Taobao / Xiaohongshu premium style)
+- commercial product photography at its best
+- not generic lifestyle photos — this is a PRODUCT SHOT
 
 REALISM:
-- correct proportions
-- no distortion
-- no floating
-- physically correct usage
+- correct proportions, no distortion, no floating
+- physically correct placement
 
-IMPORTANT: Do NOT generate random nice images.
-This image must clearly answer: Why should user buy this product?
-
+CRITICAL: This image must make users STOP scrolling and CLICK.
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 2) SELLING POINT IMAGE (CRITICAL)
-  selling: (_productName, benefits, _category) => {
+  // 2) SELLING POINT IMAGE (CRITICAL) — 一张图只表达一个卖点，必须用画面表现
+  selling: (productName, benefits, _category) => {
     return `You are generating images for an e-commerce product detail page.
 This is NOT normal image generation. This is for SELLING products.
 
-IMAGE TYPE: SELLING POINT IMAGE (CRITICAL)
-- focus on ONE key feature
-- use dramatic lighting
-- close-up or macro angle
-- must visually show the feature (e.g. open lid, leak-proof, straw)
-- must feel like advertisement${benefits ? `\n- Key feature to highlight: ${benefits}` : ''}
+IMAGE TYPE: SELLING POINT IMAGE (MOST CRITICAL)
+This is the single most important image for conversion.
+
+RULES:
+- ONE image = ONE selling point only
+- Must SHOW the feature through ACTION, not describe it
+- Use dramatic lighting to highlight the feature
+- Close-up or macro angle to emphasize detail
+- Must feel like a premium advertisement
+
+HOW TO SHOW FEATURES VISUALLY:
+- Leak-proof → product tilted/turned upside down, NO liquid spilling
+- Pop lid → capture the moment lid opens, motion implied
+- Straw → product with straw, someone actively drinking
+- Insulated → steam rising but exterior cool to touch
+- Foldable → product shown mid-fold or partially folded
+- Waterproof → product submerged or under water flow
+- Soft → hand pressing into surface showing indentation${benefits ? `\n- Key feature to highlight: ${benefits}` : ''}${productName ? `\n- Product: ${productName}` : ''}
 
 STYLE:
+- Strong lighting contrast (dramatic side light or spotlight)
+- Dark or gradient background to make product pop
+- Advertising poster feel — powerful and premium
 - Chinese e-commerce (Taobao / Xiaohongshu style)
-- premium commercial photography
-- strong selling intention
-- not generic lifestyle photos
 
 REALISM:
-- correct proportions
-- no distortion
-- no floating
-- physically correct usage
+- correct proportions, no distortion, no floating
+- physically correct usage — the action must be believable
 
-IMPORTANT: Do NOT generate random nice images.
-This image must clearly answer: Why should user buy this product?
-
+CRITICAL: This image must VISUALLY PROVE why the product is worth buying.
+Do NOT just show the product sitting there — SHOW IT IN ACTION.
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 3) FEATURE BREAKDOWN IMAGE
-  feature: (_productName, _benefits, _category) => {
+  // 3) FEATURE BREAKDOWN IMAGE — 展示产品结构，让用户看懂内部
+  feature: (productName, _benefits, _category) => {
     return `You are generating images for an e-commerce product detail page.
 This is NOT normal image generation. This is for SELLING products.
 
 IMAGE TYPE: FEATURE BREAKDOWN IMAGE
-- show product structure
-- exploded view or transparent parts
-- clearly show how it works
-- technical illustration style
-- each part visible and distinguishable
+Show users what's INSIDE and HOW IT WORKS.
+
+RULES:
+- Show product structure clearly
+- Use exploded view, transparent/cutaway, or layer-by-layer breakdown
+- Each component must be visible and distinguishable
+- Use subtle lines or visual separation between parts
+- Let users understand the internal structure and quality
+
+APPROACHES (pick the best for this product):
+- Exploded view: parts floating apart with gaps
+- Transparent/cutaway: see through outer shell to inner parts
+- Layer peel: showing layers from outside to inside
+- Disassembly: product opened up revealing internals${productName ? `\n- Product: ${productName}` : ''}
 
 STYLE:
-- Chinese e-commerce (Taobao / Xiaohongshu style)
-- premium commercial photography
-- strong selling intention
-- not generic lifestyle photos
+- Clean dark or neutral background
+- Technical illustration meets commercial photography
+- Each part well-lit and clearly visible
+- Premium feel — not a dry technical diagram
 
 REALISM:
-- correct proportions
-- no distortion
-- no floating
-- physically correct usage
+- All parts must be physically accurate
+- No impossible geometries
+- Correct material appearance
 
-IMPORTANT: Do NOT generate random nice images.
-This image must clearly answer: Why should user buy this product?
-
+CRITICAL: Users must SEE the quality inside, not just the outside.
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 4) USAGE SCENE IMAGE
-  scene: (_productName, _benefits, category) => {
+  // 4) USAGE SCENE IMAGE — 真实使用环境，禁止不合理搭配
+  scene: (productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
     return `You are generating images for an e-commerce product detail page.
 This is NOT normal image generation. This is for SELLING products.
 
 IMAGE TYPE: USAGE SCENE IMAGE
-- real life usage
-- natural context
-- believable scenario (desk, gym, outdoor)
+Show the product in REAL LIFE — where and how people actually use it.
+
+RULES:
+- Must show REAL usage environment — not a studio set
+- Must be BELIEVABLE — product must belong in this scene naturally
+- FORBIDDEN: random object placement (e.g. water bottle next to laptop, shoes on a dining table)
+- Scene must match the product type logically
 - ${sceneDesc}
-- warm natural lighting
+- Warm natural lighting (not studio flash)
+- People interacting with product is preferred
+
+SCENE RULES BY CONTEXT:
+- Kitchen items → clean kitchen counter, cooking scene
+- Office items → organized desk, working hands
+- Sports items → gym, running path, outdoor trail
+- Beauty items → vanity table, bathroom, getting-ready scene
+- Food/drinks → table setting, outdoor picnic, café${productName ? `\n- Product: ${productName}` : ''}
 
 STYLE:
-- Chinese e-commerce (Taobao / Xiaohongshu style)
-- premium commercial photography
-- strong selling intention
-- not generic lifestyle photos
+- Chinese e-commerce lifestyle photography
+- Warm, inviting, aspirational but believable
+- Xiaohongshu style scene photos
 
 REALISM:
-- correct proportions
-- no distortion
-- no floating
-- physically correct usage
+- correct proportions, no distortion, no floating
+- physically correct usage — the way product is held/used must be natural
+- lighting must match the environment (sunlight for outdoor, warm lamps for indoor)
 
-IMPORTANT: Do NOT generate random nice images.
-This image must clearly answer: Why should user buy this product?
-
+CRITICAL: Users must be able to IMAGINE THEMSELVES using this product.
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 5) COMPARISON IMAGE
-  comparison: (_productName, _benefits, _category) => {
+  // 5) COMPARISON IMAGE — 对比普通产品，强调优势
+  comparison: (productName, benefits, _category) => {
     return `You are generating images for an e-commerce product detail page.
 This is NOT normal image generation. This is for SELLING products.
 
 IMAGE TYPE: COMPARISON IMAGE
-- compare with normal product
-- highlight advantage (e.g. leak-proof vs leaking, thin vs thick, before vs after)
-- split composition showing the difference
-- the product must appear superior and more desirable
+Show why THIS product is BETTER than alternatives.
+
+RULES:
+- Split composition: THIS product on one side vs ordinary product on other side
+- Clearly show the advantage through VISUAL PROOF
+- The contrast must be immediately obvious at a glance
+
+VISUAL COMPARISON EXAMPLES:
+- Leak-proof: THIS product upside down (dry) vs ordinary product leaking
+- Insulated: THIS product keeping drink hot vs ordinary product cold
+- Durable: THIS product intact vs ordinary product dented/broken
+- Soft: hand sinking into THIS product vs hand on rigid ordinary product
+- Strong: THIS product holding weight vs ordinary product bending${benefits ? `\n- Advantage to highlight: ${benefits}` : ''}${productName ? `\n- Product: ${productName}` : ''}
+
+COMPOSITION:
+- Left-right or top-bottom split
+- THIS product side: premium, clean, well-lit
+- Other side: visibly inferior, dull lighting
+- Clear visual difference — no ambiguity about which is better
 
 STYLE:
-- Chinese e-commerce (Taobao / Xiaohongshu style)
-- premium commercial photography
-- strong selling intention
-- not generic lifestyle photos
+- Chinese e-commerce comparison style
+- The superiority must be INSTANTLY visible
+- Dark background to focus attention on the contrast
 
 REALISM:
-- correct proportions
-- no distortion
-- no floating
-- physically correct usage
+- Both sides must be physically realistic
+- No exaggeration that looks fake
 
-IMPORTANT: Do NOT generate random nice images.
-This image must clearly answer: Why should user buy this product?
-
+CRITICAL: Users must SEE the difference and think "I want THIS one."
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 6) PARAMETER IMAGE
-  parameter: (_productName, _benefits, _category) => {
+  // 6) PARAMETER IMAGE — 展示容量/尺寸/材质，简洁专业
+  parameter: (productName, _benefits, _category) => {
     return `You are generating images for an e-commerce product detail page.
 This is NOT normal image generation. This is for SELLING products.
 
 IMAGE TYPE: PARAMETER IMAGE
-- clean layout
-- show size, capacity, material
-- minimalistic style
-- product with measurement indicators or dimension lines
-- professional and technical appearance
+Show the SPECIFICATIONS — size, capacity, material, color options.
+
+RULES:
+- Product shown with clean dimension indicators or measurement lines
+- Show capacity visually (e.g. water level inside, scale marking)
+- Show material texture close-up
+- Show color options if applicable
+- Clean, organized layout — not cluttered
+
+APPROACHES:
+- Product with subtle dimension lines and arrows
+- Product with visible interior showing capacity
+- Material swatch or texture detail alongside product
+- Multiple color variants arranged neatly${productName ? `\n- Product: ${productName}` : ''}
 
 STYLE:
-- Chinese e-commerce (Taobao / Xiaohongshu style)
-- premium commercial photography
-- strong selling intention
-- not generic lifestyle photos
+- Minimalistic, professional, technical but elegant
+- Clean dark or light neutral background
+- E-commerce specification page style
+- Taobao premium product parameter display
 
 REALISM:
-- correct proportions
-- no distortion
-- no floating
-- physically correct usage
+- Accurate proportions and scale
+- Material textures must look real
 
-IMPORTANT: Do NOT generate random nice images.
-This image must clearly answer: Why should user buy this product?
-
+CRITICAL: Users must feel the product is well-designed and precisely made.
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 };
