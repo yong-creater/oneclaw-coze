@@ -592,6 +592,13 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 示例效果展示：三层结构（电商转化感） ====== */
               <div className="space-y-5">
 
+                {/* 区域标题 - 商业氛围 */}
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 bg-orange-50 border border-orange-200 text-orange-600 text-[11px] font-semibold px-2.5 py-1 rounded-md">
+                    🔥 商家正在使用的卖货效果
+                  </span>
+                </div>
+
                 {/* A. 主视觉区（Hero） - 高对比广告主图 */}
                 <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
                   {/* 深色高对比背景 */}
