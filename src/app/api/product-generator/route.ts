@@ -15,25 +15,7 @@ export const IMAGE_SLOTS: { slot: ImageSlot; label: string; order: number }[] = 
   { slot: 'scene2', label: '场景图 2', order: 4 },
 ];
 
-// ---- Base quality (apply to all images) ----
-const BASE_QUALITY = `ultra realistic, commercial photography, high detail, sharp focus,
-soft controlled lighting, realistic shadows, natural color,
-clean composition, product-centered, premium quality`;
-
-// ---- Strict product preservation ----
-const PRODUCT_PRESERVATION = `CRITICAL: Preserve the exact product structure from the original image.
-
-- Do NOT redesign, modify, or reinterpret the product
-- Do NOT change shape, size, proportions, or components
-- All parts (e.g. plug, cap, body, details) must remain exactly the same
-- The product must look identical to the original input image
-
-For functional products:
-- Maintain correct real-world usage structure
-- Do NOT generate incorrect connections (e.g. wrong plug/socket alignment)
-- Do NOT invent new parts or change product design`;
-
-// ---- Scene logic ----
+// ---- Scene logic (used by lifestyle images) ----
 const CATEGORY_SCENE: Record<ProductCategory, string> = {
   shoes: 'being worn on feet, walking or sitting naturally',
   clothing: 'being worn by a model, fashion lookbook style',
@@ -55,128 +37,144 @@ const CATEGORY_SCENE_2: Record<ProductCategory, string> = {
 // ---- Per-slot Prompt generators ----
 export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string, category?: ProductCategory) => string> = {
 
-  // 1) 主图（吸引点击）—— 最强视觉冲击
-  cover: (productName, benefits, _category) => {
-    return `Create a stunning e-commerce main image that drives clicks and conversions.
+  // 1) MAIN PRODUCT IMAGE
+  cover: (_productName, _benefits, _category) => {
+    return `Create high-conversion e-commerce product images.
 
-Base quality (apply to all images):
-${BASE_QUALITY}
+CORE GOAL: This image must be used for SELLING, not just looking good.
+It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
 
-STRICT product preservation (CRITICAL):
-${PRODUCT_PRESERVATION}
+IMAGE TYPE: MAIN PRODUCT IMAGE
+- clean background
+- centered product
+- premium lighting
+- sharp details
 
-${benefs(benefits)}
+STYLE:
+- Taobao premium product photography
+- Chinese e-commerce advertising style
+- strong studio lighting
+- clean composition
+- commercial quality
 
-Generate 1 DISTINCT image:
+REALISM (IMPORTANT):
+- correct proportions
+- no distortion
+- no floating objects
+- physically realistic placement
 
-MAIN IMAGE (click-driving, attention-grabbing):
-- Dramatic studio lighting with rim light accent
-- Pure white or subtle gradient background
-- Product centered, slightly larger than life
-- Soft shadow anchoring the product
-- Premium, aspirational feeling
-- Make the viewer WANT to click
+CRITICAL RULE:
+DO NOT generate generic photos.
+This image must look like an advertisement and clearly show why user should buy.
 
-Style: Top-selling Taobao/Tmall main image
-CRITICAL: NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
-
+NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 2) 卖点图（核心卖点/情感冲击）
+  // 2) SELLING POINT IMAGE (VERY IMPORTANT)
   selling: (_productName, benefits, _category) => {
-    return `Create a premium selling-point image with strong emotional impact.
+    return `Create high-conversion e-commerce product images.
 
-Base quality:
-${BASE_QUALITY}
+CORE GOAL: This image must be used for SELLING, not just looking good.
+It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
 
-STRICT product preservation:
-${PRODUCT_PRESERVATION}
+IMAGE TYPE: SELLING POINT IMAGE (VERY IMPORTANT)
+- strong lighting contrast
+- close-up or dramatic angle
+- highlight ONE key feature
+- advertising style
+- product should look powerful and premium${benefits ? `\n- Key feature to highlight: ${benefits}` : ''}
 
-${benefs(benefits)}
+STYLE:
+- Taobao premium product photography
+- Chinese e-commerce advertising style
+- strong lighting for selling image
+- clean composition
+- commercial quality
 
-Generate 1 DISTINCT image:
+REALISM (IMPORTANT):
+- correct proportions
+- no distortion
+- no floating objects
+- physically realistic placement
 
-SELLING POINT IMAGE (emotional / core benefit):
-- Close-up product shot, premium advertising style
-- Cinematic lighting, strong contrast but soft highlights
-- Dark or gradient background for drama
-- Visual selling cues: soft glow, subtle light diffusion around product
-- Suggest product function visually
-- Create emotional appeal: comfort, safety, premium, effectiveness
-- Must look like a high-end advertisement poster
-- Show product texture, material, and build quality
+CRITICAL RULE:
+DO NOT generate generic photos.
+This image must look like an advertisement and clearly show why user should buy.
 
-STRICT:
-- No fake reflections, no mirror-like unrealistic surfaces
-- No overexaggerated effects
-- NO text, NO watermark, NO logo`;
-
+NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 3) 场景图 1（真实使用场景）
+  // 3) LIFESTYLE IMAGE 1
   scene1: (_productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    return `Create a realistic lifestyle scene image showing the product in use.
+    return `Create high-conversion e-commerce product images.
 
-Base quality:
-${BASE_QUALITY}
+CORE GOAL: This image must be used for SELLING, not just looking good.
+It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
 
-STRICT product preservation:
-${PRODUCT_PRESERVATION}
-
-Generate 1 DISTINCT image:
-
-LIFESTYLE SCENE IMAGE 1 (real usage / conversion):
-- Realistic real-life scene, product being used correctly
-- Natural environment, believable lighting
+IMAGE TYPE: LIFESTYLE IMAGE 1
+- real usage scene
 - ${sceneDesc}
-- Warm light, cozy atmosphere
-- Comfort, safety, relaxation feeling
-- Real-life usability
+- natural environment
+- believable context
+- warm natural lighting
 
-STRICT:
-- Correct physical placement, no floating unless physically valid
-- No incorrect usage
-- No unrelated objects, no messy composition
-- NO text, NO watermark, NO logo`;
+STYLE:
+- Taobao premium product photography
+- Chinese e-commerce advertising style
+- warm natural lighting for lifestyle
+- clean composition
+- commercial quality
 
+REALISM (IMPORTANT):
+- correct proportions
+- no distortion
+- no floating objects
+- physically realistic placement
+
+CRITICAL RULE:
+DO NOT generate generic photos.
+This image must look like an advertisement and clearly show why user should buy.
+
+NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 
-  // 4) 场景图 2（另一种使用场景/氛围）
+  // 4) LIFESTYLE IMAGE 2
   scene2: (_productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE_2[cat];
-    return `Create a second lifestyle scene with a different mood and setting.
+    return `Create high-conversion e-commerce product images.
 
-Base quality:
-${BASE_QUALITY}
+CORE GOAL: This image must be used for SELLING, not just looking good.
+It must highlight a clear benefit, visually communicate value, and feel like a commercial advertisement.
 
-STRICT product preservation:
-${PRODUCT_PRESERVATION}
-
-Generate 1 DISTINCT image:
-
-LIFESTYLE SCENE IMAGE 2 (alternative setting / mood):
-- Different scene from the first lifestyle image
+IMAGE TYPE: LIFESTYLE IMAGE 2
+- different real-life scenario from the first lifestyle image
 - ${sceneDesc}
-- Different time of day or lighting mood (e.g. golden hour, evening, morning)
-- Natural and believable
-- Emotional context: enjoyment, satisfaction, daily routine
+- emotional feeling
+- different time of day or lighting mood
 
-STRICT:
-- Must be visually distinct from Scene 1
-- Correct physical placement
-- No incorrect usage
-- NO text, NO watermark, NO logo`;
+STYLE:
+- Taobao premium product photography
+- Chinese e-commerce advertising style
+- warm natural lighting for lifestyle
+- clean composition
+- commercial quality
 
+REALISM (IMPORTANT):
+- correct proportions
+- no distortion
+- no floating objects
+- physically realistic placement
+
+CRITICAL RULE:
+DO NOT generate generic photos.
+This image must look like an advertisement and clearly show why user should buy.
+
+NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
   },
 };
-
-function benefs(benefits?: string): string {
-  if (!benefits) return '';
-  return `Product selling points to emphasize: ${benefits}`;
-}
 
 // ============ 品类识别 ============
 
