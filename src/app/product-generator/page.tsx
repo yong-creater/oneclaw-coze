@@ -66,18 +66,34 @@ export default function ProductDetailGeneratorPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ===== 多图上传 =====
-  // 将任意格式图片转为JPEG（解决HEIC/WEBP等格式兼容问题）
+  // HEIC → JPEG 转换（解决iPhone默认HEIC格式）
+  const convertHeicToJpeg = async (file: File): Promise<File> => {
+    const ext = file.name.toLowerCase().split('.').pop() || '';
+    const type = file.type.toLowerCase();
+    const isHeic = ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif' || type === 'image/heic-sequence';
+    if (!isHeic) return file;
+
+    try {
+      const heic2any = (await import('heic2any')).default;
+      const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 }) as Blob;
+      const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+      return new File([blob], newName, { type: 'image/jpeg' });
+    } catch (err) {
+      console.error('HEIC转换失败:', err);
+      throw new Error('HEIC格式转换失败，请在手机相册中转为JPG后上传');
+    }
+  };
+
+  // 将任意格式图片转为JPEG base64
   const convertToJpeg = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
       const img = new Image();
-      
-      // 10秒超时（HEIC等不支持的格式可能导致onload/onerror都不触发）
       const timeout = setTimeout(() => {
         URL.revokeObjectURL(url);
-        reject(new Error('图片加载超时，可能不支持该格式'));
-      }, 10000);
-      
+        reject(new Error('图片加载超时'));
+      }, 15000);
+
       img.onload = () => {
         clearTimeout(timeout);
         const canvas = document.createElement('canvas');
@@ -85,7 +101,6 @@ export default function ProductDetailGeneratorPage() {
         canvas.height = img.naturalHeight;
         const ctx = canvas.getContext('2d');
         if (!ctx) { URL.revokeObjectURL(url); reject(new Error('Canvas创建失败')); return; }
-        // 白色背景（防止PNG透明区域变黑）
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
@@ -107,34 +122,16 @@ export default function ProductDetailGeneratorPage() {
 
     const filesToProcess = Array.from(files).slice(0, remaining);
 
-    // 前置检测：HEIC/HEIF格式直接提示
-    const heicFiles = filesToProcess.filter(f => {
-      const ext = f.name.toLowerCase().split('.').pop() || '';
-      const type = f.type.toLowerCase();
-      return ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif';
-    });
-    if (heicFiles.length > 0) {
-      setUploadError(`${heicFiles.length}张图片为HEIC格式（iPhone默认），请先在手机相册中转为JPG后上传，或用其他设备截图后上传`);
-      // 过滤掉HEIC文件，继续处理其他图片
-      const nonHeicFiles = filesToProcess.filter(f => {
-        const ext = f.name.toLowerCase().split('.').pop() || '';
-        const type = f.type.toLowerCase();
-        return ext !== 'heic' && ext !== 'heif' && type !== 'image/heic' && type !== 'image/heif';
-      });
-      if (nonHeicFiles.length === 0) {
-        e.target.value = '';
-        return;
-      }
-      filesToProcess.length = 0;
-      filesToProcess.push(...nonHeicFiles.slice(0, remaining - (uploadedImages.length)));
-    }
-
     setIsUploading(true);
     setUploadError(null);
     try {
-      // 并行处理所有图片（避免串行阻塞）
+      // Step 1: HEIC先转JPEG（并行）
+      const convertedFiles = await Promise.all(
+        filesToProcess.map(f => convertHeicToJpeg(f))
+      );
+      // Step 2: 所有图片转base64 JPEG（并行）
       const results = await Promise.allSettled(
-        filesToProcess.map(f => convertToJpeg(f))
+        convertedFiles.map(f => convertToJpeg(f))
       );
       const newImages: string[] = [];
       const failedCount = results.filter(r => r.status === 'rejected').length;
@@ -146,10 +143,13 @@ export default function ProductDetailGeneratorPage() {
       }
       if (failedCount > 0 && newImages.length === 0) {
         setUploadError(`图片处理失败（${failedCount}张），请尝试JPG/PNG格式`);
+      } else if (failedCount > 0) {
+        setUploadError(`${failedCount}张图片处理失败，已成功处理${newImages.length}张`);
       }
     } catch (err) {
       console.error('图片处理异常:', err);
-      setUploadError('图片处理异常，请重试');
+      const msg = err instanceof Error ? err.message : '图片处理异常';
+      setUploadError(msg);
     } finally {
       setIsUploading(false);
     }
