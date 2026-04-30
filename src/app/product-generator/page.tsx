@@ -515,19 +515,19 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 </div>
 
-                {/* 转化引导文案（主图正下方） */}
+                {/* 转化引导文案（三层：标题 / 能力 / 信任） */}
                 <div className="text-center space-y-2">
                   <p className="text-base font-bold text-slate-800">
-                    👇 3秒生成一整套可直接上架的商品详情页
+                    👇 3秒生成一整套能直接卖货的商品详情页
                   </p>
                   <p className="text-xs text-slate-500">
                     包含：主图 / 场景图 / 卖点图 / 长图详情页
                   </p>
-                  <p className="text-[11px] text-orange-500 font-medium">
-                    已帮助 12,000+ 商家生成商品素材
-                  </p>
                   <p className="text-[11px] text-slate-400">
-                    无需写Prompt · 一键出图
+                    无需设计 · 无需PS · 无需写Prompt
+                  </p>
+                  <p className="text-[11px] text-orange-500 font-medium">
+                    已帮助 12,000+ 商家生成商品素材 · 平均节省 90% 设计成本
                   </p>
                 </div>
 
