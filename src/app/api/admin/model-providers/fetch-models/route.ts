@@ -3,6 +3,36 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { requirePermission } from '@/lib/auth';
 import { Permissions } from '@/lib/permissions';
 
+// 常见图片生成模型列表（当 API 不支持列举图片模型时作为建议）
+const KNOWN_IMAGE_MODELS = [
+  { id: 'gpt-image-2', name: 'GPT Image 2', display_name: 'GPT Image 2', description: 'OpenAI 最新图片生成模型' },
+  { id: 'dall-e-3', name: 'DALL·E 3', display_name: 'DALL·E 3', description: 'OpenAI 图片生成模型' },
+  { id: 'stable-diffusion-xl', name: 'Stable Diffusion XL', display_name: 'SDXL', description: 'Stability AI 图片生成模型' },
+  { id: 'flux-1', name: 'Flux 1', display_name: 'Flux 1', description: 'Black Forest Labs 图片生成模型' },
+];
+
+// 规范化 API URL，避免路径拼接问题
+function normalizeApiUrl(url: string): string {
+  return url.replace(/\/+$/, ''); // 去掉末尾的斜杠
+}
+
+// 智能构建模型列表端点
+function buildEndpoints(apiUrl: string, providerType: string): Array<{ url: string; desc: string }> {
+  const base = normalizeApiUrl(apiUrl);
+  const endpoints: Array<{ url: string; desc: string }> = [];
+
+  // 如果 URL 已经包含 /v1，直接拼接 /models
+  if (base.endsWith('/v1')) {
+    endpoints.push({ url: `${base}/models`, desc: 'OpenAI v1 格式' });
+  } else {
+    // 否则先尝试 /v1/models，再尝试 /models
+    endpoints.push({ url: `${base}/v1/models`, desc: 'OpenAI v1 格式' });
+    endpoints.push({ url: `${base}/models`, desc: 'OpenAI 兼容格式' });
+  }
+
+  return endpoints;
+}
+
 // 获取模型列表（通过提供商的 API）并保存到数据库
 export async function POST(request: NextRequest) {
   const auth = await requirePermission(request, Permissions.UTILITIES_VIEW);
@@ -21,13 +51,7 @@ export async function POST(request: NextRequest) {
 
     let models: any[] = [];
     let lastError = '';
-
-    // 尝试多种 API 端点格式
-    const endpoints = [
-      { url: `${api_url}/models`, desc: 'OpenAI 兼容格式' },
-      { url: `${api_url}/v1/models`, desc: 'OpenAI v1 格式' },
-      { url: `${api_url}/images/models`, desc: '4SAPI 图片模型' },
-    ];
+    const endpoints = buildEndpoints(api_url, provider_type);
 
     for (const endpoint of endpoints) {
       try {
@@ -122,8 +146,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 对于图片模型提供商，如果获取到了模型列表，尝试筛选图片相关模型
+    if (models.length > 0 && provider_type === 'image') {
+      const imageKeywords = ['image', 'dall', 'flux', 'stable', 'diffusion', 'sd', 'midjourney', 'gpt-image', 'imagen'];
+      const imageModels = models.filter((m: any) => 
+        imageKeywords.some(kw => m.id.toLowerCase().includes(kw) || (m.display_name || '').toLowerCase().includes(kw))
+      );
+      
+      // 如果筛选出了图片模型，使用筛选结果；否则保留全部（可能 API 只返回了图片模型）
+      if (imageModels.length > 0) {
+        console.log(`[fetch-models] 从 ${models.length} 个模型中筛选出 ${imageModels.length} 个图片模型`);
+        models = imageModels;
+      } else {
+        console.log(`[fetch-models] 未筛选出图片模型，保留全部 ${models.length} 个模型`);
+      }
+    }
+
     // 如果没有获取到模型
     if (models.length === 0) {
+      // 对于图片模型提供商，提供已知模型建议
+      if (provider_type === 'image') {
+        return NextResponse.json({ 
+          success: false, 
+          error: `无法自动获取图片模型列表（该 API 不支持模型列举）。${lastError ? '最后错误: ' + lastError + '。' : ''}请手动添加模型，常见图片模型: ${KNOWN_IMAGE_MODELS.map(m => m.id).join(', ')}`,
+          suggested_models: KNOWN_IMAGE_MODELS,
+        }, { status: 400 });
+      }
+      
       return NextResponse.json({ 
         success: false, 
         error: `无法获取模型列表。${lastError}。请检查 API URL 和 Key 是否正确，或手动添加模型。` 
@@ -138,16 +187,35 @@ export async function POST(request: NextRequest) {
       .eq('provider_id', provider_id);
 
     // 2. 批量插入新模型
-    const modelsToInsert = models.map(m => ({
-      provider_id,
-      name: m.name,
-      display_name: m.display_name,
-      model_type: provider_type,
-      description: m.description || '',
-      price_per_1k_tokens: JSON.stringify(m.pricing || {}),
-      is_available: m.is_available !== false,
-      config: JSON.stringify({}),
-    }));
+    const modelsToInsert = models.map(m => {
+      // price_per_1k_tokens 是 numeric 类型，需要提取数值或设为 null
+      let pricePerToken: number | null = null;
+      if (m.pricing) {
+        if (typeof m.pricing === 'number') {
+          pricePerToken = m.pricing;
+        } else if (typeof m.pricing === 'object') {
+          // 尝试从 pricing 对象中提取数值
+          const keys = Object.keys(m.pricing);
+          if (keys.length > 0) {
+            const firstVal = m.pricing[keys[0]];
+            if (typeof firstVal === 'number') {
+              pricePerToken = firstVal;
+            }
+          }
+        }
+      }
+
+      return {
+        provider_id,
+        name: m.name,
+        display_name: m.display_name,
+        model_type: provider_type,
+        description: m.description || '',
+        price_per_1k_tokens: pricePerToken,
+        is_available: m.is_available !== false,
+        config: {},
+      };
+    });
 
     const { error: insertError } = await client
       .from('models')
