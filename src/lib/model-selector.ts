@@ -174,18 +174,37 @@ async function generateWithOpenAICompatible(
       formData.append('response_format', 'url');
       formData.append('size', imageSize);
 
-      // 处理 base64 图片 → Blob
-      let base64Data = imageInput;
+      // 处理图片来源：URL → 下载 → Buffer；base64 → 直接解码
+      let imageBuffer: Buffer;
       let mimeType = 'image/jpeg';
-      if (base64Data.startsWith('data:')) {
-        const match = base64Data.match(/^data:(image\/\w+);base64,(.+)$/);
+
+      if (imageInput.startsWith('http://') || imageInput.startsWith('https://')) {
+        // URL 图片：先下载再转 Buffer
+        console.log('[ModelSelector] 检测到URL图片，先下载:', imageInput.substring(0, 80));
+        const imgResp = await fetch(imageInput, { redirect: 'follow' });
+        if (!imgResp.ok) {
+          return { success: false, error: `参考图片下载失败: ${imgResp.status}` };
+        }
+        const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
+        if (contentType.includes('png')) mimeType = 'image/png';
+        else if (contentType.includes('webp')) mimeType = 'image/webp';
+        const arrayBuf = await imgResp.arrayBuffer();
+        imageBuffer = Buffer.from(arrayBuf);
+      } else if (imageInput.startsWith('data:')) {
+        // base64 data URL
+        const match = imageInput.match(/^data:(image\/\w+);base64,(.+)$/);
         if (match) {
           mimeType = match[1];
-          base64Data = match[2];
+          imageBuffer = Buffer.from(match[2], 'base64');
+        } else {
+          imageBuffer = Buffer.from(imageInput.split(',')[1] || imageInput, 'base64');
         }
+      } else {
+        // 纯 base64 字符串（无 data: 前缀）
+        imageBuffer = Buffer.from(imageInput, 'base64');
       }
-      const imageBuffer = Buffer.from(base64Data, 'base64');
-      const imageBlob = new Blob([imageBuffer], { type: mimeType });
+
+      const imageBlob = new Blob([new Uint8Array(imageBuffer)], { type: mimeType });
       formData.append('image', imageBlob, 'image.png');
 
       const response = await fetch(`${fullApiUrl}/images/edits`, {
@@ -291,16 +310,14 @@ export async function generateWithModel(
         const isCoze = config.providerSlug.includes('coze');
         
         if (isCoze) {
-          // 走扣子 SDK
+          // 走扣子 SDK（注意：扣子SDK不支持图生图，忽略image参数，走纯文生图）
           const client = createCozeClient(customHeaders);
           const requestParams: ImageGenerationRequest = {
             prompt,
             size,
             watermark: false,
           };
-          if (image) {
-            requestParams.image = Array.isArray(image) ? image : [image];
-          }
+          // 扣子SDK不支持参考图片，跳过image参数
           if (config.modelName) {
             requestParams.model = config.modelName;
           }
@@ -340,9 +357,7 @@ export async function generateWithModel(
       size,
       watermark: false,
     };
-    if (image) {
-      requestParams.image = Array.isArray(image) ? image : [image];
-    }
+    // 扣子SDK不支持参考图片，跳过image参数，走纯文生图
     if (model !== 'coze-image') {
       requestParams.model = model;
     }
