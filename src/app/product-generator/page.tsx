@@ -424,6 +424,22 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 </div>
 
+                {/* 转化引导文案（主图正下方） */}
+                <div className="text-center space-y-2">
+                  <p className="text-base font-bold text-slate-800">
+                    👇 3秒生成一整套可直接上架的商品详情页
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    包含：主图 / 场景图 / 卖点图 / 长图详情页
+                  </p>
+                  <p className="text-[11px] text-orange-500 font-medium">
+                    已帮助 12,000+ 商家生成商品素材
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    无需设计 · 无需PS · 无需写Prompt
+                  </p>
+                </div>
+
                 {/* B. 三图卡片区（Cards） */}
                 <div className="grid grid-cols-3 gap-4">
                   {DEMO_IMAGES.map((img) => (
@@ -440,22 +456,6 @@ export default function ProductDetailGeneratorPage() {
                       </div>
                     </div>
                   ))}
-                </div>
-
-                {/* 转化引导文案 */}
-                <div className="text-center space-y-3">
-                  <p className="text-base font-bold text-slate-800">
-                    👇 3秒生成一整套可直接上架的商品详情页
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    包含：主图 / 场景图 / 卖点图 / 长图详情页
-                  </p>
-                  <p className="text-[11px] text-orange-500 font-medium">
-                    已帮助 12,000+ 商家生成商品素材
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    无需设计 · 无需PS · 无需写Prompt
-                  </p>
                 </div>
               </div>
             ) : (
