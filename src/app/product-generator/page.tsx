@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, RefreshCw, Package, ImageIcon } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, RefreshCw, Package } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -430,8 +430,7 @@ export default function ProductDetailGeneratorPage() {
                   <Upload className="w-7 h-7 text-orange-500" strokeWidth={2.5} />
                 </div>
                 <p className="text-slate-800 dark:text-white font-bold text-base mb-1">上传商品图片</p>
-                <p className="text-slate-400 text-sm">推荐上传 3 张，最多 {MAX_IMAGES} 张</p>
-                <p className="text-[11px] text-slate-300 dark:text-slate-500 mt-2">支持 JPG / PNG / HEIC</p>
+                <p className="text-slate-400 text-sm">推荐 3 张，最多 {MAX_IMAGES} 张</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -444,8 +443,7 @@ export default function ProductDetailGeneratorPage() {
                     onDragLeave={() => setDragOverIndex(null)}
                     className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === 0 && dragIndex !== 0 ? 'border-orange-500 scale-[1.02]' : 'border-orange-400 shadow-sm'} ${dragIndex === 0 ? 'opacity-40 scale-95' : ''}`}
                   >
-                    <img src={uploadedImages[0]} alt="主图" className="w-full h-full object-cover" />
-                    <div className="absolute top-2 left-2 bg-orange-500 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-md shadow-sm">主图</div>
+                    <img src={uploadedImages[0]} alt="商品图" className="w-full h-full object-cover" />
                     <button
                       onClick={(e) => { e.stopPropagation(); handleRemoveImage(0); }}
                       className="absolute top-2 right-2 w-7 h-7 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -469,8 +467,7 @@ export default function ProductDetailGeneratorPage() {
                             onDragLeave={() => setDragOverIndex(null)}
                             className={`relative flex-1 aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === ri && dragIndex !== ri ? 'border-orange-500 scale-105' : 'border-slate-200 dark:border-slate-600'} ${dragIndex === ri ? 'opacity-40 scale-95' : ''}`}
                           >
-                            <img src={img} alt={`辅助图${ri + 1}`} className="w-full h-full object-cover" />
-                            <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent text-[10px] text-white/80 text-center py-0.5">辅助</span>
+                            <img src={img} alt={`图片${ri + 1}`} className="w-full h-full object-cover" />
                             <button
                               onClick={(e) => { e.stopPropagation(); handleRemoveImage(ri); }}
                               className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -489,21 +486,8 @@ export default function ProductDetailGeneratorPage() {
                     </div>
                   )}
 
-                  {/* 添加更多图片 + 计数 */}
-                  <div className="flex items-center gap-2">
-                    {uploadedImages.length < MAX_IMAGES && (
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 border border-dashed border-slate-200 dark:border-slate-600 hover:border-orange-400 rounded-lg transition-colors"
-                      >
-                        <ImageIcon className="w-3.5 h-3.5" />
-                        添加图片
-                      </button>
-                    )}
-                    <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                      {uploadedImages.length}/{MAX_IMAGES}张 · 正面 / 侧面 / 细节
-                    </span>
-                  </div>
+                  {/* 计数 */}
+                  <p className="text-[11px] text-slate-400 text-center">{uploadedImages.length}/{MAX_IMAGES}</p>
                 </div>
             )}
             <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif" multiple onChange={handleImageUpload} className="hidden" />
@@ -524,9 +508,6 @@ export default function ProductDetailGeneratorPage() {
                 <button onClick={() => setUploadError(null)} className="ml-auto text-red-400 hover:text-red-600 flex-shrink-0"><X className="w-3 h-3" /></button>
               </div>
             )}
-
-            {/* 分隔线 */}
-            <div className="my-5 border-t border-slate-100 dark:border-slate-700/50" />
 
             {/* 商品名称 */}
             <div className="mb-3">
@@ -581,26 +562,16 @@ export default function ProductDetailGeneratorPage() {
               <div className="space-y-5">
 
                 {/* A. 主视觉区（Hero） - 干净高级主图 */}
-                <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
+                <div className="relative rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
                   <div className="w-full h-[300px] bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden">
-                    {/* 柔和光晕 */}
                     <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-orange-100/30 rounded-full blur-3xl" />
                     <div className="absolute bottom-1/4 left-1/3 w-48 h-48 bg-amber-50/40 rounded-full blur-2xl" />
-                    {/* 产品居中，放大至60%视觉占比 */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <img
                         src={DEMO_IMAGES[0].url}
-                        alt="示例主图"
+                        alt="示例"
                         className="h-[260px] w-auto object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.08)]"
                       />
-                    </div>
-                    {/* 底部弱化提示 */}
-                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center">
-                      <div className="bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/50">
-                        <p className="text-[11px] text-slate-500 font-medium">
-                          上传商品图 <span className="text-orange-400 mx-0.5">→</span> 自动生成电商主图+详情页
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -616,15 +587,15 @@ export default function ProductDetailGeneratorPage() {
                 {/* B. 三张示例图（场景+佩戴+卖点） */}
                 <div className="grid grid-cols-3 gap-3">
                   {/* 场景图1：桌面 */}
-                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
-                    <img src={DEMO_IMAGES[1].url} alt="桌面场景" className="w-full h-[130px] object-cover" />
+                  <div className="rounded-xl overflow-hidden">
+                    <img src={DEMO_IMAGES[1].url} alt="桌面" className="w-full h-[130px] object-cover" />
                   </div>
                   {/* 场景图2：佩戴 */}
-                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url)}>
-                    <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="佩戴场景" className="w-full h-[130px] object-cover" />
+                  <div className="rounded-xl overflow-hidden">
+                    <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="佩戴" className="w-full h-[130px] object-cover" />
                   </div>
-                  {/* 卖点图：场景+文案 */}
-                  <div className="relative rounded-xl overflow-hidden cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
+                  {/* 卖点图 */}
+                  <div className="rounded-xl overflow-hidden">
                     <div className="w-full h-[130px] relative overflow-hidden">
                       <img src={DEMO_IMAGES[1].url} alt="卖点" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
@@ -653,17 +624,12 @@ export default function ProductDetailGeneratorPage() {
 
                 {/* A. 主视觉区（Hero） */}
                 {getImage('main') && (
-                  <div className={`relative group cursor-pointer rounded-xl overflow-hidden transition-all duration-500 ${revealedSlots.has('main') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(getImage('main')!)}>
+                  <div className={`relative cursor-pointer rounded-xl overflow-hidden transition-all duration-500 ${revealedSlots.has('main') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(getImage('main')!)}>
                     <img
                       src={getImage('main')!}
                       alt="主图"
                       className="w-full h-[280px] object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
-                        点击查看大图
-                      </span>
-                    </div>
                   </div>
                 )}
 
@@ -673,26 +639,15 @@ export default function ProductDetailGeneratorPage() {
                     const url = getImage(slot);
                     if (!url) return null;
                     return (
-                      <div key={slot} className={`relative group cursor-pointer rounded-xl overflow-hidden transition-all duration-500 ${revealedSlots.has(slot) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(url)}>
+                      <div key={slot} className={`relative cursor-pointer rounded-xl overflow-hidden transition-all duration-500 ${revealedSlots.has(slot) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(url)}>
                         <img
                           src={url}
                           alt={label}
                           className="w-full h-[150px] object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
-                            点击查看大图
-                          </span>
-                        </div>
                       </div>
                     );
                   })}
-                </div>
-
-                {/* C. 详情页缩略提示 */}
-                <div className="rounded-xl border border-dashed border-orange-200 bg-orange-50/30 px-4 py-4 text-center">
-                  <p className="text-xs font-medium text-orange-500">完整电商详情页长图</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">可截图用于淘宝 / 小红书 / 拼多多</p>
                 </div>
 
                 {/* 底部操作区 */}
@@ -712,11 +667,6 @@ export default function ProductDetailGeneratorPage() {
                     <RefreshCw className="w-3.5 h-3.5" />
                     换一张
                   </button>
-                </div>
-                <div className="flex items-center justify-center gap-3 text-[10px] text-slate-400">
-                  <span className="flex items-center gap-0.5"><Check className="w-3 h-3 text-green-500" />可上架</span>
-                  <span className="flex items-center gap-0.5"><Check className="w-3 h-3 text-green-500" />可截图</span>
-                  <span className="flex items-center gap-0.5"><Check className="w-3 h-3 text-green-500" />免费</span>
                 </div>
               </div>
             )}
