@@ -139,7 +139,40 @@ Each image must answer:
 
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay
 
-IF THE IMAGE DOES NOT LOOK LIKE A REAL PRODUCT PHOTOGRAPH, REGENERATE IT.`;
+IF THE IMAGE DOES NOT LOOK LIKE A REAL PRODUCT PHOTOGRAPH, REGENERATE IT.
+
+========================
+MULTI-IMAGE REFERENCE RULES (MANDATORY)
+========================================
+
+When multiple reference images are provided, you MUST follow these rules strictly:
+
+1. THE FIRST IMAGE IS THE PRIMARY REFERENCE.
+   - It defines the product's EXACT appearance: shape, color, material, finish, proportions.
+   - The generated image MUST match the first reference image's product appearance precisely.
+   - Treat the first image as the "ground truth" for what the product looks like.
+
+2. OTHER IMAGES ARE SUPPLEMENTARY REFERENCES ONLY.
+   - Use them ONLY for understanding additional details: structure, angles, internal parts, usage context.
+   - They provide INFORMATION, not appearance — do NOT mix styles or features from different images.
+   - If a supplementary image contradicts the first image, ALWAYS follow the first image.
+
+3. CONSISTENCY IS MANDATORY.
+   - ALL generated images must look like the SAME product from the SAME photoshoot.
+   - Same shape, same color, same material, same proportions across all 6 images.
+   - Think of it as photographing ONE physical product from different angles and in different contexts.
+
+4. FORBIDDEN:
+   - Mixing visual features from different reference images (e.g. shape from image 2, color from image 3)
+   - Style conflicts between generated images
+   - Collage-style generation that combines elements from different images
+   - Generating images where the product looks like a DIFFERENT product in different images
+
+5. VISUAL CONSISTENCY CHECK:
+   Before finalizing each image, verify:
+   - Does the product in this image look IDENTICAL to the product in the first reference image?
+   - Same proportions? Same color? Same material? Same details?
+   - If any doubt, simplify the image rather than risk inconsistency.`;
 
 // ---- Per-slot Prompt generators (system prompt prepended automatically) ----
 export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string, category?: ProductCategory) => string> = {
@@ -433,11 +466,16 @@ export async function POST(request: NextRequest) {
     const category = detectCategory(productName || '');
     // 第一张作为主图（用于图生图参考）
     const mainImage = imageList[0];
-    // 其他图作为补充参考信息（目前仅主图传入生成API，后续可扩展多图分析）
+    // 其他图作为补充参考信息
     const supplementaryCount = imageList.length - 1;
     if (supplementaryCount > 0) {
       console.log(`[ProductGenerator] 收到${imageList.length}张图片，第1张为主图，${supplementaryCount}张为补充`);
     }
+
+    // 构建多图上下文提示（让模型理解多图关系）
+    const multiImageContext = imageList.length > 1
+      ? `\n\nIMPORTANT MULTI-IMAGE CONTEXT:\n- You have ${imageList.length} reference images for this product.\n- The FIRST image is the PRIMARY reference — it defines the product's exact appearance (shape, color, material, proportions).\n- The other ${imageList.length - 1} images provide SUPPLEMENTARY information about structure, details, and angles.\n- ALL generated images MUST show the SAME product with IDENTICAL appearance across all 6 outputs.\n- Do NOT mix or merge visual features from different reference images.\n- Think of it as photographing ONE physical product — consistency is paramount.\n- If supplementary images show different details, prioritize the FIRST image for appearance.`
+      : '';
 
     // 并行生成 6 张图片
     const results: Partial<Record<ImageSlot, string>> = {};
@@ -445,7 +483,7 @@ export async function POST(request: NextRequest) {
 
     const generationTasks = IMAGE_SLOTS.map(async ({ slot }) => {
       try {
-        const prompt = PROMPTS[slot](productName, productBenefit, category);
+        const prompt = PROMPTS[slot](productName, productBenefit, category) + multiImageContext;
         const result = await generateWithModel(
           prompt,
           undefined, // model 由数据库配置决定
