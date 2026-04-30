@@ -387,9 +387,9 @@ export default function ProductGeneratorPage() {
           {/* 右侧：示例/结果 */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
             {!showResults ? (
-              /* 作品展示区 */
+              /* 主视觉展示区 */
               <div>
-                <div className="text-center mb-5">
+                <div className="text-center mb-4">
                   <h3 className="text-base font-bold text-slate-800 dark:text-white">
                     生成效果（电商级）
                   </h3>
@@ -397,66 +397,54 @@ export default function ProductGeneratorPage() {
                     3秒生成可直接卖货的商品图
                   </p>
                 </div>
-                <div className="grid grid-cols-4 gap-3 items-end">
-                  {/* 普通商品图 - 灰色低质感对比 */}
-                  <div className="text-center">
-                    <div className="aspect-square rounded-2xl overflow-hidden mb-2.5 bg-slate-200 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 grayscale-[30%]">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-8 h-8 mx-auto mb-1 rounded-lg bg-slate-300 dark:bg-slate-600" />
-                          <div className="w-6 h-1.5 mx-auto rounded bg-slate-300 dark:bg-slate-600 mb-1" />
-                          <div className="w-4 h-1 mx-auto rounded bg-slate-300 dark:bg-slate-600" />
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-[11px] text-slate-400 font-medium">
-                      普通商品图
+
+                {/* 主视觉大图 - 高级感主图 */}
+                <div className="relative rounded-2xl overflow-hidden shadow-lg mb-3">
+                  <div className="aspect-[4/3]">
+                    <img
+                      src={EXAMPLE_IMAGES[1].url}
+                      alt={EXAMPLE_IMAGES[1].label}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <span className="absolute top-2.5 right-2.5 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg leading-none shadow-sm">
+                    🔥 推荐
+                  </span>
+                  <span className="absolute top-2.5 left-2.5 text-[10px] text-white/70 font-medium bg-black/20 backdrop-blur-sm px-2 py-0.5 rounded leading-none">
+                    AI生成效果
+                  </span>
+                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/30 to-transparent pt-8 pb-2.5 px-3">
+                    <span className="text-xs font-bold text-white">
+                      高级感主图
                     </span>
                   </div>
+                </div>
 
-                  {/* 主图（白底） */}
-                  <div className="text-center">
-                    <div className="aspect-square rounded-2xl overflow-hidden shadow-md mb-2.5">
+                {/* 下方两张小图 */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <div className="aspect-square rounded-xl overflow-hidden shadow-md">
                       <img
                         src={EXAMPLE_IMAGES[0].url}
                         alt={EXAMPLE_IMAGES[0].label}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                      {EXAMPLE_IMAGES[0].label}
-                    </span>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 text-center mt-2">
+                      主图（白底）
+                    </p>
                   </div>
-
-                  {/* 高级感主图 - 放大+高亮+推荐标签 */}
-                  <div className="text-center -mt-2">
-                    <div className="aspect-square rounded-2xl overflow-hidden shadow-lg ring-2 ring-orange-400 mb-2.5 relative">
-                      <img
-                        src={EXAMPLE_IMAGES[1].url}
-                        alt={EXAMPLE_IMAGES[1].label}
-                        className="w-full h-full object-cover"
-                      />
-                      <span className="absolute top-1.5 right-1.5 bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md leading-none">
-                        🔥 推荐
-                      </span>
-                    </div>
-                    <span className="text-xs font-bold text-orange-600">
-                      {EXAMPLE_IMAGES[1].label}
-                    </span>
-                  </div>
-
-                  {/* 场景图 */}
-                  <div className="text-center">
-                    <div className="aspect-square rounded-2xl overflow-hidden shadow-md mb-2.5">
+                  <div>
+                    <div className="aspect-square rounded-xl overflow-hidden shadow-md">
                       <img
                         src={EXAMPLE_IMAGES[2].url}
                         alt={EXAMPLE_IMAGES[2].label}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                      {EXAMPLE_IMAGES[2].label}
-                    </span>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 text-center mt-2">
+                      场景图
+                    </p>
                   </div>
                 </div>
               </div>
