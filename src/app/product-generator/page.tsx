@@ -442,18 +442,19 @@ export default function ProductDetailGeneratorPage() {
                   ))}
                 </div>
 
-                {/* C. 详情页缩略提示 */}
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <span className="text-lg">👇</span>
-                  </div>
-                  <p className="text-xs text-slate-400">生成后，这里将展示完整电商详情页</p>
-                </div>
-
-                {/* 引导文案 */}
-                <div className="text-center">
-                  <p className="text-sm font-medium text-slate-700">
-                    上传你的商品图，<span className="text-orange-500">3秒生成同款效果</span>
+                {/* 转化引导文案 */}
+                <div className="text-center space-y-3">
+                  <p className="text-base font-bold text-slate-800">
+                    👇 3秒生成一整套可直接上架的商品详情页
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    包含：主图 / 场景图 / 卖点图 / 长图详情页
+                  </p>
+                  <p className="text-[11px] text-orange-500 font-medium">
+                    已帮助 12,000+ 商家生成商品素材
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    无需设计 · 无需PS · 无需写Prompt
                   </p>
                 </div>
               </div>
@@ -509,11 +510,9 @@ export default function ProductDetailGeneratorPage() {
                 </div>
 
                 {/* C. 详情页缩略提示 */}
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center">
-                  <div className="flex items-center justify-center gap-1.5 mb-1">
-                    <span className="text-lg">👇</span>
-                  </div>
-                  <p className="text-xs text-slate-400">完整电商详情页长图将在此展示</p>
+                <div className="rounded-xl border border-dashed border-orange-200 bg-orange-50/30 px-4 py-5 text-center">
+                  <p className="text-xs font-medium text-orange-500">完整电商详情页长图</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">可截图直接用于淘宝 / 小红书 / 拼多多</p>
                 </div>
 
                 {/* 底部操作区 */}
