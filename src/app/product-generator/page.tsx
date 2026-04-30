@@ -34,11 +34,11 @@ const LOADING_STEPS = [
 // 最大上传数量
 const MAX_IMAGES = 5;
 
-// 示例生成结果（默认展示）
+// 示例生成结果（默认展示）— 同一商品（耳机）的不同效果
 const DEMO_IMAGES = [
-  { slot: 'main' as ImageSlot, url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop', label: '主图', order: 1 },
-  { slot: 'scene' as ImageSlot, url: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=600&fit=crop', label: '使用场景图', order: 2 },
-  { slot: 'lifestyle' as ImageSlot, url: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&h=600&fit=crop', label: '生活场景图', order: 3 },
+  { slot: 'main' as ImageSlot, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop', label: '主图', order: 1 },
+  { slot: 'scene' as ImageSlot, url: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&h=600&fit=crop', label: '使用场景图', order: 2 },
+  { slot: 'lifestyle' as ImageSlot, url: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&h=600&fit=crop', label: '生活场景图', order: 3 },
 ];
 
 export default function ProductDetailGeneratorPage() {
@@ -442,21 +442,12 @@ export default function ProductDetailGeneratorPage() {
                   ))}
                 </div>
 
-                {/* C. 详情页缩略区（Long Image） */}
-                <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                  <div className="w-full max-h-[320px] overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100">
-                    <div className="w-full h-[320px] flex items-center justify-center">
-                      <div className="text-center">
-                        <Package className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
-                        <span className="text-xs text-slate-400">详情页长图预览</span>
-                      </div>
-                    </div>
+                {/* C. 详情页缩略提示 */}
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <span className="text-lg">👇</span>
                   </div>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
-                      点击查看大图
-                    </span>
-                  </div>
+                  <p className="text-xs text-slate-400">生成后，这里将展示完整电商详情页</p>
                 </div>
 
                 {/* 引导文案 */}
@@ -517,21 +508,12 @@ export default function ProductDetailGeneratorPage() {
                   })}
                 </div>
 
-                {/* C. 详情页缩略区（Long Image） */}
-                <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => { const url = getImage('main'); if (url) openPreview(url); }}>
-                  <div className="w-full max-h-[320px] overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100">
-                    <div className="w-full h-[320px] flex items-center justify-center">
-                      <div className="text-center">
-                        <Package className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
-                        <span className="text-xs text-slate-400">详情页长图预览</span>
-                      </div>
-                    </div>
+                {/* C. 详情页缩略提示 */}
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-6 text-center">
+                  <div className="flex items-center justify-center gap-1.5 mb-1">
+                    <span className="text-lg">👇</span>
                   </div>
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
-                      点击查看大图
-                    </span>
-                  </div>
+                  <p className="text-xs text-slate-400">完整电商详情页长图将在此展示</p>
                 </div>
 
                 {/* 底部操作区 */}
