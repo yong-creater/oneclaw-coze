@@ -365,18 +365,27 @@ export default function UtilityToolsPage() {
 
   // 处理模型选择
   const handleModelSelect = async (providerId: number, modelName: string) => {
-    if (!modelSelectorTool) return;
+    const tool = modelSelectorTool;
+    if (!tool) return;
 
-    // 先更新前端显示（乐观更新）
+    // 保存旧的值用于回滚
+    const oldProviderId = tool.model_provider_id;
+    const oldModelName = tool.model_name;
+
+    // 先关闭弹框
+    setModelSelectorOpen(false);
+    setModelSelectorTool(null);
+
+    // 乐观更新前端显示
     setTools(prev => prev.map(t => {
-      if (t.id === modelSelectorTool?.id) {
+      if (t.id === tool.id) {
         return { ...t, model_provider_id: providerId, model_name: modelName };
       }
       return t;
     }));
     
     // 如果编辑弹窗已打开，也更新表单
-    if (toolDialogOpen && editingTool?.id === modelSelectorTool?.id) {
+    if (toolDialogOpen && editingTool?.id === tool.id) {
       setToolForm(prev => ({
         ...prev,
         model_provider_id: providerId,
@@ -384,14 +393,14 @@ export default function UtilityToolsPage() {
       }));
     }
 
-    // 立即保存到数据库
+    // 保存到数据库
     try {
       const res = await fetch('/api/admin/utility-tools', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          id: modelSelectorTool.id,
+          id: tool.id,
           model_provider_id: providerId,
           model_name: modelName,
         }),
@@ -401,8 +410,8 @@ export default function UtilityToolsPage() {
         toast.error('模型配置保存失败');
         // 回滚前端状态
         setTools(prev => prev.map(t => {
-          if (t.id === modelSelectorTool?.id) {
-            return { ...t, model_provider_id: modelSelectorTool.model_provider_id, model_name: modelSelectorTool.model_name };
+          if (t.id === tool.id) {
+            return { ...t, model_provider_id: oldProviderId, model_name: oldModelName };
           }
           return t;
         }));
@@ -413,15 +422,12 @@ export default function UtilityToolsPage() {
       toast.error('模型配置保存失败');
       // 回滚前端状态
       setTools(prev => prev.map(t => {
-        if (t.id === modelSelectorTool?.id) {
-          return { ...t, model_provider_id: modelSelectorTool.model_provider_id, model_name: modelSelectorTool.model_name };
+        if (t.id === tool.id) {
+          return { ...t, model_provider_id: oldProviderId, model_name: oldModelName };
         }
         return t;
       }));
     }
-    
-    setModelSelectorOpen(false);
-    setModelSelectorTool(null);
   };
 
   // 获取工具当前的模型提供商信息

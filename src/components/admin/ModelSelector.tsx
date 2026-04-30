@@ -55,11 +55,34 @@ export function ModelSelector({
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 弹框打开时初始化
+  // 弹框打开时，根据 currentProviderId/currentModelName 回显选中状态
   useEffect(() => {
     if (!open) return;
-    console.log('[ModelSelector] 弹框打开, selectedType:', selectedType, 'providers:', Object.keys(providers));
-  }, [open]);
+    console.log('[ModelSelector] 弹框打开, currentProviderId:', currentProviderId, 'currentModelName:', currentModelName);
+
+    // 回显当前选中：确定模型类型并设置选中状态
+    if (currentProviderId && currentModelName) {
+      // 在 providers 中查找当前模型属于哪个类型
+      let foundType = selectedType;
+      for (const [type, providerList] of Object.entries(providers)) {
+        const found = providerList?.some(p =>
+          p.id === currentProviderId && p.models?.some(m => m.name === currentModelName)
+        );
+        if (found) {
+          foundType = type;
+          break;
+        }
+      }
+      setSelectedType(foundType);
+      setSelectedProviderId(currentProviderId);
+      setSelectedModel(currentModelName);
+    } else {
+      // 没有已选模型，重置选中状态
+      setSelectedProviderId(null);
+      setSelectedModel(null);
+    }
+    setSearchQuery('');
+  }, [open, currentProviderId, currentModelName]);
 
   // Tab 点击处理
   const handleTabClick = (type: string) => {
@@ -98,11 +121,6 @@ export function ModelSelector({
       return;
     }
     onSelect(selectedProviderId, selectedModel);
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onOpenChange(false);
-    }, 100);
   };
 
   // 选中详情
