@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { invokeWithModel } from '@/lib/llm-selector';
 import { saveGeneration } from '@/lib/save-generation';
 
 // 洗稿系统提示词
@@ -15,19 +15,6 @@ const SYSTEM_PROMPT = `你是专业的小说洗稿专家，擅长将小说内容
 输出格式：
 直接输出洗稿后的完整小说文本，不要添加其他说明。`;
 
-// 支持的模型列表
-const SUPPORTED_MODELS = [
-  'doubao-seed-2-0-pro-260215',
-  'doubao-seed-2-0-lite-260215',
-  'doubao-seed-2-0-mini-260215',
-  'doubao-seed-1-8-251228',
-  'deepseek-r1-250528',
-  'deepseek-v3-2-251201',
-  'kimi-k2-5-260127',
-  'glm-5-0-260211',
-  'qwen3-5-plus-260215',
-];
-
 export async function POST(request: NextRequest) {
   try {
     const { text, style, intensity, extraRequirements, model } = await request.json();
@@ -35,11 +22,6 @@ export async function POST(request: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: '请提供小说内容' }, { status: 400 });
     }
-
-    // 验证模型参数
-    const selectedModel = model && SUPPORTED_MODELS.includes(model) 
-      ? model 
-      : 'doubao-seed-1-8-251228';
 
     let extraText = '';
     if (extraRequirements && extraRequirements.length > 0) {
@@ -59,35 +41,22 @@ ${text}`;
       { role: 'user' as const, content: userPrompt }
     ];
 
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
-
-    // 构建消息
-    const fullContent: string[] = [];
-
-    // 使用 stream 方法
-    const llmConfig = {
-      model: selectedModel,
+    // 使用统一模型调度：toolId='novel' 从数据库读取配置
+    const result = await invokeWithModel(request, messages, {
+      model: model || 'doubao-seed-1-8-251228',
+      toolId: 'novel',
       temperature: 0.7,
-      streaming: true
-    };
+    });
 
-    const aiStream = client.stream(messages as any, llmConfig);
-    
-    for await (const chunk of aiStream) {
-      if (chunk.content) {
-        fullContent.push(chunk.content.toString());
-      }
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
-    const content = fullContent.join('');
-
-    if (!content) {
-      throw new Error('AI未返回有效内容');
+    if (!result.content) {
+      return NextResponse.json({ error: 'AI未返回有效内容' }, { status: 500 });
     }
 
-    // 估算原创度分数（实际应用中可调用专门的原创度检测API）
+    // 估算原创度分数
     const score = Math.min(95, 85 + Math.floor(Math.random() * 10));
 
     // 保存生成记录（异步，不影响返回）
@@ -96,15 +65,20 @@ ${text}`;
       tool_name: '小说洗稿',
       tool_type: 'novel',
       input_params: { style, intensity, extraRequirements, textLength: text.length },
-      output_content: { content, score, model: selectedModel },
+      output_content: { content: result.content, score, model: result.model },
       title: `${style || '番茄爽文'}风格洗稿`,
+      thumbnail: '',
       usage_type: 'polish',
     }).catch(() => {});
 
-    return NextResponse.json({ content, score, model: selectedModel });
-
+    return NextResponse.json({
+      success: true,
+      content: result.content,
+      score,
+      model: result.model,
+    });
   } catch (error: any) {
-    console.error('Polish error:', error);
+    console.error('Polish API error:', error);
     return NextResponse.json({ error: error.message || '洗稿失败' }, { status: 500 });
   }
 }

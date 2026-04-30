@@ -1,12 +1,30 @@
 /**
  * 模型选择器 - 统一处理不同模型的图片生成
+ * 
+ * 核心原则：从数据库读取模型配置，按 providerSlug 分发到不同的生成方式
+ * - providerSlug 含 "coze" → 走扣子 SDK
+ * - 其他 → 走 OpenAI 兼容 API（4sapi 等），api_url/api_key 从 model_providers 表读取
+ * 
+ * 禁止硬编码 API Key、API URL、模型名
  */
 
-import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { ImageGenerationClient, ImageGenerationResponseHelper, ImageGenerationRequest, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 获取工具的模型配置
-export async function getToolModelConfig(toolId: string): Promise<{providerId: number; modelName: string; provider: string} | null> {
+// 完整的工具模型配置（从数据库获取）
+export interface ToolModelConfig {
+  providerId: number;
+  modelName: string;
+  providerSlug: string;
+  apiUrl: string;
+  apiKey: string;
+}
+
+/**
+ * 获取工具的模型配置（从数据库读取）
+ * 支持 id 或 slug 查询
+ */
+export async function getToolModelConfig(toolId: string): Promise<ToolModelConfig | null> {
   try {
     const client = getSupabaseClient();
     
@@ -19,74 +37,75 @@ export async function getToolModelConfig(toolId: string): Promise<{providerId: n
     const { data: tool, error } = await query.single();
     
     if (error || !tool) {
-      console.error('查询工具失败:', error);
+      console.error('[ModelSelector] 查询工具失败:', error);
       return null;
     }
     
     // 如果有 provider_id 和 model_name，使用新配置方式
     if (tool.model_provider_id && tool.model_name) {
-      // 获取 provider 信息
+      // 获取 provider 信息（包含 api_url 和 api_key）
       const { data: provider } = await client
         .from('model_providers')
-        .select('slug')
+        .select('slug, api_url, api_key')
         .eq('id', tool.model_provider_id)
         .single();
+      
+      if (!provider) {
+        console.error('[ModelSelector] 未找到模型提供商:', tool.model_provider_id);
+        return null;
+      }
       
       return {
         providerId: tool.model_provider_id,
         modelName: tool.model_name,
-        provider: provider?.slug || 'unknown',
+        providerSlug: provider.slug,
+        apiUrl: provider.api_url || '',
+        apiKey: provider.api_key || '',
       };
     }
     
-    // 兼容旧的 model_config 方式
+    // 兼容旧的 model_config 方式（如果没有 model_provider_id）
     if (tool.model_config) {
+      const source = tool.model_config.model_source || 'coze';
+      const isCoze = source.includes('coze');
       return {
         providerId: tool.model_config.provider_id || 1,
         modelName: tool.model_config.default_model || 'coze-image',
-        provider: tool.model_config.model_source || 'coze',
+        providerSlug: source,
+        apiUrl: isCoze ? '' : (process.env.API4S_URL || 'https://4sapi.com/v1'),
+        apiKey: isCoze ? '' : (process.env.API4S_KEY || ''),
       };
     }
     
     return null;
   } catch (error) {
-    console.error('获取工具模型配置失败:', error);
+    console.error('[ModelSelector] 获取工具模型配置失败:', error);
     return null;
   }
 }
 
-// 图片生成模型映射
-const IMAGE_MODELS = {
-  // 扣子内置模型
-  'coze-image': { provider: 'coze', model: 'coze-image' },
-  // 4sapi 图片生成模型
-  'gpt-image2': { provider: '4sapi', model: 'gpt-image-2' },
-  'dall-e-3': { provider: '4sapi', model: 'dall-e-3' },
-  'stable-diffusion-3': { provider: '4sapi', model: 'stable-diffusion-3' },
-} as const;
-
-type ImageModel = keyof typeof IMAGE_MODELS;
-
-// 通过4sapi生成图片
-async function generateWith4SAPI(
+/**
+ * 通过 OpenAI 兼容 API 生成图片（4sapi 等）
+ * api_url 和 api_key 从数据库 model_providers 表读取
+ */
+async function generateWithOpenAICompatible(
   prompt: string,
   model: string,
   size: string,
+  apiUrl: string,
+  apiKey: string,
   image?: string | string[]
 ): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> {
   try {
-    // 4sAPI密钥 - 支持多种环境变量名称
-    const apiKey = process.env.FOURS_API_KEY 
-      || process.env.OPENAI_API_KEY 
-      || process.env.API4S_KEY;
-    
-    const apiUrl = process.env.API4S_URL || 'https://4sapi.com/v1';
-    
-    if (!apiKey || apiKey === 'your-api-key-here') {
-      return { success: false, error: '4sapi API密钥未配置' };
+    if (!apiKey) {
+      return { success: false, error: 'API密钥未配置，请在后台模型提供商中配置' };
     }
 
-    const requestBody: any = {
+    if (!apiUrl) {
+      return { success: false, error: 'API地址未配置，请在后台模型提供商中配置' };
+    }
+
+    const requestBody: Record<string, any> = {
       model: model,
       prompt: prompt,
       n: 1,
@@ -121,7 +140,7 @@ async function generateWith4SAPI(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('4sapi图片生成失败:', response.status, errorText);
+      console.error('[ModelSelector] API图片生成失败:', response.status, errorText?.substring(0, 200));
       return { success: false, error: `API错误: ${response.status}` };
     }
 
@@ -130,13 +149,13 @@ async function generateWith4SAPI(
     if (data.data && data.data.length > 0) {
       return {
         success: true,
-        imageUrls: data.data.map((item: any) => item.url),
+        imageUrls: data.data.map((item: any) => item.url || (item.b64_json ? `data:image/png;base64,${item.b64_json}` : null)).filter(Boolean),
       };
     }
 
     return { success: false, error: '未返回图片数据' };
   } catch (error: any) {
-    console.error('4sapi调用失败:', error);
+    console.error('[ModelSelector] API调用失败:', error);
     return { success: false, error: error.message };
   }
 }
@@ -149,8 +168,12 @@ function createCozeClient(customHeaders: Record<string, string> = {}) {
 
 /**
  * 统一的图片生成函数
+ * 
+ * 核心逻辑：如果传了 toolId，从数据库获取模型配置（providerSlug + apiUrl + apiKey），
+ * 根据 providerSlug 决定走扣子 SDK 还是 OpenAI 兼容 API。
+ * 
  * @param prompt 提示词
- * @param model 模型名称（如 'coze-image', 'gpt-image2'）
+ * @param model 模型名称（fallback，如果无 toolId 时使用）
  * @param size 图片尺寸
  * @param customHeaders 自定义请求头
  * @param toolId 可选的工具ID，用于获取模型配置
@@ -168,50 +191,79 @@ export async function generateWithModel(
   // 如果传入了 toolId，优先从工具配置获取模型
   if (toolId) {
     try {
-      const modelInfo = await getToolModelConfig(toolId);
-      if (modelInfo) {
-        model = modelInfo.modelName || model;
-        console.log(`工具 ${toolId} 使用模型:`, model);
+      const config = await getToolModelConfig(toolId);
+      if (config) {
+        console.log(`[ModelSelector] 工具 ${toolId} 使用模型: ${config.providerSlug} / ${config.modelName}`);
+        
+        const isCoze = config.providerSlug.includes('coze');
+        
+        if (isCoze) {
+          // 走扣子 SDK
+          const client = createCozeClient(customHeaders);
+          const requestParams: ImageGenerationRequest = {
+            prompt,
+            size,
+            watermark: false,
+          };
+          if (image) {
+            requestParams.image = Array.isArray(image) ? image : [image];
+          }
+          if (config.modelName) {
+            requestParams.model = config.modelName;
+          }
+          const response = await client.generate(requestParams);
+          const helper = new ImageGenerationResponseHelper(response);
+          if (helper.success && helper.imageUrls && helper.imageUrls.length > 0) {
+            return { success: true, imageUrls: helper.imageUrls };
+          }
+          return { success: false, error: helper.errorMessages?.join(', ') || '扣子图片生成失败' };
+        } else {
+          // 走 OpenAI 兼容 API（4sapi 等），从数据库获取 apiUrl 和 apiKey
+          return await generateWithOpenAICompatible(
+            prompt,
+            config.modelName,
+            size,
+            config.apiUrl,
+            config.apiKey,
+            image
+          );
+        }
       }
     } catch (error) {
-      console.error('获取工具模型配置失败，使用默认模型:', error);
+      console.error('[ModelSelector] 获取工具模型配置失败，使用默认模型:', error);
     }
   }
 
-  const modelKey = model as ImageModel;
-  const modelConfig = IMAGE_MODELS[modelKey] || IMAGE_MODELS['coze-image'];
-
-  console.log('使用模型:', { model, modelConfig });
-
-  if (modelConfig.provider === '4sapi') {
-    // 使用4sapi生成
-    return await generateWith4SAPI(prompt, modelConfig.model, size, image);
-  } else {
-    // 使用扣子SDK
+  // 无 toolId 时的 fallback 逻辑
+  console.log(`[ModelSelector] 无 toolId，使用默认模型: ${model}`);
+  
+  // 根据模型名推断 provider
+  const isCozeModel = model.includes('coze') || model.includes('doubao') || model.includes('seedream');
+  
+  if (isCozeModel) {
     const client = createCozeClient(customHeaders);
-    
-    const requestParams: any = {
+    const requestParams: ImageGenerationRequest = {
       prompt,
       size,
       watermark: false,
     };
-
-    // 如果有参考图片
     if (image) {
       requestParams.image = Array.isArray(image) ? image : [image];
     }
-
+    if (model !== 'coze-image') {
+      requestParams.model = model;
+    }
     const response = await client.generate(requestParams);
-    const helper = client.getResponseHelper(response);
-
+    const helper = new ImageGenerationResponseHelper(response);
     if (helper.success && helper.imageUrls && helper.imageUrls.length > 0) {
       return { success: true, imageUrls: helper.imageUrls };
     }
-
-    return {
-      success: false,
-      error: helper.errorMessages?.join(', ') || '生成失败'
-    };
+    return { success: false, error: helper.errorMessages?.join(', ') || '生成失败' };
+  } else {
+    // 非 coze 模型，尝试从环境变量读取 4sapi 配置
+    const apiKey = process.env.API4S_KEY || '';
+    const apiUrl = process.env.API4S_URL || 'https://4sapi.com/v1';
+    return await generateWithOpenAICompatible(prompt, model, size, apiUrl, apiKey, image);
   }
 }
 
@@ -221,7 +273,7 @@ export async function generateWithModel(
 export function getAvailableImageModels() {
   return [
     { id: 'coze-image', name: '扣子图片生成', provider: 'coze', price: 0, description: '免费，豆包SeeDream模型' },
-    { id: 'gpt-image2', name: 'GPT Image 2', provider: '4sapi', price: 0.01, description: '$0.01/张，支持图生图' },
+    { id: 'gpt-image-2', name: 'GPT Image 2', provider: '4sapi', price: 0.01, description: '$0.01/张，支持图生图' },
     { id: 'dall-e-3', name: 'DALL-E 3', provider: '4sapi', price: 0.04, description: '$0.04/张，OpenAI模型' },
     { id: 'stable-diffusion-3', name: 'Stable Diffusion 3', provider: '4sapi', price: 0.005, description: '$0.005/张，开源模型' },
   ];

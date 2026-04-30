@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { invokeWithModel } from '@/lib/llm-selector';
 
 // 系统提示词 - 专业招聘导向简历优化
 const SYSTEM_PROMPT = `你是拥有12年一线大厂+中大型企业招聘经验的资深简历优化专家，精通招聘胜任力模型、STAR法则梳理、简历关键词权重匹配，全程恪守100%内容真实性铁律。
@@ -40,18 +40,18 @@ const SYSTEM_PROMPT = `你是拥有12年一线大厂+中大型企业招聘经验
 输出要求
 直接输出优化后的完整简历，无需额外解析、无需备注、无需提问，内容专业简洁，匹配度拉满，全程保真。`;
 
-// 支持的模型列表
-const SUPPORTED_MODELS = [
-  'doubao-seed-2-0-pro-260215',
-  'doubao-seed-2-0-lite-260215',
-  'doubao-seed-1-8-251228',
-  'deepseek-r1-250528',
-  'deepseek-v3-2-251201',
-  'kimi-k2-5-260127',
-  'glm-5-0-260211',
-  'glm-4-7-251222',
-  'qwen-3-5-plus-260215',
-];
+// 模型显示名映射
+const MODEL_DISPLAY_NAMES: Record<string, string> = {
+  'doubao-seed-2-0-pro-260215': '豆包 Pro',
+  'doubao-seed-2-0-lite-260215': '豆包 Lite',
+  'doubao-seed-1-8-251228': '豆包标准版',
+  'deepseek-r1-250528': 'DeepSeek R1',
+  'deepseek-v3-2-251201': 'DeepSeek V3',
+  'kimi-k2-5-260127': 'Kimi K2',
+  'glm-5-0-260211': 'GLM-5',
+  'glm-4-7-251222': 'GLM-4.7',
+  'qwen-3-5-plus-260215': '通义 Qwen3.5',
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,70 +61,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '请提供简历和JD内容' }, { status: 400 });
     }
 
-    // 验证模型参数
-    const selectedModel = model && SUPPORTED_MODELS.includes(model) 
-      ? model 
-      : 'doubao-seed-1-8-251228';
-
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
-
     const messages = [
       { role: 'system' as const, content: SYSTEM_PROMPT },
       { role: 'user' as const, content: `请根据以下简历和JD进行优化：\n\n【简历原文】\n${resume}\n\n【目标岗位JD】\n${jd}` },
     ];
 
-    try {
-      // 使用 invoke 方法（非流式）
-      const response = await client.invoke(messages, {
-        model: selectedModel,
-        temperature: 0.7,
-      });
+    // 使用统一模型调度：toolId='resume' 从数据库读取配置
+    const result = await invokeWithModel(request, messages, {
+      model: model || 'doubao-seed-1-8-251228',
+      toolId: 'resume',
+      temperature: 0.7,
+    });
 
-      if (!response || !response.content) {
-        throw new Error('AI未返回有效内容');
-      }
-
-      // 解析匹配分数
-      let matchScore = 85;
-      const scoreMatch = response.content.match(/匹配评分[：:]\s*(\d+)/);
-      if (scoreMatch) {
-        matchScore = parseInt(scoreMatch[1], 10);
-      }
-
-      // 解析已使用的模型
-      const modelName = getModelDisplayName(selectedModel);
-
-      return NextResponse.json({ 
-        success: true, 
-        data: response.content,
-        matchScore,
-        model: modelName,
-        modelId: selectedModel,
-      });
-    } catch (llmError: any) {
-      console.error('Resume optimization error:', llmError);
-      throw new Error('AI服务调用失败，请重试');
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
+
+    // 解析匹配分数
+    let matchScore = 85;
+    const scoreMatch = result.content.match(/匹配评分[：:]\s*(\d+)/);
+    if (scoreMatch) {
+      matchScore = parseInt(scoreMatch[1], 10);
+    }
+
+    const modelName = MODEL_DISPLAY_NAMES[result.model || ''] || result.model || '豆包';
+
+    return NextResponse.json({ 
+      success: true, 
+      data: result.content,
+      matchScore,
+      model: modelName,
+      modelId: result.model,
+    });
 
   } catch (error: any) {
     console.error('Resume API error:', error);
     return NextResponse.json({ error: error.message || '简历优化失败' }, { status: 500 });
   }
-}
-
-function getModelDisplayName(modelId: string): string {
-  const names: Record<string, string> = {
-    'doubao-seed-2-0-pro-260215': '豆包 Pro',
-    'doubao-seed-2-0-lite-260215': '豆包 Lite',
-    'doubao-seed-1-8-251228': '豆包标准版',
-    'deepseek-r1-250528': 'DeepSeek R1',
-    'deepseek-v3-2-251201': 'DeepSeek V3',
-    'kimi-k2-5-260127': 'Kimi K2',
-    'glm-5-0-260211': 'GLM-5',
-    'glm-4-7-251222': 'GLM-4.7',
-    'qwen-3-5-plus-260215': '通义 Qwen3.5',
-  };
-  return names[modelId] || '豆包';
 }

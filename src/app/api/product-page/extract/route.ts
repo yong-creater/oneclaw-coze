@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { invokeWithModel } from '@/lib/llm-selector';
 
 // 系统提示词
 const SYSTEM_PROMPT = `你是一位专业的跨境电商商品卖点提炼专家，擅长从用户输入的模糊描述中提炼出精准、有吸引力的商品卖点。
@@ -54,36 +54,19 @@ ${text}
       { role: 'user' as const, content: userPrompt }
     ];
 
-    // 使用Coze SDK
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
-
-    const llmConfig = {
+    // 使用统一模型调度：toolId='product-page' 从数据库读取配置
+    const result = await invokeWithModel(request, messages, {
       model: 'doubao-seed-1-8-251228',
+      toolId: 'product-page',
       temperature: 0.7,
-      streaming: false
-    };
+    });
 
-    let content = '';
-    
-    try {
-      const aiStream = client.stream(messages, llmConfig);
-      
-      for await (const chunk of aiStream) {
-        if (chunk && typeof chunk === 'object' && 'content' in chunk) {
-          content += (chunk as any).content || '';
-        } else if (typeof chunk === 'string') {
-          content += chunk;
-        }
-      }
-    } catch (llmError) {
-      console.error('LLM error:', llmError);
+    if (result.error || !result.content) {
       // 如果AI调用失败，返回原文本
-      content = text;
+      return NextResponse.json({ content: text });
     }
 
-    return NextResponse.json({ content: content || text });
+    return NextResponse.json({ content: result.content });
 
   } catch (error: any) {
     console.error('Extract selling points error:', error);

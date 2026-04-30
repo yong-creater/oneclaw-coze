@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ImageGenerationClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
 import { S3Storage } from 'coze-coding-dev-sdk';
-import { getTokenFromHeader } from '@/lib/auth';
+import { generateWithModel } from '@/lib/model-selector';
 import { saveGeneration } from '@/lib/save-generation';
-
-// 创建图片生成客户端
-function createImageClient(customHeaders: Record<string, string> = {}) {
-  const config = new Config();
-  return new ImageGenerationClient(config, customHeaders);
-}
 
 // 创建存储客户端
 function createStorage() {
@@ -52,13 +45,11 @@ async function downloadAndUploadImage(imageUrl: string, storage: S3Storage, pref
   }
 }
 
-// 图像处理主函数
+// 图像处理主函数（走统一模型调度）
 async function processImage(
   imageUrl: string,
-  processType: string,
-  customHeaders: Record<string, string>
+  processType: string
 ): Promise<{ success: boolean; imageUrl?: string; error?: string }> {
-  const client = createImageClient(customHeaders);
   const storage = createStorage();
   
   const config = PROCESS_PROMPTS[processType];
@@ -79,30 +70,25 @@ async function processImage(
       return { success: false, error: '请提供有效的图片URL' };
     }
     
-    // 调用图片生成API进行处理
-    const requestParams: any = {
-      prompt: config.prompt,
-      size: '2K',
-      watermark: false,
-    };
+    // 调用统一模型调度生成图片
+    // 使用 toolId='background-removal' 从数据库读取模型配置
+    const result = await generateWithModel(
+      config.prompt,
+      'coze-image',  // fallback 模型
+      '2K',
+      {},            // customHeaders
+      'background-removal',  // toolId，走数据库配置
+      processedImageUrl.startsWith('http') ? [processedImageUrl] : undefined
+    );
     
-    // 只有当有参考图片时才添加image参数
-    if (processedImageUrl.startsWith('http')) {
-      requestParams.image = [processedImageUrl]; // 必须传入数组格式
-    }
-    
-    console.log('Calling image generation API with prompt:', config.prompt);
-    const response = await client.generate(requestParams);
-    const helper = client.getResponseHelper(response);
-    
-    if (helper.success && helper.imageUrls.length > 0) {
-      console.log('Image generated successfully:', helper.imageUrls[0]);
+    if (result.success && result.imageUrls && result.imageUrls.length > 0) {
+      console.log('Image generated successfully:', result.imageUrls[0]);
       // 将生成的图片上传到存储
-      const resultKey = await downloadAndUploadImage(helper.imageUrls[0], storage, 'output');
-      return { success: true, imageUrl: resultKey };
+      const resultUrl = await downloadAndUploadImage(result.imageUrls[0], storage, 'output');
+      return { success: true, imageUrl: resultUrl };
     } else {
-      console.error('Image generation failed:', helper.errorMessages);
-      return { success: false, error: helper.errorMessages?.join(', ') || '处理失败' };
+      console.error('Image generation failed:', result.error);
+      return { success: false, error: result.error || '处理失败' };
     }
   } catch (error: any) {
     console.error('Image processing error:', error);
@@ -113,7 +99,6 @@ async function processImage(
 // POST - 图像处理
 export async function POST(request: NextRequest) {
   try {
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
     const body = await request.json();
     const { imageUrl, processType } = body;
     
@@ -125,7 +110,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '请提供有效的处理类型' }, { status: 400 });
     }
     
-    const result = await processImage(imageUrl, processType, customHeaders);
+    const result = await processImage(imageUrl, processType);
     
     if (result.success) {
       // 保存生成记录
@@ -168,7 +153,6 @@ export async function GET() {
   }));
   
   return NextResponse.json({
-    success: true,
     types,
   });
 }

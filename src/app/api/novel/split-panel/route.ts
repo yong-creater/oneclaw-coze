@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { LLMClient, Config, HeaderUtils } from 'coze-coding-dev-sdk';
+import { invokeWithModel } from '@/lib/llm-selector';
 import { saveGeneration } from '@/lib/save-generation';
 
 // 分镜拆解系统提示词
@@ -23,19 +23,6 @@ const SYSTEM_PROMPT = `你是专业的漫画分镜师，擅长将小说内容拆
 
 请直接输出分镜内容，不要添加其他说明。`;
 
-// 支持的模型列表
-const SUPPORTED_MODELS = [
-  'doubao-seed-2-0-pro-260215',
-  'doubao-seed-2-0-lite-260215',
-  'doubao-seed-2-0-mini-260215',
-  'doubao-seed-1-8-251228',
-  'deepseek-r1-250528',
-  'deepseek-v3-2-251201',
-  'kimi-k2-5-260127',
-  'glm-5-0-260211',
-  'qwen3-5-plus-260215',
-];
-
 export async function POST(request: NextRequest) {
   try {
     const { text, style, panelCount, model } = await request.json();
@@ -43,11 +30,6 @@ export async function POST(request: NextRequest) {
     if (!text) {
       return NextResponse.json({ error: '请提供小说内容' }, { status: 400 });
     }
-
-    // 验证模型参数
-    const selectedModel = model && SUPPORTED_MODELS.includes(model) 
-      ? model 
-      : 'doubao-seed-1-8-251228';
 
     const userPrompt = `请对以下小说内容进行漫画分镜拆解：
 
@@ -61,31 +43,19 @@ ${text}`;
       { role: 'user' as const, content: userPrompt }
     ];
 
-    const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const config = new Config();
-    const client = new LLMClient(config, customHeaders);
-
-    // 构建消息
-    const fullContent: string[] = [];
-
-    const llmConfig = {
-      model: selectedModel,
+    // 使用统一模型调度：toolId='novel' 从数据库读取配置
+    const result = await invokeWithModel(request, messages, {
+      model: model || 'doubao-seed-1-8-251228',
+      toolId: 'novel',
       temperature: 0.7,
-      streaming: true
-    };
+    });
 
-    const aiStream = client.stream(messages as any, llmConfig);
-    
-    for await (const chunk of aiStream) {
-      if (chunk.content) {
-        fullContent.push(chunk.content.toString());
-      }
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
-    const content = fullContent.join('');
-
-    if (!content) {
-      throw new Error('AI未返回有效内容');
+    if (!result.content) {
+      return NextResponse.json({ error: 'AI未返回有效内容' }, { status: 500 });
     }
 
     // 保存生成记录
@@ -94,12 +64,12 @@ ${text}`;
       tool_name: '漫画分镜生成',
       tool_type: 'layout',
       input_params: { style, panelCount, textLength: text.length },
-      output_content: { content, model: selectedModel },
+      output_content: { content: result.content, model: result.model },
       title: `${style || '写实'}风格漫画分镜`,
       usage_type: 'split-panel',
     }).catch(() => {});
 
-    return NextResponse.json({ content, model: selectedModel });
+    return NextResponse.json({ content: result.content, model: result.model });
   } catch (error: any) {
     console.error('Split panel error:', error);
     return NextResponse.json({ error: error.message || '分镜拆解失败' }, { status: 500 });
