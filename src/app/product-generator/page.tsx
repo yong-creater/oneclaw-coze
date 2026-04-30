@@ -422,6 +422,12 @@ export default function ProductDetailGeneratorPage() {
                       点击查看大图
                     </span>
                   </div>
+                  {/* 前后转化感文案 - 悬浮在主图底部 */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent px-4 py-2.5">
+                    <p className="text-[11px] text-white/90 font-medium tracking-wide">
+                      普通商品图 <span className="text-orange-300">→</span> 一键生成卖货详情页
+                    </p>
+                  </div>
                 </div>
 
                 {/* 转化引导文案（主图正下方） */}
