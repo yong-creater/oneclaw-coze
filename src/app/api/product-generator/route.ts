@@ -3,78 +3,104 @@ import { generateWithModel } from '@/lib/model-selector';
 
 // ============ Prompt 体系：3 张图用途明确且明显不同 ============
 
-// 基础质量要求（所有图片共用）
-const BASE_QUALITY = [
-  'ultra realistic', 'commercial photography', 'high detail', 'sharp focus',
-  'soft controlled lighting', 'realistic shadows', 'natural color',
-  'clean composition', 'product-centered',
-].join(', ');
-
-// 通用保持商品不变
-const KEEP_PRODUCT = 'Keep the product exactly the same (no change in shape, color, structure)';
-
-// 通用禁止项
-const FORBIDDEN = 'No text, No watermark, No logo, No distortion';
-
-// 按品类选择场景描述（仅场景图使用）
 type ProductCategory = 'shoes' | 'clothing' | 'electronics' | 'beauty' | 'food' | 'general';
 
+// ---- Base quality (apply to all images) ----
+const BASE_QUALITY = `ultra realistic, commercial photography, high detail, sharp focus,
+soft controlled lighting, realistic shadows, natural color,
+clean composition, product-centered`;
+
+// ---- Global rules ----
+const GLOBAL_RULES = `Keep the product exactly the same (no change in shape, color, structure)
+No text, No watermark, No logo, No distortion, No blur, No low quality`;
+
+// ---- Scene logic for lifestyle image ----
 const CATEGORY_SCENE: Record<ProductCategory, string> = {
-  shoes: 'the same product being worn on feet with casual outfit, clean street or minimal indoor floor, no laptop, no computer desk, no coffee cup',
-  clothing: 'the same product being worn by a model, fashion lookbook style, clean background',
-  electronics: 'the same product on a modern clean desk, soft warm lighting, shallow depth of field',
-  beauty: 'the same product on a vanity table, soft elegant lighting, clean luxury background, subtle reflections',
-  food: 'the same product on a kitchen table, natural light, fresh ingredients nearby, appetizing presentation',
-  general: 'the same product in a clean modern setting, warm natural lighting, commercial advertising photography',
+  shoes: 'being worn on feet, walking or sitting naturally',
+  clothing: 'being worn by a model, fashion lookbook style, clean background',
+  electronics: 'worn on head or being used (headphones), or on a modern clean desk',
+  beauty: 'being used or placed on vanity, soft elegant lighting',
+  food: 'being served or eaten, natural light, appetizing presentation',
+  general: 'in a clean modern setting, warm natural lighting',
 };
 
 const PROMPTS = {
-  // 1) 主图：纯白底 + 居中 + 工作室打光
+  // 1) E-commerce main image
   mainImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    return [
-      'Enhance this product image into high-quality e-commerce visual.',
-      '',
-      `Base quality: ${BASE_QUALITY}`,
-      '',
-      `Rules: ${KEEP_PRODUCT}, ${FORBIDDEN}`,
-      '',
-      'Image type: E-commerce main image',
-      'pure white background, centered composition,',
-      'soft shadow, minimal clean style, studio lighting',
-    ].join('\n');
+    return `Enhance this product image into high-quality e-commerce visuals.
+
+Base quality (apply to all images):
+${BASE_QUALITY}
+
+Rules:
+${GLOBAL_RULES}
+
+Generate 1 DISTINCT image:
+
+1) E-commerce main image:
+pure white background, centered composition,
+soft shadow, minimal clean style, studio lighting
+
+Requirements:
+- Standard e-commerce main image (Taobao/JD style)
+- Extremely clean
+- NO environment
+- NO props`;
   },
 
-  // 2) 卖点图：近景特写 + 戏剧光效 + 非白底
+  // 2) Marketing image (strong visual / click attraction)
   benefitImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    return [
-      'Enhance this product image into high-quality e-commerce visual.',
-      '',
-      `Base quality: ${BASE_QUALITY}`,
-      '',
-      `Rules: ${KEEP_PRODUCT}, ${FORBIDDEN}`,
-      '',
-      'Image type: Marketing image',
-      'close-up detail, dramatic lighting, contrast lighting,',
-      'premium look, high-end advertising style,',
-      'NOT white background',
-    ].join('\n');
+    return `Enhance this product image into high-quality e-commerce visuals.
+
+Base quality (apply to all images):
+${BASE_QUALITY}
+
+Rules:
+${GLOBAL_RULES}
+
+Generate 1 DISTINCT image:
+
+2) Marketing image (strong visual / click attraction):
+close-up detail, dramatic lighting, strong contrast lighting,
+dark or gradient background, spotlight effect,
+premium glossy texture, high-end commercial advertising style,
+floating or isolated product, subtle reflection surface
+
+Rules:
+- NOT a real-life scene
+- NO table
+- NO environment objects
+- Focus on product + lighting + texture
+- Must look like an advertisement poster`;
   },
 
-  // 3) 场景图：真实使用场景 + 品类感知
+  // 3) Lifestyle image (conversion / real usage)
   sceneImage: (_productName?: string, _benefits?: string, category?: ProductCategory) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    return [
-      'Enhance this product image into high-quality e-commerce visual.',
-      '',
-      `Base quality: ${BASE_QUALITY}`,
-      '',
-      `Rules: ${KEEP_PRODUCT}, ${FORBIDDEN}, no unrelated objects, no messy background`,
-      '',
-      'Image type: Lifestyle image',
-      'realistic usage scene, product being used naturally,',
-      `scene must match product type: ${sceneDesc}`,
-    ].join('\n');
+    return `Enhance this product image into high-quality e-commerce visuals.
+
+Base quality (apply to all images):
+${BASE_QUALITY}
+
+Rules:
+${GLOBAL_RULES}
+
+Generate 1 DISTINCT image:
+
+3) Lifestyle image (conversion / real usage):
+realistic lifestyle scene, product being actively used,
+${sceneDesc}
+
+Rules:
+- MUST show real usage
+- MUST feel natural and realistic
+- NO static product display
+- NO incorrect scenes
+- no unrelated objects
+- no messy background
+- no random environment
+- no incorrect usage context`;
   },
 };
 
