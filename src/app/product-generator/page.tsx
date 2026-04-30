@@ -13,12 +13,9 @@ interface GeneratedImage {
 
 // AI生成的电商级耳机商品图（商业摄影标准）
 const EXAMPLE_IMAGES: GeneratedImage[] = [
-  // 1️⃣ 主图（白底电商）- 商业摄影棚纯白背景
-  { id: 1, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a71cc71b-dbe8-4e6f-aae1-fd6249f27ff7.jpeg', label: '主图（白底）', type: 'mainImage' },
-  // 2️⃣ 高级感主图 - 简约奢华背景，高级商业摄影
-  { id: 2, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_4088395c-34f2-4834-8a89-a3a4993a5b23.jpeg', label: '高级感主图', type: 'benefitImage' },
-  // 3️⃣ 场景图 - 现代办公桌场景，商业广告风格
-  { id: 3, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_55f1b776-3bb0-4a55-bf86-c73626241895.jpeg', label: '场景图', type: 'sceneImage' },
+  { id: 1, url: '/product-demo/main.jpg', label: '主图（白底）', type: 'mainImage' },
+  { id: 2, url: '/product-demo/benefit.jpg', label: '高级感主图', type: 'benefitImage' },
+  { id: 3, url: '/product-demo/scene.jpg', label: '场景图', type: 'sceneImage' },
 ];
 
 // 加载状态文案
