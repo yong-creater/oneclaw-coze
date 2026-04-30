@@ -1,11 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateWithModel } from '@/lib/model-selector';
 
-// ============ 商品类别识别与场景 Prompt 体系 ============
+// ============ Prompt 体系：3 张图用途明确且明显不同 ============
 
+// 基础质量要求（所有图片共用）
+const BASE_QUALITY = [
+  'ultra realistic', 'commercial photography', 'high detail', 'sharp focus',
+  'soft controlled lighting', 'realistic shadows', 'natural color',
+  'clean composition', 'product-centered',
+].join(', ');
+
+// 通用保持商品不变
+const KEEP_PRODUCT = 'Keep the product exactly the same (no change in shape, color, structure)';
+
+// 通用禁止项
+const FORBIDDEN = 'No text, No watermark, No logo, No distortion';
+
+// 按品类选择场景描述（仅场景图使用）
 type ProductCategory = 'shoes' | 'clothing' | 'electronics' | 'beauty' | 'food' | 'general';
 
-// 关键词 → 品类映射
+const CATEGORY_SCENE: Record<ProductCategory, string> = {
+  shoes: 'the same product being worn on feet with casual outfit, clean street or minimal indoor floor, no laptop, no computer desk, no coffee cup',
+  clothing: 'the same product being worn by a model, fashion lookbook style, clean background',
+  electronics: 'the same product on a modern clean desk, soft warm lighting, shallow depth of field',
+  beauty: 'the same product on a vanity table, soft elegant lighting, clean luxury background, subtle reflections',
+  food: 'the same product on a kitchen table, natural light, fresh ingredients nearby, appetizing presentation',
+  general: 'the same product in a clean modern setting, warm natural lighting, commercial advertising photography',
+};
+
+const PROMPTS = {
+  // 1) 主图：纯白底 + 居中 + 工作室打光
+  mainImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
+    return [
+      'Enhance this product image into high-quality e-commerce visual.',
+      '',
+      `Base quality: ${BASE_QUALITY}`,
+      '',
+      `Rules: ${KEEP_PRODUCT}, ${FORBIDDEN}`,
+      '',
+      'Image type: E-commerce main image',
+      'pure white background, centered composition,',
+      'soft shadow, minimal clean style, studio lighting',
+    ].join('\n');
+  },
+
+  // 2) 卖点图：近景特写 + 戏剧光效 + 非白底
+  benefitImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
+    return [
+      'Enhance this product image into high-quality e-commerce visual.',
+      '',
+      `Base quality: ${BASE_QUALITY}`,
+      '',
+      `Rules: ${KEEP_PRODUCT}, ${FORBIDDEN}`,
+      '',
+      'Image type: Marketing image',
+      'close-up detail, dramatic lighting, contrast lighting,',
+      'premium look, high-end advertising style,',
+      'NOT white background',
+    ].join('\n');
+  },
+
+  // 3) 场景图：真实使用场景 + 品类感知
+  sceneImage: (_productName?: string, _benefits?: string, category?: ProductCategory) => {
+    const cat = category || 'general';
+    const sceneDesc = CATEGORY_SCENE[cat];
+    return [
+      'Enhance this product image into high-quality e-commerce visual.',
+      '',
+      `Base quality: ${BASE_QUALITY}`,
+      '',
+      `Rules: ${KEEP_PRODUCT}, ${FORBIDDEN}, no unrelated objects, no messy background`,
+      '',
+      'Image type: Lifestyle image',
+      'realistic usage scene, product being used naturally,',
+      `scene must match product type: ${sceneDesc}`,
+    ].join('\n');
+  },
+};
+
+// ============ 品类识别 ============
+
 const CATEGORY_KEYWORDS: Record<ProductCategory, string[]> = {
   shoes: ['鞋', '运动鞋', '休闲鞋', '板鞋', '靴子', '高跟鞋', '拖鞋', '凉鞋', '皮鞋', '帆布鞋', '跑鞋', 'shoes', 'sneakers', 'boots', 'heels', 'sandals', 'slippers'],
   clothing: ['衣', '裤', '裙', '外套', '帽子', '包', 'T恤', '衬衫', '卫衣', '夹克', '大衣', '毛衣', '牛仔裤', '短裙', '连衣裙', '背包', '手提包', '围巾', '手套', 'coat', 'jacket', 'shirt', 'dress', 'hat', 'bag', 'pants'],
@@ -15,63 +89,16 @@ const CATEGORY_KEYWORDS: Record<ProductCategory, string[]> = {
   general: [],
 };
 
-// 根据商品名称识别品类
 function detectCategory(productName: string): ProductCategory {
   const name = (productName || '').toLowerCase();
-
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (category === 'general') continue;
     for (const keyword of keywords) {
-      if (name.includes(keyword.toLowerCase())) {
-        return category as ProductCategory;
-      }
+      if (name.includes(keyword.toLowerCase())) return category as ProductCategory;
     }
   }
-
   return 'general';
 }
-
-// 通用负面 Prompt（所有图片都用）
-const COMMON_NEGATIVE = 'no text, no watermark, no logo, no blur, no distortion, no unrelated objects';
-
-// 通用保持商品不变
-const KEEP_PRODUCT_UNCHANGED = 'Keep the product exactly the same (do not change shape, color, or structure)';
-
-// ============ 按品类生成 Prompt ============
-
-const PROMPTS = {
-  mainImage: (productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    const product = productName || 'product';
-    return `Professional studio product photography of the same ${product}, centered composition, pure white background, soft studio lighting, realistic shadow underneath, ultra realistic, commercial e-commerce product image, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`;
-  },
-
-  benefitImage: (productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    const product = productName || 'product';
-    return `Premium product photo of the same ${product}, light gray or beige gradient background, clean composition, soft cinematic lighting, realistic shadow, high-end commercial photography, apple style aesthetic, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`;
-  },
-
-  sceneImage: (productName?: string, _benefits?: string, category?: ProductCategory) => {
-    const product = productName || 'product';
-    const cat = category || 'general';
-
-    // 根据品类选择场景
-    const scenePrompts: Record<ProductCategory, string> = {
-      shoes: `Lifestyle fashion photography of the same ${product} being worn on feet, casual jeans outfit, clean street or minimal indoor floor, natural lighting, realistic shadow, fashion e-commerce style, high-end commercial photography, ${KEEP_PRODUCT_UNCHANGED}, no laptop, no computer desk, no coffee cup, no unrelated objects, ${COMMON_NEGATIVE}`,
-
-      clothing: `Lifestyle fashion photography of the same ${product} being worn by a model, clean background, fashion lookbook style, natural lighting, realistic shadow, high-end commercial fashion photography, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
-
-      electronics: `Lifestyle product photography of the same ${product} on a modern clean desk setup, laptop nearby, coffee cup, soft warm lighting, clean workspace, shallow depth of field, commercial product photography, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
-
-      beauty: `Luxury beauty product photography of the same ${product} on a vanity table, soft elegant lighting, clean luxury background, skincare or perfume product photography style, subtle reflections, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
-
-      food: `Clean food product photography of the same ${product} on a kitchen table or breakfast scene, natural light, fresh ingredients nearby, clean food photography style, appetizing presentation, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
-
-      general: `Lifestyle product photography of the same ${product} in a clean modern setting, warm natural lighting, realistic shadow, commercial advertising photography, high-end brand feeling, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
-    };
-
-    return scenePrompts[cat];
-  },
-};
 
 // ============ 工具标识 ============
 
