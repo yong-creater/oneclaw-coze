@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, GripVertical, ImageIcon } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, GripVertical, ImageIcon, CheckCircle2, XCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -327,6 +327,41 @@ export default function ProductDetailGeneratorPage() {
                 onChange={handleImageUpload}
                 className="hidden"
               />
+            </div>
+
+            {/* 上传引导 */}
+            <div className="mt-2.5 grid grid-cols-2 gap-2">
+              <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <p className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 mb-1">推荐上传</p>
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品正面图
+                  </p>
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品侧面图
+                  </p>
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品使用图
+                  </p>
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品细节图
+                  </p>
+                </div>
+              </div>
+              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p className="text-[11px] font-medium text-red-600 dark:text-red-400 mb-1">避免</p>
+                <div className="space-y-0.5">
+                  <p className="text-[10px] text-red-500 dark:text-red-300 flex items-center gap-1">
+                    <XCircle className="w-3 h-3 flex-shrink-0" /> 模糊图
+                  </p>
+                  <p className="text-[10px] text-red-500 dark:text-red-300 flex items-center gap-1">
+                    <XCircle className="w-3 h-3 flex-shrink-0" /> 不同产品
+                  </p>
+                  <p className="text-[10px] text-red-500 dark:text-red-300 flex items-center gap-1">
+                    <XCircle className="w-3 h-3 flex-shrink-0" /> 带强背景干扰
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* 缩略图列表 + 拖拽排序 */}
