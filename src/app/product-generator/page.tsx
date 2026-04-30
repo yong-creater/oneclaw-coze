@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import UtilityHeader from '@/components/common/UtilityHeader';
 
 // 图片槽位类型（与后端对齐）
-type ImageSlot = 'cover' | 'selling' | 'feature' | 'scene' | 'comparison' | 'parameter';
+type ImageSlot = 'main' | 'scene' | 'lifestyle';
 
 interface GeneratedImage {
   slot: ImageSlot;
@@ -17,24 +17,18 @@ interface GeneratedImage {
 
 // 槽位配置
 const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number }[] = [
-  { slot: 'cover', label: '封面图', order: 1 },
-  { slot: 'selling', label: '卖点图', order: 2 },
-  { slot: 'feature', label: '功能拆解图', order: 3 },
-  { slot: 'scene', label: '使用场景图', order: 4 },
-  { slot: 'comparison', label: '对比图', order: 5 },
-  { slot: 'parameter', label: '参数图', order: 6 },
+  { slot: 'main', label: '主图', order: 1 },
+  { slot: 'scene', label: '使用场景图', order: 2 },
+  { slot: 'lifestyle', label: '生活场景图', order: 3 },
 ];
 
 // 加载状态文案
 const LOADING_STEPS = [
   '正在分析商品特征...',
-  '正在生成封面图...',
-  '正在生成卖点图...',
-  '正在生成功能拆解图...',
+  '正在生成主图...',
   '正在生成使用场景图...',
-  '正在生成对比图...',
-  '正在生成参数图...',
-  '正在拼合详情页...',
+  '正在生成生活场景图...',
+  '即将完成...',
 ];
 
 // 最大上传数量
@@ -397,7 +391,7 @@ export default function ProductDetailGeneratorPage() {
             <div className="flex items-center justify-center gap-3 mt-3 text-[11px] text-slate-400">
               <span className="flex items-center gap-0.5"><Zap className="w-3 h-3 text-orange-400" />免费体验</span>
               <span className="text-slate-200 dark:text-slate-700">·</span>
-              <span>6张详情图</span>
+              <span>3张商品图</span>
               <span className="text-slate-200 dark:text-slate-700">·</span>
               <span>淘宝/小红书</span>
             </div>
@@ -415,7 +409,7 @@ export default function ProductDetailGeneratorPage() {
                   上传商品图后，将生成可直接用于电商的商品详情页素材
                 </p>
                 <p className="text-[11px] text-slate-300 dark:text-slate-600 mt-2">
-                  封面图 · 卖点图 · 功能拆解 · 使用场景 · 对比图 · 参数图
+                  封面主图 · 使用场景 · 生活场景
                 </p>
               </div>
             ) : (
