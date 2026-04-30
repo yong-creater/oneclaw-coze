@@ -32,8 +32,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { provider_id, api_url, api_key, provider_type } = body;
 
-    if (!provider_id || !api_url || !api_key) {
+    if (!provider_id || !api_url) {
       return NextResponse.json({ success: false, error: '缺少必要参数' }, { status: 400 });
+    }
+
+    // 获取真实 API Key：优先使用前端传入的，否则从数据库读取
+    let realApiKey = api_key;
+    if (!realApiKey || realApiKey.includes('...')) {
+      const { data: provider } = await client
+        .from('model_providers')
+        .select('api_key')
+        .eq('id', provider_id)
+        .single();
+      realApiKey = provider?.api_key;
+    }
+    if (!realApiKey) {
+      return NextResponse.json({ success: false, error: '未配置 API Key，请先在提供商设置中填写' }, { status: 400 });
     }
 
     let models: any[] = [];
@@ -46,7 +60,7 @@ export async function POST(request: NextRequest) {
         
         const response = await fetch(endpoint.url, {
           headers: {
-            'Authorization': `Bearer ${api_key}`,
+            'Authorization': `Bearer ${realApiKey}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },

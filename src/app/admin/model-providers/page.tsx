@@ -130,7 +130,7 @@ export default function ModelProvidersPage() {
       name: provider.name,
       slug: provider.slug,
       api_url: provider.api_url || '',
-      api_key: '', // 编辑时不回填脱敏的 key，留空表示不修改
+      api_key: provider.api_key || '', // 回填脱敏 key 供展示，提交时如果未修改则不传
       provider_type: provider.provider_type,
       is_active: provider.is_active,
     });
@@ -146,8 +146,8 @@ export default function ModelProvidersPage() {
       const body: any = { ...formData };
       if (editingProvider) {
         body.id = editingProvider.id;
-        // 编辑时如果 api_key 为空，不传该字段（保持数据库原值不变）
-        if (!body.api_key) {
+        // 编辑时如果 api_key 为空或是脱敏格式（含 ...），不传该字段（保持数据库原值不变）
+        if (!body.api_key || body.api_key.includes('...')) {
           delete body.api_key;
         }
       }
@@ -705,7 +705,7 @@ export default function ModelProvidersPage() {
                   value={formData.api_key}
                   disabled={editingProvider?.is_system}
                   onChange={(e) => setFormData({ ...formData, api_key: e.target.value })}
-                  placeholder={editingProvider?.has_api_key ? '已配置，点击刷新可保持不变' : '输入 API Key'}
+                  placeholder={editingProvider?.has_api_key ? '修改请输入新 Key，留空保持不变' : '输入 API Key'}
                   className={editingProvider?.is_system ? 'bg-slate-100 dark:bg-slate-800 pr-10' : 'pr-10'}
                 />
                 <button
@@ -716,7 +716,7 @@ export default function ModelProvidersPage() {
                   {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {editingProvider?.has_api_key && (
+              {editingProvider?.has_api_key && !formData.api_key?.includes('...') && (
                 <p className="text-xs text-slate-400">已有 Key，不填则保持不变</p>
               )}
             </div>
