@@ -14,10 +14,10 @@ interface GeneratedImage {
 // AI生成的电商级耳机商品图（商业摄影标准）
 const EXAMPLE_IMAGES: GeneratedImage[] = [
   // 1️⃣ 主图（白底电商）- 商业摄影棚纯白背景
-  { id: 1, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a71cc71b-dbe8-4e6f-aae1-fd6249f27ff7.jpeg', label: '电商主图', type: 'mainImage' },
-  // 2️⃣ 卖点图（高级感）- 简约奢华背景，高级商业摄影
-  { id: 2, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_4088395c-34f2-4834-8a89-a3a4993a5b23.jpeg', label: '卖点图', type: 'benefitImage' },
-  // 3️⃣ 场景图（生活氛围）- 现代办公桌场景，商业广告风格
+  { id: 1, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_a71cc71b-dbe8-4e6f-aae1-fd6249f27ff7.jpeg', label: '主图（白底）', type: 'mainImage' },
+  // 2️⃣ 高级感主图 - 简约奢华背景，高级商业摄影
+  { id: 2, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_4088395c-34f2-4834-8a89-a3a4993a5b23.jpeg', label: '高级感主图', type: 'benefitImage' },
+  // 3️⃣ 场景图 - 现代办公桌场景，商业广告风格
   { id: 3, url: 'https://coze-coding-project.tos.coze.site/coze_storage_7621509635564011535/image/generate_image_55f1b776-3bb0-4a55-bf86-c73626241895.jpeg', label: '场景图', type: 'sceneImage' },
 ];
 
@@ -388,60 +388,33 @@ export default function ProductGeneratorPage() {
           </div>
 
           {/* 右侧：示例/结果 */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm">
             {!showResults ? (
-              /* 默认示例展示 - 四列布局 */
+              /* 作品展示区 */
               <div>
-                <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-4 text-center">
-                  生成效果（电商级）
-                </h3>
-                <div className="flex items-center justify-center gap-3 flex-wrap">
-                  {/* 原图 - 普通商品图 */}
-                  <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 bg-slate-100 dark:bg-slate-700 flex items-center justify-center shadow-inner">
-                      <div className="text-center p-1">
-                        <Upload className="w-5 h-5 mx-auto mb-1 text-slate-400" />
-                        <span className="text-[10px] text-slate-400">原图</span>
+                <div className="text-center mb-5">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-white">
+                    生成效果（电商级）
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    3秒生成可直接卖货的商品图
+                  </p>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {EXAMPLE_IMAGES.map((img) => (
+                    <div key={img.id} className="text-center">
+                      <div className="aspect-square rounded-2xl overflow-hidden shadow-md mb-2.5">
+                        <img
+                          src={img.url}
+                          alt={img.label}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
+                      <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                        {img.label}
+                      </span>
                     </div>
-                    <p className="text-xs text-slate-500">普通商品图</p>
-                  </div>
-                  
-                  {/* 箭头 */}
-                  <ArrowRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                  
-                  {/* 主图 - 提升点击率 */}
-                  <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 shadow-lg ring-2 ring-orange-300 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600">
-                      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop&q=85" alt="主图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-orange-600 font-medium">提升点击率</p>
-                  </div>
-                  
-                  {/* 箭头 */}
-                  <ArrowRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                  
-                  {/* 卖点图 - 突出优势 */}
-                  <div className="text-center">
-                    <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 shadow-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30">
-                      <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop&q=85" alt="卖点图" className="w-full h-full object-cover" />
-                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2">
-                        <span className="text-[6px] text-slate-600 bg-white/90 px-1 py-0.5 rounded whitespace-nowrap">降噪</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-orange-600 font-medium">突出优势</p>
-                  </div>
-                  
-                  {/* 箭头 */}
-                  <ArrowRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                  
-                  {/* 场景图 - 提升转化 */}
-                  <div className="text-center">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden mb-2 shadow-lg">
-                      <img src="https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=200&h=200&fit=crop&q=85" alt="场景图" className="w-full h-full object-cover" />
-                    </div>
-                    <p className="text-xs text-orange-600 font-medium">提升转化</p>
-                  </div>
+                  ))}
                 </div>
               </div>
             ) : (
