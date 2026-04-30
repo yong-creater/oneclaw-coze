@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, ImageIcon } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, RefreshCw, Package, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -483,20 +483,9 @@ export default function ProductDetailGeneratorPage() {
               {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 3秒生成卖货详情页</>)}
             </button>
 
-            {/* 信任提示 */}
+            {/* 简洁提示 */}
             <div className="flex items-center justify-center gap-2 mt-2.5 text-[11px] text-slate-400">
-              <span>👉 已有 12,000+ 商家用它生成商品图</span>
-              <span className="text-slate-200 dark:text-slate-700">·</span>
-              <span>平均节省 90% 设计成本</span>
-            </div>
-
-            {/* 底部标签行 */}
-            <div className="flex items-center justify-center gap-3 mt-1.5 text-[11px] text-slate-400">
-              <span className="flex items-center gap-0.5"><Zap className="w-3 h-3 text-orange-400" />免费体验</span>
-              <span className="text-slate-200 dark:text-slate-700">·</span>
-              <span>3张商品图</span>
-              <span className="text-slate-200 dark:text-slate-700">·</span>
-              <span>淘宝/小红书</span>
+              <span>🚀 无需设计 · 无需PS</span>
             </div>
           </div>
 
@@ -538,7 +527,7 @@ export default function ProductDetailGeneratorPage() {
                     已帮助 12,000+ 商家生成商品素材
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    无需设计 · 无需PS · 无需写Prompt
+                    无需写Prompt · 一键出图
                   </p>
                 </div>
 
