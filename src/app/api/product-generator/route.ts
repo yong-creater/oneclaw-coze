@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// 4sapi GPT Image 配置
-const API4S_KEY = process.env.API4S_KEY || '';
-const API4S_URL = process.env.API4S_URL || 'https://4sapi.com/v1';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 三种电商图生成 Prompt
 const PROMPTS = {
@@ -27,17 +24,69 @@ const PROMPTS = {
   },
 };
 
+// 获取工具的模型配置（从数据库读取）
+async function getToolModelConfig(): Promise<{
+  apiUrl: string;
+  apiKey: string;
+  modelName: string;
+  providerSlug: string;
+} | null> {
+  try {
+    const supabase = getSupabaseClient();
+
+    // 查询 AI商品图生成器 的模型配置
+    const { data: toolData } = await supabase
+      .from('utility_tools')
+      .select('id, tool_id, name, model_provider_id, model_name')
+      .eq('slug', 'product-generator')
+      .single();
+
+    if (!toolData || !toolData.model_provider_id) {
+      console.warn('[Product Generator] 工具未配置模型提供商');
+      return null;
+    }
+
+    // 查询提供商数据
+    const { data: providerData } = await supabase
+      .from('model_providers')
+      .select('id, name, slug, api_url, api_key')
+      .eq('id', toolData.model_provider_id)
+      .single();
+
+    if (!providerData) {
+      console.warn('[Product Generator] 未找到模型提供商');
+      return null;
+    }
+
+    return {
+      apiUrl: providerData.api_url,
+      apiKey: providerData.api_key,
+      modelName: toolData.model_name || 'gpt-image-2',
+      providerSlug: providerData.slug,
+    };
+  } catch (err) {
+    console.error('[Product Generator] 获取模型配置失败:', err);
+    return null;
+  }
+}
+
 // Base64 转 Buffer
 function base64ToBuffer(base64: string): Buffer {
   return Buffer.from(base64, 'base64');
 }
 
-// 通过 /images/edits 端点（multipart/form-data）调用 4sapi 图生图
-async function generateWith4sApiEdit(prompt: string, imageBase64: string): Promise<string[]> {
+// 通过 /images/edits 端点（multipart/form-data）图生图
+async function generateWithEdits(
+  prompt: string,
+  imageBase64: string,
+  apiUrl: string,
+  apiKey: string,
+  modelName: string
+): Promise<string[]> {
   const imageBuffer = base64ToBuffer(imageBase64);
 
   const formData = new FormData();
-  formData.append('model', 'gpt-image-2');
+  formData.append('model', modelName);
   formData.append('prompt', prompt);
   formData.append('n', '1');
   formData.append('size', '1024x1024');
@@ -46,17 +95,17 @@ async function generateWith4sApiEdit(prompt: string, imageBase64: string): Promi
   const imageBlob = new Blob([imageBuffer], { type: 'image/png' });
   formData.append('image', imageBlob, 'image.png');
 
-  const response = await fetch(`${API4S_URL}/images/edits`, {
+  const response = await fetch(`${apiUrl}/images/edits`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${API4S_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
     },
     body: formData,
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`4sapi edits 请求失败 (${response.status}): ${errorText}`);
+    throw new Error(`edits 请求失败 (${response.status}): ${errorText}`);
   }
 
   const data = await response.json();
@@ -73,16 +122,21 @@ async function generateWith4sApiEdit(prompt: string, imageBase64: string): Promi
   return urls;
 }
 
-// 通过 /images/generations 端点（JSON）调用 4sapi 文生图（兜底方案）
-async function generateWith4sApiGen(prompt: string): Promise<string[]> {
-  const response = await fetch(`${API4S_URL}/images/generations`, {
+// 通过 /images/generations 端点（JSON）文生图（兜底方案）
+async function generateWithGenerations(
+  prompt: string,
+  apiUrl: string,
+  apiKey: string,
+  modelName: string
+): Promise<string[]> {
+  const response = await fetch(`${apiUrl}/images/generations`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${API4S_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-image-2',
+      model: modelName,
       prompt,
       n: 1,
       size: '1024x1024',
@@ -91,7 +145,7 @@ async function generateWith4sApiGen(prompt: string): Promise<string[]> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`4sapi generations 请求失败 (${response.status}): ${errorText}`);
+    throw new Error(`generations 请求失败 (${response.status}): ${errorText}`);
   }
 
   const data = await response.json();
@@ -109,24 +163,32 @@ async function generateWith4sApiGen(prompt: string): Promise<string[]> {
 }
 
 // 统一生成函数：优先用 edits（图生图），失败则回退到 generations（文生图）
-async function generateImage(prompt: string, imageBase64: string): Promise<string[]> {
+async function generateImage(
+  prompt: string,
+  imageBase64: string,
+  apiUrl: string,
+  apiKey: string,
+  modelName: string
+): Promise<string[]> {
   try {
-    const result = await generateWith4sApiEdit(prompt, imageBase64);
+    const result = await generateWithEdits(prompt, imageBase64, apiUrl, apiKey, modelName);
     if (result.length > 0) return result;
   } catch (err) {
     console.warn('[Product Generator] edits 端点失败，回退到 generations:', err instanceof Error ? err.message : err);
   }
 
   // 回退：文生图
-  return generateWith4sApiGen(prompt);
+  return generateWithGenerations(prompt, apiUrl, apiKey, modelName);
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // 检查 API Key
-    if (!API4S_KEY) {
+    // 1. 从数据库读取模型配置
+    const config = await getToolModelConfig();
+
+    if (!config) {
       return NextResponse.json(
-        { error: 'API Key 未配置，请联系管理员' },
+        { error: '模型未配置，请在后台精选工具管理中选择模型' },
         { status: 500 }
       );
     }
@@ -147,7 +209,7 @@ export async function POST(request: NextRequest) {
       imageBase64 = image.split(',')[1] || image;
     }
 
-    // 并行生成三张图片（大幅缩短等待时间）
+    // 2. 并行生成三张图片（大幅缩短等待时间）
     const results: {
       mainImage?: string;
       benefitImage?: string;
@@ -156,9 +218,9 @@ export async function POST(request: NextRequest) {
     } = { errors: [] };
 
     const [mainResult, benefitResult, sceneResult] = await Promise.allSettled([
-      generateImage(PROMPTS.mainImage(productName, productBenefit), imageBase64),
-      generateImage(PROMPTS.benefitImage(productName, productBenefit), imageBase64),
-      generateImage(PROMPTS.sceneImage(productName, productBenefit), imageBase64),
+      generateImage(PROMPTS.mainImage(productName, productBenefit), imageBase64, config.apiUrl, config.apiKey, config.modelName),
+      generateImage(PROMPTS.benefitImage(productName, productBenefit), imageBase64, config.apiUrl, config.apiKey, config.modelName),
+      generateImage(PROMPTS.sceneImage(productName, productBenefit), imageBase64, config.apiUrl, config.apiKey, config.modelName),
     ]);
 
     if (mainResult.status === 'fulfilled' && mainResult.value[0]) {
