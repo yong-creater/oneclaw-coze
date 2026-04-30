@@ -52,6 +52,7 @@ export default function ProductGeneratorPage() {
   const [productName, setProductName] = useState('');
   const [productBenefit, setProductBenefit] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [generatingStep, setGeneratingStep] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
@@ -68,6 +69,40 @@ export default function ProductGeneratorPage() {
       setUploadedImage(event.target?.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleAnalyzeBenefit = async () => {
+    if (!uploadedImage && !productName) {
+      alert('请上传商品图或输入商品名称');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const response = await fetch('/api/product-generator/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productName: productName || undefined,
+          productImage: uploadedImage ? true : undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || '分析失败');
+      }
+
+      if (data.benefits) {
+        setProductBenefit(data.benefits);
+      }
+    } catch (error) {
+      console.error('卖点分析失败:', error);
+      alert(error instanceof Error ? error.message : '卖点分析失败，请稍后重试');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleGenerate = async () => {
@@ -328,11 +363,12 @@ export default function ProductGeneratorPage() {
                   className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm"
                 />
                 <button
-                  onClick={() => setProductBenefit('高音质沉浸体验｜主动降噪｜超长续航｜轻量舒适')}
-                  className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-xs font-medium rounded-xl transition-colors whitespace-nowrap flex items-center gap-1"
+                  onClick={handleAnalyzeBenefit}
+                  disabled={isAnalyzing || (!uploadedImage && !productName)}
+                  className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-colors whitespace-nowrap flex items-center gap-1"
                 >
                   <Sparkles className="w-3 h-3" />
-                  帮我生成
+                  {isAnalyzing ? '分析中...' : '帮我生成'}
                 </button>
               </div>
             </div>
