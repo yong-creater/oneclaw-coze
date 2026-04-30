@@ -27,13 +27,72 @@ const CATEGORY_SCENE: Record<ProductCategory, string> = {
   general: 'in a clean modern setting, naturally used',
 };
 
-// ---- Per-slot Prompt generators ----
+// ============ 统一系统 Prompt ============
+
+const SYSTEM_PROMPT = `You are generating images for an e-commerce product detail page.
+
+This is NOT normal image generation.
+This is for SELLING products.
+
+Each image must clearly show product value and selling points.
+
+========================
+CORE RULES
+==========
+
+1. Every image has ONE clear purpose
+2. Must visually express selling point
+3. Must be realistic and usable for e-commerce
+4. No random lifestyle images
+
+========================
+IMAGE TYPES
+===========
+
+Generate images for:
+
+* Cover (high-end main image)
+* Selling point (visual feature highlight)
+* Feature breakdown (structure)
+* Scene (real usage)
+* Comparison (advantage)
+* Specs (parameters)
+
+========================
+STYLE
+=====
+
+* Chinese e-commerce style (Taobao / Xiaohongshu)
+* premium commercial photography
+* clean, sharp, high contrast
+* strong lighting
+* product-focused
+
+========================
+REALISM
+=======
+
+* correct proportions
+* no deformation
+* no floating objects
+* physically correct scenes
+
+========================
+IMPORTANT
+=========
+
+Each image must answer:
+
+👉 Why should the user buy this product?
+
+NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+
+// ---- Per-slot Prompt generators (system prompt prepended automatically) ----
 export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string, category?: ProductCategory) => string> = {
 
   // 1) COVER IMAGE — 吸引点击的高品质主图
   cover: (productName, _benefits, _category) => {
-    return `You are generating images for an e-commerce product detail page.
-This is NOT normal image generation. This is for SELLING products.
+    return `${SYSTEM_PROMPT}
 
 IMAGE TYPE: COVER IMAGE (for attracting clicks)
 - strong visual impact — the first thing users see
@@ -43,23 +102,12 @@ IMAGE TYPE: COVER IMAGE (for attracting clicks)
 - looks like Taobao high-end main image
 - must make users want to click and learn more${productName ? `\n- Product: ${productName}` : ''}
 
-STYLE:
-- Chinese e-commerce (Taobao / Xiaohongshu premium style)
-- commercial product photography at its best
-- not generic lifestyle photos — this is a PRODUCT SHOT
-
-REALISM:
-- correct proportions, no distortion, no floating
-- physically correct placement
-
-CRITICAL: This image must make users STOP scrolling and CLICK.
-NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+CRITICAL: This image must make users STOP scrolling and CLICK.`;
   },
 
   // 2) SELLING POINT IMAGE (CRITICAL) — 一张图只表达一个卖点，必须用画面表现
   selling: (productName, benefits, _category) => {
-    return `You are generating images for an e-commerce product detail page.
-This is NOT normal image generation. This is for SELLING products.
+    return `${SYSTEM_PROMPT}
 
 IMAGE TYPE: SELLING POINT IMAGE (MOST CRITICAL)
 This is the single most important image for conversion.
@@ -84,21 +132,14 @@ STYLE:
 - Strong lighting contrast (dramatic side light or spotlight)
 - Dark or gradient background to make product pop
 - Advertising poster feel — powerful and premium
-- Chinese e-commerce (Taobao / Xiaohongshu style)
-
-REALISM:
-- correct proportions, no distortion, no floating
-- physically correct usage — the action must be believable
 
 CRITICAL: This image must VISUALLY PROVE why the product is worth buying.
-Do NOT just show the product sitting there — SHOW IT IN ACTION.
-NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+Do NOT just show the product sitting there — SHOW IT IN ACTION.`;
   },
 
   // 3) FEATURE BREAKDOWN IMAGE — 展示产品结构，让用户看懂内部
   feature: (productName, _benefits, _category) => {
-    return `You are generating images for an e-commerce product detail page.
-This is NOT normal image generation. This is for SELLING products.
+    return `${SYSTEM_PROMPT}
 
 IMAGE TYPE: FEATURE BREAKDOWN IMAGE
 Show users what's INSIDE and HOW IT WORKS.
@@ -116,27 +157,14 @@ APPROACHES (pick the best for this product):
 - Layer peel: showing layers from outside to inside
 - Disassembly: product opened up revealing internals${productName ? `\n- Product: ${productName}` : ''}
 
-STYLE:
-- Clean dark or neutral background
-- Technical illustration meets commercial photography
-- Each part well-lit and clearly visible
-- Premium feel — not a dry technical diagram
-
-REALISM:
-- All parts must be physically accurate
-- No impossible geometries
-- Correct material appearance
-
-CRITICAL: Users must SEE the quality inside, not just the outside.
-NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+CRITICAL: Users must SEE the quality inside, not just the outside.`;
   },
 
   // 4) USAGE SCENE IMAGE — 真实使用环境，禁止不合理搭配
   scene: (productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    return `You are generating images for an e-commerce product detail page.
-This is NOT normal image generation. This is for SELLING products.
+    return `${SYSTEM_PROMPT}
 
 IMAGE TYPE: USAGE SCENE IMAGE
 Show the product in REAL LIFE — where and how people actually use it.
@@ -157,24 +185,12 @@ SCENE RULES BY CONTEXT:
 - Beauty items → vanity table, bathroom, getting-ready scene
 - Food/drinks → table setting, outdoor picnic, café${productName ? `\n- Product: ${productName}` : ''}
 
-STYLE:
-- Chinese e-commerce lifestyle photography
-- Warm, inviting, aspirational but believable
-- Xiaohongshu style scene photos
-
-REALISM:
-- correct proportions, no distortion, no floating
-- physically correct usage — the way product is held/used must be natural
-- lighting must match the environment (sunlight for outdoor, warm lamps for indoor)
-
-CRITICAL: Users must be able to IMAGINE THEMSELVES using this product.
-NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+CRITICAL: Users must be able to IMAGINE THEMSELVES using this product.`;
   },
 
   // 5) COMPARISON IMAGE — 对比普通产品，强调优势
   comparison: (productName, benefits, _category) => {
-    return `You are generating images for an e-commerce product detail page.
-This is NOT normal image generation. This is for SELLING products.
+    return `${SYSTEM_PROMPT}
 
 IMAGE TYPE: COMPARISON IMAGE
 Show why THIS product is BETTER than alternatives.
@@ -197,23 +213,12 @@ COMPOSITION:
 - Other side: visibly inferior, dull lighting
 - Clear visual difference — no ambiguity about which is better
 
-STYLE:
-- Chinese e-commerce comparison style
-- The superiority must be INSTANTLY visible
-- Dark background to focus attention on the contrast
-
-REALISM:
-- Both sides must be physically realistic
-- No exaggeration that looks fake
-
-CRITICAL: Users must SEE the difference and think "I want THIS one."
-NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+CRITICAL: Users must SEE the difference and think "I want THIS one."`;
   },
 
   // 6) PARAMETER IMAGE — 展示容量/尺寸/材质，简洁专业
   parameter: (productName, _benefits, _category) => {
-    return `You are generating images for an e-commerce product detail page.
-This is NOT normal image generation. This is for SELLING products.
+    return `${SYSTEM_PROMPT}
 
 IMAGE TYPE: PARAMETER IMAGE
 Show the SPECIFICATIONS — size, capacity, material, color options.
@@ -231,18 +236,7 @@ APPROACHES:
 - Material swatch or texture detail alongside product
 - Multiple color variants arranged neatly${productName ? `\n- Product: ${productName}` : ''}
 
-STYLE:
-- Minimalistic, professional, technical but elegant
-- Clean dark or light neutral background
-- E-commerce specification page style
-- Taobao premium product parameter display
-
-REALISM:
-- Accurate proportions and scale
-- Material textures must look real
-
-CRITICAL: Users must feel the product is well-designed and precisely made.
-NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+CRITICAL: Users must feel the product is well-designed and precisely made.`;
   },
 };
 
