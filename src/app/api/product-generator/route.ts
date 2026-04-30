@@ -8,7 +8,7 @@ type ProductCategory = 'shoes' | 'clothing' | 'electronics' | 'beauty' | 'food' 
 // ---- Base quality (apply to all images) ----
 const BASE_QUALITY = `ultra realistic, commercial photography, high detail, sharp focus,
 soft controlled lighting, realistic shadows, natural color,
-clean composition, product-centered`;
+clean composition, product-centered, premium quality`;
 
 // ---- Strict product preservation ----
 const PRODUCT_PRESERVATION = `CRITICAL: Preserve the exact product structure from the original image.
@@ -21,24 +21,22 @@ const PRODUCT_PRESERVATION = `CRITICAL: Preserve the exact product structure fro
 For functional products:
 - Maintain correct real-world usage structure
 - Do NOT generate incorrect connections (e.g. wrong plug/socket alignment)
-- Do NOT invent new parts or change product design
-
-This is a strict constraint.`;
+- Do NOT invent new parts or change product design`;
 
 // ---- Scene logic for lifestyle image ----
 const CATEGORY_SCENE: Record<ProductCategory, string> = {
-  shoes: 'being worn on feet',
+  shoes: 'being worn on feet, walking or sitting naturally',
   clothing: 'being worn by a model, fashion lookbook style',
-  electronics: 'worn on head or being used (headphones), or correctly installed or used',
+  electronics: 'correctly installed or used (e.g. headphones worn, device on desk)',
   beauty: 'being applied or used, vanity scene',
   food: 'being served or eaten',
   general: 'in a clean modern setting, naturally used',
 };
 
 const PROMPTS = {
-  // 1) E-commerce main image
+  // 1) E-commerce main image (clean & standard)
   mainImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    return `Enhance this product image into high-quality e-commerce visuals.
+    return `Enhance this product image into high-quality e-commerce visuals that can drive conversions.
 
 Base quality (apply to all images):
 ${BASE_QUALITY}
@@ -48,7 +46,7 @@ ${PRODUCT_PRESERVATION}
 
 Generate 1 DISTINCT image:
 
-1) E-commerce main image:
+1) E-commerce main image (clean & standard):
 pure white background, centered composition,
 soft shadow, minimal clean style, studio lighting
 
@@ -59,9 +57,9 @@ Requirements:
 - NO props`;
   },
 
-  // 2) Marketing image (strong visual / advertising)
+  // 2) Marketing image (selling point / emotional impact)
   benefitImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    return `Enhance this product image into high-quality e-commerce visuals.
+    return `Enhance this product image into high-quality e-commerce visuals that can drive conversions.
 
 Base quality (apply to all images):
 ${BASE_QUALITY}
@@ -71,31 +69,31 @@ ${PRODUCT_PRESERVATION}
 
 Generate 1 DISTINCT image:
 
-2) Marketing image (strong visual / advertising):
-close-up detail, dramatic lighting, strong contrast lighting,
-dark or gradient background, spotlight effect,
-premium glossy texture, high-end commercial advertising style,
-floating or isolated product
+2) Marketing image (selling point / emotional impact):
+close-up product shot, premium advertising style,
+cinematic lighting, strong contrast but soft highlights,
+dark or gradient background,
 
-Lighting rules:
-- realistic lighting only
-- optional subtle reflection ONLY if physically plausible
+add visual selling cues:
+- soft glow or subtle light diffusion around product
+- suggest product function visually (e.g. for mosquito repellent: calm, clean air feeling)
+
+IMPORTANT:
+- create emotional appeal (comfort, safety, premium)
+- make product feel "valuable" and "effective"
+- must look like a high-end advertisement poster
+
+STRICT:
 - no fake reflections
-- no mirror-like unrealistic surface
-
-Rules:
-- NOT a real-life scene
-- NO table
-- NO environment objects
-- focus on product + lighting + texture
-- must look like an advertisement poster`;
+- no mirror-like unrealistic surfaces
+- no overexaggerated effects`;
   },
 
   // 3) Lifestyle image (real usage / conversion)
   sceneImage: (_productName?: string, _benefits?: string, category?: ProductCategory) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    return `Enhance this product image into high-quality e-commerce visuals.
+    return `Enhance this product image into high-quality e-commerce visuals that can drive conversions.
 
 Base quality (apply to all images):
 ${BASE_QUALITY}
@@ -106,21 +104,32 @@ ${PRODUCT_PRESERVATION}
 Generate 1 DISTINCT image:
 
 3) Lifestyle image (real usage / conversion):
-realistic lifestyle scene, product being actively used,
-${sceneDesc}
+realistic real-life scene, product being used correctly,
+natural environment, believable lighting
 
-Usage rules:
-- MUST reflect real-world usage
-- MUST be physically correct
-- MUST feel natural and believable
+Scene logic:
+- MUST match product usage
+- MUST feel natural and practical
+- ${sceneDesc}
+
+Add emotional context:
+- warm light, cozy atmosphere
+- comfort, safety, relaxation feeling
+- real-life usability
+
+STRICT:
+- correct physical placement
+- no floating unless physically valid
+- no incorrect usage
 
 Global restrictions:
 - no unrelated objects
-- no messy background
-- no incorrect usage
+- no messy composition
+- no incorrect product usage
 - no unrealistic reflections
 - no fake mirror effects
-- no physically impossible lighting`;
+- no physically impossible lighting
+- no distortion of product`;
   },
 };
 
