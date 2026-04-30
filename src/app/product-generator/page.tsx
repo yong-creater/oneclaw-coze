@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import UtilityHeader from '@/components/common/UtilityHeader';
 
 // 图片槽位类型（与后端对齐）
-type ImageSlot = 'main' | 'scene' | 'lifestyle';
+type ImageSlot = 'main' | 'scene' | 'selling';
 
 interface GeneratedImage {
   slot: ImageSlot;
@@ -19,7 +19,7 @@ interface GeneratedImage {
 const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number }[] = [
   { slot: 'main', label: '主图', order: 1 },
   { slot: 'scene', label: '使用场景图', order: 2 },
-  { slot: 'lifestyle', label: '生活场景图', order: 3 },
+  { slot: 'selling', label: '卖点图', order: 3 },
 ];
 
 // 加载状态文案（与右侧生成提示对应）
@@ -38,7 +38,7 @@ const MAX_IMAGES = 5;
 const DEMO_IMAGES = [
   { slot: 'main' as ImageSlot, url: '/demo-main.jpg', label: '商品主图', order: 1 },
   { slot: 'scene' as ImageSlot, url: '/demo-scene.jpg', label: '使用场景', order: 2 },
-  { slot: 'lifestyle' as ImageSlot, url: '/demo-main.jpg', label: '卖点图', order: 3, isSellingPoint: true },
+  { slot: 'selling' as ImageSlot, url: '/demo-main.jpg', label: '卖点图', order: 3, isSellingPoint: true },
 ];
 
 export default function ProductDetailGeneratorPage() {
