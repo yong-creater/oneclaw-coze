@@ -118,7 +118,10 @@ export default function ProductDetailGeneratorPage() {
     if (!files || files.length === 0) return;
 
     const remaining = MAX_IMAGES - uploadedImages.length;
-    if (remaining <= 0) return;
+    if (remaining <= 0) {
+      setUploadError(`最多支持 ${MAX_IMAGES} 张商品图，推荐上传 3 张`);
+      return;
+    }
 
     const filesToProcess = Array.from(files).slice(0, remaining);
 
@@ -379,7 +382,7 @@ export default function ProductDetailGeneratorPage() {
                   <Upload className="w-7 h-7 text-orange-500" strokeWidth={2.5} />
                 </div>
                 <p className="text-slate-800 dark:text-white font-bold text-base mb-1">上传商品图片</p>
-                <p className="text-slate-400 text-sm">支持多角度上传（3-5张效果最佳）</p>
+                <p className="text-slate-400 text-sm">推荐上传 3 张，最多 {MAX_IMAGES} 张</p>
                 <p className="text-[11px] text-slate-300 dark:text-slate-500 mt-3">JPG / PNG · 最多{MAX_IMAGES}张</p>
               </div>
             ) : (
