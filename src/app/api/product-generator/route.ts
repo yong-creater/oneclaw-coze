@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 // 4sapi GPT Image 配置
 const API4S_KEY = process.env.API4S_KEY || '';
 const API4S_URL = process.env.API4S_URL || 'https://4sapi.com/v1';
-const FOURS_API_URL = `${API4S_URL}/images/edits`;
 
 // 三种电商图生成 Prompt
 const PROMPTS = {
@@ -28,32 +27,39 @@ const PROMPTS = {
   },
 };
 
-// 单次调用 4sapi 生成图片
-async function generateWith4sApi(prompt: string, imageBase64: string): Promise<string[]> {
-  const response = await fetch(FOURS_API_URL, {
+// Base64 转 Buffer
+function base64ToBuffer(base64: string): Buffer {
+  return Buffer.from(base64, 'base64');
+}
+
+// 通过 /images/edits 端点（multipart/form-data）调用 4sapi 图生图
+async function generateWith4sApiEdit(prompt: string, imageBase64: string): Promise<string[]> {
+  const imageBuffer = base64ToBuffer(imageBase64);
+
+  const formData = new FormData();
+  formData.append('model', 'gpt-image-2');
+  formData.append('prompt', prompt);
+  formData.append('n', '1');
+  formData.append('size', '1024x1024');
+
+  // 将 base64 图片作为文件上传
+  const imageBlob = new Blob([imageBuffer], { type: 'image/png' });
+  formData.append('image', imageBlob, 'image.png');
+
+  const response = await fetch(`${API4S_URL}/images/edits`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${API4S_KEY}`,
-      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: 'gpt-image-1',
-      prompt,
-      image: imageBase64,
-      n: 1,
-      size: '1024x1024',
-    }),
+    body: formData,
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`4sapi 请求失败 (${response.status}): ${errorText}`);
+    throw new Error(`4sapi edits 请求失败 (${response.status}): ${errorText}`);
   }
 
   const data = await response.json();
-
-  // 解析返回的图片数据
-  // OpenAI 兼容格式: { data: [{ b64_json: "..." }, { url: "..." }] }
   const urls: string[] = [];
   if (data.data && Array.isArray(data.data)) {
     for (const item of data.data) {
@@ -64,8 +70,55 @@ async function generateWith4sApi(prompt: string, imageBase64: string): Promise<s
       }
     }
   }
-
   return urls;
+}
+
+// 通过 /images/generations 端点（JSON）调用 4sapi 文生图（兜底方案）
+async function generateWith4sApiGen(prompt: string): Promise<string[]> {
+  const response = await fetch(`${API4S_URL}/images/generations`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${API4S_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-image-2',
+      prompt,
+      n: 1,
+      size: '1024x1024',
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`4sapi generations 请求失败 (${response.status}): ${errorText}`);
+  }
+
+  const data = await response.json();
+  const urls: string[] = [];
+  if (data.data && Array.isArray(data.data)) {
+    for (const item of data.data) {
+      if (item.url) {
+        urls.push(item.url);
+      } else if (item.b64_json) {
+        urls.push(`data:image/png;base64,${item.b64_json}`);
+      }
+    }
+  }
+  return urls;
+}
+
+// 统一生成函数：优先用 edits（图生图），失败则回退到 generations（文生图）
+async function generateImage(prompt: string, imageBase64: string): Promise<string[]> {
+  try {
+    const result = await generateWith4sApiEdit(prompt, imageBase64);
+    if (result.length > 0) return result;
+  } catch (err) {
+    console.warn('[Product Generator] edits 端点失败，回退到 generations:', err instanceof Error ? err.message : err);
+  }
+
+  // 回退：文生图
+  return generateWith4sApiGen(prompt);
 }
 
 export async function POST(request: NextRequest) {
@@ -104,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     // 1. 生成白底主图
     try {
-      const mainUrls = await generateWith4sApi(
+      const mainUrls = await generateImage(
         PROMPTS.mainImage(productName, productBenefit),
         imageBase64
       );
@@ -119,7 +172,7 @@ export async function POST(request: NextRequest) {
 
     // 2. 生成高级感主图
     try {
-      const benefitUrls = await generateWith4sApi(
+      const benefitUrls = await generateImage(
         PROMPTS.benefitImage(productName, productBenefit),
         imageBase64
       );
@@ -134,7 +187,7 @@ export async function POST(request: NextRequest) {
 
     // 3. 生成场景图
     try {
-      const sceneUrls = await generateWith4sApi(
+      const sceneUrls = await generateImage(
         PROMPTS.sceneImage(productName, productBenefit),
         imageBase64
       );
