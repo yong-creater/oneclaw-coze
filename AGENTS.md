@@ -163,6 +163,69 @@ props 传递给子组件
 
 **常见坑**：API 返回 `{ success, data }` 包装，但父组件期望直接是 `{ providers }`
 
+### 铁律六：技术实现逻辑必须统一规范
+
+> **每个功能模块必须遵循项目已有的统一架构，禁止独立造轮子！**
+
+#### 核心原则
+
+| 原则 | 说明 | 违反示例 |
+|------|------|----------|
+| 数据库驱动配置 | 模型、API等配置必须存在数据库，不硬编码 | 在代码里写死 `gpt-image-2` + `4sapi` |
+| 统一调度分发 | 通过 providerSlug 等标识走统一调度，不独立实现 | 每个工具自己写一套 API 调用逻辑 |
+| 后台可控 | 用户在后台切换配置后，前台自动生效，无需改代码 | 切了模型但还是走旧逻辑 |
+| 复用已有接口 | 优先走项目统一 API（如 `/api/images/generate`），不新建独立接口 | 每个工具创建独立的 `/api/xxx/route.ts` |
+
+#### 精选工具模型调度规范（CRITICAL）
+
+```
+后台选择模型 → utility_tools.model_provider_id
+  → 查 model_providers 表获取 providerSlug + apiUrl + apiKey
+  → providerSlug 含 "coze" → 走扣子 SDK（ImageGenerationClient / LLMClient）
+  → 其他 → 走 OpenAI 兼容 API（4sapi 等）
+```
+
+**必须遵守**：
+1. 新增精选工具时，**必须**走统一模型调度体系（读数据库配置 → 按 providerSlug 分发）
+2. **禁止**在 API 路由中硬编码 API Key、API URL、模型名
+3. **禁止**为每个工具写独立的第三方 API 调用逻辑，应复用统一的调度函数
+4. **禁止**绕过后台配置，直接在代码里指定模型
+
+#### 正确示例
+
+```typescript
+// ✅ 正确：从数据库读配置，统一分发
+async function getToolModelConfig(toolSlug: string) {
+  const { data: tool } = await supabase
+    .from('utility_tools')
+    .select('model_provider_id, model_name')
+    .eq('slug', toolSlug).single();
+
+  const { data: provider } = await supabase
+    .from('model_providers')
+    .select('slug, api_url, api_key')
+    .eq('id', tool.model_provider_id).single();
+
+  return { provider, modelName: tool.model_name };
+}
+
+// 根据 providerSlug 统一分发
+const isCoze = config.provider.slug.includes('coze');
+if (isCoze) { /* 走扣子 SDK */ }
+else { /* 走 OpenAI 兼容 API */ }
+```
+
+#### 错误示例
+
+```typescript
+// ❌ 错误：硬编码 API Key 和模型
+const API_KEY = process.env.API4S_KEY;
+const response = await fetch('https://4sapi.com/v1/images/generations', {
+  headers: { 'Authorization': `Bearer ${API_KEY}` },
+  body: JSON.stringify({ model: 'gpt-image-2' })  // 硬编码模型名
+});
+```
+
 ---
 
 ## 项目概述
