@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { Upload, Sparkles, Loader2, Download, RefreshCw, X, Check, ArrowRight, Zap } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
 interface GeneratedImage {
@@ -54,6 +55,7 @@ export default function ProductGeneratorPage() {
   const [generatingStep, setGeneratingStep] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
+  const [showUnlockDialog, setShowUnlockDialog] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -417,8 +419,8 @@ export default function ProductGeneratorPage() {
                     <span className="text-xs font-bold text-white">
                       高级感主图
                     </span>
-                    <span className="block text-[10px] text-white/60 mt-0.5">
-                      更清晰 · 更高级 · 可直接卖货
+                    <span className="block text-[10px] text-white/70 font-semibold mt-0.5">
+                      点击率更高的商品主图
                     </span>
                   </div>
                 </div>
@@ -452,11 +454,22 @@ export default function ProductGeneratorPage() {
                 </div>
 
                 {/* 视觉引导 */}
-                <div className="mt-3 flex items-center">
+                <div className="mt-3 flex items-center justify-between">
                   <span className="text-xs text-orange-500 font-medium">
-                    试一下 →
+                    👉 上传商品图试一下
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    高清无水印下载需解锁
                   </span>
                 </div>
+
+                {/* 下载高清版本按钮 */}
+                <button
+                  onClick={() => setShowUnlockDialog(true)}
+                  className="w-full mt-3 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-medium hover:from-orange-600 hover:to-orange-700 transition-all shadow-sm"
+                >
+                  ✨ 下载高清版本
+                </button>
               </div>
             ) : (
               /* 生成结果 */
@@ -529,6 +542,42 @@ export default function ProductGeneratorPage() {
           </div>
         </div>
       </div>
+
+      {/* 解锁高清弹窗 */}
+      <Dialog open={showUnlockDialog} onOpenChange={setShowUnlockDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg">解锁高清商品图</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-3">
+              <div className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-slate-700 dark:text-slate-300">更高清晰度</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-slate-700 dark:text-slate-300">商用可用</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-slate-700 dark:text-slate-300">无水印</span>
+              </div>
+            </div>
+            <div className="text-center py-2">
+              <span className="text-2xl font-bold text-orange-600">￥9.9</span>
+              <span className="text-sm text-slate-400 ml-1">/ 10次</span>
+            </div>
+            <button
+              onClick={() => setShowUnlockDialog(false)}
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium hover:from-orange-600 hover:to-orange-700 transition-all"
+            >
+              立即解锁
+            </button>
+            <p className="text-[10px] text-center text-slate-400">解锁后可下载高清无水印商品图，支持商用</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
