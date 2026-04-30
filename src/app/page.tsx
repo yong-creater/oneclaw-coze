@@ -114,6 +114,7 @@ function UtilityToolsPage() {
       'xiaohongshu-generator': '/xiaohongshu-generator',
       'product-poster': '/product-poster',
       'ai-photo': '/ai-photo',
+      'product-generator': '/product-generator',
     };
     return urls[slug] || '/';
   };
