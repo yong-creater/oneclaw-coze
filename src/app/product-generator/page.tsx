@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, GripVertical, ImageIcon, CheckCircle2, XCircle } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -297,227 +297,91 @@ export default function ProductDetailGeneratorPage() {
         </div>
 
         {/* 左右布局主体区 */}
-        <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
-          {/* ==================== 左侧：输入表单 ==================== */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm">
-            {/* 上传区域 */}
-            <div className="mb-3">
-              {/* 点击上传区 */}
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6">
+          {/* ==================== 左侧：卡片式主操作区 ==================== */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
+
+            {/* ===== 上传区域 ===== */}
+            {uploadedImages.length === 0 ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className={`relative border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors bg-gradient-to-br from-slate-50 to-orange-50/50 dark:from-slate-800 dark:to-orange-900/20 ${
-                  uploadedImages.length >= MAX_IMAGES
-                    ? 'border-slate-200 dark:border-slate-700 opacity-60 cursor-not-allowed'
-                    : 'border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500'
-                }`}
+                className="relative rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 bg-gradient-to-br from-slate-50 via-white to-orange-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-orange-900/10 border-2 border-dashed border-slate-200 dark:border-slate-600 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-[0_0_20px_rgba(249,115,22,0.1)] min-h-[220px] flex flex-col items-center justify-center"
               >
-                <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                <p className="text-slate-600 dark:text-slate-400 font-medium text-sm">
-                  上传商品多角度图片（建议3-5张效果更好）
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  支持 JPG / PNG，最多{MAX_IMAGES}张 · 可拖拽排序
-                </p>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-                className="hidden"
-              />
-            </div>
-
-            {/* 上传引导 */}
-            <div className="mt-2.5 grid grid-cols-2 gap-2">
-              <div className="p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
-                <p className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 mb-1">推荐上传</p>
-                <div className="space-y-0.5">
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品正面图
-                  </p>
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品侧面图
-                  </p>
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品使用图
-                  </p>
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-300 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 flex-shrink-0" /> 产品细节图
-                  </p>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center mb-4">
+                  <Upload className="w-7 h-7 text-orange-500" strokeWidth={2.5} />
                 </div>
+                <p className="text-slate-800 dark:text-white font-bold text-base mb-1">上传商品图片</p>
+                <p className="text-slate-400 text-sm">支持多角度上传（3-5张效果最佳）</p>
+                <p className="text-[11px] text-slate-300 dark:text-slate-500 mt-3">JPG / PNG · 最多{MAX_IMAGES}张</p>
               </div>
-              <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
-                <p className="text-[11px] font-medium text-red-600 dark:text-red-400 mb-1">避免</p>
-                <div className="space-y-0.5">
-                  <p className="text-[10px] text-red-500 dark:text-red-300 flex items-center gap-1">
-                    <XCircle className="w-3 h-3 flex-shrink-0" /> 模糊图
-                  </p>
-                  <p className="text-[10px] text-red-500 dark:text-red-300 flex items-center gap-1">
-                    <XCircle className="w-3 h-3 flex-shrink-0" /> 不同产品
-                  </p>
-                  <p className="text-[10px] text-red-500 dark:text-red-300 flex items-center gap-1">
-                    <XCircle className="w-3 h-3 flex-shrink-0" /> 带强背景干扰
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 缩略图列表 + 拖拽排序 */}
-            {uploadedImages.length > 0 && (
-              <div className="mb-3">
-                {/* 横向缩略图 */}
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-                  {uploadedImages.map((img, index) => (
-                    <div
-                      key={index}
-                      draggable
-                      onDragStart={() => handleDragStart(index)}
-                      onDragOver={(e) => handleDragOver(e, index)}
-                      onDragEnd={handleDragEnd}
-                      onDragLeave={() => setDragOverIndex(null)}
-                      className={`relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${
-                        dragOverIndex === index && dragIndex !== index
-                          ? 'border-orange-500 scale-105'
-                          : index === 0
-                          ? 'border-orange-400 shadow-sm'
-                          : 'border-slate-200 dark:border-slate-600'
-                      } ${dragIndex === index ? 'opacity-40 scale-95' : ''}`}
-                    >
-                      <img
-                        src={img}
-                        alt={`商品图${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      {/* 主图标签 */}
-                      {index === 0 && (
-                        <div className="absolute top-0 left-0 bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-br-lg">
-                          主图
-                        </div>
-                      )}
-                      {/* 序号 + 拖拽把手 */}
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-between px-1 py-0.5">
-                        <span className="text-[9px] text-white/80 font-medium">#{index + 1}</span>
-                        <GripVertical className="w-3 h-3 text-white/60" />
-                      </div>
-                      {/* 删除按钮 */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage(index);
-                        }}
-                        className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500/90 text-white rounded-full flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-
-                  {/* 继续添加按钮 */}
-                  {uploadedImages.length < MAX_IMAGES && (
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex-shrink-0 w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors"
-                    >
-                      <ImageIcon className="w-5 h-5 text-slate-400 mb-0.5" />
-                      <span className="text-[9px] text-slate-400">添加</span>
-                    </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative">
+                  {uploadedImages.length > 3 && (
+                    <>
+                      <button onClick={() => { const c = document.getElementById('image-strip'); c?.scrollBy({ left: -120, behavior: 'smooth' }); }} className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white dark:bg-slate-700 rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"><ChevronLeft className="w-4 h-4 text-slate-500" /></button>
+                      <button onClick={() => { const c = document.getElementById('image-strip'); c?.scrollBy({ left: 120, behavior: 'smooth' }); }} className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white dark:bg-slate-700 rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"><ChevronRight className="w-4 h-4 text-slate-500" /></button>
+                    </>
                   )}
-                </div>
-
-                {/* 图片用途说明 */}
-                <div className="mt-2 p-2.5 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-                  <div className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="inline-block w-4 h-4 bg-orange-500 text-white text-[8px] font-bold rounded text-center leading-4">1</span>
-                      <span className="font-medium text-orange-700 dark:text-orange-400">第一张 → 主图</span>
-                      <span className="text-slate-400">（最重要，决定整体效果）</span>
+                  <div id="image-strip" className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-thin scroll-smooth px-1">
+                    {/* 主图（第一张，放大） */}
+                    <div draggable onDragStart={() => handleDragStart(0)} onDragOver={(e) => handleDragOver(e, 0)} onDragEnd={handleDragEnd} onDragLeave={() => setDragOverIndex(null)} className={`relative flex-shrink-0 w-[140px] h-[140px] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === 0 && dragIndex !== 0 ? 'border-orange-500 scale-105' : 'border-orange-400 shadow-sm'} ${dragIndex === 0 ? 'opacity-40 scale-95' : ''}`}>
+                      <img src={uploadedImages[0]} alt="主图" className="w-full h-full object-cover" />
+                      <div className="absolute top-0 left-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-lg">主图</div>
+                      <button onClick={(e) => { e.stopPropagation(); handleRemoveImage(0); }} className="absolute top-1 right-1 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="inline-block w-4 h-4 bg-slate-300 dark:bg-slate-500 text-white text-[8px] font-bold rounded text-center leading-4">+</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">其他图 → 补充细节</span>
-                      <span className="text-slate-400">（结构/角度/使用方式）</span>
-                    </div>
+                    {/* 其他图（小卡片） */}
+                    {uploadedImages.slice(1).map((img, idx) => { const ri = idx + 1; return (
+                      <div key={ri} draggable onDragStart={() => handleDragStart(ri)} onDragOver={(e) => handleDragOver(e, ri)} onDragEnd={handleDragEnd} onDragLeave={() => setDragOverIndex(null)} className={`relative flex-shrink-0 w-[90px] h-[90px] mt-[25px] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === ri && dragIndex !== ri ? 'border-orange-500 scale-105' : 'border-slate-200 dark:border-slate-600'} ${dragIndex === ri ? 'opacity-40 scale-95' : ''}`}>
+                        <img src={img} alt={`图${ri + 1}`} className="w-full h-full object-cover" />
+                        <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent text-[9px] text-white/80 text-center py-0.5">#{ri + 1}</span>
+                        <button onClick={(e) => { e.stopPropagation(); handleRemoveImage(ri); }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-2.5 h-2.5" /></button>
+                      </div>
+                    ); })}
+                    {/* 添加按钮 */}
+                    {uploadedImages.length < MAX_IMAGES && (
+                      <div onClick={() => fileInputRef.current?.click()} className="flex-shrink-0 w-[90px] h-[90px] mt-[25px] rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors group/add">
+                        <ImageIcon className="w-5 h-5 text-slate-300 group-hover/add:text-orange-400 transition-colors mb-0.5" />
+                        <span className="text-[10px] text-slate-300 group-hover/add:text-orange-400 transition-colors">添加</span>
+                      </div>
+                    )}
                   </div>
                 </div>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center">建议上传：正面 / 侧面 / 细节 / 使用图</p>
               </div>
             )}
+            <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+
+            {/* 分隔线 */}
+            <div className="my-5 border-t border-slate-100 dark:border-slate-700/50" />
 
             {/* 商品名称 */}
             <div className="mb-3">
-              <input
-                type="text"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                placeholder="商品名称（可选，用于优化图片效果）"
-                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm"
-              />
+              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：智能保温水杯）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
             </div>
 
             {/* 商品卖点 */}
-            <div className="mb-4">
+            <div className="mb-5">
               <div className="flex gap-2">
-                <textarea
-                  value={productBenefit}
-                  onChange={(e) => setProductBenefit(e.target.value)}
-                  placeholder="商品卖点（强烈建议填写，用于优化图片效果）"
-                  rows={3}
-                  className="flex-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm"
-                />
-                <button
-                  onClick={handleAnalyzeBenefit}
-                  disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)}
-                  className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-colors whitespace-nowrap flex items-center gap-1"
-                >
-                  <Sparkles className="w-3 h-3" />
-                  {isAnalyzing ? '分析中...' : '帮我生成'}
+                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：316不锈钢 24小时保温）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
+                <button onClick={handleAnalyzeBenefit} disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)} className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-600 dark:disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-all whitespace-nowrap flex items-center gap-1 self-end">
+                  <Sparkles className="w-3 h-3" />{isAnalyzing ? '分析中...' : 'AI写卖点'}
                 </button>
               </div>
             </div>
 
-            {/* 生成按钮区域 */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-center gap-3 text-xs text-slate-500 dark:text-slate-400">
-                <span className="flex items-center gap-1">
-                  <Zap className="w-3 h-3 text-orange-500" />
-                  免费体验
-                </span>
-                <span className="text-slate-300">|</span>
-                <span>6张详情图</span>
-                <span className="text-slate-300">|</span>
-                <span>淘宝/小红书</span>
-              </div>
+            {/* ===== 生成按钮 ===== */}
+            <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 hover:from-orange-600 hover:via-orange-600 hover:to-amber-600 text-white font-bold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(249,115,22,0.35)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.45)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(249,115,22,0.35)] flex items-center justify-center gap-2">
+              {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<><Sparkles className="w-5 h-5" />生成电商详情页</>)}
+            </button>
 
-              <div className="text-center">
-                <span className="text-sm text-orange-600 dark:text-orange-400 font-medium">
-                  🔥 今日免费名额仅剩 2 次
-                </span>
-              </div>
-
-              <button
-                onClick={handleGenerate}
-                disabled={isGenerating}
-                className="w-full py-[14px] bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-base rounded-2xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    {generatingStep || '正在生成...'}
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-5 h-5" />
-                    一键生成商品详情页（免费体验）
-                  </>
-                )}
-              </button>
-
-              <div className="text-center">
-                <span className="text-[13px] text-slate-400">
-                  生成6张完整商品详情页素材
-                </span>
-              </div>
+            {/* 底部标签行 */}
+            <div className="flex items-center justify-center gap-3 mt-3 text-[11px] text-slate-400">
+              <span className="flex items-center gap-0.5"><Zap className="w-3 h-3 text-orange-400" />免费体验</span>
+              <span className="text-slate-200 dark:text-slate-700">·</span>
+              <span>6张详情图</span>
+              <span className="text-slate-200 dark:text-slate-700">·</span>
+              <span>淘宝/小红书</span>
             </div>
           </div>
 
