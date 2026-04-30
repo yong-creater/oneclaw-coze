@@ -588,29 +588,25 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 示例效果展示：电商卖货感 ====== */
               <div className="space-y-5">
 
-                {/* A. 主视觉区（Hero） - 高对比广告主图 */}
+                {/* A. 主视觉区（Hero） - 干净高级主图 */}
                 <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                  <div className="w-full h-[300px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
-                    {/* 氛围光效 */}
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/15 rounded-full blur-3xl" />
-                    <div className="absolute bottom-0 left-0 w-36 h-36 bg-amber-400/10 rounded-full blur-3xl" />
-                    {/* 产品居中突出 */}
+                  <div className="w-full h-[300px] bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden">
+                    {/* 柔和光晕 */}
+                    <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-orange-100/30 rounded-full blur-3xl" />
+                    <div className="absolute bottom-1/4 left-1/3 w-48 h-48 bg-amber-50/40 rounded-full blur-2xl" />
+                    {/* 产品居中，放大至60%视觉占比 */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <img
                         src={DEMO_IMAGES[0].url}
                         alt="示例主图"
-                        className="h-[240px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                        className="h-[260px] w-auto object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.08)]"
                       />
                     </div>
-                    {/* 主图标签 */}
-                    <div className="absolute top-3 left-3 bg-orange-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-lg">
-                      主图
-                    </div>
-                    {/* 底部转化文案 */}
-                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-                      <div className="bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                        <p className="text-[11px] text-white/90 font-semibold">
-                          你的商品图 <span className="text-orange-400 mx-0.5">→</span> 卖货详情页
+                    {/* 底部弱化提示 */}
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-center">
+                      <div className="bg-white/70 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-200/50">
+                        <p className="text-[11px] text-slate-500 font-medium">
+                          上传商品图 <span className="text-orange-400 mx-0.5">→</span> 自动生成电商主图+详情页
                         </p>
                       </div>
                     </div>
