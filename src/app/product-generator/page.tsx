@@ -558,55 +558,75 @@ export default function ProductDetailGeneratorPage() {
                 </div>
               </div>
             ) : !showResults ? (
-              /* ====== 示例效果展示：电商卖货感 ====== */
+              /* ====== 示例效果展示：多品类通用 ====== */
               <div className="space-y-5">
 
-                {/* A. 主视觉区（Hero） - 干净高级主图 */}
-                <div className="relative rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                  <div className="w-full h-[300px] bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden">
+                {/* 顶部标题：多品类适用 */}
+                <div className="text-center">
+                  <p className="text-[13px] font-semibold text-slate-700">适用于多品类商品</p>
+                  <p className="text-[11px] text-slate-400 mt-1">上传任意商品图，自动生成主图、场景图、卖点图和详情页</p>
+                </div>
+
+                {/* A. 主视觉区（Hero） */}
+                <div className="relative rounded-xl overflow-hidden">
+                  <div className="w-full h-[260px] bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden">
                     <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-orange-100/30 rounded-full blur-3xl" />
                     <div className="absolute bottom-1/4 left-1/3 w-48 h-48 bg-amber-50/40 rounded-full blur-2xl" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <img
                         src={DEMO_IMAGES[0].url}
                         alt="示例"
-                        className="h-[260px] w-auto object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.08)]"
+                        className="h-[220px] w-auto object-contain drop-shadow-[0_16px_32px_rgba(0,0,0,0.08)]"
                       />
                     </div>
                   </div>
+                  {/* 转化文案浮层 */}
+                  <div className="absolute bottom-3 left-3 right-3 text-center">
+                    <p className="text-[11px] text-slate-500 font-medium">
+                      普通商品图 <span className="text-orange-500 mx-1">→</span> 可直接卖货的详情页素材
+                    </p>
+                  </div>
                 </div>
 
-                {/* 价值文案（精简：一句话） */}
+                {/* 价值文案 */}
                 <p className="text-center text-[15px] font-bold text-slate-800 leading-snug">
                   3秒生成可直接卖货的商品详情图
                 </p>
-                <p className="text-center text-[11px] text-slate-400 mt-0.5">
+                <p className="text-center text-[11px] text-slate-400 -mt-3">
                   已帮助 12,000+ 商家生成卖货素材
                 </p>
 
-                {/* B. 三张示例图（场景+佩戴+卖点） */}
+                {/* B. 三张示例图 + 品类标签 */}
                 <div className="grid grid-cols-3 gap-3">
-                  {/* 场景图1：桌面 */}
-                  <div className="rounded-xl overflow-hidden">
-                    <img src={DEMO_IMAGES[1].url} alt="桌面" className="w-full h-[130px] object-cover" />
+                  {/* 场景图1 + 品类标签 */}
+                  <div className="space-y-1.5">
+                    <div className="rounded-xl overflow-hidden">
+                      <img src={DEMO_IMAGES[1].url} alt="桌面" className="w-full h-[120px] object-cover" />
+                    </div>
+                    <p className="text-center text-[10px] text-slate-400 font-medium">数码商品</p>
                   </div>
-                  {/* 场景图2：佩戴 */}
-                  <div className="rounded-xl overflow-hidden">
-                    <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="佩戴" className="w-full h-[130px] object-cover" />
+                  {/* 场景图2 + 品类标签 */}
+                  <div className="space-y-1.5">
+                    <div className="rounded-xl overflow-hidden">
+                      <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="佩戴" className="w-full h-[120px] object-cover" />
+                    </div>
+                    <p className="text-center text-[10px] text-slate-400 font-medium">服饰美妆</p>
                   </div>
-                  {/* 卖点图 */}
-                  <div className="rounded-xl overflow-hidden">
-                    <div className="w-full h-[130px] relative overflow-hidden">
-                      <img src={DEMO_IMAGES[1].url} alt="卖点" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-                      <div className="absolute bottom-2 left-2 right-2 space-y-0.5">
-                        <p className="text-[10px] text-white/95 font-semibold">🎧 沉浸式音质</p>
-                        <p className="text-[10px] text-white/70 font-medium">🔋 30小时续航</p>
+                  {/* 卖点图 + 品类标签 */}
+                  <div className="space-y-1.5">
+                    <div className="rounded-xl overflow-hidden">
+                      <div className="w-full h-[120px] relative overflow-hidden">
+                        <img src={DEMO_IMAGES[1].url} alt="卖点" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                        <div className="absolute bottom-2 left-2 right-2 space-y-0.5">
+                          <p className="text-[10px] text-white/95 font-semibold">🎧 沉浸式音质</p>
+                          <p className="text-[10px] text-white/70 font-medium">🔋 30小时续航</p>
+                        </div>
                       </div>
                     </div>
+                    <p className="text-center text-[10px] text-slate-400 font-medium">家居日用</p>
                   </div>
                 </div>
-
 
               </div>
             ) : (
