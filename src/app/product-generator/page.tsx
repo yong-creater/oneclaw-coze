@@ -554,31 +554,26 @@ export default function ProductDetailGeneratorPage() {
           {/* ==================== 右侧：电商详情页预览 ==================== */}
           <div className="px-6 py-6">
             {isGenerating ? (
-              /* ====== 生成中：骨架屏 + 进度提示 ====== */
-              <div className="space-y-6">
+              /* ====== 生成中：骨架屏 + 分步提示 ====== */
+              <div className="space-y-5">
                 {/* 主图骨架 */}
-                <div className="w-full h-[280px] rounded-xl bg-slate-100 animate-pulse flex items-center justify-center">
-                  <div className="text-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-orange-400 mx-auto mb-2" />
-                    <p className="text-sm text-slate-400 font-medium">{generatingStep || '正在生成...'}</p>
+                <div className="w-full h-[300px] rounded-xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
+                  <div className="absolute inset-0 flex items-center justify-center animate-none">
+                    <div className="text-center">
+                      <div className="w-10 h-10 rounded-full border-2 border-slate-200 border-t-orange-400 animate-spin mx-auto mb-3" />
+                      <p className="text-sm text-slate-500 font-medium">{generatingStep || '正在生成...'}</p>
+                    </div>
                   </div>
                 </div>
                 {/* 三图骨架 */}
-                <div className="grid grid-cols-3 gap-4">
-                  {SLOT_CONFIG.map(({ slot, label }, idx) => (
-                    <div key={slot} className="h-[150px] rounded-xl bg-slate-100 animate-pulse flex items-center justify-center" style={{ animationDelay: `${idx * 0.15}s` }}>
-                      <span className="text-xs text-slate-300">{label}</span>
+                <div className="grid grid-cols-3 gap-3">
+                  {SLOT_CONFIG.map(({ slot, label }) => (
+                    <div key={slot} className="h-[130px] rounded-xl bg-stone-50 relative overflow-hidden animate-pulse">
+                      <div className="absolute inset-0 flex items-center justify-center animate-none">
+                        <span className="text-[11px] text-slate-300 font-medium">{label}</span>
+                      </div>
                     </div>
                   ))}
-                </div>
-                {/* 详情页骨架 */}
-                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-5 text-center">
-                  <div className="h-3 w-32 bg-slate-100 rounded mx-auto animate-pulse" />
-                </div>
-                {/* 进度提示 */}
-                <div className="flex items-center justify-center gap-2 text-xs text-orange-500">
-                  <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse" />
-                  <span>AI 正在精心绘制中，请稍候...</span>
                 </div>
               </div>
             ) : !showResults ? (
