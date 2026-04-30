@@ -63,7 +63,32 @@ export default function ProductDetailGeneratorPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // ===== 多图上传 =====
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 将任意格式图片转为JPEG（解决HEIC/WEBP等格式兼容问题）
+  const convertToJpeg = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      // 如果已经是JPEG/PNG，直接读取（但PNG也转JPEG以确保一致性）
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { URL.revokeObjectURL(url); reject(new Error('Canvas创建失败')); return; }
+        // 白色背景（防止PNG透明区域变黑）
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        URL.revokeObjectURL(url);
+        resolve(jpegDataUrl);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('图片加载失败')); };
+      img.src = url;
+    });
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -72,19 +97,12 @@ export default function ProductDetailGeneratorPage() {
 
     const filesToProcess = Array.from(files).slice(0, remaining);
 
-    const readPromises = filesToProcess.map((file) => {
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          resolve(event.target?.result as string);
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    Promise.all(readPromises).then((newImages) => {
+    try {
+      const newImages = await Promise.all(filesToProcess.map(f => convertToJpeg(f)));
       setUploadedImages((prev) => [...prev, ...newImages].slice(0, MAX_IMAGES));
-    });
+    } catch (err) {
+      console.error('图片转换失败:', err);
+    }
 
     // 重置 input 以便重复选择同一文件
     e.target.value = '';

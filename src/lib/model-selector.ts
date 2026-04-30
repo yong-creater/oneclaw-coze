@@ -158,80 +158,8 @@ async function generateWithOpenAICompatible(
       imageSize = size || '1024x1024';
     }
 
-    // 判断是否有参考图片
-    const hasImage = image && (Array.isArray(image) ? image.length > 0 && image[0] : image);
-    const imageInput = hasImage
-      ? (Array.isArray(image!) ? image![0] : image!)
-      : null;
-
-    if (imageInput) {
-      // ===== 图生图：使用 /images/edits + multipart/form-data =====
-      console.log('[ModelSelector] 图生图模式，使用 /images/edits 端点');
-      const formData = new FormData();
-      formData.append('model', model);
-      formData.append('prompt', prompt);
-      formData.append('n', '1');
-      formData.append('response_format', 'url');
-      formData.append('size', imageSize);
-
-      // 处理图片来源：URL → 下载 → Buffer；base64 → 直接解码
-      let imageBuffer: Buffer;
-      let mimeType = 'image/jpeg';
-
-      if (imageInput.startsWith('http://') || imageInput.startsWith('https://')) {
-        // URL 图片：先下载再转 Buffer
-        console.log('[ModelSelector] 检测到URL图片，先下载:', imageInput.substring(0, 80));
-        const imgResp = await fetch(imageInput, { redirect: 'follow' });
-        if (!imgResp.ok) {
-          return { success: false, error: `参考图片下载失败: ${imgResp.status}` };
-        }
-        const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
-        if (contentType.includes('png')) mimeType = 'image/png';
-        else if (contentType.includes('webp')) mimeType = 'image/webp';
-        const arrayBuf = await imgResp.arrayBuffer();
-        imageBuffer = Buffer.from(arrayBuf);
-      } else if (imageInput.startsWith('data:')) {
-        // base64 data URL
-        const match = imageInput.match(/^data:(image\/\w+);base64,(.+)$/);
-        if (match) {
-          mimeType = match[1];
-          imageBuffer = Buffer.from(match[2], 'base64');
-        } else {
-          imageBuffer = Buffer.from(imageInput.split(',')[1] || imageInput, 'base64');
-        }
-      } else {
-        // 纯 base64 字符串（无 data: 前缀）
-        imageBuffer = Buffer.from(imageInput, 'base64');
-      }
-
-      const imageBlob = new Blob([new Uint8Array(imageBuffer)], { type: mimeType });
-      formData.append('image', imageBlob, 'image.png');
-
-      const response = await fetch(`${fullApiUrl}/images/edits`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[ModelSelector] /images/edits 失败:', response.status, errorText?.substring(0, 200));
-        return { success: false, error: `API错误: ${response.status}` };
-      }
-
-      const data = await response.json();
-      if (data.data && data.data.length > 0) {
-        return {
-          success: true,
-          imageUrls: data.data.map((item: any) => item.url || (item.b64_json ? `data:image/png;base64,${item.b64_json}` : null)).filter(Boolean),
-        };
-      }
-
-      return { success: false, error: '未返回图片数据' };
-    } else {
-      // ===== 文生图：使用 /images/generations + JSON =====
+    // 文生图通用函数
+    const textToImage = async (): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> => {
       console.log('[ModelSelector] 文生图模式，使用 /images/generations 端点');
       const requestBody: Record<string, any> = {
         model: model,
@@ -253,7 +181,7 @@ async function generateWithOpenAICompatible(
       if (!response.ok) {
         const errorText = await response.text();
         console.error('[ModelSelector] /images/generations 失败:', response.status, errorText?.substring(0, 200));
-        return { success: false, error: `API错误: ${response.status}` };
+        return { success: false, error: `API错误(${response.status}): ${errorText?.substring(0, 100)}` };
       }
 
       const data = await response.json();
@@ -265,6 +193,88 @@ async function generateWithOpenAICompatible(
       }
 
       return { success: false, error: '未返回图片数据' };
+    };
+
+    // 判断是否有参考图片
+    const hasImage = image && (Array.isArray(image) ? image.length > 0 && image[0] : image);
+    const imageInput = hasImage
+      ? (Array.isArray(image!) ? image![0] : image!)
+      : null;
+
+    if (imageInput) {
+      // ===== 图生图：使用 /images/edits + multipart/form-data =====
+      console.log('[ModelSelector] 图生图模式，使用 /images/edits 端点');
+
+      // 处理图片来源：URL → 下载 → Buffer；base64 → 直接解码
+      let imageBuffer: Buffer;
+      let mimeType = 'image/jpeg';
+
+      if (imageInput.startsWith('http://') || imageInput.startsWith('https://')) {
+        // URL 图片：先下载再转 Buffer
+        console.log('[ModelSelector] 检测到URL图片，先下载:', imageInput.substring(0, 80));
+        const imgResp = await fetch(imageInput, { redirect: 'follow' });
+        if (!imgResp.ok) {
+          console.log('[ModelSelector] 参考图片下载失败，降级为文生图');
+          return await textToImage();
+        }
+        const contentType = imgResp.headers.get('content-type') || 'image/jpeg';
+        if (contentType.includes('png')) mimeType = 'image/png';
+        else if (contentType.includes('webp')) mimeType = 'image/webp';
+        const arrayBuf = await imgResp.arrayBuffer();
+        imageBuffer = Buffer.from(arrayBuf);
+      } else if (imageInput.startsWith('data:')) {
+        // base64 data URL — 强制转为 image/jpeg（兼容HEIC等格式）
+        const base64Match = imageInput.match(/^data:(?:image\/\w+)?;base64,(.+)$/);
+        if (base64Match) {
+          imageBuffer = Buffer.from(base64Match[1], 'base64');
+          mimeType = 'image/jpeg'; // 强制JPEG，因为前端已统一转换
+        } else {
+          imageBuffer = Buffer.from(imageInput.split(',')[1] || imageInput, 'base64');
+          mimeType = 'image/jpeg';
+        }
+      } else {
+        // 纯 base64 字符串（无 data: 前缀）
+        imageBuffer = Buffer.from(imageInput, 'base64');
+        mimeType = 'image/jpeg';
+      }
+
+      const formData = new FormData();
+      formData.append('model', model);
+      formData.append('prompt', prompt);
+      formData.append('n', '1');
+      formData.append('response_format', 'url');
+      formData.append('size', imageSize);
+      const imageBlob = new Blob([new Uint8Array(imageBuffer)], { type: mimeType });
+      formData.append('image', imageBlob, 'image.jpg');
+
+      const response = await fetch(`${fullApiUrl}/images/edits`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[ModelSelector] /images/edits 失败:', response.status, errorText?.substring(0, 200));
+        // 图生图失败时，自动降级为文生图（某些模型不支持 /images/edits）
+        console.log('[ModelSelector] 降级为文生图模式 /images/generations');
+        return await textToImage();
+      }
+
+      const data = await response.json();
+      if (data.data && data.data.length > 0) {
+        return {
+          success: true,
+          imageUrls: data.data.map((item: any) => item.url || (item.b64_json ? `data:image/png;base64,${item.b64_json}` : null)).filter(Boolean),
+        };
+      }
+
+      return { success: false, error: '未返回图片数据' };
+    } else {
+      // ===== 纯文生图 =====
+      return await textToImage();
     }
   } catch (error: any) {
     console.error('[ModelSelector] API调用失败:', error);
