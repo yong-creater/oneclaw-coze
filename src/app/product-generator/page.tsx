@@ -34,6 +34,13 @@ const LOADING_STEPS = [
 // 最大上传数量
 const MAX_IMAGES = 5;
 
+// 示例生成结果（默认展示）
+const DEMO_IMAGES = [
+  { slot: 'main' as ImageSlot, url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop', label: '主图', order: 1 },
+  { slot: 'scene' as ImageSlot, url: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=600&fit=crop', label: '使用场景图', order: 2 },
+  { slot: 'lifestyle' as ImageSlot, url: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&h=600&fit=crop', label: '生活场景图', order: 3 },
+];
+
 export default function ProductDetailGeneratorPage() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [productName, setProductName] = useState('');
@@ -400,17 +407,60 @@ export default function ProductDetailGeneratorPage() {
           {/* ==================== 右侧：电商详情页预览 ==================== */}
           <div>
             {!showResults ? (
-              /* ====== 未生成时的占位 ====== */
-              <div className="bg-white dark:bg-slate-800/50 rounded-2xl flex flex-col items-center justify-center py-24 text-center border border-slate-100 dark:border-slate-700/50">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center mb-4">
-                  <Package className="w-8 h-8 text-orange-400" />
+              /* ====== 示例效果展示 ====== */
+              <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100">
+                {/* 示例标签 */}
+                <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                  <span className="text-[11px] font-medium text-orange-500 bg-orange-50 px-2.5 py-1 rounded-full">示例效果</span>
+                  <span className="text-[11px] text-slate-400">由 AI 生成</span>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-                  上传商品图后，将生成可直接用于电商的商品详情页素材
-                </p>
-                <p className="text-[11px] text-slate-300 dark:text-slate-600 mt-2">
-                  封面主图 · 使用场景 · 生活场景
-                </p>
+
+                {/* 主图大图 */}
+                <div className="relative group cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
+                  <img
+                    src={DEMO_IMAGES[0].url}
+                    alt="示例主图"
+                    className="w-full aspect-square object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
+                      点击查看大图
+                    </span>
+                  </div>
+                </div>
+
+                {/* 下三宫格：场景+生活+详情 */}
+                <div className="grid grid-cols-3 gap-0.5 bg-slate-100">
+                  {DEMO_IMAGES.slice(1).map((img) => (
+                    <div key={img.slot} className="relative group cursor-pointer" onClick={() => openPreview(img.url)}>
+                      <img
+                        src={img.url}
+                        alt={img.label}
+                        className="w-full aspect-[4/3] object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
+                          点击查看大图
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                  {/* 第三格：详情页长图占位 */}
+                  <div className="relative group cursor-pointer bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
+                    <div className="text-center px-2">
+                      <Package className="w-5 h-5 text-slate-400 mx-auto mb-1" />
+                      <span className="text-[10px] text-slate-400 leading-tight block">详情页长图</span>
+                    </div>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                  </div>
+                </div>
+
+                {/* 引导文案 */}
+                <div className="px-5 py-4 text-center">
+                  <p className="text-sm font-medium text-slate-700">
+                    上传你的商品图，<span className="text-orange-500">3秒生成同款效果</span>
+                  </p>
+                </div>
               </div>
             ) : (
               /* ====== 生成结果：沉浸式详情页 ====== */
