@@ -112,6 +112,9 @@ export async function getProviderConfig(providerSlug: string): Promise<{ slug: s
 /**
  * 通过 OpenAI 兼容 API 生成图片（4sapi 等）
  * api_url 和 api_key 从数据库 model_providers 表读取
+ *
+ * 文生图：POST /images/generations (JSON)
+ * 图生图：POST /images/edits (multipart/form-data)
  */
 async function generateWithOpenAICompatible(
   prompt: string,
@@ -130,55 +133,105 @@ async function generateWithOpenAICompatible(
       return { success: false, error: 'API地址未配置，请在后台模型提供商中配置' };
     }
 
-    const requestBody: Record<string, any> = {
-      model: model,
-      prompt: prompt,
-      n: 1,
-      response_format: 'url',
-    };
-
-    // 设置尺寸
+    // 解析尺寸
+    let imageSize = '1024x1024';
     if (size === '2K') {
-      requestBody.size = '1024x1024';
+      imageSize = '1024x1024';
     } else if (size === '4K') {
-      requestBody.size = '1792x1024';
+      imageSize = '1792x1024';
     } else {
-      requestBody.size = size || '1024x1024';
+      imageSize = size || '1024x1024';
     }
 
-    // 如果有参考图片（图生图）
-    if (image) {
-      const images = Array.isArray(image) ? image : [image];
-      if (images.length > 0 && images[0]) {
-        requestBody.image = images[0];
+    // 判断是否有参考图片
+    const hasImage = image && (Array.isArray(image) ? image.length > 0 && image[0] : image);
+    const imageInput = hasImage
+      ? (Array.isArray(image!) ? image![0] : image!)
+      : null;
+
+    if (imageInput) {
+      // ===== 图生图：使用 /images/edits + multipart/form-data =====
+      console.log('[ModelSelector] 图生图模式，使用 /images/edits 端点');
+      const formData = new FormData();
+      formData.append('model', model);
+      formData.append('prompt', prompt);
+      formData.append('n', '1');
+      formData.append('response_format', 'url');
+      formData.append('size', imageSize);
+
+      // 处理 base64 图片 → Blob
+      let base64Data = imageInput;
+      let mimeType = 'image/jpeg';
+      if (base64Data.startsWith('data:')) {
+        const match = base64Data.match(/^data:(image\/\w+);base64,(.+)$/);
+        if (match) {
+          mimeType = match[1];
+          base64Data = match[2];
+        }
       }
-    }
+      const imageBuffer = Buffer.from(base64Data, 'base64');
+      const imageBlob = new Blob([imageBuffer], { type: mimeType });
+      formData.append('image', imageBlob, 'image.png');
 
-    const response = await fetch(`${apiUrl}/images/generations`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(requestBody),
-    });
+      const response = await fetch(`${apiUrl}/images/edits`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: formData,
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[ModelSelector] API图片生成失败:', response.status, errorText?.substring(0, 200));
-      return { success: false, error: `API错误: ${response.status}` };
-    }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[ModelSelector] /images/edits 失败:', response.status, errorText?.substring(0, 200));
+        return { success: false, error: `API错误: ${response.status}` };
+      }
 
-    const data = await response.json();
-    
-    if (data.data && data.data.length > 0) {
-      return {
-        success: true,
-        imageUrls: data.data.map((item: any) => item.url || (item.b64_json ? `data:image/png;base64,${item.b64_json}` : null)).filter(Boolean),
+      const data = await response.json();
+      if (data.data && data.data.length > 0) {
+        return {
+          success: true,
+          imageUrls: data.data.map((item: any) => item.url || (item.b64_json ? `data:image/png;base64,${item.b64_json}` : null)).filter(Boolean),
+        };
+      }
+
+      return { success: false, error: '未返回图片数据' };
+    } else {
+      // ===== 文生图：使用 /images/generations + JSON =====
+      console.log('[ModelSelector] 文生图模式，使用 /images/generations 端点');
+      const requestBody: Record<string, any> = {
+        model: model,
+        prompt: prompt,
+        n: 1,
+        response_format: 'url',
+        size: imageSize,
       };
-    }
 
-    return { success: false, error: '未返回图片数据' };
+      const response = await fetch(`${apiUrl}/images/generations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[ModelSelector] /images/generations 失败:', response.status, errorText?.substring(0, 200));
+        return { success: false, error: `API错误: ${response.status}` };
+      }
+
+      const data = await response.json();
+      if (data.data && data.data.length > 0) {
+        return {
+          success: true,
+          imageUrls: data.data.map((item: any) => item.url || (item.b64_json ? `data:image/png;base64,${item.b64_json}` : null)).filter(Boolean),
+        };
+      }
+
+      return { success: false, error: '未返回图片数据' };
+    }
   } catch (error: any) {
     console.error('[ModelSelector] API调用失败:', error);
     return { success: false, error: error.message };
