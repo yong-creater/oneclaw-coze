@@ -15,8 +15,9 @@ const SYSTEM_PROMPT = `你是电商文案专家，擅长根据商品图片和名
 高音质沉浸体验｜主动降噪｜超长续航｜轻量舒适
 去污力强｜温和不伤手｜自然清香｜浓缩配方`;
 
-// 工具标识（对应 utility_tools 表的 slug）
-const TOOL_SLUG = 'product-generator-analyze';
+// 卖点分析使用 LLM 模型，直接指定提供商 slug
+const LLM_PROVIDER_SLUG = 'coze-llm';
+const LLM_MODEL_NAME = 'doubao-seed-2-0-lite-260215';
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,9 +68,10 @@ export async function POST(request: NextRequest) {
       { role: 'user', content: messageContent }
     ];
 
-    // 走统一模型调度（从数据库读取配置）
+    // 走统一模型调度（直接指定提供商，无需 utility_tools 记录）
     const result = await invokeWithModel(request, messages, {
-      toolId: TOOL_SLUG,
+      providerSlug: LLM_PROVIDER_SLUG,
+      modelName: LLM_MODEL_NAME,
       temperature: 0.7,
     });
 

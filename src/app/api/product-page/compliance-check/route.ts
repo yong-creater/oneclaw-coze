@@ -106,8 +106,9 @@ function buildCompliancePrompt(region: string, platform: string, imageUrl: strin
 }`;
 }
 
-// 工具标识（对应 utility_tools 表的 slug）
-const TOOL_SLUG = 'compliance-check';
+// 合规检测使用 LLM 模型，直接指定提供商 slug（无需 utility_tools 记录）
+const LLM_PROVIDER_SLUG = 'coze-llm';
+const LLM_MODEL_NAME = 'doubao-seed-1-6-vision-250815';
 
 export async function POST(request: NextRequest) {
   try {
@@ -137,7 +138,8 @@ export async function POST(request: NextRequest) {
 
     try {
       const result = await invokeWithModel(request, messages, {
-        toolId: TOOL_SLUG,
+        providerSlug: LLM_PROVIDER_SLUG,
+        modelName: LLM_MODEL_NAME,
         temperature: 0.3,
       });
       resultText = result.content || '';
@@ -150,7 +152,8 @@ export async function POST(request: NextRequest) {
         { role: 'user', content: prompt + '\n\n图片URL：' + imageUrl }
       ];
       const result = await invokeWithModel(request, textMessages, {
-        toolId: TOOL_SLUG,
+        providerSlug: LLM_PROVIDER_SLUG,
+        modelName: LLM_MODEL_NAME,
         temperature: 0.3,
       });
       resultText = result.content || '';

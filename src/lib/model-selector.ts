@@ -85,6 +85,31 @@ export async function getToolModelConfig(toolId: string): Promise<ToolModelConfi
 }
 
 /**
+ * 直接通过 provider slug 获取提供商配置（无需 utility_tools 记录）
+ * 用于内部 API（如卖点分析、合规检测）不需要在精选工具列表中展示的场景
+ */
+export async function getProviderConfig(providerSlug: string): Promise<{ slug: string; api_url: string; api_key: string } | null> {
+  try {
+    const client = getSupabaseClient();
+    const { data: provider, error } = await client
+      .from('model_providers')
+      .select('slug, api_url, api_key')
+      .eq('slug', providerSlug)
+      .single();
+    
+    if (error || !provider) {
+      console.error('[ModelSelector] 查询提供商失败:', error);
+      return null;
+    }
+    
+    return provider;
+  } catch (error) {
+    console.error('[ModelSelector] 获取提供商配置失败:', error);
+    return null;
+  }
+}
+
+/**
  * 通过 OpenAI 兼容 API 生成图片（4sapi 等）
  * api_url 和 api_key 从数据库 model_providers 表读取
  */

@@ -10,7 +10,7 @@
 
 import { LLMClient, Config, HeaderUtils, Message, ContentPart } from 'coze-coding-dev-sdk';
 import { NextRequest } from 'next/server';
-import { getToolModelConfig, ToolModelConfig } from './model-selector';
+import { getToolModelConfig, getProviderConfig, ToolModelConfig } from './model-selector';
 
 // 统一的消息内容类型：支持纯文字和多模态（图片+文字）
 export type MessageContent = string | ContentPart[];
@@ -173,12 +173,54 @@ export async function streamWithModel(
   options: {
     model?: string;         // fallback 模型名
     toolId?: string;        // 工具ID，走数据库配置
+    providerSlug?: string;  // 直接指定提供商 slug（无需 utility_tools 记录）
+    modelName?: string;     // 配合 providerSlug 使用，指定模型名
     temperature?: number;   // 温度参数
   } = {}
 ): Promise<ReadableStream> {
-  const { model: fallbackModel = 'doubao-seed-1-8-251228', toolId, temperature = 0.7 } = options;
+  const { model: fallbackModel = 'doubao-seed-1-8-251228', toolId, providerSlug, modelName, temperature = 0.7 } = options;
   const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
   const encoder = new TextEncoder();
+
+  // 优先级：providerSlug > toolId > fallback
+  if (providerSlug) {
+    try {
+      const config = await getProviderConfig(providerSlug);
+      if (config) {
+        const useModelName = modelName || fallbackModel;
+        console.log(`[LLMSelector] 使用提供商: ${providerSlug} / ${useModelName}`);
+        const isCoze = providerSlug.includes('coze');
+
+        if (isCoze) {
+          const client = createCozeLLMClient(customHeaders);
+          const llmConfig = { model: useModelName, temperature, streaming: true };
+
+          return new ReadableStream({
+            async start(controller) {
+              try {
+                const aiStream = client.stream(messages as Message[], llmConfig);
+                for await (const chunk of aiStream) {
+                  if (chunk.content) {
+                    controller.enqueue(encoder.encode(chunk.content.toString()));
+                  }
+                }
+                controller.close();
+              } catch (error: any) {
+                controller.enqueue(encoder.encode(`[错误: ${error.message}]`));
+                controller.close();
+              }
+            },
+          });
+        } else {
+          return await streamWithOpenAICompatible(
+            messages, useModelName, config.api_url, config.api_key, temperature, customHeaders
+          );
+        }
+      }
+    } catch (error) {
+      console.error('[LLMSelector] 提供商配置获取失败，使用默认模型:', error);
+    }
+  }
 
   // 如果传入了 toolId，优先从工具配置获取模型
   if (toolId) {
@@ -266,11 +308,46 @@ export async function invokeWithModel(
   options: {
     model?: string;         // fallback 模型名
     toolId?: string;        // 工具ID，走数据库配置
+    providerSlug?: string;  // 直接指定提供商 slug（无需 utility_tools 记录）
+    modelName?: string;     // 配合 providerSlug 使用，指定模型名
     temperature?: number;   // 温度参数
   } = {}
 ): Promise<{ content: string; model?: string; error?: string }> {
-  const { model: fallbackModel = 'doubao-seed-1-8-251228', toolId, temperature = 0.7 } = options;
+  const { model: fallbackModel = 'doubao-seed-1-8-251228', toolId, providerSlug, modelName, temperature = 0.7 } = options;
   const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+
+  // 优先级：providerSlug > toolId > fallback
+  if (providerSlug) {
+    try {
+      const config = await getProviderConfig(providerSlug);
+      if (config) {
+        const useModelName = modelName || fallbackModel;
+        console.log(`[LLMSelector] 使用提供商: ${providerSlug} / ${useModelName}`);
+        const isCoze = providerSlug.includes('coze');
+
+        if (isCoze) {
+          const client = createCozeLLMClient(customHeaders);
+          const response = await client.invoke(messages as Message[], {
+            model: useModelName,
+            temperature,
+          });
+
+          if (!response || !response.content) {
+            return { content: '', model: useModelName, error: 'AI未返回有效内容' };
+          }
+
+          return { content: response.content, model: useModelName };
+        } else {
+          const result = await invokeWithOpenAICompatible(
+            messages, useModelName, config.api_url, config.api_key, temperature
+          );
+          return { ...result, model: useModelName };
+        }
+      }
+    } catch (error) {
+      console.error('[LLMSelector] 提供商配置获取失败，使用默认模型:', error);
+    }
+  }
 
   // 如果传入了 toolId，优先从工具配置获取模型
   if (toolId) {
