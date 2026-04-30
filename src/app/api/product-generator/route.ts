@@ -1,9 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateWithModel } from '@/lib/model-selector';
 
-// ============ Prompt 体系：3 张图用途明确且明显不同 ============
+// ============ Prompt 体系：7 张商品详情图 ============
 
 type ProductCategory = 'shoes' | 'clothing' | 'electronics' | 'beauty' | 'food' | 'general';
+
+// 图片类型定义（顺序即展示顺序）
+export type ImageSlot = 'cover' | 'selling1' | 'selling2' | 'scene1' | 'scene2' | 'feature' | 'specs';
+
+export const IMAGE_SLOTS: { slot: ImageSlot; label: string; order: number }[] = [
+  { slot: 'cover', label: '封面图', order: 1 },
+  { slot: 'selling1', label: '卖点图 1', order: 2 },
+  { slot: 'selling2', label: '卖点图 2', order: 3 },
+  { slot: 'scene1', label: '场景图 1', order: 4 },
+  { slot: 'scene2', label: '场景图 2', order: 5 },
+  { slot: 'feature', label: '功能拆解图', order: 6 },
+  { slot: 'specs', label: '参数图', order: 7 },
+];
 
 // ---- Base quality (apply to all images) ----
 const BASE_QUALITY = `ultra realistic, commercial photography, high detail, sharp focus,
@@ -23,7 +36,7 @@ For functional products:
 - Do NOT generate incorrect connections (e.g. wrong plug/socket alignment)
 - Do NOT invent new parts or change product design`;
 
-// ---- Scene logic for lifestyle image ----
+// ---- Scene logic ----
 const CATEGORY_SCENE: Record<ProductCategory, string> = {
   shoes: 'being worn on feet, walking or sitting naturally',
   clothing: 'being worn by a model, fashion lookbook style',
@@ -33,10 +46,21 @@ const CATEGORY_SCENE: Record<ProductCategory, string> = {
   general: 'in a clean modern setting, naturally used',
 };
 
-const PROMPTS = {
-  // 1) E-commerce main image (clean & standard)
-  mainImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    return `Enhance this product image into high-quality e-commerce visuals that can drive conversions.
+const CATEGORY_SCENE_2: Record<ProductCategory, string> = {
+  shoes: 'running or active lifestyle, outdoor scene',
+  clothing: 'casual outing, street photography style',
+  electronics: 'home entertainment or work setup, cozy atmosphere',
+  beauty: 'morning routine, bathroom vanity, natural light',
+  food: 'shared meal, social gathering',
+  general: 'lifestyle close-up, aesthetic flat lay',
+};
+
+// ---- Per-slot Prompt generators ----
+export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string, category?: ProductCategory) => string> = {
+
+  // 1) 封面图（吸引点击）—— 最强视觉冲击
+  cover: (productName, benefits, _category) => {
+    return `Create a stunning e-commerce cover image that drives clicks and conversions.
 
 Base quality (apply to all images):
 ${BASE_QUALITY}
@@ -44,94 +68,202 @@ ${BASE_QUALITY}
 STRICT product preservation (CRITICAL):
 ${PRODUCT_PRESERVATION}
 
+${benefs(benefits)}
+
 Generate 1 DISTINCT image:
 
-1) E-commerce main image (clean & standard):
-pure white background, centered composition,
-soft shadow, minimal clean style, studio lighting
+COVER IMAGE (click-driving, attention-grabbing):
+- Dramatic studio lighting with rim light accent
+- Pure white or subtle gradient background
+- Product centered, slightly larger than life
+- Soft shadow anchoring the product
+- Premium, aspirational feeling
+- Make the viewer WANT to click
 
-Requirements:
-- Standard e-commerce main image (Taobao/JD style)
-- Extremely clean
-- NO environment
-- NO props`;
+Style: Top-selling Taobao/Tmall main image
+CRITICAL: NO text, NO watermark, NO logo, NO badges, NO floating text overlay`;
+
   },
 
-  // 2) Marketing image (selling point / emotional impact)
-  benefitImage: (_productName?: string, _benefits?: string, _category?: ProductCategory) => {
-    return `Enhance this product image into high-quality e-commerce visuals that can drive conversions.
+  // 2) 卖点图 1（核心卖点/情感冲击）
+  selling1: (_productName, benefits, _category) => {
+    return `Create a premium selling-point image with strong emotional impact.
 
-Base quality (apply to all images):
+Base quality:
 ${BASE_QUALITY}
 
-STRICT product preservation (CRITICAL):
+STRICT product preservation:
 ${PRODUCT_PRESERVATION}
+
+${benefs(benefits)}
 
 Generate 1 DISTINCT image:
 
-2) Marketing image (selling point / emotional impact):
-close-up product shot, premium advertising style,
-cinematic lighting, strong contrast but soft highlights,
-dark or gradient background,
-
-add visual selling cues:
-- soft glow or subtle light diffusion around product
-- suggest product function visually (e.g. for mosquito repellent: calm, clean air feeling)
-
-IMPORTANT:
-- create emotional appeal (comfort, safety, premium)
-- make product feel "valuable" and "effective"
-- must look like a high-end advertisement poster
+SELLING POINT IMAGE 1 (emotional / core benefit):
+- Close-up product shot, premium advertising style
+- Cinematic lighting, strong contrast but soft highlights
+- Dark or gradient background for drama
+- Visual selling cues: soft glow, subtle light diffusion around product
+- Suggest product function visually
+- Create emotional appeal: comfort, safety, premium, effectiveness
+- Must look like a high-end advertisement poster
 
 STRICT:
-- no fake reflections
-- no mirror-like unrealistic surfaces
-- no overexaggerated effects`;
+- No fake reflections, no mirror-like unrealistic surfaces
+- No overexaggerated effects
+- NO text, NO watermark, NO logo`;
+
   },
 
-  // 3) Lifestyle image (real usage / conversion)
-  sceneImage: (_productName?: string, _benefits?: string, category?: ProductCategory) => {
+  // 3) 卖点图 2（细节/质感展示）
+  selling2: (_productName, benefits, _category) => {
+    return `Create a detail/texture selling-point image showing product quality.
+
+Base quality:
+${BASE_QUALITY}
+
+STRICT product preservation:
+${PRODUCT_PRESERVATION}
+
+${benefs(benefits)}
+
+Generate 1 DISTINCT image:
+
+SELLING POINT IMAGE 2 (detail / texture / quality showcase):
+- Macro-style close-up of product texture and material
+- Emphasize build quality, stitching, surface finish, or material
+- Soft directional lighting highlighting texture
+- Clean, minimal background (light gray or soft gradient)
+- Make the viewer feel the quality through the image
+- Premium catalog style photography
+
+STRICT:
+- No fake reflections
+- NO text, NO watermark, NO logo`;
+
+  },
+
+  // 4) 场景图 1（真实使用场景）
+  scene1: (_productName, _benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    return `Enhance this product image into high-quality e-commerce visuals that can drive conversions.
+    return `Create a realistic lifestyle scene image showing the product in use.
 
-Base quality (apply to all images):
+Base quality:
 ${BASE_QUALITY}
 
-STRICT product preservation (CRITICAL):
+STRICT product preservation:
 ${PRODUCT_PRESERVATION}
 
 Generate 1 DISTINCT image:
 
-3) Lifestyle image (real usage / conversion):
-realistic real-life scene, product being used correctly,
-natural environment, believable lighting
-
-Scene logic:
-- MUST match product usage
-- MUST feel natural and practical
+LIFESTYLE SCENE IMAGE 1 (real usage / conversion):
+- Realistic real-life scene, product being used correctly
+- Natural environment, believable lighting
 - ${sceneDesc}
-
-Add emotional context:
-- warm light, cozy atmosphere
-- comfort, safety, relaxation feeling
-- real-life usability
+- Warm light, cozy atmosphere
+- Comfort, safety, relaxation feeling
+- Real-life usability
 
 STRICT:
-- correct physical placement
-- no floating unless physically valid
-- no incorrect usage
+- Correct physical placement, no floating unless physically valid
+- No incorrect usage
+- No unrelated objects, no messy composition
+- NO text, NO watermark, NO logo`;
 
-Global restrictions:
-- no unrelated objects
-- no messy composition
-- no incorrect product usage
-- no unrealistic reflections
-- no fake mirror effects
-- no physically impossible lighting
-- no distortion of product`;
+  },
+
+  // 5) 场景图 2（另一种使用场景/氛围）
+  scene2: (_productName, _benefits, category) => {
+    const cat = category || 'general';
+    const sceneDesc = CATEGORY_SCENE_2[cat];
+    return `Create a second lifestyle scene with a different mood and setting.
+
+Base quality:
+${BASE_QUALITY}
+
+STRICT product preservation:
+${PRODUCT_PRESERVATION}
+
+Generate 1 DISTINCT image:
+
+LIFESTYLE SCENE IMAGE 2 (alternative setting / mood):
+- Different scene from the first lifestyle image
+- ${sceneDesc}
+- Different time of day or lighting mood (e.g. golden hour, evening, morning)
+- Natural and believable
+- Emotional context: enjoyment, satisfaction, daily routine
+
+STRICT:
+- Must be visually distinct from Scene 1
+- Correct physical placement
+- No incorrect usage
+- NO text, NO watermark, NO logo`;
+
+  },
+
+  // 6) 功能拆解图
+  feature: (_productName, benefits, _category) => {
+    return `Create a feature breakdown image showing product components or functions.
+
+Base quality:
+${BASE_QUALITY}
+
+STRICT product preservation:
+${PRODUCT_PRESERVATION}
+
+${benefs(benefits)}
+
+Generate 1 DISTINCT image:
+
+FEATURE BREAKDOWN IMAGE (product anatomy / exploded view):
+- Clean, technical illustration style
+- Show product from a 3/4 angle to reveal structure
+- If applicable: subtle visual hints of internal components or layers
+- Clean white or very light gray background
+- Precision lighting showing every detail
+- Engineering-meets-premium-catalog aesthetic
+- Make the product feel well-designed and trustworthy
+
+STRICT:
+- Do NOT add imaginary components
+- Only show what is visible or logically implied
+- NO text labels, NO callout lines, NO diagrams with text
+- NO watermark, NO logo`;
+
+  },
+
+  // 7) 参数图
+  specs: (productName, _benefits, _category) => {
+    return `Create a product specification display image.
+
+Base quality:
+${BASE_QUALITY}
+
+STRICT product preservation:
+${PRODUCT_PRESERVATION}
+
+Generate 1 DISTINCT image:
+
+SPECIFICATION IMAGE (product spec showcase):
+- Product displayed with dimensional precision
+- Clean, minimal white background
+- Product shown from a clear, informative angle
+- Studio lighting with even illumination
+- Professional catalog style
+- The image should feel like a high-end product datasheet visual${productName ? `\n- Product: ${productName}` : ''}
+
+STRICT:
+- NO text, NO specification numbers, NO measurement lines
+- NO watermark, NO logo
+- Just the product in its most informative, clean presentation`;
   },
 };
+
+function benefs(benefits?: string): string {
+  if (!benefits) return '';
+  return `Product selling points to emphasize: ${benefits}`;
+}
 
 // ============ 品类识别 ============
 
@@ -159,6 +291,8 @@ function detectCategory(productName: string): ProductCategory {
 
 const TOOL_SLUG = 'product-generator';
 
+// ============ 主接口：生成整套详情图 ============
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -171,78 +305,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. 识别商品品类
     const category = detectCategory(productName || '');
-
-    // 2. 提取参考图片（用于图生图）
     const imageInput = image;
 
-    // 3. 并行生成三张图片（带品类感知的 Prompt），走统一模型调度
-    const results: {
-      mainImage?: string;
-      benefitImage?: string;
-      sceneImage?: string;
-      errors: string[];
-    } = { errors: [] };
+    // 并行生成 7 张图片
+    const results: Partial<Record<ImageSlot, string>> = {};
+    const errors: string[] = [];
 
-    const [mainResult, benefitResult, sceneResult] = await Promise.allSettled([
-      generateWithModel(
-        PROMPTS.mainImage(productName, productBenefit, category),
-        undefined, // model 由数据库配置决定
-        '2K',
-        {}, // customHeaders
-        TOOL_SLUG,
-        imageInput
-      ),
-      generateWithModel(
-        PROMPTS.benefitImage(productName, productBenefit, category),
-        undefined,
-        '2K',
-        {},
-        TOOL_SLUG,
-        imageInput
-      ),
-      generateWithModel(
-        PROMPTS.sceneImage(productName, productBenefit, category),
-        undefined,
-        '2K',
-        {},
-        TOOL_SLUG,
-        imageInput
-      ),
-    ]);
+    const generationTasks = IMAGE_SLOTS.map(async ({ slot }) => {
+      try {
+        const prompt = PROMPTS[slot](productName, productBenefit, category);
+        const result = await generateWithModel(
+          prompt,
+          undefined, // model 由数据库配置决定
+          '2K',
+          {},
+          TOOL_SLUG,
+          imageInput
+        );
 
-    if (mainResult.status === 'fulfilled' && mainResult.value.success && mainResult.value.imageUrls?.[0]) {
-      results.mainImage = mainResult.value.imageUrls[0];
-    } else {
-      const errMsg = mainResult.status === 'rejected'
-        ? mainResult.reason?.message || '未知错误'
-        : mainResult.value.error || '返回为空';
-      results.errors.push(`主图生成失败: ${errMsg}`);
-    }
+        if (result.success && result.imageUrls?.[0]) {
+          results[slot] = result.imageUrls[0];
+        } else {
+          errors.push(`${IMAGE_SLOTS.find(s => s.slot === slot)?.label || slot}生成失败: ${result.error || '返回为空'}`);
+        }
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : '未知错误';
+        errors.push(`${IMAGE_SLOTS.find(s => s.slot === slot)?.label || slot}生成异常: ${errMsg}`);
+      }
+    });
 
-    if (benefitResult.status === 'fulfilled' && benefitResult.value.success && benefitResult.value.imageUrls?.[0]) {
-      results.benefitImage = benefitResult.value.imageUrls[0];
-    } else {
-      const errMsg = benefitResult.status === 'rejected'
-        ? benefitResult.reason?.message || '未知错误'
-        : benefitResult.value.error || '返回为空';
-      results.errors.push(`高级感主图生成失败: ${errMsg}`);
-    }
-
-    if (sceneResult.status === 'fulfilled' && sceneResult.value.success && sceneResult.value.imageUrls?.[0]) {
-      results.sceneImage = sceneResult.value.imageUrls[0];
-    } else {
-      const errMsg = sceneResult.status === 'rejected'
-        ? sceneResult.reason?.message || '未知错误'
-        : sceneResult.value.error || '返回为空';
-      results.errors.push(`场景图生成失败: ${errMsg}`);
-    }
+    await Promise.all(generationTasks);
 
     // 检查是否至少生成了一张图片
-    if (!results.mainImage && !results.benefitImage && !results.sceneImage) {
+    const successCount = Object.keys(results).length;
+    if (successCount === 0) {
       return NextResponse.json(
-        { error: '图片生成失败，请重新尝试', details: results.errors },
+        { error: '图片生成失败，请重新尝试', details: errors },
         { status: 500 }
       );
     }
@@ -250,11 +349,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       images: results,
-      category, // 返回识别的品类，方便前端调试
+      category,
+      totalGenerated: successCount,
+      totalSlots: IMAGE_SLOTS.length,
+      errors: errors.length > 0 ? errors : undefined,
     });
 
   } catch (error) {
-    console.error('[Product Generator API Error]:', error);
+    console.error('[Product Detail Generator API Error]:', error);
     return NextResponse.json(
       { error: '服务器错误，请稍后重试' },
       { status: 500 }

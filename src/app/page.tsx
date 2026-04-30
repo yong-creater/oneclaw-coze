@@ -202,16 +202,16 @@ function UtilityToolsPage() {
             {/* 左侧文字区 */}
             <div className="flex-1">
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                AI商品图片一键生成
+                AI商品详情页一键生成
               </h2>
               <p className="text-white/90 text-base md:text-lg mb-4">
-                上传商品图，一键生成主图、卖点图、场景图
+                上传商品图，一键生成封面、卖点、场景、功能、参数图
               </p>
               <button
                 onClick={() => window.open('/product-generator', '_blank')}
                 className="px-6 py-3 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors shadow-lg"
               >
-                立即生成商品图
+                立即生成详情页
               </button>
             </div>
             
