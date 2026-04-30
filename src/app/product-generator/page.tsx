@@ -47,6 +47,8 @@ export default function ProductDetailGeneratorPage() {
   const [productBenefit, setProductBenefit] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [generatingStep, setGeneratingStep] = useState('');
   const [showResults, setShowResults] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
@@ -67,10 +69,17 @@ export default function ProductDetailGeneratorPage() {
   // 将任意格式图片转为JPEG（解决HEIC/WEBP等格式兼容问题）
   const convertToJpeg = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      // 如果已经是JPEG/PNG，直接读取（但PNG也转JPEG以确保一致性）
       const url = URL.createObjectURL(file);
       const img = new Image();
+      
+      // 10秒超时（HEIC等不支持的格式可能导致onload/onerror都不触发）
+      const timeout = setTimeout(() => {
+        URL.revokeObjectURL(url);
+        reject(new Error('图片加载超时，可能不支持该格式'));
+      }, 10000);
+      
       img.onload = () => {
+        clearTimeout(timeout);
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
@@ -84,7 +93,7 @@ export default function ProductDetailGeneratorPage() {
         URL.revokeObjectURL(url);
         resolve(jpegDataUrl);
       };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('图片加载失败')); };
+      img.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(url); reject(new Error('图片加载失败')); };
       img.src = url;
     });
   };
@@ -98,11 +107,51 @@ export default function ProductDetailGeneratorPage() {
 
     const filesToProcess = Array.from(files).slice(0, remaining);
 
+    // 前置检测：HEIC/HEIF格式直接提示
+    const heicFiles = filesToProcess.filter(f => {
+      const ext = f.name.toLowerCase().split('.').pop() || '';
+      const type = f.type.toLowerCase();
+      return ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif';
+    });
+    if (heicFiles.length > 0) {
+      setUploadError(`${heicFiles.length}张图片为HEIC格式（iPhone默认），请先在手机相册中转为JPG后上传，或用其他设备截图后上传`);
+      // 过滤掉HEIC文件，继续处理其他图片
+      const nonHeicFiles = filesToProcess.filter(f => {
+        const ext = f.name.toLowerCase().split('.').pop() || '';
+        const type = f.type.toLowerCase();
+        return ext !== 'heic' && ext !== 'heif' && type !== 'image/heic' && type !== 'image/heif';
+      });
+      if (nonHeicFiles.length === 0) {
+        e.target.value = '';
+        return;
+      }
+      filesToProcess.length = 0;
+      filesToProcess.push(...nonHeicFiles.slice(0, remaining - (uploadedImages.length)));
+    }
+
+    setIsUploading(true);
+    setUploadError(null);
     try {
-      const newImages = await Promise.all(filesToProcess.map(f => convertToJpeg(f)));
-      setUploadedImages((prev) => [...prev, ...newImages].slice(0, MAX_IMAGES));
+      // 并行处理所有图片（避免串行阻塞）
+      const results = await Promise.allSettled(
+        filesToProcess.map(f => convertToJpeg(f))
+      );
+      const newImages: string[] = [];
+      const failedCount = results.filter(r => r.status === 'rejected').length;
+      for (const r of results) {
+        if (r.status === 'fulfilled') newImages.push(r.value);
+      }
+      if (newImages.length > 0) {
+        setUploadedImages((prev) => [...prev, ...newImages].slice(0, MAX_IMAGES));
+      }
+      if (failedCount > 0 && newImages.length === 0) {
+        setUploadError(`图片处理失败（${failedCount}张），请尝试JPG/PNG格式`);
+      }
     } catch (err) {
-      console.error('图片转换失败:', err);
+      console.error('图片处理异常:', err);
+      setUploadError('图片处理异常，请重试');
+    } finally {
+      setIsUploading(false);
     }
 
     // 重置 input 以便重复选择同一文件
