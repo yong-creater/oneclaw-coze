@@ -2,23 +2,79 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ImageGenerationClient, ImageGenerationResponseHelper, Config } from 'coze-coding-dev-sdk';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 三种电商图生成 Prompt
+// ============ 商品类别识别与场景 Prompt 体系 ============
+
+type ProductCategory = 'shoes' | 'clothing' | 'electronics' | 'beauty' | 'food' | 'general';
+
+// 关键词 → 品类映射
+const CATEGORY_KEYWORDS: Record<ProductCategory, string[]> = {
+  shoes: ['鞋', '运动鞋', '休闲鞋', '板鞋', '靴子', '高跟鞋', '拖鞋', '凉鞋', '皮鞋', '帆布鞋', '跑鞋', 'shoes', 'sneakers', 'boots', 'heels', 'sandals', 'slippers'],
+  clothing: ['衣', '裤', '裙', '外套', '帽子', '包', 'T恤', '衬衫', '卫衣', '夹克', '大衣', '毛衣', '牛仔裤', '短裙', '连衣裙', '背包', '手提包', '围巾', '手套', 'coat', 'jacket', 'shirt', 'dress', 'hat', 'bag', 'pants'],
+  electronics: ['耳机', '手机', '键盘', '鼠标', '相机', '音箱', '充电器', '平板', '显示器', '路由器', '手表', '智能', '数码', '蓝牙', 'earphone', 'headphone', 'keyboard', 'mouse', 'camera', 'speaker', 'phone'],
+  beauty: ['香水', '口红', '面霜', '护肤', '精华', '粉底', '眉笔', '眼影', '乳液', '防晒', '卸妆', '美妆', '化妆', '洁面', '唇膏', 'perfume', 'lipstick', 'cream', 'skincare', 'makeup', 'serum'],
+  food: ['饮料', '零食', '咖啡', '茶', '保健', '牛奶', '果汁', '饼干', '巧克力', '啤酒', '红酒', '方便面', '坚果', '果干', 'drink', 'snack', 'coffee', 'tea', 'food', 'beverage'],
+  general: [],
+};
+
+// 根据商品名称识别品类
+function detectCategory(productName: string): ProductCategory {
+  const name = (productName || '').toLowerCase();
+
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (category === 'general') continue;
+    for (const keyword of keywords) {
+      if (name.includes(keyword.toLowerCase())) {
+        return category as ProductCategory;
+      }
+    }
+  }
+
+  return 'general';
+}
+
+// 通用负面 Prompt（所有图片都用）
+const COMMON_NEGATIVE = 'no text, no watermark, no logo, no blur, no distortion, no unrelated objects';
+
+// 通用保持商品不变
+const KEEP_PRODUCT_UNCHANGED = 'Keep the product exactly the same (do not change shape, color, or structure)';
+
+// ============ 按品类生成 Prompt ============
+
 const PROMPTS = {
-  mainImage: (productName?: string, benefits?: string) => {
+  mainImage: (productName?: string, _benefits?: string, _category?: ProductCategory) => {
     const product = productName || 'product';
-    const benefitPart = benefits ? `, highlighting: ${benefits}` : '';
-    return `Enhance this ${product} image into a professional e-commerce product photo with clean white background. Requirements: Keep the product exactly the same (do not change shape, color, or structure). Improve lighting, sharpness, and texture. Make it look like high-end commercial photography. Pure white background, centered composition, soft diffused lighting, realistic shadow underneath${benefitPart}. Style: ultra realistic, commercial photography, studio lighting, soft diffused light, realistic shadow, ultra high detail, sharp focus, 8k. Avoid: text, watermark, logo, blur, distortion.`;
+    return `Professional studio product photography of the same ${product}, centered composition, pure white background, soft studio lighting, realistic shadow underneath, ultra realistic, commercial e-commerce product image, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`;
   },
-  benefitImage: (productName?: string, benefits?: string) => {
+
+  benefitImage: (productName?: string, _benefits?: string, _category?: ProductCategory) => {
     const product = productName || 'product';
-    const benefitPart = benefits ? `, showcasing: ${benefits}` : '';
-    return `Enhance this ${product} image into a premium product photo with minimal luxury background. Requirements: Keep the product exactly the same (do not change shape, color, or structure). Soft beige or light gray gradient background, cinematic soft lighting, subtle shadow, elegant composition, apple style aesthetic${benefitPart}. Style: ultra realistic, commercial photography, studio lighting, soft diffused light, realistic shadow, ultra high detail, sharp focus, 8k. Avoid: text, watermark, logo, blur, distortion.`;
+    return `Premium product photo of the same ${product}, light gray or beige gradient background, clean composition, soft cinematic lighting, realistic shadow, high-end commercial photography, apple style aesthetic, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`;
   },
-  sceneImage: (productName?: string, benefits?: string) => {
+
+  sceneImage: (productName?: string, _benefits?: string, category?: ProductCategory) => {
     const product = productName || 'product';
-    return `Enhance this ${product} image by placing it in a realistic lifestyle scene. Requirements: Keep the product exactly the same (do not change shape, color, or structure). Modern desk setup, warm natural lighting, laptop nearby, coffee cup, cozy lifestyle scene, shallow depth of field, cinematic composition, soft shadows, commercial advertising photography, high-end brand feeling. Style: ultra realistic, commercial photography, studio lighting, soft diffused light, realistic shadow, ultra high detail, sharp focus, 8k. Avoid: text, watermark, logo, blur, distortion.`;
+    const cat = category || 'general';
+
+    // 根据品类选择场景
+    const scenePrompts: Record<ProductCategory, string> = {
+      shoes: `Lifestyle fashion photography of the same ${product} being worn on feet, casual jeans outfit, clean street or minimal indoor floor, natural lighting, realistic shadow, fashion e-commerce style, high-end commercial photography, ${KEEP_PRODUCT_UNCHANGED}, no laptop, no computer desk, no coffee cup, no unrelated objects, ${COMMON_NEGATIVE}`,
+
+      clothing: `Lifestyle fashion photography of the same ${product} being worn by a model, clean background, fashion lookbook style, natural lighting, realistic shadow, high-end commercial fashion photography, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
+
+      electronics: `Lifestyle product photography of the same ${product} on a modern clean desk setup, laptop nearby, coffee cup, soft warm lighting, clean workspace, shallow depth of field, commercial product photography, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
+
+      beauty: `Luxury beauty product photography of the same ${product} on a vanity table, soft elegant lighting, clean luxury background, skincare or perfume product photography style, subtle reflections, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
+
+      food: `Clean food product photography of the same ${product} on a kitchen table or breakfast scene, natural light, fresh ingredients nearby, clean food photography style, appetizing presentation, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
+
+      general: `Lifestyle product photography of the same ${product} in a clean modern setting, warm natural lighting, realistic shadow, commercial advertising photography, high-end brand feeling, ${KEEP_PRODUCT_UNCHANGED}, ${COMMON_NEGATIVE}`,
+    };
+
+    return scenePrompts[cat];
   },
 };
+
+// ============ 模型配置与调度 ============
 
 // 获取工具的模型配置（从数据库读取）
 async function getToolModelConfig(): Promise<{
@@ -190,9 +246,11 @@ export async function POST(request: NextRequest) {
       imageBase64 = image.split(',')[1] || image;
     }
 
-    console.log(`[Product Generator] 使用模型: ${config.providerSlug} / ${config.modelName}`);
+    // 2. 识别商品品类
+    const category = detectCategory(productName || '');
+    console.log(`[Product Generator] 商品: ${productName}, 品类: ${category}, 模型: ${config.providerSlug} / ${config.modelName}`);
 
-    // 2. 并行生成三张图片
+    // 3. 并行生成三张图片（带品类感知的 Prompt）
     const results: {
       mainImage?: string;
       benefitImage?: string;
@@ -201,9 +259,9 @@ export async function POST(request: NextRequest) {
     } = { errors: [] };
 
     const [mainResult, benefitResult, sceneResult] = await Promise.allSettled([
-      generateImage(PROMPTS.mainImage(productName, productBenefit), imageBase64, config),
-      generateImage(PROMPTS.benefitImage(productName, productBenefit), imageBase64, config),
-      generateImage(PROMPTS.sceneImage(productName, productBenefit), imageBase64, config),
+      generateImage(PROMPTS.mainImage(productName, productBenefit, category), imageBase64, config),
+      generateImage(PROMPTS.benefitImage(productName, productBenefit, category), imageBase64, config),
+      generateImage(PROMPTS.sceneImage(productName, productBenefit, category), imageBase64, config),
     ]);
 
     if (mainResult.status === 'fulfilled' && mainResult.value[0]) {
@@ -234,7 +292,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      images: results
+      images: results,
+      category, // 返回识别的品类，方便前端调试
     });
 
   } catch (error) {
