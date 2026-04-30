@@ -38,7 +38,7 @@ const MAX_IMAGES = 5;
 const DEMO_IMAGES = [
   { slot: 'main' as ImageSlot, url: '/demo-main.jpg', label: '商品主图', order: 1 },
   { slot: 'scene' as ImageSlot, url: '/demo-scene.jpg', label: '使用场景', order: 2 },
-  { slot: 'selling' as ImageSlot, url: '/demo-main.jpg', label: '卖点图', order: 3, isSellingPoint: true },
+  { slot: 'selling' as ImageSlot, url: '/demo-lifestyle.jpg', label: '卖点图', order: 3 },
 ];
 
 export default function ProductDetailGeneratorPage() {
@@ -589,16 +589,29 @@ export default function ProductDetailGeneratorPage() {
                 </div>
               </div>
             ) : !showResults ? (
-              /* ====== 示例效果展示：三层结构 ====== */
-              <div className="space-y-6">
+              /* ====== 示例效果展示：三层结构（电商转化感） ====== */
+              <div className="space-y-5">
 
-                {/* A. 主视觉区（Hero） */}
+                {/* A. 主视觉区（Hero） - 高对比广告主图 */}
                 <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                  <img
-                    src={DEMO_IMAGES[0].url}
-                    alt="示例主图"
-                    className="w-full h-[280px] object-cover"
-                  />
+                  {/* 深色高对比背景 */}
+                  <div className="w-full h-[280px] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+                    {/* 氛围光效 */}
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/15 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-36 h-36 bg-amber-400/10 rounded-full blur-3xl" />
+                    {/* 产品居中突出 */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <img
+                        src={DEMO_IMAGES[0].url}
+                        alt="示例主图"
+                        className="h-[220px] w-auto object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                      />
+                    </div>
+                    {/* 主图标签 */}
+                    <div className="absolute top-3 left-3 bg-orange-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-lg">
+                      主图
+                    </div>
+                  </div>
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
                       点击查看大图
@@ -628,46 +641,77 @@ export default function ProductDetailGeneratorPage() {
                   </p>
                 </div>
 
-                {/* B. 三图卡片区（Cards） */}
+                {/* B. 三图卡片区（Cards） - 三种电商图风格 */}
                 <div className="grid grid-cols-3 gap-4">
-                  {DEMO_IMAGES.map((img) => (
-                    <div key={img.slot} className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(img.url)}>
-                      {/* 卖点图：独立构图，不与场景图重复 */}
-                      {'isSellingPoint' in img && img.isSellingPoint ? (
-                        <div className="w-full h-[150px] bg-gradient-to-br from-stone-100 via-amber-50/60 to-stone-50 relative overflow-hidden flex items-center">
-                          {/* 产品图 - 偏左，增强对比度 */}
-                          <div className="absolute left-0 top-0 bottom-0 w-[65%] flex items-center justify-center">
-                            <img
-                              src={img.url}
-                              alt={img.label}
-                              className="h-[130px] w-auto object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
-                            />
-                          </div>
-                          {/* 右侧文案区 */}
-                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-end gap-1.5">
-                            <div className="w-6 h-[1px] bg-slate-400/40" />
-                            <p className="text-[11px] text-slate-700 font-medium tracking-wide leading-relaxed text-right">
-                              24小时<br/>长效保温
-                            </p>
-                            <div className="w-6 h-[1px] bg-slate-400/40" />
-                          </div>
-                          {/* 柔和光晕效果 */}
-                          <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-200/20 rounded-full blur-2xl" />
-                        </div>
-                      ) : (
-                        <img
-                          src={img.url}
-                          alt={img.label}
-                          className="w-full h-[150px] object-cover"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
-                          点击查看大图
+
+                  {/* 卡片1：场景图 - 生活化使用场景 */}
+                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
+                    <div className="w-full h-[150px] relative overflow-hidden">
+                      <img
+                        src={DEMO_IMAGES[1].url}
+                        alt="使用场景"
+                        className="w-full h-full object-cover"
+                      />
+                      {/* 场景氛围叠加 */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                      {/* 手部交互提示 */}
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <span className="inline-block bg-white/90 backdrop-blur-sm text-[10px] text-slate-700 font-medium px-2 py-0.5 rounded-md">
+                          使用场景
                         </span>
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* 卡片2：卖点图 - 环境+卖点文案 */}
+                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[1].url)}>
+                    <div className="w-full h-[150px] bg-gradient-to-br from-amber-50 via-orange-50 to-stone-100 relative overflow-hidden">
+                      {/* 暖色光效 */}
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-orange-300/20 rounded-full blur-2xl" />
+                      <div className="absolute bottom-0 left-0 w-20 h-20 bg-amber-200/25 rounded-full blur-2xl" />
+                      {/* 产品 */}
+                      <div className="absolute left-2 top-1/2 -translate-y-1/2">
+                        <img
+                          src={DEMO_IMAGES[0].url}
+                          alt="卖点图"
+                          className="h-[100px] w-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.1)]"
+                        />
+                      </div>
+                      {/* 卖点文案 - 1条，有冲击力 */}
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex flex-col items-end gap-1">
+                        <div className="w-5 h-[1px] bg-orange-400/50" />
+                        <p className="text-[11px] text-orange-700 font-semibold tracking-wide leading-relaxed text-right">
+                          🔥 24小时<br/>依然保温
+                        </p>
+                        <div className="w-5 h-[1px] bg-orange-400/50" />
+                      </div>
+                      {/* 标签 */}
+                      <div className="absolute top-2 left-2">
+                        <span className="inline-block bg-orange-500/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          卖点图
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 卡片3：生活图 - 户外/日常携带 */}
+                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url)}>
+                    <div className="w-full h-[150px] relative overflow-hidden">
+                      <img
+                        src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url}
+                        alt="生活场景"
+                        className="w-full h-full object-cover"
+                      />
+                      {/* 氛围叠加 */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <span className="inline-block bg-white/90 backdrop-blur-sm text-[10px] text-slate-700 font-medium px-2 py-0.5 rounded-md">
+                          生活场景
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             ) : (
