@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -387,39 +387,76 @@ export default function ProductDetailGeneratorPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="relative">
-                  {uploadedImages.length > 3 && (
-                    <>
-                      <button onClick={() => { const c = document.getElementById('image-strip'); c?.scrollBy({ left: -120, behavior: 'smooth' }); }} className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white dark:bg-slate-700 rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"><ChevronLeft className="w-4 h-4 text-slate-500" /></button>
-                      <button onClick={() => { const c = document.getElementById('image-strip'); c?.scrollBy({ left: 120, behavior: 'smooth' }); }} className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white dark:bg-slate-700 rounded-full shadow-md flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"><ChevronRight className="w-4 h-4 text-slate-500" /></button>
-                    </>
-                  )}
-                  <div id="image-strip" className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-thin scroll-smooth px-1">
-                    {/* 主图（第一张，放大） */}
-                    <div draggable onDragStart={() => handleDragStart(0)} onDragOver={(e) => handleDragOver(e, 0)} onDragEnd={handleDragEnd} onDragLeave={() => setDragOverIndex(null)} className={`relative flex-shrink-0 w-[140px] h-[140px] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === 0 && dragIndex !== 0 ? 'border-orange-500 scale-105' : 'border-orange-400 shadow-sm'} ${dragIndex === 0 ? 'opacity-40 scale-95' : ''}`}>
-                      <img src={uploadedImages[0]} alt="主图" className="w-full h-full object-cover" />
-                      <div className="absolute top-0 left-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-lg">主图</div>
-                      <button onClick={(e) => { e.stopPropagation(); handleRemoveImage(0); }} className="absolute top-1 right-1 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                  {/* 主图（第一张，大图展示） */}
+                  <div
+                    draggable
+                    onDragStart={() => handleDragStart(0)}
+                    onDragOver={(e) => handleDragOver(e, 0)}
+                    onDragEnd={handleDragEnd}
+                    onDragLeave={() => setDragOverIndex(null)}
+                    className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === 0 && dragIndex !== 0 ? 'border-orange-500 scale-[1.02]' : 'border-orange-400 shadow-sm'} ${dragIndex === 0 ? 'opacity-40 scale-95' : ''}`}
+                  >
+                    <img src={uploadedImages[0]} alt="主图" className="w-full h-full object-cover" />
+                    <div className="absolute top-2 left-2 bg-orange-500 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-md shadow-sm">主图</div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleRemoveImage(0); }}
+                      className="absolute top-2 right-2 w-7 h-7 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* 辅助图（横排小图，最多展示4张） */}
+                  {uploadedImages.length > 1 && (
+                    <div className="flex gap-2">
+                      {uploadedImages.slice(1, 5).map((img, idx) => {
+                        const ri = idx + 1;
+                        return (
+                          <div
+                            key={ri}
+                            draggable
+                            onDragStart={() => handleDragStart(ri)}
+                            onDragOver={(e) => handleDragOver(e, ri)}
+                            onDragEnd={handleDragEnd}
+                            onDragLeave={() => setDragOverIndex(null)}
+                            className={`relative flex-1 aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === ri && dragIndex !== ri ? 'border-orange-500 scale-105' : 'border-slate-200 dark:border-slate-600'} ${dragIndex === ri ? 'opacity-40 scale-95' : ''}`}
+                          >
+                            <img src={img} alt={`辅助图${ri + 1}`} className="w-full h-full object-cover" />
+                            <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent text-[10px] text-white/80 text-center py-0.5">辅助</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleRemoveImage(ri); }}
+                              className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                      {/* 超出4张时的折叠提示 */}
+                      {uploadedImages.length > 5 && (
+                        <div className="relative flex-1 aspect-square rounded-lg border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center bg-slate-50 dark:bg-slate-700/50">
+                          <span className="text-xs text-slate-400 font-medium">+{uploadedImages.length - 5}</span>
+                        </div>
+                      )}
                     </div>
-                    {/* 其他图（小卡片） */}
-                    {uploadedImages.slice(1).map((img, idx) => { const ri = idx + 1; return (
-                      <div key={ri} draggable onDragStart={() => handleDragStart(ri)} onDragOver={(e) => handleDragOver(e, ri)} onDragEnd={handleDragEnd} onDragLeave={() => setDragOverIndex(null)} className={`relative flex-shrink-0 w-[90px] h-[90px] mt-[25px] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === ri && dragIndex !== ri ? 'border-orange-500 scale-105' : 'border-slate-200 dark:border-slate-600'} ${dragIndex === ri ? 'opacity-40 scale-95' : ''}`}>
-                        <img src={img} alt={`图${ri + 1}`} className="w-full h-full object-cover" />
-                        <span className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent text-[9px] text-white/80 text-center py-0.5">#{ri + 1}</span>
-                        <button onClick={(e) => { e.stopPropagation(); handleRemoveImage(ri); }} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-2.5 h-2.5" /></button>
-                      </div>
-                    ); })}
-                    {/* 添加按钮 */}
+                  )}
+
+                  {/* 添加更多图片 + 计数 */}
+                  <div className="flex items-center gap-2">
                     {uploadedImages.length < MAX_IMAGES && (
-                      <div onClick={() => fileInputRef.current?.click()} className="flex-shrink-0 w-[90px] h-[90px] mt-[25px] rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors group/add">
-                        <ImageIcon className="w-5 h-5 text-slate-300 group-hover/add:text-orange-400 transition-colors mb-0.5" />
-                        <span className="text-[10px] text-slate-300 group-hover/add:text-orange-400 transition-colors">添加</span>
-                      </div>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 border border-dashed border-slate-200 dark:border-slate-600 hover:border-orange-400 rounded-lg transition-colors"
+                      >
+                        <ImageIcon className="w-3.5 h-3.5" />
+                        添加图片
+                      </button>
                     )}
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                      {uploadedImages.length}/{MAX_IMAGES}张 · 建议上传：正面 / 侧面 / 细节
+                    </span>
                   </div>
                 </div>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 text-center">建议上传：正面 / 侧面 / 细节 / 使用图</p>
-              </div>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
 
