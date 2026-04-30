@@ -70,17 +70,35 @@ export default function ProductDetailGeneratorPage() {
   const convertHeicToJpeg = async (file: File): Promise<File> => {
     const ext = file.name.toLowerCase().split('.').pop() || '';
     const type = file.type.toLowerCase();
-    const isHeic = ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif' || type === 'image/heic-sequence' || type === 'application/octet-stream' && (ext === 'heic' || ext === 'heif');
+    const isHeic = ext === 'heic' || ext === 'heif' || type === 'image/heic' || type === 'image/heif' || type === 'image/heic-sequence' || (type === 'application/octet-stream' && (ext === 'heic' || ext === 'heif'));
     if (!isHeic) return file;
 
     try {
+      // 先尝试浏览器原生支持（Safari/最新Chrome可能直接支持HEIC）
+      const nativeTest = await new Promise<boolean>((resolve) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        const timeout = setTimeout(() => { URL.revokeObjectURL(url); resolve(false); }, 3000);
+        img.onload = () => { clearTimeout(timeout); URL.revokeObjectURL(url); resolve(true); };
+        img.onerror = () => { clearTimeout(timeout); URL.revokeObjectURL(url); resolve(false); };
+        img.src = url;
+      });
+
+      if (nativeTest) {
+        // 浏览器原生支持HEIC，直接返回原文件让Canvas处理
+        console.log('浏览器原生支持HEIC，跳过heic2any转换');
+        return new File([file], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' });
+      }
+
+      // 浏览器不支持，使用heic2any转换
       const heic2any = (await import('heic2any')).default;
-      const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 }) as Blob;
+      const result = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
+      const blob = Array.isArray(result) ? result[0] : result;
       const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
       return new File([blob], newName, { type: 'image/jpeg' });
     } catch (err) {
       console.error('HEIC转换失败:', err);
-      throw new Error('HEIC格式转换失败，请在手机相册中转为JPG后上传');
+      throw new Error('HEIC格式转换失败，请在相册中转为JPG后重新上传');
     }
   };
 
@@ -130,17 +148,21 @@ export default function ProductDetailGeneratorPage() {
     try {
       // Step 1: HEIC先转JPEG（顺序处理，避免heic2any并行崩溃）
       const convertedFiles: File[] = [];
+      const heicFailNames: string[] = [];
       for (const f of filesToProcess) {
         try {
           const converted = await convertHeicToJpeg(f);
           convertedFiles.push(converted);
         } catch (err) {
           console.error('单张HEIC转换失败:', f.name, err);
-          // HEIC转换失败的文件跳过，不阻塞其他文件
+          heicFailNames.push(f.name);
         }
       }
       if (convertedFiles.length === 0) {
-        setUploadError('所有图片处理失败，请尝试JPG/PNG格式');
+        const heicHint = heicFailNames.length > 0
+          ? 'HEIC格式转换失败，请在相册中选择"选项"→"照片"→改为"自动"或"JPG"后重试'
+          : '所有图片处理失败，请尝试JPG/PNG格式';
+        setUploadError(heicHint);
         return;
       }
       // Step 2: 所有图片转base64 JPEG（并行）
@@ -159,6 +181,8 @@ export default function ProductDetailGeneratorPage() {
         setUploadError(`图片处理失败（${failedCount}张），请尝试JPG/PNG格式`);
       } else if (failedCount > 0) {
         setUploadError(`${failedCount}张图片处理失败，已成功处理${newImages.length}张`);
+      } else if (heicFailNames.length > 0 && newImages.length > 0) {
+        setUploadError(`${heicFailNames.length}张HEIC图片转换失败，已成功处理${newImages.length}张`);
       }
     } catch (err) {
       console.error('图片处理异常:', err);
@@ -470,6 +494,23 @@ export default function ProductDetailGeneratorPage() {
                 </div>
             )}
             <input ref={fileInputRef} type="file" accept="image/*,.heic,.heif" multiple onChange={handleImageUpload} className="hidden" />
+
+            {/* 上传中提示 */}
+            {isUploading && (
+              <div className="flex items-center justify-center gap-2 py-3 text-sm text-orange-500">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>正在处理图片...</span>
+              </div>
+            )}
+
+            {/* 上传错误提示 */}
+            {uploadError && (
+              <div className="flex items-center gap-2 mt-2 text-xs text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">
+                <X className="w-3 h-3 flex-shrink-0" />
+                <span>{uploadError}</span>
+                <button onClick={() => setUploadError(null)} className="ml-auto text-red-400 hover:text-red-600 flex-shrink-0"><X className="w-3 h-3" /></button>
+              </div>
+            )}
 
             {/* 分隔线 */}
             <div className="my-5 border-t border-slate-100 dark:border-slate-700/50" />
