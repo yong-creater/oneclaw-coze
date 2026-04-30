@@ -410,62 +410,75 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 示例效果展示 ====== */
               <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-100">
                 {/* 示例标签 */}
-                <div className="flex items-center justify-between px-5 pt-4 pb-2">
+                <div className="flex items-center justify-between px-5 pt-4 pb-3">
                   <span className="text-[11px] font-medium text-orange-500 bg-orange-50 px-2.5 py-1 rounded-full">示例效果</span>
                   <span className="text-[11px] text-slate-400">由 AI 生成</span>
                 </div>
 
-                {/* 主图大图 */}
-                <div className="relative group cursor-pointer" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                  <img
-                    src={DEMO_IMAGES[0].url}
-                    alt="示例主图"
-                    className="w-full aspect-square object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
-                      点击查看大图
-                    </span>
+                {/* 第一层：主视觉大图 */}
+                <div className="px-4 pb-3">
+                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
+                    <img
+                      src={DEMO_IMAGES[0].url}
+                      alt="示例主图"
+                      className="w-full aspect-[4/3] object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
+                        点击查看大图
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* 下三宫格：场景+生活+详情 */}
-                <div className="grid grid-cols-3 gap-0.5 bg-slate-100">
-                  {DEMO_IMAGES.slice(1).map((img) => (
-                    <div key={img.slot} className="relative group cursor-pointer" onClick={() => openPreview(img.url)}>
-                      <img
-                        src={img.url}
-                        alt={img.label}
-                        className="w-full aspect-[4/3] object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
-                          点击查看大图
-                        </span>
+                {/* 第二层：3张卡片图横向排列 */}
+                <div className="px-4 pb-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    {DEMO_IMAGES.map((img) => (
+                      <div key={img.slot} className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(img.url)}>
+                        <img
+                          src={img.url}
+                          alt={img.label}
+                          className="w-full aspect-square object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
+                            点击查看大图
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 第三层：详情页长图缩略 */}
+                <div className="px-4 pb-4">
+                  <div className="relative group cursor-pointer rounded-xl overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
+                    <div className="w-full aspect-[3/4] flex items-center justify-center">
+                      <div className="text-center">
+                        <Package className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
+                        <span className="text-xs text-slate-400">详情页长图预览</span>
                       </div>
                     </div>
-                  ))}
-                  {/* 第三格：详情页长图占位 */}
-                  <div className="relative group cursor-pointer bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center" onClick={() => openPreview(DEMO_IMAGES[0].url)}>
-                    <div className="text-center px-2">
-                      <Package className="w-5 h-5 text-slate-400 mx-auto mb-1" />
-                      <span className="text-[10px] text-slate-400 leading-tight block">详情页长图</span>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
+                        点击查看大图
+                      </span>
                     </div>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                   </div>
                 </div>
 
                 {/* 引导文案 */}
-                <div className="px-5 py-4 text-center">
+                <div className="px-5 pb-5 text-center">
                   <p className="text-sm font-medium text-slate-700">
                     上传你的商品图，<span className="text-orange-500">3秒生成同款效果</span>
                   </p>
                 </div>
               </div>
             ) : (
-              /* ====== 生成结果：沉浸式详情页 ====== */
+              /* ====== 生成结果：三层结构 ====== */
               <div className="bg-white rounded-2xl overflow-hidden shadow-sm">
-                {/* 详情页顶部商品信息条 */}
+                {/* 商品信息 */}
                 <div className="px-5 pt-5 pb-3">
                   <h2 className="text-lg font-bold text-slate-800 leading-snug">
                     {productName || '商品标题'}
@@ -475,31 +488,67 @@ export default function ProductDetailGeneratorPage() {
                   </p>
                 </div>
 
-                {/* 单列大图流：封面 → 卖点 → 功能 → 场景 → 对比 → 参数 */}
-                <div className="px-0">
-                  {SLOT_CONFIG.map(({ slot }) => {
-                    const url = getImage(slot);
-                    if (!url) return null;
-                    return (
-                      <div key={slot} className="relative group cursor-pointer" onClick={() => openPreview(url)}>
-                        <img
-                          src={url}
-                          alt={SLOT_CONFIG.find(s => s.slot === slot)?.label || ''}
-                          className="w-full h-auto block"
-                        />
-                        {/* hover遮罩：点击查看大图 */}
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                          <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
-                            点击查看大图
-                          </span>
-                        </div>
+                {/* 第一层：主视觉大图 */}
+                <div className="px-4 pb-3">
+                  {getImage('main') && (
+                    <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(getImage('main')!)}>
+                      <img
+                        src={getImage('main')!}
+                        alt="主图"
+                        className="w-full aspect-[4/3] object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full">
+                          点击查看大图
+                        </span>
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 第二层：3张卡片图横向排列 */}
+                <div className="px-4 pb-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    {SLOT_CONFIG.map(({ slot, label }) => {
+                      const url = getImage(slot);
+                      if (!url) return null;
+                      return (
+                        <div key={slot} className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(url)}>
+                          <img
+                            src={url}
+                            alt={label}
+                            className="w-full aspect-square object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
+                              点击查看大图
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 第三层：详情页长图缩略 */}
+                <div className="px-4 pb-4">
+                  <div className="relative group cursor-pointer rounded-xl overflow-hidden bg-gradient-to-b from-slate-50 to-slate-100" onClick={() => { const url = getImage('main'); if (url) openPreview(url); }}>
+                    <div className="w-full aspect-[3/4] flex items-center justify-center">
+                      <div className="text-center">
+                        <Package className="w-6 h-6 text-slate-400 mx-auto mb-1.5" />
+                        <span className="text-xs text-slate-400">详情页长图预览</span>
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
+                        点击查看大图
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* 底部操作区 */}
-                <div className="sticky bottom-0 bg-white border-t border-slate-100 px-5 py-4">
+                <div className="border-t border-slate-100 px-5 py-4">
                   <div className="flex gap-3">
                     <button
                       onClick={handleDownloadAll}
