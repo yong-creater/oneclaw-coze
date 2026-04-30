@@ -192,6 +192,9 @@ export async function PUT(request: NextRequest) {
     }
 
     // 同步更新 tool_model_configs 表（工具与模型的关联）
+    const toolSlug = slug || oldData?.slug || '';
+    const toolName = name || oldData?.name || '';
+
     if (model_provider_id && model_name) {
       // 获取提供商信息以推断 model_source
       const { data: provider } = await supabase
@@ -199,10 +202,6 @@ export async function PUT(request: NextRequest) {
         .select('slug, provider_type')
         .eq('id', model_provider_id)
         .single();
-      
-      // 从数据库获取 slug（前端模型选择时可能未传 slug）
-      const toolSlug = slug || existingTool?.slug || '';
-      const toolName = name || existingTool?.name || '';
 
       if (provider && toolSlug) {
         // 检查是否已存在配置
@@ -238,7 +237,7 @@ export async function PUT(request: NextRequest) {
             });
         }
       }
-    } else if (!model_provider_id || !model_name) {
+    } else if (toolSlug) {
       // 如果清空了模型配置，也删除 tool_model_configs 中的记录
       await supabase
         .from('tool_model_configs')

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ImageGenerationClient, ImageGenerationResponseHelper, Config } from 'coze-coding-dev-sdk';
+import { ImageGenerationClient, ImageGenerationResponseHelper, ImageGenerationRequest, Config } from 'coze-coding-dev-sdk';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // ============ 商品类别识别与场景 Prompt 体系 ============
@@ -134,7 +134,7 @@ async function generateWithCoze(
 ): Promise<string[]> {
   const client = createCozeClient();
 
-  const request: Record<string, any> = {
+  const request: ImageGenerationRequest = {
     prompt,
     size: '2K',
     image: `data:image/jpeg;base64,${imageBase64}`,
