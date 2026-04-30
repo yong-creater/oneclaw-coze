@@ -409,9 +409,21 @@ const TOOL_SLUG = 'product-generator';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { image, productName, productBenefit } = body;
+    const { images, productName, productBenefit } = body as {
+      images?: string[];
+      image?: string; // 兼容旧的单图字段
+      productName?: string;
+      productBenefit?: string;
+    };
 
-    if (!image) {
+    // 兼容处理：支持 images 数组或旧的 image 单图
+    const imageList = images && images.length > 0
+      ? images
+      : (body as { image?: string }).image
+        ? [(body as { image: string }).image]
+        : [];
+
+    if (imageList.length === 0) {
       return NextResponse.json(
         { error: '请上传商品图片' },
         { status: 400 }
@@ -419,7 +431,13 @@ export async function POST(request: NextRequest) {
     }
 
     const category = detectCategory(productName || '');
-    const imageInput = image;
+    // 第一张作为主图（用于图生图参考）
+    const mainImage = imageList[0];
+    // 其他图作为补充参考信息（目前仅主图传入生成API，后续可扩展多图分析）
+    const supplementaryCount = imageList.length - 1;
+    if (supplementaryCount > 0) {
+      console.log(`[ProductGenerator] 收到${imageList.length}张图片，第1张为主图，${supplementaryCount}张为补充`);
+    }
 
     // 并行生成 6 张图片
     const results: Partial<Record<ImageSlot, string>> = {};
@@ -434,7 +452,7 @@ export async function POST(request: NextRequest) {
           '2K',
           {},
           TOOL_SLUG,
-          imageInput
+          mainImage
         );
 
         if (result.success && result.imageUrls?.[0]) {

@@ -28,7 +28,13 @@ function detectCategory(productName: string): string {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { slot, image, productName, productBenefit } = body;
+    const { slot, images, image, productName, productBenefit } = body as {
+      slot?: string;
+      images?: string[];
+      image?: string;
+      productName?: string;
+      productBenefit?: string;
+    };
 
     if (!slot) {
       return NextResponse.json(
@@ -45,12 +51,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!image) {
+    // 兼容：images 数组或单张 image
+    const imageList = images && images.length > 0
+      ? images
+      : image ? [image] : [];
+
+    if (imageList.length === 0) {
       return NextResponse.json(
         { error: '请上传商品图片' },
         { status: 400 }
       );
     }
+
+    const mainImage = imageList[0];
 
     const category = detectCategory(productName || '');
     const imageSlot = slot as ImageSlot;
@@ -62,7 +75,7 @@ export async function POST(request: NextRequest) {
       '2K',
       {},
       TOOL_SLUG,
-      image
+      mainImage
     );
 
     if (result.success && result.imageUrls?.[0]) {

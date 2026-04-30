@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, ArrowRight, Zap, RefreshCw, Package, GripVertical, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -37,8 +37,11 @@ const LOADING_STEPS = [
   '正在拼合详情页...',
 ];
 
+// 最大上传数量
+const MAX_IMAGES = 5;
+
 export default function ProductDetailGeneratorPage() {
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [productName, setProductName] = useState('');
   const [productBenefit, setProductBenefit] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -53,20 +56,71 @@ export default function ProductDetailGeneratorPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewScale, setPreviewScale] = useState(1);
 
+  // 拖拽状态
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ===== 多图上传 =====
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setUploadedImage(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const remaining = MAX_IMAGES - uploadedImages.length;
+    if (remaining <= 0) return;
+
+    const filesToProcess = Array.from(files).slice(0, remaining);
+
+    const readPromises = filesToProcess.map((file) => {
+      return new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          resolve(event.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readPromises).then((newImages) => {
+      setUploadedImages((prev) => [...prev, ...newImages].slice(0, MAX_IMAGES));
+    });
+
+    // 重置 input 以便重复选择同一文件
+    e.target.value = '';
   };
 
+  // 删除单张图片
+  const handleRemoveImage = (index: number) => {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // 拖拽排序
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      setUploadedImages((prev) => {
+        const newImages = [...prev];
+        const [draggedItem] = newImages.splice(dragIndex, 1);
+        newImages.splice(dragOverIndex, 0, draggedItem);
+        return newImages;
+      });
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  // ===== 分析卖点 =====
   const handleAnalyzeBenefit = async () => {
-    if (!uploadedImage && !productName) {
+    if (uploadedImages.length === 0 && !productName) {
       alert('请上传商品图或输入商品名称');
       return;
     }
@@ -77,7 +131,7 @@ export default function ProductDetailGeneratorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productName: productName || undefined,
-          productImage: uploadedImage || undefined,
+          productImage: uploadedImages[0] || undefined,
         }),
       });
       const data = await response.json();
@@ -111,8 +165,9 @@ export default function ProductDetailGeneratorPage() {
     return result;
   }, []);
 
+  // ===== 生成详情页 =====
   const handleGenerate = async () => {
-    if (!uploadedImage && !productName) {
+    if (uploadedImages.length === 0 && !productName) {
       alert('请上传商品图或输入商品名称');
       return;
     }
@@ -132,7 +187,7 @@ export default function ProductDetailGeneratorPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          image: uploadedImage,
+          images: uploadedImages,
           productName: productName || undefined,
           productBenefit: productBenefit || undefined,
         }),
@@ -161,7 +216,7 @@ export default function ProductDetailGeneratorPage() {
   };
 
   const handleReset = () => {
-    setUploadedImage(null);
+    setUploadedImages([]);
     setProductName('');
     setProductBenefit('');
     setShowResults(false);
@@ -246,46 +301,113 @@ export default function ProductDetailGeneratorPage() {
           {/* ==================== 左侧：输入表单 ==================== */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 shadow-sm">
             {/* 上传区域 */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-6 text-center cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors bg-gradient-to-br from-slate-50 to-orange-50/50 dark:from-slate-800 dark:to-orange-900/20 mb-4"
-            >
-              {uploadedImage ? (
-                <div className="relative inline-block">
-                  <img
-                    src={uploadedImage}
-                    alt="上传预览"
-                    className="max-h-32 mx-auto rounded-lg object-contain"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setUploadedImage(null);
-                    }}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <Upload className="w-10 h-10 mx-auto mb-2 text-slate-400" />
-                  <p className="text-slate-600 dark:text-slate-400 font-medium">
-                    上传你的商品图（一键生成完整详情页）
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    支持 JPG / PNG，建议 800x800
-                  </p>
-                </>
-              )}
+            <div className="mb-3">
+              {/* 点击上传区 */}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className={`relative border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors bg-gradient-to-br from-slate-50 to-orange-50/50 dark:from-slate-800 dark:to-orange-900/20 ${
+                  uploadedImages.length >= MAX_IMAGES
+                    ? 'border-slate-200 dark:border-slate-700 opacity-60 cursor-not-allowed'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-orange-400 dark:hover:border-orange-500'
+                }`}
+              >
+                <Upload className="w-8 h-8 mx-auto mb-2 text-slate-400" />
+                <p className="text-slate-600 dark:text-slate-400 font-medium text-sm">
+                  上传商品多角度图片（建议3-5张效果更好）
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  支持 JPG / PNG，最多{MAX_IMAGES}张 · 可拖拽排序
+                </p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageUpload}
+                className="hidden"
+              />
             </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
+
+            {/* 缩略图列表 + 拖拽排序 */}
+            {uploadedImages.length > 0 && (
+              <div className="mb-3">
+                {/* 横向缩略图 */}
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                  {uploadedImages.map((img, index) => (
+                    <div
+                      key={index}
+                      draggable
+                      onDragStart={() => handleDragStart(index)}
+                      onDragOver={(e) => handleDragOver(e, index)}
+                      onDragEnd={handleDragEnd}
+                      onDragLeave={() => setDragOverIndex(null)}
+                      className={`relative flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${
+                        dragOverIndex === index && dragIndex !== index
+                          ? 'border-orange-500 scale-105'
+                          : index === 0
+                          ? 'border-orange-400 shadow-sm'
+                          : 'border-slate-200 dark:border-slate-600'
+                      } ${dragIndex === index ? 'opacity-40 scale-95' : ''}`}
+                    >
+                      <img
+                        src={img}
+                        alt={`商品图${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* 主图标签 */}
+                      {index === 0 && (
+                        <div className="absolute top-0 left-0 bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-br-lg">
+                          主图
+                        </div>
+                      )}
+                      {/* 序号 + 拖拽把手 */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent flex items-end justify-between px-1 py-0.5">
+                        <span className="text-[9px] text-white/80 font-medium">#{index + 1}</span>
+                        <GripVertical className="w-3 h-3 text-white/60" />
+                      </div>
+                      {/* 删除按钮 */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage(index);
+                        }}
+                        className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500/90 text-white rounded-full flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* 继续添加按钮 */}
+                  {uploadedImages.length < MAX_IMAGES && (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex-shrink-0 w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 dark:hover:border-orange-500 transition-colors"
+                    >
+                      <ImageIcon className="w-5 h-5 text-slate-400 mb-0.5" />
+                      <span className="text-[9px] text-slate-400">添加</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* 图片用途说明 */}
+                <div className="mt-2 p-2.5 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                  <div className="text-[11px] text-slate-600 dark:text-slate-300 space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block w-4 h-4 bg-orange-500 text-white text-[8px] font-bold rounded text-center leading-4">1</span>
+                      <span className="font-medium text-orange-700 dark:text-orange-400">第一张 → 主图</span>
+                      <span className="text-slate-400">（最重要，决定整体效果）</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="inline-block w-4 h-4 bg-slate-300 dark:bg-slate-500 text-white text-[8px] font-bold rounded text-center leading-4">+</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">其他图 → 补充细节</span>
+                      <span className="text-slate-400">（结构/角度/使用方式）</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 商品名称 */}
             <div className="mb-3">
@@ -310,7 +432,7 @@ export default function ProductDetailGeneratorPage() {
                 />
                 <button
                   onClick={handleAnalyzeBenefit}
-                  disabled={isAnalyzing || (!uploadedImage && !productName)}
+                  disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)}
                   className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-400 disabled:to-slate-400 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-colors whitespace-nowrap flex items-center gap-1"
                 >
                   <Sparkles className="w-3 h-3" />
