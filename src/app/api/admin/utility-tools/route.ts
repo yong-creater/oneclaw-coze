@@ -118,10 +118,10 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('tool_model_configs')
           .insert({
-            tool_slug: slug,
+            tool_id: slug,
             model_source: provider.slug,
             default_model: model_name,
-            model_type: provider.provider_type,
+            tool_type: provider.provider_type,
             is_active: true
           });
       }
@@ -160,7 +160,7 @@ export async function PUT(request: NextRequest) {
     // 获取更新前的数据用于日志
     const { data: oldData } = await supabase
       .from('utility_tools')
-      .select('name')
+      .select('name, slug')
       .eq('id', id)
       .single();
 
@@ -200,12 +200,16 @@ export async function PUT(request: NextRequest) {
         .eq('id', model_provider_id)
         .single();
       
-      if (provider) {
+      // 从数据库获取 slug（前端模型选择时可能未传 slug）
+      const toolSlug = slug || existingTool?.slug || '';
+      const toolName = name || existingTool?.name || '';
+
+      if (provider && toolSlug) {
         // 检查是否已存在配置
         const { data: existingConfig } = await supabase
           .from('tool_model_configs')
           .select('id')
-          .eq('tool_slug', slug)
+          .eq('tool_id', toolSlug)
           .single();
         
         if (existingConfig) {
@@ -215,20 +219,21 @@ export async function PUT(request: NextRequest) {
             .update({
               model_source: provider.slug,
               default_model: model_name,
-              model_type: provider.provider_type,
+              tool_type: provider.provider_type,
               is_active: true,
               updated_at: new Date().toISOString()
             })
-            .eq('tool_slug', slug);
+            .eq('tool_id', toolSlug);
         } else {
           // 创建新配置
           await supabase
             .from('tool_model_configs')
             .insert({
-              tool_slug: slug,
+              tool_id: toolSlug,
+              tool_name: toolName,
               model_source: provider.slug,
               default_model: model_name,
-              model_type: provider.provider_type,
+              tool_type: provider.provider_type,
               is_active: true
             });
         }
@@ -238,7 +243,7 @@ export async function PUT(request: NextRequest) {
       await supabase
         .from('tool_model_configs')
         .delete()
-        .eq('tool_slug', slug);
+        .eq('tool_id', toolSlug);
     }
 
     await logSuccess(auth.user, 'UPDATE', 'UTILITY_TOOL', id, oldData?.name || name, { changes: ['name', 'is_active', 'sort_order'] }, request);

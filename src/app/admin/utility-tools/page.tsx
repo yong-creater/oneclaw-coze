@@ -364,8 +364,10 @@ export default function UtilityToolsPage() {
   };
 
   // 处理模型选择
-  const handleModelSelect = (providerId: number, modelName: string) => {
-    // 更新工具列表中的显示
+  const handleModelSelect = async (providerId: number, modelName: string) => {
+    if (!modelSelectorTool) return;
+
+    // 先更新前端显示（乐观更新）
     setTools(prev => prev.map(t => {
       if (t.id === modelSelectorTool?.id) {
         return { ...t, model_provider_id: providerId, model_name: modelName };
@@ -379,6 +381,42 @@ export default function UtilityToolsPage() {
         ...prev,
         model_provider_id: providerId,
         model_name: modelName,
+      }));
+    }
+
+    // 立即保存到数据库
+    try {
+      const res = await fetch('/api/admin/utility-tools', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          id: modelSelectorTool.id,
+          model_provider_id: providerId,
+          model_name: modelName,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        toast.error('模型配置保存失败');
+        // 回滚前端状态
+        setTools(prev => prev.map(t => {
+          if (t.id === modelSelectorTool?.id) {
+            return { ...t, model_provider_id: modelSelectorTool.model_provider_id, model_name: modelSelectorTool.model_name };
+          }
+          return t;
+        }));
+      } else {
+        toast.success('模型配置已保存');
+      }
+    } catch (error) {
+      toast.error('模型配置保存失败');
+      // 回滚前端状态
+      setTools(prev => prev.map(t => {
+        if (t.id === modelSelectorTool?.id) {
+          return { ...t, model_provider_id: modelSelectorTool.model_provider_id, model_name: modelSelectorTool.model_name };
+        }
+        return t;
       }));
     }
     
