@@ -22,12 +22,12 @@ const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number }[] = [
   { slot: 'lifestyle', label: '生活场景图', order: 3 },
 ];
 
-// 加载状态文案
+// 加载状态文案（与右侧生成提示对应）
 const LOADING_STEPS = [
   '正在分析商品特征...',
   '正在生成主图...',
-  '正在生成使用场景图...',
-  '正在生成生活场景图...',
+  '正在生成场景图...',
+  '正在生成卖点图...',
   '即将完成...',
 ];
 
@@ -53,6 +53,10 @@ export default function ProductDetailGeneratorPage() {
   const [showResults, setShowResults] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [showUnlockDialog, setShowUnlockDialog] = useState(false);
+
+  // 生成过程：逐步展现状态
+  const [revealedSlots, setRevealedSlots] = useState<Set<ImageSlot>>(new Set());
+  const [titleRevealed, setTitleRevealed] = useState(false);
 
   // 全屏预览状态
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -311,6 +315,17 @@ export default function ProductDetailGeneratorPage() {
 
       setGeneratedImages(images);
       setShowResults(true);
+      clearInterval(stepInterval);
+
+      // 分步展现动画：主图 → 场景图 → 卖点图，每步间隔 0.6s
+      setRevealedSlots(new Set());
+      setTitleRevealed(false);
+      setTimeout(() => setTitleRevealed(true), 300);
+      images.forEach((img, idx) => {
+        setTimeout(() => {
+          setRevealedSlots(prev => new Set([...prev, img.slot]));
+        }, 600 + idx * 600);
+      });
     } catch (error) {
       console.error('生成失败:', error);
       alert(error instanceof Error ? error.message : '生成失败，请稍后重试');
@@ -327,6 +342,8 @@ export default function ProductDetailGeneratorPage() {
     setProductBenefit('');
     setShowResults(false);
     setGeneratedImages([]);
+    setRevealedSlots(new Set());
+    setTitleRevealed(false);
   };
 
   // 下载单张图片
@@ -543,7 +560,35 @@ export default function ProductDetailGeneratorPage() {
 
           {/* ==================== 右侧：电商详情页预览 ==================== */}
           <div className="px-6 py-6">
-            {!showResults ? (
+            {isGenerating ? (
+              /* ====== 生成中：骨架屏 + 进度提示 ====== */
+              <div className="space-y-6">
+                {/* 主图骨架 */}
+                <div className="w-full h-[280px] rounded-xl bg-slate-100 animate-pulse flex items-center justify-center">
+                  <div className="text-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-orange-400 mx-auto mb-2" />
+                    <p className="text-sm text-slate-400 font-medium">{generatingStep || '正在生成...'}</p>
+                  </div>
+                </div>
+                {/* 三图骨架 */}
+                <div className="grid grid-cols-3 gap-4">
+                  {SLOT_CONFIG.map(({ slot, label }, idx) => (
+                    <div key={slot} className="h-[150px] rounded-xl bg-slate-100 animate-pulse flex items-center justify-center" style={{ animationDelay: `${idx * 0.15}s` }}>
+                      <span className="text-xs text-slate-300">{label}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* 详情页骨架 */}
+                <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 px-4 py-5 text-center">
+                  <div className="h-3 w-32 bg-slate-100 rounded mx-auto animate-pulse" />
+                </div>
+                {/* 进度提示 */}
+                <div className="flex items-center justify-center gap-2 text-xs text-orange-500">
+                  <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse" />
+                  <span>AI 正在精心绘制中，请稍候...</span>
+                </div>
+              </div>
+            ) : !showResults ? (
               /* ====== 示例效果展示：三层结构 ====== */
               <div className="space-y-6">
 
@@ -629,7 +674,7 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 生成结果：三层结构 ====== */
               <div className="space-y-6">
                 {/* 商品信息 */}
-                <div>
+                <div className={`transition-all duration-500 ${titleRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
                   <h2 className="text-lg font-bold text-slate-800 leading-snug">
                     {productName || '商品标题'}
                   </h2>
@@ -640,7 +685,7 @@ export default function ProductDetailGeneratorPage() {
 
                 {/* A. 主视觉区（Hero） */}
                 {getImage('main') && (
-                  <div className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(getImage('main')!)}>
+                  <div className={`relative group cursor-pointer rounded-xl overflow-hidden transition-all duration-500 ${revealedSlots.has('main') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(getImage('main')!)}>
                     <img
                       src={getImage('main')!}
                       alt="主图"
@@ -660,7 +705,7 @@ export default function ProductDetailGeneratorPage() {
                     const url = getImage(slot);
                     if (!url) return null;
                     return (
-                      <div key={slot} className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(url)}>
+                      <div key={slot} className={`relative group cursor-pointer rounded-xl overflow-hidden transition-all duration-500 ${revealedSlots.has(slot) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(url)}>
                         <img
                           src={url}
                           alt={label}
