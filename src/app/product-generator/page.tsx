@@ -38,7 +38,7 @@ const MAX_IMAGES = 5;
 const DEMO_IMAGES = [
   { slot: 'main' as ImageSlot, url: '/demo-main.jpg', label: '商品主图', order: 1 },
   { slot: 'scene' as ImageSlot, url: '/demo-scene.jpg', label: '使用场景', order: 2 },
-  { slot: 'lifestyle' as ImageSlot, url: '/demo-scene.jpg', label: '卖点图', order: 3, isSellingPoint: true },
+  { slot: 'lifestyle' as ImageSlot, url: '/demo-main.jpg', label: '卖点图', order: 3, isSellingPoint: true },
 ];
 
 export default function ProductDetailGeneratorPage() {
@@ -587,20 +587,34 @@ export default function ProductDetailGeneratorPage() {
                 <div className="grid grid-cols-3 gap-4">
                   {DEMO_IMAGES.map((img) => (
                     <div key={img.slot} className="relative group cursor-pointer rounded-xl overflow-hidden" onClick={() => openPreview(img.url)}>
-                      <img
-                        src={img.url}
-                        alt={img.label}
-                        className="w-full h-[150px] object-cover"
-                      />
-                      {/* 卖点图叠加层 - 电商高级感 */}
-                      {'isSellingPoint' in img && img.isSellingPoint && (
-                        <div className="absolute inset-0 flex flex-col justify-end">
-                          <div className="bg-gradient-to-t from-black/50 via-black/20 to-transparent pt-10 pb-3 px-3">
-                            <p className="text-white/90 text-[10px] tracking-wider font-light leading-relaxed">
-                              长效保温 · 一整天温暖陪伴
-                            </p>
+                      {/* 卖点图：独立构图，不与场景图重复 */}
+                      {'isSellingPoint' in img && img.isSellingPoint ? (
+                        <div className="w-full h-[150px] bg-gradient-to-br from-stone-100 via-amber-50/60 to-stone-50 relative overflow-hidden flex items-center">
+                          {/* 产品图 - 偏左，增强对比度 */}
+                          <div className="absolute left-0 top-0 bottom-0 w-[65%] flex items-center justify-center">
+                            <img
+                              src={img.url}
+                              alt={img.label}
+                              className="h-[130px] w-auto object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+                            />
                           </div>
+                          {/* 右侧文案区 */}
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-end gap-1.5">
+                            <div className="w-6 h-[1px] bg-slate-400/40" />
+                            <p className="text-[11px] text-slate-700 font-medium tracking-wide leading-relaxed text-right">
+                              24小时<br/>长效保温
+                            </p>
+                            <div className="w-6 h-[1px] bg-slate-400/40" />
+                          </div>
+                          {/* 柔和光晕效果 */}
+                          <div className="absolute -right-8 -top-8 w-32 h-32 bg-amber-200/20 rounded-full blur-2xl" />
                         </div>
+                      ) : (
+                        <img
+                          src={img.url}
+                          alt={img.label}
+                          className="w-full h-[150px] object-cover"
+                        />
                       )}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-xs font-medium bg-black/40 px-2 py-1 rounded-full">
