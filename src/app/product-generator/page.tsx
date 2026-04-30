@@ -34,11 +34,11 @@ const LOADING_STEPS = [
 // 最大上传数量
 const MAX_IMAGES = 5;
 
-// 示例生成结果（默认展示）— 同一商品（耳机）的不同效果
+// 示例生成结果（默认展示）— 同一商品（白色保温杯）的不同效果
 const DEMO_IMAGES = [
-  { slot: 'main' as ImageSlot, url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop', label: '主图', order: 1 },
-  { slot: 'scene' as ImageSlot, url: 'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&h=600&fit=crop', label: '使用场景图', order: 2 },
-  { slot: 'lifestyle' as ImageSlot, url: 'https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&h=600&fit=crop', label: '生活场景图', order: 3 },
+  { slot: 'main' as ImageSlot, url: '/demo-main.jpg', label: '商品主图', order: 1 },
+  { slot: 'scene' as ImageSlot, url: '/demo-scene.jpg', label: '使用场景', order: 2 },
+  { slot: 'lifestyle' as ImageSlot, url: '/demo-lifestyle.jpg', label: '生活场景', order: 3 },
 ];
 
 export default function ProductDetailGeneratorPage() {
