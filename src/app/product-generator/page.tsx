@@ -424,10 +424,10 @@ export default function ProductDetailGeneratorPage() {
             {uploadedImages.length === 0 ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="relative rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 bg-gradient-to-br from-slate-50 via-white to-orange-50/30 dark:from-slate-800 dark:via-slate-800 dark:to-orange-900/10 border-2 border-dashed border-slate-200 dark:border-slate-600 hover:border-orange-400 dark:hover:border-orange-500 hover:shadow-[0_0_20px_rgba(249,115,22,0.1)] min-h-[220px] flex flex-col items-center justify-center"
+                className="relative rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 bg-[#FAFAFA] dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-750 border border-dashed border-[#E5E7EB] dark:border-slate-600 hover:border-[#FF7A00] dark:hover:border-[#FF7A00] min-h-[220px] flex flex-col items-center justify-center"
               >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center mb-4">
-                  <Upload className="w-7 h-7 text-orange-500" strokeWidth={2.5} />
+                <div className="w-12 h-12 rounded-2xl bg-[#FFF5EB] dark:bg-orange-900/20 flex items-center justify-center mb-4">
+                  <Upload className="w-6 h-6 text-[#FF7A00]" strokeWidth={2.5} />
                 </div>
                 <p className="text-slate-800 dark:text-white font-bold text-base mb-1">上传商品图片</p>
                 <p className="text-slate-400 text-sm">推荐 3 张，最多 {MAX_IMAGES} 张</p>
