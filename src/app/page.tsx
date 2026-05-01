@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight, ArrowRightLeft, TrendingUp, MousePointerClick, ShoppingCart } from 'lucide-react';
 import { SiteLogo } from '@/components/common/SiteLogo';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import LoginButton from '@/components/common/LoginButton';
@@ -23,36 +23,62 @@ const CASE_STUDIES = [
     name: '蓝牙耳机',
     beforeImg: '/demo-main.jpg',
     afterImages: [
-      '/demo-card-digital.jpg',
-      '/demo-card-home.jpg',
-      '/demo-card-lifestyle.jpg',
+      { src: '/demo-main.jpg', label: '主图' },
+      { src: '/demo-card-digital.jpg', label: '卖点图' },
+      { src: '/demo-card-home.jpg', label: '场景图' },
+      { src: '/demo-card-lifestyle.jpg', label: '功能图' },
     ],
-    afterLabels: ['主图', '卖点图', '场景图'],
-    highlight: '转化率提升 230%',
+    metrics: [
+      { icon: 'trending', label: '转化率提升', value: '230%' },
+      { icon: 'click', label: '点击率提升', value: '185%' },
+      { icon: 'cart', label: '加购率提升', value: '160%' },
+    ],
   },
   {
     name: '口红美妆',
     beforeImg: '/demo-main.jpg',
     afterImages: [
-      '/demo-card-digital.jpg',
-      '/demo-card-home.jpg',
-      '/demo-card-lifestyle.jpg',
+      { src: '/demo-main.jpg', label: '主图' },
+      { src: '/demo-card-digital.jpg', label: '卖点图' },
+      { src: '/demo-card-home.jpg', label: '场景图' },
+      { src: '/demo-card-lifestyle.jpg', label: '功能图' },
     ],
-    afterLabels: ['主图', '卖点图', '场景图'],
-    highlight: '点击率提升 180%',
+    metrics: [
+      { icon: 'trending', label: '转化率提升', value: '180%' },
+      { icon: 'click', label: '点击率提升', value: '210%' },
+      { icon: 'cart', label: '加购率提升', value: '145%' },
+    ],
   },
   {
     name: '保温杯',
     beforeImg: '/demo-main.jpg',
     afterImages: [
-      '/demo-card-digital.jpg',
-      '/demo-card-home.jpg',
-      '/demo-card-lifestyle.jpg',
+      { src: '/demo-main.jpg', label: '主图' },
+      { src: '/demo-card-digital.jpg', label: '卖点图' },
+      { src: '/demo-card-home.jpg', label: '场景图' },
+      { src: '/demo-card-lifestyle.jpg', label: '功能图' },
     ],
-    afterLabels: ['主图', '卖点图', '场景图'],
-    highlight: '加购率提升 150%',
+    metrics: [
+      { icon: 'trending', label: '转化率提升', value: '150%' },
+      { icon: 'click', label: '点击率提升', value: '175%' },
+      { icon: 'cart', label: '加购率提升', value: '190%' },
+    ],
   },
 ] as const;
+
+// ==================== Metric图标映射 ====================
+function MetricIcon({ type }: { type: string }) {
+  switch (type) {
+    case 'trending':
+      return <TrendingUp className="w-4 h-4" />;
+    case 'click':
+      return <MousePointerClick className="w-4 h-4" />;
+    case 'cart':
+      return <ShoppingCart className="w-4 h-4" />;
+    default:
+      return <TrendingUp className="w-4 h-4" />;
+  }
+}
 
 // ==================== 主组件 ====================
 export default function HomePage() {
@@ -156,8 +182,8 @@ export default function HomePage() {
 
         {/* ==================== 爆款卖货案例 ==================== */}
         <section className="bg-slate-50 dark:bg-slate-800/50 py-16 md:py-20">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-12">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="text-center mb-14">
               <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
                 爆款卖货案例
               </h2>
@@ -166,71 +192,84 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-16">
               {CASE_STUDIES.map((item, i) => (
-                <div key={i} className="bg-white dark:bg-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
-                  {/* Before 图片 */}
-                  <div className="relative">
-                    <div className="aspect-[4/3] bg-[#f5f7fa]">
-                      <img
-                        src={item.beforeImg}
-                        alt={`${item.name}商品原图`}
-                        className="w-full h-full object-contain"
-                      />
+                <div key={i} className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm">
+                  {/* 对比区：左原图 vs 右AI生成 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                    {/* 左：普通商品图 */}
+                    <div className="relative p-6 md:p-8 flex flex-col items-center justify-center bg-slate-100/60 dark:bg-slate-700/30">
+                      <span className="mb-4 px-3 py-1 text-xs font-semibold text-slate-500 bg-slate-200/80 dark:bg-slate-600/80 rounded-full uppercase tracking-wide">
+                        普通商品图
+                      </span>
+                      <div className="w-full max-w-[280px] aspect-square rounded-2xl overflow-hidden bg-white dark:bg-slate-700 shadow-sm">
+                        <img
+                          src={item.beforeImg}
+                          alt={`${item.name}商品原图`}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                     </div>
-                    <span className="absolute top-3 left-3 px-2.5 py-1 text-xs font-medium text-slate-600 bg-white/90 backdrop-blur-sm rounded-full border border-slate-200">
-                      原图
-                    </span>
-                  </div>
 
-                  {/* 转化箭头 */}
-                  <div className="flex items-center justify-center py-2">
-                    <div className="flex items-center gap-2 text-sm text-slate-400">
-                      <span>商品图</span>
-                      <ArrowRight className="w-4 h-4 text-orange-400" />
-                      <span className="text-orange-500 font-medium">卖货图</span>
-                    </div>
-                  </div>
-
-                  {/* After 图片组 */}
-                  <div className="px-3 pb-3">
-                    <div className="grid grid-cols-3 gap-2">
-                      {item.afterImages.map((img, j) => (
-                        <div key={j} className="relative rounded-xl overflow-hidden bg-[#f5f7fa]">
-                          <img
-                            src={img}
-                            alt={`${item.name}${item.afterLabels[j]}`}
-                            className="w-full aspect-square object-cover"
-                          />
-                          <span className="absolute bottom-1 left-1 px-1.5 py-0.5 text-[10px] font-medium text-white bg-black/50 rounded">
-                            {item.afterLabels[j]}
-                          </span>
-                        </div>
-                      ))}
+                    {/* 右：AI生成卖货图 */}
+                    <div className="relative p-6 md:p-8 flex flex-col items-center justify-center">
+                      <span className="mb-4 px-3 py-1 text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-amber-500 rounded-full uppercase tracking-wide">
+                        AI 生成卖货图
+                      </span>
+                      <div className="w-full grid grid-cols-2 gap-2.5">
+                        {item.afterImages.map((img, j) => (
+                          <div key={j} className="relative rounded-xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700">
+                            <img
+                              src={img.src}
+                              alt={`${item.name}${img.label}`}
+                              className="w-full aspect-square object-cover"
+                            />
+                            <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-black/50 backdrop-blur-sm rounded">
+                              {img.label}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
-                  {/* 提升数据 */}
-                  <div className="px-4 pb-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{item.name}</span>
-                      <span className="text-sm font-bold text-orange-500">{item.highlight}</span>
+                  {/* 中间箭头分隔（移动端） */}
+                  <div className="flex md:hidden items-center justify-center -mt-2 mb-2">
+                    <div className="flex items-center gap-2 px-4 py-1.5 bg-orange-50 dark:bg-orange-900/20 rounded-full">
+                      <ArrowRightLeft className="w-4 h-4 text-orange-500" />
+                      <span className="text-xs font-medium text-orange-600 dark:text-orange-400">AI 一键生成</span>
+                    </div>
+                  </div>
+
+                  {/* 转化数据 + CTA */}
+                  <div className="border-t border-slate-100 dark:border-slate-700 px-6 md:px-8 py-5">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                      {/* 转化数据 */}
+                      <div className="flex items-center gap-5">
+                        {item.metrics.map((m, j) => (
+                          <div key={j} className="flex items-center gap-1.5">
+                            <span className="text-orange-500">
+                              <MetricIcon type={m.icon} />
+                            </span>
+                            <span className="text-xs text-slate-400">{m.label}</span>
+                            <span className="text-sm font-bold text-orange-500">{m.value}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* CTA 按钮 */}
+                      <button
+                        onClick={handleCTA}
+                        className="px-6 py-2.5 text-white font-semibold text-sm rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] inline-flex items-center gap-2 whitespace-nowrap"
+                        style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}
+                      >
+                        🔥 用这个案例生成我的卖货图
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
               ))}
-            </div>
-
-            {/* 案例区底部 CTA */}
-            <div className="text-center mt-12">
-              <button
-                onClick={handleCTA}
-                className="px-8 py-3.5 text-white font-semibold rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] inline-flex items-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}
-              >
-                🔥 立即生成卖货图
-                <ArrowRight className="w-4 h-4" />
-              </button>
             </div>
           </div>
         </section>
