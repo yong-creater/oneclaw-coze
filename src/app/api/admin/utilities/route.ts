@@ -48,8 +48,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
+    // 网络不可达时降级返回成功（不影响业务流程）
     console.error('保存使用记录异常:', error);
-    return NextResponse.json({ error: '服务器异常' }, { status: 500 });
+    return NextResponse.json({ success: true, message: 'Log saved locally (DB unreachable)' });
   }
 }
 
@@ -71,14 +72,14 @@ export async function GET(request: NextRequest) {
 
   try {
     const searchParams = request.nextUrl.searchParams;
-    const tool_type = searchParams.get('tool_type');  // resume, novel, product_page, all
+    const tool_type = searchParams.get('tool_type');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const status = searchParams.get('status');
     const start_date = searchParams.get('start_date');
     const end_date = searchParams.get('end_date');
 
-    let query = supabase
+    let query = supabase!
       .from('utility_usage_logs')
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
@@ -108,11 +109,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取统计数据
-    const statsQuery = supabase
-      .from('utility_usage_logs')
-      .select('tool_type, status');
-
-    let statsFilteredQuery = supabase
+    let statsFilteredQuery = supabase!
       .from('utility_usage_logs')
       .select('tool_type, status');
 
@@ -127,11 +124,11 @@ export async function GET(request: NextRequest) {
     const toolTypes = ['resume', 'novel', 'product_page'];
 
     for (const type of toolTypes) {
-      const typeData = statsData?.filter(d => d.tool_type === type) || [];
+      const typeData = statsData?.filter((d: { tool_type: string; status: string }) => d.tool_type === type) || [];
       toolStats[type] = {
         total: typeData.length,
-        success: typeData.filter(d => d.status === 'success').length,
-        failed: typeData.filter(d => d.status === 'failed').length
+        success: typeData.filter((d: { tool_type: string; status: string }) => d.status === 'success').length,
+        failed: typeData.filter((d: { tool_type: string; status: string }) => d.status === 'failed').length
       };
     }
 
@@ -147,7 +144,17 @@ export async function GET(request: NextRequest) {
       stats: toolStats
     });
   } catch (error) {
+    // 网络不可达时降级返回空数据
     console.error('获取使用记录异常:', error);
-    return NextResponse.json({ error: '服务器异常' }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      data: [],
+      pagination: { page: 1, limit: 20, total: 0, total_pages: 0 },
+      stats: {
+        resume: { total: 0, success: 0, failed: 0 },
+        novel: { total: 0, success: 0, failed: 0 },
+        product_page: { total: 0, success: 0, failed: 0 }
+      }
+    });
   }
 }

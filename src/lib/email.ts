@@ -66,7 +66,7 @@ function getVerificationEmailTemplate(code: string) {
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://www.oneclaw.shop/crab-icon.png" alt="logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
+      <img src="https://www.oneclaw.shop/favicon.png" alt="logo" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';" />
       <span style="display:none;">OneClaw</span>
     </div>
     <div class="content">
