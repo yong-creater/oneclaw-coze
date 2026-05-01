@@ -280,6 +280,15 @@ html {
   }
 }
 
+@keyframes scanLine {
+  0% {
+    left: -33%;
+  }
+  100% {
+    left: 133%;
+  }
+}
+
 .skeleton {
   background: linear-gradient(90deg, 
     #f1f5f9 25%, 

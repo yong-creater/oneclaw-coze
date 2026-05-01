@@ -23,14 +23,6 @@ const SLOT_CONFIG: { slot: ImageSlot; label: string; order: number }[] = [
 ];
 
 // 加载状态文案（与右侧生成提示对应）
-const LOADING_STEPS = [
-  '正在分析商品特征...',
-  '正在生成主图...',
-  '正在生成场景图...',
-  '正在生成卖点图...',
-  '即将完成...',
-];
-
 // 最大上传数量
 const MAX_IMAGES = 5;
 
@@ -53,6 +45,7 @@ export default function ProductDetailGeneratorPage() {
   const [showResults, setShowResults] = useState(false);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [showUnlockDialog, setShowUnlockDialog] = useState(false);
+  const [hasGenerated, setHasGenerated] = useState(false);
 
   // 生成过程：逐步展现状态
   const [revealedSlots, setRevealedSlots] = useState<Set<ImageSlot>>(new Set());
@@ -285,12 +278,27 @@ export default function ProductDetailGeneratorPage() {
     setIsGenerating(true);
     setShowResults(false);
     setGeneratedImages([]);
+    setRevealedSlots(new Set());
+    setTitleRevealed(false);
 
-    let stepIndex = 0;
-    const stepInterval = setInterval(() => {
-      stepIndex = (stepIndex + 1) % LOADING_STEPS.length;
-      setGeneratingStep(LOADING_STEPS[stepIndex]);
-    }, 2000);
+    // 阶段文案序列（阶段1: 分析，阶段2: 生成）
+    const phaseTexts = [
+      'AI正在分析商品图…',
+      '正在生成卖货主图…',
+      '正在优化商品卖点…',
+      '正在生成使用场景…',
+      '正在生成详情页素材…',
+    ];
+
+    // 阶段1：0~0.8s 分析商品
+    setGeneratingStep(phaseTexts[0]);
+    await new Promise<void>(r => setTimeout(r, 800));
+
+    // 阶段2：0.8~2.0s 依次切换文案，每条0.4s
+    for (let i = 1; i < phaseTexts.length; i++) {
+      setGeneratingStep(phaseTexts[i]);
+      await new Promise<void>(r => setTimeout(r, 400));
+    }
 
     try {
       const response = await fetch('/api/product-generator', {
@@ -315,22 +323,19 @@ export default function ProductDetailGeneratorPage() {
 
       setGeneratedImages(images);
       setShowResults(true);
-      clearInterval(stepInterval);
+      setHasGenerated(true);
 
-      // 分步展现动画：主图 → 场景图 → 卖点图，每步间隔 0.6s
-      setRevealedSlots(new Set());
-      setTitleRevealed(false);
-      setTimeout(() => setTitleRevealed(true), 300);
+      // 阶段3：完成展示 — 依次淡入
+      setTimeout(() => setTitleRevealed(true), 100);
       images.forEach((img, idx) => {
         setTimeout(() => {
           setRevealedSlots(prev => new Set([...prev, img.slot]));
-        }, 600 + idx * 600);
+        }, 200 + idx * 150);
       });
     } catch (error) {
       console.error('生成失败:', error);
       alert(error instanceof Error ? error.message : '生成失败，请稍后重试');
     } finally {
-      clearInterval(stepInterval);
       setGeneratingStep('');
       setIsGenerating(false);
     }
@@ -526,7 +531,7 @@ export default function ProductDetailGeneratorPage() {
 
             {/* ===== 生成按钮 ===== */}
             <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 mt-5 text-white font-semibold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(255,106,0,0.35)] hover:shadow-[0_10px_25px_rgba(255,106,0,0.25)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(255,106,0,0.35)] disabled:active:scale-100 flex items-center justify-center gap-2 animate-[subtlePulse_3s_ease-in-out_infinite]" style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}>
-              {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 立即生成卖货图</>)}
+              {isGenerating ? (<><Loader2 className="w-4 h-4 animate-spin" />生成中…</>) : (<>🔥 {hasGenerated ? '重新生成卖货图' : '立即生成卖货图'}</>)}
             </button>
 
 
@@ -535,26 +540,50 @@ export default function ProductDetailGeneratorPage() {
           {/* ==================== 右侧：电商详情页预览 ==================== */}
           <div>
             {isGenerating ? (
-              /* ====== 生成中：骨架屏 + 分步提示 ====== */
-              <div className="space-y-5">
-                {/* 主图骨架 */}
-                <div className="w-full aspect-[16/9] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
-                  <div className="absolute inset-0 flex items-center justify-center animate-none">
+              /* ====== 生成中：示例图+模糊遮罩+阶段文案 ====== */
+              <div>
+                {/* 主图区域：模糊+遮罩+状态文案 */}
+                <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-[#f5f7fa] mb-3">
+                  <img
+                    src={DEMO_IMAGES[0].url}
+                    alt="生成中"
+                    className="w-full h-full object-contain blur-[6px] transition-all duration-700"
+                  />
+                  {/* 半透明白色遮罩 */}
+                  <div className="absolute inset-0 bg-white/65 transition-opacity duration-700" />
+                  {/* 扫描光效 */}
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-0 -left-full w-1/3 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent animate-[scanLine_2s_ease-in-out_infinite]" />
+                  </div>
+                  {/* 状态文案 */}
+                  <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <div className="w-10 h-10 rounded-full border-2 border-slate-200 border-t-orange-400 animate-spin mx-auto mb-3" />
-                      <p className="text-sm text-slate-500 font-medium">{generatingStep || '正在生成...'}</p>
+                      <p className="text-sm text-slate-700 font-medium mb-2">{generatingStep || '正在生成…'}</p>
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-[bounce_1.4s_ease-in-out_infinite]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
+                      </div>
                     </div>
                   </div>
                 </div>
-                {/* 三图骨架 */}
+                {/* 三张小图：skeleton shimmer */}
                 <div className="grid grid-cols-3 gap-3">
-                  {SLOT_CONFIG.map(({ slot, label }) => (
-                    <div key={slot} className="h-[140px] rounded-xl bg-stone-50 relative overflow-hidden animate-pulse">
-                      <div className="absolute inset-0 flex items-center justify-center animate-none">
-                        <span className="text-[11px] text-slate-300 font-medium">{label}</span>
-                      </div>
+                  <div className="h-[140px] rounded-xl bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite] relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[11px] text-slate-300 font-medium">使用场景</span>
                     </div>
-                  ))}
+                  </div>
+                  <div className="h-[140px] rounded-xl bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite_0.3s] relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[11px] text-slate-300 font-medium">核心功能</span>
+                    </div>
+                  </div>
+                  <div className="h-[140px] rounded-xl bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite_0.6s] relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[11px] text-slate-300 font-medium">卖点展示</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : !showResults ? (
