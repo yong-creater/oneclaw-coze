@@ -404,19 +404,19 @@ export default function ProductDetailGeneratorPage() {
         gradient="from-orange-500 to-amber-500"
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-3">
         {/* 核心价值标题 */}
-        <div className="text-center mb-6">
-          <h1 className="text-xl md:text-2xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">
+        <div className="text-center mb-3">
+          <h1 className="text-lg md:text-xl font-black text-slate-800 dark:text-white mb-0.5 tracking-tight">
             让商品图帮你<span className="text-orange-500">卖货</span>
           </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             普通商品照 <span className="text-orange-400 mx-0.5">→</span> 能上架的电商详情页
           </p>
         </div>
 
         {/* 左右布局主体区 */}
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4 items-start">
           {/* ==================== 左侧：卡片式主操作区 ==================== */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
 
@@ -538,7 +538,7 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 生成中：骨架屏 + 分步提示 ====== */
               <div className="space-y-5">
                 {/* 主图骨架 */}
-                <div className="w-full h-[420px] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
+                <div className="w-full h-[280px] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
                   <div className="absolute inset-0 flex items-center justify-center animate-none">
                     <div className="text-center">
                       <div className="w-10 h-10 rounded-full border-2 border-slate-200 border-t-orange-400 animate-spin mx-auto mb-3" />
@@ -566,7 +566,7 @@ export default function ProductDetailGeneratorPage() {
                   <img
                     src={DEMO_IMAGES[0].url}
                     alt="示例主图"
-                    className="w-full h-[420px] object-cover"
+                    className="w-full h-[280px] object-cover"
                   />
                   {/* 底部居中转化提示 */}
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg">
@@ -576,26 +576,26 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 </div>
 
-                {/* B. 三张能力展示图（不同品类，与大图拉开层级） */}
-                <div className="grid grid-cols-3 gap-4 mt-6">
+                {/* B. 三张能力展示图（不同品类） */}
+                <div className="grid grid-cols-3 gap-3 mt-4">
                   {/* 数码商品 */}
-                  <div className="space-y-1.5">
-                    <div className="rounded-xl overflow-hidden">
-                      <img src="/demo-card-digital.jpg" alt="数码商品" className="w-full aspect-[4/3] object-cover" />
+                  <div className="space-y-1">
+                    <div className="rounded-lg overflow-hidden">
+                      <img src="/demo-card-digital.jpg" alt="数码商品" className="w-full h-[110px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">数码商品</p>
                   </div>
                   {/* 家居日用 */}
-                  <div className="space-y-1.5">
-                    <div className="rounded-xl overflow-hidden">
-                      <img src="/demo-card-home.jpg" alt="家居日用" className="w-full aspect-[4/3] object-cover" />
+                  <div className="space-y-1">
+                    <div className="rounded-lg overflow-hidden">
+                      <img src="/demo-card-home.jpg" alt="家居日用" className="w-full h-[110px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">家居日用</p>
                   </div>
                   {/* 生活方式 */}
-                  <div className="space-y-1.5">
-                    <div className="rounded-xl overflow-hidden">
-                      <img src="/demo-card-lifestyle.jpg" alt="生活方式" className="w-full aspect-[4/3] object-cover" />
+                  <div className="space-y-1">
+                    <div className="rounded-lg overflow-hidden">
+                      <img src="/demo-card-lifestyle.jpg" alt="生活方式" className="w-full h-[110px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">生活方式</p>
                   </div>
@@ -625,7 +625,7 @@ export default function ProductDetailGeneratorPage() {
                     <img
                       src={getImage('main')!}
                       alt="主图"
-                      className="w-full h-[420px] object-cover"
+                      className="w-full h-[280px] object-cover"
                     />
                   </div>
                 )}
