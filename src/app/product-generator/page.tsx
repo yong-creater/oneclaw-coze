@@ -581,35 +581,28 @@ export default function ProductDetailGeneratorPage() {
                   </div>
                 </div>
 
-                {/* B. 三张能力展示图（与大图拉开层级） */}
+                {/* B. 三张能力展示图（不同品类，与大图拉开层级） */}
                 <div className="grid grid-cols-3 gap-4 mt-6">
-                  {/* 场景图1 + 品类标签 */}
+                  {/* 数码商品 */}
                   <div className="space-y-1.5">
                     <div className="rounded-xl overflow-hidden">
-                      <img src={DEMO_IMAGES[1].url} alt="桌面" className="w-full aspect-[4/3] object-cover" />
+                      <img src="/demo-card-digital.jpg" alt="数码商品" className="w-full aspect-[4/3] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">数码商品</p>
                   </div>
-                  {/* 场景图2 + 品类标签 */}
+                  {/* 家居日用 */}
                   <div className="space-y-1.5">
                     <div className="rounded-xl overflow-hidden">
-                      <img src={DEMO_IMAGES[2]?.url || DEMO_IMAGES[1].url} alt="佩戴" className="w-full aspect-[4/3] object-cover" />
-                    </div>
-                    <p className="text-center text-[10px] text-slate-400">服饰美妆</p>
-                  </div>
-                  {/* 卖点图 + 品类标签 */}
-                  <div className="space-y-1.5">
-                    <div className="rounded-xl overflow-hidden">
-                      <div className="w-full aspect-[4/3] relative overflow-hidden">
-                        <img src={DEMO_IMAGES[1].url} alt="卖点" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-                        <div className="absolute bottom-2 left-2 right-2 space-y-0.5">
-                          <p className="text-[10px] text-white/95 font-semibold">🌿 天然植物蜡</p>
-                          <p className="text-[10px] text-white/70 font-medium">🕯️ 48小时持久留香</p>
-                        </div>
-                      </div>
+                      <img src="/demo-card-home.jpg" alt="家居日用" className="w-full aspect-[4/3] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">家居日用</p>
+                  </div>
+                  {/* 生活方式 */}
+                  <div className="space-y-1.5">
+                    <div className="rounded-xl overflow-hidden">
+                      <img src="/demo-card-lifestyle.jpg" alt="生活方式" className="w-full aspect-[4/3] object-cover" />
+                    </div>
+                    <p className="text-center text-[10px] text-slate-400">生活方式</p>
                   </div>
                 </div>
 
