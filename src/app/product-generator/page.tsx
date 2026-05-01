@@ -584,7 +584,7 @@ export default function ProductDetailGeneratorPage() {
                 </div>
 
                 {/* B. 三张能力展示图（不同品类） */}
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-3 mt-3">
                   {/* 使用场景 */}
                   <div className="group rounded-xl overflow-hidden relative">
                     <img src="/demo-card-digital.jpg" alt="使用场景" className="w-full h-[140px] object-cover" />
