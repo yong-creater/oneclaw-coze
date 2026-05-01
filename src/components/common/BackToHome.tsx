@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import AnimatedLobster from '@/components/common/AnimatedLobster';
+import { SiteLogo } from '@/components/common/SiteLogo';
 
 interface BackToHomeProps {
   label?: string;
@@ -15,11 +15,8 @@ export default function BackToHome({ label = 'AI 工具详情', className = '', 
   return (
     <div className={`flex items-center ${className}`}>
       {showLogo ? (
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <AnimatedLobster size={28} />
-          <span className="text-lg font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-            OneClaw
-          </span>
+        <Link href="/" className="hover:opacity-80 transition-opacity">
+          <SiteLogo size={28} showText />
         </Link>
       ) : (
         <Link href="/">

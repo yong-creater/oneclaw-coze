@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ChevronRight, ArrowRightLeft, TrendingUp, MousePointerClick, ShoppingCart } from 'lucide-react';
+import { ArrowRight, ChevronRight, ArrowRightLeft, TrendingUp, MousePointerClick, ShoppingCart, Zap } from 'lucide-react';
 import { SiteLogo } from '@/components/common/SiteLogo';
-import AnimatedLobster from '@/components/common/AnimatedLobster';
 import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
 import WechatPromo from '@/components/common/WechatPromo';
@@ -99,11 +98,8 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-              <AnimatedLobster size={32} />
-              <span className="text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                OneClaw
-              </span>
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+              <SiteLogo size={32} showText />
             </Link>
 
             <div className="flex items-center gap-3">
@@ -280,10 +276,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 pb-6">
           <div className="flex flex-col md:flex-row items-center justify-center gap-3 text-sm text-slate-400 dark:text-slate-500">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center">
-                <AnimatedLobster size={12} />
-              </div>
-              <span>OneClaw</span>
+              <Zap className="w-3.5 h-3.5 text-orange-500" strokeWidth={2.5} />
+              <span className="font-semibold">OneClaw</span>
               <span>·</span>
               <span>AI卖货内容生成器</span>
             </div>

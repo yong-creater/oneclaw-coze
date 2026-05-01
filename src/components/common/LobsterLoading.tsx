@@ -1,7 +1,7 @@
 'use client';
 
-import { memo, useState } from 'react';
-import Image from 'next/image';
+import { memo } from 'react';
+import { Zap } from 'lucide-react';
 
 interface LobsterLoadingProps {
   size?: number;
@@ -10,49 +10,33 @@ interface LobsterLoadingProps {
   className?: string;
 }
 
-// 主组件 - 根据不同 variant 显示不同动画
 export const LobsterLoading = memo(function LobsterLoading({ 
   size = 64, 
   variant = 'bounce',
   text,
   className = '' 
 }: LobsterLoadingProps) {
-  const [imageError, setImageError] = useState(false);
-  
   const animationClass = {
     spin: 'animate-spin',
     bounce: 'animate-bounce',
-    wave: 'animate-typing',
-    dance: 'animate-typing',
-    pulse: 'animate-typing',
-    clamp: 'animate-typing',
+    wave: 'animate-pulse',
+    dance: 'animate-pulse',
+    pulse: 'animate-pulse',
+    clamp: 'animate-pulse',
   }[variant];
 
   return (
     <div className={`flex flex-col items-center justify-center gap-3 ${className}`}>
       <div className={animationClass} style={{ width: size, height: size }}>
-        {!imageError ? (
-          <Image
-            src="/oneclaw-logo.png?v=10"
-            alt="OneClaw 龙虾"
-            width={size}
-            height={size}
-            className="object-contain"
-            style={{ filter: 'saturate(1.3) brightness(1.1) sepia(0.1)' }}
-            priority
-            unoptimized
-            onError={() => setImageError(true)}
+        <div 
+          className="w-full h-full rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-sm"
+        >
+          <Zap 
+            className="text-white" 
+            style={{ width: size * 0.55, height: size * 0.55 }}
+            strokeWidth={2.5}
           />
-        ) : (
-          <div 
-            className="w-full h-full rounded-full bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center"
-            style={{ filter: 'saturate(1.3) brightness(1.1)' }}
-          >
-            <span className="text-white font-bold" style={{ fontSize: size * 0.4 }}>
-              OC
-            </span>
-          </div>
-        )}
+        </div>
       </div>
       {text && (
         <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">
