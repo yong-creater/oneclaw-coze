@@ -271,6 +271,15 @@ html {
   }
 }
 
+@keyframes subtlePulse {
+  0%, 100% {
+    box-shadow: 0 4px 14px rgba(255, 106, 0, 0.35);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(255, 106, 0, 0.45);
+  }
+}
+
 .skeleton {
   background: linear-gradient(90deg, 
     #f1f5f9 25%, 

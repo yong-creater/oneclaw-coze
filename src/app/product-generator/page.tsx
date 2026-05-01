@@ -525,7 +525,7 @@ export default function ProductDetailGeneratorPage() {
             </div>
 
             {/* ===== 生成按钮 ===== */}
-            <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 mt-5 text-white font-bold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(255,106,0,0.35)] hover:shadow-[0_8px_24px_rgba(255,106,0,0.5)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(255,106,0,0.35)] disabled:active:scale-100 flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}>
+            <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 mt-5 text-white font-semibold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(255,106,0,0.35)] hover:shadow-[0_10px_25px_rgba(255,106,0,0.25)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(255,106,0,0.35)] disabled:active:scale-100 flex items-center justify-center gap-2 animate-[subtlePulse_3s_ease-in-out_infinite]" style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}>
               {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 立即生成卖货图</>)}
             </button>
 
