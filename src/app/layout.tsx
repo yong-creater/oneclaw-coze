@@ -95,9 +95,9 @@ export const metadata: Metadata = {
     'mobile-agent': 'pc,mobile',
   },
   icons: {
-    icon: '/favicon.png?v=2',
-    shortcut: '/favicon.png?v=2',
-    apple: '/apple-touch-icon.png?v=2',
+    icon: '/icon',
+    shortcut: '/icon',
+    apple: '/apple-icon',
   },
 };
 
