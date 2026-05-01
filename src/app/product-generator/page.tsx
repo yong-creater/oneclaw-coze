@@ -511,13 +511,13 @@ export default function ProductDetailGeneratorPage() {
 
             {/* 商品名称 */}
             <div className="mt-4 mb-3">
-              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：植物香薰蜡烛）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
+              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：头戴式降噪耳机）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
             </div>
 
             {/* 商品卖点 */}
             <div className="mb-5">
               <div className="flex gap-2">
-                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：天然大豆蜡 48小时持久留香）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
+                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：主动降噪 40小时续航 HiFi音质）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
                 <button onClick={handleAnalyzeBenefit} disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)} className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-600 dark:disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-all whitespace-nowrap flex items-center gap-1 self-end">
                   <Sparkles className="w-3 h-3" />{isAnalyzing ? '分析中...' : 'AI写卖点'}
                 </button>
@@ -578,26 +578,26 @@ export default function ProductDetailGeneratorPage() {
 
                 {/* B. 三张能力展示图（不同品类） */}
                 <div className="grid grid-cols-3 gap-3 mt-4">
-                  {/* 数码商品 */}
+                  {/* 使用场景 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-digital.jpg" alt="数码商品" className="w-full h-[130px] object-cover" />
+                      <img src="/demo-card-digital.jpg" alt="使用场景" className="w-full h-[130px] object-cover" />
                     </div>
-                    <p className="text-center text-[10px] text-slate-400">数码商品</p>
+                    <p className="text-center text-[10px] text-slate-400">使用场景</p>
                   </div>
-                  {/* 家居日用 */}
+                  {/* 核心功能 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-home.jpg" alt="家居日用" className="w-full h-[130px] object-cover" />
+                      <img src="/demo-card-home.jpg" alt="核心功能" className="w-full h-[130px] object-cover" />
                     </div>
-                    <p className="text-center text-[10px] text-slate-400">家居日用</p>
+                    <p className="text-center text-[10px] text-slate-400">核心功能</p>
                   </div>
-                  {/* 生活方式 */}
+                  {/* 卖点展示 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-lifestyle.jpg" alt="生活方式" className="w-full h-[130px] object-cover" />
+                      <img src="/demo-card-lifestyle.jpg" alt="卖点展示" className="w-full h-[130px] object-cover" />
                     </div>
-                    <p className="text-center text-[10px] text-slate-400">生活方式</p>
+                    <p className="text-center text-[10px] text-slate-400">卖点展示</p>
                   </div>
                 </div>
 
