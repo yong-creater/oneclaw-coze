@@ -538,7 +538,7 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 生成中：骨架屏 + 分步提示 ====== */
               <div className="space-y-5">
                 {/* 主图骨架 */}
-                <div className="w-full h-[320px] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
+                <div className="w-full aspect-[16/9] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
                   <div className="absolute inset-0 flex items-center justify-center animate-none">
                     <div className="text-center">
                       <div className="w-10 h-10 rounded-full border-2 border-slate-200 border-t-orange-400 animate-spin mx-auto mb-3" />
@@ -562,11 +562,11 @@ export default function ProductDetailGeneratorPage() {
               <div>
 
                 {/* A. 主视觉 Banner（横幅大图，视觉中心） */}
-                <div className="relative rounded-2xl overflow-hidden">
+                <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-[#f5f7fa]">
                   <img
                     src={DEMO_IMAGES[0].url}
                     alt="示例主图"
-                    className="w-full h-[320px] object-cover"
+                    className="w-full h-full object-contain"
                   />
 
                 </div>
@@ -616,11 +616,11 @@ export default function ProductDetailGeneratorPage() {
 
                 {/* A. 主视觉区（Hero） */}
                 {getImage('main') && (
-                  <div className={`relative cursor-pointer rounded-xl overflow-hidden transition-all duration-500 ${revealedSlots.has('main') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(getImage('main')!)}>
+                  <div className={`relative cursor-pointer rounded-xl overflow-hidden transition-all duration-500 bg-[#f5f7fa] ${revealedSlots.has('main') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`} onClick={() => openPreview(getImage('main')!)}>
                     <img
                       src={getImage('main')!}
                       alt="主图"
-                      className="w-full h-[320px] object-cover"
+                      className="w-full aspect-[16/9] object-contain"
                     />
                   </div>
                 )}
