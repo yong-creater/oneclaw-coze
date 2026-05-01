@@ -418,7 +418,7 @@ export default function ProductDetailGeneratorPage() {
         {/* 左右布局主体区 */}
         <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-4 items-start">
           {/* ==================== 左侧：卡片式主操作区 ==================== */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)]">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 pb-7 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] flex flex-col gap-4">
 
             {/* ===== 上传区域 ===== */}
             {uploadedImages.length === 0 ? (
@@ -510,12 +510,12 @@ export default function ProductDetailGeneratorPage() {
             )}
 
             {/* 商品名称 */}
-            <div className="mt-4 mb-3">
+            <div>
               <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：头戴式降噪耳机）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
             </div>
 
             {/* 商品卖点 */}
-            <div className="mb-5">
+            <div>
               <div className="flex gap-2">
                 <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：主动降噪 40小时续航 HiFi音质）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
                 <button onClick={handleAnalyzeBenefit} disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)} className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-600 dark:disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-all whitespace-nowrap flex items-center gap-1 self-end">
@@ -525,7 +525,7 @@ export default function ProductDetailGeneratorPage() {
             </div>
 
             {/* ===== 生成按钮 ===== */}
-            <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 hover:from-orange-600 hover:via-orange-600 hover:to-amber-600 text-white font-bold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(249,115,22,0.35)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.45)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(249,115,22,0.35)] flex items-center justify-center gap-2">
+            <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 mt-5 bg-gradient-to-r from-orange-500 via-orange-500 to-amber-500 hover:from-orange-600 hover:via-orange-600 hover:to-amber-600 text-white font-bold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(249,115,22,0.35)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.45)] hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(249,115,22,0.35)] flex items-center justify-center gap-2">
               {isGenerating ? (<><Loader2 className="w-5 h-5 animate-spin" />{generatingStep || '正在生成...'}</>) : (<>🔥 一键生成能卖货的详情页</>)}
             </button>
 
