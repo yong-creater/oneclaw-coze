@@ -538,7 +538,7 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 生成中：骨架屏 + 分步提示 ====== */
               <div className="space-y-5">
                 {/* 主图骨架 */}
-                <div className="w-full h-[280px] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
+                <div className="w-full h-[320px] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
                   <div className="absolute inset-0 flex items-center justify-center animate-none">
                     <div className="text-center">
                       <div className="w-10 h-10 rounded-full border-2 border-slate-200 border-t-orange-400 animate-spin mx-auto mb-3" />
@@ -566,7 +566,7 @@ export default function ProductDetailGeneratorPage() {
                   <img
                     src={DEMO_IMAGES[0].url}
                     alt="示例主图"
-                    className="w-full h-[280px] object-cover"
+                    className="w-full h-[320px] object-cover"
                   />
                   {/* 底部居中转化提示 */}
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg">
@@ -581,21 +581,21 @@ export default function ProductDetailGeneratorPage() {
                   {/* 数码商品 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-digital.jpg" alt="数码商品" className="w-full h-[110px] object-cover" />
+                      <img src="/demo-card-digital.jpg" alt="数码商品" className="w-full h-[130px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">数码商品</p>
                   </div>
                   {/* 家居日用 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-home.jpg" alt="家居日用" className="w-full h-[110px] object-cover" />
+                      <img src="/demo-card-home.jpg" alt="家居日用" className="w-full h-[130px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">家居日用</p>
                   </div>
                   {/* 生活方式 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-lifestyle.jpg" alt="生活方式" className="w-full h-[110px] object-cover" />
+                      <img src="/demo-card-lifestyle.jpg" alt="生活方式" className="w-full h-[130px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">生活方式</p>
                   </div>
@@ -625,7 +625,7 @@ export default function ProductDetailGeneratorPage() {
                     <img
                       src={getImage('main')!}
                       alt="主图"
-                      className="w-full h-[280px] object-cover"
+                      className="w-full h-[320px] object-cover"
                     />
                   </div>
                 )}
