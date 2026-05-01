@@ -19,7 +19,9 @@ export default function GlobalError({
       <body>
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
           <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md mx-4">
-            <div className="text-7xl mb-6">🦞</div>
+            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
             <h2 className="text-2xl font-bold text-slate-800 mb-3">
               出了点问题
             </h2>

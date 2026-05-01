@@ -89,13 +89,13 @@ export default function LoginPage() {
         {/* Logo区域 */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center mb-4">
-            <span className="text-3xl">🦞</span>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           </div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
             登录 OneClaw
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
-            发现优质AI工具，提升工作效率
+            AI 卖货内容生成器
           </p>
         </div>
 

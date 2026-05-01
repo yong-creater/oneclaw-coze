@@ -1,6 +1,7 @@
 'use client';
 
 import { Component, ReactNode } from 'react';
+import { Zap } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
@@ -31,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
       return this.props.fallback || (
         <div className="min-h-screen flex items-center justify-center bg-slate-50">
           <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md">
-            <div className="text-6xl mb-4">🦞</div>
+            <div className="text-6xl mb-4 text-orange-500"><Zap /></div>
             <h2 className="text-xl font-bold text-slate-800 mb-2">页面出错了</h2>
             <p className="text-slate-500 mb-4">抱歉，页面加载时遇到了问题</p>
             <button
