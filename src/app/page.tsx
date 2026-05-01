@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ChevronRight, ArrowRightLeft, TrendingUp, MousePointerClick, ShoppingCart, Zap } from 'lucide-react';
+import { ArrowRight, ChevronRight, TrendingUp, MousePointerClick, ShoppingCart, Zap } from 'lucide-react';
 import { SiteLogo } from '@/components/common/SiteLogo';
 import LoginButton from '@/components/common/LoginButton';
 import Link from 'next/link';
@@ -191,7 +191,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="space-y-12">
+            <div className="space-y-14">
               {CASE_STUDIES.map((item, i) => (
                 <div key={i} className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700">
                   {/* 案例头部 */}
@@ -200,11 +200,11 @@ export default function HomePage() {
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">{item.name}</h3>
                   </div>
 
-                  {/* 对比区：左原图 → 箭头 → 右AI生成 */}
+                  {/* 对比区：左原图 → AI节点 → 右AI生成 */}
                   <div className="px-6 md:px-8 pb-6">
-                    <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+                    <div className="flex flex-col md:flex-row items-stretch gap-4 md:gap-5">
                       {/* 左：普通商品图 */}
-                      <div className="flex-1 w-full md:max-w-[260px] flex flex-col items-center">
+                      <div className="flex-1 w-full md:max-w-[240px] flex flex-col items-center">
                         <span className="mb-3 px-3 py-1 text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-full">
                           普通商品图
                         </span>
@@ -217,67 +217,69 @@ export default function HomePage() {
                         </div>
                       </div>
 
-                      {/* 中间箭头：桌面+移动端都显示 */}
-                      <div className="flex flex-col items-center gap-1 shrink-0">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                          <ArrowRightLeft className="w-4.5 h-4.5 text-white" />
+                      {/* 中间AI节点：竖向居中 */}
+                      <div className="flex md:flex-col items-center justify-center gap-2 shrink-0 py-2 md:py-0">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center shadow-lg shadow-orange-500/30">
+                          <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
                         </div>
-                        <span className="text-xs font-semibold text-orange-500">AI生成</span>
+                        <span className="text-xs font-bold text-orange-500 tracking-wide">AI重构</span>
                       </div>
 
-                      {/* 右：AI生成卖货图 */}
-                      <div className="flex-[2] w-full flex flex-col items-center gap-2.5">
-                        <span className="mb-0.5 px-3 py-1 text-xs font-medium text-white bg-gradient-to-r from-orange-500 to-amber-500 rounded-full">
+                      {/* 右：AI生成卖货图 - 整体卡片容器 */}
+                      <div className="flex-[2] w-full flex flex-col">
+                        <span className="mb-2 self-start px-3 py-1 text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-sm">
                           AI 卖货图
                         </span>
-                        {/* 第一行：主图（占满） */}
-                        <div className="w-full relative rounded-2xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30 shadow-sm">
-                          <img
-                            src={item.afterMainImg}
-                            alt={`${item.name}AI主图`}
-                            className="w-full aspect-[16/9] object-contain"
-                          />
-                          <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded-lg">
-                            主图
-                          </span>
-                        </div>
-                        {/* 第二行：卖点图 + 场景图（2列） */}
-                        <div className="w-full grid grid-cols-2 gap-2.5">
-                          {item.afterSubImages.slice(0, 2).map((img, j) => (
-                            <div key={j} className="relative rounded-2xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30 shadow-sm">
+                        <div className="flex-1 rounded-2xl bg-[#fafbfc] dark:bg-slate-700/30 border border-orange-100 dark:border-orange-900/20 p-3 space-y-2.5">
+                          {/* 第一行：主图 */}
+                          <div className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
+                            <img
+                              src={item.afterMainImg}
+                              alt={`${item.name}AI主图`}
+                              className="w-full aspect-[16/9] object-contain"
+                            />
+                            <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-semibold text-white bg-orange-500/85 backdrop-blur-sm rounded-lg">
+                              主图
+                            </span>
+                          </div>
+                          {/* 第二行：卖点图 + 场景图（2列） */}
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {item.afterSubImages.slice(0, 2).map((img, j) => (
+                              <div key={j} className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
+                                <img
+                                  src={img.src}
+                                  alt={`${item.name}${img.label}`}
+                                  className="w-full aspect-[4/3] object-cover"
+                                />
+                                <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-semibold text-white bg-orange-500/85 backdrop-blur-sm rounded-lg">
+                                  {img.label}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                          {/* 第三行：功能图（单独一行，稍大） */}
+                          <div className="flex justify-center">
+                            <div className="w-[calc(50%-5px)] relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
                               <img
-                                src={img.src}
-                                alt={`${item.name}${img.label}`}
+                                src={item.afterSubImages[2].src}
+                                alt={`${item.name}${item.afterSubImages[2].label}`}
                                 className="w-full aspect-[4/3] object-cover"
                               />
-                              <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded-lg">
-                                {img.label}
+                              <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-semibold text-white bg-orange-500/85 backdrop-blur-sm rounded-lg">
+                                {item.afterSubImages[2].label}
                               </span>
                             </div>
-                          ))}
-                        </div>
-                        {/* 第三行：功能图（居中放大） */}
-                        <div className="w-full flex justify-center">
-                          <div className="w-full sm:w-1/2 relative rounded-2xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30 shadow-sm">
-                            <img
-                              src={item.afterSubImages[2].src}
-                              alt={`${item.name}${item.afterSubImages[2].label}`}
-                              className="w-full aspect-[4/3] object-cover"
-                            />
-                            <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded-lg">
-                              {item.afterSubImages[2].label}
-                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* 转化数据 + CTA */}
+                  {/* 转化数据 + CTA（紧跟案例内容下方） */}
                   <div className="border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/20 px-6 md:px-8 py-5">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                       {/* 转化数据 */}
-                      <div className="flex items-center gap-5">
+                      <div className="flex items-center gap-6">
                         {item.metrics.map((m, j) => (
                           <div key={j} className="flex items-center gap-1.5">
                             <span className="text-orange-500">
@@ -293,7 +295,7 @@ export default function HomePage() {
                       <button
                         onClick={handleCTA}
                         className="px-6 py-2.5 text-white font-semibold text-sm rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] inline-flex items-center gap-2 whitespace-nowrap"
-                        style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}
+                        style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)', boxShadow: '0 4px 16px rgba(255,106,0,0.2)' }}
                       >
                         🔥 用这个案例生成我的卖货图
                         <ArrowRight className="w-4 h-4" />
