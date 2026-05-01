@@ -568,12 +568,7 @@ export default function ProductDetailGeneratorPage() {
                     alt="示例主图"
                     className="w-full h-[320px] object-cover"
                   />
-                  {/* 底部居中转化提示 */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg">
-                    <p className="text-[12px] text-white font-medium tracking-wide whitespace-nowrap">
-                      🚀 上传商品图 → 3秒生成卖货主图
-                    </p>
-                  </div>
+
                 </div>
 
                 {/* B. 三张能力展示图（不同品类） */}
