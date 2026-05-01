@@ -151,29 +151,38 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* 右侧：4张结果预览 */}
+            {/* 右侧：4张结果预览（主图全宽 + 3列小图） */}
             <div className="flex-1 w-full max-w-lg">
-              <div className="grid grid-cols-2 gap-3">
-                {RESULT_PREVIEWS.map((item, i) => (
-                  <div
-                    key={i}
-                    className={`group relative rounded-2xl overflow-hidden bg-[#f5f7fa] ${
-                      i === 0 ? 'col-span-2' : ''
-                    }`}
-                  >
-                    <img
-                      src={item.src}
-                      alt={`AI生成电商${item.label}`}
-                      className={`w-full object-contain transition-transform duration-300 group-hover:scale-[1.02] ${
-                        i === 0 ? 'aspect-[16/9]' : 'aspect-[4/3]'
-                      }`}
-                    />
-                    {/* 标签 */}
-                    <span className="absolute bottom-2 left-2 px-2.5 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-sm rounded-lg">
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
+              <div className="space-y-3">
+                {/* 主图 - 全宽 */}
+                <div className="group relative rounded-2xl overflow-hidden bg-[#f5f7fa]">
+                  <img
+                    src={RESULT_PREVIEWS[0].src}
+                    alt={`AI生成电商${RESULT_PREVIEWS[0].label}`}
+                    className="w-full aspect-[16/9] object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                  />
+                  <span className="absolute bottom-2 left-2 px-2.5 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-sm rounded-lg">
+                    {RESULT_PREVIEWS[0].label}
+                  </span>
+                </div>
+                {/* 3列小图 - 等宽无空白 */}
+                <div className="grid grid-cols-3 gap-3">
+                  {RESULT_PREVIEWS.slice(1).map((item, i) => (
+                    <div
+                      key={i}
+                      className="group relative rounded-2xl overflow-hidden bg-[#f5f7fa]"
+                    >
+                      <img
+                        src={item.src}
+                        alt={`AI生成电商${item.label}`}
+                        className="w-full aspect-[4/3] object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                      />
+                      <span className="absolute bottom-2 left-2 px-2.5 py-1 text-xs font-medium text-white bg-black/50 backdrop-blur-sm rounded-lg">
+                        {item.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
