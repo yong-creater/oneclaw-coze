@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Sparkles, Loader2, Download, X, Check, RefreshCw, Package } from 'lucide-react';
+import { Upload, Sparkles, Loader2, Download, X, Check, Package } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UtilityHeader from '@/components/common/UtilityHeader';
 
@@ -341,16 +341,6 @@ export default function ProductDetailGeneratorPage() {
     }
   };
 
-  const handleReset = () => {
-    setUploadedImages([]);
-    setProductName('');
-    setProductBenefit('');
-    setShowResults(false);
-    setGeneratedImages([]);
-    setRevealedSlots(new Set());
-    setTitleRevealed(false);
-  };
-
   // 下载单张图片
   const handleDownloadImage = async (url: string, filename: string) => {
     try {
@@ -541,7 +531,7 @@ export default function ProductDetailGeneratorPage() {
           <div>
             {isGenerating ? (
               /* ====== 生成中：示例图+模糊遮罩+阶段文案 ====== */
-              <div>
+              <div className="space-y-7">
                 {/* 主图区域：模糊+遮罩+状态文案 */}
                 <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-[#f5f7fa]">
                   <img
@@ -567,22 +557,15 @@ export default function ProductDetailGeneratorPage() {
                     </div>
                   </div>
                 </div>
-                {/* 使用场景 skeleton */}
-                <div className="mt-8">
-                  <div className="h-3 w-16 rounded bg-slate-100 mb-3" />
-                  <div className="aspect-[16/9] rounded-2xl bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite] relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs text-slate-300 font-medium">使用场景</span>
-                    </div>
+                {/* 小图 skeleton ×2 */}
+                <div className="aspect-[16/9] rounded-2xl bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite] relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs text-slate-300 font-medium">场景图</span>
                   </div>
                 </div>
-                {/* 产品优势 skeleton */}
-                <div className="mt-8">
-                  <div className="h-3 w-16 rounded bg-slate-100 mb-3" />
-                  <div className="aspect-[16/9] rounded-2xl bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite_0.3s] relative overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-xs text-slate-300 font-medium">产品优势</span>
-                    </div>
+                <div className="aspect-[16/9] rounded-2xl bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 bg-[length:200%_100%] animate-[shimmer_1.5s_ease-in-out_infinite_0.3s] relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs text-slate-300 font-medium">卖点图</span>
                   </div>
                 </div>
               </div>
@@ -631,118 +614,52 @@ export default function ProductDetailGeneratorPage() {
                 </p>
               </div>
             ) : (
-              /* ====== 生成结果：电商详情页结构 ====== */
-              <div className="space-y-0">
+              /* ====== 生成结果：电商详情页内容流 ====== */
+              <div className="space-y-7">
 
-                {/* 模块1：商品信息 */}
+                {/* 标题区：商品名称 + 一句话卖点 */}
                 <div className={`transition-all duration-500 ${titleRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
                   <h2 className="text-lg font-bold text-slate-800 leading-snug">
                     {productName || '商品标题'}
                   </h2>
-                  <p className="text-sm text-orange-600 mt-1 font-medium">
+                  <p className="text-sm text-orange-500 mt-1.5 font-medium tracking-wide">
                     {productBenefit || '核心卖点短句'}
                   </p>
                 </div>
 
-                {/* 模块2：主图 + 下载主图 */}
-                {getImage('main') && (
-                  <div className={`mt-8 transition-all duration-500 ${revealedSlots.has('main') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                    <div className="relative group rounded-2xl overflow-hidden bg-[#f5f7fa] cursor-pointer" onClick={() => openPreview(getImage('main')!)}>
-                      <img
-                        src={getImage('main')!}
-                        alt="主图"
-                        className="w-full aspect-[16/9] object-contain"
-                      />
-                      {/* 悬浮下载主图 */}
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDownloadImage(getImage('main')!, `${productName || '商品'}_主图.png`); }}
-                          className="px-4 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-medium text-slate-700 shadow-md hover:bg-white transition-colors flex items-center gap-1.5"
-                        >
-                          <Download className="w-3 h-3" />
-                          下载主图
-                        </button>
+                {/* 图片内容流：4张大图纵向排列 */}
+                {SLOT_CONFIG.map(({ slot, label }, index) => {
+                  const url = getImage(slot);
+                  if (!url) return null;
+                  return (
+                    <div
+                      key={slot}
+                      className={`transition-all duration-500 ${revealedSlots.has(slot) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}
+                    >
+                      <div
+                        className="rounded-2xl overflow-hidden bg-[#f5f7fa] cursor-pointer"
+                        onClick={() => openPreview(url)}
+                      >
+                        <img
+                          src={url}
+                          alt={label}
+                          className="w-full object-contain"
+                        />
                       </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })}
 
-                {/* 模块3：核心卖点条 */}
-                {productBenefit && (
-                  <div className={`mt-8 py-3 flex items-center justify-center gap-3 transition-all duration-500 ${revealedSlots.has('main') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                    {productBenefit.split(/[\s|｜、]+/).filter(Boolean).map((point, i) => (
-                      <span key={i} className="text-sm text-slate-600 font-medium">
-                        {i > 0 && <span className="text-slate-300 mx-1">|</span>}
-                        <span className="text-orange-500">{point}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {/* 模块4：使用场景 */}
-                {getImage('scene') && (
-                  <div className={`mt-10 transition-all duration-500 ${revealedSlots.has('scene') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                    <h3 className="text-sm font-semibold text-slate-500 tracking-wider uppercase mb-3">使用场景</h3>
-                    <div className="relative group rounded-2xl overflow-hidden cursor-pointer" onClick={() => openPreview(getImage('scene')!)}>
-                      <img
-                        src={getImage('scene')!}
-                        alt="使用场景"
-                        className="w-full aspect-[16/9] object-cover"
-                      />
-                      {/* 悬浮下载 */}
-                      <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDownloadImage(getImage('scene')!, `${productName || '商品'}_场景图.png`); }}
-                          className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-medium text-slate-700 shadow-md hover:bg-white transition-colors flex items-center gap-1"
-                        >
-                          <Download className="w-3 h-3" />
-                          下载
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 模块5：核心功能 */}
-                {getImage('selling') && (
-                  <div className={`mt-10 transition-all duration-500 ${revealedSlots.has('selling') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}`}>
-                    <h3 className="text-sm font-semibold text-slate-500 tracking-wider uppercase mb-3">产品优势</h3>
-                    <div className="relative group rounded-2xl overflow-hidden cursor-pointer" onClick={() => openPreview(getImage('selling')!)}>
-                      <img
-                        src={getImage('selling')!}
-                        alt="产品优势"
-                        className="w-full aspect-[16/9] object-cover"
-                      />
-                      {/* 悬浮下载 */}
-                      <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDownloadImage(getImage('selling')!, `${productName || '商品'}_卖点图.png`); }}
-                          className="px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-xs font-medium text-slate-700 shadow-md hover:bg-white transition-colors flex items-center gap-1"
-                        >
-                          <Download className="w-3 h-3" />
-                          下载
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 底部操作区 */}
-                <div className="mt-10 flex gap-3">
+                {/* 底部：下载整套详情图 */}
+                <div className="pt-2">
                   <button
                     onClick={handleDownloadAll}
                     disabled={generatedImages.length === 0}
-                    className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full py-3.5 text-white font-semibold text-sm rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}
                   >
                     <Download className="w-4 h-4" />
-                    下载全部图片
-                  </button>
-                  <button
-                    onClick={handleReset}
-                    className="px-5 py-3 border-2 border-slate-200 hover:border-orange-400 text-slate-600 text-sm rounded-xl transition-colors flex items-center gap-1.5"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    换一张
+                    下载整套详情图
                   </button>
                 </div>
               </div>
