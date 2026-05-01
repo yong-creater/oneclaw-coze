@@ -568,10 +568,10 @@ export default function ProductDetailGeneratorPage() {
                     alt="示例主图"
                     className="w-full h-[420px] object-cover"
                   />
-                  {/* 左下角轻量提示（不遮挡图片自带文案） */}
-                  <div className="absolute bottom-3 right-3 bg-black/30 backdrop-blur-sm px-2.5 py-1 rounded-md">
-                    <p className="text-[10px] text-white/80 font-medium">
-                      AI 生成示例
+                  {/* 底部居中转化提示 */}
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm px-4 py-2 rounded-lg">
+                    <p className="text-[12px] text-white font-medium tracking-wide whitespace-nowrap">
+                      🚀 上传商品图 → 3秒生成卖货主图
                     </p>
                   </div>
                 </div>
