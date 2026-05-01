@@ -574,25 +574,25 @@ export default function ProductDetailGeneratorPage() {
                 {/* B. 三张能力展示图（不同品类） */}
                 <div className="grid grid-cols-3 gap-3">
                   {/* 使用场景 */}
-                  <div className="space-y-1">
-                    <div className="rounded-xl overflow-hidden">
-                      <img src="/demo-card-digital.jpg" alt="使用场景" className="w-full h-[140px] object-cover" />
+                  <div className="group rounded-xl overflow-hidden relative">
+                    <img src="/demo-card-digital.jpg" alt="使用场景" className="w-full h-[140px] object-cover" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                      <p className="text-white text-[12px] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">日常办公 / 沉浸学习</p>
                     </div>
-                    <p className="text-center text-[10px] text-slate-400">使用场景</p>
                   </div>
                   {/* 核心功能 */}
-                  <div className="space-y-1">
-                    <div className="rounded-xl overflow-hidden">
-                      <img src="/demo-card-home.jpg" alt="核心功能" className="w-full h-[140px] object-cover" />
+                  <div className="group rounded-xl overflow-hidden relative">
+                    <img src="/demo-card-home.jpg" alt="核心功能" className="w-full h-[140px] object-cover" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                      <p className="text-white text-[12px] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">主动降噪</p>
                     </div>
-                    <p className="text-center text-[10px] text-slate-400">核心功能</p>
                   </div>
                   {/* 卖点展示 */}
-                  <div className="space-y-1">
-                    <div className="rounded-xl overflow-hidden">
-                      <img src="/demo-card-lifestyle.jpg" alt="卖点展示" className="w-full h-[140px] object-cover" />
+                  <div className="group rounded-xl overflow-hidden relative">
+                    <img src="/demo-card-lifestyle.jpg" alt="卖点展示" className="w-full h-[140px] object-cover" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                      <p className="text-white text-[12px] font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">40小时续航</p>
                     </div>
-                    <p className="text-center text-[10px] text-slate-400">卖点展示</p>
                   </div>
                 </div>
 
