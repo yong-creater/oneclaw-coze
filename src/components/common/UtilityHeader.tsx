@@ -47,7 +47,9 @@ export default function UtilityHeader({
         </div>
 
         {/* 右侧：登录按钮 */}
-        <LoginButton />
+        <div className="flex items-center min-w-[80px] justify-end">
+          <LoginButton />
+        </div>
       </div>
     </div>
   );
