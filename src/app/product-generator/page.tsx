@@ -562,7 +562,7 @@ export default function ProductDetailGeneratorPage() {
               <div>
 
                 {/* A. 主视觉 Banner（横幅大图，视觉中心） */}
-                <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-[#f5f7fa]">
+                <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden bg-[#f5f7fa] mb-3">
                   <img
                     src={DEMO_IMAGES[0].url}
                     alt="示例主图"
@@ -572,24 +572,24 @@ export default function ProductDetailGeneratorPage() {
                 </div>
 
                 {/* B. 三张能力展示图（不同品类） */}
-                <div className="grid grid-cols-3 gap-3 mt-4">
+                <div className="grid grid-cols-3 gap-3">
                   {/* 使用场景 */}
                   <div className="space-y-1">
-                    <div className="rounded-lg overflow-hidden">
+                    <div className="rounded-xl overflow-hidden">
                       <img src="/demo-card-digital.jpg" alt="使用场景" className="w-full h-[140px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">使用场景</p>
                   </div>
                   {/* 核心功能 */}
                   <div className="space-y-1">
-                    <div className="rounded-lg overflow-hidden">
+                    <div className="rounded-xl overflow-hidden">
                       <img src="/demo-card-home.jpg" alt="核心功能" className="w-full h-[140px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">核心功能</p>
                   </div>
                   {/* 卖点展示 */}
                   <div className="space-y-1">
-                    <div className="rounded-lg overflow-hidden">
+                    <div className="rounded-xl overflow-hidden">
                       <img src="/demo-card-lifestyle.jpg" alt="卖点展示" className="w-full h-[140px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">卖点展示</p>
