@@ -18,10 +18,8 @@ const RESULT_PREVIEWS = [
 const CASE_STUDIES = [
   {
     name: '蓝牙耳机',
-    category: '科技类',
-    beforeImg: '/demo-main.jpg',
-    afterMainImg: '/demo-main.jpg',
-    afterSubImages: [
+    mainImg: '/demo-main.jpg',
+    subImages: [
       { src: '/demo-card-digital.jpg', label: '卖点图' },
       { src: '/demo-card-home.jpg', label: '场景图' },
       { src: '/demo-card-lifestyle.jpg', label: '功能图' },
@@ -34,12 +32,10 @@ const CASE_STUDIES = [
   },
   {
     name: '口红美妆',
-    category: '消费类',
-    beforeImg: '/demo-card-home.jpg',
-    afterMainImg: '/demo-card-home.jpg',
-    afterSubImages: [
-      { src: '/demo-main.jpg', label: '主图' },
-      { src: '/demo-card-digital.jpg', label: '卖点图' },
+    mainImg: '/demo-card-home.jpg',
+    subImages: [
+      { src: '/demo-main.jpg', label: '卖点图' },
+      { src: '/demo-card-digital.jpg', label: '场景图' },
       { src: '/demo-card-lifestyle.jpg', label: '功能图' },
     ],
     metrics: [
@@ -50,13 +46,11 @@ const CASE_STUDIES = [
   },
   {
     name: '保温杯',
-    category: '通用类',
-    beforeImg: '/demo-card-lifestyle.jpg',
-    afterMainImg: '/demo-card-lifestyle.jpg',
-    afterSubImages: [
-      { src: '/demo-main.jpg', label: '主图' },
-      { src: '/demo-card-digital.jpg', label: '卖点图' },
-      { src: '/demo-card-home.jpg', label: '场景图' },
+    mainImg: '/demo-card-lifestyle.jpg',
+    subImages: [
+      { src: '/demo-main.jpg', label: '卖点图' },
+      { src: '/demo-card-digital.jpg', label: '场景图' },
+      { src: '/demo-card-home.jpg', label: '功能图' },
     ],
     metrics: [
       { icon: 'trending', label: '转化率提升', value: '150%' },
@@ -175,7 +169,7 @@ export default function HomePage() {
                 爆款卖货案例
               </h2>
               <p className="mt-2 text-slate-500 text-sm">
-                普通商品图 → AI 卖货图，效果对比一目了然
+                无需准备素材，AI 一键生成全套卖货图
               </p>
             </div>
 
@@ -183,69 +177,38 @@ export default function HomePage() {
               {CASE_STUDIES.map((item, i) => (
                 <div key={i} className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700">
                   {/* 案例头部 */}
-                  <div className="px-6 md:px-8 pt-6 pb-4 flex items-center gap-3">
-                    <span className="px-2.5 py-1 text-xs font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/20 rounded-md">{item.category}</span>
+                  <div className="px-6 md:px-8 pt-6 pb-4">
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">{item.name}</h3>
                   </div>
 
-                  {/* 对比区：左原图 → AI节点 → 右AI生成 */}
+                  {/* AI 生成图展示区 */}
                   <div className="px-6 md:px-8 pb-6">
-                    <div className="flex flex-col md:flex-row items-stretch gap-4 md:gap-5">
-                      {/* 左：普通商品图 */}
-                      <div className="flex-1 w-full md:max-w-[240px] flex flex-col items-center">
-                        <span className="mb-3 px-3 py-1 text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-700 rounded-full">
-                          普通商品图
+                    <div className="rounded-2xl bg-[#fafbfc] dark:bg-slate-700/30 border border-orange-100 dark:border-orange-900/20 p-3 space-y-2.5">
+                      {/* 第一行：主图 */}
+                      <div className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
+                        <img
+                          src={item.mainImg}
+                          alt={`${item.name}主图`}
+                          className="w-full aspect-[16/9] object-contain"
+                        />
+                        <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/70 backdrop-blur-sm rounded-md">
+                          主图
                         </span>
-                        <div className="w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-700/50 border-2 border-dashed border-slate-200 dark:border-slate-600">
-                          <img
-                            src={item.beforeImg}
-                            alt={`${item.name}商品原图`}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
                       </div>
-
-                      {/* 中间AI节点：竖向居中 */}
-                      <div className="flex md:flex-col items-center justify-center gap-2 shrink-0 py-2 md:py-0">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 flex items-center justify-center shadow-lg shadow-orange-500/30">
-                          <Zap className="w-5 h-5 text-white" strokeWidth={2.5} />
-                        </div>
-                        <span className="text-xs font-bold text-orange-500 tracking-wide">AI重构</span>
-                      </div>
-
-                      {/* 右：AI生成卖货图 - 整体卡片容器 */}
-                      <div className="flex-[2] w-full flex flex-col">
-                        <span className="mb-2 self-start px-3 py-1 text-xs font-semibold text-white bg-gradient-to-r from-orange-500 to-amber-500 rounded-full shadow-sm">
-                          AI 卖货图
-                        </span>
-                        <div className="flex-1 rounded-2xl bg-[#fafbfc] dark:bg-slate-700/30 border border-orange-100 dark:border-orange-900/20 p-3 space-y-2.5">
-                          {/* 第一行：主图 */}
-                          <div className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
+                      {/* 第二行：卖点图 + 场景图 + 功能图（3列等宽） */}
+                      <div className="grid grid-cols-3 gap-2.5">
+                        {item.subImages.map((img, j) => (
+                          <div key={j} className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
                             <img
-                              src={item.afterMainImg}
-                              alt={`${item.name}AI主图`}
-                              className="w-full aspect-[16/9] object-contain"
+                              src={img.src}
+                              alt={`${item.name}${img.label}`}
+                              className="w-full aspect-[4/3] object-cover"
                             />
                             <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/70 backdrop-blur-sm rounded-md">
-                              主图
+                              {img.label}
                             </span>
                           </div>
-                          {/* 第二行：卖点图 + 场景图 + 功能图（3列等宽） */}
-                          <div className="grid grid-cols-3 gap-2.5">
-                            {item.afterSubImages.map((img, j) => (
-                              <div key={j} className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
-                                <img
-                                  src={img.src}
-                                  alt={`${item.name}${img.label}`}
-                                  className="w-full aspect-[4/3] object-cover"
-                                />
-                                <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/70 backdrop-blur-sm rounded-md">
-                                  {img.label}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                        ))}
                       </div>
                     </div>
                   </div>
