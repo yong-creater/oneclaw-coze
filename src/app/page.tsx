@@ -238,37 +238,24 @@ export default function HomePage() {
                               alt={`${item.name}AI主图`}
                               className="w-full aspect-[16/9] object-contain"
                             />
-                            <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-semibold text-white bg-orange-500/85 backdrop-blur-sm rounded-lg">
+                            <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/70 backdrop-blur-sm rounded-md">
                               主图
                             </span>
                           </div>
-                          {/* 第二行：卖点图 + 场景图（2列） */}
-                          <div className="grid grid-cols-2 gap-2.5">
-                            {item.afterSubImages.slice(0, 2).map((img, j) => (
+                          {/* 第二行：卖点图 + 场景图 + 功能图（3列等宽） */}
+                          <div className="grid grid-cols-3 gap-2.5">
+                            {item.afterSubImages.map((img, j) => (
                               <div key={j} className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
                                 <img
                                   src={img.src}
                                   alt={`${item.name}${img.label}`}
                                   className="w-full aspect-[4/3] object-cover"
                                 />
-                                <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-semibold text-white bg-orange-500/85 backdrop-blur-sm rounded-lg">
+                                <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/70 backdrop-blur-sm rounded-md">
                                   {img.label}
                                 </span>
                               </div>
                             ))}
-                          </div>
-                          {/* 第三行：功能图（单独一行，稍大） */}
-                          <div className="flex justify-center">
-                            <div className="w-[calc(50%-5px)] relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
-                              <img
-                                src={item.afterSubImages[2].src}
-                                alt={`${item.name}${item.afterSubImages[2].label}`}
-                                className="w-full aspect-[4/3] object-cover"
-                              />
-                              <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-semibold text-white bg-orange-500/85 backdrop-blur-sm rounded-lg">
-                                {item.afterSubImages[2].label}
-                              </span>
-                            </div>
                           </div>
                         </div>
                       </div>
