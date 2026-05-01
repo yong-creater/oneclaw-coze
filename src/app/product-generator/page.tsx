@@ -511,13 +511,13 @@ export default function ProductDetailGeneratorPage() {
 
             {/* 商品名称 */}
             <div className="mt-4 mb-3">
-              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：蓝牙降噪耳机）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
+              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：植物香薰蜡烛）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
             </div>
 
             {/* 商品卖点 */}
             <div className="mb-5">
               <div className="flex gap-2">
-                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：主动降噪 40小时续航）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
+                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：天然大豆蜡 48小时持久留香）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
                 <button onClick={handleAnalyzeBenefit} disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)} className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-600 dark:disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-all whitespace-nowrap flex items-center gap-1 self-end">
                   <Sparkles className="w-3 h-3" />{isAnalyzing ? '分析中...' : 'AI写卖点'}
                 </button>
@@ -604,8 +604,8 @@ export default function ProductDetailGeneratorPage() {
                         <img src={DEMO_IMAGES[1].url} alt="卖点" className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
                         <div className="absolute bottom-2 left-2 right-2 space-y-0.5">
-                          <p className="text-[10px] text-white/95 font-semibold">🎧 沉浸式音质</p>
-                          <p className="text-[10px] text-white/70 font-medium">🔋 30小时续航</p>
+                          <p className="text-[10px] text-white/95 font-semibold">🌿 天然植物蜡</p>
+                          <p className="text-[10px] text-white/70 font-medium">🕯️ 48小时持久留香</p>
                         </div>
                       </div>
                     </div>
