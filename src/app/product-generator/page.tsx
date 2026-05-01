@@ -568,12 +568,10 @@ export default function ProductDetailGeneratorPage() {
                     alt="示例主图"
                     className="w-full h-[420px] object-cover"
                   />
-                  {/* 底部渐变遮罩 */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                  {/* 左下角浮层文案 */}
-                  <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                    <p className="text-[11px] text-white/90 font-medium">
-                      普通商品图 <span className="text-orange-400 mx-1">→</span> 自动生成卖货素材
+                  {/* 左下角轻量提示（不遮挡图片自带文案） */}
+                  <div className="absolute bottom-3 right-3 bg-black/30 backdrop-blur-sm px-2.5 py-1 rounded-md">
+                    <p className="text-[10px] text-white/80 font-medium">
+                      AI 生成示例
                     </p>
                   </div>
                 </div>
