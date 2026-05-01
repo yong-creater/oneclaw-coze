@@ -226,34 +226,48 @@ export default function HomePage() {
                       </div>
 
                       {/* 右：AI生成卖货图 */}
-                      <div className="flex-[2] w-full flex flex-col items-center">
-                        <span className="mb-3 px-3 py-1 text-xs font-medium text-white bg-gradient-to-r from-orange-500 to-amber-500 rounded-full">
+                      <div className="flex-[2] w-full flex flex-col items-center gap-2.5">
+                        <span className="mb-0.5 px-3 py-1 text-xs font-medium text-white bg-gradient-to-r from-orange-500 to-amber-500 rounded-full">
                           AI 卖货图
                         </span>
-                        {/* 主图 + 3张小图 */}
-                        <div className="w-full grid grid-cols-1 sm:grid-cols-4 gap-2.5">
-                          <div className="sm:col-span-2 relative rounded-xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30">
-                            <img
-                              src={item.afterMainImg}
-                              alt={`${item.name}AI主图`}
-                              className="w-full aspect-[4/3] object-contain"
-                            />
-                            <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded">
-                              主图
-                            </span>
-                          </div>
-                          {item.afterSubImages.map((img, j) => (
-                            <div key={j} className="relative rounded-xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30">
+                        {/* 第一行：主图（占满） */}
+                        <div className="w-full relative rounded-2xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30 shadow-sm">
+                          <img
+                            src={item.afterMainImg}
+                            alt={`${item.name}AI主图`}
+                            className="w-full aspect-[16/9] object-contain"
+                          />
+                          <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded-lg">
+                            主图
+                          </span>
+                        </div>
+                        {/* 第二行：卖点图 + 场景图（2列） */}
+                        <div className="w-full grid grid-cols-2 gap-2.5">
+                          {item.afterSubImages.slice(0, 2).map((img, j) => (
+                            <div key={j} className="relative rounded-2xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30 shadow-sm">
                               <img
                                 src={img.src}
                                 alt={`${item.name}${img.label}`}
-                                className="w-full aspect-square object-cover"
+                                className="w-full aspect-[4/3] object-cover"
                               />
-                              <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded">
+                              <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded-lg">
                                 {img.label}
                               </span>
                             </div>
                           ))}
+                        </div>
+                        {/* 第三行：功能图（居中放大） */}
+                        <div className="w-full flex justify-center">
+                          <div className="w-full sm:w-1/2 relative rounded-2xl overflow-hidden bg-[#f5f7fa] dark:bg-slate-700/50 border border-orange-100 dark:border-orange-900/30 shadow-sm">
+                            <img
+                              src={item.afterSubImages[2].src}
+                              alt={`${item.name}${item.afterSubImages[2].label}`}
+                              className="w-full aspect-[4/3] object-cover"
+                            />
+                            <span className="absolute bottom-2 left-2 px-2.5 py-1 text-[11px] font-medium text-white bg-orange-500/80 backdrop-blur-sm rounded-lg">
+                              {item.afterSubImages[2].label}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
