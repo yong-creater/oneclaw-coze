@@ -14,8 +14,10 @@ import {
   Sparkles, Feather, UserCircle, ImageIcon, Mountain,
   FileText, Globe, TrendingUp, Scissors, Layout,
   Camera, Palette, Sparkle, LayoutTemplate,
-  Package, Layers, Shirt, ShoppingBag, Heart
+  Package, Layers, Shirt, ShoppingBag, Heart,
+  Home, Zap
 } from 'lucide-react';
+import { SiteLogo } from '@/components/common/SiteLogo';
 import AnimatedLobster from '@/components/common/AnimatedLobster';
 import { SkeletonGrid } from '@/components/common/LobsterSkeleton';
 import SponsorBadge, { isSponsorActive } from '@/components/common/SponsorBadge';
@@ -306,14 +308,12 @@ const DIFFICULTY_COLORS: Record<string, string> = {
 
 
 const MAIN_TABS = [
-  { key: 'utilities', label: '精选工具', icon: Star },
-  { key: 'templates', label: '模板库', icon: LayoutTemplate },
-  { key: 'tools', label: 'AI应用', icon: Wand2 },
-  { key: 'prompts', label: '提示词', icon: Lightbulb },
-  { key: 'tutorials', label: '教程', icon: BookOpen },
+  { key: 'home', label: '首页', icon: Home },
+  { key: 'generator', label: '生成器', icon: Sparkles },
 ] as const;
 
-type MainTab = typeof MAIN_TABS[number]['key'];
+// 保留所有历史 tab 类型，旧代码不删除但 UI 不展示
+type MainTab = 'home' | 'generator' | 'tools' | 'prompts' | 'tutorials' | 'templates' | 'utilities';
 
 // ==================== 工具函数 ====================
 const getUserId = (): string => {
@@ -377,7 +377,7 @@ export default function HomePage() {
   const router = useRouter();
   
   // 主Tab状态 - 默认精选工具
-  const [mainTab, setMainTab] = useState<MainTab>('utilities');
+  const [mainTab, setMainTab] = useState<MainTab>('home');
 
   // 页面加载时，从 sessionStorage 读取返回的 tab
   useEffect(() => {
@@ -742,7 +742,13 @@ export default function HomePage() {
                 return (
                   <button
                     key={tab.key}
-                    onClick={() => setMainTab(tab.key)}
+                    onClick={() => {
+                      if (tab.key === 'generator') {
+                        router.push('/product-generator');
+                      } else {
+                        setMainTab(tab.key);
+                      }
+                    }}
                     className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-full text-sm font-medium transition-all ${
                       isActive
                         ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md'
@@ -765,7 +771,76 @@ export default function HomePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* ==================== 工具导航 ==================== */}
+        {/* ==================== 首页：生成器入口 ==================== */}
+        {mainTab === 'home' && (
+          <div className="flex flex-col items-center text-center py-12 md:py-20">
+            {/* 品牌标识 */}
+            <div className="mb-6">
+              <SiteLogo size={48} showText={false} />
+            </div>
+
+            {/* 主标题 */}
+            <h1 className="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white leading-tight max-w-2xl">
+              上传商品图<br />
+              <span className="text-orange-500">3秒生成卖货详情页</span>
+            </h1>
+
+            {/* 副标题 */}
+            <p className="mt-4 text-base md:text-lg text-slate-500 max-w-xl">
+              AI 自动生成电商主图、场景图、卖点图，可直接上架淘宝、京东、拼多多
+            </p>
+
+            {/* CTA 按钮 */}
+            <a
+              href="/product-generator"
+              className="mt-8 px-10 py-4 text-white font-semibold text-lg rounded-2xl transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] flex items-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}
+            >
+              <Wand2 className="w-5 h-5" />
+              立即生成卖货图
+            </a>
+
+            {/* 信任提示 */}
+            <p className="mt-4 text-xs text-slate-400">
+              已帮助 12,000+ 商家生成卖货素材
+            </p>
+
+            {/* 真实案例展示 */}
+            <div className="mt-16 w-full max-w-4xl">
+              <h2 className="text-sm font-semibold text-slate-400 tracking-wider uppercase mb-6">真实案例展示</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* 案例卡1：主图 */}
+                <div className="rounded-2xl overflow-hidden bg-[#f5f7fa] shadow-sm hover:shadow-md transition-shadow">
+                  <img src="/demo-main.jpg" alt="电商主图案例" className="w-full aspect-[16/9] object-contain" />
+                  <div className="p-4 text-left">
+                    <p className="text-sm font-medium text-slate-700">头戴式降噪耳机 · 主图</p>
+                    <p className="text-xs text-slate-400 mt-1">AI 自动生成，可直接上架</p>
+                  </div>
+                </div>
+                {/* 案例卡2：场景图 */}
+                <div className="rounded-2xl overflow-hidden bg-[#f5f7fa] shadow-sm hover:shadow-md transition-shadow">
+                  <img src="/demo-card-digital.jpg" alt="使用场景案例" className="w-full aspect-[16/9] object-contain" />
+                  <div className="p-4 text-left">
+                    <p className="text-sm font-medium text-slate-700">头戴式降噪耳机 · 场景图</p>
+                    <p className="text-xs text-slate-400 mt-1">沉浸办公场景，提升购买欲</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 底部二次CTA */}
+            <a
+              href="/product-generator"
+              className="mt-16 px-8 py-3 text-white font-semibold text-sm rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] flex items-center gap-2"
+              style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}
+            >
+              <Wand2 className="w-4 h-4" />
+              开始生成你的卖货图
+            </a>
+          </div>
+        )}
+
+        {/* ==================== 工具导航（隐藏但保留代码） ==================== */}
         {mainTab === 'tools' && (
           <div className="flex gap-6">
             {/* 左侧分类导航 - 桌面端侧边栏，移动端可折叠 */}
