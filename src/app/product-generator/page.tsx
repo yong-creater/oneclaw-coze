@@ -406,7 +406,7 @@ export default function ProductDetailGeneratorPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-3">
         {/* 核心价值标题 */}
-        <div className="text-center mb-3">
+        <div className="text-center mb-7">
           <h1 className="text-lg md:text-xl font-black text-slate-800 dark:text-white mb-0.5 tracking-tight">
             让商品图帮你<span className="text-orange-500">卖货</span>
           </h1>
