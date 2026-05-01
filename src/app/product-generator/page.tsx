@@ -549,7 +549,7 @@ export default function ProductDetailGeneratorPage() {
                 {/* 三图骨架 */}
                 <div className="grid grid-cols-3 gap-3">
                   {SLOT_CONFIG.map(({ slot, label }) => (
-                    <div key={slot} className="h-[130px] rounded-xl bg-stone-50 relative overflow-hidden animate-pulse">
+                    <div key={slot} className="h-[140px] rounded-xl bg-stone-50 relative overflow-hidden animate-pulse">
                       <div className="absolute inset-0 flex items-center justify-center animate-none">
                         <span className="text-[11px] text-slate-300 font-medium">{label}</span>
                       </div>
@@ -576,21 +576,21 @@ export default function ProductDetailGeneratorPage() {
                   {/* 使用场景 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-digital.jpg" alt="使用场景" className="w-full h-[130px] object-cover" />
+                      <img src="/demo-card-digital.jpg" alt="使用场景" className="w-full h-[140px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">使用场景</p>
                   </div>
                   {/* 核心功能 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-home.jpg" alt="核心功能" className="w-full h-[130px] object-cover" />
+                      <img src="/demo-card-home.jpg" alt="核心功能" className="w-full h-[140px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">核心功能</p>
                   </div>
                   {/* 卖点展示 */}
                   <div className="space-y-1">
                     <div className="rounded-lg overflow-hidden">
-                      <img src="/demo-card-lifestyle.jpg" alt="卖点展示" className="w-full h-[130px] object-cover" />
+                      <img src="/demo-card-lifestyle.jpg" alt="卖点展示" className="w-full h-[140px] object-cover" />
                     </div>
                     <p className="text-center text-[10px] text-slate-400">卖点展示</p>
                   </div>
