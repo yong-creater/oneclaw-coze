@@ -4,24 +4,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
   Wrench,
   FileText,
-  FolderTree,
   Lightbulb,
-  BookOpen,
   Users,
-  MessageSquare,
   ShoppingCart,
-  Settings,
-  Shield,
   ChevronDown,
   LogOut,
   Menu,
   X,
   Loader2,
   Grid3X3,
-  Hash,
+  Home,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,18 +43,11 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { name: '仪表盘', href: '/admin', icon: LayoutDashboard },
   { name: '精选工具', href: '/admin/utility-tools', icon: Wrench },
   { name: '模板库', href: '/admin/templates', icon: FileText },
-  { name: 'AI应用', href: '/admin/tools', icon: FolderTree },
-  { name: '分类管理', href: '/admin/categories', icon: Hash },
   { name: '提示词库', href: '/admin/prompts', icon: Lightbulb },
-  { name: '教程库', href: '/admin/tutorials', icon: BookOpen },
   { name: '会员管理', href: '/admin/members', icon: Users },
-  { name: '评论审核', href: '/admin/reviews', icon: MessageSquare },
   { name: '订单管理', href: '/admin/orders', icon: ShoppingCart },
-  { name: '广告管理', href: '/admin/ads', icon: Settings },
-  { name: 'API Key', href: '/admin/api-keys', icon: Shield },
   { name: '模型提供商', href: '/admin/model-providers', icon: Grid3X3 },
 ];
 
@@ -203,7 +190,7 @@ export default function AdminLayout({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/" target="_blank">
-                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    <Home className="w-4 h-4 mr-2" />
                     访问前台
                   </Link>
                 </DropdownMenuItem>
@@ -279,7 +266,7 @@ export default function AdminLayout({
               target="_blank"
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
             >
-              <LayoutDashboard className="w-5 h-5 text-slate-400" />
+              <Home className="w-5 h-5 text-slate-400" />
               <span>返回前台</span>
             </Link>
           </div>
