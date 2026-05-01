@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ChevronRight, TrendingUp, MousePointerClick, ShoppingCart, Zap } from 'lucide-react';
-import { SiteLogo } from '@/components/common/SiteLogo';
-import LoginButton from '@/components/common/LoginButton';
-import Link from 'next/link';
+import { ArrowRight, TrendingUp, MousePointerClick, ShoppingCart, Zap } from 'lucide-react';
+import SiteHeader from '@/components/common/SiteHeader';
 import WechatPromo from '@/components/common/WechatPromo';
 
 // ==================== 结果预览图配置 ====================
@@ -97,27 +95,8 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
-      {/* 顶部导航 */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center shrink-0 hover:opacity-80 transition-opacity">
-              <SiteLogo size={32} showText />
-            </Link>
-
-            <div className="flex items-center gap-3 min-w-[120px] justify-end">
-              <button
-                onClick={handleCTA}
-                className="hidden sm:flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-orange-500 hover:text-orange-600 border border-orange-200 hover:border-orange-300 rounded-full transition-colors"
-              >
-                <span>生成器</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-              <LoginButton />
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* 顶部导航 - 使用独立组件避免hydration闪烁 */}
+      <SiteHeader />
 
       <main>
         {/* ==================== 第一屏：文案 + 结果预览 ==================== */}
