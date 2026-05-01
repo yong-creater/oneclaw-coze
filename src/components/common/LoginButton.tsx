@@ -50,12 +50,12 @@ export default function LoginButton() {
           />
           <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-50">
             <Link
-              href="/workspace"
+              href="/membership"
               onClick={() => setShowDropdown(false)}
               className="flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               <User className="w-4 h-4" />
-              我的工作台
+              会员中心
             </Link>
             <Link
               href="/membership"

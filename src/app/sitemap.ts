@@ -14,27 +14,9 @@ const getFullUrl = () => {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getFullUrl();
-  
-  // 工具分类slug
-  const categorySlugs = [
-    'video-generation',
-    'digital-human',
-    'video-editing',
-    'ai-dubbing',
-    'ai-painting',
-    'ai-chat',
-    'ai-writing',
-    'ai-coding',
-    'ai-audio',
-    'ai-office',
-    'ai-marketing',
-    'ai-learning',
-    'ai-search',
-    'ai-translation',
-  ];
 
-  // 静态页面
-  const staticPages: MetadataRoute.Sitemap = [
+  // 核心页面
+  const pages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -42,22 +24,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/prompts`,
+      url: `${baseUrl}/product-generator`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
+      changeFrequency: 'daily',
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/tutorials`,
+      url: `${baseUrl}/product-poster`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.9,
+      priority: 0.8,
     },
     {
-      url: `${baseUrl}/workspace`,
+      url: `${baseUrl}/xiaohongshu-generator`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.6,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/ai-photo`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/background-removal`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/membership`,
@@ -66,35 +60,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/sbti`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
       url: `${baseUrl}/novel`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.8,
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/resume`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/productpage`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/sbti`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
     },
   ];
 
-  // 分类页面
-  const categoryPages: MetadataRoute.Sitemap = categorySlugs.map((slug) => ({
-    url: `${baseUrl}/category/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 0.8,
-  }));
-
-  // 工具详情页 - 从数据库获取或使用静态列表
-  const topToolIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-  const toolPages: MetadataRoute.Sitemap = topToolIds.map((id) => ({
-    url: `${baseUrl}/tools/${id}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }));
-
-  return [...staticPages, ...categoryPages, ...toolPages];
+  return pages;
 }
