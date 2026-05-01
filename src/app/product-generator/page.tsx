@@ -533,12 +533,12 @@ export default function ProductDetailGeneratorPage() {
           </div>
 
           {/* ==================== 右侧：电商详情页预览 ==================== */}
-          <div className="px-6 py-6">
+          <div className="px-3 py-4">
             {isGenerating ? (
               /* ====== 生成中：骨架屏 + 分步提示 ====== */
               <div className="space-y-5">
                 {/* 主图骨架 */}
-                <div className="w-full h-[300px] rounded-xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
+                <div className="w-full h-[420px] rounded-2xl bg-gradient-to-br from-stone-50 via-slate-50 to-stone-100 relative overflow-hidden animate-pulse">
                   <div className="absolute inset-0 flex items-center justify-center animate-none">
                     <div className="text-center">
                       <div className="w-10 h-10 rounded-full border-2 border-slate-200 border-t-orange-400 animate-spin mx-auto mb-3" />
@@ -561,15 +561,12 @@ export default function ProductDetailGeneratorPage() {
               /* ====== 示例效果展示：视觉主区域 ====== */
               <div>
 
-                {/* 顶部标题（靠左） */}
-                <p className="text-[13px] font-semibold text-slate-700 mb-5">适用于多品类商品</p>
-
-                {/* A. 主视觉 Banner（横幅大图，object-cover 铺满） */}
+                {/* A. 主视觉 Banner（横幅大图，视觉中心） */}
                 <div className="relative rounded-2xl overflow-hidden">
                   <img
                     src={DEMO_IMAGES[0].url}
                     alt="示例主图"
-                    className="w-full h-[300px] object-cover"
+                    className="w-full h-[420px] object-cover"
                   />
                   {/* 底部渐变遮罩 */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
@@ -630,7 +627,7 @@ export default function ProductDetailGeneratorPage() {
                     <img
                       src={getImage('main')!}
                       alt="主图"
-                      className="w-full h-[280px] object-cover"
+                      className="w-full h-[420px] object-cover"
                     />
                   </div>
                 )}
