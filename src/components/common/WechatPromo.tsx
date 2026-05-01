@@ -31,7 +31,7 @@ export default function WechatPromo({ className = '' }: WechatPromoProps) {
         
         {/* 底部链接 */}
         <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
-          <Link href="/about" className="hover:text-orange-500 transition-colors">关于OneClaw</Link>
+          <span className="text-slate-500 dark:text-slate-400">OneClaw - AI卖货内容生成器</span>
           <span className="text-slate-300 dark:text-slate-600">|</span>
           <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
             渝ICP备2026004291号-2
