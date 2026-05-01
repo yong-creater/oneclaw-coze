@@ -533,7 +533,7 @@ export default function ProductDetailGeneratorPage() {
           </div>
 
           {/* ==================== 右侧：电商详情页预览 ==================== */}
-          <div className="px-3 py-4">
+          <div>
             {isGenerating ? (
               /* ====== 生成中：骨架屏 + 分步提示 ====== */
               <div className="space-y-5">
