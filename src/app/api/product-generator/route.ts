@@ -97,7 +97,35 @@ When multiple reference images are provided:
 
 NO text, NO watermark, NO logo, NO badges, NO floating text overlay, NO graphic design elements.
 IF THE IMAGE DOES NOT LOOK LIKE A REAL PRODUCT PHOTOGRAPH, REGENERATE IT.
-IF THE IMAGE LOOKS LIKE A DESIGN TEMPLATE OR INFOGRAPHIC, REGENERATE IT.`;
+IF THE IMAGE LOOKS LIKE A DESIGN TEMPLATE OR INFOGRAPHIC, REGENERATE IT.
+
+========================
+【VISUAL CONSISTENCY — ALL 3 IMAGES】
+========================
+
+1. UNIFIED STYLE: All 3 images must share the same lighting direction, color temperature, and visual tone.
+   - If Image 1 has warm golden light → Images 2 and 3 must also have warm golden light.
+   - If Image 1 has soft morning window light → Images 2 and 3 must match.
+
+2. NO PURE WHITE BACKGROUND: Every image must have an environment or gradient background.
+   - FORBIDDEN: #FFFFFF solid background with no atmosphere.
+   - USE: Soft gradients, natural surfaces, warm/cool ambient light.
+
+3. NO DUPLICATE IMAGES: Each image must be visually distinct in composition and scene.
+   - Different angle, different setting, different mood.
+   - FORBIDDEN: Two images that look nearly identical.
+
+4. DISTINCT ROLE PER IMAGE:
+   - Image 1 (MAIN): Product-dominant, click-stopping, high contrast.
+   - Image 2 (SCENE): Human interaction, usage behavior, real environment.
+   - Image 3 (SELLING): Atmospheric storytelling, selling point visualized through environment.
+   - Each image must feel like a different frame from the same premium photoshoot.
+
+5. E-COMMERCE CONVERSION FOCUS:
+   - Every image must look like it belongs on a top Taobao/Tmall product page.
+   - NOT a photography exhibition piece. NOT an art project.
+   - The goal is CONVERSION — making customers want to BUY.
+   - Visual language: warm, inviting, premium, trustworthy.`;
 
 // ---- Scene logic (used by scene & selling images) ----
 const CATEGORY_SCENE: Record<ProductCategory, string> = {
@@ -122,7 +150,7 @@ This is the primary product image — the THUMBNAIL customers see first on Taoba
 
 REQUIREMENTS:
 - Product is the SOLE focus — centered and dominant, occupying 75%+ of the frame
-- Background: CLEAN white (#FFFFFF) or very light neutral gradient
+- Background: CLEAN light neutral gradient or soft surface — NOT pure solid white (#FFFFFF)
 - HIGH CONTRAST between product and background — product must visually POP
 - Studio lighting: key light from upper-left, soft fill light, subtle rim light for edge definition
 - Product surface must show material texture (metallic sheen, fabric weave, matte finish — whatever is accurate)
