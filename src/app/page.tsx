@@ -32,11 +32,11 @@ const CASE_STUDIES = [
   },
   {
     name: '口红美妆',
-    mainImg: '/case-lipstick-main.png',
+    mainImg: '/case-lipstick-model.png',
     subImages: [
       { src: '/case-lipstick-product.png', label: '卖点图' },
       { src: '/case-lipstick-scene.png', label: '场景图' },
-      { src: '/case-lipstick-model.png', label: '功能图' },
+      { src: '/case-lipstick-main.png', label: '功能图' },
     ],
     metrics: [
       { icon: 'trending', label: '转化率提升', value: '180%' },
