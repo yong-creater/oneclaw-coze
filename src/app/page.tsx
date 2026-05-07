@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, TrendingUp, MousePointerClick, ShoppingCart, Zap } from 'lucide-react';
+import { ArrowRight, Zap } from 'lucide-react';
 import SiteHeader from '@/components/common/SiteHeader';
 import WechatPromo from '@/components/common/WechatPromo';
 
@@ -59,20 +59,6 @@ const CASE_STUDIES = [
     ],
   },
 ] as const;
-
-// ==================== Metric图标映射 ====================
-function MetricIcon({ type }: { type: string }) {
-  switch (type) {
-    case 'trending':
-      return <TrendingUp className="w-4 h-4" />;
-    case 'click':
-      return <MousePointerClick className="w-4 h-4" />;
-    case 'cart':
-      return <ShoppingCart className="w-4 h-4" />;
-    default:
-      return <TrendingUp className="w-4 h-4" />;
-  }
-}
 
 // ==================== 主组件 ====================
 export default function HomePage() {
@@ -162,69 +148,69 @@ export default function HomePage() {
         </section>
 
         {/* ==================== 爆款卖货案例 ==================== */}
-        <section className="bg-slate-50 dark:bg-slate-800/50 py-16 md:py-20">
+        <section className="bg-gradient-to-b from-slate-50/80 to-white dark:from-slate-800/30 dark:to-slate-900 py-16 md:py-24">
           <div className="max-w-5xl mx-auto px-4">
             <div className="text-center mb-14">
               <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
                 爆款卖货案例
               </h2>
-              <p className="mt-2 text-slate-500 text-sm">
+              <p className="mt-3 text-slate-500 text-base">
                 无需准备素材，AI 一键生成全套卖货图
               </p>
             </div>
 
-            <div className="space-y-14">
+            <div className="space-y-10">
               {CASE_STUDIES.map((item, i) => (
-                <div key={i} className="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700">
+                <div
+                  key={i}
+                  className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden"
+                  style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}
+                >
                   {/* 案例头部 */}
-                  <div className="px-6 md:px-8 pt-6 pb-4">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">{item.name}</h3>
+                  <div className="px-8 pt-8 pb-5">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{item.name}</h3>
                   </div>
 
-                  {/* AI 生成图展示区 */}
-                  <div className="px-6 md:px-8 pb-6">
-                    <div className="rounded-2xl bg-[#fafbfc] dark:bg-slate-700/30 border border-orange-100 dark:border-orange-900/20 p-3 space-y-2.5">
-                      {/* 第一行：主图 */}
-                      <div className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
-                        <img
-                          src={item.mainImg}
-                          alt={`${item.name}主图`}
-                          className="w-full aspect-[16/9] object-contain"
-                        />
-                        <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/70 backdrop-blur-sm rounded-md">
-                          主图
-                        </span>
-                      </div>
-                      {/* 第二行：卖点图 + 场景图 + 功能图（3列等宽） */}
-                      <div className="grid grid-cols-3 gap-2.5">
-                        {item.subImages.map((img, j) => (
-                          <div key={j} className="relative rounded-xl overflow-hidden bg-white dark:bg-slate-700/50 shadow-sm">
-                            <img
-                              src={img.src}
-                              alt={`${item.name}${img.label}`}
-                              className="w-full aspect-[4/3] object-cover"
-                            />
-                            <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 text-[10px] font-medium text-white bg-orange-500/70 backdrop-blur-sm rounded-md">
-                              {img.label}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                  {/* 图片展示区 */}
+                  <div className="px-8 pb-8">
+                    {/* 主图 - 16:9 铺满 */}
+                    <div className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700">
+                      <img
+                        src={item.mainImg}
+                        alt={`${item.name}主图`}
+                        className="w-full aspect-[16/9] object-cover"
+                      />
+                      <span className="absolute bottom-3 left-3 px-3 py-1 text-xs font-medium text-white/90 bg-black/40 backdrop-blur-md rounded-lg">
+                        主图
+                      </span>
+                    </div>
+
+                    {/* 三张小图 - 4:3 等高 */}
+                    <div className="grid grid-cols-3 gap-4 mt-5">
+                      {item.subImages.map((img, j) => (
+                        <div key={j} className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-700">
+                          <img
+                            src={img.src}
+                            alt={`${item.name}${img.label}`}
+                            className="w-full aspect-[4/3] object-cover"
+                          />
+                          <span className="absolute bottom-2.5 left-2.5 px-2.5 py-1 text-xs font-medium text-white/90 bg-black/40 backdrop-blur-md rounded-lg">
+                            {img.label}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* 转化数据 + CTA（紧跟案例内容下方） */}
-                  <div className="border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-700/20 px-6 md:px-8 py-5">
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  {/* 转化数据 + CTA */}
+                  <div className="px-8 pb-8">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
                       {/* 转化数据 */}
-                      <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-8">
                         {item.metrics.map((m, j) => (
-                          <div key={j} className="flex items-center gap-1.5">
-                            <span className="text-orange-500">
-                              <MetricIcon type={m.icon} />
-                            </span>
-                            <span className="text-xs text-slate-400">{m.label}</span>
-                            <span className="text-sm font-bold text-orange-500">{m.value}</span>
+                          <div key={j} className="flex flex-col items-center sm:items-start">
+                            <span className="text-xl font-bold text-orange-500">{m.value}</span>
+                            <span className="text-xs text-slate-400 mt-0.5">{m.label}</span>
                           </div>
                         ))}
                       </div>
@@ -232,7 +218,7 @@ export default function HomePage() {
                       {/* CTA 按钮 */}
                       <button
                         onClick={handleCTA}
-                        className="px-6 py-2.5 text-white font-semibold text-sm rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] inline-flex items-center gap-2 whitespace-nowrap"
+                        className="px-7 py-3 text-white font-semibold text-sm rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98] inline-flex items-center gap-2 whitespace-nowrap"
                         style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)', boxShadow: '0 4px 16px rgba(255,106,0,0.2)' }}
                       >
                         🔥 用这个案例生成我的卖货图
