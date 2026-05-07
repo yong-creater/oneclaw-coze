@@ -185,7 +185,7 @@ export default function HomePage() {
                       <img
                         src={item.mainImg}
                         alt={`${item.name}主图`}
-                        className="w-full aspect-[16/9] object-cover"
+                        className="w-full aspect-[16/9] object-contain"
                       />
                       <span className="absolute bottom-3 left-3 px-3 py-1 text-xs font-medium text-white/90 bg-black/40 backdrop-blur-md rounded-lg">
                         主图
@@ -199,7 +199,7 @@ export default function HomePage() {
                           <img
                             src={img.src}
                             alt={`${item.name}${img.label}`}
-                            className="w-full aspect-[4/3] object-cover"
+                            className="w-full aspect-[4/3] object-contain"
                           />
                           <span className="absolute bottom-2.5 left-2.5 px-2.5 py-1 text-xs font-medium text-white/90 bg-black/40 backdrop-blur-md rounded-lg">
                             {img.label}
