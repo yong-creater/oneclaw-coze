@@ -60,6 +60,10 @@ const CASE_STUDIES = [
   },
 ] as const;
 
+// ==================== 统一容器 ====================
+// 全站统一 max-width + padding，保证左边缘对齐
+const CONTAINER = 'max-w-[1280px] mx-auto px-6 md:px-10';
+
 // ==================== 主组件 ====================
 export default function HomePage() {
   const router = useRouter();
@@ -75,12 +79,12 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
-      {/* 顶部导航 - 使用独立组件避免hydration闪烁 */}
+      {/* 顶部导航 */}
       <SiteHeader />
 
       <main>
         {/* ==================== 第一屏：文案 + 结果预览 ==================== */}
-        <section className="max-w-7xl mx-auto px-4 py-12 md:py-20">
+        <section className={`${CONTAINER} py-12 md:py-20`}>
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
             {/* 左侧：文案 + CTA */}
             <div className="flex-1 text-center lg:text-left max-w-xl">
@@ -149,8 +153,10 @@ export default function HomePage() {
 
         {/* ==================== 爆款卖货案例 ==================== */}
         <section className="bg-gradient-to-b from-slate-50/80 to-white dark:from-slate-800/30 dark:to-slate-900 py-16 md:py-24">
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="text-center mb-14">
+          {/* 统一容器 - 与 Hero 区严格对齐 */}
+          <div className={CONTAINER}>
+            {/* 标题 - 左对齐 */}
+            <div className="mb-14">
               <h2 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
                 爆款卖货案例
               </h2>
@@ -159,6 +165,7 @@ export default function HomePage() {
               </p>
             </div>
 
+            {/* 案例卡片列表 */}
             <div className="space-y-10">
               {CASE_STUDIES.map((item, i) => (
                 <div
@@ -235,7 +242,7 @@ export default function HomePage() {
 
       <footer className="bg-gradient-to-t from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 border-t border-slate-200 dark:border-slate-700 mt-12">
         <WechatPromo />
-        <div className="max-w-7xl mx-auto px-4 pb-6">
+        <div className={`${CONTAINER} pb-6`}>
           <div className="flex flex-col md:flex-row items-center justify-center gap-3 text-sm text-slate-400 dark:text-slate-500">
             <div className="flex items-center gap-2">
               <Zap className="w-3.5 h-3.5 text-orange-500" strokeWidth={2.5} />
