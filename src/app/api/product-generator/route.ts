@@ -14,126 +14,27 @@ export const IMAGE_SLOTS: { slot: ImageSlot; label: string; order: number }[] = 
   { slot: 'selling', label: '卖点图', order: 3 },
 ];
 
-// ============ 统一系统 Prompt ============
+// ============ 商品保真核心指令 ============
+// 注意：model-selector 在 Coze 文生图模式下会自动注入视觉 LLM 分析的商品描述
+// 这段前缀用于指导模型严格按视觉描述还原商品
 
-const SYSTEM_PROMPT = `You are a professional e-commerce product photographer and visual designer.
-You generate HIGH-CONVERSION product images for platforms like Taobao, Tmall, Xiaohongshu (Little Red Book).
+const PRODUCT_FIDELITY_PREFIX = `CRITICAL PRODUCT FIDELITY: The product description above (in [PRODUCT VISUAL REFERENCE]) describes the EXACT product you must render. You MUST reproduce this product with pixel-perfect accuracy — identical shape, color, material, proportions, and all visual details. NEVER alter, deform, or reimagine the product. Only create the specified scene/background around this exact product.
 
-INPUT:
-- Product image(s) provided by user
-- Product name and selling points
+ABSOLUTE RULES:
+1. The product MUST look EXACTLY as described — same shape, same color, same material, same proportions.
+2. NEVER deform, distort, reshape, or stylize the product.
+3. ONLY create the background, lighting, scene, and environment.
+4. NO text, NO watermark, NO logo, NO badges, NO graphic overlays on the image.
 
-GOAL:
-Generate 3 images that make customers want to BUY. Every image must look like real product photography, NOT a design template.
-
-========================
-【CORE RULES — ABSOLUTE】
-========================
-
-1. PRODUCT FIDELITY: Keep product structure 100% accurate.
-   - Same shape, same color, same material, same proportions as reference.
-   - NEVER deform, redesign, or alter the product.
-
-2. NO UNREALISTIC ELEMENTS:
-   - No floating objects. No deformation. No impossible physics.
-   - No exploded views. No disassembled parts. No internal structure.
-
-3. NO TEMPLATE/DESIGN LAYOUT:
-   - This is NOT a design task. Do NOT create layout grids, text boxes, badge overlays, or infographic-style compositions.
-   - Every image must look like a REAL PHOTOGRAPH taken by a professional product photographer.
-   - FORBIDDEN: pure white background with floating text, template-style arrangement, multiple text labels stacked.
-
-========================
-【STYLE: E-COMMERCE PHOTOGRAPHY】
-========================
-
-- Realistic photography — the #1 rule. If it doesn't look real, it fails.
-- Soft directional lighting that reveals product texture and material quality.
-- Shallow depth of field: product razor-sharp, background naturally blurred.
-- High contrast between product and background — product must POP.
-- Color grading: warm, inviting, premium feel. Similar to top-selling Taobao stores.
-
-========================
-【SCENE LOGIC — MUST BE REAL】
-========================
-
-Choose the most natural real-life usage scenario based on product category:
-- Household products → real home environment (kitchen counter, living room shelf)
-- Personal items → desk setup / daily carry / hand-held
-- Portable items → outdoor / on-the-go / hand-held in natural setting
-
-Scenes must:
-- Show ACTUAL USAGE BEHAVIOR (hands touching, product being used, not just placed)
-- Have natural context objects (coffee cup near a thermos, yoga mat near sportswear)
-- Look like a real photo someone took in their home/office/outdoor
-- NEVER look like a studio backdrop or artificial setup
-
-========================
-【MULTI-IMAGE REFERENCE RULES】
-========================
-
-When multiple reference images are provided:
-
-1. THE FIRST IMAGE IS THE PRIMARY REFERENCE.
-   - It defines the product's EXACT appearance: shape, color, material, finish, proportions.
-   - Treat the first image as the "ground truth".
-
-2. OTHER IMAGES ARE SUPPLEMENTARY ONLY.
-   - Use only for structure and detail understanding.
-   - If a supplementary image contradicts the first image, ALWAYS follow the first image.
-
-3. CONSISTENCY IS MANDATORY.
-   - ALL generated images must look like the SAME product from the SAME photoshoot.
-   - Same shape, same color, same material, same proportions across all 3 images.
-
-4. FORBIDDEN:
-   - Mixing visual features from different reference images
-   - Style conflicts between generated images
-   - Collage-style generation
-
-========================
-【CRITICAL OUTPUT RULES】
-========================
-
-NO text, NO watermark, NO logo, NO badges, NO floating text overlay, NO graphic design elements.
-IF THE IMAGE DOES NOT LOOK LIKE A REAL PRODUCT PHOTOGRAPH, REGENERATE IT.
-IF THE IMAGE LOOKS LIKE A DESIGN TEMPLATE OR INFOGRAPHIC, REGENERATE IT.
-
-========================
-【VISUAL CONSISTENCY — ALL 3 IMAGES】
-========================
-
-1. UNIFIED STYLE: All 3 images must share the same lighting direction, color temperature, and visual tone.
-   - If Image 1 has warm golden light → Images 2 and 3 must also have warm golden light.
-   - If Image 1 has soft morning window light → Images 2 and 3 must match.
-
-2. NO PURE WHITE BACKGROUND: Every image must have an environment or gradient background.
-   - FORBIDDEN: #FFFFFF solid background with no atmosphere.
-   - USE: Soft gradients, natural surfaces, warm/cool ambient light.
-
-3. NO DUPLICATE IMAGES: Each image must be visually distinct in composition and scene.
-   - Different angle, different setting, different mood.
-   - FORBIDDEN: Two images that look nearly identical.
-
-4. DISTINCT ROLE PER IMAGE:
-   - Image 1 (MAIN): Product-dominant, click-stopping, high contrast.
-   - Image 2 (SCENE): Human interaction, usage behavior, real environment.
-   - Image 3 (SELLING): Atmospheric storytelling, selling point visualized through environment.
-   - Each image must feel like a different frame from the same premium photoshoot.
-
-5. E-COMMERCE CONVERSION FOCUS:
-   - Every image must look like it belongs on a top Taobao/Tmall product page.
-   - NOT a photography exhibition piece. NOT an art project.
-   - The goal is CONVERSION — making customers want to BUY.
-   - Visual language: warm, inviting, premium, trustworthy.`;
+`;
 
 // ---- Scene logic (used by scene & selling images) ----
 const CATEGORY_SCENE: Record<ProductCategory, string> = {
-  shoes: 'feet wearing the shoes, walking on street or sitting casually, shoes clearly visible',
-  clothing: 'model wearing the item, fashion lookbook style, natural pose in real setting',
-  electronics: 'device being used by hands — wearing headphones, typing on keyboard, holding phone',
-  beauty: 'hands applying the product, vanity table scene, mirror reflection optional',
-  food: 'product being served, poured, or consumed — steam rising, spoon scooping, hand holding',
+  shoes: 'feet wearing the shoes on street or casual setting',
+  clothing: 'model wearing the item, fashion lookbook style, natural pose',
+  electronics: 'hands using the device — wearing headphones, typing keyboard, holding phone',
+  beauty: 'hands applying the product, vanity table scene',
+  food: 'product being served or held — steam rising, spoon scooping',
   general: 'hands naturally holding or using the product in a real environment',
 };
 
@@ -142,90 +43,56 @@ export const PROMPTS: Record<ImageSlot, (productName?: string, benefits?: string
 
   // 1) MAIN PRODUCT SHOT — 电商主图
   main: (productName, benefits, _category) => {
-    return `${SYSTEM_PROMPT}
+    return `${PRODUCT_FIDELITY_PREFIX}Create a premium e-commerce main product photo (主图).
 
-Generate Image 1 of 3: MAIN PRODUCT SHOT (电商主图)
+- Place the product against a clean, light neutral gradient background (soft warm beige or light gray, NOT pure white #FFFFFF)
+- Product centered, occupying 75%+ of the frame
+- Studio lighting: key light from upper-left, soft fill, subtle rim light for edge definition
+- Show material texture accurately (metallic sheen, fabric weave, matte finish)
+- High contrast between product and background — product must visually POP
+- This must look like a top Taobao/Tmall seller's main product image${productName ? `\n- Product: ${productName}` : ''}${benefits ? `\n- Selling points: ${benefits}` : ''}
 
-This is the primary product image — the THUMBNAIL customers see first on Taobao/Tmall.
-
-REQUIREMENTS:
-- Product is the SOLE focus — centered and dominant, occupying 75%+ of the frame
-- Background: CLEAN light neutral gradient or soft surface — NOT pure solid white (#FFFFFF)
-- HIGH CONTRAST between product and background — product must visually POP
-- Studio lighting: key light from upper-left, soft fill light, subtle rim light for edge definition
-- Product surface must show material texture (metallic sheen, fabric weave, matte finish — whatever is accurate)
-- Slight reflection on surface is OK for premium feel
-- Product must look physically perfect — no deformation, no missing parts
-- This must look like a top Taobao seller's main image${productName ? `\n- Product: ${productName}` : ''}${benefits ? `\n- Selling points: ${benefits}` : ''}
-
-CRITICAL: This image must make users STOP scrolling and CLICK.
-Think: "Would I click this thumbnail over 100 others?"
-The product must look so irresistible that users instinctively want to buy it.`;
+The goal: make users STOP scrolling and CLICK this thumbnail over 100 others.`;
   },
 
-  // 2) USAGE SCENE — 使用场景图（必须有人/手/使用行为）
+  // 2) USAGE SCENE — 使用场景图
   scene: (productName, benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    return `${SYSTEM_PROMPT}
+    return `${PRODUCT_FIDELITY_PREFIX}Create a lifestyle usage scene photo (场景图).
 
-Generate Image 2 of 3: USAGE SCENE (使用场景图)
-
-Show the product BEING USED in real life — with HUMAN INTERACTION.
-
-REQUIREMENTS:
-- MUST show USAGE BEHAVIOR: hand holding, person using, product in action
+- Show ${sceneDesc}
 - Product must be the LARGEST element, occupying 60%+ of the frame
-- NATURAL environment: real desk, real kitchen, real outdoor setting
+- NATURAL environment: real desk, kitchen, outdoor setting — NOT a studio backdrop
 - Warm NATURAL lighting: window light, morning sunlight, or golden hour
 - Shallow depth of field: product razor-sharp, background softly blurred
 - Context objects must be LOGICALLY related (coffee near thermos, books near desk lamp)
-- Must look like a CANDID LIFESTYLE PHOTO — not a studio setup, not staged
+- Must look like a CANDID LIFESTYLE PHOTO from Xiaohongshu — real, not staged${productName ? `\n- Product: ${productName}` : ''}${benefits ? `\n- Selling points: ${benefits}` : ''}
 
-HUMAN INTERACTION GUIDELINES:
-- ${sceneDesc}
-- If showing hands: natural grip, correct anatomy, relaxed posture
-- If showing person: casual pose, real activity, not looking at camera
-- FORBIDDEN: product just sitting on a table with no usage context${productName ? `\n- Product: ${productName}` : ''}${benefits ? `\n- Selling points: ${benefits}` : ''}
-
-CRITICAL: Users must be able to IMAGINE THEMSELVES using this product RIGHT NOW.
-Think: "Does this make me feel like I need this product in my life?"
-The scene must feel REAL, like a photo from a Xiaohongshu post.`;
+The goal: users must be able to IMAGINE THEMSELVES using this product RIGHT NOW.`;
   },
 
-  // 3) SELLING POINT — 卖点强化图（有环境+光影，非纯白）
+  // 3) SELLING POINT — 卖点强化图
   selling: (productName, benefits, category) => {
     const cat = category || 'general';
     const sceneDesc = CATEGORY_SCENE[cat];
-    // Extract the top selling point for visual emphasis
     const topBenefit = benefits ? benefits.split(/[,，、;；\n]/)[0].trim() : '';
-    return `${SYSTEM_PROMPT}
+    return `${PRODUCT_FIDELITY_PREFIX}Create an atmospheric selling point photo (卖点图).
 
-Generate Image 3 of 3: SELLING POINT IMAGE (卖点强化图)
-
-A product image that VISUALLY DEMONSTRATES the #1 selling point through environment and atmosphere.
-
-REQUIREMENTS:
-- Product MUST be in an ENVIRONMENT — NOT a pure white/blank background
-- Environment should REINFORCE the top selling point through visual storytelling
-  (e.g., "24h insulation" → warm steam + cozy desk scene; "waterproof" → rain/splash scene; "portable" → outdoor hand-held scene)
-- Product occupying 65%+ of the frame, positioned off-center (rule of thirds) for visual interest
-- ATMOSPHERIC LIGHTING that supports the selling point:
+- Product in an ENVIRONMENT with atmospheric lighting — NOT pure white background
+- Environment REINFORCES the selling point through visual storytelling${topBenefit ? `\n- TOP SELLING POINT to visualize: "${topBenefit}"` : ''}
+  (e.g., "24h insulation" → warm steam + cozy desk; "waterproof" → rain/splash; "portable" → outdoor hand-held)
+- Product occupying 65%+ of frame, positioned off-center (rule of thirds)
+- ATMOSPHERIC LIGHTING matching the selling point:
   * Insulation/warmth → warm golden light, steam wisps, cozy ambiance
-  * Freshness/cooling → cool blue-white light, ice crystals, clean feel
+  * Freshness/cooling → cool blue-white light, clean feel
   * Durability/outdoor → dramatic side lighting, textured surfaces
   * Beauty/skincare → soft diffused light, clean minimal surface
+- Scene context: ${sceneDesc}
 - Shallow depth of field with beautiful bokeh
-- Must look like a HIGH-END PRODUCT AD PHOTO — the kind you see in Tmall flagship stores${topBenefit ? `\n- PRIMARY SELLING POINT to visualize: "${topBenefit}"` : ''}${productName ? `\n- Product: ${productName}` : ''}${benefits ? `\n- All selling points: ${benefits}` : ''}
+- Must look like a HIGH-END Tmall flagship store product ad${productName ? `\n- Product: ${productName}` : ''}${benefits ? `\n- All selling points: ${benefits}` : ''}
 
-CRITICAL VISUAL RULES:
-❌ NO pure white/blank background — must have an environment
-❌ NO text overlay, NO floating labels, NO badge, NO infographic
-❌ NO multiple selling points crammed into one image
-✅ ONE visual story that makes the top selling point FEEL real
-✅ Environment + lighting + atmosphere = the selling point speaks for itself
-
-Think: "Would this image make me believe the selling point without reading any text?"`;
+The goal: make users BELIEVE the selling point without reading any text.`;
   },
 };
 
@@ -290,18 +157,14 @@ export async function POST(request: NextRequest) {
       console.log(`[ProductGenerator] 收到${imageList.length}张图片，第1张为主图，${supplementaryCount}张为补充`);
     }
 
-    // 构建多图上下文提示（让模型理解多图关系）
-    const multiImageContext = imageList.length > 1
-      ? `\n\nIMPORTANT MULTI-IMAGE CONTEXT:\n- You have ${imageList.length} reference images for this product.\n- Use the first image as the main reference for product appearance.\n- Use other images only for structure and detail understanding.\n- ALL generated images MUST show the SAME product with IDENTICAL appearance across all 3 outputs.\n- Do NOT mix or merge visual features from different reference images.\n- Think of it as photographing ONE physical product — consistency is paramount.\n- If supplementary images show different details, prioritize the FIRST image for appearance.`
-      : '';
-
     // 并行生成 3 张图片
+    // 注意：视觉LLM分析在 model-selector 层自动完成，对同一张参考图会分析一次
     const results: Partial<Record<ImageSlot, string>> = {};
     const errors: string[] = [];
 
     const generationTasks = IMAGE_SLOTS.map(async ({ slot }) => {
       try {
-        const prompt = PROMPTS[slot](productName, productBenefit, category) + multiImageContext;
+        const prompt = PROMPTS[slot](productName, productBenefit, category);
         const result = await generateWithModel(
           prompt,
           undefined, // model 由数据库配置决定

@@ -68,12 +68,7 @@ export async function POST(request: NextRequest) {
     const category = detectCategory(productName || '');
     const imageSlot = slot as ImageSlot;
 
-    // 构建多图上下文提示
-    const multiImageContext = imageList.length > 1
-      ? `\n\nIMPORTANT MULTI-IMAGE CONTEXT:\n- You have ${imageList.length} reference images for this product.\n- Use the first image as the main reference for product appearance.\n- Use other images only for structure and detail understanding.\n- ALL generated images MUST show the SAME product with IDENTICAL appearance.\n- Do NOT mix or merge visual features from different reference images.\n- Think of it as photographing ONE physical product — consistency is paramount.`
-      : '';
-
-    const prompt = PROMPTS[imageSlot](productName, productBenefit, category as any) + multiImageContext;
+    const prompt = PROMPTS[imageSlot](productName, productBenefit, category as any);
     const result = await generateWithModel(
       prompt,
       undefined,
