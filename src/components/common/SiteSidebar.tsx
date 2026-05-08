@@ -155,7 +155,7 @@ export default function SiteSidebar() {
                   <Icon
                     className={`w-[20px] h-[20px] transition-all duration-250 ${
                       isActive
-                        ? 'text-[#7B61FF]'
+                        ? 'text-[#7B61FF]/80'
                         : 'text-slate-300 group-hover:text-slate-500'
                     }`}
                   />
@@ -190,7 +190,7 @@ export default function SiteSidebar() {
                   <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full shrink-0 ring-1 ring-slate-100" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7B61FF]/8 to-[#5B8CFF]/6 flex items-center justify-center shrink-0">
-                    <span className="text-[#7B61FF] text-[11px] font-semibold">
+                    <span className="text-[#7B61FF]/80 text-[11px] font-semibold">
                       {user?.nickname?.slice(0, 1).toUpperCase() || '用'}
                     </span>
                   </div>
@@ -207,7 +207,7 @@ export default function SiteSidebar() {
               {/* 升级会员 — 轻量文字链接，不要大按钮 */}
               <button
                 onClick={() => router.push('/membership')}
-                className="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[11.5px] font-medium text-[#7B61FF]/70 hover:text-[#7B61FF] hover:bg-[#7B61FF]/[0.04] transition-all"
+                className="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[11.5px] font-medium text-[#7B61FF]/80/70 hover:text-[#7B61FF]/80 hover:bg-[#7B61FF]/[0.04] transition-all"
               >
                 <Crown className="w-3 h-3" />
                 升级会员
@@ -263,7 +263,7 @@ export default function SiteSidebar() {
                 className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7B61FF]/8 to-[#5B8CFF]/6 flex items-center justify-center hover:ring-2 hover:ring-[#7B61FF]/15 transition-all"
                 title={user?.nickname || '用户'}
               >
-                <span className="text-[#7B61FF] text-[11px] font-semibold">
+                <span className="text-[#7B61FF]/80 text-[11px] font-semibold">
                   {user?.nickname?.slice(0, 1).toUpperCase() || '用'}
                 </span>
               </button>

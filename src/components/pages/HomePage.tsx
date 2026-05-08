@@ -230,7 +230,7 @@ export default function HomePage() {
       {/* ==================== 最近创作 — 作品卡片流 ==================== */}
       <div className="animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-bold text-slate-800">
+          <h2 className="text-xl font-semibold text-slate-700">
             最近创作 <span className="text-[#7B61FF]">✦</span>
           </h2>
           <button
@@ -242,7 +242,7 @@ export default function HomePage() {
         </div>
 
         {recentProjects.length > 0 ? (
-          <div className="grid grid-cols-4 gap-5">
+          <div className="grid grid-cols-4 gap-6">
             {recentProjects.map((project) => (
               <div
                 key={project.id}
@@ -273,7 +273,7 @@ export default function HomePage() {
                 </div>
                 {/* 信息区 */}
                 <div className="p-4">
-                  <p className="text-sm font-semibold text-slate-800 truncate">{project.title || project.tool_name || '未命名创作'}</p>
+                  <p className="text-sm font-semibold text-slate-700 truncate">{project.title || project.tool_name || '未命名创作'}</p>
                   <p className="text-xs text-slate-400 mt-1.5">
                     {project.created_at ? new Date(project.created_at).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
                   </p>
@@ -284,7 +284,7 @@ export default function HomePage() {
         ) : (
           /* 空状态 — AI 插画感 */
           <div className="os-card !rounded-2xl !border-0 flex flex-col items-center justify-center py-20 text-center">
-            <div className="relative mb-6">
+            <div className="relative mb-8">
               {/* 柔和光晕 */}
               <div className="absolute -inset-6 bg-gradient-to-br from-[#7B61FF]/[0.08] to-[#5B8CFF]/[0.05] rounded-full blur-2xl" />
               {/* 图标容器 */}
@@ -323,7 +323,7 @@ export default function HomePage() {
                   className="os-card shrink-0 flex items-center gap-3 cursor-pointer group !py-3 !px-4"
                   style={{ width: '260px' }}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br ${tool.color || 'from-[#7B61FF]/20 to-[#5B8CFF]/20'}`}>
+                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 bg-gradient-to-br ${tool.color || 'from-[#7B61FF]/20 to-[#5B8CFF]/20'}`}>
                     <ToolIcon className="w-5 h-5 text-white/80" />
                   </div>
                   <div className="text-left min-w-0 flex-1">
