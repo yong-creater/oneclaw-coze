@@ -46,7 +46,7 @@ interface UtilityTool {
   color: string | null;
   sort_order: number;
   tool_type: string | null;
-  use_cases: string[] | null;
+  use_cases: {title: string; desc: string}[] | null;
 }
 
 // slug 到路由的映射
@@ -177,9 +177,9 @@ export default function ToolsPage() {
                   {/* 标签 + 按钮 */}
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex gap-1.5">
-                      {(tool.use_cases || []).slice(0, 2).map((tag: string) => (
-                        <span key={tag} className="os-btn-capsule !h-6 !text-xs !px-2.5 pointer-events-none">
-                          {tag}
+                      {(tool.use_cases || []).slice(0, 2).map((uc: {title: string; desc: string}) => (
+                        <span key={uc.title} className="os-btn-capsule !h-6 !text-xs !px-2.5 pointer-events-none">
+                          {uc.title}
                         </span>
                       ))}
                     </div>

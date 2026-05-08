@@ -65,7 +65,7 @@ interface UtilityTool {
   description: string;
   cover_image: string | null;
   color: string;
-  use_cases: string[];
+  use_cases: {title: string; desc: string}[];
 }
 
 export default function HomePage() {
@@ -284,8 +284,8 @@ export default function HomePage() {
                   <p className="text-[13px] text-slate-500 line-clamp-2">{tool.description}</p>
                   {tool.use_cases && tool.use_cases.length > 0 && (
                     <div className="flex gap-1.5 flex-wrap mt-1">
-                      {tool.use_cases.slice(0, 3).map((tag: string, i: number) => (
-                        <span key={i} className="os-btn-capsule !h-6 !text-[11px] !px-2 pointer-events-none">{tag}</span>
+                      {tool.use_cases.slice(0, 3).map((uc: {title: string; desc: string}, i: number) => (
+                        <span key={i} className="os-btn-capsule !h-6 !text-[11px] !px-2 pointer-events-none">{uc.title}</span>
                       ))}
                     </div>
                   )}
