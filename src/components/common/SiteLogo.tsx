@@ -26,7 +26,7 @@ export function SiteLogo({
     <Link href={href} className={`flex items-center gap-2.5 ${className}`}>
       {/* Logo Icon - SaaS style */}
       <div 
-        className="relative rounded-xl flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-[#6C5CE7] to-[#00D2FF] shadow-sm"
+        className="relative rounded-xl flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-[#7B61FF] to-[#5B8CFF] shadow-sm"
         style={{ width: size, height: size }}
       >
         <Zap 
@@ -51,7 +51,7 @@ export function ToolPageLogo({ size = 32 }: { size?: number }) {
   return (
     <div className="flex items-center gap-2.5">
       <div 
-        className="relative rounded-xl flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-[#6C5CE7] to-[#00D2FF] shadow-sm"
+        className="relative rounded-xl flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-[#7B61FF] to-[#5B8CFF] shadow-sm"
         style={{ width: size, height: size }}
       >
         <Zap 

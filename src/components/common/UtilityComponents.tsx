@@ -239,7 +239,7 @@ export function ModeToggle({ modes, value, onChange, color = 'orange' }: ModeTog
   const activeColor = {
     orange: 'bg-orange-500 text-white',
     blue: 'bg-blue-500 text-white',
-    purple: 'bg-purple-500 text-white',
+    purple: 'bg-[#7B61FF] text-white',
     green: 'bg-green-500 text-white',
   };
   const activeBgClass = activeColor[color as keyof typeof activeColor] || activeColor.orange;
@@ -274,7 +274,7 @@ export function Tag({ children, color = 'orange' }: TagProps) {
     orange: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     green: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    purple: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    purple: 'bg-[#7B61FF]/10 text-[#7B61FF] dark:bg-[#7B61FF]/20 dark:text-[#A78BFA]',
     gray: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
   };
   const bgClass = colorClasses[color];

@@ -178,7 +178,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
           {/* 头部 - 紫蓝渐变 */}
-          <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
+          <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}>
             <CloseButton onClose={() => onOpenChange(false)} />
             <h2 className="text-xl font-bold text-white">欢迎来到 OneClaw</h2>
             <p className="text-sm text-white/80 mt-1">登录后解锁更多功能</p>
@@ -212,9 +212,9 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
             {/* 邮箱验证码登录 */}
             <button
               onClick={() => setLoginType('email-code')}
-              className="w-full p-4 rounded-xl border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 transition-all flex items-center gap-4"
+              className="w-full p-4 rounded-xl border-2 border-[#7B61FF]/20 hover:border-[#7B61FF]/40 hover:bg-[#7B61FF]/[0.04] transition-all flex items-center gap-4"
             >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}>
                 <Mail className="w-6 h-6 text-white" />
               </div>
               <div className="text-left">
@@ -285,7 +285,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
-        <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
+        <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}>
           <CloseButton onClose={() => onOpenChange(false)} />
           <h2 className="text-xl font-bold text-white">邮箱验证码登录</h2>
           <p className="text-sm text-white/80 mt-1">输入邮箱，我们会发送验证码到您的邮箱</p>
@@ -355,7 +355,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
             onClick={handleEmailLogin}
             disabled={loading || !email || code.length < 6}
             className="w-full text-white border-0 hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}
+            style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}
           >
             {loading ? '登录中...' : '登录 / 注册'}
           </Button>

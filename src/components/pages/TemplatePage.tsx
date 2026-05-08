@@ -22,14 +22,14 @@ interface Template {
 // ========== 分类映射 ==========
 const CATEGORY_MAP: Record<string, { label: string; gradient: string }> = {
   all: { label: '全部', gradient: '' },
-  xhs_post: { label: '小红书', gradient: 'from-red-400 to-orange-500' },
-  goods_poster: { label: '商品海报', gradient: 'from-violet-500 to-purple-600' },
-  portrait: { label: 'AI写真', gradient: 'from-pink-400 to-rose-500' },
-  cover: { label: '封面设计', gradient: 'from-blue-400 to-cyan-500' },
-  background_removal: { label: '智能抠图', gradient: 'from-emerald-400 to-teal-500' },
-  resume: { label: '简历优化', gradient: 'from-amber-400 to-yellow-500' },
-  novel: { label: '小说创作', gradient: 'from-fuchsia-500 to-pink-500' },
-  script: { label: '视频脚本', gradient: 'from-indigo-400 to-blue-500' },
+  xhs_post: { label: '小红书', gradient: 'from-[#7B61FF] to-[#FFB84D]' },
+  goods_poster: { label: '商品海报', gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
+  portrait: { label: 'AI写真', gradient: 'from-[#7B61FF] to-[#A78BFA]' },
+  cover: { label: '封面设计', gradient: 'from-[#5B8CFF] to-[#6EE7FF]' },
+  background_removal: { label: '智能抠图', gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
+  resume: { label: '简历优化', gradient: 'from-[#7B61FF] to-[#6EE7FF]' },
+  novel: { label: '小说创作', gradient: 'from-[#A78BFA] to-[#7B61FF]' },
+  script: { label: '视频脚本', gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
 };
 
 export default function TemplatePage() {
@@ -106,7 +106,7 @@ export default function TemplatePage() {
       {/* 模板网格 */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-purple-500 rounded-full animate-spin mb-3" />
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-[#7B61FF] rounded-full animate-spin mb-3" />
           <p className="text-sm">加载中...</p>
         </div>
       ) : filtered.length > 0 ? (

@@ -14,7 +14,7 @@ export default function LoginButton() {
       <button
         onClick={() => setShowLoginModal(true)}
         className="w-full py-2 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90"
-        style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}
+        style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}
       >
         登录
       </button>
@@ -30,7 +30,7 @@ export default function LoginButton() {
         {user?.avatar_url ? (
           <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full shrink-0" />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#5B8CFF] flex items-center justify-center shrink-0">
             <span className="text-white text-xs font-medium">
               {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
             </span>
@@ -56,7 +56,7 @@ export default function LoginButton() {
               onClick={() => setShowDropdown(false)}
               className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
             >
-              <Crown className="w-4 h-4 text-purple-500" />
+              <Crown className="w-4 h-4 text-[#FFB84D]" />
               会员中心
             </Link>
             <Link

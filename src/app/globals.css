@@ -62,37 +62,37 @@ html {
 
 :root {
   --radius: 0.75rem;
-  --background: #F7F8FA;
+  --background: #F5F7FB;
   --foreground: #111827;
   --card: #FFFFFF;
   --card-foreground: #111827;
   --popover: #FFFFFF;
   --popover-foreground: #111827;
-  --primary: #6C5CE7;
+  --primary: #7B61FF;
   --primary-foreground: #FFFFFF;
   --secondary: #F1F3F5;
   --secondary-foreground: #374151;
   --muted: #F1F3F5;
-  --muted-foreground: #6B7280;
+  --muted-foreground: #94A3B8;
   --accent: #F1F3F5;
   --accent-foreground: #111827;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #E5E7EB;
-  --input: #E5E7EB;
-  --ring: #6C5CE7;
-  --chart-1: #6C5CE7;
-  --chart-2: #00D2FF;
-  --chart-3: #A78BFA;
+  --border: #E9EEF5;
+  --input: #E9EEF5;
+  --ring: #7B61FF;
+  --chart-1: #7B61FF;
+  --chart-2: #5B8CFF;
+  --chart-3: #6EE7FF;
   --chart-4: #34D399;
-  --chart-5: #F59E0B;
+  --chart-5: #FFB84D;
   --sidebar: #FFFFFF;
   --sidebar-foreground: #374151;
-  --sidebar-primary: #6C5CE7;
+  --sidebar-primary: #7B61FF;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #F3F0FF;
-  --sidebar-accent-foreground: #6C5CE7;
-  --sidebar-border: #F1F3F5;
-  --sidebar-ring: #6C5CE7;
+  --sidebar-accent-foreground: #7B61FF;
+  --sidebar-border: #E9EEF5;
+  --sidebar-ring: #7B61FF;
 }
 
 .dark {
@@ -115,10 +115,10 @@ html {
   --input: oklch(1 0 0 / 15%);
   --ring: #A78BFA;
   --chart-1: #A78BFA;
-  --chart-2: #00D2FF;
-  --chart-3: #6C5CE7;
+  --chart-2: #5B8CFF;
+  --chart-3: #6EE7FF;
   --chart-4: #34D399;
-  --chart-5: #F59E0B;
+  --chart-5: #FFB84D;
   --sidebar: #111128;
   --sidebar-foreground: #d1d5db;
   --sidebar-primary: #A78BFA;
@@ -140,29 +140,42 @@ html {
 
 body {
   @apply font-sans;
-  background: #F7F8FA;
+  background: #F5F7FB;
 }
 
 .dark body {
   background: #0f0f0f;
 }
 
-/* ==================== Creator OS 品牌色系 ==================== */
+/* ==================== OneClaw 全局色彩系统 ==================== */
 :root {
-  --brand: #6C5CE7;
-  --brand-light: #EDE9FE;
-  --brand-dark: #5B4CC4;
-  --brand-cyan: #00D2FF;
-  --brand-gradient: linear-gradient(135deg, #6C5CE7 0%, #00D2FF 100%);
-  --brand-gradient-hover: linear-gradient(135deg, #5B4CC4 0%, #00B8E6 100%);
-  --brand-glow: 0 0 20px rgba(108, 92, 231, 0.3);
-  --brand-glow-strong: 0 0 40px rgba(108, 92, 231, 0.4), 0 0 80px rgba(0, 210, 255, 0.15);
-  --bg-primary: #F7F8FA;
+  /* Primary - 蓝紫渐变 */
+  --brand: #7B61FF;
+  --brand-secondary: #5B8CFF;
+  --brand-light: #F0EDFF;
+  --brand-dark: #6948E8;
+  --brand-cyan: #6EE7FF;
+  --brand-gradient: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
+  --brand-gradient-hover: linear-gradient(135deg, #6948E8 0%, #4A7AE6 100%);
+
+  /* Accent - 限量橙 */
+  --accent-orange: #FFB84D;
+
+  /* Glow */
+  --brand-glow: 0 0 20px rgba(123, 97, 255, 0.25);
+  --brand-glow-strong: 0 0 40px rgba(123, 97, 255, 0.35), 0 0 80px rgba(91, 140, 255, 0.12);
+
+  /* Page */
+  --bg-primary: #F5F7FB;
   --bg-card: #FFFFFF;
+
+  /* Text */
   --text-primary: #111827;
-  --text-secondary: #6B7280;
-  --text-tertiary: #9CA3AF;
-  --border-default: #E5E7EB;
+  --text-secondary: #374151;
+  --text-tertiary: #94A3B8;
+
+  /* Border */
+  --border-default: #E9EEF5;
   --border-light: #F1F3F5;
 }
 
@@ -239,7 +252,7 @@ body {
 
 /* 渐变文字 */
 .gradient-text {
-  background: linear-gradient(135deg, #6C5CE7 0%, #00D2FF 100%);
+  background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -256,8 +269,8 @@ body {
 }
 .os-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px -8px rgba(108, 92, 231, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
-  border-color: rgba(108, 92, 231, 0.2);
+  box-shadow: 0 12px 32px -8px rgba(123, 97, 255, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+  border-color: rgba(123, 97, 255, 0.2);
 }
 
 /* 静态卡片（不浮起） */
@@ -289,7 +302,7 @@ body {
 
 /* ==================== Creator OS 按钮系统 ==================== */
 
-/* 主按钮 - 紫蓝渐变 */
+/* 主按钮 - 蓝紫渐变 */
 .os-btn-primary {
   display: inline-flex;
   align-items: center;
@@ -300,19 +313,19 @@ body {
   font-size: 14px;
   font-weight: 600;
   border-radius: 12px;
-  background: linear-gradient(135deg, #6C5CE7 0%, #00D2FF 100%);
+  background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   border: none;
 }
 .os-btn-primary:hover {
-  background: linear-gradient(135deg, #5B4CC4 0%, #00B8E6 100%);
+  background: linear-gradient(135deg, #6948E8 0%, #4A7AE6 100%);
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px -4px rgba(108, 92, 231, 0.4);
+  box-shadow: 0 8px 24px -4px rgba(123, 97, 255, 0.4);
 }
 .os-btn-primary:active {
   transform: translateY(0);
-  box-shadow: 0 2px 8px -2px rgba(108, 92, 231, 0.3);
+  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.3);
 }
 .os-btn-primary:disabled {
   opacity: 0.5;
@@ -392,8 +405,8 @@ body {
 }
 .os-ai-input:focus {
   background: #FFFFFF;
-  border-color: #6C5CE7;
-  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1), 0 0 20px rgba(108, 92, 231, 0.08);
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 4px rgba(123, 97, 255, 0.1), 0 0 20px rgba(123, 97, 255, 0.08);
 }
 
 /* 搜索输入框 */
@@ -415,8 +428,8 @@ body {
   border-color: #D1D5DB;
 }
 .os-search-input:focus {
-  border-color: #6C5CE7;
-  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08);
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08);
 }
 
 /* ==================== Creator OS 标签系统 ==================== */
@@ -434,9 +447,9 @@ body {
   border: none;
 }
 .os-filter-tag-active {
-  background: linear-gradient(135deg, #6C5CE7, #7C6CF7);
+  background: linear-gradient(135deg, #7B61FF, #8B71FF);
   color: white;
-  box-shadow: 0 2px 8px -2px rgba(108, 92, 231, 0.4);
+  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.4);
 }
 .os-filter-tag-inactive {
   background: #F3F4F6;
@@ -472,7 +485,7 @@ body {
 /* 模块副标题 */
 .os-section-desc {
   font-size: 14px;
-  color: #6B7280;
+  color: var(--text-tertiary);
   margin-top: 4px;
 }
 
@@ -502,8 +515,8 @@ body {
   color: #374151;
 }
 .sidebar-menu-item-active {
-  background: linear-gradient(135deg, rgba(108, 92, 231, 0.08), rgba(99, 102, 241, 0.04));
-  color: #6C5CE7;
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.08), rgba(91, 140, 255, 0.04));
+  color: #7B61FF;
 }
 
 /* ==================== 移动端适配 ==================== */

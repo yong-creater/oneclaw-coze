@@ -18,10 +18,10 @@ interface Prompt {
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; gradient: string }> = {
-  '场景描述': { label: '场景描述', gradient: 'from-blue-400 to-cyan-500' },
-  '特效制作': { label: '特效制作', gradient: 'from-violet-500 to-purple-600' },
-  '角色扮演': { label: '角色扮演', gradient: 'from-amber-400 to-orange-500' },
-  '风格迁移': { label: '风格迁移', gradient: 'from-emerald-400 to-teal-500' },
+  '场景描述': { label: '场景描述', gradient: 'from-[#5B8CFF] to-[#6EE7FF]' },
+  '特效制作': { label: '特效制作', gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
+  '角色扮演': { label: '角色扮演', gradient: 'from-[#7B61FF] to-[#6EE7FF]' },
+  '风格迁移': { label: '风格迁移', gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
 };
 
 export default function PromptPage() {
@@ -116,7 +116,7 @@ export default function PromptPage() {
       {/* Loading */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-purple-500 rounded-full animate-spin mb-3" />
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-[#7B61FF] rounded-full animate-spin mb-3" />
           <p className="text-sm">加载中...</p>
         </div>
       )}
@@ -168,7 +168,7 @@ export default function PromptPage() {
                 {prompt.tags && prompt.tags.length > 0 && (
                   <div className="flex gap-1.5 flex-wrap">
                     {prompt.tags.slice(0, 4).map((tag, i) => (
-                      <span key={i} className="flex items-center gap-0.5 px-2 py-0.5 bg-purple-50 text-purple-500 rounded-md text-[11px] font-medium">
+                      <span key={i} className="flex items-center gap-0.5 px-2 py-0.5 bg-[#7B61FF]/[0.06] text-[#7B61FF] rounded-md text-[11px] font-medium">
                         <Tag className="w-2.5 h-2.5" />
                         {tag}
                       </span>

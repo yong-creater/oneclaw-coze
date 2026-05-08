@@ -33,16 +33,16 @@ interface Generation {
 
 // ========== 工具类型映射 ==========
 const TOOL_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; gradient: string }> = {
-  product_generator: { label: 'AI商品图', icon: Package, gradient: 'from-violet-500 to-purple-600' },
-  background_removal: { label: '智能抠图', icon: Scissors, gradient: 'from-blue-400 to-cyan-500' },
-  ai_photo: { label: 'AI写真', icon: Camera, gradient: 'from-pink-400 to-rose-500' },
-  product_poster: { label: '商品海报', icon: ImageIcon, gradient: 'from-fuchsia-500 to-pink-500' },
-  xiaohongshu: { label: '小红书', icon: FileText, gradient: 'from-red-400 to-orange-500' },
-  novel: { label: '小说创作', icon: BookOpen, gradient: 'from-emerald-400 to-teal-500' },
-  resume: { label: '简历优化', icon: Sparkles, gradient: 'from-amber-400 to-yellow-500' },
-  productpage: { label: '详情页', icon: FileText, gradient: 'from-blue-400 to-indigo-500' },
-  cover: { label: '封面设计', icon: ImageIcon, gradient: 'from-teal-400 to-emerald-500' },
-  video: { label: '视频脚本', icon: FileText, gradient: 'from-rose-400 to-red-500' },
+  product_generator: { label: 'AI商品图', icon: Package, gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
+  background_removal: { label: '智能抠图', icon: Scissors, gradient: 'from-[#5B8CFF] to-[#6EE7FF]' },
+  ai_photo: { label: 'AI写真', icon: Camera, gradient: 'from-[#7B61FF] to-[#A78BFA]' },
+  product_poster: { label: '商品海报', icon: ImageIcon, gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
+  xiaohongshu: { label: '小红书', icon: FileText, gradient: 'from-[#7B61FF] to-[#FFB84D]' },
+  novel: { label: '小说创作', icon: BookOpen, gradient: 'from-[#A78BFA] to-[#7B61FF]' },
+  resume: { label: '简历优化', icon: Sparkles, gradient: 'from-[#7B61FF] to-[#6EE7FF]' },
+  productpage: { label: '详情页', icon: FileText, gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
+  cover: { label: '封面设计', icon: ImageIcon, gradient: 'from-[#6EE7FF] to-[#5B8CFF]' },
+  video: { label: '视频脚本', icon: FileText, gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
 };
 
 export default function ProjectPage() {
@@ -138,7 +138,7 @@ export default function ProjectPage() {
       {/* 项目列表 */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-purple-500 rounded-full animate-spin mb-3" />
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-[#7B61FF] rounded-full animate-spin mb-3" />
           <p className="text-sm">加载中...</p>
         </div>
       ) : filtered.length > 0 ? (
@@ -210,7 +210,7 @@ export default function ProjectPage() {
                     </button>
                     <button
                       onClick={() => handleRegenerate(project)}
-                      className="os-btn-ghost px-2 py-1.5 text-slate-400 hover:text-purple-500"
+                      className="os-btn-ghost px-2 py-1.5 text-slate-400 hover:text-[#7B61FF]"
                       title="重新生成"
                     >
                       <RefreshCw className="w-4 h-4" />

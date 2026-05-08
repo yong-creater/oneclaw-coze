@@ -26,15 +26,15 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles,
 };
 
-// 默认渐变色
+// 默认渐变色 — 统一蓝紫体系
 const DEFAULT_GRADIENTS = [
-  'from-violet-500 to-purple-600',
-  'from-blue-400 to-cyan-500',
-  'from-pink-400 to-rose-500',
-  'from-fuchsia-500 to-pink-500',
-  'from-red-400 to-orange-500',
-  'from-emerald-400 to-teal-500',
-  'from-amber-400 to-yellow-500',
+  'from-[#7B61FF] to-[#5B8CFF]',
+  'from-[#5B8CFF] to-[#6EE7FF]',
+  'from-[#7B61FF] to-[#A78BFA]',
+  'from-[#5B8CFF] to-[#7B61FF]',
+  'from-[#7B61FF] to-[#6EE7FF]',
+  'from-[#6EE7FF] to-[#5B8CFF]',
+  'from-[#A78BFA] to-[#5B8CFF]',
 ];
 
 interface UtilityTool {
@@ -184,7 +184,7 @@ export default function ToolsPage() {
                     {tool.description || 'AI智能创作工具'}
                   </p>
                   {/* 进入按钮 */}
-                  <div className="flex items-center text-xs text-slate-400 mt-3 group-hover:text-[#6C5CE7] transition-colors">
+                  <div className="flex items-center text-xs text-slate-400 mt-3 group-hover:text-[#7B61FF] transition-colors">
                     进入工具
                     <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
                   </div>

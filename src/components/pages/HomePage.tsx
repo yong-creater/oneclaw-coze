@@ -131,19 +131,19 @@ export default function HomePage() {
     setInputText(action.prompt);
   }, []);
 
-  // 工具颜色渐变映射
+  // 工具颜色渐变映射 — 统一蓝紫体系
   const getGradient = (color: string) => {
     const map: Record<string, string> = {
-      purple: 'from-violet-500 to-purple-600',
-      blue: 'from-blue-400 to-indigo-500',
-      pink: 'from-pink-400 to-rose-500',
-      green: 'from-emerald-400 to-teal-500',
-      orange: 'from-orange-400 to-amber-500',
-      yellow: 'from-yellow-400 to-orange-400',
-      cyan: 'from-cyan-400 to-sky-500',
-      red: 'from-red-400 to-rose-500',
+      purple: 'from-[#7B61FF] to-[#5B8CFF]',
+      blue: 'from-[#5B8CFF] to-[#6EE7FF]',
+      pink: 'from-[#7B61FF] to-[#A78BFA]',
+      green: 'from-[#34D399] to-[#5B8CFF]',
+      orange: 'from-[#FFB84D] to-[#7B61FF]',
+      yellow: 'from-[#FFB84D] to-[#5B8CFF]',
+      cyan: 'from-[#6EE7FF] to-[#5B8CFF]',
+      red: 'from-[#7B61FF] to-[#F87171]',
     };
-    return map[color] || 'from-purple-400 to-indigo-500';
+    return map[color] || 'from-[#7B61FF] to-[#5B8CFF]';
   };
 
   return (
@@ -180,7 +180,7 @@ export default function HomePage() {
                     <button
                       key={action.label}
                       onClick={() => handleQuickAction(action)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 bg-slate-50 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 bg-slate-50 hover:bg-[#7B61FF]/[0.06] hover:text-[#7B61FF] transition-colors"
                     >
                       <Icon className="w-3.5 h-3.5" />
                       {action.label}
@@ -217,7 +217,7 @@ export default function HomePage() {
             <button
               key={prompt}
               onClick={() => handleQuickPrompt(prompt)}
-              className="px-3 py-1 rounded-full text-xs text-slate-500 bg-white border border-slate-200 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50 transition-all"
+              className="px-3 py-1 rounded-full text-xs text-slate-500 bg-white border border-slate-200 hover:border-[#7B61FF]/30 hover:text-[#7B61FF] hover:bg-[#7B61FF]/[0.04] transition-all"
             >
               {prompt}
             </button>
@@ -227,7 +227,7 @@ export default function HomePage() {
               const idx = Math.floor(Math.random() * quickPrompts.length);
               handleQuickPrompt(quickPrompts[idx]);
             }}
-            className="p-1 text-slate-400 hover:text-purple-500 transition-colors"
+            className="p-1 text-slate-400 hover:text-[#7B61FF] transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -236,8 +236,8 @@ export default function HomePage() {
 
       {/* 生成结果区 */}
       {result && (
-        <div className="max-w-2xl mx-auto mb-8 p-4 bg-purple-50 rounded-2xl border border-purple-200 animate-fade-slide-up">
-          <p className="text-sm text-purple-800">{result}</p>
+        <div className="max-w-2xl mx-auto mb-8 p-4 bg-[#7B61FF]/[0.06] rounded-2xl border border-[#7B61FF]/10 animate-fade-slide-up">
+          <p className="text-sm text-[#6948E8]">{result}</p>
         </div>
       )}
 
@@ -282,7 +282,7 @@ export default function HomePage() {
                 <div className="p-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-slate-800">{tool.name}</h3>
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-purple-400 transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#7B61FF] transition-colors" />
                   </div>
                   <p className="text-xs text-slate-500 mt-1 line-clamp-1">{tool.description}</p>
                 </div>
@@ -333,8 +333,8 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="os-card-static rounded-2xl p-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center mx-auto mb-3">
-                <FolderOpen className="w-6 h-6 text-purple-300" />
+              <div className="w-12 h-12 rounded-full bg-[#7B61FF]/[0.06] flex items-center justify-center mx-auto mb-3">
+                <FolderOpen className="w-6 h-6 text-[#7B61FF]/30" />
               </div>
               <p className="text-sm text-slate-400 mb-3">还没有生成记录</p>
               <p className="text-xs text-slate-300">在上方输入需求开始创作吧</p>
@@ -353,7 +353,7 @@ export default function HomePage() {
 
           <div className="space-y-3">
             {[
-              { name: '提示词库', desc: '浏览和使用AI创作提示词', path: '/prompts', gradient: 'from-violet-500 to-purple-600' },
+              { name: '提示词库', desc: '浏览和使用AI创作提示词', path: '/prompts', gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
               { name: '模板中心', desc: '一键使用创作模板', path: '/templates', gradient: 'from-blue-400 to-cyan-500' },
               { name: '小工具', desc: '使用AI创作小工具', path: '/tools', gradient: 'from-pink-400 to-rose-500' },
               { name: '我的项目', desc: '查看所有生成记录', path: '/projects', gradient: 'from-emerald-400 to-teal-500' },

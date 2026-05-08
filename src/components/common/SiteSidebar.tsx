@@ -144,7 +144,7 @@ export default function SiteSidebar() {
                   ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : 'px-3'}
                   ${sidebarExpanded ? 'h-[52px]' : 'h-[44px]'}
                   ${isActive
-                    ? 'bg-gradient-to-r from-purple-50/80 to-indigo-50/40 text-purple-700'
+                    ? 'bg-gradient-to-r from-[#7B61FF]/[0.08] to-[#5B8CFF]/[0.04] text-[#6948E8]'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                   }
                 `}
@@ -153,13 +153,13 @@ export default function SiteSidebar() {
                 <div className={`shrink-0 flex items-center justify-center ${!sidebarExpanded ? 'w-full' : ''}`}>
                   <Icon
                     className={`w-5 h-5 transition-colors duration-200 ${
-                      isActive ? 'text-purple-600' : 'text-slate-400 group-hover:text-slate-600'
+                      isActive ? 'text-[#7B61FF]' : 'text-slate-400 group-hover:text-slate-600'
                     }`}
                   />
                 </div>
                 {sidebarExpanded && (
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className={`font-medium truncate text-[13px] leading-tight ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
+                    <div className={`font-medium truncate text-[13px] leading-tight ${isActive ? 'text-[#6948E8]' : 'text-slate-700'}`}>
                       {menu.name}
                     </div>
                     <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
@@ -186,8 +186,8 @@ export default function SiteSidebar() {
                 {user?.avatar_url ? (
                   <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full shrink-0 ring-2 ring-slate-100" />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center shrink-0">
-                    <span className="text-purple-600 text-xs font-semibold">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7B61FF]/10 to-[#5B8CFF]/10 flex items-center justify-center shrink-0">
+                    <span className="text-[#7B61FF] text-xs font-semibold">
                       {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
                     </span>
                   </div>
@@ -248,10 +248,10 @@ export default function SiteSidebar() {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center hover:ring-2 hover:ring-purple-200 transition-all"
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7B61FF]/10 to-[#5B8CFF]/10 flex items-center justify-center hover:ring-2 hover:ring-[#7B61FF]/20 transition-all"
                 title={user?.nickname || '用户'}
               >
-                <span className="text-purple-600 text-xs font-semibold">
+                <span className="text-[#7B61FF] text-xs font-semibold">
                   {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
                 </span>
               </button>
@@ -296,7 +296,7 @@ export default function SiteSidebar() {
           ) : (
             <button
               onClick={() => setShowLoginModal(true)}
-              className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center hover:bg-purple-50 transition-colors"
+              className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center hover:bg-[#7B61FF]/[0.06] transition-colors"
               title="登录"
             >
               <User className="w-4 h-4 text-slate-300" />
