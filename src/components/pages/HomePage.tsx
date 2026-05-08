@@ -151,18 +151,18 @@ export default function HomePage() {
       {/* ==================== 第一层：Hero AI 输入区 ==================== */}
       <div className="animate-fade-slide-up">
         {/* 标题区 */}
-        <div className="text-center mb-8 pt-8">
-          <h1 className="text-[32px] font-bold tracking-tight text-slate-900 leading-tight">
+        <div className="text-center mb-10 pt-12">
+          <h1 className="os-h1 tracking-tight">
             <span className="gradient-text">今天你想创造什么？</span>
           </h1>
-          <p className="text-base text-slate-400 mt-3 font-light">
+          <p className="os-caption mt-4 font-light" style={{ fontSize: '18px' }}>
             输入你的想法，AI 为你生成高质量卖货内容
           </p>
         </div>
 
         {/* AI 输入大卡片 */}
-        <div className="max-w-2xl mx-auto mb-6">
-          <div className="os-card-static rounded-[20px] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <div className="max-w-2xl mx-auto mb-8">
+          <div className="os-card-static rounded-[20px] overflow-hidden shadow-sm hover:shadow-md transition-shadow" style={{ padding: 0 }}>
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value.slice(0, 500))}
@@ -171,7 +171,7 @@ export default function HomePage() {
               style={{ minHeight: 120 }}
               rows={4}
             />
-            <div className="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-white">
+            <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-100 bg-white">
               <div className="flex items-center gap-2">
                 {/* 快捷动作按钮 */}
                 {quickActions.map((action) => {
@@ -200,7 +200,7 @@ export default function HomePage() {
                 <button
                   onClick={handleGenerate}
                   disabled={!inputText.trim() || isLoading}
-                  className="os-btn-primary text-sm py-2 px-5"
+                  className="os-btn-primary text-sm py-2.5 px-5"
                 >
                   <Sparkles className="w-4 h-4" />
                   {isLoading ? '生成中...' : '生成内容'}
@@ -211,8 +211,8 @@ export default function HomePage() {
         </div>
 
         {/* 试试这些 */}
-        <div className="max-w-2xl mx-auto mb-2 flex items-center gap-2 flex-wrap justify-center">
-          <span className="text-xs text-slate-400">试试这些:</span>
+        <div className="max-w-2xl mx-auto mb-16 flex items-center gap-2 flex-wrap justify-center">
+          <span className="os-caption">试试这些:</span>
           {quickPrompts.map((prompt) => (
             <button
               key={prompt}
@@ -243,10 +243,10 @@ export default function HomePage() {
 
       {/* ==================== 第二层：AI 创作能力 ==================== */}
       {tools.length > 0 && (
-        <div className="mt-12 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center justify-between mb-5">
+        <div className="animate-fade-slide-up" style={{ marginTop: "var(--spacing-section)", animationDelay: '0.1s' }}>
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="os-section-title">AI 创作能力</h2>
+              <h2 className="os-h2">AI 创作能力</h2>
               <p className="os-section-desc">选择能力，快速生成内容</p>
             </div>
             <button
@@ -257,7 +257,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-6">
             {tools.map((tool) => (
               <button
                 key={tool.id}
@@ -293,12 +293,12 @@ export default function HomePage() {
       )}
 
       {/* ==================== 第三层：最近使用 + 快捷入口 ==================== */}
-      <div className="mt-12 grid grid-cols-5 gap-6 animate-fade-slide-up" style={{ animationDelay: '0.2s' }}>
+      <div className="grid grid-cols-5 gap-6 animate-fade-slide-up" style={{ marginTop: 'var(--spacing-section)', animationDelay: '0.2s' }}>
         {/* 最近项目 */}
         <div className="col-span-3">
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="os-section-title">最近项目</h2>
+              <h2 className="os-h2">最近项目</h2>
               <p className="os-section-desc">查看和管理你的生成内容</p>
             </div>
             <button
@@ -344,9 +344,9 @@ export default function HomePage() {
 
         {/* 快捷入口 */}
         <div className="col-span-2">
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="os-section-title">快捷入口</h2>
+              <h2 className="os-h2">快捷入口</h2>
               <p className="os-section-desc">快速跳转到常用功能</p>
             </div>
           </div>

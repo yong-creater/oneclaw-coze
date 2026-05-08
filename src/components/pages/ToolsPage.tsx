@@ -101,10 +101,10 @@ export default function ToolsPage() {
     return (
       <div className="os-page">
         <div className="mb-6">
-          <h1 className="os-section-title text-2xl">小工具</h1>
+          <h1 className="os-h1">小工具</h1>
           <p className="os-section-desc">选择工具，快速生成内容</p>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="os-card p-0 animate-pulse">
               <div className="h-36 bg-slate-100 rounded-t-2xl" />
@@ -123,7 +123,7 @@ export default function ToolsPage() {
     <div className="os-page">
       {/* 标题区 */}
       <div className="mb-6 animate-fade-slide-up">
-        <h1 className="os-section-title text-2xl">小工具</h1>
+        <h1 className="os-h1">小工具</h1>
         <p className="os-section-desc">选择工具，快速生成内容</p>
       </div>
 
@@ -141,7 +141,7 @@ export default function ToolsPage() {
 
       {/* 工具网格 */}
       {filtered.length > 0 ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-6">
           {filtered.map((tool, index) => {
             const Icon = (tool.icon && ICON_MAP[tool.icon]) || Package;
             const gradient = DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];

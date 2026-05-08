@@ -12,10 +12,10 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
     <>
       <SiteSidebar />
       <main
-        className="min-h-screen bg-[#F7F8FA] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-y-auto"
-        style={{ marginLeft }}
+        className="min-h-screen transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-y-auto"
+        style={{ marginLeft, background: 'var(--bg-page)' }}
       >
-        <div className="p-8">
+        <div style={{ padding: 'var(--spacing-page-x)' }}>
           {children}
         </div>
       </main>

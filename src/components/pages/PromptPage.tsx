@@ -77,7 +77,7 @@ export default function PromptPage() {
     <div className="os-page">
       {/* Header */}
       <div className="mb-6 animate-fade-slide-up">
-        <h1 className="os-section-title text-2xl">提示词库</h1>
+        <h1 className="os-h1">提示词库</h1>
         <p className="os-section-desc">{prompts.length} 条精选提示词，即用即走</p>
       </div>
 
@@ -133,7 +133,7 @@ export default function PromptPage() {
 
       {/* Prompt Cards */}
       {!loading && filtered.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filtered.map((prompt, index) => {
             const catConfig = CATEGORY_CONFIG[prompt.category] || { label: prompt.category, gradient: 'from-slate-400 to-slate-500' };
             const isCopied = copiedId === prompt.id;

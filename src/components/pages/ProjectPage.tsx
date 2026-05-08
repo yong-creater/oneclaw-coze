@@ -98,7 +98,7 @@ export default function ProjectPage() {
     <div className="os-page">
       {/* 标题区 */}
       <div className="mb-6 animate-fade-slide-up">
-        <h1 className="os-section-title text-2xl">我的项目</h1>
+        <h1 className="os-h1">我的项目</h1>
         <p className="os-section-desc">查看和管理生成记录</p>
       </div>
 

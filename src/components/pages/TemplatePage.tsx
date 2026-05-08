@@ -74,7 +74,7 @@ export default function TemplatePage() {
     <div className="os-page">
       {/* 标题区 */}
       <div className="mb-6 animate-fade-slide-up">
-        <h1 className="os-section-title text-2xl">模板</h1>
+        <h1 className="os-h1">模板</h1>
         <p className="os-section-desc">选择模板，快速开始创作</p>
       </div>
 
@@ -110,7 +110,7 @@ export default function TemplatePage() {
           <p className="text-sm">加载中...</p>
         </div>
       ) : filtered.length > 0 ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-6">
           {filtered.map((tpl, index) => {
             const catConfig = CATEGORY_MAP[tpl.template_type] || { label: tpl.template_type, gradient: 'from-slate-400 to-slate-500' };
             return (

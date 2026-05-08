@@ -179,6 +179,51 @@ body {
   --border-light: #F1F3F5;
 }
 
+/* ==================== OneClaw 字体系统 (Typography) ==================== */
+:root {
+  /* H1 - 页面主标题 */
+  --typo-h1-size: 48px;
+  --typo-h1-weight: 700;
+  --typo-h1-color: #111827;
+  --typo-h1-line-height: 1.2;
+
+  /* H2 - 模块标题 */
+  --typo-h2-size: 32px;
+  --typo-h2-weight: 700;
+  --typo-h2-color: #111827;
+
+  /* H3 - 卡片标题 */
+  --typo-h3-size: 20px;
+  --typo-h3-weight: 600;
+  --typo-h3-color: #111827;
+
+  /* Body - 正文 */
+  --typo-body-size: 16px;
+  --typo-body-weight: 400;
+  --typo-body-color: #374151;
+  --typo-body-line-height: 1.6;
+
+  /* Caption - 辅助说明 */
+  --typo-caption-size: 14px;
+  --typo-caption-weight: 400;
+  --typo-caption-color: #94A3B8;
+
+  /* Button - 按钮 */
+  --typo-btn-size: 15px;
+  --typo-btn-weight: 600;
+}
+
+/* ==================== OneClaw 间距系统 (Spacing) ==================== */
+:root {
+  --spacing-page-x: 48px;       /* 页面左右边距 */
+  --spacing-section-y: 64px;    /* 模块上下间距 */
+  --spacing-card-gap: 24px;     /* 卡片之间间距 */
+  --spacing-card-padding: 24px; /* 卡片内部 padding */
+  --spacing-input-padding: 20px;/* 输入框内部 padding */
+  --spacing-btn-px: 20px;       /* 按钮左右 padding */
+  --spacing-btn-py: 12px;       /* 按钮上下 padding */
+}
+
 
 
 /* ==================== 自定义滚动条 ==================== */
@@ -265,6 +310,7 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 16px;
+  padding: var(--spacing-card-padding);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .os-card:hover {
@@ -308,10 +354,10 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: var(--spacing-btn-py) var(--spacing-btn-px);
   color: white;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--typo-btn-size);
+  font-weight: var(--typo-btn-weight);
   border-radius: 12px;
   background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -340,11 +386,11 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: var(--spacing-btn-py) var(--spacing-btn-px);
   background: white;
   border: 1px solid var(--border-default);
   color: #374151;
-  font-size: 14px;
+  font-size: var(--typo-caption-size);
   font-weight: 500;
   border-radius: 12px;
   transition: all 0.2s ease;
@@ -385,12 +431,12 @@ body {
 .os-ai-input {
   width: 100%;
   min-height: 120px;
-  padding: 20px 24px;
+  padding: var(--spacing-input-padding) 24px;
   background: #F9FAFB;
   border: 2px solid transparent;
   border-radius: 20px;
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: var(--typo-body-size);
+  line-height: var(--typo-body-line-height);
   color: #111827;
   resize: none;
   outline: none;
@@ -464,29 +510,62 @@ body {
 
 /* 页面容器 */
 .os-page {
-  padding: 32px;
+  padding: 40px var(--spacing-page-x);
   max-width: 1200px;
   margin: 0 auto;
 }
 @media (max-width: 768px) {
   .os-page {
-    padding: 16px;
+    padding: 24px 16px;
   }
 }
 
-/* 模块标题 */
+/* 页面主标题 H1 */
+.os-h1 {
+  font-size: var(--typo-h1-size);
+  font-weight: var(--typo-h1-weight);
+  color: var(--typo-h1-color);
+  line-height: var(--typo-h1-line-height);
+  letter-spacing: -0.02em;
+}
+
+/* 模块标题 H2 */
 .os-section-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
+  font-size: var(--typo-h2-size);
+  font-weight: var(--typo-h2-weight);
+  color: var(--typo-h2-color);
+  letter-spacing: -0.02em;
+}
+
+/* 卡片标题 H3 */
+.os-h3 {
+  font-size: var(--typo-h3-size);
+  font-weight: var(--typo-h3-weight);
+  color: var(--typo-h3-color);
   letter-spacing: -0.01em;
+}
+
+/* 正文 */
+.os-body {
+  font-size: var(--typo-body-size);
+  font-weight: var(--typo-body-weight);
+  color: var(--typo-body-color);
+  line-height: var(--typo-body-line-height);
+}
+
+/* 辅助说明 */
+.os-caption {
+  font-size: var(--typo-caption-size);
+  font-weight: var(--typo-caption-weight);
+  color: var(--typo-caption-color);
 }
 
 /* 模块副标题 */
 .os-section-desc {
-  font-size: 14px;
-  color: var(--text-tertiary);
-  margin-top: 4px;
+  font-size: var(--typo-caption-size);
+  color: var(--typo-caption-color);
+  margin-top: 6px;
+  line-height: 1.5;
 }
 
 /* ==================== Sidebar 特有样式 ==================== */
