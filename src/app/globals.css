@@ -937,25 +937,53 @@ body {
 
 /* 输入区能力按钮 — 复用 Capsule Button */
 
-/* ---- 创作场景 Tabs ---- */
-.os-scene-tabs {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 14px;
-  border: 1px solid rgba(233, 238, 245, 0.6);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+/* ---- AI Workspace 工作台 ---- */
+.os-workspace-wrapper {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
 }
-.os-scene-tab {
+
+.os-workspace {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(233, 238, 245, 0.7);
+  border-radius: 20px;
+  box-shadow:
+    0 8px 40px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
+    0 0 60px rgba(123, 97, 255, 0.04);
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.os-workspace:focus-within {
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 0 0 3px rgba(123, 97, 255, 0.08),
+    0 12px 48px rgba(123, 97, 255, 0.1),
+    0 0 80px rgba(123, 97, 255, 0.06);
+  border-color: rgba(123, 97, 255, 0.18);
+}
+
+/* 顶部 Tabs 区域 */
+.os-workspace-header {
+  padding: 12px 16px 0;
+}
+.os-workspace-tabs {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: 10px;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(15, 23, 42, 0.03);
+  border-radius: 12px;
+}
+.os-workspace-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 14px;
+  border-radius: 9px;
   font-size: 13px;
   font-weight: 500;
   color: #94A3B8;
@@ -966,50 +994,72 @@ body {
   outline: none;
   white-space: nowrap;
 }
-.os-scene-tab:hover {
+.os-workspace-tab:hover {
   color: #7B61FF;
-  background: rgba(123, 97, 255, 0.04);
+  background: rgba(123, 97, 255, 0.05);
 }
-.os-scene-tab-active {
+.os-workspace-tab-active {
   color: #7B61FF;
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.10) 0%, rgba(91, 140, 255, 0.06) 100%);
-  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(123, 97, 255, 0.08);
   font-weight: 600;
 }
 
-/* ---- 输入框底部工具栏 ---- */
-.os-input-toolbar {
+/* 中间输入区 */
+.os-workspace-body {
+  padding: 0;
+}
+.os-workspace-textarea {
+  width: 100%;
+  min-height: 200px;
+  padding: 20px 24px;
+  background: transparent;
+  border: none;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  resize: none;
+  outline: none;
+}
+.os-workspace-textarea::placeholder {
+  color: #B0B8C8;
+  font-size: 14px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+/* 底部工具栏 */
+.os-workspace-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 20px;
-  border-top: 1px solid rgba(123, 97, 255, 0.06);
-  background: rgba(255, 255, 255, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 10px 16px 12px;
+  border-top: 1px solid rgba(123, 97, 255, 0.04);
 }
-.os-toolbar-btn {
+.os-workspace-tool-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 6px;
+  gap: 4px;
+  padding: 6px 10px;
   border-radius: 8px;
   color: #94A3B8;
   background: transparent;
   border: none;
   cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
   transition: all 0.2s ease;
   outline: none;
 }
-.os-toolbar-btn:hover {
+.os-workspace-tool-btn:hover {
   color: #7B61FF;
   background: rgba(123, 97, 255, 0.06);
 }
-.os-toolbar-counter {
+.os-workspace-counter {
   font-size: 11px;
   color: #CBD5E1;
   font-variant-numeric: tabular-nums;
-  margin-left: 4px;
+  margin-left: 6px;
 }
 
 /* ==================== Creator OS 标签系统 ==================== */
