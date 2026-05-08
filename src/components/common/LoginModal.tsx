@@ -106,7 +106,6 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
   // 微信扫码登录
   const handleWechatLogin = () => {
-    // TODO: 实现微信扫码登录
     setError('微信登录功能开发中，请使用邮箱验证码登录');
   };
 
@@ -164,10 +163,10 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
   // ==================== 选择登录方式 ====================
   if (!loginType) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden">
-          {/* 头部 */}
-          <div className="relative p-6 pb-4 bg-gradient-to-r from-orange-500 to-red-500">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
+          {/* 头部 - 紫蓝渐变 */}
+          <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
             <button
               onClick={() => onOpenChange(false)}
               className="absolute top-4 right-4 p-1 rounded-full hover:bg-white/20 transition-colors"
@@ -186,7 +185,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
             <div className="relative">
               <button
                 onClick={() => setLoginType('wechat')}
-                className="w-full p-4 rounded-xl border-2 border-green-200 dark:border-green-800 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all flex items-center gap-4"
+                className="w-full p-4 rounded-xl border-2 border-green-200 hover:border-green-400 hover:bg-green-50 transition-all flex items-center gap-4"
               >
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
                   <svg viewBox="0 0 24 24" className="w-7 h-7 text-white">
@@ -194,7 +193,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
                   </svg>
                 </div>
                 <div className="text-left">
-                  <div className="font-semibold text-slate-800 dark:text-slate-200">微信扫码登录</div>
+                  <div className="font-semibold text-slate-800">微信扫码登录</div>
                   <div className="text-sm text-slate-500">使用微信扫一扫快速登录</div>
                 </div>
                 <span className="absolute top-3 right-3 px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
@@ -206,23 +205,23 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
             {/* 邮箱验证码登录 */}
             <button
               onClick={() => setLoginType('email-code')}
-              className="w-full p-4 rounded-xl border-2 border-orange-200 dark:border-orange-800 hover:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all flex items-center gap-4"
+              className="w-full p-4 rounded-xl border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50 transition-all flex items-center gap-4"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
                 <Mail className="w-6 h-6 text-white" />
               </div>
               <div className="text-left">
-                <div className="font-semibold text-slate-800 dark:text-slate-200">邮箱验证码登录</div>
+                <div className="font-semibold text-slate-800">邮箱验证码登录</div>
                 <div className="text-sm text-slate-500">输入邮箱，通过验证码登录</div>
               </div>
             </button>
 
             {/* 开发环境模拟登录 */}
             {devMode && (
-              <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="pt-4 border-t border-slate-100">
                 <button
                   onClick={handleMockLogin}
-                  className="w-full p-3 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-sm text-slate-500 flex items-center justify-center gap-2"
+                  className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors text-sm text-slate-500 flex items-center justify-center gap-2"
                 >
                   <AlertCircle className="w-4 h-4" />
                   模拟登录（开发环境）
@@ -238,9 +237,9 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
   // ==================== 微信扫码登录 ====================
   if (loginType === 'wechat') {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden">
-          <div className="p-6 pb-4 bg-gradient-to-r from-green-500 to-emerald-500">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
+          <div className="relative p-6 pb-4 bg-gradient-to-r from-green-500 to-emerald-500">
             <button
               onClick={() => setLoginType(null)}
               className="absolute top-4 left-4 p-1 rounded-full hover:bg-white/20 transition-colors"
@@ -252,7 +251,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
           </div>
 
           <div className="p-6 text-center">
-            <div className="w-48 h-48 mx-auto mb-4 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center">
+            <div className="w-48 h-48 mx-auto mb-4 bg-slate-50 rounded-xl flex items-center justify-center">
               <div className="text-slate-400">
                 <svg className="w-16 h-16 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
@@ -263,7 +262,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
             <p className="text-sm text-slate-500">打开微信扫一扫</p>
             
             {error && (
-              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400 text-sm">
+              <div className="mt-4 p-3 bg-red-50 rounded-xl text-red-600 text-sm">
                 {error}
               </div>
             )}
@@ -282,9 +281,9 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
   // ==================== 邮箱验证码登录 ====================
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden">
-        <div className="p-6 pb-4 bg-gradient-to-r from-orange-500 to-red-500">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
+        <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
           <button
             onClick={() => setLoginType(null)}
             className="absolute top-4 left-4 p-1 rounded-full hover:bg-white/20 transition-colors"
@@ -298,7 +297,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
         <div className="p-6 space-y-4">
           {/* 邮箱输入 */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               邮箱地址
             </label>
             <EmailInput
@@ -310,7 +309,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
           {/* 验证码输入 */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-sm font-medium text-slate-700 mb-2">
               验证码
             </label>
             <div className="flex gap-2">
@@ -340,7 +339,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
           {/* 错误提示 */}
           {error && (
-            <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+            <div className="p-3 bg-red-50 rounded-xl text-red-600 text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               {error}
             </div>
@@ -348,7 +347,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
           {/* 成功提示 */}
           {success && (
-            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-600 dark:text-green-400 text-sm flex items-center gap-2">
+            <div className="p-3 bg-green-50 rounded-xl text-green-600 text-sm flex items-center gap-2">
               <CheckCircle className="w-4 h-4 flex-shrink-0" />
               {success}
             </div>
@@ -358,7 +357,8 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
           <Button
             onClick={handleEmailLogin}
             disabled={loading || !email || code.length < 6}
-            className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+            className="w-full text-white border-0 hover:opacity-90"
+            style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}
           >
             {loading ? '登录中...' : '登录 / 注册'}
           </Button>

@@ -4,7 +4,9 @@ import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMenu, type MenuId } from '@/components/common/MenuProvider';
+import { useUser } from '@/contexts/UserContext';
 import { SiteLogo } from '@/components/common/SiteLogo';
+import LoginButton from '@/components/common/LoginButton';
 import {
   Home,
   Wand2,
@@ -18,6 +20,7 @@ import {
   User,
   PanelLeftClose,
   PanelLeft,
+  LogOut,
 } from 'lucide-react';
 
 // ========== 菜单数据结构 ==========
@@ -38,6 +41,7 @@ const menuList: Array<{
 export default function SiteSidebar() {
   const pathname = usePathname();
   const { currentMenu, setCurrentMenu, sidebarExpanded, toggleSidebar } = useMenu();
+  const { user, authenticated, setShowLoginModal, logout } = useUser();
 
   // 根据路径推断当前菜单
   useEffect(() => {
@@ -78,7 +82,7 @@ export default function SiteSidebar() {
         </button>
       </div>
 
-      {/* 菜单列表 — 所有项统一样式，点击切换右侧内容区 */}
+      {/* 菜单列表 */}
       <nav className="flex-1 py-2 px-2.5 overflow-y-auto scrollbar-hide">
         <div className="space-y-0.5">
           {menuList.map((menu) => {
@@ -114,10 +118,9 @@ export default function SiteSidebar() {
         </div>
       </nav>
 
-      {/* 底部区域 */}
+      {/* 底部区域 - 会员升级卡片（仅展开时） */}
       {sidebarExpanded && (
         <div className="px-3 pb-2 shrink-0 animate-fade-slide-up">
-          {/* 会员升级卡片 */}
           <div className="bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl p-3 border border-purple-100/50">
             <div className="flex items-start gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shrink-0">
@@ -130,7 +133,7 @@ export default function SiteSidebar() {
             </div>
             <Link
               href="/membership"
-              className="mt-2.5 block w-full text-center py-1.5 rounded-xl text-xs font-semibold text-white transition-all"
+              className="mt-2.5 block w-full text-center py-1.5 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90"
               style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}
             >
               立即升级
@@ -160,22 +163,65 @@ export default function SiteSidebar() {
         )}
       </div>
 
-      {/* 用户信息 */}
+      {/* 用户信息区 - 集成登录功能 */}
       <div className={`px-3 py-3 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'flex justify-center'}`}>
         {sidebarExpanded ? (
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center shrink-0">
-              <User className="w-4 h-4 text-white" />
+          authenticated ? (
+            // 已登录：显示用户信息 + 下拉
+            <div className="flex items-center gap-2.5">
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full shrink-0" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center shrink-0">
+                  <span className="text-white text-xs font-medium">
+                    {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
+                  </span>
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-medium text-slate-700 truncate">{user?.nickname || '用户'}</div>
+                <div className="text-[10px] text-slate-400">免费版</div>
+              </div>
+              <button
+                onClick={logout}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+                title="退出登录"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-medium text-slate-700 truncate">OneClaw 用户</div>
-              <div className="text-[10px] text-slate-400">免费版</div>
+          ) : (
+            // 未登录：显示登录按钮
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <LoginButton />
+              </div>
             </div>
-          </div>
+          )
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center">
-            <User className="w-4 h-4 text-white" />
-          </div>
+          // 收缩模式
+          authenticated ? (
+            <button
+              onClick={() => setShowLoginModal(false)}
+              className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center"
+              title={user?.nickname || '用户'}
+            >
+              <span className="text-white text-xs font-medium">
+                {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
+              </span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowLoginModal(true)}
+              className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-purple-50 transition-colors"
+              title="登录"
+            >
+              <User className="w-4 h-4 text-slate-400" />
+            </button>
+          )
         )}
       </div>
     </aside>
