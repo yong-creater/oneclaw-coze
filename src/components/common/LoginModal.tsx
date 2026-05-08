@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { X, Mail, Lock, MessageSquare, User, CheckCircle, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import EmailInput from '@/components/ui/email-input';
 
@@ -317,14 +316,13 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
                 placeholder="输入6位验证码"
                 className="flex-1"
               />
-              <Button
-                variant="outline"
+              <button
                 onClick={sendCode}
                 disabled={loading || countdown > 0}
-                className="whitespace-nowrap"
+                className="os-btn-secondary whitespace-nowrap !h-10"
               >
                 {countdown > 0 ? `${countdown}s` : '获取验证码'}
-              </Button>
+              </button>
             </div>
           </div>
 
@@ -351,14 +349,13 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
           )}
 
           {/* 登录按钮 */}
-          <Button
+          <button
             onClick={handleEmailLogin}
             disabled={loading || !email || code.length < 6}
-            className="w-full text-white border-0 hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}
+            className="os-btn-primary w-full"
           >
             {loading ? '登录中...' : '登录 / 注册'}
-          </Button>
+          </button>
 
           <button
             onClick={() => setLoginType(null)}

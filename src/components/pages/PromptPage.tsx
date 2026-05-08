@@ -104,7 +104,7 @@ export default function PromptPage() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`os-filter-tag ${isActive ? 'os-filter-tag-active' : 'os-filter-tag-inactive'}`}
+              className={`os-btn-capsule ${isActive ? 'os-btn-capsule-active' : ''}`}
             >
               {cat === 'all' ? '全部' : CATEGORY_CONFIG[cat]?.label || cat}
               <span className="ml-1 text-xs opacity-60">{count}</span>

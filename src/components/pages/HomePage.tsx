@@ -217,7 +217,7 @@ export default function HomePage() {
             <button
               key={prompt}
               onClick={() => handleQuickPrompt(prompt)}
-              className="px-3 py-1 rounded-full text-xs text-slate-500 bg-white border border-slate-200 hover:border-[#7B61FF]/30 hover:text-[#7B61FF] hover:bg-[#7B61FF]/[0.04] transition-all"
+              className="os-btn-capsule text-xs !h-[30px] !px-3"
             >
               {prompt}
             </button>
@@ -227,7 +227,7 @@ export default function HomePage() {
               const idx = Math.floor(Math.random() * quickPrompts.length);
               handleQuickPrompt(quickPrompts[idx]);
             }}
-            className="p-1 text-slate-400 hover:text-[#7B61FF] transition-colors"
+            className="os-btn-ghost !p-1"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>

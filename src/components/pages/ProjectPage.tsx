@@ -118,7 +118,7 @@ export default function ProjectPage() {
       <div className="flex gap-2 flex-wrap mb-6 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
         <button
           onClick={() => setActiveType('all')}
-          className={`os-filter-tag ${activeType === 'all' ? 'os-filter-tag-active' : 'os-filter-tag-inactive'}`}
+          className={`os-btn-capsule ${activeType === 'all' ? 'os-btn-capsule-active' : ''}`}
         >
           全部 {projects.length}
         </button>
@@ -128,7 +128,7 @@ export default function ProjectPage() {
             <button
               key={key}
               onClick={() => setActiveType(key)}
-              className={`os-filter-tag ${activeType === key ? 'os-filter-tag-active' : 'os-filter-tag-inactive'}`}
+              className={`os-btn-capsule ${activeType === key ? 'os-btn-capsule-active' : ''}`}
             >
               {meta.label} {typeCounts[key]}
             </button>

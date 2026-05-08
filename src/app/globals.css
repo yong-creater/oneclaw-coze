@@ -348,29 +348,32 @@ body {
 
 /* ==================== Creator OS 按钮系统 ==================== */
 
-/* 主按钮 - 蓝紫渐变 */
+/* 主按钮 - 蓝紫渐变 (Primary) */
 .os-btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  height: 44px;
   padding: var(--spacing-btn-py) var(--spacing-btn-px);
   color: white;
   font-size: var(--typo-btn-size);
   font-weight: var(--typo-btn-weight);
-  border-radius: 12px;
+  border-radius: 14px;
   background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 12px -2px rgba(123, 97, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   border: none;
+  outline: none;
 }
 .os-btn-primary:hover {
-  background: linear-gradient(135deg, #6948E8 0%, #4A7AE6 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px -4px rgba(123, 97, 255, 0.4);
+  background: linear-gradient(135deg, #8B71FF 0%, #6B9CFF 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(123, 97, 255, 0.45);
 }
 .os-btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.98);
   box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.3);
 }
 .os-btn-primary:disabled {
@@ -380,49 +383,93 @@ body {
   box-shadow: none;
 }
 
-/* 次要按钮 */
+/* 次要按钮 (Secondary) */
 .os-btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  height: 44px;
   padding: var(--spacing-btn-py) var(--spacing-btn-px);
   background: white;
   border: 1px solid var(--border-default);
   color: #374151;
-  font-size: var(--typo-caption-size);
+  font-size: var(--typo-btn-size);
   font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.2s ease;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  outline: none;
 }
 .os-btn-secondary:hover {
   background: #F9FAFB;
   border-color: #D1D5DB;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
 }
 .os-btn-secondary:active {
+  transform: translateY(0) scale(0.98);
   background: #F3F4F6;
 }
 
-/* 幽灵按钮 */
+/* 幽灵按钮 (Ghost) */
 .os-btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 8px 14px;
   background: transparent;
   border: none;
   color: #6B7280;
   font-size: 13px;
   font-weight: 500;
-  border-radius: 10px;
-  transition: all 0.2s ease;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  outline: none;
 }
 .os-btn-ghost:hover {
   background: #F3F4F6;
   color: #374151;
+  transform: translateY(-1px);
+}
+.os-btn-ghost:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 胶囊按钮 (Capsule) - 能力标签/分类/Prompt推荐 */
+.os-btn-capsule {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  background: #F3F6FB;
+  border: 1px solid transparent;
+  color: #6B7280;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 999px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  outline: none;
+}
+.os-btn-capsule:hover {
+  background: rgba(123, 97, 255, 0.06);
+  color: #7B61FF;
+  border-color: rgba(123, 97, 255, 0.15);
+}
+.os-btn-capsule-active {
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.1), rgba(91, 140, 255, 0.06));
+  color: #7B61FF;
+  border-color: rgba(123, 97, 255, 0.2);
+  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.15);
+}
+.os-btn-capsule:active {
+  transform: scale(0.97);
 }
 
 /* ==================== Creator OS 输入系统 ==================== */
@@ -479,32 +526,6 @@ body {
 }
 
 /* ==================== Creator OS 标签系统 ==================== */
-
-/* 筛选标签 */
-.os-filter-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 14px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-}
-.os-filter-tag-active {
-  background: linear-gradient(135deg, #7B61FF, #8B71FF);
-  color: white;
-  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.4);
-}
-.os-filter-tag-inactive {
-  background: #F3F4F6;
-  color: #6B7280;
-}
-.os-filter-tag-inactive:hover {
-  background: #E5E7EB;
-  color: #374151;
-}
 
 /* ==================== Creator OS 页面布局 ==================== */
 

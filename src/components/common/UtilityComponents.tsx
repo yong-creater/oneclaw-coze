@@ -22,7 +22,7 @@ export function UtilityCard({
   icon, 
   children, 
   className = '',
-  gradient = 'from-orange-500 to-amber-500'
+  gradient = 'from-[#7B61FF] to-[#5B8CFF]'
 }: UtilityCardProps) {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
@@ -30,7 +30,7 @@ export function UtilityCard({
       <div className={`px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r ${gradient} bg-opacity-5`}>
         <div className="flex items-center gap-2">
           {icon && (
-            <span className="[&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-orange-500">
+            <span className="[&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-[#7B61FF]">
               {icon}
             </span>
           )}
@@ -104,7 +104,7 @@ export function PrimaryButton({
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className={`flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`os-btn-primary ${className}`}
     >
       {loading ? (
         <>
@@ -142,17 +142,17 @@ export function ActionButton({
   className = ''
 }: ActionButtonProps) {
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white shadow-md hover:shadow-lg',
-    secondary: 'border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300',
-    danger: 'bg-red-500 hover:bg-red-600 text-white',
-    ghost: 'text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800',
+    primary: 'os-btn-primary',
+    secondary: 'os-btn-secondary',
+    danger: 'bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-xl transition-all',
+    ghost: 'os-btn-ghost',
   };
 
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${className}`}
+      className={`${variantClasses[variant]} ${className}`}
     >
       {icon && <span className="[&>svg]:w-4 [&>svg]:h-4">{icon}</span>}
       {children}
@@ -181,12 +181,12 @@ export function SelectField({ label, value, onChange, options, placeholder, icon
     <div>
       {label && (
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-          {icon && <span className="inline-flex items-center mr-1 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:text-orange-500">{icon}</span>}
+          {icon && <span className="inline-flex items-center mr-1 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:text-[#7B61FF]">{icon}</span>}
           {label}
         </label>
       )}
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:border-orange-500 transition-colors hover:border-slate-300 dark:hover:border-slate-600 ${
+        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:border-[#7B61FF] transition-colors hover:border-slate-300 dark:hover:border-slate-600 ${
           showBorder ? 'border-2 border-slate-200 dark:border-slate-700' : 'border-2 border-transparent'
         }`}>
           <SelectValue placeholder={placeholder} />
@@ -220,8 +220,8 @@ export function TextareaField({ value, onChange, placeholder, rows = 6, classNam
       rows={rows}
       className={`w-full p-4 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors resize-none hover:border-slate-300 dark:hover:border-slate-600 ${className} ${
         showBorder 
-          ? 'border-2 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-orange-500' 
-          : 'border-2 border-transparent focus:outline-none focus:border-orange-500'
+          ? 'border-2 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#7B61FF]' 
+          : 'border-2 border-transparent focus:outline-none focus:border-[#7B61FF]'
       }`}
     />
   );
@@ -236,25 +236,13 @@ interface ModeToggleProps {
 }
 
 export function ModeToggle({ modes, value, onChange, color = 'orange' }: ModeToggleProps) {
-  const activeColor = {
-    orange: 'bg-orange-500 text-white',
-    blue: 'bg-blue-500 text-white',
-    purple: 'bg-[#7B61FF] text-white',
-    green: 'bg-green-500 text-white',
-  };
-  const activeBgClass = activeColor[color as keyof typeof activeColor] || activeColor.orange;
-
   return (
     <div className="flex gap-2">
       {modes.map(mode => (
         <button
           key={mode.value}
           onClick={() => onChange(mode.value)}
-          className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-            value === mode.value 
-              ? activeBgClass
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-          }`}
+          className={`os-btn-capsule ${value === mode.value ? 'os-btn-capsule-active' : ''}`}
         >
           {mode.label}
         </button>
@@ -269,7 +257,7 @@ interface TagProps {
   color?: 'orange' | 'blue' | 'green' | 'purple' | 'gray';
 }
 
-export function Tag({ children, color = 'orange' }: TagProps) {
+export function Tag({ children, color = 'purple' }: TagProps) {
   const colorClasses = {
     orange: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',

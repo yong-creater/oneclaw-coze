@@ -13,8 +13,7 @@ export default function LoginButton() {
     return (
       <button
         onClick={() => setShowLoginModal(true)}
-        className="w-full py-2 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90"
-        style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}
+        className="os-btn-primary w-full !text-xs !h-9"
       >
         登录
       </button>

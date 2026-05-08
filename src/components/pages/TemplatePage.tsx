@@ -96,7 +96,7 @@ export default function TemplatePage() {
           <button
             key={key}
             onClick={() => setActiveCategory(key)}
-            className={`os-filter-tag ${activeCategory === key ? 'os-filter-tag-active' : 'os-filter-tag-inactive'}`}
+            className={`os-btn-capsule ${activeCategory === key ? 'os-btn-capsule-active' : ''}`}
           >
             {config.label}
           </button>
