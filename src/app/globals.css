@@ -307,115 +307,156 @@ body {
 /* ==================== AI 氛围系统 (Atmosphere Layer) ==================== */
 /*  参考：OpenAI / Linear / Apple — 极简 / 柔和 / 安静 / 高级  */
 
-/* ---- 页面渐变底色 ---- */
+/* ---- 页面渐变底色 — 更亮更白 ---- */
 .os-page {
   position: relative;
   background: linear-gradient(
-    175deg,
-    #FAFAFF 0%,           /* 极浅紫白 */
-    #F5F7FB 35%,          /* 冷灰白 */
-    #F0F2FA 65%,          /* 浅蓝灰 */
-    #F6F5FF 100%          /* 回到微紫白 */
+    170deg,
+    #FFFFFF 0%,              /* 纯白起点 */
+    #F8F7FF 20%,             /* 极浅紫 */
+    #F2F4FF 45%,             /* 浅蓝紫 */
+    #F6F8FF 70%,             /* 浅蓝白 */
+    #FFFFFF 100%             /* 回到纯白 */
   );
 }
+
+/* 顶部柔和光晕 — 更大更明显 */
 .os-page::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: -20%;
+  left: -10%;
+  right: -10%;
+  height: 80%;
   background:
-    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(123, 97, 255, 0.08) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 35% at 80% 8%, rgba(110, 231, 255, 0.06) 0%, transparent 45%),
-    radial-gradient(ellipse 45% 30% at 15% 3%, rgba(91, 140, 255, 0.05) 0%, transparent 45%);
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(123, 97, 255, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 75% 5%, rgba(91, 140, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 35% at 25% 8%, rgba(110, 231, 255, 0.06) 0%, transparent 45%);
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
 }
 
-/* ---- 柔光球 (Soft Glow Orb) ---- */
+/* ---- 柔光球 (Soft Glow Orb) — 更大更柔和 ---- */
 @keyframes orbDrift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(15px, -20px) scale(1.03); }
-  66% { transform: translate(-10px, -8px) scale(0.97); }
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  33% { transform: translate(20px, -25px) scale(1.04); opacity: 0.85; }
+  66% { transform: translate(-15px, -10px) scale(0.96); opacity: 0.95; }
 }
 @keyframes orbDrift2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  40% { transform: translate(-12px, -15px) scale(1.02); }
-  70% { transform: translate(8px, -25px) scale(0.98); }
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+  40% { transform: translate(-18px, -20px) scale(1.03); opacity: 0.88; }
+  70% { transform: translate(10px, -30px) scale(0.97); opacity: 0.92; }
 }
 
 .os-orb {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  will-change: transform;
-  filter: blur(60px);
+  will-change: transform, opacity;
+  filter: blur(80px);
 }
+/* 主光球 — 页面中心，最大最亮 */
 .os-orb-primary {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(123, 97, 255, 0.15) 0%, rgba(123, 97, 255, 0.05) 40%, transparent 70%);
-  animation: orbDrift 16s ease-in-out infinite;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(123, 97, 255, 0.18) 0%, rgba(123, 97, 255, 0.06) 35%, transparent 65%);
+  animation: orbDrift 18s ease-in-out infinite;
 }
+/* 辅助光球 — 青蓝色 */
 .os-orb-secondary {
-  width: 380px;
-  height: 380px;
+  width: 450px;
+  height: 450px;
   background: radial-gradient(circle, rgba(110, 231, 255, 0.12) 0%, rgba(110, 231, 255, 0.03) 40%, transparent 70%);
-  animation: orbDrift2 20s ease-in-out infinite;
+  animation: orbDrift2 22s ease-in-out infinite;
 }
+/* 点缀光球 — 蓝色 */
 .os-orb-accent {
-  width: 280px;
-  height: 280px;
+  width: 350px;
+  height: 350px;
   background: radial-gradient(circle, rgba(91, 140, 255, 0.10) 0%, rgba(91, 140, 255, 0.02) 40%, transparent 70%);
-  animation: orbDrift 14s ease-in-out infinite reverse;
+  animation: orbDrift 16s ease-in-out infinite reverse;
 }
 
-/* ---- 漂浮微粒 (Floating Motes) ---- */
+/* ---- 动态模糊光带 (Soft Light Band) ---- */
+@keyframes bandSway {
+  0%, 100% { transform: translateX(-50%) rotate(-8deg) scaleX(1); opacity: 0.5; }
+  50% { transform: translateX(-50%) rotate(-4deg) scaleX(1.1); opacity: 0.8; }
+}
+@keyframes bandSway2 {
+  0%, 100% { transform: translateX(-50%) rotate(5deg) scaleX(1); opacity: 0.4; }
+  50% { transform: translateX(-50%) rotate(8deg) scaleX(1.05); opacity: 0.7; }
+}
+
+.os-light-band {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+  filter: blur(100px);
+}
+/* 紫色光带 — 页面中偏上 */
+.os-light-band-primary {
+  width: 800px;
+  height: 200px;
+  top: 15%;
+  left: 50%;
+  background: linear-gradient(90deg, transparent 0%, rgba(123, 97, 255, 0.08) 30%, rgba(123, 97, 255, 0.12) 50%, rgba(123, 97, 255, 0.08) 70%, transparent 100%);
+  border-radius: 50%;
+  animation: bandSway 12s ease-in-out infinite;
+}
+/* 蓝色光带 — 页面中偏下 */
+.os-light-band-secondary {
+  width: 600px;
+  height: 150px;
+  top: 45%;
+  left: 50%;
+  background: linear-gradient(90deg, transparent 0%, rgba(91, 140, 255, 0.06) 30%, rgba(91, 140, 255, 0.10) 50%, rgba(91, 140, 255, 0.06) 70%, transparent 100%);
+  border-radius: 50%;
+  animation: bandSway2 15s ease-in-out infinite;
+}
+
+/* ---- 漂浮微粒 (Floating Motes) — 更柔和 ---- */
 @keyframes moteRise {
-  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
-  20%  { opacity: 0.6; }
-  80%  { opacity: 0.6; }
-  100% { opacity: 0; transform: translateY(-60px) scale(1); }
+  0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+  15%  { opacity: 0.5; }
+  85%  { opacity: 0.4; }
+  100% { opacity: 0; transform: translateY(-80px) scale(1.1); }
 }
 .os-mote {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
-  animation: moteRise var(--dur, 6s) ease-in-out infinite;
+  animation: moteRise var(--dur, 7s) ease-in-out infinite;
   animation-delay: var(--delay, 0s);
 }
 .os-mote-purple {
   width: 4px;
   height: 4px;
-  background: rgba(123, 97, 255, 0.25);
-  box-shadow: 0 0 6px rgba(123, 97, 255, 0.15);
+  background: rgba(123, 97, 255, 0.30);
+  box-shadow: 0 0 8px rgba(123, 97, 255, 0.15);
 }
 .os-mote-blue {
   width: 3px;
   height: 3px;
-  background: rgba(91, 140, 255, 0.20);
-  box-shadow: 0 0 5px rgba(91, 140, 255, 0.10);
+  background: rgba(91, 140, 255, 0.25);
+  box-shadow: 0 0 6px rgba(91, 140, 255, 0.12);
 }
 .os-mote-cyan {
-  width: 2.5px;
-  height: 2.5px;
-  background: rgba(110, 231, 255, 0.22);
-  box-shadow: 0 0 4px rgba(110, 231, 255, 0.10);
+  width: 3px;
+  height: 3px;
+  background: rgba(110, 231, 255, 0.25);
+  box-shadow: 0 0 6px rgba(110, 231, 255, 0.12);
 }
 
-/* ---- Glow 呼吸 ---- */
+/* ---- Glow 呼吸 — 更柔和 ---- */
 @keyframes glowBreathe {
-  0%, 100% { box-shadow: 0 0 20px rgba(123, 97, 255, 0.12), 0 0 40px rgba(123, 97, 255, 0.04); }
-  50% { box-shadow: 0 0 28px rgba(123, 97, 255, 0.20), 0 0 56px rgba(123, 97, 255, 0.06); }
+  0%, 100% { box-shadow: 0 0 24px rgba(123, 97, 255, 0.10), 0 0 48px rgba(123, 97, 255, 0.03); }
+  50% { box-shadow: 0 0 32px rgba(123, 97, 255, 0.16), 0 0 64px rgba(123, 97, 255, 0.05); }
 }
 
 /* ---- 旧装饰元素（已废弃，保留兼容） ---- */
 .os-hero-bg { position: relative; overflow: hidden; }
 .os-hero-bg::before,
 .os-hero-bg::after { display: none; }
-
-/* ---- 主按钮 Glow 增强 — 已合并到按钮系统 ---- */
 
 /* ---- 卡片深度层 (Depth Layer) ---- */
 .os-card::before {
@@ -458,32 +499,44 @@ body {
 
 /* ---- Hero 氛围定位 ---- */
 
-/* 主光球 — 页面视觉中心上方 */
+/* 主光球 — 页面视觉中心 */
 .os-atmo-orb-center {
-  top: -80px;
+  top: -120px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 /* 左下柔光 */
 .os-atmo-orb-left {
-  bottom: 20px;
-  left: 2%;
+  bottom: 40px;
+  left: -5%;
 }
 
 /* 右上柔光 */
 .os-atmo-orb-right {
-  top: 10px;
-  right: 4%;
+  top: 20px;
+  right: -3%;
+}
+
+/* 光带定位 */
+.os-atmo-band-top {
+  top: 10%;
+  left: 50%;
+}
+.os-atmo-band-mid {
+  top: 42%;
+  left: 50%;
 }
 
 /* 漂浮微粒定位 */
-.os-mote-1 { top: 18%; left: 12%; --dur: 7s; --delay: 0s; }
-.os-mote-2 { top: 28%; right: 18%; --dur: 8s; --delay: 1.5s; }
-.os-mote-3 { top: 50%; left: 6%; --dur: 6s; --delay: 3s; }
-.os-mote-4 { top: 65%; right: 10%; --dur: 9s; --delay: 0.8s; }
-.os-mote-5 { top: 38%; left: 25%; --dur: 7.5s; --delay: 2s; }
-.os-mote-6 { top: 72%; right: 28%; --dur: 8.5s; --delay: 4s; }
+.os-mote-1 { top: 15%; left: 10%; --dur: 7s; --delay: 0s; }
+.os-mote-2 { top: 25%; right: 15%; --dur: 8.5s; --delay: 1.2s; }
+.os-mote-3 { top: 48%; left: 5%; --dur: 6.5s; --delay: 2.8s; }
+.os-mote-4 { top: 60%; right: 8%; --dur: 9s; --delay: 0.5s; }
+.os-mote-5 { top: 35%; left: 22%; --dur: 7.5s; --delay: 1.8s; }
+.os-mote-6 { top: 70%; right: 25%; --dur: 8s; --delay: 3.5s; }
+.os-mote-7 { top: 20%; left: 40%; --dur: 9.5s; --delay: 4.2s; }
+.os-mote-8 { top: 55%; right: 35%; --dur: 7s; --delay: 2s; }
 
 /* ==================== Creator OS 卡片系统 ==================== */
 

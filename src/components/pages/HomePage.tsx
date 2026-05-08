@@ -105,14 +105,20 @@ export default function HomePage() {
     <div className="os-page">
       {/* ==================== Hero 创作区（780px · 居中） ==================== */}
       <div className="os-hero">
-        {/* 氛围光晕层 */}
+        {/* 柔光球层 — 三个大型模糊光球 */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="os-orb os-orb-primary os-atmo-orb-center" />
           <div className="os-orb os-orb-secondary os-atmo-orb-left" />
           <div className="os-orb os-orb-accent os-atmo-orb-right" />
         </div>
 
-        {/* 漂浮微粒层 */}
+        {/* 动态模糊光带 — 超浅渐变飘动 */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="os-light-band os-light-band-primary os-atmo-band-top" />
+          <div className="os-light-band os-light-band-secondary os-atmo-band-mid" />
+        </div>
+
+        {/* 漂浮微粒层 — 8颗缓慢上升 */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="os-mote os-mote-purple os-mote-1" />
           <div className="os-mote os-mote-cyan os-mote-2" />
@@ -120,6 +126,8 @@ export default function HomePage() {
           <div className="os-mote os-mote-purple os-mote-4" />
           <div className="os-mote os-mote-cyan os-mote-5" />
           <div className="os-mote os-mote-blue os-mote-6" />
+          <div className="os-mote os-mote-purple os-mote-7" />
+          <div className="os-mote os-mote-cyan os-mote-8" />
         </div>
 
         {/* 内容层 — 垂直居中 */}
