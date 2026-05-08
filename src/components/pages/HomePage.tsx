@@ -145,10 +145,10 @@ export default function HomePage() {
         </div>
 
         {/* 内容层 — 垂直居中 */}
-        <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[720px] mx-auto">
+        <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[1080px] mx-auto">
 
           {/* 标题 — 结果导向，64px 渐变 */}
-          <h1 className="os-hero-title text-center">
+          <h1 className="os-hero-title text-center max-w-[640px]">
             输入需求，
             <br />
             <span className="gradient-text">OneClaw 帮你直接生成结果</span>
@@ -161,8 +161,8 @@ export default function HomePage() {
             不会 AI 也能轻松生成。
           </p>
 
-          {/* 创作模式卡片 — 4 列 */}
-          <div className="os-mode-cards mt-8">
+          {/* 创作模式卡片 — AI Mode Selector */}
+          <div className="os-mode-cards mt-10">
             {modeCards.map((mode) => {
               const Icon = mode.icon;
               const isActive = activeMode === mode.key;
@@ -185,7 +185,7 @@ export default function HomePage() {
           </div>
 
           {/* ===== AI 输入工作台 ===== */}
-          <div className="os-workspace-wrapper w-full mt-6">
+          <div className="w-full max-w-[720px] mt-8">
             <div className="os-workspace">
               {/* Prompt 输入区域 */}
               <div className="os-workspace-body">
