@@ -1006,67 +1006,50 @@ body {
 
 /* ==================== AI 创作工作台 (Studio Layout) ==================== */
 
-/* ---- 模式卡片 V2 — 260×92 玻璃卡片 ---- */
-.os-mode-card-v2 {
-  width: 260px;
-  height: 92px;
-  padding: 18px 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  cursor: pointer;
+/* ---- 推荐创作 chips ---- */
+.os-chips-bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  text-align: left;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 12px;
+  max-width: 1180px;
+  width: 100%;
 }
-.os-mode-card-v2:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.10);
-  border-color: rgba(123, 97, 255, 0.15);
-  background: rgba(255, 255, 255, 0.85);
-}
-.os-mode-card-v2-active {
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.08), rgba(91, 140, 255, 0.05)) !important;
-  border-color: rgba(123, 97, 255, 0.25) !important;
-  box-shadow: 0 0 28px rgba(123, 97, 255, 0.12), 0 8px 40px rgba(99, 102, 241, 0.06) !important;
-}
-.os-mode-card-v2-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #F1F3F8;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-.os-mode-card-v2-active .os-mode-card-v2-icon {
-  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.25);
-}
-.os-mode-card-v2-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.os-mode-card-v2-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1E293B;
-  line-height: 1.2;
-}
-.os-mode-card-v2-desc {
-  font-size: 12px;
-  font-weight: 400;
+.os-chips-label {
+  font-size: 13px;
+  font-weight: 500;
   color: #94A3B8;
-  line-height: 1.3;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.os-chips-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.os-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: #64748B;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.os-chip:hover {
+  background: rgba(123, 97, 255, 0.08);
+  border-color: rgba(123, 97, 255, 0.2);
+  color: #7B61FF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(123, 97, 255, 0.08);
 }
 
 /* ---- AI 创作工作台 — 左右分栏 ---- */
@@ -1076,7 +1059,7 @@ body {
   display: grid;
   grid-template-columns: 6fr 4fr;
   gap: 24px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 32px;
@@ -1093,7 +1076,7 @@ body {
 }
 .os-studio-input-area {
   background: #F8FAFC;
-  border-radius: 24px;
+  border-radius: 28px;
   padding: 28px;
   flex: 1;
 }

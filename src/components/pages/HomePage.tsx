@@ -7,23 +7,21 @@ import {
   Sparkles,
   Upload,
   ArrowRight,
-  ShoppingBag,
-  LayoutTemplate,
-  Heart,
-  Video,
   ImageIcon,
   Wand2,
   Lightbulb,
   TrendingUp,
 } from 'lucide-react';
 
-// 创作模式卡片
-const modeCards = [
-  { key: 'product', label: '商品图', desc: '主图 / 场景图 / 卖点图', icon: ShoppingBag, slug: 'product-generator', gradient: 'from-[#7B61FF] to-[#5B8CFF]', color: '#7B61FF' },
-  { key: 'detail', label: '详情页', desc: '商品详情 / 卖点长图', icon: LayoutTemplate, slug: 'productpage', gradient: 'from-[#5B8CFF] to-[#6EE7FF]', color: '#5B8CFF' },
-  { key: 'xiaohongshu', label: '小红书', desc: '封面 / 文案 / 标签', icon: Heart, slug: 'xiaohongshu-generator', gradient: 'from-[#FF6B9D] to-[#FF9A76]', color: '#FF6B9D' },
-  { key: 'video', label: '视频脚本', desc: '口播 / 分镜 / 带货', icon: Video, slug: 'novel', gradient: 'from-[#FFB84D] to-[#FF6B6B]', color: '#FFB84D' },
-] as const;
+// 推荐创作场景 chips — 点击自动填充输入框
+const recommendChips = [
+  { label: '商品图', example: '帮我生成高级护肤品商品图，白底高级感' },
+  { label: '详情页', example: '数码产品详情页，极简科技风格' },
+  { label: '小红书', example: '小红书种草图，夏日护肤推荐' },
+  { label: '视频脚本', example: '零食带货视频脚本，3分钟口播' },
+  { label: 'AI 写真', example: '生成个人职业形象照，商务高级感' },
+  { label: '带货文案', example: '美白精华种草文案，适合小红书发布' },
+];
 
 // 示例结果数据 — 使用本地高质量静态图片
 const showcaseExamples = [
@@ -50,7 +48,6 @@ export default function HomePage() {
   const router = useRouter();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeMode, setActiveMode] = useState<string>('product');
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -60,12 +57,11 @@ export default function HomePage() {
     }
   }, [pendingInput, consumePendingInput]);
 
-  // 开始创作
+  // 开始生成 — AI 自动匹配创作方式
   const handleGenerate = useCallback(() => {
     if (!inputText.trim() || isLoading) return;
-    const route = modeCards.find(m => m.key === activeMode)?.slug ?? 'product-generator';
-    router.push(`/${route}`);
-  }, [inputText, isLoading, activeMode, router]);
+    router.push('/product-generator');
+  }, [inputText, isLoading, router]);
 
   // Ctrl+Enter 快捷键
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -75,8 +71,10 @@ export default function HomePage() {
     }
   }, [handleGenerate]);
 
-  // 获取活跃模式颜色
-  const activeColor = modeCards.find(m => m.key === activeMode)?.color ?? '#7B61FF';
+  // Chip 点击 — 自动填充示例内容
+  const handleChipClick = useCallback((example: string) => {
+    setInputText(example);
+  }, []);
 
   return (
     <div className="os-page">
@@ -85,42 +83,19 @@ export default function HomePage() {
         {/* 内容层 */}
         <div className="relative z-10 flex flex-col items-center w-full max-w-[1280px] mx-auto px-4">
 
-          {/* 主标题 — 聚焦小白也能用 */}
+          {/* 主标题 — 聚焦"描述需求 → AI 自动完成" */}
           <h1 className="os-hero-title text-center !text-[52px] !leading-[1.2] !tracking-[-0.03em]">
             不会 Prompt，<br className="sm:hidden" />也能生成{' '}
             <span className="gradient-text">专业内容</span>
           </h1>
 
-          {/* 副标题 — 18px 灰色 */}
+          {/* 副标题 */}
           <p className="text-center text-[18px] text-[#6B7280] mt-4 max-w-[640px] leading-relaxed">
-            上传图片或输入需求，OneClaw 自动匹配创作工具，帮你生成商品图、详情页、小红书和视频脚本。
+            上传图片或输入一句话，OneClaw 自动帮你生成商品图、详情页、小红书和视频脚本。
           </p>
 
-          {/* ===== 场景入口卡片 — 4 卡片横向 ===== */}
-          <div className="flex gap-4 mt-10">
-            {modeCards.map((mode) => {
-              const Icon = mode.icon;
-              const isActive = activeMode === mode.key;
-              return (
-                <button
-                  key={mode.key}
-                  onClick={() => setActiveMode(mode.key)}
-                  className={`os-mode-card-v2 ${isActive ? 'os-mode-card-v2-active' : ''}`}
-                >
-                  <div className={`os-mode-card-v2-icon ${isActive ? `bg-gradient-to-br ${mode.gradient}` : ''}`}>
-                    <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                  </div>
-                  <div className="os-mode-card-v2-text">
-                    <span className="os-mode-card-v2-label">{mode.label}</span>
-                    <span className="os-mode-card-v2-desc">{mode.desc}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ===== AI 创作工作台 — 左右分栏 ===== */}
-          <div className="os-studio mt-8">
+          {/* ===== AI 输入工作台 — 左右分栏 ===== */}
+          <div className="os-studio mt-10">
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
               <div className="os-studio-input-area">
@@ -128,7 +103,7 @@ export default function HomePage() {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value.slice(0, 500))}
                   onKeyDown={handleKeyDown}
-                  placeholder={'描述你的需求，例如：\n上传一张耳机图，生成电商主图、卖点图和场景图'}
+                  placeholder={'描述你想生成的内容，例如：\n上传一张耳机图，生成高级商品主图和场景图'}
                   className="os-studio-textarea"
                   rows={6}
                 />
@@ -161,10 +136,9 @@ export default function HomePage() {
                   onClick={handleGenerate}
                   disabled={!inputText.trim() || isLoading}
                   className="os-studio-cta"
-                  style={{ '--cta-color': activeColor } as React.CSSProperties}
                 >
                   <Wand2 className="w-5 h-5" />
-                  {isLoading ? '生成中...' : '开始创作'}
+                  {isLoading ? '生成中...' : '开始生成'}
                 </button>
               </div>
             </div>
@@ -192,6 +166,22 @@ export default function HomePage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* ===== 推荐创作场景 chips ===== */}
+          <div className="os-chips-bar mt-6">
+            <span className="os-chips-label">推荐创作</span>
+            <div className="os-chips-list">
+              {recommendChips.map((chip) => (
+                <button
+                  key={chip.label}
+                  className="os-chip"
+                  onClick={() => handleChipClick(chip.example)}
+                >
+                  {chip.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
