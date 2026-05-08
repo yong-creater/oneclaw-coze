@@ -1015,9 +1015,9 @@ body {
   width: 100%;
 }
 .os-chips-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  color: #94A3B8;
+  color: #B0B8C8;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1030,26 +1030,25 @@ body {
 .os-chip {
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  padding: 0 14px;
+  height: 28px;
+  padding: 0 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  color: #64748B;
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+  color: #94A3B8;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
 }
 .os-chip:hover {
-  background: rgba(123, 97, 255, 0.08);
-  border-color: rgba(123, 97, 255, 0.2);
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(123, 97, 255, 0.15);
   color: #7B61FF;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(123, 97, 255, 0.08);
 }
 
 /* ---- AI 创作工作台 — 左右分栏 ---- */
@@ -1075,14 +1074,27 @@ body {
   gap: 0;
 }
 .os-studio-input-area {
-  background: #F8FAFC;
-  border-radius: 28px;
-  padding: 28px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 32px;
+  padding: 36px;
   flex: 1;
+  min-height: 220px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1.5px solid transparent;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.os-studio-input-area:hover {
+  border-color: rgba(123, 97, 255, 0.15);
+}
+.os-studio-input-area:focus-within {
+  border-color: rgba(123, 97, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 0 0 3px rgba(123, 97, 255, 0.08);
 }
 .os-studio-textarea {
   width: 100%;
-  min-height: 160px;
+  min-height: 120px;
   padding: 0;
   background: transparent;
   border: none;
@@ -1091,12 +1103,35 @@ body {
   color: #1E293B;
   resize: none;
   outline: none;
+  position: relative;
+  z-index: 2;
 }
 .os-studio-textarea::placeholder {
-  color: #B0B8C8;
+  color: transparent;
+}
+/* 结构化 placeholder — 标题 + 示例层级 */
+.os-studio-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+  padding: 0;
+}
+.os-studio-placeholder-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #64748B;
+  margin: 0 0 8px 0;
+  line-height: 1.6;
+}
+.os-studio-placeholder-example {
   font-size: 15px;
+  font-weight: 400;
+  color: #B0B8C8;
+  margin: 0;
   line-height: 1.8;
-  white-space: pre-line;
 }
 
 /* 底部工具栏 */
@@ -1127,16 +1162,16 @@ body {
   background: rgba(123, 97, 255, 0.06);
 }
 
-/* 开始创作 CTA — 52px 高 / 16px 圆角 / 渐变 */
+/* 开始生成 CTA — 56px 高 / 18px 圆角 / 渐变 + 强 glow */
 .os-studio-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 52px;
-  padding: 0 32px;
+  height: 56px;
+  padding: 0 36px;
   border: none;
-  border-radius: 16px;
+  border-radius: 18px;
   background: linear-gradient(135deg, #7C5CFF 0%, #5B8CFF 100%);
   color: #fff;
   font-size: 16px;
@@ -1145,7 +1180,7 @@ body {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(123, 97, 255, 0.25);
+  box-shadow: 0 12px 30px rgba(124, 92, 255, 0.22);
 }
 .os-studio-cta::before {
   content: '';
@@ -1158,7 +1193,7 @@ body {
 }
 .os-studio-cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(123, 97, 255, 0.3), 0 0 48px rgba(123, 97, 255, 0.12);
+  box-shadow: 0 16px 40px rgba(124, 92, 255, 0.35), 0 0 64px rgba(124, 92, 255, 0.15);
 }
 .os-studio-cta:hover::before {
   opacity: 1;
@@ -1189,6 +1224,12 @@ body {
   aspect-ratio: 4/3;
   background: #F1F5F9;
   cursor: pointer;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.06);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+.os-showcase-item:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.12);
 }
 
 /* ---- 渐入动画 ---- */

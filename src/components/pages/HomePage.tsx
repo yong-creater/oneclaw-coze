@@ -99,14 +99,23 @@ export default function HomePage() {
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
               <div className="os-studio-input-area">
-                <textarea
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value.slice(0, 500))}
-                  onKeyDown={handleKeyDown}
-                  placeholder={'描述你想生成的内容，例如：\n上传一张耳机图，生成高级商品主图和场景图'}
-                  className="os-studio-textarea"
-                  rows={6}
-                />
+                <div className="relative">
+                  {/* 结构化 placeholder — 标题+示例层级 */}
+                  {!inputText && (
+                    <div className="os-studio-placeholder" onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}>
+                      <p className="os-studio-placeholder-title">描述你想生成的内容</p>
+                      <p className="os-studio-placeholder-example">例如：上传一张耳机图，生成高级商品主图和场景图</p>
+                    </div>
+                  )}
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value.slice(0, 500))}
+                    onKeyDown={handleKeyDown}
+                    placeholder=""
+                    className="os-studio-textarea"
+                    rows={6}
+                  />
+                </div>
               </div>
               {/* 底部工具栏 */}
               <div className="os-studio-toolbar">
@@ -145,10 +154,11 @@ export default function HomePage() {
 
             {/* 右侧：示例结果 (40%) */}
             <div className="os-studio-showcase">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-1">
                 <ImageIcon className="w-3.5 h-3.5 text-[#7B61FF]/60" />
-                <span className="text-[13px] font-medium text-slate-400">示例结果</span>
+                <span className="text-[13px] font-medium text-slate-500">示例结果</span>
               </div>
+              <p className="text-[11px] text-slate-400 mb-4">根据需求自动生成对应内容</p>
               <div className="grid grid-cols-2 gap-3">
                 {showcaseExamples.map((example, idx) => (
                   <div key={idx} className="os-showcase-item group">
