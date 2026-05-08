@@ -7,7 +7,7 @@ import {
   ChevronDown, ChevronUp, Eye, Trash2, Star, Package,
   Shield, Palette, FileText, Zap, RefreshCw, X
 } from 'lucide-react';
-import UtilityHeader from '../common/UtilityHeader';
+
 import { PrimaryButton, ActionButton } from '../common/UtilityComponents';
 import LoginButton from '@/components/common/LoginButton';
 import { useToolModelConfig } from '@/hooks/useToolModelConfig';
@@ -425,13 +425,6 @@ export default function ProductPageGenerator() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800">
-      {/* 统一头部 */}
-      <UtilityHeader
-        toolIcon={<Globe />}
-        toolName="出海详情页"
-        toolDescription="合规适配 · 人文贴合 · 多平台兼容"
-        gradient="from-emerald-500 to-teal-500"
-      />
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* 模型未配置错误提示 */}

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Zap } from 'lucide-react';
-import SiteHeader from '@/components/common/SiteHeader';
 import WechatPromo from '@/components/common/WechatPromo';
 
 // ==================== 结果预览图配置 ====================
@@ -79,9 +78,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
-      {/* 顶部导航 */}
-      <SiteHeader />
-
       <main>
         {/* ==================== 第一屏：文案 + 结果预览 ==================== */}
         <section className={`${CONTAINER} py-12 md:py-20`}>

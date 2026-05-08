@@ -7,7 +7,7 @@ import {
   Lightbulb, Star, TrendingUp, BookOpen, FileDown,
   Eye, Palette, X, ChevronDown, Settings2
 } from 'lucide-react';
-import UtilityHeader from '../common/UtilityHeader';
+
 import { UtilityCard, FormField, PrimaryButton, ActionButton } from '../common/UtilityComponents';
 import LoginButton from '../common/LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
@@ -387,14 +387,7 @@ export default function ResumeOptimizer() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-orange-50 dark:from-slate-900 dark:to-slate-800">
-      {/* 统一头部 */}
-      <UtilityHeader
-        toolIcon={<FileText />}
-        toolName="STAR简历优化"
-        toolDescription="JD精准匹配 · STAR法则优化"
-        gradient="from-blue-500 to-cyan-500"
-      />
-      
+
       {/* 主内容区 */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         

@@ -10,7 +10,7 @@ import {
   Crown
 } from 'lucide-react';
 import LoginButton from '@/components/common/LoginButton';
-import UtilityHeader from '../common/UtilityHeader';
+
 import JSZip from 'jszip';
 import {
   Select,
@@ -682,13 +682,6 @@ export default function NovelCreator() {
   // ==================== 渲染 ====================
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800">
-      {/* 统一头部 */}
-      <UtilityHeader
-        toolIcon={<Feather />}
-        toolName="小说创作工坊"
-        toolDescription="小说洗稿 · 漫画生图 · 推文脚本"
-        gradient="from-purple-500 to-pink-500"
-      />
       
       {/* 标签页导航 */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">

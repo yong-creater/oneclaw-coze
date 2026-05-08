@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import WechatPromo from '@/components/common/WechatPromo';
-import UtilityHeader from '@/components/common/UtilityHeader';
+
 import { 
   Scissors, Upload, Loader2, Download, 
   RefreshCw, Check, Layers, Eraser, Move, Trash2, DownloadCloud
@@ -147,13 +147,6 @@ export default function BackgroundRemovalPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cyan-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* 顶部导航 */}
-      <UtilityHeader
-        toolIcon={<Scissors className="w-4 h-4" />}
-        toolName="AI智能抠图"
-        toolDescription="发丝级精准抠图"
-        gradient="from-cyan-500 to-blue-500"
-      />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center py-8">

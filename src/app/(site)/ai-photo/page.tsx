@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import WechatPromo from '@/components/common/WechatPromo';
-import UtilityHeader from '@/components/common/UtilityHeader';
+
 import { Camera, Upload, Loader2, Download, Sparkles, RotateCcw, Check, X, Image } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -256,14 +256,7 @@ export default function AIPhotoPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* 顶部导航 */}
-      <UtilityHeader
-        toolIcon={<Camera className="w-4 h-4" />}
-        toolName="AI写真生成器"
-        toolDescription="一键生成专业人像写真"
-        gradient="from-violet-500 to-purple-500"
-      />
-      
+
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 标题区 */}
         <div className="text-center py-8">

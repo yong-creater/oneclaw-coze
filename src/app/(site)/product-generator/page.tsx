@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload, Sparkles, Loader2, Download, X, Check, Package } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import UtilityHeader from '@/components/common/UtilityHeader';
+
 
 // 图片槽位类型（与后端对齐）
 type ImageSlot = 'main' | 'scene' | 'selling';
@@ -392,12 +392,6 @@ export default function ProductDetailGeneratorPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <UtilityHeader
-        toolIcon={<Package className="w-4 h-4 text-white" />}
-        toolName="AI商品详情页生成器"
-        toolDescription="一键生成完整商品详情页图片"
-        gradient="from-orange-500 to-amber-500"
-      />
 
       <div className="max-w-6xl mx-auto px-4 py-3">
         {/* 核心价值标题 */}
