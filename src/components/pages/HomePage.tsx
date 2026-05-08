@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
-  Sparkles,
   Upload,
   ArrowRight,
   ImageIcon,
@@ -238,7 +237,7 @@ export default function HomePage() {
       </div>
 
       {/* ==================== 热门创作结果 — AI 结果流 ==================== */}
-      <section className="os-section animate-fade-slide-up" style={{ animationDelay: '0.15s' }}>
+      <section className="os-section animate-fade-slide-up !mt-[100px]" style={{ animationDelay: '0.15s' }}>
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
@@ -289,34 +288,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================== 最近创作 — 作品卡片流 ==================== */}
-      <section className="os-section animate-fade-slide-up" style={{ animationDelay: '0.25s' }}>
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-semibold text-slate-700">
-            最近创作
-          </h2>
-          <button
-            onClick={() => router.push('/projects')}
-            className="text-sm text-slate-400 hover:text-[#7B61FF] transition-colors flex items-center gap-1"
-          >
-            查看全部 <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* 空状态 */}
-        <div className="os-card !rounded-2xl !border-0 flex flex-col items-center justify-center py-16 text-center">
-          <div className="relative mb-6">
-            <div className="absolute -inset-5 bg-gradient-to-br from-[#7B61FF]/[0.06] to-[#5B8CFF]/[0.04] rounded-full blur-2xl" />
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7B61FF]/[0.06] to-[#5B8CFF]/[0.03] flex items-center justify-center">
-              <Sparkles className="w-7 h-7 text-[#7B61FF]/30" />
-            </div>
-          </div>
-          <p className="text-[14px] font-medium text-slate-500 mb-1.5">还没有创作内容</p>
-          <p className="text-[13px] text-slate-400">
-            试试上方输入需求开始生成
-          </p>
-        </div>
-      </section>
     </div>
   );
 }
