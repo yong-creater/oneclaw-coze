@@ -14,8 +14,6 @@ import {
   FileText,
   BookOpen,
   Sparkles,
-  ChevronDown,
-  ChevronUp,
 } from 'lucide-react';
 import { useMenu } from '@/components/common/MenuProvider';
 
@@ -33,17 +31,17 @@ interface Generation {
 }
 
 // ========== 工具类型映射 ==========
-const TOOL_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  product_generator: { label: 'AI商品图', icon: Package, color: 'text-orange-600 bg-orange-50' },
-  background_removal: { label: '智能抠图', icon: Scissors, color: 'text-blue-600 bg-blue-50' },
-  ai_photo: { label: 'AI写真', icon: Camera, color: 'text-pink-600 bg-pink-50' },
-  product_poster: { label: '商品海报', icon: ImageIcon, color: 'text-violet-600 bg-violet-50' },
-  xiaohongshu: { label: '小红书', icon: FileText, color: 'text-red-600 bg-red-50' },
-  novel: { label: '小说创作', icon: BookOpen, color: 'text-emerald-600 bg-emerald-50' },
-  resume: { label: '简历优化', icon: Sparkles, color: 'text-amber-600 bg-amber-50' },
-  productpage: { label: '详情页', icon: FileText, color: 'text-sky-600 bg-sky-50' },
-  cover: { label: '封面设计', icon: ImageIcon, color: 'text-teal-600 bg-teal-50' },
-  video: { label: '视频脚本', icon: FileText, color: 'text-rose-600 bg-rose-50' },
+const TOOL_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; gradient: string }> = {
+  product_generator: { label: 'AI商品图', icon: Package, gradient: 'from-violet-500 to-purple-600' },
+  background_removal: { label: '智能抠图', icon: Scissors, gradient: 'from-blue-400 to-cyan-500' },
+  ai_photo: { label: 'AI写真', icon: Camera, gradient: 'from-pink-400 to-rose-500' },
+  product_poster: { label: '商品海报', icon: ImageIcon, gradient: 'from-fuchsia-500 to-pink-500' },
+  xiaohongshu: { label: '小红书', icon: FileText, gradient: 'from-red-400 to-orange-500' },
+  novel: { label: '小说创作', icon: BookOpen, gradient: 'from-emerald-400 to-teal-500' },
+  resume: { label: '简历优化', icon: Sparkles, gradient: 'from-amber-400 to-yellow-500' },
+  productpage: { label: '详情页', icon: FileText, gradient: 'from-blue-400 to-indigo-500' },
+  cover: { label: '封面设计', icon: ImageIcon, gradient: 'from-teal-400 to-emerald-500' },
+  video: { label: '视频脚本', icon: FileText, gradient: 'from-rose-400 to-red-500' },
 };
 
 export default function ProjectPage() {
@@ -72,7 +70,7 @@ export default function ProjectPage() {
     } catch {}
   };
 
-  // 重新生成 → 跳转首页
+  // 重新生成
   const handleRegenerate = (project: Generation) => {
     setPendingInput(`重新生成：${project.title || project.tool_name}`);
     setCurrentMenu('home');
@@ -95,34 +93,30 @@ export default function ProjectPage() {
   }, {});
 
   return (
-    <div className="ui-page">
+    <div className="os-page">
       {/* 标题区 */}
-      <div className="ui-page-header">
-        <h1 className="ui-page-title">我的项目</h1>
-        <p className="ui-page-desc">查看和管理生成记录</p>
+      <div className="mb-6 animate-fade-slide-up">
+        <h1 className="os-section-title text-2xl">我的项目</h1>
+        <p className="os-section-desc">查看和管理生成记录</p>
       </div>
 
       {/* 搜索栏 */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="relative mb-5 animate-fade-slide-up" style={{ animationDelay: '0.05s' }}>
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="搜索项目..."
-          className="ui-input pl-10"
+          className="os-search-input"
         />
       </div>
 
       {/* 分类筛选 */}
-      <div className="flex gap-1.5 flex-wrap">
+      <div className="flex gap-2 flex-wrap mb-6 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
         <button
           onClick={() => setActiveType('all')}
-          className={`px-3 py-1.5 rounded-[10px] text-xs font-medium transition-colors ${
-            activeType === 'all'
-              ? 'bg-slate-900 text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
+          className={`os-filter-tag ${activeType === 'all' ? 'os-filter-tag-active' : 'os-filter-tag-inactive'}`}
         >
           全部 {projects.length}
         </button>
@@ -132,11 +126,7 @@ export default function ProjectPage() {
             <button
               key={key}
               onClick={() => setActiveType(key)}
-              className={`px-3 py-1.5 rounded-[10px] text-xs font-medium transition-colors ${
-                activeType === key
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+              className={`os-filter-tag ${activeType === key ? 'os-filter-tag-active' : 'os-filter-tag-inactive'}`}
             >
               {meta.label} {typeCounts[key]}
             </button>
@@ -145,31 +135,36 @@ export default function ProjectPage() {
 
       {/* 项目列表 */}
       {loading ? (
-        <div className="flex items-center justify-center py-16 text-slate-400 text-sm">
-          加载中...
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-purple-500 rounded-full animate-spin mb-3" />
+          <p className="text-sm">加载中...</p>
         </div>
       ) : filtered.length > 0 ? (
-        <div className="space-y-2">
-          {filtered.map((project) => {
+        <div className="space-y-3">
+          {filtered.map((project, index) => {
             const meta = TOOL_META[project.tool_type] || {
               label: project.tool_type,
               icon: FolderOpen,
-              color: 'text-slate-600 bg-slate-50',
+              gradient: 'from-slate-400 to-slate-500',
             };
             const Icon = meta.icon;
             const isExpanded = expandedId === project.id;
 
             return (
-              <div key={project.id} className="ui-card p-0 overflow-hidden">
+              <div
+                key={project.id}
+                className="os-card-static rounded-2xl overflow-hidden animate-stagger-in"
+                style={{ animationDelay: `${index * 0.03}s` }}
+              >
                 {/* 主行 */}
-                <div className="p-4 flex items-center gap-3">
-                  {/* 缩略图/图标 */}
-                  <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 ${meta.color}`}>
+                <div className="p-4 flex items-center gap-4">
+                  {/* 图标 */}
+                  <div className={`os-icon-bg bg-gradient-to-br ${meta.gradient} text-white shrink-0`}>
                     {project.thumbnail ? (
                       <img
                         src={project.thumbnail}
                         alt=""
-                        className="w-full h-full object-cover rounded-[10px]"
+                        className="w-full h-full object-cover rounded-xl"
                       />
                     ) : (
                       <Icon className="w-5 h-5" />
@@ -177,43 +172,43 @@ export default function ProjectPage() {
                   </div>
                   {/* 文字 */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-900 truncate">
+                    <h3 className="text-sm font-semibold text-slate-800 truncate">
                       {project.title || project.tool_name}
                     </h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-[10px] text-slate-400">
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[11px] text-slate-400">
                         {meta.label}
                       </span>
-                      <span className="text-[10px] text-slate-300">|</span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[11px] text-slate-200">|</span>
+                      <span className="text-[11px] text-slate-400">
                         {new Date(project.created_at).toLocaleDateString('zh-CN')}
                       </span>
                     </div>
                   </div>
                   {/* 状态 */}
-                  <span className="shrink-0 flex items-center gap-1 text-[10px] text-emerald-600">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="shrink-0 flex items-center gap-1.5 text-xs text-emerald-500 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                     完成
                   </span>
                   {/* 操作 */}
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => setExpandedId(isExpanded ? null : project.id)}
-                      className="ui-btn-icon"
+                      className="os-btn-ghost px-2 py-1.5"
                       title="查看"
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(project.id)}
-                      className="ui-btn-icon text-slate-400 hover:text-red-500"
+                      className="os-btn-ghost px-2 py-1.5 text-slate-400 hover:text-red-500"
                       title="删除"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleRegenerate(project)}
-                      className="ui-btn-icon text-slate-400 hover:text-brand"
+                      className="os-btn-ghost px-2 py-1.5 text-slate-400 hover:text-purple-500"
                       title="重新生成"
                     >
                       <RefreshCw className="w-4 h-4" />
@@ -241,14 +236,14 @@ export default function ProjectPage() {
                       </div>
                       <div>
                         <span className="text-slate-400">状态：</span>
-                        <span className="text-emerald-600">已完成</span>
+                        <span className="text-emerald-500 font-medium">已完成</span>
                       </div>
                       {project.thumbnail && (
                         <div className="col-span-2 mt-1">
                           <img
                             src={project.thumbnail}
                             alt=""
-                            className="w-full max-w-[200px] rounded-[10px] border border-slate-200"
+                            className="w-full max-w-[200px] rounded-xl border border-slate-100"
                           />
                         </div>
                       )}
@@ -260,8 +255,10 @@ export default function ProjectPage() {
           })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-          <FolderOpen className="w-8 h-8 mb-2" />
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+            <FolderOpen className="w-8 h-8 text-slate-300" />
+          </div>
           <p className="text-sm">暂无生成记录</p>
         </div>
       )}

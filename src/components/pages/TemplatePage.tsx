@@ -19,16 +19,16 @@ interface Template {
 }
 
 // ========== 分类映射 ==========
-const CATEGORY_MAP: Record<string, string> = {
-  all: '全部',
-  xhs_post: '小红书',
-  goods_poster: '商品海报',
-  portrait: 'AI写真',
-  cover: '封面设计',
-  background_removal: '智能抠图',
-  resume: '简历优化',
-  novel: '小说创作',
-  script: '视频脚本',
+const CATEGORY_MAP: Record<string, { label: string; gradient: string }> = {
+  all: { label: '全部', gradient: '' },
+  xhs_post: { label: '小红书', gradient: 'from-red-400 to-orange-500' },
+  goods_poster: { label: '商品海报', gradient: 'from-violet-500 to-purple-600' },
+  portrait: { label: 'AI写真', gradient: 'from-pink-400 to-rose-500' },
+  cover: { label: '封面设计', gradient: 'from-blue-400 to-cyan-500' },
+  background_removal: { label: '智能抠图', gradient: 'from-emerald-400 to-teal-500' },
+  resume: { label: '简历优化', gradient: 'from-amber-400 to-yellow-500' },
+  novel: { label: '小说创作', gradient: 'from-fuchsia-500 to-pink-500' },
+  script: { label: '视频脚本', gradient: 'from-indigo-400 to-blue-500' },
 };
 
 export default function TemplatePage() {
@@ -47,13 +47,11 @@ export default function TemplatePage() {
           setTemplates(data.templates);
         }
       })
-      .catch(() => {
-        // fetch 失败时保持空数组
-      })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  // 分类筛选 + 搜索（防御性过滤）
+  // 分类筛选 + 搜索
   const filtered = (templates || []).filter((t) => {
     const matchCategory = activeCategory === 'all' || t.template_type === activeCategory;
     const matchSearch =
@@ -64,104 +62,107 @@ export default function TemplatePage() {
     return matchCategory && matchSearch;
   });
 
-  // 使用模板 → 跳转首页填充
+  // 使用模板
   const handleUseTemplate = (tpl: Template) => {
     setPendingInput(`使用模板「${tpl.name}」生成内容`);
     setCurrentMenu('home');
   };
 
   return (
-    <div className="ui-page">
+    <div className="os-page">
       {/* 标题区 */}
-      <div className="ui-page-header">
-        <h1 className="ui-page-title">模板</h1>
-        <p className="ui-page-desc">选择模板，快速开始创作</p>
+      <div className="mb-6 animate-fade-slide-up">
+        <h1 className="os-section-title text-2xl">模板</h1>
+        <p className="os-section-desc">选择模板，快速开始创作</p>
       </div>
 
       {/* 搜索栏 */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+      <div className="relative mb-5 animate-fade-slide-up" style={{ animationDelay: '0.05s' }}>
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="搜索模板..."
-          className="ui-input pl-10"
+          className="os-search-input"
         />
       </div>
 
       {/* 分类筛选 */}
-      <div className="flex gap-1.5 flex-wrap">
-        {Object.entries(CATEGORY_MAP).map(([key, label]) => (
+      <div className="flex gap-2 flex-wrap mb-6 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
+        {Object.entries(CATEGORY_MAP).map(([key, config]) => (
           <button
             key={key}
             onClick={() => setActiveCategory(key)}
-            className={`px-3 py-1.5 rounded-[10px] text-xs font-medium transition-colors ${
-              activeCategory === key
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+            className={`os-filter-tag ${activeCategory === key ? 'os-filter-tag-active' : 'os-filter-tag-inactive'}`}
           >
-            {label}
+            {config.label}
           </button>
         ))}
       </div>
 
       {/* 模板网格 */}
       {loading ? (
-        <div className="flex items-center justify-center py-16 text-slate-400 text-sm">
-          加载中...
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+          <div className="w-8 h-8 border-2 border-slate-200 border-t-purple-500 rounded-full animate-spin mb-3" />
+          <p className="text-sm">加载中...</p>
         </div>
       ) : filtered.length > 0 ? (
         <div className="grid grid-cols-3 gap-4">
-          {filtered.map((tpl) => (
-            <div key={tpl.id} className="ui-card p-0 overflow-hidden flex flex-col group">
-              {/* 图片占位 */}
-              <div className="aspect-[16/10] bg-slate-100 relative flex items-center justify-center">
-                {tpl.thumbnail ? (
-                  <img
-                    src={tpl.thumbnail}
-                    alt={tpl.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="text-slate-300">
-                    <Tag className="w-8 h-8" />
+          {filtered.map((tpl, index) => {
+            const catConfig = CATEGORY_MAP[tpl.template_type] || { label: tpl.template_type, gradient: 'from-slate-400 to-slate-500' };
+            return (
+              <div
+                key={tpl.id}
+                className="os-card p-0 overflow-hidden flex flex-col animate-stagger-in"
+                style={{ animationDelay: `${index * 0.03}s` }}
+              >
+                {/* 图片占位 */}
+                <div className="aspect-[16/10] bg-slate-50 relative flex items-center justify-center">
+                  {tpl.thumbnail ? (
+                    <img src={tpl.thumbnail} alt={tpl.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${catConfig.gradient} flex items-center justify-center opacity-30`}>
+                      <Tag className="w-5 h-5 text-white" />
+                    </div>
+                  )}
+                  {/* 推荐标记 */}
+                  {tpl.is_featured && (
+                    <div className="absolute top-2.5 right-2.5">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                        <Star className="w-3.5 h-3.5 text-white fill-white" />
+                      </div>
+                    </div>
+                  )}
+                  {/* 分类标签 */}
+                  <div className="absolute bottom-2.5 left-2.5">
+                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold text-white bg-gradient-to-r ${catConfig.gradient}`}>
+                      {catConfig.label}
+                    </span>
                   </div>
-                )}
-                {/* 推荐标记 */}
-                {tpl.is_featured && (
-                  <div className="absolute top-2 right-2">
-                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  </div>
-                )}
-                {/* 分类标签 */}
-                <div className="absolute bottom-2 left-2">
-                  <span className="px-2 py-0.5 bg-white/90 rounded-[6px] text-[10px] font-medium text-slate-600">
-                    {CATEGORY_MAP[tpl.template_type] || tpl.template_type}
-                  </span>
+                </div>
+                {/* 文字区 */}
+                <div className="p-4 flex-1 flex flex-col gap-2">
+                  <h3 className="text-sm font-semibold text-slate-800 truncate">{tpl.name}</h3>
+                  <p className="text-xs text-slate-500 line-clamp-2 flex-1">
+                    {tpl.description || '暂无描述'}
+                  </p>
+                  <button
+                    onClick={() => handleUseTemplate(tpl)}
+                    className="os-btn-primary w-full justify-center text-xs py-2"
+                  >
+                    使用模板
+                  </button>
                 </div>
               </div>
-              {/* 文字区 */}
-              <div className="p-4 flex-1 flex flex-col gap-2">
-                <h3 className="text-sm font-semibold text-slate-900 truncate">{tpl.name}</h3>
-                <p className="text-xs text-slate-500 line-clamp-2 flex-1">
-                  {tpl.description || '暂无描述'}
-                </p>
-                <button
-                  onClick={() => handleUseTemplate(tpl)}
-                  className="ui-btn-secondary w-full justify-center"
-                >
-                  <ArrowRight className="w-3 h-3" />
-                  使用模板
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-          <Search className="w-8 h-8 mb-2" />
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
+            <Search className="w-8 h-8 text-slate-300" />
+          </div>
           <p className="text-sm">未找到匹配的模板</p>
         </div>
       )}

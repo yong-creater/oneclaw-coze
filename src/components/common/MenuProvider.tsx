@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 // ========== 菜单 ID 类型 ==========
-export type MenuId = 'home' | 'tools' | 'template' | 'prompt' | 'project';
+export type MenuId = 'home' | 'create' | 'tools' | 'template' | 'prompt' | 'project';
 
 // ========== Context 值类型 ==========
 interface MenuContextValue {
@@ -13,6 +13,10 @@ interface MenuContextValue {
   pendingInput: string;
   setPendingInput: (text: string) => void;
   consumePendingInput: () => string;
+  // Sidebar 展开/收缩
+  sidebarExpanded: boolean;
+  setSidebarExpanded: (v: boolean) => void;
+  toggleSidebar: () => void;
 }
 
 // ========== Context ==========
@@ -22,6 +26,7 @@ const MenuContext = createContext<MenuContextValue | null>(null);
 export function MenuProvider({ children }: { children: ReactNode }) {
   const [currentMenu, setCurrentMenuState] = useState<MenuId>('home');
   const [pendingInput, setPendingInputState] = useState('');
+  const [sidebarExpanded, setSidebarExpandedRaw] = useState(false);
 
   const setCurrentMenu = useCallback((id: MenuId) => {
     setCurrentMenuState(id);
@@ -31,6 +36,10 @@ export function MenuProvider({ children }: { children: ReactNode }) {
     setPendingInputState(text);
   }, []);
 
+  const setSidebarExpanded = useCallback((v: boolean) => {
+    setSidebarExpandedRaw(v);
+  }, []);
+
   // 消费 pendingInput：读取后清空，确保只被消费一次
   const consumePendingInput = useCallback(() => {
     const text = pendingInput;
@@ -38,9 +47,22 @@ export function MenuProvider({ children }: { children: ReactNode }) {
     return text;
   }, [pendingInput]);
 
+  const toggleSidebar = useCallback(() => {
+    setSidebarExpandedRaw((prev: boolean) => !prev);
+  }, []);
+
   return (
     <MenuContext.Provider
-      value={{ currentMenu, setCurrentMenu, pendingInput, setPendingInput, consumePendingInput }}
+      value={{
+        currentMenu,
+        setCurrentMenu,
+        pendingInput,
+        setPendingInput,
+        consumePendingInput,
+        sidebarExpanded,
+        setSidebarExpanded,
+        toggleSidebar,
+      }}
     >
       {children}
     </MenuContext.Provider>

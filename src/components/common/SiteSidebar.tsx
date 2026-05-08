@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useMenu } from '@/components/common/MenuProvider';
+import { useMenu, type MenuId } from '@/components/common/MenuProvider';
 import { SiteLogo } from '@/components/common/SiteLogo';
 import {
   Home,
@@ -11,21 +11,33 @@ import {
   LayoutTemplate,
   Lightbulb,
   FolderOpen,
+  Sparkles,
   ChevronRight,
   Crown,
   Moon,
   Bell,
   Settings,
   User,
+  PanelLeftClose,
+  PanelLeft,
 } from 'lucide-react';
 
-// ========== 菜单数据结构（带图标颜色和副标题） ==========
-const menuList = [
-  { id: 'home' as const, name: '首页', icon: Home, color: 'text-emerald-500', href: '/' },
-  { id: 'tools' as const, name: '小工具', icon: Wand2, color: 'text-purple-500', desc: '商品图、详情页、视频等' },
-  { id: 'template' as const, name: '模板', icon: LayoutTemplate, color: 'text-emerald-500', desc: '海量模板，一键使用' },
-  { id: 'prompt' as const, name: '提示库', icon: Lightbulb, color: 'text-amber-500', desc: '优质提示词，激发灵感' },
-  { id: 'project' as const, name: '我的项目', icon: FolderOpen, color: 'text-blue-500', desc: '管理您的生成内容' },
+// ========== 菜单数据结构 ==========
+const menuList: Array<{
+  id: MenuId;
+  name: string;
+  shortName?: string;
+  icon: React.ComponentType<{ className?: string }>;
+  gradient: string;
+  desc: string;
+  href?: string;
+}> = [
+  { id: 'home', name: '首页', icon: Home, gradient: 'from-violet-500 to-purple-600', desc: 'AI创作工作台', href: '/' },
+  { id: 'create', name: '创作', icon: Sparkles, gradient: 'from-cyan-400 to-blue-500', desc: '快速开始创作' },
+  { id: 'tools', name: '小工具', icon: Wand2, gradient: 'from-fuchsia-500 to-pink-500', desc: '商品图、详情页等' },
+  { id: 'template', name: '模板', icon: LayoutTemplate, gradient: 'from-emerald-400 to-teal-500', desc: '海量模板一键用' },
+  { id: 'prompt', name: '提示库', icon: Lightbulb, gradient: 'from-amber-400 to-orange-500', desc: '优质提示词灵感' },
+  { id: 'project', name: '项目', icon: FolderOpen, gradient: 'from-blue-400 to-indigo-500', desc: '管理生成内容' },
 ];
 
 // ========== 小工具子菜单 ==========
@@ -41,8 +53,9 @@ const toolSubItems = [
 
 export default function SiteSidebar() {
   const pathname = usePathname();
-  const { currentMenu, setCurrentMenu } = useMenu();
+  const { currentMenu, setCurrentMenu, sidebarExpanded, setSidebarExpanded, toggleSidebar } = useMenu();
   const [toolsExpanded, setToolsExpanded] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<MenuId | null>(null);
 
   // 根据路径推断当前菜单
   useEffect(() => {
@@ -64,140 +77,193 @@ export default function SiteSidebar() {
   // 判断小工具子项是否激活
   const isToolSubActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
+  // 判断菜单是否激活（create 和 home 共享首页）
+  const isMenuActive = (id: MenuId) => {
+    if (id === 'create') return currentMenu === 'create' || currentMenu === 'home';
+    return currentMenu === id;
+  };
+
+  const sidebarWidth = sidebarExpanded ? 240 : 68;
+
   return (
-    <aside className="fixed left-0 top-0 w-[240px] h-screen bg-white border-r border-slate-100 flex flex-col z-30">
-      {/* Logo */}
-      <div className="h-[60px] flex items-center px-5 border-b border-slate-100 shrink-0">
-        <SiteLogo size={22} showText />
+    <aside
+      className="fixed left-0 top-0 h-screen bg-white border-r border-slate-100/80 flex flex-col z-30 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      style={{ width: sidebarWidth }}
+      onMouseEnter={() => setSidebarExpanded(true)}
+      onMouseLeave={() => setSidebarExpanded(false)}
+    >
+      {/* Logo + 折叠按钮 */}
+      <div className="h-[60px] flex items-center justify-between px-4 border-b border-slate-100/80 shrink-0">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+          <SiteLogo size={22} showText={sidebarExpanded} />
+        </div>
+        <button
+          onClick={toggleSidebar}
+          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shrink-0"
+        >
+          {sidebarExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
+        </button>
       </div>
 
       {/* 菜单列表 */}
-      <nav className="flex-1 py-3 px-3 overflow-y-auto">
-        {menuList.map((menu) => {
-          const Icon = menu.icon;
-          const isActive = currentMenu === menu.id;
-          const isTools = menu.id === 'tools';
+      <nav className="flex-1 py-2 px-2.5 overflow-y-auto scrollbar-hide">
+        <div className="space-y-0.5">
+          {menuList.map((menu) => {
+            const Icon = menu.icon;
+            const isActive = isMenuActive(menu.id);
+            const isTools = menu.id === 'tools';
 
-          // 首页用 Link 导航
-          if (menu.href) {
-            return (
-              <Link
-                key={menu.id}
-                href={menu.href}
-                onClick={() => setCurrentMenu(menu.id)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm transition-all ${
-                  isActive
-                    ? 'bg-emerald-50 text-emerald-700'
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}
-              >
-                <Icon className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-emerald-600' : menu.color}`} />
-                <span className="truncate font-medium">{menu.name}</span>
-              </Link>
-            );
-          }
-
-          // 带副标题的导航项
-          return (
-            <div key={menu.id}>
-              <button
-                onClick={() => {
-                  setCurrentMenu(menu.id);
-                  if (isTools) setToolsExpanded(!toolsExpanded);
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-sm transition-all ${
-                  isActive
-                    ? 'bg-slate-50'
-                    : 'hover:bg-slate-50'
-                }`}
-              >
-                <Icon className={`w-[18px] h-[18px] shrink-0 ${menu.color}`} />
-                <div className="flex-1 text-left min-w-0">
-                  <div className={`font-medium truncate ${isActive ? 'text-slate-900' : 'text-slate-700'}`}>
-                    {menu.name}
+            // 首页和创作用 Link 导航
+            if (menu.href) {
+              return (
+                <Link
+                  key={menu.id}
+                  href={menu.href}
+                  onClick={() => setCurrentMenu(menu.id)}
+                  onMouseEnter={() => setHoveredItem(menu.id)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''}`}
+                >
+                  <div className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
+                       style={{ width: 36, height: 36, borderRadius: 10 }}>
+                    <Icon className="w-[18px] h-[18px]" />
                   </div>
-                  {menu.desc && (
-                    <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
-                      {menu.desc}
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
+                      {menu.name}
                     </div>
-                  )}
-                </div>
-                <ChevronRight
-                  className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform ${
-                    isTools && toolsExpanded ? 'rotate-90' : ''
-                  }`}
-                />
-              </button>
+                    {sidebarExpanded && (
+                      <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
+                        {menu.desc}
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              );
+            }
 
-              {/* 小工具子菜单 */}
-              {isTools && toolsExpanded && (
-                <div className="ml-5 mt-1 space-y-0.5 border-l border-slate-100 pl-3">
-                  {toolSubItems.map((sub) => (
-                    <Link
-                      key={sub.href}
-                      href={sub.href}
-                      className={`block px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                        isToolSubActive(sub.href)
-                          ? 'text-emerald-600 font-medium bg-emerald-50'
-                          : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+            // 带子菜单的导航项
+            return (
+              <div key={menu.id}>
+                <button
+                  onClick={() => {
+                    setCurrentMenu(menu.id);
+                    if (isTools) setToolsExpanded(!toolsExpanded);
+                  }}
+                  onMouseEnter={() => setHoveredItem(menu.id)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''}`}
+                >
+                  <div className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
+                       style={{ width: 36, height: 36, borderRadius: 10 }}>
+                    <Icon className="w-[18px] h-[18px]" />
+                  </div>
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
+                      {menu.name}
+                    </div>
+                    {sidebarExpanded && (
+                      <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
+                        {menu.desc}
+                      </div>
+                    )}
+                  </div>
+                  {sidebarExpanded && isTools && (
+                    <ChevronRight
+                      className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform ${
+                        toolsExpanded ? 'rotate-90' : ''
                       }`}
-                    >
-                      {sub.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                    />
+                  )}
+                </button>
+
+                {/* 小工具子菜单 */}
+                {isTools && toolsExpanded && sidebarExpanded && (
+                  <div className="ml-5 mt-1 space-y-0.5 border-l border-slate-100 pl-3">
+                    {toolSubItems.map((sub) => (
+                      <Link
+                        key={sub.href}
+                        href={sub.href}
+                        className={`block px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
+                          isToolSubActive(sub.href)
+                            ? 'text-purple-600 font-medium bg-purple-50'
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        {sub.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </nav>
 
-      {/* 会员升级卡片 */}
-      <div className="px-3 pb-2 shrink-0">
-        <div className="bg-slate-50 rounded-[10px] p-3">
-          <div className="flex items-start gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
-              <Crown className="w-4 h-4 text-amber-600" />
+      {/* 底部区域 */}
+      {sidebarExpanded && (
+        <div className="px-3 pb-2 shrink-0 animate-fade-slide-up">
+          {/* 会员升级卡片 */}
+          <div className="bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl p-3 border border-purple-100/50">
+            <div className="flex items-start gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shrink-0">
+                <Crown className="w-4 h-4 text-white" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-semibold text-slate-800">解锁全部高级功能</div>
+                <div className="text-[10px] text-slate-400 mt-0.5 leading-snug">无限生成、高清导出等特权</div>
+              </div>
             </div>
-            <div className="min-w-0">
-              <div className="text-xs font-medium text-slate-800">解锁全部高级功能</div>
-              <div className="text-[10px] text-slate-400 mt-0.5 leading-snug">升级会员，享无限生成、高清导出等特权</div>
-            </div>
+            <Link
+              href="/membership"
+              className="mt-2.5 block w-full text-center py-1.5 rounded-xl text-xs font-semibold text-white transition-all"
+              style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}
+            >
+              立即升级
+            </Link>
           </div>
-          <Link
-            href="/membership"
-            className="mt-2.5 block w-full text-center py-1.5 rounded-lg text-xs font-medium text-white transition-all"
-            style={{ background: 'linear-gradient(135deg, #10b981, #34d399)' }}
-          >
-            立即升级
-          </Link>
         </div>
-      </div>
+      )}
 
       {/* 底部功能图标 */}
-      <div className="px-5 py-2 flex items-center gap-1 border-t border-slate-100 shrink-0">
-        <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-          <Moon className="w-4 h-4" />
-        </button>
-        <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-          <Bell className="w-4 h-4" />
-        </button>
-        <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-          <Settings className="w-4 h-4" />
-        </button>
+      <div className={`px-3 py-2 flex items-center gap-1 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'justify-center'}`}>
+        {sidebarExpanded ? (
+          <>
+            <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
+              <Moon className="w-4 h-4" />
+            </button>
+            <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
+              <Bell className="w-4 h-4" />
+            </button>
+            <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
+              <Settings className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
+            <Settings className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* 用户信息 */}
-      <div className="px-4 py-3 border-t border-slate-100 shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-            <User className="w-4 h-4 text-emerald-600" />
+      <div className={`px-3 py-3 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'flex justify-center'}`}>
+        {sidebarExpanded ? (
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center shrink-0">
+              <User className="w-4 h-4 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-medium text-slate-700 truncate">OneClaw 用户</div>
+              <div className="text-[10px] text-slate-400">免费版</div>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-xs font-medium text-slate-700 truncate">OneClaw 用户</div>
-            <div className="text-[10px] text-slate-400">免费版</div>
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center">
+            <User className="w-4 h-4 text-white" />
           </div>
-        </div>
+        )}
       </div>
     </aside>
   );
