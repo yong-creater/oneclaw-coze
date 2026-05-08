@@ -19,18 +19,18 @@ import {
 
 // 创作模式卡片
 const modeCards = [
-  { key: 'product', label: '商品图', desc: '生成主图 / 场景图', icon: ShoppingBag, slug: 'product-generator', gradient: 'from-[#7B61FF] to-[#5B8CFF]', color: '#7B61FF' },
-  { key: 'detail', label: '详情页', desc: '自动生成卖点长图', icon: LayoutTemplate, slug: 'productpage', gradient: 'from-[#5B8CFF] to-[#6EE7FF]', color: '#5B8CFF' },
-  { key: 'xiaohongshu', label: '小红书', desc: '封面 + 文案 + 标签', icon: Heart, slug: 'xiaohongshu-generator', gradient: 'from-[#FF6B9D] to-[#FF9A76]', color: '#FF6B9D' },
-  { key: 'video', label: '视频脚本', desc: '带货口播与分镜', icon: Video, slug: 'novel', gradient: 'from-[#FFB84D] to-[#FF6B6B]', color: '#FFB84D' },
+  { key: 'product', label: '商品图', desc: '主图 / 场景图 / 卖点图', icon: ShoppingBag, slug: 'product-generator', gradient: 'from-[#7B61FF] to-[#5B8CFF]', color: '#7B61FF' },
+  { key: 'detail', label: '详情页', desc: '商品详情 / 卖点长图', icon: LayoutTemplate, slug: 'productpage', gradient: 'from-[#5B8CFF] to-[#6EE7FF]', color: '#5B8CFF' },
+  { key: 'xiaohongshu', label: '小红书', desc: '封面 / 文案 / 标签', icon: Heart, slug: 'xiaohongshu-generator', gradient: 'from-[#FF6B9D] to-[#FF9A76]', color: '#FF6B9D' },
+  { key: 'video', label: '视频脚本', desc: '口播 / 分镜 / 带货', icon: Video, slug: 'novel', gradient: 'from-[#FFB84D] to-[#FF6B6B]', color: '#FFB84D' },
 ] as const;
 
-// 实时案例数据
+// 示例结果数据 — 使用本地高质量静态图片
 const showcaseExamples = [
-  { title: '护肤品商品图', category: '商品图', image: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b17?w=400&h=400&fit=crop&auto=format&q=80' },
-  { title: '零食小红书封面', category: '小红书', image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bbd7f?w=400&h=400&fit=crop&auto=format&q=80' },
-  { title: '数码详情页', category: '详情页', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&auto=format&q=80' },
-  { title: '服装视频封面', category: '视频脚本', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=400&fit=crop&auto=format&q=80' },
+  { title: '商品主图', category: '商品图', image: '/case-lipstick-main.png' },
+  { title: '小红书封面', category: '小红书', image: '/demo-card-lifestyle.jpg' },
+  { title: '详情页片段', category: '详情页', image: '/case-ecommerce.jpg' },
+  { title: '视频封面', category: '视频脚本', image: '/demo-scene.jpg' },
 ];
 
 // 今日热门数据
@@ -108,19 +108,19 @@ export default function HomePage() {
         {/* 内容层 */}
         <div className="relative z-10 flex flex-col items-center w-full max-w-[1280px] mx-auto px-4">
 
-          {/* 主标题 — 52px 深色渐变 */}
+          {/* 主标题 — 聚焦小白也能用 */}
           <h1 className="os-hero-title text-center !text-[52px] !leading-[1.2] !tracking-[-0.03em]">
-            一句话生成专业{' '}
-            <span className="gradient-text">AI 内容</span>
+            不会 Prompt，<br className="sm:hidden" />也能生成{' '}
+            <span className="gradient-text">专业内容</span>
           </h1>
 
           {/* 副标题 — 18px 灰色 */}
           <p className="text-center text-[18px] text-[#6B7280] mt-4 max-w-[640px] leading-relaxed">
-            上传图片或输入想法，OneClaw 自动生成商品图、详情页、小红书内容与视频脚本。
+            上传图片或输入需求，OneClaw 自动匹配创作工具，帮你生成商品图、详情页、小红书和视频脚本。
           </p>
 
-          {/* ===== 模式卡片 — 4 卡片横向 ===== */}
-          <div className="flex gap-5 mt-10">
+          {/* ===== 场景入口卡片 — 4 卡片横向 ===== */}
+          <div className="flex gap-4 mt-10">
             {modeCards.map((mode) => {
               const Icon = mode.icon;
               const isActive = activeMode === mode.key;
@@ -151,9 +151,9 @@ export default function HomePage() {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value.slice(0, 500))}
                   onKeyDown={handleKeyDown}
-                  placeholder={'帮我生成：\n- 高级护肤品商品图\n- 电商详情页\n- 小红书封面\n- 带货视频脚本'}
+                  placeholder={'描述你的需求，例如：\n上传一张耳机图，生成电商主图、卖点图和场景图'}
                   className="os-studio-textarea"
-                  rows={8}
+                  rows={6}
                 />
               </div>
               {/* 底部工具栏 */}
@@ -176,7 +176,7 @@ export default function HomePage() {
                     className="os-studio-tool-btn"
                   >
                     <Lightbulb className="w-4 h-4" />
-                    <span>灵感</span>
+                    <span>灵感推荐</span>
                   </button>
                   <span className="text-[12px] text-slate-300 ml-1">{inputText.length} / 500</span>
                 </div>
@@ -192,11 +192,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 右侧：实时案例 (40%) */}
+            {/* 右侧：示例结果 (40%) */}
             <div className="os-studio-showcase">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-3.5 h-3.5 text-[#7B61FF]/60" />
-                <span className="text-[13px] font-medium text-slate-400">AI 正在生成这些内容</span>
+                <ImageIcon className="w-3.5 h-3.5 text-[#7B61FF]/60" />
+                <span className="text-[13px] font-medium text-slate-400">示例结果</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {showcaseExamples.map((example, idx) => (
@@ -206,9 +206,9 @@ export default function HomePage() {
                       alt={example.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute bottom-0 left-0 right-0 p-2.5 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <span className="text-[10px] font-medium text-white/90 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                      <span className="inline-block text-[11px] font-medium text-white/90 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
                         {example.category}
                       </span>
                     </div>
