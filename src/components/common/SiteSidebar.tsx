@@ -14,9 +14,6 @@ import {
   Lightbulb,
   FolderOpen,
   Crown,
-  Moon,
-  Bell,
-  Settings,
   User,
   PanelLeftClose,
   PanelLeft,
@@ -141,27 +138,6 @@ export default function SiteSidebar() {
           </div>
         </div>
       )}
-
-      {/* 底部功能图标 */}
-      <div className={`px-3 py-2 flex items-center gap-1 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'justify-center'}`}>
-        {sidebarExpanded ? (
-          <>
-            <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-              <Moon className="w-4 h-4" />
-            </button>
-            <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-              <Bell className="w-4 h-4" />
-            </button>
-            <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-              <Settings className="w-4 h-4" />
-            </button>
-          </>
-        ) : (
-          <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors">
-            <Settings className="w-4 h-4" />
-          </button>
-        )}
-      </div>
 
       {/* 用户信息区 - 集成登录功能 */}
       <div className={`px-3 py-3 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'flex justify-center'}`}>
