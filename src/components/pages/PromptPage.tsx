@@ -18,9 +18,9 @@ interface Prompt {
 
 const CATEGORY_CONFIG: Record<string, { label: string; gradient: string }> = {
   '场景描述': { label: '场景描述', gradient: 'from-blue-400 to-cyan-500' },
-  '风格设定': { label: '风格设定', gradient: 'from-violet-500 to-purple-600' },
-  '技术参数': { label: '技术参数', gradient: 'from-emerald-400 to-teal-500' },
+  '特效制作': { label: '特效制作', gradient: 'from-violet-500 to-purple-600' },
   '角色扮演': { label: '角色扮演', gradient: 'from-amber-400 to-orange-500' },
+  '风格迁移': { label: '风格迁移', gradient: 'from-emerald-400 to-teal-500' },
 };
 
 export default function PromptPage() {
@@ -41,7 +41,7 @@ export default function PromptPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const categories = ['all', ...Object.keys(CATEGORY_CONFIG)];
+  const categories = ['all', ...new Set(prompts.map(p => p.category).filter(Boolean))];
 
   const filtered = (prompts || []).filter(p => {
     if (activeCategory !== 'all' && p.category !== activeCategory) return false;
