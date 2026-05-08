@@ -22,19 +22,18 @@ import {
   CreditCard,
 } from 'lucide-react';
 
-// ========== 主导航菜单 ==========
+// ========== 主导航菜单 — 精简文案，无副标题 ==========
 const menuList: Array<{
   id: string;
   name: string;
-  subtitle: string;
   icon: React.ComponentType<{ className?: string }>;
   path: string;
 }> = [
-  { id: 'home', name: '首页', subtitle: 'AI 创作工作台', icon: Home, path: '/' },
-  { id: 'tools', name: '创作中心', subtitle: '商品图、详情页、小红书', icon: Sparkles, path: '/tools' },
-  { id: 'template', name: '模板库', subtitle: '可复用创作模板', icon: LayoutTemplate, path: '/templates' },
-  { id: 'prompt', name: '灵感库', subtitle: '高质量提示词与灵感', icon: Lightbulb, path: '/prompts' },
-  { id: 'project', name: '项目', subtitle: '历史生成与作品', icon: FolderOpen, path: '/projects' },
+  { id: 'home', name: 'AI 工作台', icon: Home, path: '/' },
+  { id: 'tools', name: '创作工具', icon: Sparkles, path: '/tools' },
+  { id: 'template', name: '创作模板', icon: LayoutTemplate, path: '/templates' },
+  { id: 'prompt', name: '创作灵感', icon: Lightbulb, path: '/prompts' },
+  { id: 'project', name: '我的创作', icon: FolderOpen, path: '/projects' },
 ];
 
 // ========== 从 pathname 推导当前菜单 ID ==========
@@ -110,7 +109,7 @@ export default function SiteSidebar() {
       className="fixed left-0 top-0 h-screen bg-white/90 backdrop-blur-xl border-r border-slate-100/60 flex flex-col z-30 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden"
       style={{ width: sidebarWidth }}
     >
-      {/* ===== Logo 区 — 更简洁 ===== */}
+      {/* ===== Logo 区 ===== */}
       <div className="h-[56px] flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden">
           <SiteLogo size={26} showText={sidebarExpanded} />
@@ -124,9 +123,9 @@ export default function SiteSidebar() {
         </button>
       </div>
 
-      {/* ===== 主导航菜单 — 56px 高 / 18px 圆角 / 更大留白 ===== */}
+      {/* ===== 主导航菜单 — 无副标题 ===== */}
       <nav className="flex-1 py-4 overflow-y-auto scrollbar-hide">
-        <div className={`${sidebarExpanded ? 'px-3' : 'px-2.5'} space-y-1.5`}>
+        <div className={`${sidebarExpanded ? 'px-3' : 'px-2.5'} space-y-1`}>
           {menuList.map((menu) => {
             const Icon = menu.icon;
             const isActive = currentMenu === menu.id;
@@ -139,17 +138,17 @@ export default function SiteSidebar() {
                   group flex items-center gap-3 w-full text-left overflow-hidden
                   transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]
                   ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : 'px-4'}
-                  h-[56px] rounded-[18px]
+                  h-[48px] rounded-[14px]
                   ${isActive
                     ? 'bg-[#7B61FF]/[0.06] text-[#6948E8] relative'
                     : 'text-slate-400 hover:bg-slate-50/80 hover:text-slate-600'
                   }
                 `}
-                title={!sidebarExpanded ? `${menu.name} · ${menu.subtitle}` : undefined}
+                title={!sidebarExpanded ? menu.name : undefined}
               >
                 {/* 选中项左侧 glow 光条 */}
                 {isActive && sidebarExpanded && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-gradient-to-b from-[#7B61FF] to-[#5B8CFF] shadow-[0_0_8px_rgba(123,97,255,0.4)]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-gradient-to-b from-[#7B61FF] to-[#5B8CFF] shadow-[0_0_8px_rgba(123,97,255,0.4)]" />
                 )}
                 <div className={`shrink-0 flex items-center justify-center ${!sidebarExpanded ? 'w-full' : ''}`}>
                   <Icon
@@ -161,14 +160,9 @@ export default function SiteSidebar() {
                   />
                 </div>
                 {sidebarExpanded && (
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className={`font-medium truncate text-[13.5px] leading-tight ${isActive ? 'text-[#6948E8]' : 'text-slate-700'}`}>
-                      {menu.name}
-                    </div>
-                    <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
-                      {menu.subtitle}
-                    </div>
-                  </div>
+                  <span className={`font-medium truncate text-[13.5px] leading-tight ${isActive ? 'text-[#6948E8]' : 'text-slate-600'}`}>
+                    {menu.name}
+                  </span>
                 )}
               </button>
             );
@@ -176,7 +170,7 @@ export default function SiteSidebar() {
         </div>
       </nav>
 
-      {/* ===== 底部用户区 — 更简洁 ===== */}
+      {/* ===== 底部用户区 ===== */}
       <div className={`shrink-0 ${sidebarExpanded ? 'px-3 pb-4 pt-2' : 'px-2.5 pb-4 pt-2 flex justify-center'}`}>
         {sidebarExpanded ? (
           // ========== 展开模式 ==========
@@ -204,10 +198,10 @@ export default function SiteSidebar() {
                 </div>
               </button>
 
-              {/* 升级会员 — 轻量文字链接，不要大按钮 */}
+              {/* 升级会员 — 轻量文字链接 */}
               <button
                 onClick={() => router.push('/membership')}
-                className="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[11.5px] font-medium text-[#7B61FF]/80/70 hover:text-[#7B61FF]/80 hover:bg-[#7B61FF]/[0.04] transition-all"
+                className="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[11.5px] font-medium text-[#7B61FF]/60 hover:text-[#7B61FF] hover:bg-[#7B61FF]/[0.04] transition-all"
               >
                 <Crown className="w-3 h-3" />
                 升级会员

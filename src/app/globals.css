@@ -62,7 +62,7 @@ html {
 
 :root {
   --radius: 0.75rem;
-  --background: #F5F7FB;
+  --background: linear-gradient(170deg, #F7F8FC 0%, #EEF2FF 100%);
   --foreground: #1E293B;
   --card: #FFFFFF;
   --card-foreground: #1E293B;
@@ -140,7 +140,7 @@ html {
 
 body {
   @apply font-sans;
-  background: #F5F7FB;
+  background: linear-gradient(170deg, #F7F8FC 0%, #EEF2FF 100%);
 }
 
 .dark body {
@@ -297,7 +297,7 @@ body {
 
 /* 渐变文字 */
 .gradient-text {
-  background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
+  background: linear-gradient(135deg, #111827 0%, #6366F1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -307,16 +307,16 @@ body {
 /* ==================== AI 氛围系统 (Atmosphere Layer) ==================== */
 /*  参考：OpenAI / Linear / Apple — 极简 / 柔和 / 安静 / 高级  */
 
-/* ---- 页面渐变底色 — 更亮更白 ---- */
+/* ---- 页面渐变底色 — 浅灰紫 #F7F8FC → #EEF2FF ---- */
 .os-page {
   position: relative;
   background: linear-gradient(
     170deg,
-    #FFFFFF 0%,              /* 纯白起点 */
-    #F8F7FF 20%,             /* 极浅紫 */
-    #F2F4FF 45%,             /* 浅蓝紫 */
-    #F6F8FF 70%,             /* 浅蓝白 */
-    #FFFFFF 100%             /* 回到纯白 */
+    #F7F8FC 0%,
+    #F3F4FF 25%,
+    #EEF2FF 50%,
+    #F5F7FF 75%,
+    #F7F8FC 100%
   );
 }
 
@@ -616,7 +616,7 @@ body {
   font-size: var(--typo-btn-size);
   font-weight: var(--typo-btn-weight);
   border-radius: 16px;
-  background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
+  background: linear-gradient(135deg, #111827 0%, #6366F1 100%);
   box-shadow: 0 2px 16px -2px rgba(123, 97, 255, 0.35);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
@@ -961,7 +961,7 @@ body {
   padding: 0 32px;
   border: none;
   border-radius: 18px;
-  background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
+  background: linear-gradient(135deg, #111827 0%, #6366F1 100%);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
@@ -1000,6 +1000,225 @@ body {
 .os-cta-btn > * {
   position: relative;
   z-index: 1;
+}
+
+/* ==================== AI 创作工作台 (Studio Layout) ==================== */
+
+/* ---- 模式卡片 V2 — 260×92 玻璃卡片 ---- */
+.os-mode-card-v2 {
+  width: 260px;
+  height: 92px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.os-mode-card-v2:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(123, 97, 255, 0.08);
+  border-color: rgba(123, 97, 255, 0.15);
+  background: rgba(255, 255, 255, 0.85);
+}
+.os-mode-card-v2-active {
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.06), rgba(91, 140, 255, 0.04)) !important;
+  border-color: rgba(123, 97, 255, 0.2) !important;
+  box-shadow: 0 0 24px rgba(123, 97, 255, 0.08), 0 4px 16px rgba(15, 23, 42, 0.03) !important;
+}
+.os-mode-card-v2-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F3F8;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+.os-mode-card-v2-active .os-mode-card-v2-icon {
+  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.25);
+}
+.os-mode-card-v2-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.os-mode-card-v2-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1E293B;
+  line-height: 1.2;
+}
+.os-mode-card-v2-desc {
+  font-size: 12px;
+  font-weight: 400;
+  color: #94A3B8;
+  line-height: 1.3;
+}
+
+/* ---- AI 创作工作台 — 左右分栏 ---- */
+.os-studio {
+  width: 100%;
+  max-width: 1180px;
+  display: grid;
+  grid-template-columns: 6fr 4fr;
+  gap: 24px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 32px;
+  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.08), 0 2px 12px rgba(15, 23, 42, 0.03);
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* 左侧输入区 */
+.os-studio-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.os-studio-input-area {
+  background: #F8FAFC;
+  border-radius: 24px;
+  padding: 28px;
+  flex: 1;
+}
+.os-studio-textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #1E293B;
+  resize: none;
+  outline: none;
+}
+.os-studio-textarea::placeholder {
+  color: #B0B8C8;
+  font-size: 15px;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+/* 底部工具栏 */
+.os-studio-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0 0;
+  gap: 12px;
+}
+.os-studio-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  color: #94A3B8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  outline: none;
+}
+.os-studio-tool-btn:hover {
+  color: #7B61FF;
+  background: rgba(123, 97, 255, 0.06);
+}
+
+/* 开始创作 CTA — 52px 高 / 16px 圆角 / 渐变 */
+.os-studio-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #7C5CFF 0%, #5B8CFF 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.os-studio-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #8C6CFF 0%, #6B9CFF 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.os-studio-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(123, 97, 255, 0.3), 0 0 48px rgba(123, 97, 255, 0.12);
+}
+.os-studio-cta:hover::before {
+  opacity: 1;
+}
+.os-studio-cta:active {
+  transform: translateY(0) scale(0.98);
+}
+.os-studio-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.os-studio-cta > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 右侧案例展示 */
+.os-studio-showcase {
+  display: flex;
+  flex-direction: column;
+}
+.os-showcase-item {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: #F1F5F9;
+  cursor: pointer;
+}
+
+/* ---- 渐入动画 ---- */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-slide-up {
+  animation: fadeSlideUp 0.5s ease-out forwards;
+  opacity: 0;
 }
 
 /* ==================== Creator OS 标签系统 ==================== */
