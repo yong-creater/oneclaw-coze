@@ -66,9 +66,9 @@ export default function SiteSidebar() {
       style={{ width: sidebarWidth }}
     >
       {/* Logo + 折叠按钮 */}
-      <div className="h-[60px] flex items-center justify-between px-4 border-b border-slate-100/80 shrink-0">
+      <div className="h-[68px] flex items-center justify-between px-4 border-b border-slate-100/80 shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <SiteLogo size={22} showText={sidebarExpanded} />
+          <SiteLogo size={32} showText={sidebarExpanded} />
         </div>
         <button
           onClick={toggleSidebar}
