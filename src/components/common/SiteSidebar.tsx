@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useMenu, type MenuId } from '@/components/common/MenuProvider';
@@ -11,7 +11,6 @@ import {
   LayoutTemplate,
   Lightbulb,
   FolderOpen,
-  ChevronRight,
   Crown,
   Moon,
   Bell,
@@ -28,50 +27,35 @@ const menuList: Array<{
   icon: React.ComponentType<{ className?: string }>;
   gradient: string;
   desc: string;
-  href?: string;
 }> = [
-  { id: 'home', name: '首页', icon: Home, gradient: 'from-violet-500 to-purple-600', desc: 'AI创作工作台', href: '/' },
+  { id: 'home', name: '首页', icon: Home, gradient: 'from-violet-500 to-purple-600', desc: 'AI创作工作台' },
   { id: 'tools', name: '小工具', icon: Wand2, gradient: 'from-fuchsia-500 to-pink-500', desc: '商品图、详情页等' },
   { id: 'template', name: '模板', icon: LayoutTemplate, gradient: 'from-emerald-400 to-teal-500', desc: '海量模板一键用' },
   { id: 'prompt', name: '提示库', icon: Lightbulb, gradient: 'from-amber-400 to-orange-500', desc: '优质提示词灵感' },
   { id: 'project', name: '项目', icon: FolderOpen, gradient: 'from-blue-400 to-indigo-500', desc: '管理生成内容' },
 ];
 
-// ========== 小工具子菜单 ==========
-const toolSubItems = [
-  { name: '商品图生成', href: '/product-generator' },
-  { name: '智能抠图', href: '/background-removal' },
-  { name: 'AI写真', href: '/ai-photo' },
-  { name: '商品海报', href: '/product-poster' },
-  { name: '小红书图文', href: '/xiaohongshu-generator' },
-  { name: '小说创作', href: '/novel' },
-  { name: '简历优化', href: '/resume' },
-];
-
 export default function SiteSidebar() {
   const pathname = usePathname();
   const { currentMenu, setCurrentMenu, sidebarExpanded, toggleSidebar } = useMenu();
-  const [toolsExpanded, setToolsExpanded] = useState(false);
 
   // 根据路径推断当前菜单
   useEffect(() => {
     if (pathname === '/') {
       setCurrentMenu('home');
-    } else if (pathname.startsWith('/product-generator') ||
-               pathname.startsWith('/background-removal') ||
-               pathname.startsWith('/ai-photo') ||
-               pathname.startsWith('/product-poster') ||
-               pathname.startsWith('/xiaohongshu-generator') ||
-               pathname.startsWith('/novel') ||
-               pathname.startsWith('/resume') ||
-               pathname.startsWith('/productpage')) {
+    } else if (
+      pathname.startsWith('/product-generator') ||
+      pathname.startsWith('/background-removal') ||
+      pathname.startsWith('/ai-photo') ||
+      pathname.startsWith('/product-poster') ||
+      pathname.startsWith('/xiaohongshu-generator') ||
+      pathname.startsWith('/novel') ||
+      pathname.startsWith('/resume') ||
+      pathname.startsWith('/productpage')
+    ) {
       setCurrentMenu('tools');
-      setToolsExpanded(true);
     }
   }, [pathname, setCurrentMenu]);
-
-  // 判断小工具子项是否激活
-  const isToolSubActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
   const sidebarWidth = sidebarExpanded ? 240 : 68;
 
@@ -94,95 +78,37 @@ export default function SiteSidebar() {
         </button>
       </div>
 
-      {/* 菜单列表 */}
+      {/* 菜单列表 — 所有项统一样式，点击切换右侧内容区 */}
       <nav className="flex-1 py-2 px-2.5 overflow-y-auto scrollbar-hide">
         <div className="space-y-0.5">
           {menuList.map((menu) => {
             const Icon = menu.icon;
             const isActive = currentMenu === menu.id;
-            const isTools = menu.id === 'tools';
 
-            // 首页用 Link 导航
-            if (menu.href) {
-              return (
-                <Link
-                  key={menu.id}
-                  href={menu.href}
-                  onClick={() => setCurrentMenu(menu.id)}
-                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center' : ''}`}
-                  title={!sidebarExpanded ? menu.name : undefined}
-                >
-                  <div className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
-                       style={{ width: 36, height: 36, borderRadius: 10 }}>
-                    <Icon className="w-[18px] h-[18px]" />
-                  </div>
-                  {sidebarExpanded && (
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
-                        {menu.name}
-                      </div>
-                      <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
-                        {menu.desc}
-                      </div>
-                    </div>
-                  )}
-                </Link>
-              );
-            }
-
-            // 带子菜单的导航项
             return (
-              <div key={menu.id}>
-                <button
-                  onClick={() => {
-                    setCurrentMenu(menu.id);
-                    if (isTools) setToolsExpanded(!toolsExpanded);
-                  }}
-                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center' : ''}`}
-                  title={!sidebarExpanded ? menu.name : undefined}
+              <button
+                key={menu.id}
+                onClick={() => setCurrentMenu(menu.id)}
+                className={`sidebar-menu-item w-full ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center' : ''}`}
+                title={!sidebarExpanded ? menu.name : undefined}
+              >
+                <div
+                  className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
+                  style={{ width: 36, height: 36, borderRadius: 10 }}
                 >
-                  <div className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
-                       style={{ width: 36, height: 36, borderRadius: 10 }}>
-                    <Icon className="w-[18px] h-[18px]" />
-                  </div>
-                  {sidebarExpanded && (
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
-                        {menu.name}
-                      </div>
-                      <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
-                        {menu.desc}
-                      </div>
+                  <Icon className="w-[18px] h-[18px]" />
+                </div>
+                {sidebarExpanded && (
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
+                      {menu.name}
                     </div>
-                  )}
-                  {sidebarExpanded && isTools && (
-                    <ChevronRight
-                      className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform ${
-                        toolsExpanded ? 'rotate-90' : ''
-                      }`}
-                    />
-                  )}
-                </button>
-
-                {/* 小工具子菜单 */}
-                {isTools && toolsExpanded && sidebarExpanded && (
-                  <div className="ml-5 mt-1 space-y-0.5 border-l border-slate-100 pl-3">
-                    {toolSubItems.map((sub) => (
-                      <Link
-                        key={sub.href}
-                        href={sub.href}
-                        className={`block px-2.5 py-1.5 rounded-lg text-xs transition-colors ${
-                          isToolSubActive(sub.href)
-                            ? 'text-purple-600 font-medium bg-purple-50'
-                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {sub.name}
-                      </Link>
-                    ))}
+                    <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
+                      {menu.desc}
+                    </div>
                   </div>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>
