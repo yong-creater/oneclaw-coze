@@ -144,12 +144,16 @@ export default function SiteSidebar() {
                   ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : 'px-3'}
                   ${sidebarExpanded ? 'h-[52px]' : 'h-[44px]'}
                   ${isActive
-                    ? 'bg-gradient-to-r from-[#7B61FF]/[0.08] to-[#5B8CFF]/[0.04] text-[#6948E8]'
+                    ? 'bg-gradient-to-r from-[#7B61FF]/[0.08] to-[#5B8CFF]/[0.04] text-[#6948E8] relative'
                     : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                   }
                 `}
                 title={!sidebarExpanded ? `${menu.name} · ${menu.subtitle}` : undefined}
               >
+                {/* 选中项左侧紫色竖条 */}
+                {isActive && sidebarExpanded && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#7B61FF]" />
+                )}
                 <div className={`shrink-0 flex items-center justify-center ${!sidebarExpanded ? 'w-full' : ''}`}>
                   <Icon
                     className={`w-5 h-5 transition-colors duration-200 ${
@@ -199,6 +203,15 @@ export default function SiteSidebar() {
                     <span className="text-[11px] text-slate-400">免费版</span>
                   </div>
                 </div>
+              </button>
+
+              {/* 升级会员按钮 */}
+              <button
+                onClick={() => router.push('/membership')}
+                className="w-full mt-2 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-[#7B61FF] to-[#5B8CFF] hover:shadow-md hover:shadow-[#7B61FF]/20 transition-all"
+              >
+                <Crown className="w-3.5 h-3.5" />
+                升级会员
               </button>
 
               {/* 用户浮层菜单 */}
