@@ -6,7 +6,6 @@ import { useMenu } from '@/components/common/MenuProvider';
 import {
   Upload,
   ArrowRight,
-  ImageIcon,
   Wand2,
   Lightbulb,
   TrendingUp,
@@ -190,20 +189,20 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* 右侧：示例结果 (40%) */}
+            {/* 右侧：AI 正在生成 (35%) */}
             <div className="os-studio-showcase">
               <div className="flex items-center gap-2 mb-1">
-                <ImageIcon className="w-3.5 h-3.5 text-[#7B61FF]/60" />
-                <span className="text-[13px] font-medium text-slate-500">示例结果</span>
+                <span className="text-sm">✨</span>
+                <span className="text-[13px] font-medium text-slate-500">AI 正在生成</span>
               </div>
-              <p className="text-[11px] text-slate-400 mb-4">根据需求自动生成对应内容</p>
+              <p className="text-[11px] text-slate-400 mb-4">根据你的需求自动生成对应内容</p>
               <div className="grid grid-cols-2 gap-3">
                 {showcaseExamples.map((example, idx) => (
                   <div key={idx} className="os-showcase-item group">
                     <img
                       src={example.image}
                       alt={example.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-2.5">
