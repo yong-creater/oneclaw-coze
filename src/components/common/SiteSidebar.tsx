@@ -8,7 +8,7 @@ import { SiteLogo } from '@/components/common/SiteLogo';
 import LoginButton from '@/components/common/LoginButton';
 import {
   Home,
-  Wand2,
+  Sparkles,
   LayoutTemplate,
   Lightbulb,
   FolderOpen,
@@ -22,7 +22,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 
-// ========== 主导航菜单（不含设置） ==========
+// ========== 主导航菜单 ==========
 const menuList: Array<{
   id: string;
   name: string;
@@ -31,15 +31,14 @@ const menuList: Array<{
   path: string;
 }> = [
   { id: 'home', name: '首页', subtitle: 'AI 创作工作台', icon: Home, path: '/' },
-  { id: 'tools', name: '小工具', subtitle: '商品图、详情页、小红书等', icon: Wand2, path: '/tools' },
-  { id: 'template', name: '模板', subtitle: '可复用创作模板', icon: LayoutTemplate, path: '/templates' },
-  { id: 'prompt', name: '提示库', subtitle: '高质量提示词', icon: Lightbulb, path: '/prompts' },
+  { id: 'tools', name: '创作中心', subtitle: '商品图、详情页、小红书', icon: Sparkles, path: '/tools' },
+  { id: 'template', name: '模板库', subtitle: '可复用创作模板', icon: LayoutTemplate, path: '/templates' },
+  { id: 'prompt', name: '灵感库', subtitle: '高质量提示词与灵感', icon: Lightbulb, path: '/prompts' },
   { id: 'project', name: '项目', subtitle: '历史生成与作品', icon: FolderOpen, path: '/projects' },
 ];
 
 // ========== 从 pathname 推导当前菜单 ID ==========
 function getMenuIdFromPath(pathname: string): string {
-  // 工具子路由
   if (
     pathname.startsWith('/product-generator') ||
     pathname.startsWith('/background-removal') ||
@@ -52,10 +51,8 @@ function getMenuIdFromPath(pathname: string): string {
   ) {
     return 'tools';
   }
-  // 精确匹配菜单路径
   const match = menuList.find(m => m.path !== '/' && pathname.startsWith(m.path));
   if (match) return match.id;
-  // 首页兜底
   return 'home';
 }
 
@@ -110,26 +107,26 @@ export default function SiteSidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen bg-white border-r border-slate-100/80 flex flex-col z-30 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden"
+      className="fixed left-0 top-0 h-screen bg-white/90 backdrop-blur-xl border-r border-slate-100/60 flex flex-col z-30 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden"
       style={{ width: sidebarWidth }}
     >
-      {/* Logo + 折叠按钮 */}
-      <div className="h-[60px] flex items-center justify-between px-4 border-b border-slate-100/60 shrink-0">
+      {/* ===== Logo 区 — 更简洁 ===== */}
+      <div className="h-[56px] flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <SiteLogo size={28} showText={sidebarExpanded} />
+          <SiteLogo size={26} showText={sidebarExpanded} />
         </div>
         <button
           onClick={toggleSidebar}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shrink-0"
+          className="p-1.5 rounded-lg text-slate-300 hover:text-slate-500 hover:bg-slate-50/80 transition-all shrink-0"
           title={sidebarExpanded ? '收起侧栏' : '展开侧栏'}
         >
           {sidebarExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
         </button>
       </div>
 
-      {/* 主导航菜单 */}
-      <nav className="flex-1 py-3 overflow-y-auto scrollbar-hide">
-        <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} space-y-1`}>
+      {/* ===== 主导航菜单 — 56px 高 / 18px 圆角 / 更大留白 ===== */}
+      <nav className="flex-1 py-4 overflow-y-auto scrollbar-hide">
+        <div className={`${sidebarExpanded ? 'px-3' : 'px-2.5'} space-y-1.5`}>
           {menuList.map((menu) => {
             const Icon = menu.icon;
             const isActive = currentMenu === menu.id;
@@ -140,30 +137,32 @@ export default function SiteSidebar() {
                 onClick={() => router.push(menu.path)}
                 className={`
                   group flex items-center gap-3 w-full text-left overflow-hidden
-                  transition-all duration-200 rounded-xl
-                  ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : 'px-3'}
-                  ${sidebarExpanded ? 'h-[52px]' : 'h-[44px]'}
+                  transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]
+                  ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : 'px-4'}
+                  h-[56px] rounded-[18px]
                   ${isActive
-                    ? 'bg-gradient-to-r from-[#7B61FF]/[0.08] to-[#5B8CFF]/[0.04] text-[#6948E8] relative'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                    ? 'bg-[#7B61FF]/[0.06] text-[#6948E8] relative'
+                    : 'text-slate-400 hover:bg-slate-50/80 hover:text-slate-600'
                   }
                 `}
                 title={!sidebarExpanded ? `${menu.name} · ${menu.subtitle}` : undefined}
               >
-                {/* 选中项左侧紫色竖条 */}
+                {/* 选中项左侧 glow 光条 */}
                 {isActive && sidebarExpanded && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[#7B61FF]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-gradient-to-b from-[#7B61FF] to-[#5B8CFF] shadow-[0_0_8px_rgba(123,97,255,0.4)]" />
                 )}
                 <div className={`shrink-0 flex items-center justify-center ${!sidebarExpanded ? 'w-full' : ''}`}>
                   <Icon
-                    className={`w-5 h-5 transition-colors duration-200 ${
-                      isActive ? 'text-[#7B61FF]' : 'text-slate-400 group-hover:text-slate-600'
+                    className={`w-[20px] h-[20px] transition-all duration-250 ${
+                      isActive
+                        ? 'text-[#7B61FF]'
+                        : 'text-slate-300 group-hover:text-slate-500'
                     }`}
                   />
                 </div>
                 {sidebarExpanded && (
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className={`font-medium truncate text-[13px] leading-tight ${isActive ? 'text-[#6948E8]' : 'text-slate-700'}`}>
+                    <div className={`font-medium truncate text-[13.5px] leading-tight ${isActive ? 'text-[#6948E8]' : 'text-slate-700'}`}>
                       {menu.name}
                     </div>
                     <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
@@ -177,65 +176,65 @@ export default function SiteSidebar() {
         </div>
       </nav>
 
-      {/* 用户信息区 - 左下角 */}
-      <div className={`shrink-0 border-t border-slate-100/60 ${sidebarExpanded ? 'px-3 py-3' : 'px-2 py-3 flex justify-center'}`}>
+      {/* ===== 底部用户区 — 更简洁 ===== */}
+      <div className={`shrink-0 ${sidebarExpanded ? 'px-3 pb-4 pt-2' : 'px-2.5 pb-4 pt-2 flex justify-center'}`}>
         {sidebarExpanded ? (
           // ========== 展开模式 ==========
           authenticated ? (
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2.5 w-full rounded-xl px-1 py-1.5 hover:bg-slate-50 transition-colors text-left"
+                className="flex items-center gap-2.5 w-full rounded-2xl px-2 py-2 hover:bg-slate-50/80 transition-colors text-left"
               >
                 {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full shrink-0 ring-2 ring-slate-100" />
+                  <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full shrink-0 ring-1 ring-slate-100" />
                 ) : (
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7B61FF]/10 to-[#5B8CFF]/10 flex items-center justify-center shrink-0">
-                    <span className="text-[#7B61FF] text-xs font-semibold">
-                      {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7B61FF]/8 to-[#5B8CFF]/6 flex items-center justify-center shrink-0">
+                    <span className="text-[#7B61FF] text-[11px] font-semibold">
+                      {user?.nickname?.slice(0, 1).toUpperCase() || '用'}
                     </span>
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <div className="text-[13px] font-medium text-slate-700 truncate">{user?.nickname || '用户'}</div>
+                  <div className="text-[13px] font-medium text-slate-600 truncate">{user?.nickname || '用户'}</div>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <Crown className="w-3 h-3 text-amber-400" />
-                    <span className="text-[11px] text-slate-400">免费版</span>
+                    <Crown className="w-2.5 h-2.5 text-amber-400/70" />
+                    <span className="text-[10.5px] text-slate-400">免费版</span>
                   </div>
                 </div>
               </button>
 
-              {/* 升级会员按钮 */}
+              {/* 升级会员 — 轻量文字链接，不要大按钮 */}
               <button
                 onClick={() => router.push('/membership')}
-                className="w-full mt-2 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-medium text-white bg-gradient-to-r from-[#7B61FF] to-[#5B8CFF] hover:shadow-md hover:shadow-[#7B61FF]/20 transition-all"
+                className="w-full mt-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[11.5px] font-medium text-[#7B61FF]/70 hover:text-[#7B61FF] hover:bg-[#7B61FF]/[0.04] transition-all"
               >
-                <Crown className="w-3.5 h-3.5" />
+                <Crown className="w-3 h-3" />
                 升级会员
               </button>
 
               {/* 用户浮层菜单 */}
               {userMenuOpen && (
-                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-1.5 z-50">
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-100/80 shadow-[0_8px_30px_rgba(0,0,0,0.06)] py-1.5 z-50">
                   {userMenuItems.map((item, idx) => {
                     const ItemIcon = item.icon;
                     const isLogout = item.action === 'logout';
                     return (
                       <div key={item.id}>
                         {idx === userMenuItems.length - 1 && (
-                          <div className="my-1.5 border-t border-slate-100/80" />
+                          <div className="my-1 border-t border-slate-100/60" />
                         )}
                         <button
                           onClick={() => handleUserMenuAction(item)}
                           className={`
-                            flex items-center gap-2.5 w-full px-3.5 py-2 text-[13px] text-left transition-colors
+                            flex items-center gap-2.5 w-full px-4 py-2 text-[13px] text-left transition-colors
                             ${isLogout
-                              ? 'text-red-500 hover:bg-red-50'
-                              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                              ? 'text-red-400 hover:bg-red-50/50'
+                              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                             }
                           `}
                         >
-                          <ItemIcon className={`w-4 h-4 shrink-0 ${isLogout ? 'text-red-400' : 'text-slate-400'}`} />
+                          <ItemIcon className={`w-4 h-4 shrink-0 ${isLogout ? 'text-red-300' : 'text-slate-300'}`} />
                           <span>{item.name}</span>
                         </button>
                       </div>
@@ -246,8 +245,8 @@ export default function SiteSidebar() {
             </div>
           ) : (
             // 未登录
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2.5 px-2 py-2">
+              <div className="w-8 h-8 rounded-full bg-slate-50/80 flex items-center justify-center shrink-0">
                 <User className="w-4 h-4 text-slate-300" />
               </div>
               <div className="min-w-0 flex-1">
@@ -261,22 +260,22 @@ export default function SiteSidebar() {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7B61FF]/10 to-[#5B8CFF]/10 flex items-center justify-center hover:ring-2 hover:ring-[#7B61FF]/20 transition-all"
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-[#7B61FF]/8 to-[#5B8CFF]/6 flex items-center justify-center hover:ring-2 hover:ring-[#7B61FF]/15 transition-all"
                 title={user?.nickname || '用户'}
               >
-                <span className="text-[#7B61FF] text-xs font-semibold">
-                  {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
+                <span className="text-[#7B61FF] text-[11px] font-semibold">
+                  {user?.nickname?.slice(0, 1).toUpperCase() || '用'}
                 </span>
               </button>
 
-              {/* 收缩模式浮层 - 向右展开 */}
+              {/* 收缩模式浮层 */}
               {userMenuOpen && (
-                <div className="absolute left-full bottom-0 ml-3 w-44 bg-white rounded-xl border border-slate-100 shadow-[0_8px_30px_rgba(0,0,0,0.08)] py-1.5 z-50">
-                  <div className="px-3.5 py-2.5 border-b border-slate-100/80">
-                    <div className="text-[13px] font-medium text-slate-700 truncate">{user?.nickname || '用户'}</div>
+                <div className="absolute left-full bottom-0 ml-3 w-44 bg-white/95 backdrop-blur-xl rounded-2xl border border-slate-100/80 shadow-[0_8px_30px_rgba(0,0,0,0.06)] py-1.5 z-50">
+                  <div className="px-4 py-2.5 border-b border-slate-100/60">
+                    <div className="text-[13px] font-medium text-slate-600 truncate">{user?.nickname || '用户'}</div>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <Crown className="w-3 h-3 text-amber-400" />
-                      <span className="text-[11px] text-slate-400">免费版</span>
+                      <Crown className="w-2.5 h-2.5 text-amber-400/70" />
+                      <span className="text-[10.5px] text-slate-400">免费版</span>
                     </div>
                   </div>
                   {userMenuItems.map((item, idx) => {
@@ -285,19 +284,19 @@ export default function SiteSidebar() {
                     return (
                       <div key={item.id}>
                         {idx === userMenuItems.length - 1 && (
-                          <div className="my-1.5 border-t border-slate-100/80" />
+                          <div className="my-1 border-t border-slate-100/60" />
                         )}
                         <button
                           onClick={() => handleUserMenuAction(item)}
                           className={`
-                            flex items-center gap-2.5 w-full px-3.5 py-2 text-[13px] text-left transition-colors
+                            flex items-center gap-2.5 w-full px-4 py-2 text-[13px] text-left transition-colors
                             ${isLogout
-                              ? 'text-red-500 hover:bg-red-50'
-                              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'
+                              ? 'text-red-400 hover:bg-red-50/50'
+                              : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                             }
                           `}
                         >
-                          <ItemIcon className={`w-4 h-4 shrink-0 ${isLogout ? 'text-red-400' : 'text-slate-400'}`} />
+                          <ItemIcon className={`w-4 h-4 shrink-0 ${isLogout ? 'text-red-300' : 'text-slate-300'}`} />
                           <span>{item.name}</span>
                         </button>
                       </div>
@@ -309,7 +308,7 @@ export default function SiteSidebar() {
           ) : (
             <button
               onClick={() => setShowLoginModal(true)}
-              className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center hover:bg-[#7B61FF]/[0.06] transition-colors"
+              className="w-9 h-9 rounded-full bg-slate-50/80 flex items-center justify-center hover:bg-[#7B61FF]/[0.04] transition-colors"
               title="登录"
             >
               <User className="w-4 h-4 text-slate-300" />
