@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useMenu, type MenuId } from '@/components/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
 import { SiteLogo } from '@/components/common/SiteLogo';
@@ -36,7 +35,8 @@ const menuList: Array<{
 
 export default function SiteSidebar() {
   const pathname = usePathname();
-  const { currentMenu, setCurrentMenu, sidebarExpanded, toggleSidebar } = useMenu();
+  const router = useRouter();
+  const { currentMenu, setCurrentMenu, sidebarExpanded, toggleSidebar, setActiveToolRoute } = useMenu();
   const { user, authenticated, setShowLoginModal, logout } = useUser();
 
   // 根据路径推断当前菜单
@@ -54,8 +54,9 @@ export default function SiteSidebar() {
       pathname.startsWith('/productpage')
     ) {
       setCurrentMenu('tools');
+      setActiveToolRoute(pathname);
     }
-  }, [pathname, setCurrentMenu]);
+  }, [pathname, setCurrentMenu, setActiveToolRoute]);
 
   const sidebarWidth = sidebarExpanded ? 240 : 68;
 
@@ -90,7 +91,16 @@ export default function SiteSidebar() {
             return (
               <button
                 key={menu.id}
-                onClick={() => setCurrentMenu(menu.id)}
+                onClick={() => {
+                  setCurrentMenu(menu.id);
+                  // 点击小工具时重置子路由，确保展示ToolsPage
+                  if (menu.id === 'tools') {
+                    setActiveToolRoute(null);
+                    if (pathname !== '/') {
+                      router.push('/');
+                    }
+                  }
+                }}
                 className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : ''}`}
                 title={!sidebarExpanded ? menu.name : undefined}
               >

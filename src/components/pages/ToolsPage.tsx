@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useMenu } from '@/components/common/MenuProvider';
 import {
   Package,
   Scissors,
@@ -76,6 +77,8 @@ const toolsList = [
 
 export default function ToolsPage() {
   const [search, setSearch] = useState('');
+  const router = useRouter();
+  const { setActiveToolRoute } = useMenu();
 
   const filtered = toolsList.filter(
     (t) =>
@@ -109,10 +112,13 @@ export default function ToolsPage() {
           {filtered.map((tool, index) => {
             const Icon = tool.icon;
             return (
-              <Link
+              <div
                 key={tool.id}
-                href={tool.href}
-                className="os-card p-5 flex flex-col gap-4 animate-stagger-in"
+                onClick={() => {
+                  setActiveToolRoute(tool.href);
+                  router.push(tool.href);
+                }}
+                className="os-card p-5 flex flex-col gap-4 animate-stagger-in cursor-pointer"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 {/* 图标 */}
@@ -129,7 +135,7 @@ export default function ToolsPage() {
                   进入工具
                   <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

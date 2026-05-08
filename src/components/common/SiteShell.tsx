@@ -1,6 +1,5 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
 import { MenuProvider, useMenu, type MenuId } from '@/components/common/MenuProvider';
 import SiteSidebar from '@/components/common/SiteSidebar';
 import HomePage from '@/components/pages/HomePage';
@@ -18,30 +17,14 @@ const PAGE_MAP: Record<MenuId, React.ComponentType> = {
   project: ProjectPage,
 };
 
-// 工具子路由前缀
-const TOOL_PATHS = [
-  '/product-generator',
-  '/background-removal',
-  '/ai-photo',
-  '/product-poster',
-  '/xiaohongshu-generator',
-  '/novel',
-  '/resume',
-  '/productpage',
-];
-
 function PageSwitcher({ children }: { children: React.ReactNode }) {
-  const { currentMenu, sidebarExpanded } = useMenu();
-  const pathname = usePathname();
-
-  // 判断当前是否在工具子路由上
-  const isOnToolSubRoute = TOOL_PATHS.some((p) => pathname.startsWith(p));
+  const { currentMenu, sidebarExpanded, activeToolRoute } = useMenu();
 
   // 动态计算主区域偏移
   const marginLeft = sidebarExpanded ? 240 : 68;
 
-  // 工具菜单下：如果正在某个工具子路由，渲染 children（Next.js 路由页面）
-  if (currentMenu === 'tools' && isOnToolSubRoute) {
+  // 工具菜单下：如果有活跃的工具子路由，渲染 children（Next.js 路由页面）
+  if (currentMenu === 'tools' && activeToolRoute) {
     return (
       <>
         <SiteSidebar />
