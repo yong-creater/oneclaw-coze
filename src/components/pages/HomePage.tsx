@@ -8,7 +8,6 @@ import {
   Upload,
   ArrowRight,
   FolderOpen,
-  ImagePlus,
   RefreshCw,
   ClipboardPaste,
   ShoppingBag,
@@ -25,15 +24,15 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Video,
 };
 
-// 模式（用于智能匹配路由，不作为主要视觉焦点）
-const modes = [
-  { key: 'product', label: '商品图', icon: ShoppingBag, slug: 'product-generator' },
-  { key: 'detail', label: '详情页', icon: LayoutTemplate, slug: 'productpage' },
-  { key: 'xiaohongshu', label: '小红书', icon: Heart, slug: 'xiaohongshu-generator' },
-  { key: 'video', label: '视频脚本', icon: Video, slug: 'novel' },
+// 创作模式卡片
+const modeCards = [
+  { key: 'product', label: '商品图', desc: '主图·场景图·卖点图', icon: ShoppingBag, slug: 'product-generator', gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
+  { key: 'detail', label: '详情页', desc: '商品详情·图文内容', icon: LayoutTemplate, slug: 'productpage', gradient: 'from-[#5B8CFF] to-[#6EE7FF]' },
+  { key: 'xiaohongshu', label: '小红书', desc: '种草封面·爆款文案', icon: Heart, slug: 'xiaohongshu-generator', gradient: 'from-[#FF6B9D] to-[#FF9A76]' },
+  { key: 'video', label: '视频脚本', desc: '短视频·口播·带货', icon: Video, slug: 'novel', gradient: 'from-[#FFB84D] to-[#FF6B6B]' },
 ] as const;
 
-// 推荐 Prompt
+// 推荐案例
 const promptPool = [
   '帮我生成一张高级护肤品主图',
   '护肤品白色背景商品图',
@@ -63,13 +62,12 @@ export default function HomePage() {
   const router = useRouter();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
+  const [activeMode, setActiveMode] = useState<string>('product');
   const [recentProjects, setRecentProjects] = useState<Array<{
     id: number; title: string; thumbnail: string | null; tool_name: string;
   }>>([]);
   const [tools, setTools] = useState<UtilityTool[]>([]);
   const [prompts, setPrompts] = useState<string[]>(() => {
-    // 初始随机选3个
     const shuffled = [...promptPool].sort(() => Math.random() - 0.5);
     return shuffled.slice(0, 3);
   });
@@ -104,22 +102,12 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  // 根据输入内容智能匹配模式
-  const detectMode = useCallback((text: string): string => {
-    const t = text.toLowerCase();
-    if (/详情页|详情|detail/.test(t)) return 'detail';
-    if (/小红书|种草|xhs|redbook/.test(t)) return 'xiaohongshu';
-    if (/视频|脚本|口播|video|script/.test(t)) return 'video';
-    return 'product'; // 默认商品图
-  }, []);
-
   // 开始创作
   const handleGenerate = useCallback(() => {
     if (!inputText.trim() || isLoading) return;
-    const mode = detectMode(inputText);
-    const route = modes.find(m => m.key === mode)?.slug ?? 'product-generator';
+    const route = modeCards.find(m => m.key === activeMode)?.slug ?? 'product-generator';
     router.push(`/${route}`);
-  }, [inputText, isLoading, detectMode, router]);
+  }, [inputText, isLoading, activeMode, router]);
 
   // Ctrl+Enter 快捷键
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -137,18 +125,17 @@ export default function HomePage() {
 
   return (
     <div className="os-page">
-      {/* ==================== AI 创作超级入口（占据全屏中心） ==================== */}
-      <div className="animate-fade-slide-up relative flex flex-col items-center justify-center" style={{ minHeight: '92vh' }}>
-
+      {/* ==================== Hero 创作区（780px · 居中） ==================== */}
+      <div className="os-hero">
         {/* 氛围光晕层 */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ height: '800px' }}>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="os-orb os-orb-primary os-atmo-orb-center" />
           <div className="os-orb os-orb-secondary os-atmo-orb-left" />
           <div className="os-orb os-orb-accent os-atmo-orb-right" />
         </div>
 
         {/* 漂浮微粒层 */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ height: '800px' }}>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="os-mote os-mote-purple os-mote-1" />
           <div className="os-mote os-mote-cyan os-mote-2" />
           <div className="os-mote os-mote-blue os-mote-3" />
@@ -157,100 +144,110 @@ export default function HomePage() {
           <div className="os-mote os-mote-blue os-mote-6" />
         </div>
 
-        {/* 标题 — 极简，不抢焦点 */}
-        <div className="text-center relative z-10 mb-10">
-          <h1 className="os-h1 tracking-tight">
-            <span className="gradient-text">创造任何你想要的</span>
+        {/* 内容层 — 垂直居中 */}
+        <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[720px] mx-auto">
+
+          {/* 标题 — 结果导向，64px 渐变 */}
+          <h1 className="os-hero-title text-center">
+            输入需求，
+            <br />
+            <span className="gradient-text">OneClaw 帮你直接生成结果</span>
           </h1>
-        </div>
 
-        {/* ===== AI 输入工作台（绝对视觉中心） ===== */}
-        <div className="os-workspace-wrapper relative z-10 w-full" style={{ maxWidth: '780px' }}>
-          <div className="os-workspace">
-            {/* Prompt 输入区域 */}
-            <div className="os-workspace-body">
-              <textarea
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value.slice(0, 500))}
-                onKeyDown={handleKeyDown}
-                placeholder="描述你想生成的内容…&#10;&#10;例如：帮我生成一张高级护肤品主图、创建数码产品详情页、制作小红书种草封面…"
-                className="os-workspace-textarea"
-                rows={6}
-              />
-            </div>
+          {/* 副标题 — 20px 灰蓝色 */}
+          <p className="os-hero-subtitle text-center mt-4">
+            商品图、详情页、小红书、视频脚本，
+            <br className="sm:hidden" />
+            不会 AI 也能轻松生成。
+          </p>
 
-            {/* 底部工具栏 */}
-            <div className="os-workspace-footer">
-              <div className="flex items-center gap-1">
-                <button className="os-workspace-tool-btn" title="上传图片">
-                  <Upload className="w-4 h-4" />
-                  <span>上传</span>
-                </button>
+          {/* 创作模式卡片 — 4 列 */}
+          <div className="os-mode-cards mt-8">
+            {modeCards.map((mode) => {
+              const Icon = mode.icon;
+              const isActive = activeMode === mode.key;
+              return (
                 <button
-                  onClick={() => navigator.clipboard.readText().then(t => setInputText(t.slice(0, 500))).catch(() => {})}
-                  className="os-workspace-tool-btn"
-                  title="粘贴"
+                  key={mode.key}
+                  onClick={() => setActiveMode(mode.key)}
+                  className={`os-mode-card ${isActive ? 'os-mode-card-active' : ''}`}
                 >
-                  <ClipboardPaste className="w-4 h-4" />
+                  <div className={`os-mode-card-icon ${isActive ? `bg-gradient-to-br ${mode.gradient}` : ''}`}>
+                    <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  </div>
+                  <div className="os-mode-card-text">
+                    <span className="os-mode-card-label">{mode.label}</span>
+                    <span className="os-mode-card-desc">{mode.desc}</span>
+                  </div>
                 </button>
-                <span className="os-workspace-counter">{inputText.length} / 500</span>
+              );
+            })}
+          </div>
+
+          {/* ===== AI 输入工作台 ===== */}
+          <div className="os-workspace-wrapper w-full mt-6">
+            <div className="os-workspace">
+              {/* Prompt 输入区域 */}
+              <div className="os-workspace-body">
+                <textarea
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value.slice(0, 500))}
+                  onKeyDown={handleKeyDown}
+                  placeholder="描述你想生成的内容…&#10;&#10;例如：帮我生成一张高级护肤品主图"
+                  className="os-workspace-textarea"
+                  rows={6}
+                />
               </div>
-              <button
-                onClick={handleGenerate}
-                disabled={!inputText.trim() || isLoading}
-                className="os-btn-primary !h-12 !rounded-[14px] !px-8 !text-[14px] !gap-2.5"
-              >
-                <Sparkles className="w-[16px] h-[16px]" />
-                {isLoading ? '生成中...' : '开始创作'}
-              </button>
+
+              {/* 底部工具栏 */}
+              <div className="os-workspace-footer">
+                <div className="flex items-center gap-1">
+                  <button className="os-workspace-tool-btn" title="上传图片">
+                    <Upload className="w-4 h-4" />
+                    <span>上传</span>
+                  </button>
+                  <button
+                    onClick={() => navigator.clipboard.readText().then(t => setInputText(t.slice(0, 500))).catch(() => {})}
+                    className="os-workspace-tool-btn"
+                    title="粘贴"
+                  >
+                    <ClipboardPaste className="w-4 h-4" />
+                  </button>
+                  <span className="os-workspace-counter">{inputText.length} / 500</span>
+                </div>
+                <button
+                  onClick={handleGenerate}
+                  disabled={!inputText.trim() || isLoading}
+                  className="os-btn-primary !h-12 !rounded-[14px] !px-8 !text-[14px] !gap-2.5"
+                >
+                  <Sparkles className="w-[16px] h-[16px]" />
+                  {isLoading ? '生成中...' : '开始创作'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* 推荐 Prompt — 极简胶囊 */}
-        <div className="relative z-10 mt-5 flex items-center gap-2.5 flex-wrap justify-center">
-          {prompts.map((prompt) => (
-            <button
-              key={prompt}
-              onClick={() => setInputText(prompt)}
-              className="os-btn-capsule text-xs !h-[30px] !px-3.5"
-            >
-              {prompt}
-            </button>
-          ))}
-          <button
-            onClick={refreshPrompts}
-            className="os-btn-ghost !p-1.5"
-            title="换一批"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* 能力标签 — 极弱化，只做信心暗示 */}
-        <div className="relative z-10 mt-6 flex items-center gap-3 justify-center">
-          {modes.map((mode) => {
-            const Icon = mode.icon;
-            return (
+          {/* 推荐案例 — 胶囊标签 */}
+          <div className="mt-5 flex items-center gap-2.5 flex-wrap justify-center">
+            {prompts.map((prompt) => (
               <button
-                key={mode.key}
-                onClick={() => router.push(`/${mode.slug}`)}
-                className="flex items-center gap-1.5 text-[12px] text-[var(--text-tertiary)] hover:text-[#7B61FF] transition-colors"
+                key={prompt}
+                onClick={() => setInputText(prompt)}
+                className="os-btn-capsule text-xs !h-[30px] !px-3.5"
               >
-                <Icon className="w-3.5 h-3.5" />
-                {mode.label}
+                {prompt}
               </button>
-            );
-          })}
+            ))}
+            <button
+              onClick={refreshPrompts}
+              className="os-btn-ghost !p-1.5"
+              title="换一批"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* 生成结果区 */}
-      {result && (
-        <div className="max-w-[780px] mx-auto mb-8 p-5 bg-[#7B61FF]/[0.06] rounded-2xl border border-[#7B61FF]/10 animate-fade-slide-up">
-          <p className="text-sm text-[#6948E8]">{result}</p>
-        </div>
-      )}
 
       {/* ==================== 最近创作（弱化 — 只保留 3 条） ==================== */}
       <div className="animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
