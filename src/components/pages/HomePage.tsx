@@ -197,6 +197,29 @@ export default function HomePage() {
           <div className="absolute top-20 left-1/3 w-[300px] h-[300px] rounded-full opacity-20" style={{ background: 'radial-gradient(circle, rgba(110,231,255,0.2) 0%, transparent 60%)' }} />
         </div>
 
+        {/* ===== AI 氛围装饰层 ===== */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ height: '540px' }}>
+          {/* 玻璃方块 - 左上 */}
+          <div className="os-hero-cube os-cube-1" />
+          {/* 玻璃方块 - 右侧 */}
+          <div className="os-hero-cube os-cube-2" />
+          {/* 渐变光球 - 左下 */}
+          <div className="os-hero-orb os-orb-1" />
+          {/* 渐变光球 - 右上 */}
+          <div className="os-hero-orb os-orb-2" />
+          {/* 轨迹线 - 左 */}
+          <div className="os-hero-trail os-trail-1" />
+          {/* 轨迹线 - 右 */}
+          <div className="os-hero-trail os-trail-2" />
+          {/* 微粒子群 */}
+          <div className="os-hero-particle os-particle-1" />
+          <div className="os-hero-particle os-particle-2" />
+          <div className="os-hero-particle os-particle-3" />
+          <div className="os-hero-particle os-particle-4" />
+          <div className="os-hero-particle os-particle-5" />
+          <div className="os-hero-particle os-particle-6" />
+        </div>
+
         {/* 标题区 */}
         <div className="text-center relative z-10 pt-16 pb-8">
           <h1 className="os-h1 tracking-tight">
@@ -209,7 +232,7 @@ export default function HomePage() {
 
         {/* AI 输入区 */}
         <div className="max-w-2xl mx-auto relative z-10">
-          <div className="os-card-static rounded-[20px] overflow-hidden" style={{ padding: 0, boxShadow: '0 4px 24px rgba(15,23,42,0.06), 0 0 0 1px rgba(123,97,255,0.04)' }}>
+          <div className="os-ai-input-shell os-card-static rounded-[20px] overflow-hidden" style={{ padding: 0 }}>
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value.slice(0, 500))}
@@ -219,7 +242,7 @@ export default function HomePage() {
               rows={4}
             />
             {/* 底部工具栏 */}
-            <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-100 bg-white">
+            <div className="flex items-center justify-between px-6 py-3.5 border-t border-white/30" style={{ background: 'rgba(255,255,255,0.5)', backdropFilter: 'blur(8px)' }}>
               <div className="flex items-center gap-2 flex-wrap">
                 {capabilities.map((cap) => {
                   const Icon = cap.icon;
