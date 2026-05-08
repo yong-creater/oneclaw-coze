@@ -304,39 +304,91 @@ body {
 }
 
 /* Hero 背景氛围 */
-/* ==================== AI 氛围系统 (Atmosphere Layer) ==================== */
-/*  参考：OpenAI / Linear / Apple — 极简 / 柔和 / 安静 / 高级  */
+/* ==================== 全局 AI 氛围背景系统 ==================== */
+/*  参考：Linear / Framer / Claude / Arc — 极简 / 柔和 / 统一 / 沉浸  */
+/*  核心原则：整个 main 内容区共享同一个背景，无断层 */
 
-/* ---- 页面渐变底色 — 浅灰紫 #F7F8FC → #EEF2FF ---- */
-.os-page {
+/* ---- main 画布 — 全局渐变底色 ---- */
+.os-main-canvas {
   position: relative;
   background: linear-gradient(
     170deg,
-    #F7F8FC 0%,
-    #F3F4FF 25%,
-    #EEF2FF 50%,
-    #F5F7FF 75%,
-    #F7F8FC 100%
+    #F7F8FF 0%,
+    #F4F1FF 20%,
+    #EEF2FF 40%,
+    #F0EDFF 60%,
+    #F5F7FF 80%,
+    #F7F8FF 100%
   );
 }
 
-/* 顶部柔和光晕 — 更大更明显 */
-.os-page::before {
-  content: '';
+/* ---- 全局背景层 — fixed 定位覆盖右侧内容区 ---- */
+.os-global-bg {
   position: fixed;
-  top: -20%;
-  left: -10%;
-  right: -10%;
-  height: 80%;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(123, 97, 255, 0.10) 0%, transparent 55%),
-    radial-gradient(ellipse 60% 40% at 75% 5%, rgba(91, 140, 255, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 35% at 25% 8%, rgba(110, 231, 255, 0.06) 0%, transparent 45%);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* 全局模糊光斑 — 超大、超柔、超低透明度 */
+.os-global-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  filter: blur(120px);
+}
+
+/* 顶部中央 — 主光斑（淡紫） */
+.os-global-orb-top {
+  width: 900px;
+  height: 600px;
+  top: -15%;
+  left: 30%;
+  background: radial-gradient(ellipse at center, rgba(123, 97, 255, 0.08) 0%, rgba(123, 97, 255, 0.03) 40%, transparent 70%);
+  animation: orbDrift 20s ease-in-out infinite;
+}
+
+/* 右上角 — 辅助光斑（淡蓝） */
+.os-global-orb-right {
+  width: 500px;
+  height: 500px;
+  top: 5%;
+  right: -5%;
+  background: radial-gradient(ellipse at center, rgba(91, 140, 255, 0.07) 0%, rgba(91, 140, 255, 0.02) 40%, transparent 70%);
+  animation: orbDrift2 24s ease-in-out infinite;
+}
+
+/* 页面中部 — 点缀光斑（淡白紫） */
+.os-global-orb-mid {
+  width: 700px;
+  height: 400px;
+  top: 45%;
+  left: 20%;
+  background: radial-gradient(ellipse at center, rgba(139, 113, 255, 0.05) 0%, rgba(139, 113, 255, 0.01) 40%, transparent 70%);
+  animation: orbDrift 18s ease-in-out infinite reverse;
+}
+
+/* ---- 页面内容区 — 透明通道，让全局背景透出 ---- */
+.os-page {
+  position: relative;
+  background: transparent;
+}
+
+/* ---- 页面级氛围装饰层（光带+微粒）---- */
+.os-page-atmo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
   z-index: 0;
 }
 
-/* ---- 柔光球 (Soft Glow Orb) — 更大更柔和 ---- */
+/* ---- 柔光球动画关键帧 ---- */
 @keyframes orbDrift {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
   33% { transform: translate(20px, -25px) scale(1.04); opacity: 0.85; }
@@ -346,35 +398,6 @@ body {
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
   40% { transform: translate(-18px, -20px) scale(1.03); opacity: 0.88; }
   70% { transform: translate(10px, -30px) scale(0.97); opacity: 0.92; }
-}
-
-.os-orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  will-change: transform, opacity;
-  filter: blur(80px);
-}
-/* 主光球 — 页面中心，最大最亮 */
-.os-orb-primary {
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(123, 97, 255, 0.18) 0%, rgba(123, 97, 255, 0.06) 35%, transparent 65%);
-  animation: orbDrift 18s ease-in-out infinite;
-}
-/* 辅助光球 — 青蓝色 */
-.os-orb-secondary {
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(110, 231, 255, 0.12) 0%, rgba(110, 231, 255, 0.03) 40%, transparent 70%);
-  animation: orbDrift2 22s ease-in-out infinite;
-}
-/* 点缀光球 — 蓝色 */
-.os-orb-accent {
-  width: 350px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(91, 140, 255, 0.10) 0%, rgba(91, 140, 255, 0.02) 40%, transparent 70%);
-  animation: orbDrift 16s ease-in-out infinite reverse;
 }
 
 /* ---- 动态模糊光带 (Soft Light Band) ---- */
@@ -457,8 +480,6 @@ body {
 .os-hero-bg { position: relative; overflow: hidden; }
 .os-hero-bg::before,
 .os-hero-bg::after { display: none; }
-
-/* ---- 卡片深度层 (Depth Layer) ---- */
 .os-card::before {
   content: '';
   position: absolute;
@@ -499,25 +520,6 @@ body {
 
 /* ---- Hero 氛围定位 ---- */
 
-/* 主光球 — 页面视觉中心 */
-.os-atmo-orb-center {
-  top: -120px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* 左下柔光 */
-.os-atmo-orb-left {
-  bottom: 40px;
-  left: -5%;
-}
-
-/* 右上柔光 */
-.os-atmo-orb-right {
-  top: 20px;
-  right: -3%;
-}
-
 /* 光带定位 */
 .os-atmo-band-top {
   top: 10%;
@@ -550,12 +552,12 @@ body {
   border: none;
   border-radius: 24px;
   padding: var(--spacing-card-padding);
-  box-shadow: 0 2px 16px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .os-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06), 0 0 20px rgba(123, 97, 255, 0.05);
+  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.10), 0 0 20px rgba(123, 97, 255, 0.06);
 }
 
 /* 静态卡片（不浮起） */
@@ -566,7 +568,7 @@ body {
   border: none;
   border-radius: 24px;
   padding: var(--spacing-card-padding);
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
 }
 
 /* 卡片图片区域 */
@@ -772,12 +774,12 @@ body {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(123, 97, 255, 0.04);
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06);
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .os-ai-input-shell:focus-within {
   background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08), 0 8px 32px rgba(123, 97, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08), 0 12px 48px rgba(99, 102, 241, 0.10);
   border-color: rgba(123, 97, 255, 0.2);
 }
 
@@ -1025,14 +1027,14 @@ body {
 }
 .os-mode-card-v2:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(123, 97, 255, 0.08);
+  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.10);
   border-color: rgba(123, 97, 255, 0.15);
   background: rgba(255, 255, 255, 0.85);
 }
 .os-mode-card-v2-active {
   background: linear-gradient(135deg, rgba(123, 97, 255, 0.08), rgba(91, 140, 255, 0.05)) !important;
   border-color: rgba(123, 97, 255, 0.25) !important;
-  box-shadow: 0 0 28px rgba(123, 97, 255, 0.12), 0 4px 16px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 0 28px rgba(123, 97, 255, 0.12), 0 8px 40px rgba(99, 102, 241, 0.06) !important;
 }
 .os-mode-card-v2-icon {
   width: 40px;
@@ -1078,7 +1080,7 @@ body {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 32px;
-  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.08), 0 2px 12px rgba(15, 23, 42, 0.03);
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06);
   padding: 32px;
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
@@ -1226,11 +1228,11 @@ body {
 
 /* ==================== Creator OS 页面布局 ==================== */
 
-/* 页面容器 */
+/* 页面容器 — 透明通道，背景由 os-main-canvas 提供 */
 .os-page {
-  padding: 40px var(--spacing-page-x);
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 40px 0;
+  position: relative;
+  min-height: 100vh;
 }
 @media (max-width: 768px) {
   .os-page {
