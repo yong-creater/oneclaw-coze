@@ -311,12 +311,13 @@ body {
   border: 1px solid var(--border-light);
   border-radius: 16px;
   padding: var(--spacing-card-padding);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .os-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px -8px rgba(123, 97, 255, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
-  border-color: rgba(123, 97, 255, 0.2);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  border-color: rgba(123, 97, 255, 0.15);
 }
 
 /* 静态卡片（不浮起） */
@@ -324,6 +325,21 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 16px;
+  padding: var(--spacing-card-padding);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+
+/* 卡片图片区域 */
+.os-card-image {
+  aspect-ratio: 16 / 10;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #F8FAFC;
+}
+.os-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* 卡片图标背景 - 渐变 */

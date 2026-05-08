@@ -159,7 +159,7 @@ export default function ProjectPage() {
                 style={{ animationDelay: `${index * 0.03}s` }}
               >
                 {/* 主行 */}
-                <div className="p-4 flex items-center gap-4">
+                <div className="p-6 flex items-center gap-4">
                   {/* 图标 */}
                   <div className={`os-icon-bg bg-gradient-to-br ${meta.gradient} text-white shrink-0`}>
                     {project.thumbnail ? (
@@ -174,15 +174,15 @@ export default function ProjectPage() {
                   </div>
                   {/* 文字 */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-800 truncate">
+                    <h3 className="os-h3 truncate">
                       {project.title || project.tool_name}
                     </h3>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[11px] text-slate-400">
+                      <span className="os-caption">
                         {meta.label}
                       </span>
                       <span className="text-[11px] text-slate-200">|</span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="os-caption">
                         {new Date(project.created_at).toLocaleDateString('zh-CN')}
                       </span>
                     </div>

@@ -119,8 +119,8 @@ export default function TemplatePage() {
                 className="os-card p-0 overflow-hidden flex flex-col animate-stagger-in"
                 style={{ animationDelay: `${index * 0.03}s` }}
               >
-                {/* 图片占位 */}
-                <div className="aspect-[16/10] bg-slate-50 relative flex items-center justify-center">
+                {/* 图片区域 */}
+                <div className="aspect-[4/3] bg-slate-50 relative flex items-center justify-center">
                   {tpl.thumbnail ? (
                     <img src={tpl.thumbnail} alt={tpl.name} className="w-full h-full object-cover" />
                   ) : (
@@ -131,27 +131,27 @@ export default function TemplatePage() {
                   {/* 推荐标记 */}
                   {tpl.is_featured && (
                     <div className="absolute top-2.5 right-2.5">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-[#FFB84D] flex items-center justify-center">
                         <Star className="w-3.5 h-3.5 text-white fill-white" />
                       </div>
                     </div>
                   )}
                   {/* 分类标签 */}
                   <div className="absolute bottom-2.5 left-2.5">
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-semibold text-white bg-gradient-to-r ${catConfig.gradient}`}>
+                    <span className="os-btn-capsule !h-5 !text-[10px] !px-2 !font-semibold pointer-events-none bg-black/40 !text-white">
                       {catConfig.label}
                     </span>
                   </div>
                 </div>
                 {/* 文字区 */}
-                <div className="p-4 flex-1 flex flex-col gap-2">
-                  <h3 className="text-sm font-semibold text-slate-800 truncate">{tpl.name}</h3>
-                  <p className="text-xs text-slate-500 line-clamp-2 flex-1">
+                <div className="p-6 flex-1 flex flex-col gap-2">
+                  <h3 className="os-h3 truncate">{tpl.name}</h3>
+                  <p className="os-caption line-clamp-2 flex-1">
                     {tpl.description || '暂无描述'}
                   </p>
                   <button
                     onClick={() => handleUseTemplate(tpl)}
-                    className="os-btn-primary w-full justify-center text-xs py-2"
+                    className="os-btn-primary w-full justify-center text-xs py-2.5"
                   >
                     使用模板
                   </button>

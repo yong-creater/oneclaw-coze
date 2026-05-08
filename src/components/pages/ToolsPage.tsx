@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
   Search,
-  ArrowRight,
   Package,
   Scissors,
   Camera,
@@ -47,6 +46,7 @@ interface UtilityTool {
   color: string | null;
   sort_order: number;
   tool_type: string | null;
+  use_cases: string[] | null;
 }
 
 // slug 到路由的映射
@@ -156,37 +156,36 @@ export default function ToolsPage() {
               >
                 {/* 封面图区域 */}
                 {hasCover ? (
-                  <div className="relative h-36 bg-slate-50 overflow-hidden">
+                  <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden">
                     <img
                       src={tool.cover_image!}
                       alt={tool.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    {/* 底部渐变遮罩 */}
-                    <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white/90 to-transparent" />
                   </div>
                 ) : (
-                  <div className={`h-36 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-                    <Icon className="w-10 h-10 text-white/80" />
+                  <div className={`aspect-[4/3] bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                    <Icon className="w-12 h-12 text-white/80" />
                   </div>
                 )}
                 {/* 文字区域 */}
-                <div className="p-5 pt-3">
-                  <div className="flex items-center gap-2.5">
-                    {!hasCover && (
-                      <div className={`os-icon-bg-sm bg-gradient-to-br ${gradient} text-white`}>
-                        <Icon className="w-3.5 h-3.5" />
-                      </div>
-                    )}
-                    <h3 className="text-sm font-semibold text-slate-800">{tool.name}</h3>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-2">
+                <div className="p-6">
+                  <h3 className="os-h3">{tool.name}</h3>
+                  <p className="os-caption mt-1.5 line-clamp-2">
                     {tool.description || 'AI智能创作工具'}
                   </p>
-                  {/* 进入按钮 */}
-                  <div className="flex items-center text-xs text-slate-400 mt-3 group-hover:text-[#7B61FF] transition-colors">
-                    进入工具
-                    <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                  {/* 标签 + 按钮 */}
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex gap-1.5">
+                      {(tool.use_cases || []).slice(0, 2).map((tag: string) => (
+                        <span key={tag} className="os-btn-capsule !h-6 !text-xs !px-2.5 pointer-events-none">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-xs font-medium text-[#7B61FF] opacity-0 group-hover:opacity-100 transition-opacity">
+                      进入 →
+                    </span>
                   </div>
                 </div>
               </div>

@@ -141,26 +141,26 @@ export default function PromptPage() {
             return (
               <div
                 key={prompt.id}
-                className="os-card p-5 flex flex-col gap-3 animate-stagger-in"
+                className="os-card flex flex-col gap-3 animate-stagger-in"
                 style={{ animationDelay: `${index * 0.03}s` }}
               >
                 {/* Top: Category + Uses */}
                 <div className="flex items-center justify-between">
-                  <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold text-white bg-gradient-to-r ${catConfig.gradient}`}>
+                  <span className="os-btn-capsule !h-6 !text-xs !px-2.5 !font-semibold pointer-events-none bg-[#7B61FF]/10 !text-[#7B61FF]">
                     {catConfig.label}
                   </span>
                   {prompt.uses != null && (
-                    <span className="text-xs text-slate-400">{prompt.uses} 次使用</span>
+                    <span className="os-caption">{prompt.uses} 次使用</span>
                   )}
                 </div>
 
                 {/* Title */}
-                <h3 className="text-sm font-semibold text-slate-800 leading-snug">
+                <h3 className="os-h3 leading-snug">
                   {prompt.title}
                 </h3>
 
                 {/* Content Preview */}
-                <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
+                <p className="os-body line-clamp-3" style={{fontSize: "13px"}}>
                   {prompt.content}
                 </p>
 
@@ -168,7 +168,7 @@ export default function PromptPage() {
                 {prompt.tags && prompt.tags.length > 0 && (
                   <div className="flex gap-1.5 flex-wrap">
                     {prompt.tags.slice(0, 4).map((tag, i) => (
-                      <span key={i} className="flex items-center gap-0.5 px-2 py-0.5 bg-[#7B61FF]/[0.06] text-[#7B61FF] rounded-md text-[11px] font-medium">
+                      <span key={i} className="os-btn-capsule !h-5 !text-[11px] !px-2 pointer-events-none bg-[#7B61FF]/[0.06] !text-[#7B61FF]">
                         <Tag className="w-2.5 h-2.5" />
                         {tag}
                       </span>

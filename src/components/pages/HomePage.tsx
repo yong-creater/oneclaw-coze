@@ -13,8 +13,6 @@ import {
   RefreshCw,
   FolderOpen,
   ArrowRight,
-  Wand2,
-  ChevronRight,
   Package,
   Scissors,
   Camera,
@@ -24,6 +22,8 @@ import {
   ShoppingBag,
   Heart,
   Feather,
+  Layout,
+  Wrench,
 } from 'lucide-react';
 
 // 图标名称 → Lucide 组件映射
@@ -259,13 +259,13 @@ export default function HomePage() {
 
           <div className="grid grid-cols-3 gap-6">
             {tools.map((tool) => (
-              <button
+              <div
                 key={tool.id}
                 onClick={() => router.push(`/${tool.slug}`)}
-                className="os-card rounded-2xl overflow-hidden text-left group"
+                className="os-card p-0 overflow-hidden cursor-pointer group"
               >
                 {/* 封面图区域 */}
-                <div className="relative h-28 bg-slate-50 overflow-hidden">
+                <div className="os-card-image">
                   {tool.cover_image ? (
                     <img
                       src={tool.cover_image}
@@ -279,14 +279,23 @@ export default function HomePage() {
                   )}
                 </div>
                 {/* 信息区 */}
-                <div className="p-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-slate-800">{tool.name}</h3>
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#7B61FF] transition-colors" />
+                <div className="p-5 flex flex-col gap-2">
+                  <h3 className="text-[15px] font-semibold text-slate-800">{tool.name}</h3>
+                  <p className="text-[13px] text-slate-500 line-clamp-2">{tool.description}</p>
+                  {tool.use_cases && tool.use_cases.length > 0 && (
+                    <div className="flex gap-1.5 flex-wrap mt-1">
+                      {tool.use_cases.slice(0, 3).map((tag: string, i: number) => (
+                        <span key={i} className="os-btn-capsule !h-6 !text-[11px] !px-2 pointer-events-none">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-2">
+                    <span className="os-btn-primary !text-xs !py-1.5 !px-4 inline-flex items-center gap-1">
+                      开始使用 <ArrowRight className="w-3 h-3" />
+                    </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-1">{tool.description}</p>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -353,26 +362,29 @@ export default function HomePage() {
 
           <div className="space-y-3">
             {[
-              { name: '提示词库', desc: '浏览和使用AI创作提示词', path: '/prompts', gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
-              { name: '模板中心', desc: '一键使用创作模板', path: '/templates', gradient: 'from-blue-400 to-cyan-500' },
-              { name: '小工具', desc: '使用AI创作小工具', path: '/tools', gradient: 'from-pink-400 to-rose-500' },
-              { name: '我的项目', desc: '查看所有生成记录', path: '/projects', gradient: 'from-emerald-400 to-teal-500' },
-            ].map((item) => (
-              <button
-                key={item.path}
-                onClick={() => router.push(item.path)}
-                className="w-full os-card p-4 flex items-center gap-3 text-left"
-              >
-                <div className={`os-icon-bg bg-gradient-to-br ${item.gradient} text-white`} style={{ width: 40, height: 40, borderRadius: 10 }}>
-                  <Wand2 className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-slate-800">{item.name}</div>
-                  <div className="text-xs text-slate-500">{item.desc}</div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
-              </button>
-            ))}
+              { name: '提示词库', desc: '浏览和使用AI创作提示词', path: '/prompts', icon: BookOpen },
+              { name: '模板中心', desc: '一键使用创作模板', path: '/templates', icon: Layout },
+              { name: '小工具', desc: '使用AI创作小工具', path: '/tools', icon: Wrench },
+              { name: '我的项目', desc: '查看所有生成记录', path: '/projects', icon: FolderOpen },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => router.push(item.path)}
+                  className="w-full os-card flex items-center gap-4 text-left"
+                >
+                  <div className="w-10 h-10 rounded-[10px] bg-[#7B61FF]/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-5 h-5 text-[#7B61FF]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="os-h3">{item.name}</div>
+                    <div className="os-caption">{item.desc}</div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
