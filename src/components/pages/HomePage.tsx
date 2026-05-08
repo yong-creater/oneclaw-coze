@@ -31,16 +31,56 @@ const showcaseExamples = [
   { title: '视频封面', category: '视频脚本', image: '/demo-scene.jpg' },
 ];
 
-// 今日热门数据
-const hotToday = [
-  { title: '高级护肤品主图', category: '商品图', image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=750&fit=crop&auto=format&q=80' },
-  { title: '夏日穿搭种草图', category: '小红书', image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=450&fit=crop&auto=format&q=80' },
-  { title: '家居好物详情页', category: '详情页', image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=600&fit=crop&auto=format&q=80' },
-  { title: '零食包装场景图', category: '商品图', image: 'https://images.unsplash.com/photo-1599490659213-e2b9527bbd7f?w=600&h=750&fit=crop&auto=format&q=80' },
-  { title: '数码产品主图', category: '商品图', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=450&fit=crop&auto=format&q=80' },
-  { title: '健身器材详情页', category: '详情页', image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&h=600&fit=crop&auto=format&q=80' },
-  { title: '美妆种草封面', category: '小红书', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=750&fit=crop&auto=format&q=80' },
-  { title: '美食带货脚本', category: '视频脚本', image: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=600&h=450&fit=crop&auto=format&q=80' },
+// 热门创作结果数据
+const hotResults = [
+  {
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '商品图',
+    prompt: '高级护肤品主图，白底高级感',
+    tags: ['GPT-Image-2', '商业风'],
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '小红书',
+    prompt: '夏日穿搭种草图，清新文艺风格',
+    tags: ['GPT-Image-2', '小红书'],
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '详情页',
+    prompt: '家居好物卖点长图，极简风格',
+    tags: ['GPT-Image-2', '电商'],
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '商品图',
+    prompt: '数码产品主图，深色科技风',
+    tags: ['GPT-Image-2', '科技感'],
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '小红书',
+    prompt: '美妆种草封面，高级质感',
+    tags: ['GPT-Image-2', '美妆'],
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '视频脚本',
+    prompt: '零食带货口播脚本，3分钟',
+    tags: ['GPT-4o', '带货'],
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '商品图',
+    prompt: '手表产品主图，极简商务风',
+    tags: ['GPT-Image-2', '商务风'],
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=600&fit=crop&auto=format&q=80',
+    type: '详情页',
+    prompt: '笔记本电脑详情页，科技风格',
+    tags: ['GPT-Image-2', '数码'],
+  },
 ];
 
 export default function HomePage() {
@@ -197,12 +237,15 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ==================== 今日热门生成 — 瀑布流 ==================== */}
+      {/* ==================== 热门创作结果 — AI 结果流 ==================== */}
       <section className="os-section animate-fade-slide-up" style={{ animationDelay: '0.15s' }}>
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <TrendingUp className="w-5 h-5 text-[#7B61FF]/60" />
-            <h2 className="text-xl font-semibold text-slate-700">今日热门生成</h2>
+          <div>
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-5 h-5 text-[#7B61FF]/60" />
+              <h2 className="text-xl font-semibold text-slate-700">热门创作结果</h2>
+            </div>
+            <p className="text-[13px] text-slate-400 mt-1.5 ml-8">看看大家正在生成什么内容</p>
           </div>
           <button
             onClick={() => router.push('/tools')}
@@ -212,26 +255,34 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* 瀑布流布局 */}
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-          {hotToday.map((item, idx) => (
+        {/* 4列规则网格 */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {hotResults.map((item, idx) => (
             <div
               key={idx}
-              className="os-card group cursor-pointer overflow-hidden !border-0 break-inside-avoid"
+              className="os-result-card group cursor-pointer"
               onClick={() => router.push('/tools')}
             >
-              <div className="relative overflow-hidden">
+              {/* 大图区域 */}
+              <div className="os-result-card-image">
                 <img
                   src={item.image}
-                  alt={item.title}
-                  className="w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  style={{ aspectRatio: idx % 3 === 0 ? '4/5' : idx % 3 === 1 ? '4/3' : '1/1' }}
+                  alt={item.prompt}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {/* 类型标签 — 悬浮在图片上 */}
+                <span className="os-result-card-type">{item.type}</span>
               </div>
-              <div className="p-3.5">
-                <p className="text-[13px] font-medium text-slate-700 truncate">{item.title}</p>
-                <span className="text-[11px] text-slate-400">{item.category}</span>
+              {/* 信息区 */}
+              <div className="os-result-card-info">
+                {/* 用户需求 */}
+                <p className="os-result-card-prompt">{item.prompt}</p>
+                {/* 生成标签 */}
+                <div className="os-result-card-tags">
+                  {item.tags.map((tag) => (
+                    <span key={tag} className="os-result-card-tag">{tag}</span>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
