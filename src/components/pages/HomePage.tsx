@@ -137,13 +137,12 @@ export default function HomePage() {
           <div className="os-studio mt-12">
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
+              <h3 className="os-studio-label">描述你想生成的内容</h3>
               <div className="os-studio-input-area">
                 <div className="relative">
-                  {/* 结构化 placeholder — 标题+示例层级 */}
                   {!inputText && (
                     <div className="os-studio-placeholder" onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}>
-                      <p className="os-studio-placeholder-title">描述你想生成的内容</p>
-                      <p className="os-studio-placeholder-example">例如：上传一张耳机图，生成高级商品主图和场景图</p>
+                      <p className="os-studio-placeholder-example">例如：上传一张耳机图，生成高级商品主图、卖点图和场景图</p>
                     </div>
                   )}
                   <textarea
