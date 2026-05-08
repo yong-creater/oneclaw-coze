@@ -8,8 +8,6 @@ import {
   Upload,
   ArrowRight,
   FolderOpen,
-  RefreshCw,
-  ClipboardPaste,
   ShoppingBag,
   LayoutTemplate,
   Heart,
@@ -31,19 +29,6 @@ const modeCards = [
   { key: 'xiaohongshu', label: '小红书', desc: '种草封面·爆款文案', icon: Heart, slug: 'xiaohongshu-generator', gradient: 'from-[#FF6B9D] to-[#FF9A76]' },
   { key: 'video', label: '视频脚本', desc: '短视频·口播·带货', icon: Video, slug: 'novel', gradient: 'from-[#FFB84D] to-[#FF6B6B]' },
 ] as const;
-
-// 推荐案例
-const promptPool = [
-  '帮我生成一张高级护肤品主图',
-  '护肤品白色背景商品图',
-  '零食包装场景图',
-  '护肤品详情页，强调成分功效',
-  '数码产品详情页，极简科技风',
-  '小红书种草图，夏日护肤',
-  '测评类小红书封面',
-  '护肤品带货短视频脚本',
-  '数码产品开箱脚本',
-];
 
 // ========== UtilityTool 类型 ==========
 interface UtilityTool {
@@ -67,10 +52,7 @@ export default function HomePage() {
     id: number; title: string; thumbnail: string | null; tool_name: string;
   }>>([]);
   const [tools, setTools] = useState<UtilityTool[]>([]);
-  const [prompts, setPrompts] = useState<string[]>(() => {
-    const shuffled = [...promptPool].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 3);
-  });
+
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -117,11 +99,7 @@ export default function HomePage() {
     }
   }, [handleGenerate]);
 
-  // 换一批推荐
-  const refreshPrompts = useCallback(() => {
-    const shuffled = [...promptPool].sort(() => Math.random() - 0.5);
-    setPrompts(shuffled.slice(0, 3));
-  }, []);
+
 
   return (
     <div className="os-page">
@@ -184,8 +162,8 @@ export default function HomePage() {
             })}
           </div>
 
-          {/* ===== AI 输入工作台 ===== */}
-          <div className="w-full max-w-[720px] mt-8">
+          {/* ===== AI 输入工作台 — 1180px / 420px ===== */}
+          <div className="w-full mt-8">
             <div className="os-workspace">
               {/* Prompt 输入区域 */}
               <div className="os-workspace-body">
@@ -193,9 +171,9 @@ export default function HomePage() {
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value.slice(0, 500))}
                   onKeyDown={handleKeyDown}
-                  placeholder="描述你想生成的内容…&#10;&#10;例如：帮我生成一张高级护肤品主图"
+                  placeholder={'描述你想生成的内容，例如：\n\n帮我生成一套高级护肤品商品图\n或者：\n上传商品图，自动生成详情页和卖点图'}
                   className="os-workspace-textarea"
-                  rows={6}
+                  rows={12}
                 />
               </div>
 
@@ -207,45 +185,36 @@ export default function HomePage() {
                     <span>上传</span>
                   </button>
                   <button
-                    onClick={() => navigator.clipboard.readText().then(t => setInputText(t.slice(0, 500))).catch(() => {})}
+                    onClick={() => {
+                      const ideas = [
+                        '帮我生成一套高级护肤品商品图',
+                        '零食包装场景图，白底高级感',
+                        '数码产品详情页，极简科技风',
+                        '小红书种草图，夏日护肤推荐',
+                      ];
+                      setInputText(ideas[Math.floor(Math.random() * ideas.length)]);
+                    }}
                     className="os-workspace-tool-btn"
-                    title="粘贴"
+                    title="灵感推荐"
                   >
-                    <ClipboardPaste className="w-4 h-4" />
+                    <Sparkles className="w-4 h-4" />
+                    <span>灵感推荐</span>
                   </button>
                   <span className="os-workspace-counter">{inputText.length} / 500</span>
                 </div>
                 <button
                   onClick={handleGenerate}
                   disabled={!inputText.trim() || isLoading}
-                  className="os-btn-primary !h-12 !rounded-[14px] !px-8 !text-[14px] !gap-2.5"
+                  className="os-cta-btn"
                 >
-                  <Sparkles className="w-[16px] h-[16px]" />
+                  <Sparkles className="w-5 h-5" />
                   {isLoading ? '生成中...' : '开始创作'}
                 </button>
               </div>
             </div>
           </div>
 
-          {/* 推荐案例 — 胶囊标签 */}
-          <div className="mt-5 flex items-center gap-2.5 flex-wrap justify-center">
-            {prompts.map((prompt) => (
-              <button
-                key={prompt}
-                onClick={() => setInputText(prompt)}
-                className="os-btn-capsule text-xs !h-[30px] !px-3.5"
-              >
-                {prompt}
-              </button>
-            ))}
-            <button
-              onClick={refreshPrompts}
-              className="os-btn-ghost !p-1.5"
-              title="换一批"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-            </button>
-          </div>
+
         </div>
       </div>
 
