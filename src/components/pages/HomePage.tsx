@@ -14,6 +14,7 @@ import {
   FolderOpen,
   ArrowRight,
   Wand2,
+  ChevronRight,
 } from 'lucide-react';
 
 // ========== 快捷动作 ==========
@@ -32,8 +33,20 @@ const quickPrompts = [
   '生成TikTok带货视频脚本',
 ];
 
+// ========== 工具数据类型 ==========
+interface UtilityTool {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string;
+  description: string;
+  cover_image: string | null;
+  color: string;
+  use_cases: string[];
+}
+
 export default function HomePage() {
-  const { pendingInput, consumePendingInput, setPendingInput } = useMenu();
+  const { pendingInput, consumePendingInput } = useMenu();
   const router = useRouter();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +54,7 @@ export default function HomePage() {
   const [recentProjects, setRecentProjects] = useState<Array<{
     id: number; title: string; thumbnail: string | null; tool_name: string;
   }>>([]);
+  const [tools, setTools] = useState<UtilityTool[]>([]);
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -57,6 +71,18 @@ export default function HomePage() {
       .then(data => {
         const list = Array.isArray(data?.data) ? data.data : Array.isArray(data?.generations) ? data.generations : [];
         setRecentProjects(list.slice(0, 6));
+      })
+      .catch(() => {});
+  }, []);
+
+  // 获取工具列表（仅 is_active 的）
+  useEffect(() => {
+    fetch('/api/utility-tools', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.tools)) {
+          setTools(data.tools);
+        }
       })
       .catch(() => {});
   }, []);
@@ -81,6 +107,21 @@ export default function HomePage() {
   const handleQuickAction = useCallback((action: typeof quickActions[0]) => {
     setInputText(action.prompt);
   }, []);
+
+  // 工具颜色渐变映射
+  const getGradient = (color: string) => {
+    const map: Record<string, string> = {
+      purple: 'from-violet-500 to-purple-600',
+      blue: 'from-blue-400 to-indigo-500',
+      pink: 'from-pink-400 to-rose-500',
+      green: 'from-emerald-400 to-teal-500',
+      orange: 'from-orange-400 to-amber-500',
+      yellow: 'from-yellow-400 to-orange-400',
+      cyan: 'from-cyan-400 to-sky-500',
+      red: 'from-red-400 to-rose-500',
+    };
+    return map[color] || 'from-purple-400 to-indigo-500';
+  };
 
   return (
     <div className="os-page">
@@ -177,8 +218,65 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ==================== 第二层：最近使用 + 快捷入口 ==================== */}
-      <div className="mt-12 grid grid-cols-5 gap-6 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
+      {/* ==================== 第二层：AI 创作能力 ==================== */}
+      {tools.length > 0 && (
+        <div className="mt-12 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="os-section-title">AI 创作能力</h2>
+              <p className="os-section-desc">选择能力，快速生成内容</p>
+            </div>
+            <button
+              onClick={() => router.push('/tools')}
+              className="os-btn-ghost text-sm"
+            >
+              查看全部 <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            {tools.map((tool) => (
+              <button
+                key={tool.id}
+                onClick={() => router.push(`/${tool.slug}`)}
+                className="os-card rounded-2xl overflow-hidden text-left group"
+              >
+                {/* 封面图区域 */}
+                <div className="relative h-28 bg-slate-50 overflow-hidden">
+                  {tool.cover_image ? (
+                    <img
+                      src={tool.cover_image}
+                      alt={tool.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${getGradient(tool.color)} flex items-center justify-center`}>
+                      <span className="text-3xl">{tool.icon || '🛠️'}</span>
+                    </div>
+                  )}
+                  {/* 渐变遮罩 + 图标 */}
+                  <div className="absolute top-2.5 left-2.5">
+                    <div className={`os-icon-bg-sm bg-gradient-to-br ${getGradient(tool.color)} text-white shadow-lg`}>
+                      <span className="text-sm">{tool.icon || '🛠️'}</span>
+                    </div>
+                  </div>
+                </div>
+                {/* 信息区 */}
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-slate-800">{tool.name}</h3>
+                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-purple-400 transition-colors" />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-1">{tool.description}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ==================== 第三层：最近使用 + 快捷入口 ==================== */}
+      <div className="mt-12 grid grid-cols-5 gap-6 animate-fade-slide-up" style={{ animationDelay: '0.2s' }}>
         {/* 最近项目 */}
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-5">
