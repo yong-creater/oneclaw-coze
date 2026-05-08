@@ -43,13 +43,18 @@ export default function TemplatePage() {
     fetch('/api/templates')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setTemplates(data.templates || []);
+        if (data.success && Array.isArray(data.templates)) {
+          setTemplates(data.templates);
+        }
+      })
+      .catch(() => {
+        // fetch 失败时保持空数组
       })
       .finally(() => setLoading(false));
   }, []);
 
-  // 分类筛选 + 搜索
-  const filtered = templates.filter((t) => {
+  // 分类筛选 + 搜索（防御性过滤）
+  const filtered = (templates || []).filter((t) => {
     const matchCategory = activeCategory === 'all' || t.template_type === activeCategory;
     const matchSearch =
       search === '' ||
