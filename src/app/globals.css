@@ -1141,14 +1141,15 @@ body {
 .os-studio {
   width: 100%;
   max-width: 1180px;
+  height: 420px;
   display: grid;
-  grid-template-columns: 6fr 4fr;
+  grid-template-columns: 65% 35%;
   gap: 24px;
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 32px;
-  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06);
+  box-shadow: 0 20px 60px rgba(109, 94, 246, 0.08);
   padding: 32px;
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
