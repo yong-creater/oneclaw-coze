@@ -454,7 +454,7 @@ export default function ResumeOptimizer() {
 • 工作经历
 • 项目经验
 • 专业技能`}
-                    className="w-full min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 hover:border-slate-300 dark:hover:border-slate-600 transition-colors resize-y text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-mono"
+                    className="os-textarea w-full !min-h-[280px] font-mono"
                   />
                   
                   {/* 底部区域 */}
@@ -502,7 +502,7 @@ export default function ResumeOptimizer() {
                     value={jdText}
                     onChange={(e) => setJdText(e.target.value)}
                     placeholder="请粘贴目标岗位JD全文（支持复制Boss直聘、智联等平台JD），系统将自动拆解核心关键词..."
-                    className="w-full min-h-[280px] p-4 bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 hover:border-slate-300 dark:hover:border-slate-600 transition-colors resize-y text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="os-textarea w-full !min-h-[280px]"
                   />
                   
                   {/* 底部关键词区 */}

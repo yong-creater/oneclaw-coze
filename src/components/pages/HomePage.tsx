@@ -166,9 +166,9 @@ export default function HomePage() {
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value.slice(0, 500))}
-              placeholder="描述你的创作需求，例如：为这款护肤品生成一张高端主图..."
+              placeholder="描述你想生成的内容，例如：为这款耳机生成高级电商主图..."
               className="os-ai-input border-none rounded-b-none"
-              style={{ minHeight: 120 }}
+              style={{ minHeight: 140 }}
               rows={4}
             />
             <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-100 bg-white">

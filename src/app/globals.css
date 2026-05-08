@@ -490,48 +490,72 @@ body {
 
 /* ==================== Creator OS 输入系统 ==================== */
 
-/* AI 大输入框 */
+/* AI 主输入框 — 首页 Hero / Prompt Workspace 风格 */
 .os-ai-input {
   width: 100%;
-  min-height: 120px;
-  padding: var(--spacing-input-padding) 24px;
-  background: #F9FAFB;
-  border: 2px solid transparent;
+  min-height: 140px;
+  padding: 24px;
+  background: #FFFFFF;
+  border: 1px solid #E9EEF5;
   border-radius: 20px;
   font-size: var(--typo-body-size);
   line-height: var(--typo-body-line-height);
-  color: #111827;
+  color: var(--text-title);
   resize: none;
   outline: none;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .os-ai-input::placeholder {
-  color: #9CA3AF;
+  color: #94A3B8;
+  font-size: 15px;
 }
 .os-ai-input:hover {
-  background: #FFFFFF;
-  border-color: #E5E7EB;
+  border-color: #D1D5DB;
 }
 .os-ai-input:focus {
-  background: #FFFFFF;
   border-color: #7B61FF;
-  box-shadow: 0 0 0 4px rgba(123, 97, 255, 0.1), 0 0 20px rgba(123, 97, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(123, 97, 255, 0.08), 0 0 24px rgba(91, 140, 255, 0.06);
+}
+
+/* 普通输入框 — 商品名/标题/搜索 */
+.os-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  background: #FFFFFF;
+  border: 1px solid #E9EEF5;
+  border-radius: 14px;
+  font-size: var(--typo-body-size);
+  color: var(--text-title);
+  outline: none;
+  transition: all 0.2s ease;
+}
+.os-input::placeholder {
+  color: #94A3B8;
+}
+.os-input:hover {
+  border-color: #D1D5DB;
+}
+.os-input:focus {
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08);
 }
 
 /* 搜索输入框 */
 .os-search-input {
   width: 100%;
-  padding: 10px 16px 10px 40px;
-  background: white;
-  border: 1px solid var(--border-light);
-  border-radius: 12px;
+  height: 44px;
+  padding: 0 16px 0 40px;
+  background: #FFFFFF;
+  border: 1px solid #E9EEF5;
+  border-radius: 14px;
   font-size: 14px;
   color: #111827;
   outline: none;
   transition: all 0.2s ease;
 }
 .os-search-input::placeholder {
-  color: #9CA3AF;
+  color: #94A3B8;
 }
 .os-search-input:hover {
   border-color: #D1D5DB;
@@ -540,6 +564,52 @@ body {
   border-color: #7B61FF;
   box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08);
 }
+
+/* Textarea — 卖点/描述等 */
+.os-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  border: 1px solid #E9EEF5;
+  border-radius: 14px;
+  font-size: var(--typo-body-size);
+  line-height: 1.6;
+  color: var(--text-title);
+  resize: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.os-textarea::placeholder {
+  color: #94A3B8;
+}
+.os-textarea:hover {
+  border-color: #D1D5DB;
+}
+.os-textarea:focus {
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08);
+}
+
+/* 上传区域 — AI 创作风格 */
+.os-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 32px;
+  background: #F8FAFC;
+  border: 2px dashed #D1D5DB;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.os-upload:hover {
+  background: rgba(123, 97, 255, 0.03);
+  border-color: #7B61FF;
+}
+
+/* 输入区能力按钮 — 复用 Capsule Button */
 
 /* ==================== Creator OS 标签系统 ==================== */
 

@@ -215,7 +215,7 @@ export default function XiaohongshuGeneratorPage() {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="比如：减肥方法 / AI副业 / 护肤心得 / 探店美食"
-                  className="w-full h-28 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-pink-200 dark:border-pink-800 rounded-xl focus:outline-none focus:border-pink-500 transition-colors resize-none text-slate-800 dark:text-white placeholder:text-slate-400 text-sm"
+                  className="os-textarea w-full !min-h-[112px]"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey && keyword.trim()) {
                       e.preventDefault();

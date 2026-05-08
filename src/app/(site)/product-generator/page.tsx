@@ -413,13 +413,13 @@ export default function ProductDetailGeneratorPage() {
             {uploadedImages.length === 0 ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="relative rounded-2xl p-8 text-center cursor-pointer transition-all duration-200 bg-[#FAFAFA] dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-750 border border-dashed border-[#E5E7EB] dark:border-slate-600 hover:border-[#FF7A00] dark:hover:border-[#FF7A00] min-h-[220px] flex flex-col items-center justify-center"
+                className="os-upload"
               >
-                <div className="w-12 h-12 rounded-2xl bg-[#FFF5EB] dark:bg-orange-900/20 flex items-center justify-center mb-4">
-                  <Upload className="w-6 h-6 text-[#FF7A00]" strokeWidth={2.5} />
+                <div className="w-12 h-12 rounded-2xl bg-[#7B61FF]/10 flex items-center justify-center mb-4">
+                  <Upload className="w-6 h-6 text-[#7B61FF]" strokeWidth={2.5} />
                 </div>
                 <p className="text-slate-800 dark:text-white font-bold text-base mb-1">上传商品图片</p>
-                <p className="text-slate-400 text-sm">推荐 3 张，最多 {MAX_IMAGES} 张</p>
+                <p className="text-slate-400 text-sm">拖拽图片到这里，或点击上传 · 支持 JPG / PNG · 最多 {MAX_IMAGES} 张</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -483,7 +483,7 @@ export default function ProductDetailGeneratorPage() {
 
             {/* 上传中提示 */}
             {isUploading && (
-              <div className="flex items-center justify-center gap-2 py-3 text-sm text-orange-500">
+              <div className="flex items-center justify-center gap-2 py-3 text-sm text-[#7B61FF]">
                 <Loader2 className="w-4 h-4 animate-spin" />
                 <span>正在处理图片...</span>
               </div>
@@ -500,21 +500,21 @@ export default function ProductDetailGeneratorPage() {
 
             {/* 商品名称 */}
             <div>
-              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：头戴式降噪耳机）" className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 text-sm" />
+              <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="商品名称（如：头戴式降噪耳机）" className="os-input" />
             </div>
 
             {/* 商品卖点 */}
             <div>
               <div className="flex gap-2">
-                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：主动降噪 40小时续航 HiFi音质）" rows={2} className="flex-1 px-4 py-2.5 bg-slate-50/80 dark:bg-slate-700/50 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-orange-500 outline-none transition-colors text-slate-800 dark:text-white placeholder:text-slate-400 resize-none text-sm" />
-                <button onClick={handleAnalyzeBenefit} disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)} className="px-3 py-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:from-slate-300 disabled:to-slate-300 dark:disabled:from-slate-600 dark:disabled:to-slate-600 disabled:cursor-not-allowed text-white text-xs font-medium rounded-xl transition-all whitespace-nowrap flex items-center gap-1 self-end">
+                <textarea value={productBenefit} onChange={(e) => setProductBenefit(e.target.value)} placeholder="商品卖点（如：主动降噪 40小时续航 HiFi音质）" rows={2} className="os-textarea flex-1" />
+                <button onClick={handleAnalyzeBenefit} disabled={isAnalyzing || (uploadedImages.length === 0 && !productName)} className="os-btn-primary !h-9 !text-xs !rounded-xl whitespace-nowrap flex items-center gap-1 self-end">
                   <Sparkles className="w-3 h-3" />{isAnalyzing ? '分析中...' : 'AI写卖点'}
                 </button>
               </div>
             </div>
 
             {/* ===== 生成按钮 ===== */}
-            <button onClick={handleGenerate} disabled={isGenerating} className="w-full h-12 mt-5 text-white font-semibold text-[15px] rounded-2xl transition-all duration-200 shadow-[0_4px_14px_rgba(255,106,0,0.35)] hover:shadow-[0_10px_25px_rgba(255,106,0,0.25)] hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-[0_4px_14px_rgba(255,106,0,0.35)] disabled:active:scale-100 flex items-center justify-center gap-2 animate-[subtlePulse_3s_ease-in-out_infinite]" style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}>
+            <button onClick={handleGenerate} disabled={isGenerating} className="os-btn-primary w-full !h-12 !mt-5 flex items-center justify-center gap-2">
               {isGenerating ? (<><Loader2 className="w-4 h-4 animate-spin" />生成中…</>) : (<>🔥 {hasGenerated ? '重新生成卖货图' : '立即生成卖货图'}</>)}
             </button>
 
@@ -616,7 +616,7 @@ export default function ProductDetailGeneratorPage() {
                   <h2 className="text-lg font-bold text-slate-800 leading-snug">
                     {productName || '商品标题'}
                   </h2>
-                  <p className="text-sm text-orange-500 mt-1.5 font-medium tracking-wide">
+                  <p className="text-sm text-[#7B61FF] mt-1.5 font-medium tracking-wide">
                     {productBenefit || '核心卖点短句'}
                   </p>
                 </div>

@@ -424,7 +424,7 @@ export default function ProductPageGenerator() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-[var(--bg-page)]">
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* 模型未配置错误提示 */}
@@ -497,7 +497,7 @@ export default function ProductPageGenerator() {
                           onClick={() => toggleRegion(region.value)}
                           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                             selectedRegions.includes(region.value)
-                              ? 'bg-orange-500 text-white shadow-md'
+                              ? 'bg-[#7B61FF] text-white shadow-md'
                               : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                           }`}
                         >
@@ -550,7 +550,7 @@ export default function ProductPageGenerator() {
                 value={sellingPoints}
                 onChange={(e) => setSellingPoints(e.target.value)}
                 placeholder="请输入商品核心卖点（功能、材质、优势、场景等），越详细，生成的图片越精准..."
-                className="w-full h-40 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 hover:border-slate-300 dark:hover:border-slate-600 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="os-textarea w-full !h-40"
               />
               
               {/* 参考图上传 */}
@@ -568,7 +568,7 @@ export default function ProductPageGenerator() {
                   />
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl hover:border-[#7B61FF] hover:bg-[#7B61FF]/5 transition-colors"
                   >
                     <Upload className="w-4 h-4 text-slate-400" />
                     <span className="text-sm text-slate-500">上传参考图</span>
@@ -612,7 +612,7 @@ export default function ProductPageGenerator() {
                       onClick={() => toggleImageType(type.value)}
                       className={`p-3 rounded-xl text-center transition-all ${
                         selectedImageTypes.includes(type.value)
-                          ? 'bg-orange-500 text-white shadow-md'
+                          ? 'bg-[#7B61FF] text-white shadow-md'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                       }`}
                     >
@@ -634,7 +634,7 @@ export default function ProductPageGenerator() {
                       onClick={() => setQuality(q.value)}
                       className={`flex-1 p-3 rounded-xl text-center transition-all ${
                         quality === q.value
-                          ? 'bg-orange-500 text-white shadow-md'
+                          ? 'bg-[#7B61FF] text-white shadow-md'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                       }`}
                     >
@@ -657,7 +657,7 @@ export default function ProductPageGenerator() {
                       onClick={() => setTone(t.value)}
                       className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                         tone === t.value
-                          ? 'bg-orange-500 text-white'
+                          ? 'bg-[#7B61FF] text-white'
                           : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                       }`}
                     >
@@ -712,7 +712,7 @@ export default function ProductPageGenerator() {
                   value={extraRequirements}
                   onChange={(e) => setExtraRequirements(e.target.value)}
                   placeholder="输入图片细节需求，如：合规标识放置在右下角、场景图融入当地生活元素..."
-                  className="w-full h-20 px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="os-textarea w-full !h-20"
                 />
               </div>
             </div>
@@ -885,7 +885,7 @@ export default function ProductPageGenerator() {
                 {REGIONS.map(region => (
                   <div 
                     key={region.value}
-                    className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+                    className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl cursor-pointer hover:bg-[#7B61FF]/5 transition-colors"
                     onClick={() => setActiveRegion(activeRegion === region.value ? null : region.value)}
                   >
                     <div className="flex items-center justify-between">
@@ -924,7 +924,7 @@ export default function ProductPageGenerator() {
                     key={p.value}
                     className={`p-3 rounded-xl transition-colors ${
                       platform === p.value 
-                        ? 'bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800' 
+                        ? 'bg-[#7B61FF]/5 border border-[#7B61FF]/20' 
                         : 'bg-slate-50 dark:bg-slate-900'
                     }`}
                   >

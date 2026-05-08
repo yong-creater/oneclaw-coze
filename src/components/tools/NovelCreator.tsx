@@ -748,7 +748,7 @@ export default function NovelCreator() {
                       value={originalText}
                       onChange={(e) => setOriginalText(e.target.value)}
                       placeholder="请粘贴小说章节/全文内容..."
-                      className="w-full h-64 p-4 border-2 border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 hover:border-slate-300 dark:hover:border-slate-600 transition-colors resize-none text-sm placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                      className="os-textarea w-full !h-64"
                     />
                   ) : (
                     <div className="space-y-4">
@@ -761,7 +761,7 @@ export default function NovelCreator() {
                       />
                       
                       {uploadFile ? (
-                        <div className="p-6 border-2 border-dashed border-orange-200 rounded-xl bg-orange-50 text-center">
+                        <div className="os-upload !p-6 !min-h-0 text-center">
                           <FileText className="w-12 h-12 text-orange-500 mx-auto mb-2" />
                           <p className="text-sm text-slate-600">{uploadFile.name}</p>
                           <p className="text-xs text-slate-400 mt-1">
