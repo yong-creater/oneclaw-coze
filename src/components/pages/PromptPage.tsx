@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import { Search, Copy, ArrowRight, Check, Tag, Sparkles, BookOpen } from 'lucide-react';
 
@@ -24,7 +25,8 @@ const CATEGORY_CONFIG: Record<string, { label: string; gradient: string }> = {
 };
 
 export default function PromptPage() {
-  const { setCurrentMenu, setPendingInput } = useMenu();
+  const { setPendingInput } = useMenu();
+  const router = useRouter();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -68,7 +70,7 @@ export default function PromptPage() {
 
   const handleUse = (prompt: Prompt) => {
     setPendingInput(`使用提示词「${prompt.title}」生成内容：\n\n${prompt.content}`);
-    setCurrentMenu('home');
+    router.push('/');
   };
 
   return (

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   FolderOpen,
   Eye,
@@ -45,7 +46,8 @@ const TOOL_META: Record<string, { label: string; icon: React.ComponentType<{ cla
 };
 
 export default function ProjectPage() {
-  const { setCurrentMenu, setPendingInput } = useMenu();
+  const { setPendingInput } = useMenu();
+  const router = useRouter();
   const [projects, setProjects] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -73,7 +75,7 @@ export default function ProjectPage() {
   // 重新生成
   const handleRegenerate = (project: Generation) => {
     setPendingInput(`重新生成：${project.title || project.tool_name}`);
-    setCurrentMenu('home');
+    router.push('/');
   };
 
   // 筛选

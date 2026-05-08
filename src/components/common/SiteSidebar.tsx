@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useMenu, type MenuId } from '@/components/common/MenuProvider';
+import { useMenu } from '@/components/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
 import { SiteLogo } from '@/components/common/SiteLogo';
 import LoginButton from '@/components/common/LoginButton';
@@ -20,43 +19,49 @@ import {
 
 // ========== 菜单数据结构 ==========
 const menuList: Array<{
-  id: MenuId;
+  id: string;
   name: string;
   icon: React.ComponentType<{ className?: string }>;
   gradient: string;
   desc: string;
+  path: string;
 }> = [
-  { id: 'home', name: '首页', icon: Home, gradient: 'from-violet-500 to-purple-600', desc: 'AI创作工作台' },
-  { id: 'tools', name: '小工具', icon: Wand2, gradient: 'from-fuchsia-500 to-pink-500', desc: '商品图、详情页等' },
-  { id: 'template', name: '模板', icon: LayoutTemplate, gradient: 'from-emerald-400 to-teal-500', desc: '海量模板一键用' },
-  { id: 'prompt', name: '提示库', icon: Lightbulb, gradient: 'from-amber-400 to-orange-500', desc: '优质提示词灵感' },
-  { id: 'project', name: '项目', icon: FolderOpen, gradient: 'from-blue-400 to-indigo-500', desc: '管理生成内容' },
+  { id: 'home', name: '首页', icon: Home, gradient: 'from-violet-500 to-purple-600', desc: 'AI创作工作台', path: '/' },
+  { id: 'tools', name: '小工具', icon: Wand2, gradient: 'from-fuchsia-500 to-pink-500', desc: '商品图、详情页等', path: '/tools' },
+  { id: 'template', name: '模板', icon: LayoutTemplate, gradient: 'from-emerald-400 to-teal-500', desc: '海量模板一键用', path: '/templates' },
+  { id: 'prompt', name: '提示库', icon: Lightbulb, gradient: 'from-amber-400 to-orange-500', desc: '优质提示词灵感', path: '/prompts' },
+  { id: 'project', name: '项目', icon: FolderOpen, gradient: 'from-blue-400 to-indigo-500', desc: '管理生成内容', path: '/projects' },
 ];
+
+// ========== 从 pathname 推导当前菜单 ID ==========
+function getMenuIdFromPath(pathname: string): string {
+  // 工具子路由
+  if (
+    pathname.startsWith('/product-generator') ||
+    pathname.startsWith('/background-removal') ||
+    pathname.startsWith('/ai-photo') ||
+    pathname.startsWith('/product-poster') ||
+    pathname.startsWith('/xiaohongshu-generator') ||
+    pathname.startsWith('/novel') ||
+    pathname.startsWith('/resume') ||
+    pathname.startsWith('/productpage')
+  ) {
+    return 'tools';
+  }
+  // 精确匹配菜单路径
+  const match = menuList.find(m => m.path !== '/' && pathname === m.path);
+  if (match) return match.id;
+  // 首页兜底
+  return 'home';
+}
 
 export default function SiteSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentMenu, setCurrentMenu, sidebarExpanded, toggleSidebar, setActiveToolRoute } = useMenu();
+  const { sidebarExpanded, toggleSidebar } = useMenu();
   const { user, authenticated, setShowLoginModal, logout } = useUser();
 
-  // 根据路径推断当前菜单
-  useEffect(() => {
-    if (pathname === '/') {
-      setCurrentMenu('home');
-    } else if (
-      pathname.startsWith('/product-generator') ||
-      pathname.startsWith('/background-removal') ||
-      pathname.startsWith('/ai-photo') ||
-      pathname.startsWith('/product-poster') ||
-      pathname.startsWith('/xiaohongshu-generator') ||
-      pathname.startsWith('/novel') ||
-      pathname.startsWith('/resume') ||
-      pathname.startsWith('/productpage')
-    ) {
-      setCurrentMenu('tools');
-      setActiveToolRoute(pathname);
-    }
-  }, [pathname, setCurrentMenu, setActiveToolRoute]);
+  const currentMenu = getMenuIdFromPath(pathname);
 
   const sidebarWidth = sidebarExpanded ? 240 : 68;
 
@@ -92,14 +97,7 @@ export default function SiteSidebar() {
               <button
                 key={menu.id}
                 onClick={() => {
-                  setCurrentMenu(menu.id);
-                  // 点击小工具时重置子路由，确保展示ToolsPage
-                  if (menu.id === 'tools') {
-                    setActiveToolRoute(null);
-                    if (pathname !== '/') {
-                      router.push('/');
-                    }
-                  }
+                  router.push(menu.path);
                 }}
                 className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : ''}`}
                 title={!sidebarExpanded ? menu.name : undefined}
@@ -130,7 +128,7 @@ export default function SiteSidebar() {
       <div className={`px-3 py-3 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'flex justify-center'}`}>
         {sidebarExpanded ? (
           authenticated ? (
-            // 已登录：显示用户信息 + 下拉
+            // 已登录：显示用户信息 + 退出
             <div className="flex items-center gap-2.5">
               {user?.avatar_url ? (
                 <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full shrink-0" />

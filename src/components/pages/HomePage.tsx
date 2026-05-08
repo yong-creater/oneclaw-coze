@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
   Sparkles,
@@ -88,7 +89,8 @@ const quickPrompts = [
 ];
 
 export default function HomePage() {
-  const { pendingInput, consumePendingInput, setCurrentMenu, setPendingInput } = useMenu();
+  const { pendingInput, consumePendingInput, setPendingInput } = useMenu();
+  const router = useRouter();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -239,7 +241,7 @@ export default function HomePage() {
             <p className="os-section-desc">选择能力，快速生成内容</p>
           </div>
           <button
-            onClick={() => setCurrentMenu('tools')}
+            onClick={() => router.push('/tools')}
             className="os-btn-ghost text-sm"
           >
             查看全部 <ArrowRight className="w-4 h-4" />
@@ -280,7 +282,7 @@ export default function HomePage() {
               <p className="os-section-desc">查看和管理你的生成内容</p>
             </div>
             <button
-              onClick={() => setCurrentMenu('project')}
+              onClick={() => router.push('/projects')}
               className="os-btn-ghost text-sm"
             >
               全部项目 <ArrowRight className="w-4 h-4" />
@@ -328,7 +330,7 @@ export default function HomePage() {
               <p className="os-section-desc">一键使用，快速开始</p>
             </div>
             <button
-              onClick={() => setCurrentMenu('template')}
+              onClick={() => router.push('/templates')}
               className="os-btn-ghost text-sm"
             >
               更多 <ArrowRight className="w-4 h-4" />
@@ -347,7 +349,7 @@ export default function HomePage() {
                 key={i}
                 onClick={() => {
                   setPendingInput(`使用模板「${tpl.name}」生成内容`);
-                  setCurrentMenu('home');
+                  router.push('/');
                 }}
                 className="w-full os-card p-4 flex items-center gap-3 text-left"
               >

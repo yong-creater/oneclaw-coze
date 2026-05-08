@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, ArrowRight, Star, Tag } from 'lucide-react';
 import { useMenu } from '@/components/common/MenuProvider';
 
@@ -32,7 +33,8 @@ const CATEGORY_MAP: Record<string, { label: string; gradient: string }> = {
 };
 
 export default function TemplatePage() {
-  const { setCurrentMenu, setPendingInput } = useMenu();
+  const { setPendingInput } = useMenu();
+  const router = useRouter();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -65,7 +67,7 @@ export default function TemplatePage() {
   // 使用模板
   const handleUseTemplate = (tpl: Template) => {
     setPendingInput(`使用模板「${tpl.name}」生成内容`);
-    setCurrentMenu('home');
+    router.push('/');
   };
 
   return (
