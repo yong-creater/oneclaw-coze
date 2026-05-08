@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
+  Search,
+  ArrowRight,
   Package,
   Scissors,
   Camera,
@@ -11,80 +13,111 @@ import {
   FileText,
   BookOpen,
   Sparkles,
-  ArrowRight,
-  Search,
 } from 'lucide-react';
 
-// ========== 数据结构 ==========
-const toolsList = [
-  {
-    id: 'product-generator',
-    name: 'AI商品图生成',
-    desc: '上传商品图，AI生成高质量卖货图',
-    href: '/product-generator',
-    icon: Package,
-    gradient: 'from-violet-500 to-purple-600',
-  },
-  {
-    id: 'background-removal',
-    name: 'AI智能抠图',
-    desc: '一键去除背景，支持复杂边缘',
-    href: '/background-removal',
-    icon: Scissors,
-    gradient: 'from-blue-400 to-cyan-500',
-  },
-  {
-    id: 'ai-photo',
-    name: 'AI写真生成',
-    desc: '上传照片，生成多种风格写真',
-    href: '/ai-photo',
-    icon: Camera,
-    gradient: 'from-pink-400 to-rose-500',
-  },
-  {
-    id: 'product-poster',
-    name: '商品海报生成',
-    desc: '自动生成电商促销海报',
-    href: '/product-poster',
-    icon: ImageIcon,
-    gradient: 'from-fuchsia-500 to-pink-500',
-  },
-  {
-    id: 'xiaohongshu-generator',
-    name: '小红书爆款生成',
-    desc: '生成小红书种草图文内容',
-    href: '/xiaohongshu-generator',
-    icon: FileText,
-    gradient: 'from-red-400 to-orange-500',
-  },
-  {
-    id: 'novel',
-    name: '小说创作工坊',
-    desc: 'AI辅助小说创作与续写',
-    href: '/novel',
-    icon: BookOpen,
-    gradient: 'from-emerald-400 to-teal-500',
-  },
-  {
-    id: 'resume',
-    name: 'STAR简历优化',
-    desc: 'AI优化简历，提升面试通过率',
-    href: '/resume',
-    icon: Sparkles,
-    gradient: 'from-amber-400 to-yellow-500',
-  },
+// 图标映射
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Package,
+  Scissors,
+  Camera,
+  ImageIcon,
+  FileText,
+  BookOpen,
+  Sparkles,
+};
+
+// 默认渐变色
+const DEFAULT_GRADIENTS = [
+  'from-violet-500 to-purple-600',
+  'from-blue-400 to-cyan-500',
+  'from-pink-400 to-rose-500',
+  'from-fuchsia-500 to-pink-500',
+  'from-red-400 to-orange-500',
+  'from-emerald-400 to-teal-500',
+  'from-amber-400 to-yellow-500',
 ];
+
+interface UtilityTool {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string | null;
+  description: string | null;
+  cover_image: string | null;
+  color: string | null;
+  sort_order: number;
+  tool_type: string | null;
+}
+
+// slug 到路由的映射
+const SLUG_ROUTE_MAP: Record<string, string> = {
+  'product-generator': '/product-generator',
+  'background-removal': '/background-removal',
+  'ai-photo': '/ai-photo',
+  'product-poster': '/product-poster',
+  'xiaohongshu-generator': '/xiaohongshu-generator',
+  'novel': '/novel',
+  'resume': '/resume',
+  'productpage': '/productpage',
+};
 
 export default function ToolsPage() {
   const [search, setSearch] = useState('');
+  const [tools, setTools] = useState<UtilityTool[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   const { setActiveToolRoute } = useMenu();
 
-  const filtered = toolsList.filter(
+  useEffect(() => {
+    async function fetchTools() {
+      try {
+        const res = await fetch('/api/utility-tools', { cache: 'no-store' });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.tools)) {
+          setTools(data.tools);
+        }
+      } catch (e) {
+        console.error('Failed to fetch tools:', e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTools();
+  }, []);
+
+  const filtered = tools.filter(
     (t) =>
       t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.desc.toLowerCase().includes(search.toLowerCase())
+      (t.description || '').toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleToolClick = (tool: UtilityTool) => {
+    const route = SLUG_ROUTE_MAP[tool.slug] || `/${tool.slug}`;
+    setActiveToolRoute(route);
+    router.push(route);
+  };
+
+  if (loading) {
+    return (
+      <div className="os-page">
+        <div className="mb-6">
+          <h1 className="os-section-title text-2xl">小工具</h1>
+          <p className="os-section-desc">选择工具，快速生成内容</p>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="os-card p-0 animate-pulse">
+              <div className="h-36 bg-slate-100 rounded-t-2xl" />
+              <div className="p-5 space-y-3">
+                <div className="h-4 bg-slate-100 rounded w-2/3" />
+                <div className="h-3 bg-slate-100 rounded w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="os-page">
@@ -110,30 +143,51 @@ export default function ToolsPage() {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-3 gap-4">
           {filtered.map((tool, index) => {
-            const Icon = tool.icon;
+            const Icon = (tool.icon && ICON_MAP[tool.icon]) || Package;
+            const gradient = DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
+            const hasCover = !!tool.cover_image;
+
             return (
               <div
                 key={tool.id}
-                onClick={() => {
-                  setActiveToolRoute(tool.href);
-                  router.push(tool.href);
-                }}
-                className="os-card p-5 flex flex-col gap-4 animate-stagger-in cursor-pointer"
+                onClick={() => handleToolClick(tool)}
+                className="os-card p-0 overflow-hidden animate-stagger-in cursor-pointer group"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
-                {/* 图标 */}
-                <div className={`os-icon-bg bg-gradient-to-br ${tool.gradient} text-white`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                {/* 文字 */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-slate-800">{tool.name}</h3>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{tool.desc}</p>
-                </div>
-                {/* 进入按钮 */}
-                <div className="flex items-center text-xs text-slate-400 group-hover:text-purple-500 transition-colors">
-                  进入工具
-                  <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                {/* 封面图区域 */}
+                {hasCover ? (
+                  <div className="relative h-36 bg-slate-50 overflow-hidden">
+                    <img
+                      src={tool.cover_image!}
+                      alt={tool.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {/* 底部渐变遮罩 */}
+                    <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white/90 to-transparent" />
+                  </div>
+                ) : (
+                  <div className={`h-36 bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+                    <Icon className="w-10 h-10 text-white/80" />
+                  </div>
+                )}
+                {/* 文字区域 */}
+                <div className="p-5 pt-3">
+                  <div className="flex items-center gap-2.5">
+                    {!hasCover && (
+                      <div className={`os-icon-bg-sm bg-gradient-to-br ${gradient} text-white`}>
+                        <Icon className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                    <h3 className="text-sm font-semibold text-slate-800">{tool.name}</h3>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-2">
+                    {tool.description || 'AI智能创作工具'}
+                  </p>
+                  {/* 进入按钮 */}
+                  <div className="flex items-center text-xs text-slate-400 mt-3 group-hover:text-[#6C5CE7] transition-colors">
+                    进入工具
+                    <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
                 </div>
               </div>
             );

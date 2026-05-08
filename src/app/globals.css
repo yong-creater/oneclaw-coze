@@ -312,6 +312,15 @@ body {
   justify-content: center;
   flex-shrink: 0;
 }
+.os-icon-bg-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
 /* ==================== Creator OS 按钮系统 ==================== */
 
