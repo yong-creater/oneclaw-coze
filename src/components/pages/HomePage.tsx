@@ -14,7 +14,6 @@ import {
   FolderOpen,
   ArrowRight,
   Package,
-  Scissors,
   Camera,
   Image as ImageIcon,
   FileText,
@@ -22,14 +21,13 @@ import {
   ShoppingBag,
   Heart,
   Feather,
-  Layout,
-  Wrench,
+  Palette,
+  Flame,
 } from 'lucide-react';
 
 // 图标名称 → Lucide 组件映射
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Package,
-  Scissors,
   Camera,
   ImageIcon,
   FileText,
@@ -38,35 +36,75 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   ShoppingBag,
   Heart,
   Feather,
+  Scissors: Package,
 };
 
-// ========== 快捷动作 ==========
-const quickActions = [
-  { label: '生成图片', icon: ImagePlus, prompt: '生成一张商品主图' },
-  { label: '详情页', icon: LayoutTemplate, prompt: '生成亚马逊A+详情页' },
-  { label: '种草图', icon: Lightbulb, prompt: '制作小红书种草图' },
-  { label: '视频脚本', icon: Video, prompt: '生成TikTok带货视频脚本' },
+// ========== 快捷能力 ==========
+const capabilities = [
+  { label: '生成图片', icon: ImagePlus },
+  { label: '商品详情页', icon: LayoutTemplate },
+  { label: '小红书种草', icon: Lightbulb },
+  { label: '视频脚本', icon: Video },
 ];
 
-// ========== 试试这些标签 ==========
-const quickPrompts = [
-  '生成亚马逊A+详情页',
-  '创建产品卖点图',
+// ========== 推荐创作 Prompt ==========
+const recommendedPrompts = [
+  '生成耳机商品主图',
+  '创建护肤品详情页',
   '制作小红书种草图',
-  '生成TikTok带货视频脚本',
+  '生成带货视频脚本',
 ];
 
-// ========== 工具数据类型 ==========
-interface UtilityTool {
-  id: number;
-  name: string;
-  slug: string;
-  icon: string;
-  description: string;
-  cover_image: string | null;
-  color: string;
-  use_cases: {title: string; desc: string}[];
-}
+// ========== 创作场景 ==========
+const creativeScenes = [
+  {
+    title: '电商商品图',
+    desc: '生成主图、卖点图、场景图',
+    slug: 'product-generator',
+    icon: ShoppingBag,
+    cover: '/scene-product.jpg',
+    gradient: 'from-[#7B61FF]/80 to-[#5B8CFF]/80',
+  },
+  {
+    title: '商品详情页',
+    desc: '一键生成电商详情页',
+    slug: 'productpage',
+    icon: LayoutTemplate,
+    cover: '/scene-detail.jpg',
+    gradient: 'from-[#5B8CFF]/80 to-[#6EE7FF]/80',
+  },
+  {
+    title: '小红书种草图',
+    desc: '生成封面 + 图文内容',
+    slug: 'xiaohongshu-generator',
+    icon: Heart,
+    cover: '/scene-xiaohongshu.jpg',
+    gradient: 'from-[#FF6B9D]/70 to-[#7B61FF]/80',
+  },
+  {
+    title: '带货视频脚本',
+    desc: '生成短视频脚本与口播文案',
+    slug: 'novel',
+    icon: Video,
+    cover: '/scene-video.jpg',
+    gradient: 'from-[#FFB84D]/80 to-[#7B61FF]/80',
+  },
+  {
+    title: 'AI 写真',
+    desc: '生成高级感人物写真',
+    slug: 'ai-photo',
+    icon: Camera,
+    cover: '/scene-photo.jpg',
+    gradient: 'from-[#6EE7FF]/80 to-[#7B61FF]/80',
+  },
+];
+
+// ========== 热门模板 ==========
+const hotTemplates = [
+  { title: '电商主图模板', desc: '白底 / 场景 / 卖点', icon: Flame, gradient: 'from-[#FFB84D] to-[#FF8C4D]' },
+  { title: '详情页模板', desc: '品牌故事 / 功效展示', icon: LayoutTemplate, gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
+  { title: '小红书封面', desc: '种草 / 测评 / 打卡', icon: Heart, gradient: 'from-[#FF6B9D] to-[#A78BFA]' },
+];
 
 export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
@@ -77,7 +115,6 @@ export default function HomePage() {
   const [recentProjects, setRecentProjects] = useState<Array<{
     id: number; title: string; thumbnail: string | null; tool_name: string;
   }>>([]);
-  const [tools, setTools] = useState<UtilityTool[]>([]);
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -98,18 +135,6 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  // 获取工具列表（仅 is_active 的）
-  useEffect(() => {
-    fetch('/api/utility-tools', { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => {
-        if (data?.success && Array.isArray(data.tools)) {
-          setTools(data.tools);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   // 生成内容（模拟）
   const handleGenerate = useCallback(() => {
     if (!inputText.trim() || isLoading) return;
@@ -126,44 +151,8 @@ export default function HomePage() {
     setInputText(prompt);
   }, []);
 
-  // 点击快捷动作
-  const handleQuickAction = useCallback((action: typeof quickActions[0]) => {
-    setInputText(action.prompt);
-  }, []);
-
-  // 工具颜色渐变映射 — 统一蓝紫体系
-  const getGradient = (color: string) => {
-    const map: Record<string, string> = {
-      purple: 'from-[#7B61FF] to-[#5B8CFF]',
-      blue: 'from-[#5B8CFF] to-[#6EE7FF]',
-      pink: 'from-[#7B61FF] to-[#A78BFA]',
-      green: 'from-[#34D399] to-[#5B8CFF]',
-      orange: 'from-[#FFB84D] to-[#7B61FF]',
-      yellow: 'from-[#FFB84D] to-[#5B8CFF]',
-      cyan: 'from-[#6EE7FF] to-[#5B8CFF]',
-      red: 'from-[#7B61FF] to-[#F87171]',
-    };
-    return map[color] || 'from-[#7B61FF] to-[#5B8CFF]';
-  };
-
   // 快捷能力按钮状态
   const [activeCapability, setActiveCapability] = useState('生成图片');
-
-  // 快捷能力列表
-  const capabilities = [
-    { label: '生成图片', icon: ImagePlus },
-    { label: '商品详情页', icon: LayoutTemplate },
-    { label: '小红书种草', icon: Lightbulb },
-    { label: '视频脚本', icon: Video },
-  ];
-
-  // 推荐创作 Prompt
-  const recommendedPrompts = [
-    '生成耳机商品主图',
-    '创建护肤品详情页',
-    '制作小红书种草图',
-    '生成带货视频脚本',
-  ];
 
   return (
     <div className="os-page">
@@ -199,7 +188,6 @@ export default function HomePage() {
             {/* 底部工具栏 */}
             <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-100 bg-white">
               <div className="flex items-center gap-2 flex-wrap">
-                {/* 快捷能力胶囊 */}
                 {capabilities.map((cap) => {
                   const Icon = cap.icon;
                   const isActive = activeCapability === cap.label;
@@ -275,68 +263,48 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ==================== 第二层：AI 创作能力 ==================== */}
-      {tools.length > 0 && (
-        <div className="animate-fade-slide-up" style={{ marginTop: "var(--spacing-section)", animationDelay: '0.1s' }}>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h2 className="os-h2">AI 创作能力</h2>
-              <p className="os-section-desc">选择能力，快速生成内容</p>
-            </div>
-            <button
-              onClick={() => router.push('/tools')}
-              className="os-btn-ghost text-sm"
-            >
-              查看全部 <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+      {/* ==================== 第二层：开始创作 — 创作场景 ==================== */}
+      <div className="animate-fade-slide-up" style={{ marginTop: "var(--spacing-section)", animationDelay: '0.1s' }}>
+        <div className="text-center mb-10">
+          <h2 className="os-h2">开始创作</h2>
+          <p className="os-section-desc mt-2">选择一个高频场景，快速生成内容</p>
+        </div>
 
-          <div className="grid grid-cols-3 gap-6">
-            {tools.map((tool) => (
+        <div className="grid grid-cols-5 gap-5">
+          {creativeScenes.map((scene) => {
+            const Icon = scene.icon;
+            return (
               <div
-                key={tool.id}
-                onClick={() => router.push(`/${tool.slug}`)}
+                key={scene.slug}
+                onClick={() => router.push(`/${scene.slug}`)}
                 className="os-card p-0 overflow-hidden cursor-pointer group"
               >
-                {/* 封面图区域 */}
-                <div className="os-card-image">
-                  {tool.cover_image ? (
-                    <img
-                      src={tool.cover_image}
-                      alt={tool.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className={`w-full h-full bg-gradient-to-br ${getGradient(tool.color)} flex items-center justify-center`}>
-                      {(() => { const Ic = ICON_MAP[tool.icon] || Package; return <Ic className="w-10 h-10 text-white/80" />; })()}
-                    </div>
-                  )}
+                {/* 视觉图区域 */}
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${scene.gradient} flex items-center justify-center`}>
+                    <Icon className="w-12 h-12 text-white/60 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                  {/* hover 蒙层 */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-200" />
                 </div>
                 {/* 信息区 */}
                 <div className="p-5 flex flex-col gap-2">
-                  <h3 className="text-[15px] font-semibold text-slate-800">{tool.name}</h3>
-                  <p className="text-[13px] text-slate-500 line-clamp-2">{tool.description}</p>
-                  {tool.use_cases && tool.use_cases.length > 0 && (
-                    <div className="flex gap-1.5 flex-wrap mt-1">
-                      {tool.use_cases.slice(0, 3).map((uc: {title: string; desc: string}, i: number) => (
-                        <span key={i} className="os-btn-capsule !h-6 !text-[11px] !px-2 pointer-events-none">{uc.title}</span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-2">
+                  <h3 className="os-h3">{scene.title}</h3>
+                  <p className="os-caption line-clamp-2">{scene.desc}</p>
+                  <div className="mt-1">
                     <span className="os-btn-primary !text-xs !py-1.5 !px-4 inline-flex items-center gap-1">
-                      开始使用 <ArrowRight className="w-3 h-3" />
+                      立即创作 <ArrowRight className="w-3 h-3" />
                     </span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
-      {/* ==================== 第三层：最近使用 + 快捷入口 ==================== */}
-      <div className="grid grid-cols-5 gap-6 animate-fade-slide-up" style={{ marginTop: 'var(--spacing-section)', animationDelay: '0.2s' }}>
+      {/* ==================== 第三层：最近项目 + 热门模板 ==================== */}
+      <div className="grid grid-cols-5 gap-8 animate-fade-slide-up" style={{ marginTop: 'var(--spacing-section)', animationDelay: '0.2s' }}>
         {/* 最近项目 */}
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-6">
@@ -353,7 +321,7 @@ export default function HomePage() {
           </div>
 
           {recentProjects.length > 0 ? (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-4">
               {recentProjects.map((project) => (
                 <div
                   key={project.id}
@@ -375,45 +343,46 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="os-card-static rounded-2xl p-8 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#7B61FF]/[0.06] flex items-center justify-center mx-auto mb-3">
-                <FolderOpen className="w-6 h-6 text-[#7B61FF]/30" />
+            <div className="os-card-static rounded-2xl p-10 text-center">
+              <div className="w-14 h-14 rounded-full bg-[#7B61FF]/[0.06] flex items-center justify-center mx-auto mb-4">
+                <Palette className="w-7 h-7 text-[#7B61FF]/30" />
               </div>
-              <p className="text-sm text-slate-400 mb-3">还没有生成记录</p>
-              <p className="text-xs text-slate-300">在上方输入需求开始创作吧</p>
+              <p className="os-body mb-1">还没有创作记录</p>
+              <p className="os-caption">在上方输入需求，开始你的第一次创作</p>
             </div>
           )}
         </div>
 
-        {/* 快捷入口 */}
+        {/* 热门模板 */}
         <div className="col-span-2">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="os-h2">快捷入口</h2>
-              <p className="os-section-desc">快速跳转到常用功能</p>
+              <h2 className="os-h2">热门模板</h2>
+              <p className="os-section-desc">创作灵感，一键使用</p>
             </div>
+            <button
+              onClick={() => router.push('/templates')}
+              className="os-btn-ghost text-sm"
+            >
+              更多 <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
 
           <div className="space-y-3">
-            {[
-              { name: '提示词库', desc: '浏览和使用AI创作提示词', path: '/prompts', icon: BookOpen },
-              { name: '模板中心', desc: '一键使用创作模板', path: '/templates', icon: Layout },
-              { name: '小工具', desc: '使用AI创作小工具', path: '/tools', icon: Wrench },
-              { name: '我的项目', desc: '查看所有生成记录', path: '/projects', icon: FolderOpen },
-            ].map((item) => {
-              const Icon = item.icon;
+            {hotTemplates.map((tpl, idx) => {
+              const Icon = tpl.icon;
               return (
                 <button
-                  key={item.path}
-                  onClick={() => router.push(item.path)}
+                  key={idx}
+                  onClick={() => router.push('/templates')}
                   className="w-full os-card flex items-center gap-4 text-left"
                 >
-                  <div className="w-10 h-10 rounded-[10px] bg-[#7B61FF]/10 flex items-center justify-center shrink-0">
-                    <Icon className="w-5 h-5 text-[#7B61FF]" />
+                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tpl.gradient} flex items-center justify-center shrink-0`}>
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="os-h3">{item.name}</div>
-                    <div className="os-caption">{item.desc}</div>
+                    <div className="os-h3">{tpl.title}</div>
+                    <div className="os-caption">{tpl.desc}</div>
                   </div>
                   <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
                 </button>
