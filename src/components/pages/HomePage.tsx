@@ -103,27 +103,24 @@ export default function HomePage() {
     <div className="os-page">
       {/* ==================== Hero 创作区 ==================== */}
       <div className="animate-fade-slide-up relative">
-        {/* 氛围背景 */}
-        <div className="absolute inset-0 -top-8 -left-12 -right-12 pointer-events-none overflow-hidden" style={{ height: '700px' }}>
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] rounded-full opacity-30" style={{ background: 'radial-gradient(ellipse at center, rgba(123,97,255,0.18) 0%, rgba(91,140,255,0.08) 40%, transparent 70%)' }} />
-          <div className="absolute top-32 left-1/4 w-[400px] h-[400px] rounded-full opacity-12" style={{ background: 'radial-gradient(circle, rgba(110,231,255,0.15) 0%, transparent 60%)' }} />
-          <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] rounded-full opacity-10" style={{ background: 'radial-gradient(circle, rgba(123,97,255,0.12) 0%, transparent 55%)' }} />
+        {/* 氛围光晕层 */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ height: '800px' }}>
+          {/* 主柔光球 — 页面上方中心 */}
+          <div className="os-orb os-orb-primary os-atmo-orb-center" />
+          {/* 左下辅助光 */}
+          <div className="os-orb os-orb-secondary os-atmo-orb-left" />
+          {/* 右上辅助光 */}
+          <div className="os-orb os-orb-accent os-atmo-orb-right" />
         </div>
 
-        {/* AI 氛围装饰层 */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ height: '700px' }}>
-          <div className="os-hero-cube os-cube-1" />
-          <div className="os-hero-cube os-cube-2" />
-          <div className="os-hero-orb os-orb-1" />
-          <div className="os-hero-orb os-orb-2" />
-          <div className="os-hero-trail os-trail-1" />
-          <div className="os-hero-trail os-trail-2" />
-          <div className="os-hero-particle os-particle-1" />
-          <div className="os-hero-particle os-particle-2" />
-          <div className="os-hero-particle os-particle-3" />
-          <div className="os-hero-particle os-particle-4" />
-          <div className="os-hero-particle os-particle-5" />
-          <div className="os-hero-particle os-particle-6" />
+        {/* 漂浮微粒层 */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ height: '800px' }}>
+          <div className="os-mote os-mote-purple os-mote-1" />
+          <div className="os-mote os-mote-cyan os-mote-2" />
+          <div className="os-mote os-mote-blue os-mote-3" />
+          <div className="os-mote os-mote-purple os-mote-4" />
+          <div className="os-mote os-mote-cyan os-mote-5" />
+          <div className="os-mote os-mote-blue os-mote-6" />
         </div>
 
         {/* 标题区 */}

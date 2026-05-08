@@ -304,39 +304,19 @@ body {
 }
 
 /* Hero 背景氛围 */
-.os-hero-bg {
-  position: relative;
-  overflow: hidden;
-}
-.os-hero-bg::before {
-  content: '';
-  position: absolute;
-  top: -40%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 140%;
-  height: 80%;
-  background: radial-gradient(ellipse at center, rgba(123, 97, 255, 0.06) 0%, rgba(91, 140, 255, 0.04) 40%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-.os-hero-bg::after {
-  content: '';
-  position: absolute;
-  top: -20%;
-  right: -10%;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(circle, rgba(110, 231, 255, 0.05) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
-
 /* ==================== AI 氛围系统 (Atmosphere Layer) ==================== */
+/*  参考：OpenAI / Linear / Apple — 极简 / 柔和 / 安静 / 高级  */
 
-/* ---- 页面背景氛围 ---- */
+/* ---- 页面渐变底色 ---- */
 .os-page {
   position: relative;
+  background: linear-gradient(
+    175deg,
+    #FAFAFF 0%,           /* 极浅紫白 */
+    #F5F7FB 35%,          /* 冷灰白 */
+    #F0F2FA 65%,          /* 浅蓝灰 */
+    #F6F5FF 100%          /* 回到微紫白 */
+  );
 }
 .os-page::before {
   content: '';
@@ -346,29 +326,23 @@ body {
   right: 0;
   bottom: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(123, 97, 255, 0.04) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 10%, rgba(110, 231, 255, 0.03) 0%, transparent 50%),
-    radial-gradient(ellipse 50% 30% at 20% 5%, rgba(91, 140, 255, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse 90% 55% at 50% -5%, rgba(123, 97, 255, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 35% at 80% 8%, rgba(110, 231, 255, 0.06) 0%, transparent 45%),
+    radial-gradient(ellipse 45% 30% at 15% 3%, rgba(91, 140, 255, 0.05) 0%, transparent 45%);
   pointer-events: none;
   z-index: -1;
 }
 
-/* ---- 浮动光球 ---- */
-@keyframes orbFloat1 {
+/* ---- 柔光球 (Soft Glow Orb) ---- */
+@keyframes orbDrift {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(12px, -18px) scale(1.05); }
-  50% { transform: translate(-8px, -30px) scale(0.97); }
-  75% { transform: translate(16px, -12px) scale(1.03); }
+  33% { transform: translate(15px, -20px) scale(1.03); }
+  66% { transform: translate(-10px, -8px) scale(0.97); }
 }
-@keyframes orbFloat2 {
+@keyframes orbDrift2 {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-15px, -20px) scale(1.04); }
-  66% { transform: translate(10px, -10px) scale(0.96); }
-}
-@keyframes orbFloat3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  40% { transform: translate(8px, -25px) scale(1.02); }
-  70% { transform: translate(-12px, -8px) scale(0.98); }
+  40% { transform: translate(-12px, -15px) scale(1.02); }
+  70% { transform: translate(8px, -25px) scale(0.98); }
 }
 
 .os-orb {
@@ -376,93 +350,70 @@ body {
   border-radius: 50%;
   pointer-events: none;
   will-change: transform;
+  filter: blur(60px);
 }
-.os-orb-1 {
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(circle, rgba(123, 97, 255, 0.12) 0%, rgba(123, 97, 255, 0.04) 40%, transparent 70%);
-  filter: blur(40px);
-  animation: orbFloat1 12s ease-in-out infinite;
+.os-orb-primary {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(123, 97, 255, 0.15) 0%, rgba(123, 97, 255, 0.05) 40%, transparent 70%);
+  animation: orbDrift 16s ease-in-out infinite;
 }
-.os-orb-2 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(110, 231, 255, 0.10) 0%, rgba(110, 231, 255, 0.03) 40%, transparent 70%);
-  filter: blur(36px);
-  animation: orbFloat2 15s ease-in-out infinite;
+.os-orb-secondary {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(110, 231, 255, 0.12) 0%, rgba(110, 231, 255, 0.03) 40%, transparent 70%);
+  animation: orbDrift2 20s ease-in-out infinite;
 }
-.os-orb-3 {
-  width: 240px;
-  height: 240px;
-  background: radial-gradient(circle, rgba(91, 140, 255, 0.10) 0%, rgba(91, 140, 255, 0.03) 40%, transparent 70%);
-  filter: blur(32px);
-  animation: orbFloat3 10s ease-in-out infinite;
+.os-orb-accent {
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(91, 140, 255, 0.10) 0%, rgba(91, 140, 255, 0.02) 40%, transparent 70%);
+  animation: orbDrift 14s ease-in-out infinite reverse;
 }
 
-/* ---- 玻璃方块 (Glass Cube) ---- */
-@keyframes cubeFloat {
-  0%, 100% { transform: rotateX(15deg) rotateY(-20deg) translateZ(0); }
-  50% { transform: rotateX(20deg) rotateY(-15deg) translateZ(10px); }
+/* ---- 漂浮微粒 (Floating Motes) ---- */
+@keyframes moteRise {
+  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+  20%  { opacity: 0.6; }
+  80%  { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-60px) scale(1); }
 }
-.os-glass-cube {
+.os-mote {
   position: absolute;
+  border-radius: 50%;
   pointer-events: none;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.08) 0%, rgba(91, 140, 255, 0.04) 100%);
-  border: 1px solid rgba(123, 97, 255, 0.08);
-  backdrop-filter: blur(2px);
-  animation: cubeFloat 8s ease-in-out infinite;
-  will-change: transform;
+  animation: moteRise var(--dur, 6s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
 }
-.os-glass-cube-sm {
-  width: 60px;
-  height: 60px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(110, 231, 255, 0.08) 0%, rgba(123, 97, 255, 0.03) 100%);
-  border: 1px solid rgba(110, 231, 255, 0.06);
-  animation: cubeFloat 11s ease-in-out infinite;
+.os-mote-purple {
+  width: 4px;
+  height: 4px;
+  background: rgba(123, 97, 255, 0.25);
+  box-shadow: 0 0 6px rgba(123, 97, 255, 0.15);
 }
-
-/* ---- 微粒子 ---- */
-@keyframes particleFade {
-  0%, 100% { opacity: 0; transform: translateY(0) scale(0.8); }
-  50% { opacity: 1; transform: translateY(-12px) scale(1); }
-}
-.os-particle {
-  position: absolute;
+.os-mote-blue {
   width: 3px;
   height: 3px;
-  border-radius: 50%;
-  background: rgba(123, 97, 255, 0.35);
-  pointer-events: none;
-  animation: particleFade var(--dur, 4s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
+  background: rgba(91, 140, 255, 0.20);
+  box-shadow: 0 0 5px rgba(91, 140, 255, 0.10);
 }
-
-/* ---- 轨迹线 (Trail Line) ---- */
-@keyframes trailSlide {
-  0% { opacity: 0; transform: translateX(-20px); }
-  30% { opacity: 1; }
-  70% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(20px); }
-}
-.os-trail {
-  position: absolute;
-  height: 1px;
-  border-radius: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(123, 97, 255, 0.15) 30%, rgba(91, 140, 255, 0.12) 70%, transparent 100%);
-  pointer-events: none;
-  animation: trailSlide var(--dur, 6s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
+.os-mote-cyan {
+  width: 2.5px;
+  height: 2.5px;
+  background: rgba(110, 231, 255, 0.22);
+  box-shadow: 0 0 4px rgba(110, 231, 255, 0.10);
 }
 
 /* ---- Glow 呼吸 ---- */
 @keyframes glowBreathe {
-  0%, 100% { box-shadow: 0 0 20px rgba(123, 97, 255, 0.15), 0 0 40px rgba(123, 97, 255, 0.05); }
-  50% { box-shadow: 0 0 28px rgba(123, 97, 255, 0.25), 0 0 56px rgba(123, 97, 255, 0.08); }
+  0%, 100% { box-shadow: 0 0 20px rgba(123, 97, 255, 0.12), 0 0 40px rgba(123, 97, 255, 0.04); }
+  50% { box-shadow: 0 0 28px rgba(123, 97, 255, 0.20), 0 0 56px rgba(123, 97, 255, 0.06); }
 }
 
-/* ---- 输入框玻璃态 — 已合并到 .os-ai-input-shell ---- */
+/* ---- 旧装饰元素（已废弃，保留兼容） ---- */
+.os-hero-bg { position: relative; overflow: hidden; }
+.os-hero-bg::before,
+.os-hero-bg::after { display: none; }
 
 /* ---- 主按钮 Glow 增强 — 已合并到按钮系统 ---- */
 
@@ -505,104 +456,34 @@ body {
   opacity: 1;
 }
 
-/* ---- Hero 专属装饰定位 ---- */
-/* 玻璃方块 */
-.os-hero-cube {
-  position: absolute;
-  pointer-events: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.06) 0%, rgba(91, 140, 255, 0.03) 100%);
-  border: 1px solid rgba(123, 97, 255, 0.06);
-  backdrop-filter: blur(2px);
-  will-change: transform;
-}
-.os-cube-1 {
-  top: 30px;
-  left: 8%;
-  width: 72px;
-  height: 72px;
-  animation: cubeFloat 9s ease-in-out infinite;
-  opacity: 0.6;
-}
-.os-cube-2 {
-  top: 80px;
-  right: 12%;
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgba(110, 231, 255, 0.06) 0%, rgba(123, 97, 255, 0.02) 100%);
-  border: 1px solid rgba(110, 231, 255, 0.05);
-  animation: cubeFloat 13s ease-in-out infinite reverse;
-  opacity: 0.5;
+/* ---- Hero 氛围定位 ---- */
+
+/* 主光球 — 页面视觉中心上方 */
+.os-atmo-orb-center {
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* 光球 */
-.os-hero-orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  will-change: transform;
-  filter: blur(40px);
-}
-.os-orb-1 {
-  bottom: 40px;
-  left: 4%;
-  width: 280px;
-  height: 280px;
-  background: radial-gradient(circle, rgba(123, 97, 255, 0.10) 0%, rgba(123, 97, 255, 0.03) 40%, transparent 70%);
-  animation: orbFloat1 14s ease-in-out infinite;
-}
-.os-orb-2 {
-  top: 20px;
-  right: 6%;
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, rgba(110, 231, 255, 0.08) 0%, rgba(110, 231, 255, 0.02) 40%, transparent 70%);
-  animation: orbFloat2 16s ease-in-out infinite;
+/* 左下柔光 */
+.os-atmo-orb-left {
+  bottom: 20px;
+  left: 2%;
 }
 
-/* 轨迹线 */
-.os-hero-trail {
-  position: absolute;
-  height: 1px;
-  border-radius: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(123, 97, 255, 0.12) 30%, rgba(91, 140, 255, 0.08) 70%, transparent 100%);
-  pointer-events: none;
-  animation: trailSlide var(--dur, 7s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-}
-.os-trail-1 {
-  top: 50%;
-  left: 0;
-  width: 140px;
-  --dur: 7s;
-  --delay: 0s;
-}
-.os-trail-2 {
-  top: 35%;
-  right: 0;
-  width: 100px;
-  --dur: 9s;
-  --delay: 2s;
+/* 右上柔光 */
+.os-atmo-orb-right {
+  top: 10px;
+  right: 4%;
 }
 
-/* 微粒子 */
-.os-hero-particle {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: rgba(123, 97, 255, 0.30);
-  pointer-events: none;
-  animation: particleFade var(--dur, 4s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-}
-.os-particle-1 { top: 15%; left: 15%; --dur: 4.5s; --delay: 0s; }
-.os-particle-2 { top: 25%; right: 20%; --dur: 5s; --delay: 1.2s; background: rgba(110, 231, 255, 0.25); }
-.os-particle-3 { top: 45%; left: 8%; --dur: 3.8s; --delay: 0.6s; }
-.os-particle-4 { top: 60%; right: 15%; --dur: 5.5s; --delay: 2s; background: rgba(91, 140, 255, 0.25); }
-.os-particle-5 { top: 35%; left: 30%; --dur: 4.2s; --delay: 1.5s; width: 2px; height: 2px; }
-.os-particle-6 { top: 70%; right: 35%; --dur: 6s; --delay: 0.8s; width: 2px; height: 2px; background: rgba(110, 231, 255, 0.20); }
+/* 漂浮微粒定位 */
+.os-mote-1 { top: 18%; left: 12%; --dur: 7s; --delay: 0s; }
+.os-mote-2 { top: 28%; right: 18%; --dur: 8s; --delay: 1.5s; }
+.os-mote-3 { top: 50%; left: 6%; --dur: 6s; --delay: 3s; }
+.os-mote-4 { top: 65%; right: 10%; --dur: 9s; --delay: 0.8s; }
+.os-mote-5 { top: 38%; left: 25%; --dur: 7.5s; --delay: 2s; }
+.os-mote-6 { top: 72%; right: 28%; --dur: 8.5s; --delay: 4s; }
 
 /* ==================== Creator OS 卡片系统 ==================== */
 

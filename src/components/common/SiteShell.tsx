@@ -13,7 +13,7 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
       <SiteSidebar />
       <main
         className="min-h-screen transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-y-auto"
-        style={{ marginLeft, background: 'var(--bg-page)' }}
+        style={{ marginLeft }}
       >
         <div style={{ padding: 'var(--spacing-page-x)' }}>
           {children}
