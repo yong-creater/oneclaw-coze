@@ -11,26 +11,28 @@ import {
   LayoutTemplate,
   Lightbulb,
   FolderOpen,
+  Settings,
   User,
   PanelLeftClose,
   PanelLeft,
   LogOut,
+  Crown,
 } from 'lucide-react';
 
 // ========== 菜单数据结构 ==========
 const menuList: Array<{
   id: string;
   name: string;
+  subtitle: string;
   icon: React.ComponentType<{ className?: string }>;
-  gradient: string;
-  desc: string;
   path: string;
 }> = [
-  { id: 'home', name: '首页', icon: Home, gradient: 'from-violet-500 to-purple-600', desc: 'AI创作工作台', path: '/' },
-  { id: 'tools', name: '小工具', icon: Wand2, gradient: 'from-fuchsia-500 to-pink-500', desc: '商品图、详情页等', path: '/tools' },
-  { id: 'template', name: '模板', icon: LayoutTemplate, gradient: 'from-emerald-400 to-teal-500', desc: '海量模板一键用', path: '/templates' },
-  { id: 'prompt', name: '提示库', icon: Lightbulb, gradient: 'from-amber-400 to-orange-500', desc: '优质提示词灵感', path: '/prompts' },
-  { id: 'project', name: '项目', icon: FolderOpen, gradient: 'from-blue-400 to-indigo-500', desc: '管理生成内容', path: '/projects' },
+  { id: 'home', name: '首页', subtitle: 'AI 创作工作台', icon: Home, path: '/' },
+  { id: 'tools', name: '小工具', subtitle: '商品图、详情页、小红书等', icon: Wand2, path: '/tools' },
+  { id: 'template', name: '模板', subtitle: '可复用创作模板', icon: LayoutTemplate, path: '/templates' },
+  { id: 'prompt', name: '提示库', subtitle: '高质量提示词', icon: Lightbulb, path: '/prompts' },
+  { id: 'project', name: '项目', subtitle: '历史生成与作品', icon: FolderOpen, path: '/projects' },
+  { id: 'settings', name: '设置', subtitle: '账号与偏好', icon: Settings, path: '/settings' },
 ];
 
 // ========== 从 pathname 推导当前菜单 ID ==========
@@ -49,7 +51,7 @@ function getMenuIdFromPath(pathname: string): string {
     return 'tools';
   }
   // 精确匹配菜单路径
-  const match = menuList.find(m => m.path !== '/' && pathname === m.path);
+  const match = menuList.find(m => m.path !== '/' && pathname.startsWith(m.path));
   if (match) return match.id;
   // 首页兜底
   return 'home';
@@ -62,7 +64,6 @@ export default function SiteSidebar() {
   const { user, authenticated, setShowLoginModal, logout } = useUser();
 
   const currentMenu = getMenuIdFromPath(pathname);
-
   const sidebarWidth = sidebarExpanded ? 240 : 68;
 
   return (
@@ -71,13 +72,13 @@ export default function SiteSidebar() {
       style={{ width: sidebarWidth }}
     >
       {/* Logo + 折叠按钮 */}
-      <div className="h-[68px] flex items-center justify-between px-4 border-b border-slate-100/80 shrink-0">
+      <div className="h-[60px] flex items-center justify-between px-4 border-b border-slate-100/60 shrink-0">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <SiteLogo size={32} showText={sidebarExpanded} />
+          <SiteLogo size={28} showText={sidebarExpanded} />
         </div>
         <button
           onClick={toggleSidebar}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shrink-0"
+          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shrink-0"
           title={sidebarExpanded ? '收起侧栏' : '展开侧栏'}
         >
           {sidebarExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
@@ -85,13 +86,11 @@ export default function SiteSidebar() {
       </div>
 
       {/* 菜单列表 */}
-      <nav className="flex-1 py-2 overflow-y-auto scrollbar-hide">
-        <div className={`${sidebarExpanded ? 'px-2.5' : 'px-2'} space-y-0.5`}>
+      <nav className="flex-1 py-3 overflow-y-auto scrollbar-hide">
+        <div className={`${sidebarExpanded ? 'px-3' : 'px-2'} space-y-1`}>
           {menuList.map((menu) => {
             const Icon = menu.icon;
             const isActive = currentMenu === menu.id;
-            const iconSize = sidebarExpanded ? 36 : 32;
-            const iconRadius = sidebarExpanded ? 10 : 8;
 
             return (
               <button
@@ -99,22 +98,34 @@ export default function SiteSidebar() {
                 onClick={() => {
                   router.push(menu.path);
                 }}
-                className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : ''}`}
-                title={!sidebarExpanded ? menu.name : undefined}
+                className={`
+                  group flex items-center gap-3 w-full text-left overflow-hidden
+                  transition-all duration-200 rounded-xl
+                  ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : 'px-3'}
+                  ${sidebarExpanded ? 'h-[52px]' : 'h-[44px]'}
+                  ${isActive
+                    ? 'bg-gradient-to-r from-purple-50/80 to-indigo-50/40 text-purple-700'
+                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                  }
+                `}
+                title={!sidebarExpanded ? `${menu.name} · ${menu.subtitle}` : undefined}
               >
-                <div
-                  className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
-                  style={{ width: iconSize, height: iconSize, borderRadius: iconRadius }}
-                >
-                  <Icon className={sidebarExpanded ? 'w-[18px] h-[18px]' : 'w-4 h-4'} />
+                {/* 图标 - 统一 20px */}
+                <div className={`shrink-0 flex items-center justify-center ${!sidebarExpanded ? 'w-full' : ''}`}>
+                  <Icon
+                    className={`w-5 h-5 transition-colors duration-200 ${
+                      isActive ? 'text-purple-600' : 'text-slate-400 group-hover:text-slate-600'
+                    }`}
+                  />
                 </div>
+                {/* 文字区 */}
                 {sidebarExpanded && (
                   <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
+                    <div className={`font-medium truncate text-[13px] leading-tight ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
                       {menu.name}
                     </div>
                     <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
-                      {menu.desc}
+                      {menu.subtitle}
                     </div>
                   </div>
                 )}
@@ -124,38 +135,45 @@ export default function SiteSidebar() {
         </div>
       </nav>
 
-      {/* 用户信息区 - 集成登录功能 */}
-      <div className={`px-3 py-3 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'flex justify-center'}`}>
+      {/* 用户信息区 - 左下角 */}
+      <div className={`shrink-0 border-t border-slate-100/60 ${sidebarExpanded ? 'px-3 py-3' : 'px-2 py-3 flex justify-center'}`}>
         {sidebarExpanded ? (
           authenticated ? (
-            // 已登录：显示用户信息 + 退出
             <div className="flex items-center gap-2.5">
               {user?.avatar_url ? (
-                <img src={user.avatar_url} alt="" className="w-8 h-8 rounded-full shrink-0" />
+                <img src={user.avatar_url} alt="" className="w-9 h-9 rounded-full shrink-0 ring-2 ring-slate-100" />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center shrink-0">
-                  <span className="text-white text-xs font-medium">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center shrink-0">
+                  <span className="text-purple-600 text-xs font-semibold">
                     {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
                   </span>
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-medium text-slate-700 truncate">{user?.nickname || '用户'}</div>
-                <div className="text-[10px] text-slate-400">免费版</div>
+                <div className="text-[13px] font-medium text-slate-700 truncate">{user?.nickname || '用户'}</div>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Crown className="w-3 h-3 text-amber-400" />
+                  <span className="text-[11px] text-slate-400">免费版</span>
+                  <button
+                    onClick={() => router.push('/membership')}
+                    className="text-[11px] text-purple-500 hover:text-purple-600 font-medium ml-0.5"
+                  >
+                    升级
+                  </button>
+                </div>
               </div>
               <button
                 onClick={logout}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+                className="p-1.5 rounded-lg text-slate-300 hover:text-red-400 hover:bg-red-50 transition-colors shrink-0"
                 title="退出登录"
               >
                 <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
-            // 未登录：显示登录按钮
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                <User className="w-4 h-4 text-slate-400" />
+              <div className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center shrink-0">
+                <User className="w-4 h-4 text-slate-300" />
               </div>
               <div className="min-w-0 flex-1">
                 <LoginButton />
@@ -166,21 +184,20 @@ export default function SiteSidebar() {
           // 收缩模式
           authenticated ? (
             <button
-              onClick={() => setShowLoginModal(false)}
-              className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-cyan-400 flex items-center justify-center"
+              className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center"
               title={user?.nickname || '用户'}
             >
-              <span className="text-white text-xs font-medium">
+              <span className="text-purple-600 text-xs font-semibold">
                 {user?.nickname?.slice(0, 2).toUpperCase() || '用'}
               </span>
             </button>
           ) : (
             <button
               onClick={() => setShowLoginModal(true)}
-              className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-purple-50 transition-colors"
+              className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center hover:bg-purple-50 transition-colors"
               title="登录"
             >
-              <User className="w-4 h-4 text-slate-400" />
+              <User className="w-4 h-4 text-slate-300" />
             </button>
           )
         )}
