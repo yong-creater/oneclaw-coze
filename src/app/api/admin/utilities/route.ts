@@ -105,7 +105,17 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('获取使用记录失败:', error);
-      return NextResponse.json({ error: '获取失败' }, { status: 500 });
+      // Supabase不可达时降级返回空数据（不影响后台页面加载）
+      return NextResponse.json({
+        success: true,
+        data: [],
+        pagination: { page, limit, total: 0, total_pages: 0 },
+        stats: {
+          resume: { total: 0, success: 0, failed: 0 },
+          novel: { total: 0, success: 0, failed: 0 },
+          product_page: { total: 0, success: 0, failed: 0 }
+        }
+      });
     }
 
     // 获取统计数据

@@ -60,6 +60,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// 登录失败次数限制（内存级，防暴力破解）
+const loginAttempts = new Map<string, { count: number; lockUntil: number }>();
+const MAX_ATTEMPTS = 5;
+const LOCK_DURATION = 15 * 60 * 1000; // 15分钟
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -71,6 +76,20 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // 检查登录限制
+    const attempt = loginAttempts.get(username);
+    if (attempt && attempt.count >= MAX_ATTEMPTS) {
+      const remaining = Math.ceil((attempt.lockUntil - Date.now()) / 60000);
+      if (remaining > 0) {
+        return NextResponse.json(
+          { success: false, error: `登录失败次数过多，请${remaining}分钟后重试` },
+          { status: 429 }
+        );
+      }
+      // 锁定时间已过，重置
+      loginAttempts.delete(username);
+    }
     
     const client = getSupabaseClient();
     const { data: user, error } = await client
@@ -80,6 +99,11 @@ export async function POST(request: NextRequest) {
       .single();
     
     if (error || !user) {
+      // 记录失败次数
+      const a = loginAttempts.get(username) || { count: 0, lockUntil: 0 };
+      a.count++;
+      if (a.count >= MAX_ATTEMPTS) a.lockUntil = Date.now() + LOCK_DURATION;
+      loginAttempts.set(username, a);
       await logLogin(username, false, "用户不存在", request);
       return NextResponse.json(
         { success: false, error: "用户名或密码错误" },
@@ -100,6 +124,11 @@ export async function POST(request: NextRequest) {
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
     
     if (!isValidPassword) {
+      // 记录失败次数
+      const a = loginAttempts.get(username) || { count: 0, lockUntil: 0 };
+      a.count++;
+      if (a.count >= MAX_ATTEMPTS) a.lockUntil = Date.now() + LOCK_DURATION;
+      loginAttempts.set(username, a);
       await logLogin(username, false, "密码错误", request);
       return NextResponse.json(
         { success: false, error: "用户名或密码错误" },
@@ -128,6 +157,9 @@ export async function POST(request: NextRequest) {
     const permissions = getPermissionsByRole(user.role);
     
     // 记录登录日志
+    // 登录成功，清除失败计数
+    loginAttempts.delete(username);
+
     await logLogin(username, true, "登录成功", request);
     
     const response = NextResponse.json({

@@ -16,6 +16,11 @@ const TOOL_ID_MAP: Record<string, string> = {
   'background-removal': 'background-removal',
   'xhs-generator': 'xhs-generator',
   'resume': 'resume',
+  'product-generator': 'product-generator',
+  'ai-photo': 'ai-photo',
+  'product-poster': 'product-enhance',
+  'layout-design': 'layout-design',
+  'portrait-enhance': 'portrait-enhance',
 };
 
 // 默认免费模型配置（当数据库无配置时使用）
@@ -23,12 +28,16 @@ const DEFAULT_CONFIGS: Record<string, { model: string; source: string; isFree: b
   'novel-polish': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
   'novel-script': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
   'novel-split-panel': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
-  'novel-generate-image': { model: 'coze-image', source: 'coze', isFree: true },
+  'novel-generate-image': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
   'product-compliance': { model: 'doubao-seed-1-6-vision-250815', source: 'coze', isFree: true },
-  'product-enhance': { model: 'coze-image', source: 'coze', isFree: true },
-  'background-removal': { model: 'coze-image', source: 'coze', isFree: true },
+  'product-enhance': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
+  'background-removal': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
   'xhs-generator': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
   'resume': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
+  'product-generator': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
+  'ai-photo': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
+  'layout-design': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
+  'portrait-enhance': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
 };
 
 // GET - 获取单个工具的模型配置
