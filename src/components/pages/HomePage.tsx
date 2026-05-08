@@ -122,19 +122,19 @@ export default function HomePage() {
         {/* 内容层 */}
         <div className="relative z-10 flex flex-col items-center w-full max-w-[1280px] mx-auto px-4">
 
-          {/* 主标题 — 聚焦"描述需求 → AI 自动完成" */}
-          <h1 className="os-hero-title text-center !text-[52px] !leading-[1.2] !tracking-[-0.03em]">
-            不会 Prompt，<br className="sm:hidden" />也能生成{' '}
-            <span className="gradient-text">专业内容</span>
+          {/* 主标题 */}
+          <h1 className="text-center font-bold !text-[72px] !leading-[1.1] !tracking-[-0.03em]">
+            一句需求，<br className="sm:hidden" />直接生成{' '}
+            <span className="gradient-text">结果</span>
           </h1>
 
           {/* 副标题 */}
-          <p className="text-center text-[18px] text-[#6B7280] mt-4 max-w-[640px] leading-relaxed">
-            上传图片或输入一句话，OneClaw 自动帮你生成商品图、详情页、小红书和视频脚本。
+          <p className="text-center text-[24px] text-[#6B7280] mt-4 max-w-[880px] leading-[1.6]">
+            上传图片或输入一句话，OneClaw 自动匹配最佳 AI 工作流。
           </p>
 
           {/* ===== AI 输入工作台 — 左右分栏 ===== */}
-          <div className="os-studio mt-10">
+          <div className="os-studio mt-12">
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
               <div className="os-studio-input-area">
