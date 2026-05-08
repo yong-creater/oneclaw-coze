@@ -1,28 +1,29 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
   Sparkles,
-  ClipboardPaste,
   Upload,
   ImagePlus,
   LayoutTemplate,
-  Lightbulb,
+  Heart,
   Video,
   RefreshCw,
   FolderOpen,
   ArrowRight,
   ShoppingBag,
   Camera,
-  Heart,
+  ChevronLeft,
+  ChevronRight,
   Package,
   ImageIcon,
   FileText,
   BookOpen,
   Scissors,
-  Star,
+  Lightbulb,
+  ClipboardPaste,
 } from 'lucide-react';
 
 // 图标名称 → Lucide 组件映射
@@ -54,6 +55,18 @@ const scenePrompts: Record<string, string[]> = {
   video: ['护肤品带货短视频脚本', '数码产品开箱脚本', '零食种草短视频口播'],
 };
 
+// ========== UtilityTool 类型 ==========
+interface UtilityTool {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string;
+  color: string;
+  cover_image: string | null;
+  description: string;
+  highlight: string;
+}
+
 export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
   const router = useRouter();
@@ -64,6 +77,8 @@ export default function HomePage() {
     id: number; title: string; thumbnail: string | null; tool_name: string;
   }>>([]);
   const [activeScene, setActiveScene] = useState<string>('product');
+  const [tools, setTools] = useState<UtilityTool[]>([]);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -73,13 +88,24 @@ export default function HomePage() {
     }
   }, [pendingInput, consumePendingInput]);
 
-  // 获取最近项目
+  // 获取最近项目（只取 3 条）
   useEffect(() => {
-    fetch('/api/generations?limit=6', { cache: 'no-store' })
+    fetch('/api/generations?limit=3', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const list = Array.isArray(data?.data) ? data.data : Array.isArray(data?.generations) ? data.generations : [];
-        setRecentProjects(list.slice(0, 6));
+        setRecentProjects(list.slice(0, 3));
+      })
+      .catch(() => {});
+  }, []);
+
+  // 获取推荐工具
+  useEffect(() => {
+    fetch('/api/utility-tools', { cache: 'no-store' })
+      .then(res => res.json())
+      .then(data => {
+        const list = data?.tools ?? [];
+        setTools(list);
       })
       .catch(() => {});
   }, []);
@@ -95,21 +121,26 @@ export default function HomePage() {
     }, 2000);
   }, [inputText, isLoading]);
 
-  // 切换场景时更新 placeholder
+  // 切换场景
   const currentScene = modeCards.find(s => s.key === activeScene) ?? modeCards[0];
   const currentPrompts = scenePrompts[activeScene] ?? scenePrompts.product;
 
+  // 横向滚动
+  const scrollTools = (dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const amount = 320;
+    el.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
+
   return (
     <div className="os-page">
-      {/* ==================== Hero 创作区 ==================== */}
-      <div className="animate-fade-slide-up relative">
+      {/* ==================== Hero 创作区（核心 — 占首屏 75%） ==================== */}
+      <div className="animate-fade-slide-up relative" style={{ minHeight: '75vh' }}>
         {/* 氛围光晕层 */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ height: '800px' }}>
-          {/* 主柔光球 — 页面上方中心 */}
           <div className="os-orb os-orb-primary os-atmo-orb-center" />
-          {/* 左下辅助光 */}
           <div className="os-orb os-orb-secondary os-atmo-orb-left" />
-          {/* 右上辅助光 */}
           <div className="os-orb os-orb-accent os-atmo-orb-right" />
         </div>
 
@@ -124,16 +155,16 @@ export default function HomePage() {
         </div>
 
         {/* 标题区 */}
-        <div className="text-center relative z-10 pt-16 pb-8">
+        <div className="text-center relative z-10 pt-16 pb-6">
           <h1 className="os-h1 tracking-tight">
             <span className="gradient-text">今天你想创造什么？</span>
           </h1>
-          <p className="mt-5 max-w-lg mx-auto" style={{ color: 'var(--text-tertiary)', fontSize: '16px', lineHeight: 1.7, fontWeight: 400 }}>
+          <p className="mt-4 max-w-md mx-auto" style={{ color: 'var(--text-tertiary)', fontSize: '15px', lineHeight: 1.6, fontWeight: 400 }}>
             输入想法，AI 帮你生成商品图、详情页、小红书内容、视频脚本
           </p>
         </div>
 
-        {/* ========== AI 创作模式选择器 ========== */}
+        {/* AI 创作模式选择器 */}
         <div className="os-mode-grid os-workspace-wrapper relative z-10 mb-5">
           {modeCards.map((mode) => {
             const Icon = mode.icon;
@@ -156,10 +187,10 @@ export default function HomePage() {
           })}
         </div>
 
-        {/* ========== AI Workspace 工作台 ========== */}
+        {/* AI Workspace 工作台 */}
         <div className="os-workspace-wrapper relative z-10">
           <div className="os-workspace">
-            {/* 中间：Prompt 输入区域 */}
+            {/* Prompt 输入区域 */}
             <div className="os-workspace-body">
               <textarea
                 value={inputText}
@@ -170,13 +201,10 @@ export default function HomePage() {
               />
             </div>
 
-            {/* 底部：工具栏 */}
+            {/* 底部工具栏 */}
             <div className="os-workspace-footer">
               <div className="flex items-center gap-1">
-                <button
-                  className="os-workspace-tool-btn"
-                  title="上传图片"
-                >
+                <button className="os-workspace-tool-btn" title="上传图片">
                   <Upload className="w-4 h-4" />
                   <span>上传</span>
                 </button>
@@ -201,8 +229,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 试试这些创作 */}
-        <div className="os-workspace-wrapper mt-5 mb-20 flex items-center gap-2.5 flex-wrap justify-center relative z-10">
+        {/* 推荐 Prompt */}
+        <div className="os-workspace-wrapper mt-4 mb-16 flex items-center gap-2.5 flex-wrap justify-center relative z-10">
           <Lightbulb className="w-3.5 h-3.5 text-[#94A3B8]" />
           {currentPrompts.map((prompt) => (
             <button
@@ -232,13 +260,10 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ==================== 最近创作（弱化） ==================== */}
-      <div className="animate-fade-slide-up" style={{ animationDelay: '0.15s' }}>
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-[var(--text-primary)] flex items-center gap-2">
-            最近创作
-            <Star className="w-3.5 h-3.5 text-[#7B61FF] fill-[#7B61FF]/20" />
-          </h2>
+      {/* ==================== 最近创作（弱化 — 只保留 3 条） ==================== */}
+      <div className="animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-[var(--text-secondary)]">最近创作</h2>
           <button
             onClick={() => router.push('/projects')}
             className="os-btn-ghost text-xs"
@@ -248,21 +273,18 @@ export default function HomePage() {
         </div>
 
         {recentProjects.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             {recentProjects.map((project) => (
               <div
                 key={project.id}
-                className="os-card aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50 !p-0"
+                className="os-card aspect-[16/10] rounded-2xl overflow-hidden bg-slate-50 !p-0 cursor-pointer"
+                onClick={() => router.push('/projects')}
               >
                 {project.thumbnail ? (
-                  <img
-                    src={project.thumbnail}
-                    alt={project.title}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={project.thumbnail} alt={project.title} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-2">
-                    <FolderOpen className="w-7 h-7" />
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-1.5">
+                    <FolderOpen className="w-6 h-6" />
                     <span className="text-[11px] truncate max-w-[80%]">{project.title || project.tool_name}</span>
                   </div>
                 )}
@@ -270,15 +292,66 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="os-card-static rounded-2xl py-10 text-center">
-            <div className="w-10 h-10 rounded-full bg-[#7B61FF]/[0.06] flex items-center justify-center mx-auto mb-3">
+          <div className="os-card-static rounded-2xl py-8 text-center">
+            <div className="w-9 h-9 rounded-full bg-[#7B61FF]/[0.06] flex items-center justify-center mx-auto mb-2.5">
               <ImagePlus className="w-4 h-4 text-[#7B61FF]/30" />
             </div>
-            <p className="os-body mb-1 text-sm">还没有创作记录</p>
-            <p className="os-caption">在上方输入需求，开始你的第一次创作</p>
+            <p className="os-caption">还没有创作记录</p>
           </div>
         )}
       </div>
+
+      {/* ==================== 推荐工具（横向滑动） ==================== */}
+      {tools.length > 0 && (
+        <div className="animate-fade-slide-up mt-10" style={{ animationDelay: '0.2s' }}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-[var(--text-secondary)]">推荐工具</h2>
+            <div className="flex items-center gap-1.5">
+              <button onClick={() => scrollTools('left')} className="os-btn-ghost !p-1.5 rounded-full">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => scrollTools('right')} className="os-btn-ghost !p-1.5 rounded-full">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide pb-2" style={{ scrollSnapType: 'x mandatory' }}>
+            {tools.map((tool) => {
+              const ToolIcon = ICON_MAP[tool.icon] || Sparkles;
+              return (
+                <button
+                  key={tool.id}
+                  onClick={() => router.push(`/${tool.slug}`)}
+                  className="os-card shrink-0 flex flex-col overflow-hidden cursor-pointer group"
+                  style={{ width: '240px', scrollSnapAlign: 'start' }}
+                >
+                  {/* 封面图区域 */}
+                  <div className="os-card-cover bg-gradient-to-br relative" style={{ backgroundImage: tool.cover_image ? 'none' : undefined }}>
+                    {tool.cover_image ? (
+                      <img src={tool.cover_image} alt={tool.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${tool.color || 'from-[#7B61FF] to-[#5B8CFF]'}`}>
+                        <ToolIcon className="w-8 h-8 text-white/70" />
+                      </div>
+                    )}
+                  </div>
+                  {/* 文字区 */}
+                  <div className="p-4 text-left">
+                    <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1 truncate">{tool.name}</h3>
+                    <p className="text-xs text-[var(--text-tertiary)] line-clamp-2 leading-relaxed">
+                      {tool.highlight || tool.description || 'AI 智能创作工具'}
+                    </p>
+                    <span className="inline-flex items-center gap-1 mt-3 text-xs font-medium text-[#7B61FF] group-hover:gap-1.5 transition-all">
+                      立即使用 <ArrowRight className="w-3 h-3" />
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
