@@ -182,9 +182,23 @@ html {
   background: #4b5563;
 }
 
-/* 品牌色文字 */
+/* 品牌色 - 薄荷绿 */
+:root {
+  --brand: #10b981;
+  --brand-light: #d1fae5;
+  --brand-dark: #059669;
+}
 .text-brand {
-  color: #ea580c;
+  color: var(--brand);
+}
+.bg-brand {
+  background-color: var(--brand);
+}
+.bg-brand-light {
+  background-color: var(--brand-light);
+}
+.border-brand {
+  border-color: var(--brand);
 }
 
 /* 龙虾敲键盘动画 - 左右手交替敲击 */
@@ -277,14 +291,26 @@ html {
   @apply border-slate-600;
 }
 
-/* 统一主按钮 */
+/* 统一主按钮 - 薄荷绿渐变 */
 .ui-btn-primary {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2 
-         bg-slate-900 text-white text-sm font-medium rounded-[10px]
-         hover:bg-slate-800 active:bg-slate-700 transition-colors cursor-pointer;
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 
+         text-white text-sm font-medium rounded-[10px]
+         transition-all cursor-pointer;
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+.ui-btn-primary:hover {
+  background: linear-gradient(135deg, #059669, #10b981);
+  transform: translateY(-0.5px);
+}
+.ui-btn-primary:active {
+  background: linear-gradient(135deg, #047857, #059669);
+  transform: translateY(0);
 }
 .dark .ui-btn-primary {
-  @apply bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300;
+  background: linear-gradient(135deg, #10b981, #34d399);
+}
+.dark .ui-btn-primary:hover {
+  background: linear-gradient(135deg, #34d399, #6ee7b7);
 }
 
 /* 统一次要按钮 */

@@ -22,7 +22,7 @@ const toolsList = [
     desc: '上传商品图，AI生成高质量卖货图',
     href: '/product-generator',
     icon: Package,
-    color: 'text-orange-600 bg-orange-50',
+    color: 'text-violet-600 bg-violet-50',
   },
   {
     id: 'background-removal',
@@ -30,7 +30,7 @@ const toolsList = [
     desc: '一键去除背景，支持复杂边缘',
     href: '/background-removal',
     icon: Scissors,
-    color: 'text-blue-600 bg-blue-50',
+    color: 'text-sky-600 bg-sky-50',
   },
   {
     id: 'ai-photo',

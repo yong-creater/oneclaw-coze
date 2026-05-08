@@ -27,6 +27,7 @@ const TOOL_PATHS = [
   '/xiaohongshu-generator',
   '/novel',
   '/resume',
+  '/productpage',
 ];
 
 function PageSwitcher({ children }: { children: React.ReactNode }) {
@@ -37,25 +38,24 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
   const isOnToolSubRoute = TOOL_PATHS.some((p) => pathname.startsWith(p));
 
   // 工具菜单下：如果正在某个工具子路由，渲染 children（Next.js 路由页面）
-  // 否则渲染 ToolsPage 空壳
   if (currentMenu === 'tools' && isOnToolSubRoute) {
     return (
       <>
         <SiteSidebar />
-        <main className="ml-[240px] w-[calc(100%-240px)] min-h-screen">
+        <main className="ml-[240px] w-[calc(100%-240px)] min-h-screen bg-[#FAFBFC] p-6">
           {children}
         </main>
       </>
     );
   }
 
-  // 其他菜单：渲染对应页面组件（默认隐藏，menuState 控制显示）
+  // 其他菜单：渲染对应页面组件
   const ActivePage = PAGE_MAP[currentMenu];
 
   return (
     <>
       <SiteSidebar />
-      <main className="ml-[240px] w-[calc(100%-240px)] min-h-screen">
+      <main className="ml-[240px] w-[calc(100%-240px)] min-h-screen bg-[#FAFBFC] p-6">
         <ActivePage />
       </main>
     </>
