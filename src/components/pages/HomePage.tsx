@@ -38,12 +38,12 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Scissors,
 };
 
-// ========== 创作场景 Tabs ==========
-const sceneTabs = [
-  { key: 'product', label: '商品图', icon: ShoppingBag, slug: 'product-generator', placeholder: '描述你想生成的内容...\n\n例如：为这款耳机生成高级电商主图' },
-  { key: 'detail', label: '详情页', icon: LayoutTemplate, slug: 'productpage', placeholder: '描述你想生成的内容...\n\n例如：帮我生成高级感护肤品详情页' },
-  { key: 'xiaohongshu', label: '小红书', icon: Heart, slug: 'xiaohongshu-generator', placeholder: '描述你想生成的内容...\n\n例如：制作小红书爆款封面' },
-  { key: 'video', label: '视频脚本', icon: Video, slug: 'novel', placeholder: '描述你想生成的内容...\n\n例如：生成带货短视频脚本与口播文案' },
+// ========== 创作模式选择器 ==========
+const modeCards = [
+  { key: 'product', label: '商品图', desc: '生成主图 / 场景图', icon: ShoppingBag, slug: 'product-generator', placeholder: '描述你想生成的内容...\n\n例如：为这款耳机生成高级电商主图' },
+  { key: 'detail', label: '详情页', desc: '生成商品详情内容', icon: LayoutTemplate, slug: 'productpage', placeholder: '描述你想生成的内容...\n\n例如：帮我生成高级感护肤品详情页' },
+  { key: 'xiaohongshu', label: '小红书', desc: '生成封面与文案', icon: Heart, slug: 'xiaohongshu-generator', placeholder: '描述你想生成的内容...\n\n例如：制作小红书爆款封面' },
+  { key: 'video', label: '视频脚本', desc: '生成短视频口播脚本', icon: Video, slug: 'novel', placeholder: '描述你想生成的内容...\n\n例如：生成带货短视频脚本与口播文案' },
 ] as const;
 
 // ========== 推荐创作 Prompt（按场景分组） ==========
@@ -96,7 +96,7 @@ export default function HomePage() {
   }, [inputText, isLoading]);
 
   // 切换场景时更新 placeholder
-  const currentScene = sceneTabs.find(s => s.key === activeScene) ?? sceneTabs[0];
+  const currentScene = modeCards.find(s => s.key === activeScene) ?? modeCards[0];
   const currentPrompts = scenePrompts[activeScene] ?? scenePrompts.product;
 
   return (
@@ -136,31 +136,34 @@ export default function HomePage() {
           </p>
         </div>
 
+        {/* ========== AI 创作模式选择器 ========== */}
+        <div className="os-mode-grid os-workspace-wrapper relative z-10 mb-5">
+          {modeCards.map((mode) => {
+            const Icon = mode.icon;
+            const isActive = activeScene === mode.key;
+            return (
+              <button
+                key={mode.key}
+                onClick={() => setActiveScene(mode.key)}
+                className={`os-mode-card ${isActive ? 'os-mode-card-active' : ''}`}
+              >
+                <div className={`os-mode-card-icon ${isActive ? 'os-mode-card-icon-active' : ''}`}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                <div className="os-mode-card-text">
+                  <span className="os-mode-card-title">{mode.label}</span>
+                  <span className="os-mode-card-desc">{mode.desc}</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
         {/* ========== AI Workspace 工作台 ========== */}
         <div className="os-workspace-wrapper relative z-10">
           <div className="os-workspace">
-            {/* 顶部：模式 Tabs（内嵌） */}
-            <div className="os-workspace-header">
-              <div className="os-workspace-tabs">
-                {sceneTabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeScene === tab.key;
-                  return (
-                    <button
-                      key={tab.key}
-                      onClick={() => setActiveScene(tab.key)}
-                      className={`os-workspace-tab ${isActive ? 'os-workspace-tab-active' : ''}`}
-                    >
-                      <Icon className="w-[15px] h-[15px]" />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* 中间：Prompt 输入区域 */}
-            <div className="os-workspace-body">
+            <div className="os-workspace-body" style={{ paddingTop: '18px' }}>
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value.slice(0, 500))}
