@@ -166,11 +166,7 @@ body {
   --border-light: #F1F3F5;
 }
 
-.text-brand { color: var(--brand); }
-.bg-brand { background-color: var(--brand); }
-.bg-brand-light { background-color: var(--brand-light); }
-.border-brand { border-color: var(--brand); }
-.text-brand-cyan { color: var(--brand-cyan); }
+
 
 /* ==================== 自定义滚动条 ==================== */
 ::-webkit-scrollbar {
@@ -194,25 +190,7 @@ body {
   background: #4b5563;
 }
 
-/* ==================== 龙虾敲键盘动画 ==================== */
-@keyframes tap-left {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.7; }
-}
-@keyframes tap-right {
-  0%, 100% { opacity: 0.2; }
-  50% { opacity: 0.7; }
-}
-.animate-tap-left { animation: tap-left 0.4s ease-in-out infinite; }
-.animate-tap-right { animation: tap-right 0.4s ease-in-out infinite; animation-delay: 0.2s; }
-
-@keyframes page-loading {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-.animate-page-loading { animation: page-loading 2s ease-in-out infinite; }
-
-/* ==================== 骨架屏动画 ==================== */
+/* ==================== 骨架屏动画 ====================*/
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -257,19 +235,6 @@ body {
 }
 .animate-stagger-in {
   animation: staggerIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* 光晕脉冲 */
-@keyframes glowPulse {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(108, 92, 231, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 35px rgba(108, 92, 231, 0.3), 0 0 60px rgba(0, 210, 255, 0.1);
-  }
-}
-.animate-glow-pulse {
-  animation: glowPulse 3s ease-in-out infinite;
 }
 
 /* 渐变文字 */
@@ -454,29 +419,6 @@ body {
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08);
 }
 
-/* 标准输入框 */
-.os-input {
-  width: 100%;
-  padding: 10px 16px;
-  background: white;
-  border: 1px solid var(--border-default);
-  border-radius: 12px;
-  font-size: 14px;
-  color: #111827;
-  outline: none;
-  transition: all 0.2s ease;
-}
-.os-input::placeholder {
-  color: #9CA3AF;
-}
-.os-input:hover {
-  border-color: #D1D5DB;
-}
-.os-input:focus {
-  border-color: #6C5CE7;
-  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.08);
-}
-
 /* ==================== Creator OS 标签系统 ==================== */
 
 /* 筛选标签 */
@@ -503,16 +445,6 @@ body {
 .os-filter-tag-inactive:hover {
   background: #E5E7EB;
   color: #374151;
-}
-
-/* 徽标标签 */
-.os-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
 }
 
 /* ==================== Creator OS 页面布局 ==================== */
