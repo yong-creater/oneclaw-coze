@@ -62,7 +62,7 @@ export default function SiteSidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen bg-white border-r border-slate-100/80 flex flex-col z-30 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="fixed left-0 top-0 h-screen bg-white border-r border-slate-100/80 flex flex-col z-30 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] overflow-hidden"
       style={{ width: sidebarWidth }}
     >
       {/* Logo + 折叠按钮 */}
@@ -80,24 +80,26 @@ export default function SiteSidebar() {
       </div>
 
       {/* 菜单列表 */}
-      <nav className="flex-1 py-2 px-2.5 overflow-y-auto scrollbar-hide">
-        <div className="space-y-0.5">
+      <nav className="flex-1 py-2 overflow-y-auto scrollbar-hide">
+        <div className={`${sidebarExpanded ? 'px-2.5' : 'px-2'} space-y-0.5`}>
           {menuList.map((menu) => {
             const Icon = menu.icon;
             const isActive = currentMenu === menu.id;
+            const iconSize = sidebarExpanded ? 36 : 32;
+            const iconRadius = sidebarExpanded ? 10 : 8;
 
             return (
               <button
                 key={menu.id}
                 onClick={() => setCurrentMenu(menu.id)}
-                className={`sidebar-menu-item w-full ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center' : ''}`}
+                className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center !px-0 !gap-0' : ''}`}
                 title={!sidebarExpanded ? menu.name : undefined}
               >
                 <div
                   className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
-                  style={{ width: 36, height: 36, borderRadius: 10 }}
+                  style={{ width: iconSize, height: iconSize, borderRadius: iconRadius }}
                 >
-                  <Icon className="w-[18px] h-[18px]" />
+                  <Icon className={sidebarExpanded ? 'w-[18px] h-[18px]' : 'w-4 h-4'} />
                 </div>
                 {sidebarExpanded && (
                   <div className="flex-1 min-w-0 overflow-hidden">

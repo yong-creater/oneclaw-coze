@@ -554,6 +554,7 @@ body {
   background: none;
   width: 100%;
   text-align: left;
+  overflow: hidden;
 }
 .sidebar-menu-item:hover {
   background: #F3F4F6;
