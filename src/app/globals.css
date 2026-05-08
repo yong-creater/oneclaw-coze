@@ -939,31 +939,29 @@ body {
 
 /* ---- AI Workspace 工作台 ---- */
 .os-workspace-wrapper {
-  max-width: 960px;
+  max-width: 980px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .os-workspace {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(233, 238, 245, 0.7);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: none;
+  border-radius: 24px;
   box-shadow:
-    0 8px 40px rgba(15, 23, 42, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.6) inset,
-    0 0 60px rgba(123, 97, 255, 0.04);
+    0 2px 24px rgba(15, 23, 42, 0.04),
+    0 0 0 0.5px rgba(255, 255, 255, 0.8) inset;
   overflow: hidden;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .os-workspace:focus-within {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.82);
   box-shadow:
-    0 0 0 3px rgba(123, 97, 255, 0.08),
-    0 12px 48px rgba(123, 97, 255, 0.1),
-    0 0 80px rgba(123, 97, 255, 0.06);
-  border-color: rgba(123, 97, 255, 0.18);
+    0 0 0 1px rgba(123, 97, 255, 0.1),
+    0 8px 40px rgba(123, 97, 255, 0.08),
+    0 0 80px rgba(123, 97, 255, 0.05);
 }
 
 /* ---- AI 创作模式选择器 ---- */
@@ -1047,23 +1045,23 @@ body {
 
 /* 中间输入区 */
 .os-workspace-body {
-  padding: 0 20px;
+  padding: 0 32px;
 }
 .os-workspace-textarea {
   width: 100%;
-  min-height: 180px;
-  padding: 16px 0;
+  min-height: 260px;
+  padding: 0;
   background: transparent;
   border: none;
   font-size: 15px;
-  line-height: 1.7;
+  line-height: 1.75;
   color: var(--text-primary);
   resize: none;
   outline: none;
 }
 .os-workspace-textarea::placeholder {
-  color: #B0B8C8;
-  font-size: 14px;
+  color: #B8C0D0;
+  font-size: 15px;
   line-height: 1.8;
   white-space: pre-line;
 }
@@ -1073,20 +1071,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 20px 14px;
-  border-top: 1px solid rgba(123, 97, 255, 0.04);
+  padding: 12px 32px 20px;
 }
 .os-workspace-tool-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 10px;
   color: #94A3B8;
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   transition: all 0.2s ease;
   outline: none;
@@ -1096,10 +1093,10 @@ body {
   background: rgba(123, 97, 255, 0.06);
 }
 .os-workspace-counter {
-  font-size: 11px;
+  font-size: 12px;
   color: #CBD5E1;
   font-variant-numeric: tabular-nums;
-  margin-left: 6px;
+  margin-left: 8px;
 }
 
 /* ==================== Creator OS 标签系统 ==================== */

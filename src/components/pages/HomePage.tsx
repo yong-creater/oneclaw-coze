@@ -40,10 +40,10 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 // ========== 创作模式选择器 ==========
 const modeCards = [
-  { key: 'product', label: '商品图', desc: '生成主图 / 场景图', icon: ShoppingBag, slug: 'product-generator', placeholder: '描述你想生成的内容...\n\n例如：为这款耳机生成高级电商主图' },
-  { key: 'detail', label: '详情页', desc: '生成商品详情内容', icon: LayoutTemplate, slug: 'productpage', placeholder: '描述你想生成的内容...\n\n例如：帮我生成高级感护肤品详情页' },
-  { key: 'xiaohongshu', label: '小红书', desc: '生成封面与文案', icon: Heart, slug: 'xiaohongshu-generator', placeholder: '描述你想生成的内容...\n\n例如：制作小红书爆款封面' },
-  { key: 'video', label: '视频脚本', desc: '生成短视频口播脚本', icon: Video, slug: 'novel', placeholder: '描述你想生成的内容...\n\n例如：生成带货短视频脚本与口播文案' },
+  { key: 'product', label: '商品图', desc: '生成主图 / 场景图', icon: ShoppingBag, slug: 'product-generator', placeholder: '描述你想生成的内容，例如：\n帮我生成一张高级护肤品主图' },
+  { key: 'detail', label: '详情页', desc: '生成商品详情内容', icon: LayoutTemplate, slug: 'productpage', placeholder: '描述你想生成的内容，例如：\n帮我生成高级感护肤品详情页' },
+  { key: 'xiaohongshu', label: '小红书', desc: '生成封面与文案', icon: Heart, slug: 'xiaohongshu-generator', placeholder: '描述你想生成的内容，例如：\n制作小红书爆款封面和种草文案' },
+  { key: 'video', label: '视频脚本', desc: '生成短视频口播脚本', icon: Video, slug: 'novel', placeholder: '描述你想生成的内容，例如：\n生成带货短视频脚本与口播文案' },
 ] as const;
 
 // ========== 推荐创作 Prompt（按场景分组） ==========
@@ -163,7 +163,7 @@ export default function HomePage() {
         <div className="os-workspace-wrapper relative z-10">
           <div className="os-workspace">
             {/* 中间：Prompt 输入区域 */}
-            <div className="os-workspace-body" style={{ paddingTop: '18px' }}>
+            <div className="os-workspace-body">
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value.slice(0, 500))}
@@ -195,9 +195,9 @@ export default function HomePage() {
               <button
                 onClick={() => router.push(`/${currentScene.slug}`)}
                 disabled={!inputText.trim() || isLoading}
-                className="os-btn-primary !text-[13px] !h-[36px] !rounded-xl !gap-1.5 !px-5"
+                className="os-btn-primary !h-12 !rounded-[14px] !px-7 !text-[14px] !gap-2"
               >
-                <Sparkles className="w-[14px] h-[14px]" />
+                <Sparkles className="w-[16px] h-[16px]" />
                 {isLoading ? '生成中...' : '开始创作'}
               </button>
             </div>
