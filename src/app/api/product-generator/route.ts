@@ -15,16 +15,16 @@ export const IMAGE_SLOTS: { slot: ImageSlot; label: string; order: number }[] = 
 ];
 
 // ============ 商品保真核心指令 ============
-// 注意：model-selector 在 Coze 文生图模式下会自动注入视觉 LLM 分析的商品描述
-// 这段前缀用于指导模型严格按视觉描述还原商品
+// Coze SeeDream 模型通过 image 参数直接看到参考图片，原生支持图生图
+// 这段前缀确保模型严格保持商品原始形态，只改变背景/场景
 
-const PRODUCT_FIDELITY_PREFIX = `CRITICAL PRODUCT FIDELITY: The product description above (in [PRODUCT VISUAL REFERENCE]) describes the EXACT product you must render. You MUST reproduce this product with pixel-perfect accuracy — identical shape, color, material, proportions, and all visual details. NEVER alter, deform, or reimagine the product. Only create the specified scene/background around this exact product.
+const PRODUCT_FIDELITY_PREFIX = `CRITICAL: You MUST preserve the EXACT product from the reference image. The product's shape, color, material, proportions, and ALL visual details must remain IDENTICAL. ONLY change the background, lighting, and scene environment. NEVER deform, distort, or reimagine the product.
 
-ABSOLUTE RULES:
-1. The product MUST look EXACTLY as described — same shape, same color, same material, same proportions.
+RULES:
+1. Product MUST look EXACTLY like the reference image — same shape, color, material, proportions.
 2. NEVER deform, distort, reshape, or stylize the product.
 3. ONLY create the background, lighting, scene, and environment.
-4. NO text, NO watermark, NO logo, NO badges, NO graphic overlays on the image.
+4. NO text, NO watermark, NO logo, NO badges, NO graphic overlays.
 
 `;
 
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 并行生成 3 张图片
-    // 注意：视觉LLM分析在 model-selector 层自动完成，对同一张参考图会分析一次
+    // Coze SeeDream 通过 image 参数传入参考图，原生支持图生图
     const results: Partial<Record<ImageSlot, string>> = {};
     const errors: string[] = [];
 
