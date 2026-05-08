@@ -845,84 +845,7 @@ body {
     0 0 80px rgba(123, 97, 255, 0.05);
 }
 
-/* ---- AI 创作模式选择器 ---- */
-.os-mode-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-.os-mode-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  height: 88px;
-  padding: 0 20px;
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  outline: none;
-  text-align: left;
-}
-.os-mode-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);
-  background: rgba(255, 255, 255, 0.85);
-}
-.os-mode-card-active {
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.08) 0%, rgba(91, 140, 255, 0.06) 100%);
-  box-shadow:
-    0 4px 20px rgba(123, 97, 255, 0.1),
-    0 0 0 1px rgba(123, 97, 255, 0.08) inset;
-}
-.os-mode-card-active:hover {
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.12) 0%, rgba(91, 140, 255, 0.08) 100%);
-  box-shadow:
-    0 8px 28px rgba(123, 97, 255, 0.14),
-    0 0 0 1px rgba(123, 97, 255, 0.1) inset;
-}
-.os-mode-card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  background: rgba(15, 23, 42, 0.04);
-  color: #94A3B8;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.os-mode-card-icon-active {
-  background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(123, 97, 255, 0.25);
-}
-.os-mode-card-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.os-mode-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  line-height: 1.3;
-}
-.os-mode-card-desc {
-  font-size: 12px;
-  font-weight: 400;
-  color: #94A3B8;
-  line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* ---- AI 创作模式选择器（已移除，首页改为智能匹配模式） ---- */
 
 /* 中间输入区 */
 .os-workspace-body {
@@ -930,7 +853,7 @@ body {
 }
 .os-workspace-textarea {
   width: 100%;
-  min-height: 260px;
+  min-height: 200px;
   padding: 0;
   background: transparent;
   border: none;
