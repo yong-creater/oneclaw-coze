@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
+
 import { usePathname } from 'next/navigation';
 import { useMenu, type MenuId } from '@/components/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -13,7 +13,6 @@ import {
   LayoutTemplate,
   Lightbulb,
   FolderOpen,
-  Crown,
   User,
   PanelLeftClose,
   PanelLeft,
@@ -116,30 +115,6 @@ export default function SiteSidebar() {
           })}
         </div>
       </nav>
-
-      {/* 底部区域 - 会员升级卡片（仅展开时） */}
-      {sidebarExpanded && (
-        <div className="px-3 pb-2 shrink-0 animate-fade-slide-up">
-          <div className="bg-gradient-to-br from-purple-50 to-cyan-50 rounded-2xl p-3 border border-purple-100/50">
-            <div className="flex items-start gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center shrink-0">
-                <Crown className="w-4 h-4 text-white" />
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-semibold text-slate-800">解锁全部高级功能</div>
-                <div className="text-[10px] text-slate-400 mt-0.5 leading-snug">无限生成、高清导出等特权</div>
-              </div>
-            </div>
-            <Link
-              href="/membership"
-              className="mt-2.5 block w-full text-center py-1.5 rounded-xl text-xs font-semibold text-white transition-all hover:opacity-90"
-              style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}
-            >
-              立即升级
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* 用户信息区 - 集成登录功能 */}
       <div className={`px-3 py-3 border-t border-slate-100/80 shrink-0 ${sidebarExpanded ? '' : 'flex justify-center'}`}>
