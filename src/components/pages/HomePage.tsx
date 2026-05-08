@@ -192,9 +192,9 @@ export default function HomePage() {
               <button
                 onClick={() => router.push(`/${currentScene.slug}`)}
                 disabled={!inputText.trim() || isLoading}
-                className="os-btn-primary !text-sm !h-9 !rounded-xl !gap-2"
+                className="os-btn-primary !text-[13px] !h-[36px] !rounded-xl !gap-1.5 !px-5"
               >
-                <Sparkles className="w-4 h-4" />
+                <Sparkles className="w-[14px] h-[14px]" />
                 {isLoading ? '生成中...' : '开始创作'}
               </button>
             </div>
