@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { SiteLogo } from '@/components/common/SiteLogo';
 import LoginButton from '@/components/common/LoginButton';
+import { useMenu, type MenuId } from '@/components/common/MenuProvider';
 import {
   Home,
   Wrench,
@@ -23,14 +23,12 @@ import {
 
 // ========== 菜单数据结构 ==========
 const menuList = [
-  { id: 'home', name: '首页', icon: Home },
-  { id: 'tools', name: '小工具', icon: Wrench },
-  { id: 'template', name: '模板', icon: LayoutTemplate },
-  { id: 'prompt', name: '提示库', icon: MessageSquareText },
-  { id: 'project', name: '我的项目', icon: FolderKanban },
-] as const;
-
-export type MenuId = (typeof menuList)[number]['id'];
+  { id: 'home' as MenuId, name: '首页', icon: Home },
+  { id: 'tools' as MenuId, name: '小工具', icon: Wrench },
+  { id: 'template' as MenuId, name: '模板', icon: LayoutTemplate },
+  { id: 'prompt' as MenuId, name: '提示库', icon: MessageSquareText },
+  { id: 'project' as MenuId, name: '我的项目', icon: FolderKanban },
+];
 
 // 子菜单映射
 const SUB_MENUS: Record<string, { href: string; label: string; icon: React.ComponentType<{ className?: string }> }[]> = {
@@ -58,7 +56,13 @@ function inferMenuFromPath(pathname: string): MenuId {
 
 export default function SiteSidebar() {
   const pathname = usePathname();
-  const [currentMenu, setCurrentMenu] = useState<MenuId>(inferMenuFromPath(pathname));
+  const { currentMenu, setCurrentMenu } = useMenu();
+
+  // pathname 变化时同步菜单状态
+  const inferredMenu = inferMenuFromPath(pathname);
+  if (currentMenu !== inferredMenu) {
+    setCurrentMenu(inferredMenu);
+  }
 
   const handleMenuClick = (id: MenuId) => {
     setCurrentMenu(id);
