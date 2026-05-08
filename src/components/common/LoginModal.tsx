@@ -15,6 +15,18 @@ interface LoginModalProps {
 // 登录方式
 type LoginType = 'wechat' | 'email-code';
 
+// 关闭按钮组件 - 声明在组件外部避免每次渲染重建
+function CloseButton({ onClose }: { onClose: () => void }) {
+  return (
+    <button
+      onClick={onClose}
+      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors z-10"
+    >
+      <X className="w-4 h-4 text-white" />
+    </button>
+  );
+}
+
 export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModalProps) {
   const [loginType, setLoginType] = useState<LoginType | null>(null);
   const [email, setEmail] = useState('');
@@ -167,12 +179,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
         <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
           {/* 头部 - 紫蓝渐变 */}
           <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="absolute top-4 right-4 p-1 rounded-full hover:bg-white/20 transition-colors"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
+            <CloseButton onClose={() => onOpenChange(false)} />
             <h2 className="text-xl font-bold text-white">欢迎来到 OneClaw</h2>
             <p className="text-sm text-white/80 mt-1">登录后解锁更多功能</p>
           </div>
@@ -240,12 +247,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
           <div className="relative p-6 pb-4 bg-gradient-to-r from-green-500 to-emerald-500">
-            <button
-              onClick={() => setLoginType(null)}
-              className="absolute top-4 left-4 p-1 rounded-full hover:bg-white/20 transition-colors"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
+            <CloseButton onClose={() => onOpenChange(false)} />
             <h2 className="text-xl font-bold text-white">微信扫码登录</h2>
             <p className="text-sm text-white/80 mt-1">使用微信扫描下方二维码</p>
           </div>
@@ -284,12 +286,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
         <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #6C5CE7, #00D2FF)' }}>
-          <button
-            onClick={() => setLoginType(null)}
-            className="absolute top-4 left-4 p-1 rounded-full hover:bg-white/20 transition-colors"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
+          <CloseButton onClose={() => onOpenChange(false)} />
           <h2 className="text-xl font-bold text-white">邮箱验证码登录</h2>
           <p className="text-sm text-white/80 mt-1">输入邮箱，我们会发送验证码到您的邮箱</p>
         </div>
