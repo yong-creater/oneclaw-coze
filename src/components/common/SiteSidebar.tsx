@@ -11,7 +11,6 @@ import {
   LayoutTemplate,
   Lightbulb,
   FolderOpen,
-  Sparkles,
   ChevronRight,
   Crown,
   Moon,
@@ -26,14 +25,12 @@ import {
 const menuList: Array<{
   id: MenuId;
   name: string;
-  shortName?: string;
   icon: React.ComponentType<{ className?: string }>;
   gradient: string;
   desc: string;
   href?: string;
 }> = [
   { id: 'home', name: '首页', icon: Home, gradient: 'from-violet-500 to-purple-600', desc: 'AI创作工作台', href: '/' },
-  { id: 'create', name: '创作', icon: Sparkles, gradient: 'from-cyan-400 to-blue-500', desc: '快速开始创作' },
   { id: 'tools', name: '小工具', icon: Wand2, gradient: 'from-fuchsia-500 to-pink-500', desc: '商品图、详情页等' },
   { id: 'template', name: '模板', icon: LayoutTemplate, gradient: 'from-emerald-400 to-teal-500', desc: '海量模板一键用' },
   { id: 'prompt', name: '提示库', icon: Lightbulb, gradient: 'from-amber-400 to-orange-500', desc: '优质提示词灵感' },
@@ -53,9 +50,8 @@ const toolSubItems = [
 
 export default function SiteSidebar() {
   const pathname = usePathname();
-  const { currentMenu, setCurrentMenu, sidebarExpanded, setSidebarExpanded, toggleSidebar } = useMenu();
+  const { currentMenu, setCurrentMenu, sidebarExpanded, toggleSidebar } = useMenu();
   const [toolsExpanded, setToolsExpanded] = useState(false);
-  const [hoveredItem, setHoveredItem] = useState<MenuId | null>(null);
 
   // 根据路径推断当前菜单
   useEffect(() => {
@@ -77,20 +73,12 @@ export default function SiteSidebar() {
   // 判断小工具子项是否激活
   const isToolSubActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
 
-  // 判断菜单是否激活（create 和 home 共享首页）
-  const isMenuActive = (id: MenuId) => {
-    if (id === 'create') return currentMenu === 'create' || currentMenu === 'home';
-    return currentMenu === id;
-  };
-
   const sidebarWidth = sidebarExpanded ? 240 : 68;
 
   return (
     <aside
       className="fixed left-0 top-0 h-screen bg-white border-r border-slate-100/80 flex flex-col z-30 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
       style={{ width: sidebarWidth }}
-      onMouseEnter={() => setSidebarExpanded(true)}
-      onMouseLeave={() => setSidebarExpanded(false)}
     >
       {/* Logo + 折叠按钮 */}
       <div className="h-[60px] flex items-center justify-between px-4 border-b border-slate-100/80 shrink-0">
@@ -100,6 +88,7 @@ export default function SiteSidebar() {
         <button
           onClick={toggleSidebar}
           className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shrink-0"
+          title={sidebarExpanded ? '收起侧栏' : '展开侧栏'}
         >
           {sidebarExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
         </button>
@@ -110,34 +99,33 @@ export default function SiteSidebar() {
         <div className="space-y-0.5">
           {menuList.map((menu) => {
             const Icon = menu.icon;
-            const isActive = isMenuActive(menu.id);
+            const isActive = currentMenu === menu.id;
             const isTools = menu.id === 'tools';
 
-            // 首页和创作用 Link 导航
+            // 首页用 Link 导航
             if (menu.href) {
               return (
                 <Link
                   key={menu.id}
                   href={menu.href}
                   onClick={() => setCurrentMenu(menu.id)}
-                  onMouseEnter={() => setHoveredItem(menu.id)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''}`}
+                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center' : ''}`}
+                  title={!sidebarExpanded ? menu.name : undefined}
                 >
                   <div className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
                        style={{ width: 36, height: 36, borderRadius: 10 }}>
                     <Icon className="w-[18px] h-[18px]" />
                   </div>
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
-                      {menu.name}
-                    </div>
-                    {sidebarExpanded && (
+                  {sidebarExpanded && (
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
+                        {menu.name}
+                      </div>
                       <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
                         {menu.desc}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </Link>
               );
             }
@@ -150,24 +138,23 @@ export default function SiteSidebar() {
                     setCurrentMenu(menu.id);
                     if (isTools) setToolsExpanded(!toolsExpanded);
                   }}
-                  onMouseEnter={() => setHoveredItem(menu.id)}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''}`}
+                  className={`sidebar-menu-item ${isActive ? 'sidebar-menu-item-active' : ''} ${!sidebarExpanded ? 'justify-center' : ''}`}
+                  title={!sidebarExpanded ? menu.name : undefined}
                 >
                   <div className={`os-icon-bg bg-gradient-to-br ${menu.gradient} text-white shrink-0`}
                        style={{ width: 36, height: 36, borderRadius: 10 }}>
                     <Icon className="w-[18px] h-[18px]" />
                   </div>
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
-                      {menu.name}
-                    </div>
-                    {sidebarExpanded && (
+                  {sidebarExpanded && (
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className={`font-medium truncate text-sm ${isActive ? 'text-purple-700' : 'text-slate-700'}`}>
+                        {menu.name}
+                      </div>
                       <div className="text-[11px] text-slate-400 truncate leading-tight mt-0.5">
                         {menu.desc}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   {sidebarExpanded && isTools && (
                     <ChevronRight
                       className={`w-3.5 h-3.5 text-slate-400 shrink-0 transition-transform ${

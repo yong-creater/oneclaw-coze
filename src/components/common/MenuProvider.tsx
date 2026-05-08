@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
 // ========== 菜单 ID 类型 ==========
-export type MenuId = 'home' | 'create' | 'tools' | 'template' | 'prompt' | 'project';
+export type MenuId = 'home' | 'tools' | 'template' | 'prompt' | 'project';
 
 // ========== Context 值类型 ==========
 interface MenuContextValue {
@@ -26,7 +26,7 @@ const MenuContext = createContext<MenuContextValue | null>(null);
 export function MenuProvider({ children }: { children: ReactNode }) {
   const [currentMenu, setCurrentMenuState] = useState<MenuId>('home');
   const [pendingInput, setPendingInputState] = useState('');
-  const [sidebarExpanded, setSidebarExpandedRaw] = useState(false);
+  const [sidebarExpanded, setSidebarExpandedRaw] = useState(true);
 
   const setCurrentMenu = useCallback((id: MenuId) => {
     setCurrentMenuState(id);

@@ -9,10 +9,9 @@ import TemplatePage from '@/components/pages/TemplatePage';
 import PromptPage from '@/components/pages/PromptPage';
 import ProjectPage from '@/components/pages/ProjectPage';
 
-// 页面组件映射（create 复用 HomePage）
+// 页面组件映射
 const PAGE_MAP: Record<MenuId, React.ComponentType> = {
   home: HomePage,
-  create: HomePage,
   tools: ToolsPage,
   template: TemplatePage,
   prompt: PromptPage,
