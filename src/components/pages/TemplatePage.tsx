@@ -9,23 +9,26 @@ interface Template {
   id: number;
   name: string;
   template_type: string;
+  category: string;
   description: string;
   tags: string[];
-  preview_image: string;
+  thumbnail: string;
   is_featured: boolean;
+  is_active: boolean;
+  usage_count: number;
 }
 
 // ========== 分类映射 ==========
 const CATEGORY_MAP: Record<string, string> = {
   all: '全部',
-  xiaohongshu: '小红书',
-  product_poster: '商品海报',
-  ai_photo: 'AI写真',
-  cover_design: '封面设计',
+  xhs_post: '小红书',
+  goods_poster: '商品海报',
+  portrait: 'AI写真',
+  cover: '封面设计',
   background_removal: '智能抠图',
   resume: '简历优化',
   novel: '小说创作',
-  video_script: '视频脚本',
+  script: '视频脚本',
 };
 
 export default function TemplatePage() {
@@ -40,7 +43,7 @@ export default function TemplatePage() {
     fetch('/api/templates')
       .then((res) => res.json())
       .then((data) => {
-        if (data.success) setTemplates(data.data);
+        if (data.success) setTemplates(data.templates || []);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -110,9 +113,9 @@ export default function TemplatePage() {
             <div key={tpl.id} className="ui-card p-0 overflow-hidden flex flex-col group">
               {/* 图片占位 */}
               <div className="aspect-[16/10] bg-slate-100 relative flex items-center justify-center">
-                {tpl.preview_image ? (
+                {tpl.thumbnail ? (
                   <img
-                    src={tpl.preview_image}
+                    src={tpl.thumbnail}
                     alt={tpl.name}
                     className="w-full h-full object-cover"
                   />
