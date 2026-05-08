@@ -937,6 +937,81 @@ body {
 
 /* 输入区能力按钮 — 复用 Capsule Button */
 
+/* ---- 创作场景 Tabs ---- */
+.os-scene-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 14px;
+  border: 1px solid rgba(233, 238, 245, 0.6);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+.os-scene-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #94A3B8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  white-space: nowrap;
+}
+.os-scene-tab:hover {
+  color: #7B61FF;
+  background: rgba(123, 97, 255, 0.04);
+}
+.os-scene-tab-active {
+  color: #7B61FF;
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.10) 0%, rgba(91, 140, 255, 0.06) 100%);
+  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.15);
+  font-weight: 600;
+}
+
+/* ---- 输入框底部工具栏 ---- */
+.os-input-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-top: 1px solid rgba(123, 97, 255, 0.06);
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.os-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  color: #94A3B8;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+.os-toolbar-btn:hover {
+  color: #7B61FF;
+  background: rgba(123, 97, 255, 0.06);
+}
+.os-toolbar-counter {
+  font-size: 11px;
+  color: #CBD5E1;
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
+}
+
 /* ==================== Creator OS 标签系统 ==================== */
 
 /* ==================== Creator OS 页面布局 ==================== */
