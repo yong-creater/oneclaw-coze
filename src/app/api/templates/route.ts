@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// 禁用缓存，后台修改后前台立即生效
+export const revalidate = 0;
+
 function getSupabase() {
   const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
@@ -39,7 +42,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: '获取模板失败' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, templates: data || [] });
+    const response = NextResponse.json({ success: true, templates: data || [] });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('CDN-Cache-Control', 'no-store');
+    return response;
   } catch (error) {
     console.error('Templates API error:', error);
     return NextResponse.json({ success: false, templates: [] }, { status: 200 });

@@ -108,7 +108,7 @@ export default function HomePage() {
 
   // 获取最近项目
   useEffect(() => {
-    fetch('/api/generations?limit=6')
+    fetch('/api/generations?limit=6', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const list = Array.isArray(data?.data) ? data.data : Array.isArray(data?.generations) ? data.generations : [];

@@ -56,7 +56,7 @@ export default function ProjectPage() {
 
   // 获取生成记录
   useEffect(() => {
-    fetch('/api/generations')
+    fetch('/api/generations', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) setProjects(data.data || []);

@@ -42,7 +42,7 @@ export default function TemplatePage() {
 
   // 获取模板数据
   useEffect(() => {
-    fetch('/api/templates')
+    fetch('/api/templates', { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.templates)) {

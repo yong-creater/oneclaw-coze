@@ -34,7 +34,7 @@ export default function PromptPage() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch('/api/prompts')
+    fetch('/api/prompts', { cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         setPrompts(Array.isArray(data?.prompts) ? data.prompts : []);

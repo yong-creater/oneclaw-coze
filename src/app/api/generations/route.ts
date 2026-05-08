@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// 禁用缓存，确保数据实时性
+export const revalidate = 0;
+
 // 使用Coze内置的环境变量
 const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
@@ -65,7 +68,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '获取记录失败' }, { status: 500 });
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       generations: data || [],
       pagination: {
@@ -75,6 +78,8 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil((count || 0) / limit),
       },
     });
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    return response;
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
