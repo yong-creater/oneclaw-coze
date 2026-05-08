@@ -118,7 +118,7 @@ export default function HomePage() {
   return (
     <div className="os-page">
       {/* ==================== Hero 创作区 ==================== */}
-      <div className="os-hero">
+      <div className="os-hero pt-[72px] pb-[56px]">
         {/* 内容层 */}
         <div className="relative z-10 flex flex-col items-center w-full max-w-[1280px] mx-auto px-4">
 
