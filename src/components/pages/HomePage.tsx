@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sparkles, Loader2 } from 'lucide-react';
+import { useMenu } from '@/components/common/MenuProvider';
 
 interface HomeState {
   inputText: string;
@@ -10,11 +11,20 @@ interface HomeState {
 }
 
 export default function HomePage() {
+  const { consumePendingInput } = useMenu();
   const [state, setState] = useState<HomeState>({
     inputText: '',
     isLoading: false,
     result: null,
   });
+
+  // 消费从模板页传来的 pendingInput
+  useEffect(() => {
+    const pending = consumePendingInput();
+    if (pending) {
+      setState((prev) => ({ ...prev, inputText: pending }));
+    }
+  }, [consumePendingInput]);
 
   const handleGenerate = () => {
     if (!state.inputText.trim() || state.isLoading) return;
