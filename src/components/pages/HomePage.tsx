@@ -146,49 +146,83 @@ export default function HomePage() {
     return map[color] || 'from-[#7B61FF] to-[#5B8CFF]';
   };
 
+  // 快捷能力按钮状态
+  const [activeCapability, setActiveCapability] = useState('生成图片');
+
+  // 快捷能力列表
+  const capabilities = [
+    { label: '生成图片', icon: ImagePlus },
+    { label: '商品详情页', icon: LayoutTemplate },
+    { label: '小红书种草', icon: Lightbulb },
+    { label: '视频脚本', icon: Video },
+  ];
+
+  // 推荐创作 Prompt
+  const recommendedPrompts = [
+    '生成耳机商品主图',
+    '创建护肤品详情页',
+    '制作小红书种草图',
+    '生成带货视频脚本',
+  ];
+
   return (
     <div className="os-page">
       {/* ==================== 第一层：Hero AI 输入区 ==================== */}
-      <div className="animate-fade-slide-up">
+      <div className="animate-fade-slide-up relative">
+        {/* 氛围背景 */}
+        <div className="absolute inset-0 -top-8 -left-12 -right-12 pointer-events-none overflow-hidden" style={{ height: '520px' }}>
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full opacity-30" style={{ background: 'radial-gradient(ellipse at center, rgba(123,97,255,0.15) 0%, rgba(91,140,255,0.08) 40%, transparent 70%)' }} />
+          <div className="absolute top-20 left-1/3 w-[300px] h-[300px] rounded-full opacity-20" style={{ background: 'radial-gradient(circle, rgba(110,231,255,0.2) 0%, transparent 60%)' }} />
+        </div>
+
         {/* 标题区 */}
-        <div className="text-center mb-10 pt-12">
+        <div className="text-center relative z-10 pt-16 pb-8">
           <h1 className="os-h1 tracking-tight">
             <span className="gradient-text">今天你想创造什么？</span>
           </h1>
-          <p className="os-caption mt-4 font-light" style={{ fontSize: '18px' }}>
-            输入你的想法，AI 为你生成高质量卖货内容
+          <p className="os-body mt-5 max-w-xl mx-auto" style={{ color: 'var(--text-muted)', fontSize: '17px', lineHeight: 1.7 }}>
+            上传商品图、输入想法，OneClaw 帮你生成高质量商品图、详情页、小红书内容和视频脚本。
           </p>
         </div>
 
-        {/* AI 输入大卡片 */}
-        <div className="max-w-2xl mx-auto mb-8">
-          <div className="os-card-static rounded-[20px] overflow-hidden shadow-sm hover:shadow-md transition-shadow" style={{ padding: 0 }}>
+        {/* AI 输入区 */}
+        <div className="max-w-2xl mx-auto relative z-10">
+          <div className="os-card-static rounded-[20px] overflow-hidden" style={{ padding: 0, boxShadow: '0 4px 24px rgba(15,23,42,0.06), 0 0 0 1px rgba(123,97,255,0.04)' }}>
             <textarea
               value={inputText}
               onChange={(e) => setInputText(e.target.value.slice(0, 500))}
-              placeholder="描述你想生成的内容，例如：为这款耳机生成高级电商主图..."
+              placeholder="为这款耳机生成高级电商主图..."
               className="os-ai-input border-none rounded-b-none"
               style={{ minHeight: 140 }}
               rows={4}
             />
+            {/* 底部工具栏 */}
             <div className="flex items-center justify-between px-6 py-3.5 border-t border-slate-100 bg-white">
-              <div className="flex items-center gap-2">
-                {/* 快捷动作按钮 */}
-                {quickActions.map((action) => {
-                  const Icon = action.icon;
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* 快捷能力胶囊 */}
+                {capabilities.map((cap) => {
+                  const Icon = cap.icon;
+                  const isActive = activeCapability === cap.label;
                   return (
                     <button
-                      key={action.label}
-                      onClick={() => handleQuickAction(action)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 bg-slate-50 hover:bg-[#7B61FF]/[0.06] hover:text-[#7B61FF] transition-colors"
+                      key={cap.label}
+                      onClick={() => { setActiveCapability(cap.label); }}
+                      className={`os-btn-capsule !h-8 !px-3.5 !text-xs flex items-center gap-1.5 ${isActive ? 'os-btn-capsule-active' : ''}`}
                     >
                       <Icon className="w-3.5 h-3.5" />
-                      {action.label}
+                      {cap.label}
                     </button>
                   );
                 })}
+                <button
+                  onClick={() => router.push('/tools')}
+                  className="os-btn-capsule !h-8 !px-3.5 !text-xs flex items-center gap-1.5"
+                >
+                  更多工具
+                  <ArrowRight className="w-3 h-3" />
+                </button>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0 ml-3">
                 <button
                   onClick={() => navigator.clipboard.readText().then(t => setInputText(t.slice(0, 500)))}
                   className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
@@ -200,34 +234,34 @@ export default function HomePage() {
                 <button
                   onClick={handleGenerate}
                   disabled={!inputText.trim() || isLoading}
-                  className="os-btn-primary text-sm py-2.5 px-5"
+                  className="os-btn-primary !text-sm"
                 >
                   <Sparkles className="w-4 h-4" />
-                  {isLoading ? '生成中...' : '生成内容'}
+                  {isLoading ? '生成中...' : '开始创作'}
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 试试这些 */}
-        <div className="max-w-2xl mx-auto mb-16 flex items-center gap-2 flex-wrap justify-center">
-          <span className="os-caption">试试这些:</span>
-          {quickPrompts.map((prompt) => (
+        {/* 试试这些创作 */}
+        <div className="max-w-2xl mx-auto mt-8 mb-20 flex items-center gap-2.5 flex-wrap justify-center relative z-10">
+          <span className="os-caption !text-[13px]">试试这些创作：</span>
+          {recommendedPrompts.map((prompt) => (
             <button
               key={prompt}
               onClick={() => handleQuickPrompt(prompt)}
-              className="os-btn-capsule text-xs !h-[30px] !px-3"
+              className="os-btn-capsule text-xs !h-[32px] !px-4"
             >
               {prompt}
             </button>
           ))}
           <button
             onClick={() => {
-              const idx = Math.floor(Math.random() * quickPrompts.length);
-              handleQuickPrompt(quickPrompts[idx]);
+              const idx = Math.floor(Math.random() * recommendedPrompts.length);
+              handleQuickPrompt(recommendedPrompts[idx]);
             }}
-            className="os-btn-ghost !p-1"
+            className="os-btn-ghost !p-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
@@ -236,7 +270,7 @@ export default function HomePage() {
 
       {/* 生成结果区 */}
       {result && (
-        <div className="max-w-2xl mx-auto mb-8 p-4 bg-[#7B61FF]/[0.06] rounded-2xl border border-[#7B61FF]/10 animate-fade-slide-up">
+        <div className="max-w-2xl mx-auto mb-8 p-5 bg-[#7B61FF]/[0.06] rounded-2xl border border-[#7B61FF]/10 animate-fade-slide-up">
           <p className="text-sm text-[#6948E8]">{result}</p>
         </div>
       )}

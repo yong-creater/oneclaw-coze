@@ -303,6 +303,35 @@ body {
   background-clip: text;
 }
 
+/* Hero 背景氛围 */
+.os-hero-bg {
+  position: relative;
+  overflow: hidden;
+}
+.os-hero-bg::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140%;
+  height: 80%;
+  background: radial-gradient(ellipse at center, rgba(123, 97, 255, 0.06) 0%, rgba(91, 140, 255, 0.04) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.os-hero-bg::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(110, 231, 255, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 /* ==================== Creator OS 卡片系统 ==================== */
 
 /* 标准卡片 */
