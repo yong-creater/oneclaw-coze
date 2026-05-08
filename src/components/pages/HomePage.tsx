@@ -15,7 +15,30 @@ import {
   ArrowRight,
   Wand2,
   ChevronRight,
+  Package,
+  Scissors,
+  Camera,
+  Image as ImageIcon,
+  FileText,
+  BookOpen,
+  ShoppingBag,
+  Heart,
+  Feather,
 } from 'lucide-react';
+
+// 图标名称 → Lucide 组件映射
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Package,
+  Scissors,
+  Camera,
+  ImageIcon,
+  FileText,
+  BookOpen,
+  Sparkles,
+  ShoppingBag,
+  Heart,
+  Feather,
+};
 
 // ========== 快捷动作 ==========
 const quickActions = [
@@ -251,15 +274,9 @@ export default function HomePage() {
                     />
                   ) : (
                     <div className={`w-full h-full bg-gradient-to-br ${getGradient(tool.color)} flex items-center justify-center`}>
-                      <span className="text-3xl">{tool.icon || '🛠️'}</span>
+                      {(() => { const Ic = ICON_MAP[tool.icon] || Package; return <Ic className="w-10 h-10 text-white/80" />; })()}
                     </div>
                   )}
-                  {/* 渐变遮罩 + 图标 */}
-                  <div className="absolute top-2.5 left-2.5">
-                    <div className={`os-icon-bg-sm bg-gradient-to-br ${getGradient(tool.color)} text-white shadow-lg`}>
-                      <span className="text-sm">{tool.icon || '🛠️'}</span>
-                    </div>
-                  </div>
                 </div>
                 {/* 信息区 */}
                 <div className="p-4">
