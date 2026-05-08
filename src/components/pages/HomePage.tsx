@@ -12,6 +12,7 @@ import {
   LayoutTemplate,
   Heart,
   Video,
+  ImageIcon,
 } from 'lucide-react';
 
 // 图标名称 → Lucide 组件映射
@@ -49,7 +50,7 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeMode, setActiveMode] = useState<string>('product');
   const [recentProjects, setRecentProjects] = useState<Array<{
-    id: number; title: string; thumbnail: string | null; tool_name: string;
+    id: number; title: string; thumbnail: string | null; tool_name: string; created_at?: string;
   }>>([]);
   const [tools, setTools] = useState<UtilityTool[]>([]);
 
@@ -64,11 +65,11 @@ export default function HomePage() {
 
   // 获取最近项目（只取 3 条）
   useEffect(() => {
-    fetch('/api/generations?limit=3', { cache: 'no-store' })
+    fetch('/api/generations?limit=4', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const list = Array.isArray(data?.data) ? data.data : Array.isArray(data?.generations) ? data.generations : [];
-        setRecentProjects(list.slice(0, 3));
+        setRecentProjects(list.slice(0, 4));
       })
       .catch(() => {});
   }, []);
@@ -226,40 +227,75 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ==================== 最近创作（弱化 — 只保留 3 条） ==================== */}
+      {/* ==================== 最近创作 — 作品卡片流 ==================== */}
       <div className="animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-[var(--text-tertiary)]">最近创作</h2>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-xl font-bold text-slate-800">
+            最近创作 <span className="text-[#7B61FF]">✦</span>
+          </h2>
           <button
             onClick={() => router.push('/projects')}
-            className="os-btn-ghost text-xs"
+            className="text-sm text-slate-400 hover:text-[#7B61FF] transition-colors flex items-center gap-1"
           >
-            查看全部 <ArrowRight className="w-3 h-3" />
+            查看全部 <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {recentProjects.length > 0 ? (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-5">
             {recentProjects.map((project) => (
               <div
                 key={project.id}
-                className="os-card aspect-[16/10] rounded-2xl overflow-hidden bg-slate-50 !p-0 cursor-pointer"
+                className="os-card group cursor-pointer overflow-hidden !rounded-2xl !border-0 !shadow-[0_2px_16px_rgba(15,23,42,0.04)]"
                 onClick={() => router.push('/projects')}
               >
-                {project.thumbnail ? (
-                  <img src={project.thumbnail} alt={project.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-300 gap-1.5">
-                    <FolderOpen className="w-6 h-6" />
-                    <span className="text-[11px] truncate max-w-[80%]">{project.title || project.tool_name}</span>
+                {/* 4:3 预览图 */}
+                <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-50 to-slate-100/80 overflow-hidden">
+                  {project.thumbnail ? (
+                    <img
+                      src={project.thumbnail}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-2xl bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                        <ImageIcon className="w-5 h-5 text-slate-300" />
+                      </div>
+                    </div>
+                  )}
+                  {/* 状态标签 */}
+                  <div className="absolute top-3 right-3">
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/90 text-white backdrop-blur-sm">
+                      已完成
+                    </span>
                   </div>
-                )}
+                </div>
+                {/* 信息区 */}
+                <div className="p-4">
+                  <p className="text-sm font-semibold text-slate-800 truncate">{project.title || project.tool_name || '未命名创作'}</p>
+                  <p className="text-xs text-slate-400 mt-1.5">
+                    {project.created_at ? new Date(project.created_at).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="os-card-static rounded-2xl py-6 text-center">
-            <p className="os-caption">还没有创作记录</p>
+          /* 空状态 — AI 插画感 */
+          <div className="os-card !rounded-2xl !border-0 flex flex-col items-center justify-center py-20 text-center">
+            <div className="relative mb-6">
+              {/* 柔和光晕 */}
+              <div className="absolute -inset-6 bg-gradient-to-br from-[#7B61FF]/[0.08] to-[#5B8CFF]/[0.05] rounded-full blur-2xl" />
+              {/* 图标容器 */}
+              <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-[#7B61FF]/[0.08] to-[#5B8CFF]/[0.04] flex items-center justify-center">
+                <Sparkles className="w-9 h-9 text-[#7B61FF]/40" />
+              </div>
+            </div>
+            <p className="text-[15px] font-medium text-slate-600 mb-2">还没有创作内容</p>
+            <p className="text-sm text-slate-400 max-w-[260px] leading-relaxed">
+              试试上方输入需求开始生成
+            </p>
           </div>
         )}
       </div>
