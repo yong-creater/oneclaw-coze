@@ -1,76 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
   Sparkles,
   ClipboardPaste,
-  ShoppingBag,
-  FileText,
-  Users,
-  Video,
   ImagePlus,
-  ArrowRight,
-  FolderOpen,
-  RefreshCw,
-  Zap,
-  ImageIcon,
-  Wand2,
   LayoutTemplate,
   Lightbulb,
-  Package,
-  Camera,
-  Scissors,
-  BookOpen,
+  Video,
+  RefreshCw,
+  FolderOpen,
+  ArrowRight,
+  Wand2,
 } from 'lucide-react';
-
-// ========== AI 能力推荐卡片 ==========
-const aiCapabilities = [
-  {
-    name: '商品图生成',
-    desc: 'AI生成高质量卖货主图',
-    icon: Package,
-    gradient: 'from-violet-500 to-purple-600',
-    href: '/product-generator',
-  },
-  {
-    name: 'A+详情页',
-    desc: '生成专业A+页面内容',
-    icon: FileText,
-    gradient: 'from-blue-400 to-cyan-500',
-    href: '/productpage',
-  },
-  {
-    name: 'AI写真',
-    desc: '更换模特背景风格',
-    icon: Camera,
-    gradient: 'from-pink-400 to-rose-500',
-    href: '/ai-photo',
-  },
-  {
-    name: '智能抠图',
-    desc: '一键去除复杂背景',
-    icon: Scissors,
-    gradient: 'from-emerald-400 to-teal-500',
-    href: '/background-removal',
-  },
-  {
-    name: '小红书图文',
-    desc: '生成种草爆款内容',
-    icon: ImageIcon,
-    gradient: 'from-red-400 to-orange-500',
-    href: '/xiaohongshu-generator',
-  },
-  {
-    name: '小说创作',
-    desc: 'AI辅助小说创作续写',
-    icon: BookOpen,
-    gradient: 'from-amber-400 to-yellow-500',
-    href: '/novel',
-  },
-];
 
 // ========== 快捷动作 ==========
 const quickActions = [
@@ -233,47 +177,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ==================== 第二层：AI 能力推荐卡片区 ==================== */}
-      <div className="mt-12 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h2 className="os-section-title">AI 创作能力</h2>
-            <p className="os-section-desc">选择能力，快速生成内容</p>
-          </div>
-          <button
-            onClick={() => router.push('/tools')}
-            className="os-btn-ghost text-sm"
-          >
-            查看全部 <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4">
-          {aiCapabilities.map((cap, index) => {
-            const Icon = cap.icon;
-            return (
-              <Link
-                key={cap.href}
-                href={cap.href}
-                className="os-card p-5 flex items-start gap-4 animate-stagger-in"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <div className={`os-icon-bg bg-gradient-to-br ${cap.gradient} text-white`}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-slate-800 mb-1">{cap.name}</div>
-                  <div className="text-xs text-slate-500">{cap.desc}</div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-purple-400 mt-0.5 shrink-0 transition-colors" />
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ==================== 第三层：最近使用 + 模板入口 ==================== */}
-      <div className="mt-12 grid grid-cols-5 gap-6 animate-fade-slide-up" style={{ animationDelay: '0.2s' }}>
+      {/* ==================== 第二层：最近使用 + 快捷入口 ==================== */}
+      <div className="mt-12 grid grid-cols-5 gap-6 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
         {/* 最近项目 */}
         <div className="col-span-3">
           <div className="flex items-center justify-between mb-5">
@@ -322,43 +227,33 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* 快捷模板入口 */}
+        {/* 快捷入口 */}
         <div className="col-span-2">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="os-section-title">热门模板</h2>
-              <p className="os-section-desc">一键使用，快速开始</p>
+              <h2 className="os-section-title">快捷入口</h2>
+              <p className="os-section-desc">快速跳转到常用功能</p>
             </div>
-            <button
-              onClick={() => router.push('/templates')}
-              className="os-btn-ghost text-sm"
-            >
-              更多 <ArrowRight className="w-4 h-4" />
-            </button>
           </div>
 
           <div className="space-y-3">
-            {/* 模板卡片用静态数据快速展示 */}
             {[
-              { name: '亚马逊A+详情页', type: '商品海报', gradient: 'from-blue-400 to-cyan-500' },
-              { name: '小红书种草笔记', type: '小红书', gradient: 'from-red-400 to-orange-500' },
-              { name: '高端商品主图', type: '商品图', gradient: 'from-violet-500 to-purple-600' },
-              { name: '促销活动海报', type: '封面设计', gradient: 'from-emerald-400 to-teal-500' },
-            ].map((tpl, i) => (
+              { name: '提示词库', desc: '浏览和使用AI创作提示词', path: '/prompts', gradient: 'from-violet-500 to-purple-600' },
+              { name: '模板中心', desc: '一键使用创作模板', path: '/templates', gradient: 'from-blue-400 to-cyan-500' },
+              { name: '小工具', desc: '使用AI创作小工具', path: '/tools', gradient: 'from-pink-400 to-rose-500' },
+              { name: '我的项目', desc: '查看所有生成记录', path: '/projects', gradient: 'from-emerald-400 to-teal-500' },
+            ].map((item) => (
               <button
-                key={i}
-                onClick={() => {
-                  setPendingInput(`使用模板「${tpl.name}」生成内容`);
-                  router.push('/');
-                }}
+                key={item.path}
+                onClick={() => router.push(item.path)}
                 className="w-full os-card p-4 flex items-center gap-3 text-left"
               >
-                <div className={`os-icon-bg bg-gradient-to-br ${tpl.gradient} text-white`} style={{ width: 40, height: 40, borderRadius: 10 }}>
+                <div className={`os-icon-bg bg-gradient-to-br ${item.gradient} text-white`} style={{ width: 40, height: 40, borderRadius: 10 }}>
                   <Wand2 className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-slate-800 truncate">{tpl.name}</div>
-                  <div className="text-[11px] text-slate-400">{tpl.type}</div>
+                  <div className="text-sm font-semibold text-slate-800">{item.name}</div>
+                  <div className="text-xs text-slate-500">{item.desc}</div>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-300 shrink-0" />
               </button>
@@ -366,9 +261,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* 底部留白 */}
-      <div className="h-12" />
     </div>
   );
 }
