@@ -67,14 +67,28 @@ type GenStatus = 'idle' | 'generating' | 'success' | 'failed';
 export default function CreateWorkbench() {
   const searchParams = useSearchParams();
 
-  // ===== 从首页传入的参数 =====
+  // ===== 从首页/工具库传入的参数 =====
   const initialPrompt = searchParams.get('prompt') || '';
   const initialType = searchParams.get('type') || 'auto';
   const initialImage = searchParams.get('image') || '';
+  const toolId = searchParams.get('toolId') || '';
+
+  // slug → genType 映射
+  const slugToGenType = (slug: string): string => {
+    const map: Record<string, string> = {
+      'product-generator': 'product',
+      'xiaohongshu-generator': 'xiaohongshu',
+      'ai-photo': 'aiphoto',
+      'background-removal': 'removebg',
+      'productpage': 'detail',
+      'product-poster': 'product',
+    };
+    return map[slug] || slug;
+  };
 
   // ===== 状态 =====
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [genType, setGenType] = useState(initialType);
+  const [genType, setGenType] = useState(slugToGenType(initialType));
   const [uploadedImages, setUploadedImages] = useState<string[]>(initialImage ? [initialImage] : []);
   const [status, setStatus] = useState<GenStatus>('idle');
   const [currentStep, setCurrentStep] = useState(0);

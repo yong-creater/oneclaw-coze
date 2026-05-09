@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMenu } from '@/components/common/MenuProvider';
 import {
   Search,
   Package,
@@ -14,6 +13,9 @@ import {
   Sparkles,
   ArrowRight,
   Wrench,
+  ShoppingBag,
+  Heart,
+  PenTool,
 } from 'lucide-react';
 
 // 图标映射
@@ -25,17 +27,19 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   FileText,
   BookOpen,
   Sparkles,
+  ShoppingBag,
+  Heart,
+  PenTool,
 };
 
-// 默认渐变色 — 统一蓝紫体系
+// 默认渐变色 — 按工具类型分配
 const DEFAULT_GRADIENTS = [
-  'from-[#7B61FF] to-[#5B8CFF]',
-  'from-[#5B8CFF] to-[#6EE7FF]',
-  'from-[#7B61FF] to-[#A78BFA]',
-  'from-[#5B8CFF] to-[#7B61FF]',
-  'from-[#7B61FF] to-[#6EE7FF]',
-  'from-[#6EE7FF] to-[#5B8CFF]',
-  'from-[#A78BFA] to-[#5B8CFF]',
+  'from-orange-500 to-amber-500',
+  'from-violet-500 to-purple-500',
+  'from-blue-500 to-cyan-500',
+  'from-rose-500 to-pink-500',
+  'from-indigo-500 to-violet-500',
+  'from-emerald-500 to-teal-500',
 ];
 
 interface UtilityTool {
@@ -47,28 +51,14 @@ interface UtilityTool {
   cover_image: string | null;
   color: string | null;
   sort_order: number;
-  tool_type: string | null;
   use_cases: { title: string; desc: string }[] | null;
 }
-
-// slug 到路由的映射
-const SLUG_ROUTE_MAP: Record<string, string> = {
-  'product-generator': '/product-generator',
-  'background-removal': '/background-removal',
-  'ai-photo': '/ai-photo',
-  'product-poster': '/product-poster',
-  'xiaohongshu-generator': '/xiaohongshu-generator',
-  'novel': '/novel',
-  'resume': '/resume',
-  'productpage': '/productpage',
-};
 
 export default function ToolsPage() {
   const [search, setSearch] = useState('');
   const [tools, setTools] = useState<UtilityTool[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { setActiveToolRoute } = useMenu();
 
   useEffect(() => {
     // 优先读缓存
@@ -106,10 +96,13 @@ export default function ToolsPage() {
       (t.description || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleToolClick = (tool: UtilityTool) => {
-    const route = SLUG_ROUTE_MAP[tool.slug] || `/${tool.slug}`;
-    setActiveToolRoute(route);
-    router.push(route);
+  // 点击工具 → 进入统一生成工作台，带入 toolId
+  const handleUseTool = (tool: UtilityTool) => {
+    const params = new URLSearchParams({ toolId: String(tool.id), type: tool.slug });
+    if (tool.description) {
+      params.set('prompt', tool.description);
+    }
+    router.push(`/create?${params.toString()}`);
   };
 
   if (loading) {
@@ -123,10 +116,11 @@ export default function ToolsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="os-card p-0 animate-pulse">
-                <div className="h-36 bg-slate-100 rounded-t-2xl" />
+                <div className="h-44 bg-slate-100 rounded-t-2xl" />
                 <div className="p-5 space-y-3">
                   <div className="h-4 bg-slate-100 rounded w-2/3" />
                   <div className="h-3 bg-slate-100 rounded w-full" />
+                  <div className="h-3 bg-slate-100 rounded w-4/5" />
                 </div>
               </div>
             ))}
@@ -169,14 +163,14 @@ export default function ToolsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((tool, index) => {
               const Icon = (tool.icon && ICON_MAP[tool.icon]) || Package;
-              const gradient = DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
+              const gradient = tool.color || DEFAULT_GRADIENTS[index % DEFAULT_GRADIENTS.length];
               const hasCover = !!tool.cover_image;
+              const useCases = (tool.use_cases || []).slice(0, 3);
 
               return (
                 <div
                   key={tool.id}
-                  onClick={() => handleToolClick(tool)}
-                  className="os-card p-0 overflow-hidden animate-fade-slide-up cursor-pointer group"
+                  className="os-card p-0 overflow-hidden animate-fade-slide-up group"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   {/* 封面图区域 */}
@@ -194,25 +188,45 @@ export default function ToolsPage() {
                       <Icon className="w-12 h-12 text-white/80" />
                     </div>
                   )}
+
                   {/* 文字区域 */}
                   <div className="p-5">
+                    {/* 工具名称 */}
                     <h3 className="os-h3">{tool.name}</h3>
+
+                    {/* 一句话说明 */}
                     <p className="os-caption mt-1.5 line-clamp-2">
                       {tool.description || 'AI智能创作工具'}
                     </p>
-                    {/* 标签 + 进入 */}
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex gap-1.5">
-                        {(tool.use_cases || []).slice(0, 2).map((uc: { title: string; desc: string }) => (
-                          <span key={uc.title} className="os-btn-capsule !h-6 !text-xs !px-2.5 pointer-events-none">
+
+                    {/* 适用人群标签 */}
+                    {useCases.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {useCases.map((uc) => (
+                          <span
+                            key={uc.title}
+                            className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium
+                                       bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                          >
                             {uc.title}
                           </span>
                         ))}
                       </div>
-                      <span className="text-xs font-medium text-[#7B61FF] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-                        进入 <ArrowRight className="w-3 h-3" />
-                      </span>
-                    </div>
+                    )}
+
+                    {/* 使用按钮 */}
+                    <button
+                      onClick={() => handleUseTool(tool)}
+                      className="mt-4 w-full flex items-center justify-center gap-1.5 h-10
+                                 rounded-xl text-sm font-medium text-white
+                                 bg-gradient-to-r from-[#7B61FF] to-[#5B8CFF]
+                                 hover:from-[#6B51EF] hover:to-[#4B7CEF]
+                                 transition-all duration-200
+                                 shadow-sm hover:shadow-md"
+                    >
+                      使用
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               );
