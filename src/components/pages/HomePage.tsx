@@ -141,24 +141,24 @@ export default function HomePage() {
 
           {/* 主标题 */}
           <h1 className="os-hero-title">
-            一键生成<span className="gradient-text">商品图</span>、小红书和视频内容
+            上传图片，一键生成<span className="gradient-text">高质量内容</span>
           </h1>
 
           {/* 副标题 */}
           <p className="os-hero-subtitle">
-            不会写 Prompt 也没关系，<br className="sm:hidden" />上传图片，AI 自动帮你生成。
+            商品图、详情页、小红书、视频脚本，<br className="sm:hidden" />简单输入需求就能生成。
           </p>
 
           {/* ===== AI 输入工作台 — 左右分栏 ===== */}
           <div className="os-studio mt-10">
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
-              <h3 className="os-studio-label">描述你想生成的内容</h3>
+              <h3 className="os-studio-label">你想生成什么？</h3>
               <div className="os-studio-input-area">
                 <div className="relative">
                   {!inputText && (
                     <div className="os-studio-placeholder" onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}>
-                      <p className="os-studio-placeholder-example">例如：上传一张耳机图，生成高级商品主图、卖点图和场景图</p>
+                      <p className="os-studio-placeholder-example">例如：上传一张耳机图，生成电商主图、卖点图和场景图</p>
                     </div>
                   )}
                   <textarea
@@ -195,7 +195,7 @@ export default function HomePage() {
             <div className="os-studio-showcase">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm">✨</span>
-                <span className="text-[13px] font-medium text-slate-500">AI 正在生成</span>
+                <span className="text-[13px] font-medium text-slate-500">生成效果预览</span>
               </div>
               <p className="text-[11px] text-slate-400 mb-4">根据你的需求自动生成对应内容</p>
               <div className="grid grid-cols-2 gap-3">
@@ -237,8 +237,8 @@ export default function HomePage() {
           {/* ===== 选择创作方向 ===== */}
           <div className="w-full mt-8">
             <div className="text-center mb-7">
-              <h2 className="text-lg font-semibold text-slate-700">选择你想生成的内容</h2>
-              <p className="text-[13px] text-slate-400 mt-1.5">不知道怎么写？选择一个方向，AI 会帮你自动生成。</p>
+              <h2 className="text-lg font-semibold text-slate-700">选择内容类型</h2>
+              <p className="text-[13px] text-slate-400 mt-1.5">不知道怎么写？选一个类型，AI 会帮你完成。</p>
             </div>
 
             <div className="os-scene-row">
@@ -273,9 +273,9 @@ export default function HomePage() {
           <div>
             <div className="flex items-center gap-3">
               <TrendingUp className="w-5 h-5 text-[#7B61FF]/60" />
-              <h2 className="text-xl font-semibold text-slate-700">热门创作结果</h2>
+              <h2 className="text-xl font-semibold text-slate-700">热门生成案例</h2>
             </div>
-            <p className="text-[13px] text-slate-400 mt-1.5 ml-8">看看大家正在生成什么内容</p>
+            <p className="text-[13px] text-slate-400 mt-1.5 ml-8">看看 OneClaw 能生成哪些内容</p>
           </div>
           <button
             onClick={() => router.push('/tools')}
