@@ -1,99 +1,274 @@
-/* ===== AI Rail 导航栏 ===== */
-.os-rail {
+/* ============================================================
+   AI Dock — 轻悬浮导航栏
+   风格：Claude / Linear / Arc Browser 轻量 AI Dock
+   ============================================================ */
+
+/* ── Dock 容器 ── */
+.os-dock {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 80px;
-  background: rgba(255,255,255,0.72);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-right: 1px solid rgba(120,120,255,0.06);
-  user-select: none;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0 16px;
+  z-index: 40;
+  /* 超轻毛玻璃，几乎透明 */
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* 右侧极轻分割线 */
+  border-right: 1px solid rgba(120, 110, 255, 0.06);
+  /* 不裁切子元素溢出（QR 浮窗等） */
+  overflow: visible;
 }
 
-.os-rail-logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ── Logo ── */
+.os-dock-logo {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
-.os-rail-logo:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(120,120,255,0.18);
+.os-dock-logo:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(120, 110, 255, 0.12);
 }
 
-.os-rail-item {
-  width: 56px;
-  height: 52px;
-  border-radius: 14px;
+/* ── 主导航区 ── */
+.os-dock-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0;
+}
+
+/* ── 导航按钮 ── */
+.os-dock-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background: transparent;
-  border: none;
-  color: rgba(30,30,50,0.42);
-  position: relative;
-}
-.os-rail-item:hover {
-  background: rgba(120,120,255,0.06);
-  color: rgba(30,30,50,0.65);
-}
-.os-rail-item-active {
-  background: rgba(120,120,255,0.10);
-  color: #6D5EF6;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  /* 轻毛玻璃 */
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  /* 极轻边框 */
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-/* 选中态 — 左侧竖线指示器（栏内侧，紧贴导航栏左边缘） */
-.os-rail-item-active::before {
-  content: '';
-  position: absolute;
-  left: -12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
+/* ── 图标 ── */
+.os-dock-icon {
+  width: 20px;
   height: 20px;
-  border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, #7C6CFB, #5B5CF6);
-  /* 确保超出 aside 左边缘也能显示 */
-  z-index: 1;
+  color: #7C8192;
+  transition: color 0.25s ease, transform 0.25s ease;
+  flex-shrink: 0;
 }
 
-.os-rail-item-text {
-  font-size: 10px;
+/* ── 文字标签 ── */
+.os-dock-label {
+  font-size: 9px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  color: #7C8192;
+  margin-top: 2px;
   line-height: 1;
+  letter-spacing: 0.02em;
+  transition: color 0.25s ease;
+  white-space: nowrap;
 }
 
-.os-rail-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(120,120,255,0.06);
+/* ── Hover ── */
+.os-dock-item:hover {
+  background: rgba(120, 110, 255, 0.06);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(120, 110, 255, 0.08);
+  border-color: rgba(120, 110, 255, 0.1);
+}
+.os-dock-item:hover .os-dock-icon {
+  color: #6B5FFF;
+}
+.os-dock-item:hover .os-dock-label {
+  color: #6B5FFF;
+}
+
+/* ── Active 选中态（胶囊渐变） ── */
+.os-dock-item-active {
+  background: linear-gradient(135deg, #7B6DFF, #6EA8FF);
+  border-color: transparent;
+  box-shadow: 0 6px 24px rgba(123, 109, 255, 0.18);
+  transform: translateY(0);
+}
+.os-dock-item-active:hover {
+  background: linear-gradient(135deg, #7B6DFF, #6EA8FF);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(123, 109, 255, 0.22);
+}
+.os-dock-item-active .os-dock-icon {
+  color: #FFFFFF;
+}
+.os-dock-item-active .os-dock-label {
+  color: #FFFFFF;
+}
+
+/* ── 底部区域 ── */
+.os-dock-bottom {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  overflow: hidden;
-  border: 1.5px solid rgba(120,120,255,0.10);
-}
-.os-rail-avatar:hover {
-  border-color: rgba(120,120,255,0.25);
-  box-shadow: 0 2px 12px rgba(120,120,255,0.12);
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 12px;
 }
 
-.os-rail-user-menu {
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(120,120,255,0.08);
+/* 底部按钮更小巧 */
+.os-dock-bottom .os-dock-item {
+  width: 44px;
+  height: 44px;
   border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
-  overflow: hidden;
+}
+.os-dock-bottom .os-dock-icon {
+  width: 17px;
+  height: 17px;
+}
+.os-dock-bottom .os-dock-label {
+  font-size: 8px;
+}
+
+/* ── ICP 备案标记 ── */
+.os-dock-icp {
+  font-size: 8px;
+  font-weight: 600;
+  color: rgba(20, 20, 20, 0.2);
+  margin-top: 8px;
+  letter-spacing: 0.05em;
+  cursor: default;
+}
+
+/* ── 公众号二维码浮窗 ── */
+.os-dock-qr-popup {
+  position: fixed;
+  left: 92px;
+  bottom: 48px;
+  z-index: 50;
+  animation: osDockQrIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.os-dock-qr-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 12px 48px rgba(120, 110, 255, 0.1),
+              0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+.os-dock-qr-img {
+  width: 140px;
+  height: 140px;
+  border-radius: 14px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+}
+.os-dock-qr-text {
+  font-size: 12px;
+  color: rgba(20, 20, 20, 0.6);
+  margin-top: 10px;
+  line-height: 1.4;
+}
+.os-dock-qr-sub {
+  font-size: 11px;
+  color: rgba(20, 20, 20, 0.4);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+.os-dock-qr-arrow {
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+@keyframes osDockQrIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* ── 响应式 ── */
+@media (max-width: 768px) {
+  .os-dock {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 64px;
+    flex-direction: row;
+    padding: 0 12px;
+    border-right: none;
+    border-top: 1px solid rgba(120, 110, 255, 0.06);
+  }
+  .os-dock-logo {
+    display: none;
+  }
+  .os-dock-nav {
+    flex-direction: row;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+  }
+  .os-dock-item {
+    width: 52px;
+    height: 48px;
+    border-radius: 14px;
+  }
+  .os-dock-bottom {
+    display: none;
+  }
+  .os-dock-qr-popup {
+    left: 50%;
+    bottom: 76px;
+    transform: translateX(-50%);
+  }
+  .os-dock-qr-arrow {
+    left: 50%;
+    top: auto;
+    bottom: -6px;
+    transform: translateX(-50%) rotate(-45deg);
+    border-left: none;
+    border-bottom: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+  }
 }

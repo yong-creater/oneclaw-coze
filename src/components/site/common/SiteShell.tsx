@@ -5,7 +5,7 @@ import SiteSidebar from '@/components/site/common/SiteSidebar';
 import SiteFooter from '@/components/site/common/SiteFooter';
 
 function PageSwitcher({ children }: { children: React.ReactNode }) {
-  const marginLeft = 88;
+  const marginLeft = 88; // dock 80px + 8px gap
 
   return (
     <>
