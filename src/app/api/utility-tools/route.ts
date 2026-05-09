@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 5分钟服务端缓存 — 工具配置变更不频繁
-export const revalidate = 300;
+// 短缓存，确保数据更新后能快速生效
+export const revalidate = 60;
 
 // 前台公开接口 - 获取活跃的工具列表
 export async function GET() {
@@ -22,7 +22,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, tools: data || [] }, {
-      headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=600' }
+      headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=120' }
     });
   } catch (err) {
     console.error('[utility-tools] Catch error:', err);
