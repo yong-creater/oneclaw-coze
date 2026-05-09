@@ -745,23 +745,34 @@ export default function HomePage() {
                 <div className="os-ai-nomatch-icon">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <span className="os-ai-nomatch-title">暂未匹配到专属工具</span>
-                <span className="os-ai-nomatch-desc">OneClaw 当前更擅长：</span>
+                <span className="os-ai-nomatch-title">我们为你推荐这些创作方式</span>
+                <span className="os-ai-nomatch-desc">当前需求不够明确，你可以选择一个方向继续创作</span>
                 <div className="os-ai-nomatch-tags">
                   {TOOL_MATCHES.map(tool => (
-                    <span key={tool.slug} className="os-ai-nomatch-tag">
+                    <button
+                      key={tool.slug}
+                      className="os-ai-nomatch-tag os-ai-nomatch-tag-clickable"
+                      onClick={() => {
+                        const params = new URLSearchParams({
+                          prompt: inputText.trim(),
+                          type: tool.type,
+                          toolId: tool.slug,
+                        });
+                        if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
+                        router.push(`/create?${params.toString()}`);
+                      }}
+                    >
                       {tool.icon}
                       <span className="ml-1">{tool.name.replace('AI', '').replace('生成器', '').replace('工坊', '')}</span>
-                    </span>
+                    </button>
                   ))}
                 </div>
                 <div className="os-ai-nomatch-actions">
                   <button onClick={handleAutoCreate} className="os-ai-nomatch-primary">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>自动识别创作</span>
+                    选择第一个推荐工具继续
                   </button>
-                  <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览工具库</button>
-                  <button onClick={resetIdentify} className="os-ai-nomatch-ghost">返回修改</button>
+                  <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览全部工具</button>
+                  <button onClick={resetIdentify} className="os-ai-nomatch-ghost">返回修改需求</button>
                 </div>
               </div>
             )}
