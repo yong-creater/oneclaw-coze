@@ -67,18 +67,20 @@ interface CreateContext {
   fromHome?: boolean;
 }
 
-function getContext(): CreateContext | null {
+function getContext(): { ctx: CreateContext; shouldAuto: boolean } | null {
   if (typeof window === 'undefined') return null;
   try {
     const raw = sessionStorage.getItem('oneclaw_create_context');
     if (!raw) return null;
     const ctx = JSON.parse(raw) as CreateContext;
+    // 在修改前保存原始 autoGenerate 值
+    const shouldAuto = !!(ctx.autoGenerate || ctx.fromHome);
     // 读取后立即关闭 autoGenerate 防止刷新重复生成
     if (ctx.autoGenerate) {
       ctx.autoGenerate = false;
       sessionStorage.setItem('oneclaw_create_context', JSON.stringify({ ...ctx, autoGenerate: false }));
     }
-    return ctx;
+    return { ctx, shouldAuto };
   } catch { return null; }
 }
 
@@ -87,7 +89,8 @@ export default function CreateWorkbench() {
   const searchParams = useSearchParams();
 
   // ===== 读取上下文 =====
-  const ctxRef = useRef(getContext());
+  const parsedCtx = useRef(getContext());
+  const ctxRef = useRef(parsedCtx.current?.ctx || null);
   const urlType = searchParams.get('type') || '';
   const urlPrompt = searchParams.get('prompt') || '';
 
@@ -119,7 +122,7 @@ export default function CreateWorkbench() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
-  const shouldAutoGenerate = !!(ctxRef.current?.autoGenerate || ctxRef.current?.fromHome);
+  const shouldAutoGenerate = !!(parsedCtx.current?.shouldAuto);
   const autoGenTriggered = useRef(false);
   const stepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
