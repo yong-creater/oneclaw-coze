@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Upload,
-  Wand2,
   Loader2,
   Download,
   RotateCcw,
@@ -18,23 +17,11 @@ import {
   Copy,
   FolderOpen,
   RefreshCw,
+  ArrowRight,
+  Image as ImageIcon,
+  Wand2,
 } from 'lucide-react';
-
-// ===== 生成类型 =====
-interface GenType {
-  id: string;
-  label: string;
-  icon: string;
-}
-
-const GEN_TYPES: GenType[] = [
-  { id: 'auto', label: '自动识别', icon: '🤖' },
-  { id: 'product', label: '商品图', icon: '📦' },
-  { id: 'xiaohongshu', label: '小红书', icon: '📕' },
-  { id: 'aiphoto', label: 'AI写真', icon: '📸' },
-  { id: 'removebg', label: '抠图', icon: '✂️' },
-  { id: 'detail', label: '详情页', icon: '📋' },
-];
+import { getToolWorkflow, slugToGenType, genTypeToSlug, type ToolWorkflowConfig, type GuideStep } from '@/lib/tool-workflow-config';
 
 // ===== 生成步骤 =====
 const GEN_STEPS = [
@@ -50,7 +37,7 @@ const GEN_STEPS = [
 interface GenResult {
   url: string;
   label: string;
-  type: string; // 'image' | 'text'
+  type: string;
   textContent?: string;
 }
 
@@ -62,7 +49,7 @@ interface Toast {
 }
 
 // ===== 生成状态 =====
-type GenStatus = 'idle' | 'generating' | 'success' | 'failed';
+type GenStatus = 'idle' | 'guiding' | 'generating' | 'success' | 'failed';
 
 export default function CreateWorkbench() {
   const searchParams = useSearchParams();
@@ -73,7 +60,6 @@ export default function CreateWorkbench() {
       const stored = sessionStorage.getItem('oneclaw_create_context');
       if (stored) {
         const ctx = JSON.parse(stored);
-        // 读取后标记为已消费（防止刷新重复自动生成）
         if (ctx.autoGenerate) {
           ctx.autoGenerate = false;
           try { sessionStorage.setItem('oneclaw_create_context', JSON.stringify(ctx)); } catch {}
@@ -88,10 +74,7 @@ export default function CreateWorkbench() {
           autoGenerate: !!ctx.autoGenerate,
         };
       }
-    } catch {
-      // sessionStorage 不可用时降级为 URL 参数
-    }
-    // 降级：从 URL 参数读取
+    } catch {}
     return {
       prompt: searchParams.get('prompt') || '',
       type: searchParams.get('type') || 'auto',
@@ -102,37 +85,24 @@ export default function CreateWorkbench() {
   }, [searchParams]);
 
   const context = useRef(getContext()).current;
-
-  // ===== 从首页/工具库传入的参数 =====
   const initialPrompt = context.prompt;
   const initialType = context.type;
-  const toolId = context.toolId;
   const shouldAutoGenerate = context.autoGenerate;
 
-  // slug → genType 映射
-  const slugToGenType = (slug: string): string => {
-    const map: Record<string, string> = {
-      'product-generator': 'product',
-      'xiaohongshu-generator': 'xiaohongshu',
-      'ai-photo': 'aiphoto',
-      'background-removal': 'removebg',
-      'product-page': 'detail',
-      'productpage': 'detail',
-      'product-poster': 'product',
-      'novel': 'novel',
-    };
-    return map[slug] || slug;
-  };
+  // ===== 当前工具配置 =====
+  const resolvedSlug = genTypeToSlug(slugToGenType(initialType));
+  const [currentSlug, setCurrentSlug] = useState(resolvedSlug || 'product-generator');
+  const toolConfig = getToolWorkflow(currentSlug);
 
   // ===== 状态 =====
   const [prompt, setPrompt] = useState(initialPrompt);
-  const [genType, setGenType] = useState(slugToGenType(initialType));
   const [uploadedImages, setUploadedImages] = useState<string[]>(context.images);
-  const [status, setStatus] = useState<GenStatus>('idle');
+  const [status, setStatus] = useState<GenStatus>(shouldAutoGenerate ? 'generating' : 'idle');
   const [currentStep, setCurrentStep] = useState(0);
   const [results, setResults] = useState<GenResult[]>([]);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [guideAnswers, setGuideAnswers] = useState<Record<string, string>>({});
 
   // 结果交互状态
   const [activeIndex, setActiveIndex] = useState(0);
@@ -140,9 +110,9 @@ export default function CreateWorkbench() {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stepTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const toastIdRef = useRef(0);
+  const autoGenTriggered = useRef(false);
 
   // ===== Toast 工具 =====
   const showToast = useCallback((message: string, type: Toast['type'] = 'success') => {
@@ -152,14 +122,6 @@ export default function CreateWorkbench() {
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 3000);
   }, []);
-
-  // 如果从首页带入了 prompt，自动聚焦输入框
-  useEffect(() => {
-    if (initialPrompt && textareaRef.current) {
-      textareaRef.current.focus();
-      textareaRef.current.setSelectionRange(initialPrompt.length, initialPrompt.length);
-    }
-  }, [initialPrompt]);
 
   // 清理步骤计时器
   useEffect(() => {
@@ -172,9 +134,9 @@ export default function CreateWorkbench() {
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
+    const maxFiles = toolConfig?.steps.find(s => s.type === 'upload')?.maxFiles || 5;
     const newImages: string[] = [];
-    for (const file of Array.from(files).slice(0, 5 - uploadedImages.length)) {
+    for (const file of Array.from(files).slice(0, maxFiles - uploadedImages.length)) {
       const reader = new FileReader();
       const dataUrl = await new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
@@ -182,17 +144,34 @@ export default function CreateWorkbench() {
       });
       newImages.push(dataUrl);
     }
-    setUploadedImages(prev => [...prev, ...newImages].slice(0, 5));
+    setUploadedImages(prev => [...prev, ...newImages].slice(0, maxFiles));
     e.target.value = '';
-  }, [uploadedImages.length]);
+  }, [uploadedImages.length, toolConfig]);
 
   const removeImage = useCallback((index: number) => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   }, []);
 
+  // ===== 引导步骤选择 =====
+  const handleGuideSelect = useCallback((stepId: string, value: string) => {
+    setGuideAnswers(prev => ({ ...prev, [stepId]: value }));
+  }, []);
+
+  // ===== 判断引导是否完成 =====
+  const isGuideComplete = useCallback((): boolean => {
+    if (!toolConfig) return !!prompt.trim() || uploadedImages.length > 0;
+    const requiredSteps = toolConfig.steps.filter(s => !s.optional);
+    return requiredSteps.every(step => {
+      if (step.type === 'upload') return uploadedImages.length > 0;
+      if (step.type === 'select') return !!guideAnswers[step.id];
+      if (step.type === 'input') return !!prompt.trim();
+      return true;
+    });
+  }, [toolConfig, uploadedImages, guideAnswers, prompt]);
+
   // ===== 开始生成 =====
   const handleGenerate = useCallback(async () => {
-    if (!prompt.trim() && uploadedImages.length === 0) return;
+    if (!prompt.trim() && uploadedImages.length === 0 && Object.keys(guideAnswers).length === 0) return;
 
     stepTimerRef.current.forEach(t => clearTimeout(t));
     stepTimerRef.current = [];
@@ -211,19 +190,18 @@ export default function CreateWorkbench() {
       stepTimerRef.current.push(timer);
     });
 
-    // TODO: 替换为真实 API 调用
     try {
       await new Promise<void>((resolve) => {
         const totalTimer = setTimeout(resolve, 5500);
         stepTimerRef.current.push(totalTimer);
       });
 
-      const currentType = GEN_TYPES.find(t => t.id === genType) || GEN_TYPES[0];
+      const toolLabel = toolConfig?.name || 'AI';
       const mockResults: GenResult[] = [
-        { url: '/case-lipstick-main.png', label: '生成结果 1', type: 'image' },
-        { url: '/demo-card-lifestyle.jpg', label: '生成结果 2', type: 'image' },
-        { url: '/demo-scene.jpg', label: '生成结果 3', type: 'image' },
-        { url: '/case-ecommerce.jpg', label: '生成结果 4', type: 'image' },
+        { url: '/case-lipstick-main.png', label: `${toolLabel}结果 1`, type: 'image' },
+        { url: '/demo-card-lifestyle.jpg', label: `${toolLabel}结果 2`, type: 'image' },
+        { url: '/demo-scene.jpg', label: `${toolLabel}结果 3`, type: 'image' },
+        { url: '/case-ecommerce.jpg', label: `${toolLabel}结果 4`, type: 'image' },
       ];
 
       setResults(mockResults);
@@ -232,14 +210,12 @@ export default function CreateWorkbench() {
       setStatus('failed');
       setErrorMsg('生成失败，请稍后重试');
     }
-  }, [prompt, uploadedImages, genType]);
+  }, [prompt, uploadedImages, guideAnswers, toolConfig]);
 
-  // ===== 自动生成（从首页 AI 分析完成后跳转过来时触发） =====
-  const autoGenTriggered = useRef(false);
+  // ===== 自动生成 =====
   useEffect(() => {
     if (shouldAutoGenerate && !autoGenTriggered.current && (initialPrompt.trim() || context.images.length > 0)) {
       autoGenTriggered.current = true;
-      // 延迟触发，确保组件状态已稳定
       const timer = setTimeout(() => {
         handleGenerate();
       }, 300);
@@ -264,7 +240,6 @@ export default function CreateWorkbench() {
     }
   }, [showToast]);
 
-  // ===== 下载全部 =====
   const handleDownloadAll = useCallback(() => {
     const imageResults = results.filter(r => r.type === 'image');
     imageResults.forEach((r, i) => {
@@ -272,13 +247,10 @@ export default function CreateWorkbench() {
     });
   }, [results, handleDownload]);
 
-  // ===== 保存到作品 =====
   const handleSaveToProjects = useCallback(() => {
-    // TODO: 调用保存 API
     showToast('已保存到作品');
   }, [showToast]);
 
-  // ===== 复制文本 =====
   const handleCopyText = useCallback(async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -288,37 +260,41 @@ export default function CreateWorkbench() {
     }
   }, [showToast]);
 
-  // ===== 设为封面 =====
   const handleSetAsCover = useCallback((index: number) => {
     setActiveIndex(index);
     showToast('已设为封面');
   }, [showToast]);
 
-  // ===== 继续优化 =====
   const handleContinueOptimize = useCallback(() => {
     const activeResult = results[activeIndex];
     if (activeResult) {
       setPrompt(prev => `${prev}\n\n请在此基础上继续优化：${activeResult.label}`);
       setStatus('idle');
       setResults([]);
-      textareaRef.current?.focus();
     }
   }, [results, activeIndex]);
 
-  // ===== 当前生成类型 =====
-  const currentGenType = GEN_TYPES.find(t => t.id === genType) || GEN_TYPES[0];
+  // ===== 切换工具 =====
+  const handleToolChange = useCallback((slug: string) => {
+    setCurrentSlug(slug);
+    setShowTypeDropdown(false);
+    // 切换工具时不自动生成，保留已上传图片和输入
+    if (status === 'generating') return;
+  }, [status]);
 
-  // ===== 当前选中结果 =====
+  // ===== 计算进度 =====
+  const progressPercent = status === 'generating'
+    ? Math.min(100, Math.round((currentStep / GEN_STEPS.length) * 100))
+    : status === 'success' ? 100 : 0;
+
   const activeResult = results[activeIndex] || null;
   const hasImageResults = results.some(r => r.type === 'image');
   const hasTextResults = results.some(r => r.type === 'text');
   const imageResults = results.filter(r => r.type === 'image');
   const textResults = results.filter(r => r.type === 'text');
 
-  // ===== 计算进度百分比 =====
-  const progressPercent = status === 'generating'
-    ? Math.min(100, Math.round((currentStep / GEN_STEPS.length) * 100))
-    : status === 'success' ? 100 : 0;
+  // ===== 全部工具列表（用于切换下拉） =====
+  const allTools = getAllToolWorkflowsSimple();
 
   return (
     <div className="os-page">
@@ -338,29 +314,36 @@ export default function CreateWorkbench() {
           </div>
         )}
 
-        {/* ===== 顶部：生成类型标识 ===== */}
+        {/* ===== 顶部：已选择工具 + 切换 ===== */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-slate-800">生成工作台</h1>
+            <div className="flex items-center gap-2">
+              <div className="os-aw-tool-badge">
+                <span className="text-base">{toolConfig?.icon || '🤖'}</span>
+              </div>
+              <div>
+                <div className="text-xs text-slate-400">已选择</div>
+                <div className="text-sm font-semibold text-slate-800">{toolConfig?.name || 'AI 创作工具'}</div>
+              </div>
+            </div>
             <div className="relative">
               <button
                 onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-purple-300 transition-colors text-sm"
+                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-purple-300 transition-colors text-xs text-slate-400"
               >
-                <span>{currentGenType.icon}</span>
-                <span className="text-slate-600 font-medium">{currentGenType.label}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <span>切换</span>
+                <ChevronDown className="w-3 h-3" />
               </button>
               {showTypeDropdown && (
-                <div className="absolute top-full left-0 mt-1.5 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-20 min-w-[140px]">
-                  {GEN_TYPES.map(type => (
+                <div className="absolute top-full left-0 mt-1.5 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-20 min-w-[180px]">
+                  {allTools.map(t => (
                     <button
-                      key={type.id}
-                      onClick={() => { setGenType(type.id); setShowTypeDropdown(false); }}
-                      className={`flex items-center gap-2 w-full px-3.5 py-2 text-sm text-left hover:bg-slate-50 transition-colors ${genType === type.id ? 'text-purple-600 bg-purple-50/50' : 'text-slate-600'}`}
+                      key={t.slug}
+                      onClick={() => handleToolChange(t.slug)}
+                      className={`flex items-center gap-2 w-full px-3.5 py-2 text-sm text-left hover:bg-slate-50 transition-colors ${currentSlug === t.slug ? 'text-purple-600 bg-purple-50/50' : 'text-slate-600'}`}
                     >
-                      <span>{type.icon}</span>
-                      <span>{type.label}</span>
+                      <span>{t.icon}</span>
+                      <span>{t.name}</span>
                     </button>
                   ))}
                 </div>
@@ -372,52 +355,100 @@ export default function CreateWorkbench() {
         {/* ===== 主体：左右分栏 ===== */}
         <div className="os-wb-layout">
 
-          {/* ====== 左侧：输入面板 ====== */}
+          {/* ====== 左侧：AI 引导式输入 ====== */}
           <div className="os-wb-left">
 
-            {/* 上传图片预览 */}
-            {uploadedImages.length > 0 && (
-              <div className="mb-4">
-                <div className="text-xs text-slate-400 font-medium mb-2">已上传图片</div>
-                <div className="flex flex-wrap gap-2">
-                  {uploadedImages.map((img, idx) => (
-                    <div key={idx} className="relative group w-20 h-20 rounded-xl overflow-hidden border border-slate-200">
-                      <img src={img} alt={`上传图 ${idx + 1}`} className="w-full h-full object-cover" />
-                      <button
-                        onClick={() => removeImage(idx)}
-                        className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+            {/* AI 问候语 */}
+            <div className="os-aw-greeting">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <span>{toolConfig?.greeting || '告诉我你想生成什么？'}</span>
+            </div>
+
+            {/* 动态引导步骤 */}
+            {toolConfig && toolConfig.steps.map((step) => (
+              <div key={step.id} className="os-aw-step">
+                {/* 步骤标签 */}
+                <div className="os-aw-step-label">
+                  {step.optional && <span className="os-aw-step-optional">可选</span>}
+                  {step.label}
                 </div>
+
+                {/* 上传类步骤 */}
+                {step.type === 'upload' && (
+                  <div>
+                    {uploadedImages.length > 0 ? (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {uploadedImages.map((img, idx) => (
+                          <div key={idx} className="relative group w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-100">
+                            <img src={img} alt={`上传图 ${idx + 1}`} className="w-full h-full object-cover" />
+                            <button
+                              onClick={() => removeImage(idx)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="os-aw-upload-area"
+                    >
+                      <ImageIcon className="w-5 h-5 text-slate-300" />
+                      <span className="text-sm text-slate-400">
+                        {step.placeholder || '点击上传或拖拽图片'}
+                      </span>
+                      <span className="text-[11px] text-slate-300">
+                        JPG / PNG，最多{step.maxFiles || 5}张
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {/* 选择类步骤 */}
+                {step.type === 'select' && step.options && (
+                  <div className="os-aw-options">
+                    {step.options.map(opt => (
+                      <button
+                        key={opt.value}
+                        onClick={() => handleGuideSelect(step.id, opt.value)}
+                        className={`os-aw-option ${guideAnswers[step.id] === opt.value ? 'active' : ''}`}
+                      >
+                        {opt.icon && <span className="text-sm">{opt.icon}</span>}
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* 输入类步骤 */}
+                {step.type === 'input' && (
+                  <textarea
+                    value={prompt}
+                    onChange={e => setPrompt(e.target.value.slice(0, 500))}
+                    placeholder={step.placeholder || '请输入…'}
+                    className="os-wb-textarea"
+                    rows={3}
+                  />
+                )}
+              </div>
+            ))}
+
+            {/* 无工具配置时 fallback 到原始输入 */}
+            {!toolConfig && (
+              <div className="os-aw-step">
+                <div className="os-aw-step-label">你的需求</div>
+                <textarea
+                  value={prompt}
+                  onChange={e => setPrompt(e.target.value.slice(0, 500))}
+                  placeholder="描述你想生成的内容，例如：生成高级电商商品主图和场景图"
+                  className="os-wb-textarea"
+                  rows={5}
+                />
               </div>
             )}
 
-            {/* 需求输入框 */}
-            <div className="mb-4">
-              <div className="text-xs text-slate-400 font-medium mb-2">你的需求</div>
-              <textarea
-                ref={textareaRef}
-                value={prompt}
-                onChange={e => setPrompt(e.target.value.slice(0, 500))}
-                placeholder="描述你想生成的内容，例如：生成高级电商商品主图和场景图"
-                className="os-wb-textarea"
-                rows={5}
-              />
-              <div className="text-right text-[11px] text-slate-300 mt-1">{prompt.length} / 500</div>
-            </div>
-
-            {/* 上传图片按钮 */}
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="os-wb-upload-btn mb-5"
-            >
-              <Upload className="w-4 h-4" />
-              <span>上传参考图片</span>
-              <span className="text-[11px] text-slate-300 ml-1">(JPG / PNG，最多5张)</span>
-            </button>
             <input
               ref={fileInputRef}
               type="file"
@@ -427,23 +458,27 @@ export default function CreateWorkbench() {
               className="hidden"
             />
 
-            {/* 操作按钮 */}
-            <div className="flex gap-3">
+            {/* 开始生成按钮 */}
+            <div className="mt-auto pt-4">
               <button
                 onClick={handleGenerate}
-                disabled={status === 'generating' || (!prompt.trim() && uploadedImages.length === 0)}
-                className="os-wb-gen-btn flex-1"
+                disabled={status === 'generating' || !isGuideComplete()}
+                className="os-wb-gen-btn w-full"
               >
                 {status === 'generating' ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /><span>生成中…</span></>
                 ) : (
-                  <><Wand2 className="w-4 h-4" /><span>开始生成</span></>
+                  <>
+                    <Wand2 className="w-4 h-4" />
+                    <span>开始生成</span>
+                    <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                  </>
                 )}
               </button>
               {results.length > 0 && status !== 'generating' && (
                 <button
                   onClick={handleGenerate}
-                  className="os-wb-secondary-btn"
+                  className="os-wb-secondary-btn w-full mt-2"
                 >
                   <RotateCcw className="w-4 h-4" />
                   <span>重新生成</span>
@@ -452,7 +487,7 @@ export default function CreateWorkbench() {
             </div>
           </div>
 
-          {/* ====== 右侧：结果面板 ====== */}
+          {/* ====== 右侧：结果 / 案例 ====== */}
           <div className="os-wb-right">
 
             {/* ===== 生成中状态 ===== */}
@@ -469,23 +504,6 @@ export default function CreateWorkbench() {
                 </div>
                 <div className="os-wb-progress-track">
                   <div className="os-wb-progress-fill" style={{ width: `${progressPercent}%` }} />
-                </div>
-                <div className="os-wb-step-list">
-                  {GEN_STEPS.map((step, idx) => {
-                    const stepNum = idx + 1;
-                    const isCompleted = currentStep > stepNum;
-                    const isCurrent = currentStep === stepNum;
-                    return (
-                      <div key={step.id} className={`os-wb-step-item ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
-                        <div className={`os-wb-step-dot ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
-                          {isCompleted ? <Check className="w-3 h-3" /> : stepNum}
-                        </div>
-                        <span className={`os-wb-step-text ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
-                          {step.text}
-                        </span>
-                      </div>
-                    );
-                  })}
                 </div>
                 <div className="os-wb-skeleton-area">
                   <div className="os-wb-skeleton" style={{ height: '200px' }} />
@@ -512,27 +530,45 @@ export default function CreateWorkbench() {
               </div>
             )}
 
-            {/* ===== 无结果默认态 ===== */}
+            {/* ===== 空状态：展示工具案例 ===== */}
             {status === 'idle' && results.length === 0 && (
-              <div className="os-wb-empty">
-                <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-4">
-                  <Sparkles className="w-7 h-7 text-purple-400" />
+              <div className="os-aw-cases">
+                <div className="os-aw-cases-header">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  <span>{toolConfig?.name || 'AI'}创作案例</span>
                 </div>
-                <h3 className="text-base font-medium text-slate-600 mb-1.5">等待生成</h3>
-                <p className="text-sm text-slate-400 text-center leading-relaxed">
-                  在左侧输入需求或上传图片，<br />点击「开始生成」查看结果
-                </p>
+                <div className="os-aw-cases-grid">
+                  {(toolConfig?.cases || FALLBACK_CASES).map((c, idx) => (
+                    <div key={idx} className="os-aw-case-card">
+                      <div className="os-aw-case-img">
+                        {c.image ? (
+                          <img src={c.image} alt={c.title} />
+                        ) : (
+                          <div className="os-aw-case-img-fallback">
+                            <ImageIcon className="w-6 h-6 text-slate-300" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="os-aw-case-info">
+                        <div className="os-aw-case-title">{c.title}</div>
+                        <div className="os-aw-case-desc">{c.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="os-aw-cases-hint">
+                  完成左侧创作引导后，AI 将自动为你生成
+                </div>
               </div>
             )}
 
             {/* ===== 图片结果展示 ===== */}
             {status === 'success' && hasImageResults && (
               <div className="os-wb-results">
-                {/* 标题栏 */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-slate-700">生成结果</span>
-                    <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{currentGenType.label}</span>
+                    <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{toolConfig?.name || 'AI'}</span>
                     <span className="text-[11px] text-slate-400">{imageResults.length} 张</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -543,57 +579,31 @@ export default function CreateWorkbench() {
                   </div>
                 </div>
 
-                {/* 大图预览区 */}
                 {activeResult && activeResult.type === 'image' && (
                   <div className="os-wb-preview-main group">
-                    <img
-                      src={activeResult.url}
-                      alt={activeResult.label}
-                      className="os-wb-preview-img"
-                    />
-                    {/* 图片操作浮层 */}
+                    <img src={activeResult.url} alt={activeResult.label} className="os-wb-preview-img" />
                     <div className="os-wb-preview-overlay">
                       <div className="os-wb-preview-actions">
-                        <button
-                          onClick={() => setShowLightbox(true)}
-                          className="os-wb-preview-action"
-                          title="放大查看"
-                        >
-                          <ZoomIn className="w-4 h-4" />
-                          <span>放大</span>
+                        <button onClick={() => setShowLightbox(true)} className="os-wb-preview-action" title="放大查看">
+                          <ZoomIn className="w-4 h-4" /><span>放大</span>
                         </button>
-                        <button
-                          onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)}
-                          className="os-wb-preview-action"
-                          title="下载图片"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>下载</span>
+                        <button onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)} className="os-wb-preview-action" title="下载图片">
+                          <Download className="w-4 h-4" /><span>下载</span>
                         </button>
-                        <button
-                          onClick={() => handleSetAsCover(activeIndex)}
-                          className="os-wb-preview-action"
-                          title="设为封面"
-                        >
-                          <Check className="w-4 h-4" />
-                          <span>设为封面</span>
+                        <button onClick={() => handleSetAsCover(activeIndex)} className="os-wb-preview-action" title="设为封面">
+                          <Check className="w-4 h-4" /><span>设为封面</span>
                         </button>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 多图缩略图行 */}
                 {imageResults.length > 1 && (
                   <div className="os-wb-thumb-row">
                     {imageResults.map((result, idx) => {
                       const globalIdx = results.indexOf(result);
                       return (
-                        <button
-                          key={idx}
-                          onClick={() => setActiveIndex(globalIdx)}
-                          className={`os-wb-thumb-item ${activeIndex === globalIdx ? 'active' : ''}`}
-                        >
+                        <button key={idx} onClick={() => setActiveIndex(globalIdx)} className={`os-wb-thumb-item ${activeIndex === globalIdx ? 'active' : ''}`}>
                           <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
                           {activeIndex === globalIdx && (
                             <div className="os-wb-thumb-active-indicator">
@@ -606,22 +616,18 @@ export default function CreateWorkbench() {
                   </div>
                 )}
 
-                {/* 底部操作栏 */}
                 <div className="os-wb-bottom-bar">
                   <div className="flex items-center gap-2">
                     <button onClick={handleContinueOptimize} className="os-wb-action-btn">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>继续优化</span>
+                      <Sparkles className="w-3.5 h-3.5" /><span>继续优化</span>
                     </button>
                     <button onClick={handleGenerate} className="os-wb-action-btn">
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      <span>重新生成</span>
+                      <RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span>
                     </button>
                   </div>
                   <div className="flex items-center gap-2">
                     <button onClick={handleDownloadAll} className="os-wb-action-btn">
-                      <Download className="w-3.5 h-3.5" />
-                      <span>下载全部</span>
+                      <Download className="w-3.5 h-3.5" /><span>下载全部</span>
                     </button>
                   </div>
                 </div>
@@ -634,11 +640,10 @@ export default function CreateWorkbench() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-slate-700">生成结果</span>
-                    <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{currentGenType.label}</span>
+                    <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{toolConfig?.name || 'AI'}</span>
                   </div>
                   <button onClick={handleSaveToProjects} className="os-wb-action-btn">
-                    <FolderOpen className="w-3.5 h-3.5" />
-                    <span>保存到作品</span>
+                    <FolderOpen className="w-3.5 h-3.5" /><span>保存到作品</span>
                   </button>
                 </div>
 
@@ -646,12 +651,8 @@ export default function CreateWorkbench() {
                   <div key={idx} className="os-wb-text-card">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs text-slate-400 font-medium">{result.label}</span>
-                      <button
-                        onClick={() => handleCopyText(result.textContent || '')}
-                        className="os-wb-action-btn text-xs"
-                      >
-                        <Copy className="w-3 h-3" />
-                        <span>复制</span>
+                      <button onClick={() => handleCopyText(result.textContent || '')} className="os-wb-action-btn text-xs">
+                        <Copy className="w-3 h-3" /><span>复制</span>
                       </button>
                     </div>
                     <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
@@ -660,17 +661,12 @@ export default function CreateWorkbench() {
                   </div>
                 ))}
 
-                {/* 如果同时有图片结果，展示图片缩略图 */}
                 {hasImageResults && (
                   <div className="mt-4">
                     <div className="text-xs text-slate-400 font-medium mb-2">图片结果</div>
                     <div className="grid grid-cols-3 gap-2">
                       {imageResults.map((result, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => { setActiveIndex(idx); setShowLightbox(true); }}
-                          className="os-wb-thumb-item-sm"
-                        >
+                        <button key={idx} onClick={() => { setActiveIndex(idx); setShowLightbox(true); }} className="os-wb-thumb-item-sm">
                           <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
                         </button>
                       ))}
@@ -681,12 +677,10 @@ export default function CreateWorkbench() {
                 <div className="os-wb-bottom-bar">
                   <div className="flex items-center gap-2">
                     <button onClick={handleContinueOptimize} className="os-wb-action-btn">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>继续优化</span>
+                      <Sparkles className="w-3.5 h-3.5" /><span>继续优化</span>
                     </button>
                     <button onClick={handleGenerate} className="os-wb-action-btn">
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      <span>重新生成</span>
+                      <RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span>
                     </button>
                   </div>
                 </div>
@@ -701,51 +695,27 @@ export default function CreateWorkbench() {
       {showLightbox && activeResult && activeResult.type === 'image' && (
         <div className="os-wb-lightbox" onClick={() => setShowLightbox(false)}>
           <div className="os-wb-lightbox-content" onClick={e => e.stopPropagation()}>
-            <button
-              onClick={() => setShowLightbox(false)}
-              className="os-wb-lightbox-close"
-            >
+            <button onClick={() => setShowLightbox(false)} className="os-wb-lightbox-close">
               <X className="w-5 h-5" />
             </button>
-            <img
-              src={activeResult.url}
-              alt={activeResult.label}
-              className="os-wb-lightbox-img"
-            />
+            <img src={activeResult.url} alt={activeResult.label} className="os-wb-lightbox-img" />
             <div className="os-wb-lightbox-actions">
-              <button
-                onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)}
-                className="os-wb-lightbox-btn"
-              >
-                <Download className="w-4 h-4" />
-                <span>下载 PNG</span>
+              <button onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)} className="os-wb-lightbox-btn">
+                <Download className="w-4 h-4" /><span>下载 PNG</span>
               </button>
-              <button
-                onClick={() => { handleSetAsCover(activeIndex); setShowLightbox(false); }}
-                className="os-wb-lightbox-btn"
-              >
-                <Check className="w-4 h-4" />
-                <span>设为封面</span>
+              <button onClick={() => { handleSetAsCover(activeIndex); setShowLightbox(false); }} className="os-wb-lightbox-btn">
+                <Check className="w-4 h-4" /><span>设为封面</span>
               </button>
-              <button
-                onClick={() => { handleSaveToProjects(); setShowLightbox(false); }}
-                className="os-wb-lightbox-btn"
-              >
-                <FolderOpen className="w-4 h-4" />
-                <span>保存到作品</span>
+              <button onClick={() => { handleSaveToProjects(); setShowLightbox(false); }} className="os-wb-lightbox-btn">
+                <FolderOpen className="w-4 h-4" /><span>保存到作品</span>
               </button>
             </div>
-            {/* 缩略图切换 */}
             {imageResults.length > 1 && (
               <div className="os-wb-lightbox-thumbs">
                 {imageResults.map((r, idx) => {
                   const globalIdx = results.indexOf(r);
                   return (
-                    <button
-                      key={idx}
-                      onClick={(e) => { e.stopPropagation(); setActiveIndex(globalIdx); }}
-                      className={`os-wb-lightbox-thumb ${activeIndex === globalIdx ? 'active' : ''}`}
-                    >
+                    <button key={idx} onClick={(e) => { e.stopPropagation(); setActiveIndex(globalIdx); }} className={`os-wb-lightbox-thumb ${activeIndex === globalIdx ? 'active' : ''}`}>
                       <img src={r.url} alt={r.label} className="w-full h-full object-cover" />
                     </button>
                   );
@@ -758,3 +728,23 @@ export default function CreateWorkbench() {
     </div>
   );
 }
+
+// ===== 简单工具列表（切换下拉用） =====
+function getAllToolWorkflowsSimple() {
+  return [
+    { slug: 'product-generator', name: 'AI商品图', icon: '📦' },
+    { slug: 'xiaohongshu-generator', name: '小红书爆款', icon: '📕' },
+    { slug: 'ai-photo', name: 'AI写真', icon: '📸' },
+    { slug: 'background-removal', name: '智能抠图', icon: '✂️' },
+    { slug: 'product-page', name: '商品详情页', icon: '📋' },
+    { slug: 'novel', name: '小说创作', icon: '📖' },
+    { slug: 'resume-optimizer', name: '简历优化', icon: '📝' },
+  ];
+}
+
+// ===== 兜底案例 =====
+const FALLBACK_CASES = [
+  { image: '/case-lipstick-main.png', title: '商品图案例', desc: '高级感电商主图' },
+  { image: '/demo-card-lifestyle.jpg', title: '封面案例', desc: '氛围感内容封面' },
+  { image: '/demo-scene.jpg', title: '场景图案例', desc: '生活化场景展示' },
+];

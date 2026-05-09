@@ -129,12 +129,25 @@ export default function ToolsPage() {
               <button
                 key={tool.slug}
                 onClick={() => {
-                  const params = new URLSearchParams({
-                    toolId: String(tool.id),
-                    type: tool.slug,
-                    prompt: tool.description || meta?.valueProp || '',
-                  });
-                  router.push(`/create?${params.toString()}`);
+                  // 使用 sessionStorage 传递上下文，避免 URL 过长被浏览器拦截
+                  try {
+                    sessionStorage.setItem('oneclaw_create_context', JSON.stringify({
+                      prompt: '',
+                      type: tool.slug,
+                      toolId: String(tool.id),
+                      uploadedImages: [],
+                      matchedTool: tool.slug,
+                      analysisResult: {
+                        tool: tool.slug,
+                        confidence: 1.0,
+                        style: meta?.valueProp || '',
+                        industry: '',
+                        output_type: tool.name,
+                      },
+                      autoGenerate: false,  // 工具库进入不自动生成，等用户完成引导
+                    }));
+                  } catch {}
+                  router.push('/create');
                 }}
                 className="os-tl-card"
               >

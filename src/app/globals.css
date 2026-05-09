@@ -3073,6 +3073,204 @@ body {
   }
 }
 
+/* ==================== AI Workflow 引导式工作流 ==================== */
+
+/* 工具徽章 */
+.os-aw-tool-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(120,120,255,0.1), rgba(120,120,255,0.05));
+  border: 1px solid rgba(120,120,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* AI 问候语 */
+.os-aw-greeting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(120,120,255,0.04);
+  border-radius: 14px;
+  border: 1px solid rgba(120,120,255,0.06);
+  font-size: 14px;
+  color: rgba(30,30,50,0.72);
+  margin-bottom: 20px;
+}
+
+/* 引导步骤 */
+.os-aw-step {
+  margin-bottom: 20px;
+}
+
+.os-aw-step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(30,30,50,0.65);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.os-aw-step-optional {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(30,30,50,0.3);
+  background: rgba(0,0,0,0.04);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* 上传区域 */
+.os-aw-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 20px 16px;
+  border: 2px dashed rgba(120,120,255,0.15);
+  border-radius: 16px;
+  background: rgba(120,120,255,0.02);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.os-aw-upload-area:hover {
+  border-color: rgba(120,120,255,0.3);
+  background: rgba(120,120,255,0.05);
+}
+
+/* 选项按钮组 */
+.os-aw-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.os-aw-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.06);
+  background: white;
+  font-size: 13px;
+  color: rgba(30,30,50,0.65);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.os-aw-option:hover {
+  border-color: rgba(120,120,255,0.2);
+  background: rgba(120,120,255,0.03);
+}
+
+.os-aw-option.active {
+  border-color: rgba(120,120,255,0.35);
+  background: rgba(120,120,255,0.06);
+  color: rgba(80,80,200,0.85);
+  box-shadow: 0 2px 12px rgba(120,120,255,0.08);
+}
+
+/* 右侧案例展示 */
+.os-aw-cases {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.os-aw-cases-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(30,30,50,0.5);
+  margin-bottom: 20px;
+}
+
+.os-aw-cases-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.os-aw-case-card {
+  border-radius: 18px;
+  overflow: hidden;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  transition: all 0.3s ease;
+}
+
+.os-aw-case-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(120,120,255,0.08);
+}
+
+.os-aw-case-img {
+  width: 100%;
+  height: 140px;
+  overflow: hidden;
+  background: rgba(120,120,255,0.03);
+}
+
+.os-aw-case-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.os-aw-case-card:hover .os-aw-case-img img {
+  transform: scale(1.04);
+}
+
+.os-aw-case-img-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(120,120,255,0.03);
+}
+
+.os-aw-case-info {
+  padding: 12px 14px;
+}
+
+.os-aw-case-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(30,30,50,0.72);
+  margin-bottom: 2px;
+}
+
+.os-aw-case-desc {
+  font-size: 11px;
+  color: rgba(30,30,50,0.35);
+}
+
+.os-aw-cases-hint {
+  margin-top: 20px;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(30,30,50,0.3);
+  background: rgba(120,120,255,0.02);
+  border-radius: 12px;
+  border: 1px dashed rgba(120,120,255,0.08);
+}
+
 /* ===== Site Footer ===== */
 .os-footer {
   margin-top: auto;
