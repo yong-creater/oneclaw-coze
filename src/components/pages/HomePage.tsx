@@ -41,10 +41,10 @@ interface SceneItem {
   href: string;
 }
 const sceneItems: SceneItem[] = [
-  { icon: Package, title: '商品图', desc: '主图、场景图、卖点图', href: '/product-generator' },
+  { icon: Package, title: '商品图', desc: '主图 / 场景图 / 卖点图', href: '/product-generator' },
   { icon: LayoutTemplate, title: '详情页', desc: '商品详情长图', href: '/productpage' },
-  { icon: BookOpen, title: '小红书', desc: '封面、标题和标签', href: '/xiaohongshu-generator' },
-  { icon: Video, title: '视频脚本', desc: '口播和带货脚本', href: '' },
+  { icon: BookOpen, title: '小红书', desc: '封面 / 标题 / 标签', href: '/xiaohongshu-generator' },
+  { icon: Video, title: '视频脚本', desc: '口播 / 分镜 / 带货', href: '' },
   { icon: Camera, title: 'AI 写真', desc: '高级感人物写真', href: '/ai-photo' },
 ];
 
