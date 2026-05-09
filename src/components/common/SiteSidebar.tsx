@@ -31,6 +31,7 @@ const menuList: Array<{
 // ========== 从 pathname 推导当前菜单 ID ==========
 function getMenuIdFromPath(pathname: string): string {
   if (
+    pathname.startsWith('/create') ||
     pathname.startsWith('/product-generator') ||
     pathname.startsWith('/background-removal') ||
     pathname.startsWith('/ai-photo') ||

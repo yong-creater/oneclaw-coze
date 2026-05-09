@@ -69,10 +69,11 @@ export default function HomePage() {
     }
   }, [pendingInput, consumePendingInput]);
 
-  // 开始生成 — AI 自动匹配创作方式
+  // 开始生成 — 跳转到统一生成工作台
   const handleGenerate = useCallback(() => {
     if (!inputText.trim() || isLoading) return;
-    router.push('/product-generator');
+    const params = new URLSearchParams({ prompt: inputText.trim() });
+    router.push(`/create?${params.toString()}`);
   }, [inputText, isLoading, router]);
 
   // Ctrl+Enter 快捷键
@@ -221,8 +222,8 @@ export default function HomePage() {
               key={idx}
               className="os-result-card group cursor-pointer"
               onClick={() => {
-                setInputText(item.examplePrompt);
-                studioInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const params = new URLSearchParams({ prompt: item.examplePrompt });
+                router.push(`/create?${params.toString()}`);
               }}
             >
               {/* 图片区域 */}
@@ -241,8 +242,8 @@ export default function HomePage() {
                     className="os-result-card-cta"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setInputText(item.examplePrompt);
-                      studioInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      const params = new URLSearchParams({ prompt: item.examplePrompt });
+                      router.push(`/create?${params.toString()}`);
                     }}
                   >
                     <Wand2 className="w-3.5 h-3.5" />

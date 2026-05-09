@@ -1239,6 +1239,257 @@ body {
   line-height: 1.5;
 }
 
+  /* ==================== 生成工作台 (Create Workbench) ==================== */
+
+  /* 左右分栏布局 */
+  .os-wb-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    min-height: 560px;
+  }
+
+  /* 左侧输入面板 */
+  .os-wb-left {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(18px);
+    border-radius: 20px;
+    border: 1px solid rgba(124, 92, 255, 0.06);
+    box-shadow: 0 8px 30px rgba(124, 92, 255, 0.05);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 右侧结果面板 */
+  .os-wb-right {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(18px);
+    border-radius: 20px;
+    border: 1px solid rgba(124, 92, 255, 0.06);
+    box-shadow: 0 8px 30px rgba(124, 92, 255, 0.05);
+    padding: 24px;
+    position: relative;
+  }
+
+  /* 需求输入框 */
+  .os-wb-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(248, 250, 252, 0.8);
+    border: 1.5px solid rgba(226, 232, 240, 0.8);
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1e293b;
+    resize: none;
+    transition: border-color 0.2s ease;
+    outline: none;
+  }
+  .os-wb-textarea:hover {
+    border-color: rgba(124, 92, 255, 0.3);
+  }
+  .os-wb-textarea:focus {
+    border-color: #7C5CFF;
+    background: #fff;
+  }
+  .os-wb-textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  /* 上传按钮 */
+  .os-wb-upload-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 16px;
+    background: rgba(248, 250, 252, 0.6);
+    border: 1.5px dashed rgba(203, 213, 225, 0.6);
+    border-radius: 14px;
+    color: #64748b;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .os-wb-upload-btn:hover {
+    border-color: rgba(124, 92, 255, 0.3);
+    background: rgba(124, 92, 255, 0.03);
+    color: #7C5CFF;
+  }
+
+  /* 主生成按钮 */
+  .os-wb-gen-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #7C6CFF, #5B5DE6);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 20px rgba(124, 108, 255, 0.3);
+  }
+  .os-wb-gen-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(124, 108, 255, 0.4);
+  }
+  .os-wb-gen-btn:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  .os-wb-gen-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* 次要按钮 */
+  .os-wb-secondary-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1.5px solid rgba(226, 232, 240, 0.8);
+    border-radius: 14px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .os-wb-secondary-btn:hover:not(:disabled) {
+    border-color: rgba(124, 92, 255, 0.3);
+    color: #7C5CFF;
+  }
+  .os-wb-secondary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* 小操作按钮 */
+  .os-wb-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: 10px;
+    color: #475569;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .os-wb-action-btn:hover {
+    border-color: rgba(124, 92, 255, 0.3);
+    color: #7C5CFF;
+    background: rgba(124, 92, 255, 0.04);
+  }
+
+  /* 生成中状态 */
+  .os-wb-generating {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  /* 骨架屏 */
+  .os-wb-skeleton {
+    background: linear-gradient(90deg, rgba(241, 245, 249, 0.6) 25%, rgba(226, 232, 240, 0.4) 50%, rgba(241, 245, 249, 0.6) 75%);
+    background-size: 200% 100%;
+    animation: wbShimmer 1.5s ease-in-out infinite;
+    border-radius: 16px;
+  }
+  @keyframes wbShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* 空状态 */
+  .os-wb-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 400px;
+  }
+
+  /* 结果区 */
+  .os-wb-results {
+    /* no extra styles needed */
+  }
+
+  /* 主结果图 */
+  .os-wb-result-main {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: #f1f5f9;
+  }
+
+  /* 缩略结果图 */
+  .os-wb-result-thumb {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: #f1f5f9;
+  }
+
+  /* 结果 hover 浮层 */
+  .os-wb-result-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .os-wb-result-main:hover .os-wb-result-overlay,
+  .os-wb-result-thumb:hover .os-wb-result-overlay {
+    opacity: 1;
+  }
+
+  /* 浮层操作按钮 */
+  .os-wb-result-action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 10px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+  }
+  .os-wb-result-action:hover {
+    background: #fff;
+    transform: scale(1.04);
+  }
+
+  /* 响应式：平板和手机 */
+  @media (max-width: 900px) {
+    .os-wb-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
 /* ==================== AI Rail 导航 (替代 Sidebar) ==================== */
 
 /* Rail 容器 */
