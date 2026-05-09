@@ -39,9 +39,7 @@ function getMenuIdFromPath(pathname: string): string {
     pathname.startsWith('/xiaohongshu-generator') ||
     pathname.startsWith('/novel') ||
     pathname.startsWith('/resume') ||
-    pathname.startsWith('/productpage') ||
-    pathname.startsWith('/templates')
-  ) {
+    pathname.startsWith('/productpage')) {
     return 'create';
   }
   if (pathname.startsWith('/tools')) {

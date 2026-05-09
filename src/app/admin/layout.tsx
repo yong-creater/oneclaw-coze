@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   Wrench,
-  FileText,
   Lightbulb,
   Users,
   ShoppingCart,
@@ -44,8 +43,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { name: '精选工具', href: '/admin/utility-tools', icon: Wrench },
-  { name: '模板库', href: '/admin/templates', icon: FileText },
-  { name: '提示词库', href: '/admin/prompts', icon: Lightbulb },
+  { name: '灵感库', href: '/admin/inspiration', icon: Lightbulb },
   { name: '会员管理', href: '/admin/members', icon: Users },
   { name: '订单管理', href: '/admin/orders', icon: ShoppingCart },
   { name: '模型提供商', href: '/admin/model-providers', icon: Grid3X3 },

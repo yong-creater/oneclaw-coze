@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Search, Plus, Edit, Trash2, Copy, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -20,449 +20,411 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Sparkles, Plus, Pencil, Trash2, Search, RefreshCw } from 'lucide-react';
 
-interface Prompt {
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+interface InspirationItem {
   id: number;
   title: string;
+  description: string;
   content: string;
-  tool_id: number | null;
   category: string;
   tags: string[];
-  author: string | null;
-  status: string;
-  uses: number;
+  is_featured: boolean;
+  use_count: number;
   created_at: string;
-  tools?: { id: number; name: string; logo: string } | null;
+  updated_at: string;
 }
 
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  total_pages: number;
-}
-
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
 const CATEGORIES = [
-  '视频生成', 'AI绘画', '文案写作', '代码编程', '数字人', 
-  '音频生成', '图像处理', '数据分析', '营销文案', '学习助手', '其他'
+  '商品图', '小红书', 'AI写真', '海报设计', '详情页', '视频',
+  '电商', '美食', '穿搭', '美妆', '数码', '家居',
 ];
 
-const STATUS_COLORS: Record<string, string> = {
-  'published': 'bg-green-100 text-green-700',
-  'draft': 'bg-slate-100 text-slate-700',
+const DEFAULT_FORM = {
+  title: '',
+  description: '',
+  content: '',
+  category: '商品图',
+  tags: '',
+  is_featured: false,
 };
 
-export default function PromptsAdminPage() {
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1, limit: 20, total: 0, total_pages: 0
-  });
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+export default function AdminInspirationPage() {
+  const [items, setItems] = useState<InspirationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    search: '',
-    category: 'all',
-    status: 'all',
-  });
-  
-  // 编辑弹窗
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
-  const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    category: '',
-    tags: '',
-    author: '',
-    status: 'published'
-  });
+  const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
 
-  const fetchData = useCallback(async () => {
+  // Dialog
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const [saving, setSaving] = useState(false);
+
+  // Delete
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  /* ---- Fetch ---- */
+  const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      params.set('page', pagination.page.toString());
-      params.set('limit', pagination.limit.toString());
-      if (filters.search) params.set('search', filters.search);
-      if (filters.category && filters.category !== 'all') params.set('category', filters.category);
-      if (filters.status && filters.status !== 'all') params.set('status', filters.status);
-      
-      const res = await fetch(`/api/admin/prompts?${params}`);
+      if (search) params.set('search', search);
+      if (filterCategory !== 'all') params.set('category', filterCategory);
+      const res = await fetch(`/api/prompts?${params}`);
       const data = await res.json();
-      
       if (data.success) {
-        setPrompts(data.data);
-        setPagination(prev => ({ ...prev, total: data.pagination.total, total_pages: data.pagination.total_pages }));
+        setItems(data.data || []);
       }
-    } catch (error) {
-      console.error('获取数据失败:', error);
+    } catch (err) {
+      console.error('Failed to fetch inspiration items:', err);
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, filters]);
+  }, [search, filterCategory]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchItems(); }, [fetchItems]);
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('确定要删除这个Prompt吗？')) return;
-    
-    try {
-      const res = await fetch(`/api/admin/prompts?id=${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      
-      if (data.success) {
-        fetchData();
-      } else {
-        alert('删除失败: ' + data.error);
-      }
-    } catch (error) {
-      console.error('删除失败:', error);
-      alert('删除失败');
-    }
+  /* ---- Form handlers ---- */
+  const openCreate = () => {
+    setEditingId(null);
+    setForm(DEFAULT_FORM);
+    setDialogOpen(true);
   };
 
-  const openEditDialog = (prompt?: Prompt) => {
-    if (prompt) {
-      setEditingPrompt(prompt);
-      setFormData({
-        title: prompt.title,
-        content: prompt.content,
-        category: prompt.category,
-        tags: prompt.tags?.join(', ') || '',
-        author: prompt.author || '',
-        status: prompt.status
-      });
-    } else {
-      setEditingPrompt(null);
-      setFormData({
-        title: '',
-        content: '',
-        category: '',
-        tags: '',
-        author: '',
-        status: 'published'
-      });
-    }
-    setShowEditDialog(true);
+  const openEdit = (item: InspirationItem) => {
+    setEditingId(item.id);
+    setForm({
+      title: item.title,
+      description: item.description || '',
+      content: item.content,
+      category: item.category,
+      tags: (item.tags || []).join(', '),
+      is_featured: item.is_featured,
+    });
+    setDialogOpen(true);
   };
 
   const handleSave = async () => {
-    if (!formData.title || !formData.content || !formData.category) {
-      alert('请填写必填项');
-      return;
-    }
-
+    if (!form.title.trim() || !form.content.trim()) return;
+    setSaving(true);
     try {
-      const url = '/api/admin/prompts';
-      const method = editingPrompt ? 'PUT' : 'POST';
-      const body = editingPrompt 
-        ? { 
-            ...formData, 
-            id: editingPrompt.id,
-            tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean)
-          }
-        : {
-            ...formData,
-            tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean)
-          };
-
+      const payload = {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        content: form.content.trim(),
+        category: form.category,
+        tags: form.tags.split(/[,，]/).map(t => t.trim()).filter(Boolean),
+        is_featured: form.is_featured,
+      };
+      const url = editingId ? `/api/prompts/${editingId}` : '/api/prompts';
+      const method = editingId ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(payload),
       });
-      
       const data = await res.json();
-      
       if (data.success) {
-        setShowEditDialog(false);
-        fetchData();
+        setDialogOpen(false);
+        fetchItems();
       } else {
-        alert('保存失败: ' + data.error);
+        alert(data.error || '保存失败');
       }
-    } catch (error) {
-      console.error('保存失败:', error);
-      alert('保存失败');
+    } catch (err) {
+      console.error('Save failed:', err);
+      alert('保存失败，请重试');
+    } finally {
+      setSaving(false);
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/prompts/${deleteId}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setDeleteId(null);
+        fetchItems();
+      }
+    } catch (err) {
+      console.error('Delete failed:', err);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  /* ---- Stats ---- */
+  const stats = {
+    total: items.length,
+    featured: items.filter(i => i.is_featured).length,
+    categories: [...new Set(items.map(i => i.category))].length,
+  };
+
+  /* ---- Render ---- */
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Prompt管理</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            共 {pagination.total} 个Prompt模板
-          </p>
+          <h2 className="text-2xl font-bold">灵感库管理</h2>
+          <p className="text-sm text-muted-foreground">管理前台灵感案例库的内容，包括提示词模板和创作灵感</p>
         </div>
-        <Button onClick={() => openEditDialog()} className="bg-orange-500 hover:bg-orange-600">
-          <Plus className="w-4 h-4 mr-2" />
-          添加Prompt
+        <Button onClick={openCreate} className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Plus className="w-4 h-4 mr-1" /> 新增灵感
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card className="bg-white dark:bg-slate-800">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <Input
-                placeholder="搜索标题、作者..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="dark:bg-slate-700"
-              />
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-blue-500" />
             </div>
-            <Select value={filters.category} onValueChange={(v) => setFilters(prev => ({ ...prev, category: v }))}>
-              <SelectTrigger className="w-[150px] dark:bg-slate-700">
-                <SelectValue placeholder="分类" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部分类</SelectItem>
-                {CATEGORIES.map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filters.status} onValueChange={(v) => setFilters(prev => ({ ...prev, status: v }))}>
-              <SelectTrigger className="w-[120px] dark:bg-slate-700">
-                <SelectValue placeholder="状态" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
-                <SelectItem value="published">已发布</SelectItem>
-                <SelectItem value="draft">草稿</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={() => setFilters({ search: '', category: 'all', status: 'all' })}>
-              重置
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            <div>
+              <p className="text-2xl font-bold">{stats.total}</p>
+              <p className="text-xs text-muted-foreground">灵感总数</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{stats.featured}</p>
+              <p className="text-xs text-muted-foreground">精选推荐</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-green-500" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{stats.categories}</p>
+              <p className="text-xs text-muted-foreground">分类数</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            className="pl-9"
+            placeholder="搜索灵感标题或内容..."
+            value={search}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+          />
+        </div>
+        <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="全部分类" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">全部分类</SelectItem>
+            {CATEGORIES.map(c => (
+              <SelectItem key={c} value={c}>{c}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="icon" onClick={fetchItems}>
+          <RefreshCw className="w-4 h-4" />
+        </Button>
+      </div>
 
       {/* Table */}
-      <Card className="bg-white dark:bg-slate-800">
+      <Card>
         <CardContent className="p-0">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-            </div>
-          ) : prompts.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500">暂无Prompt数据</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 dark:bg-slate-700/50">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-slate-600 dark:text-slate-300">标题</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-slate-600 dark:text-slate-300">分类</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-slate-600 dark:text-slate-300">标签</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-slate-600 dark:text-slate-300">作者</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-slate-600 dark:text-slate-300">使用次数</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-slate-600 dark:text-slate-300">状态</th>
-                    <th className="px-4 py-3 text-center text-sm font-medium text-slate-600 dark:text-slate-300">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {prompts.map(prompt => (
-                    <tr key={prompt.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900/30 dark:to-red-900/30 flex items-center justify-center">
-                            <FileText className="w-5 h-5 text-orange-500" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-slate-800 dark:text-white line-clamp-1">{prompt.title}</p>
-                            {prompt.tools && (
-                              <p className="text-xs text-slate-500">{prompt.tools.name}</p>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="outline">{prompt.category}</Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {prompt.tags?.slice(0, 3).map((tag, i) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {prompt.tags?.length > 3 && (
-                            <span className="text-xs text-slate-500">+{prompt.tags.length - 3}</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
-                        {prompt.author || '-'}
-                      </td>
-                      <td className="px-4 py-3 text-center text-sm text-slate-600 dark:text-slate-300">
-                        <span className="flex items-center justify-center gap-1">
-                          <Copy className="w-3 h-3" />
-                          {prompt.uses}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <span className={`text-xs px-2 py-1 rounded ${STATUS_COLORS[prompt.status] || ''}`}>
-                          {prompt.status === 'published' ? '已发布' : '草稿'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditDialog(prompt)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(prompt.id)}
-                            className="text-red-500 hover:text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">ID</TableHead>
+                <TableHead>标题</TableHead>
+                <TableHead>分类</TableHead>
+                <TableHead>标签</TableHead>
+                <TableHead className="w-16">推荐</TableHead>
+                <TableHead className="w-16">使用次数</TableHead>
+                <TableHead className="w-28">操作</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    加载中...
+                  </TableCell>
+                </TableRow>
+              ) : items.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    暂无灵感内容，点击右上角新增
+                  </TableCell>
+                </TableRow>
+              ) : (
+                items.map(item => (
+                  <TableRow key={item.id}>
+                    <TableCell className="text-muted-foreground">{item.id}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{item.title}</p>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">{item.category}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {(item.tags || []).slice(0, 3).map((tag: string) => (
+                          <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                        ))}
+                        {(item.tags || []).length > 3 && (
+                          <Badge variant="outline" className="text-xs">+{item.tags.length - 3}</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {item.is_featured ? (
+                        <Badge className="bg-amber-100 text-amber-700">推荐</Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{item.use_count || 0}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(item)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)} className="text-red-500 hover:text-red-600">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
-      {/* Pagination */}
-      {pagination.total_pages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={pagination.page === 1}
-            onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <span className="text-sm text-slate-500">
-            {pagination.page} / {pagination.total_pages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={pagination.page === pagination.total_pages}
-            onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-      )}
-
-      {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      {/* Create / Edit Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingPrompt ? '编辑Prompt' : '添加Prompt'}</DialogTitle>
+            <DialogTitle>{editingId ? '编辑灵感' : '新增灵感'}</DialogTitle>
           </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                标题 <span className="text-red-500">*</span>
-              </label>
-              <Input
-                value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Prompt标题"
-                className="dark:bg-slate-700"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                内容 <span className="text-red-500">*</span>
-              </label>
-              <Textarea
-                value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
-                placeholder="Prompt内容..."
-                rows={10}
-                className="dark:bg-slate-700 font-mono text-sm"
-              />
-            </div>
-            
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                  分类 <span className="text-red-500">*</span>
-                </label>
-                <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v }))}>
-                  <SelectTrigger className="dark:bg-slate-700">
-                    <SelectValue placeholder="选择分类" />
+                <label className="text-sm font-medium mb-1 block">标题</label>
+                <Input
+                  value={form.title}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, title: e.target.value }))}
+                  placeholder="例：夏日护肤封面"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">分类</label>
+                <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
+                  <SelectTrigger>
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    {CATEGORIES.map(c => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div>
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                  作者
-                </label>
-                <Input
-                  value={formData.author}
-                  onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                  placeholder="作者名称"
-                  className="dark:bg-slate-700"
-                />
-              </div>
             </div>
-            
             <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                标签
-              </label>
+              <label className="text-sm font-medium mb-1 block">简介</label>
               <Input
-                value={formData.tags}
-                onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                placeholder="多个标签用逗号分隔"
-                className="dark:bg-slate-700"
+                value={form.description}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="一句话描述这个灵感案例"
               />
-              <p className="text-xs text-slate-500 mt-1">例如: 视频生成, 动画, 特效</p>
             </div>
-            
             <div>
-              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
-                状态
-              </label>
-              <Select value={formData.status} onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}>
-                <SelectTrigger className="dark:bg-slate-700 w-[150px]">
-                  <SelectValue placeholder="选择状态" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="published">已发布</SelectItem>
-                  <SelectItem value="draft">草稿</SelectItem>
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium mb-1 block">灵感内容 / Prompt</label>
+              <Textarea
+                value={form.content}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, content: e.target.value }))}
+                placeholder="输入灵感提示词内容..."
+                rows={6}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium mb-1 block">标签（逗号分隔）</label>
+              <Input
+                value={form.tags}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, tags: e.target.value }))}
+                placeholder="例：电商, 夏日, 清新"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="is_featured"
+                checked={form.is_featured}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, is_featured: e.target.checked }))}
+                className="rounded border-slate-300"
+              />
+              <label htmlFor="is_featured" className="text-sm">设为推荐（前台优先展示）</label>
             </div>
           </div>
-          
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>取消</Button>
-            <Button onClick={handleSave} className="bg-orange-500 hover:bg-orange-600">保存</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
+            <Button onClick={handleSave} disabled={saving || !form.title.trim() || !form.content.trim()} className="bg-orange-500 hover:bg-orange-600 text-white">
+              {saving ? '保存中...' : '保存'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>确认删除</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">确定要删除这条灵感内容吗？此操作不可撤销。</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>取消</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? '删除中...' : '确认删除'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
