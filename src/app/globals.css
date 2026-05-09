@@ -3537,6 +3537,102 @@ body {
     gap: 24px;
   }
 
+/* ===== AI Rail 导航栏 ===== */
+.os-rail {
+  width: 72px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(120,120,255,0.06);
+  user-select: none;
+}
+
+.os-rail-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.os-rail-logo:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(120,120,255,0.18);
+}
+
+.os-rail-item {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  color: rgba(30,30,50,0.42);
+  position: relative;
+}
+.os-rail-item:hover {
+  background: rgba(120,120,255,0.06);
+  color: rgba(30,30,50,0.65);
+}
+.os-rail-item-active {
+  background: rgba(120,120,255,0.10);
+  color: #6D5EF6;
+}
+.os-rail-item-active::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, #7C6CFB, #5B5CF6);
+}
+
+.os-rail-item-text {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.os-rail-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(120,120,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  border: 1.5px solid rgba(120,120,255,0.10);
+}
+.os-rail-avatar:hover {
+  border-color: rgba(120,120,255,0.25);
+  box-shadow: 0 2px 12px rgba(120,120,255,0.12);
+}
+
+.os-rail-user-menu {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(120,120,255,0.08);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
 /* ===== Site Footer ===== */
 .os-footer {
   margin-top: auto;
