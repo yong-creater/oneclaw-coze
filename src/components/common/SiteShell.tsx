@@ -32,7 +32,7 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
           <div className="os-mote os-mote-purple os-mote-7" />
           <div className="os-mote os-mote-cyan os-mote-8" />
         </div>
-        <div style={{ padding: 'var(--spacing-page-x)', position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', zIndex: 1 }}>
           {children}
         </div>
       </main>

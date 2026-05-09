@@ -326,7 +326,7 @@ body {
 .os-global-bg {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 88px;
   right: 0;
   bottom: 0;
   pointer-events: none;
@@ -377,6 +377,7 @@ body {
 .os-page {
   position: relative;
   background: transparent;
+  padding: 0 56px;
 }
 
 /* ---- 页面级氛围装饰层（光带+微粒）---- */
@@ -485,6 +486,10 @@ body {
 .os-hero {
   position: relative;
   overflow: hidden;
+  margin-left: -56px;
+  margin-right: -56px;
+  padding-left: 56px;
+  padding-right: 56px;
   background: radial-gradient(circle at top center, rgba(109, 94, 246, 0.14), transparent 60%);
 }
 .os-hero::before {
