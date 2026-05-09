@@ -274,7 +274,7 @@ export default function HomePage() {
                 <div className="os-scene-hero-content">
                   <h3 className="os-scene-hero-title">{heroScene.title}</h3>
                   <p className="os-scene-hero-desc">{heroScene.desc}</p>
-                  <span className="os-scene-hero-btn">立即生成</span>
+                  <span className="os-scene-hero-cta">立即生成</span>
                 </div>
               </button>
 

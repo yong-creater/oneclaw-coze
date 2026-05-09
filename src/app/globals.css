@@ -727,6 +727,17 @@ body {
 
 /* ── 创作场景入口卡片 ───────────────────── */
 /* --- Scene Hero: 主推荐卡片 --- */
+/* --- Scene Grid: 左右分栏布局 --- */
+.os-scene-grid {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+@media (max-width: 768px) {
+  .os-scene-grid { grid-template-columns: 1fr; }
+}
+
 .os-scene-hero {
   display: flex;
   flex-direction: column;
@@ -748,21 +759,53 @@ body {
   box-shadow: 0 16px 48px rgba(109,94,246,0.12);
   border-color: rgba(109,94,246,0.20);
 }
+
+/* 预览图片容器 */
 .os-scene-hero-preview {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 24px;
+  right: 24px;
   width: 140px;
   height: 140px;
   border-radius: 18px;
-  object-fit: cover;
+  overflow: hidden;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   opacity: 0.85;
   transition: opacity 0.3s ease;
+  z-index: 1;
+}
+.os-scene-hero-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .os-scene-hero:hover .os-scene-hero-preview {
   opacity: 1;
 }
+
+/* 内容区域 — 左下区域，避开右上预览图 */
+.os-scene-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+/* 图片遮罩 — 预览图底部渐变，增强文字可读性 */
+.os-scene-hero-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(248,246,255,0.8), transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+
 .os-scene-hero-icon {
   width: 48px;
   height: 48px;
@@ -813,6 +856,14 @@ body {
   background: #5B4FE0;
   box-shadow: 0 8px 24px rgba(109,94,246,0.30);
   transform: translateY(-1px);
+}
+
+/* --- Scene Quick Grid: 2×2 网格 --- */
+.os-scene-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: stretch;
 }
 
 /* --- Scene Quick: 轻量入口卡片 --- */
@@ -1326,7 +1377,7 @@ body {
 .os-studio {
   width: 100%;
   max-width: 1180px;
-  height: 420px;
+  min-height: 420px;
   display: grid;
   grid-template-columns: 65% 35%;
   gap: 24px;
