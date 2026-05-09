@@ -438,18 +438,21 @@ export default function HomePage() {
             <div className="os-studio-input">
               {/* AI 创作描述框 */}
               <div className="os-studio-input-area">
-                {/* 顶部 AI 引导文字 — 有输入时收起 */}
-                <span className={`os-studio-ai-hint${inputText ? ' os-studio-ai-hint-hidden' : ''}`}>AI 正在等待你的创意…</span>
+                {/* 顶部 AI 引导文字 — 有输入时完全移除，杜绝重叠 */}
+                {!inputText && <span className="os-studio-ai-hint">AI 正在等待你的创意…</span>}
                 {/* 输入区域：placeholder + textarea 叠加 */}
                 <div className="os-studio-textarea-wrap">
-                  <div
-                    className={`os-studio-placeholder ${placeholderVisible && !inputText ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
-                    onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
-                  >
-                    <p className="os-studio-placeholder-example">
-                      {placeholderTexts[placeholderIndex]}
-                    </p>
-                  </div>
+                  {/* placeholder 仅在无输入时渲染，彻底避免文字重叠 */}
+                  {!inputText && (
+                    <div
+                      className={`os-studio-placeholder ${placeholderVisible ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
+                      onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
+                    >
+                      <p className="os-studio-placeholder-example">
+                        {placeholderTexts[placeholderIndex]}
+                      </p>
+                    </div>
+                  )}
                   <textarea
                     value={inputText}
                     onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}

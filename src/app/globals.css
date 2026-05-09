@@ -1459,13 +1459,6 @@ body {
   display: block;
   flex-shrink: 0;
   letter-spacing: 0.01em;
-  transition: opacity 0.15s ease, height 0.15s ease, margin 0.15s ease;
-  overflow: hidden;
-}
-.os-studio-ai-hint-hidden {
-  opacity: 0;
-  height: 0;
-  margin-bottom: 0;
 }
 /* placeholder 示例文本 — 轮播动画，叠在 textarea 上方 */
 .os-studio-placeholder {
