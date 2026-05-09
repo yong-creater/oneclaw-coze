@@ -10,7 +10,7 @@ import {
   Heart, ArrowLeftRight, Bell, Users, Headphones, Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-import { SiteLogo } from '@/components/common/SiteLogo';
+import { SiteLogo } from '@/components/site/common/SiteLogo';
 
 // 会员套餐配置
 const PLANS = [

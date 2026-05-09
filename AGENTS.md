@@ -346,7 +346,17 @@ const response = await fetch('https://4sapi.com/v1/images/generations', {
 │   │       ├── members/    # 会员API
 │   │       ├── ads/        # 广告API
 │   │       └── admin/      # 后台管理API
-│   ├── components/ui/      # Shadcn UI 组件库
+│   ├── components/
+│   │   ├── ui/             # Shadcn UI 组件库
+│   │   ├── site/           # 前台网站组件
+│   │   │   ├── pages/      # 前台页面组件 (HomePage, CreateWorkbench 等)
+│   │   │   ├── tools/      # 前台工具组件 (NovelCreator, ProductPageGenerator 等)
+│   │   │   └── common/     # 前台公共组件 (SiteShell, SiteSidebar, SiteFooter 等)
+│   │   └── admin/          # 后台管理组件 (ModelSelector 等)
+│   ├── styles/             # 模块化 CSS
+│   │   ├── common/         # 公共组件样式 (rail.css, footer.css)
+│   │   ├── shared/         # 共享样式 (cards, buttons, inputs 等)
+│   │   └── pages/          # 页面样式 (home, workspace 等)
 │   ├── data/               # 静态数据（旧）
 │   ├── storage/database/   # Supabase数据库
 │   └── lib/                # 工具库
@@ -520,21 +530,21 @@ interface Tool {
 
 | 组件 | 用途 | 导入路径 |
 |------|------|----------|
-| `SiteLogo` | 站点 Logo（含 fallback） | `@/components/common/SiteLogo` |
-| `AnimatedLobster` | 龙虾动画（品牌标识） | `@/components/common/AnimatedLobster` |
-| `BackButton` | 返回上一页按钮 | `@/components/common/BackButton` |
-| `BackToHome` | 返回首页按钮（面包屑） | `@/components/common/BackToHome` |
-| `WechatPromo` | 公众号推广 | `@/components/common/WechatPromo` |
-| `LobsterLoading` | 龙虾加载动画 | `@/components/common/LobsterLoading` |
-| `LobsterSkeleton` | 龙虾骨架屏 | `@/components/common/LobsterSkeleton` |
-| `LoginButton` | 登录按钮 | `@/components/common/LoginButton` |
-| `LoginModal` | 登录弹窗 | `@/components/common/LoginModal` |
-| `UtilityHeader` | 工具页头部导航 | `@/components/common/UtilityHeader` |
-| `ToolLogo` | 工具 Logo 组件 | `@/components/common/ToolLogo` |
-| `SponsorBadge` | 赞助商徽章 | `@/components/common/SponsorBadge` |
-| `AdBanner` | 广告横幅组件 | `@/components/common/AdBanner` |
-| `CaseStudyFloatCard` | 案例浮窗卡片 | `@/components/common/CaseStudyFloatCard` |
-| `TutorialLikeButton` | 教程点赞按钮 | `@/components/common/TutorialLikeButton` |
+| `SiteLogo` | 站点 Logo（含 fallback） | `@/components/site/common/SiteLogo` |
+| `AnimatedLobster` | 龙虾动画（品牌标识） | `@/components/site/common/AnimatedLobster` |
+| `BackButton` | 返回上一页按钮 | `@/components/site/common/BackButton` |
+| `BackToHome` | 返回首页按钮（面包屑） | `@/components/site/common/BackToHome` |
+| `WechatPromo` | 公众号推广 | `@/components/site/common/WechatPromo` |
+| `LobsterLoading` | 龙虾加载动画 | `@/components/site/common/LobsterLoading` |
+| `LobsterSkeleton` | 龙虾骨架屏 | `@/components/site/common/LobsterSkeleton` |
+| `LoginButton` | 登录按钮 | `@/components/site/common/LoginButton` |
+| `LoginModal` | 登录弹窗 | `@/components/site/common/LoginModal` |
+| `UtilityHeader` | 工具页头部导航 | `@/components/site/common/UtilityHeader` |
+| `ToolLogo` | 工具 Logo 组件 | `@/components/site/common/ToolLogo` |
+| `SponsorBadge` | 赞助商徽章 | `@/components/site/common/SponsorBadge` |
+| `AdBanner` | 广告横幅组件 | `@/components/site/common/AdBanner` |
+| `CaseStudyFloatCard` | 案例浮窗卡片 | `@/components/site/common/CaseStudyFloatCard` |
+| `TutorialLikeButton` | 教程点赞按钮 | `@/components/site/common/TutorialLikeButton` |
 
 ## 1.6 Logo 使用规范
 
@@ -542,7 +552,7 @@ interface Tool {
 
 ```tsx
 // ✅ 正确：使用 SiteLogo 组件（含 fallback）
-import { SiteLogo } from '@/components/common/SiteLogo';
+import { SiteLogo } from '@/components/site/common/SiteLogo';
 <SiteLogo size={32} showText />
 
 // ❌ 错误：直接使用 img 标签（无 fallback）
@@ -888,16 +898,16 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 
 // 前台专用组件
-import AnimatedLobster from '@/components/common/AnimatedLobster';
-import BackButton from '@/components/common/BackButton';
-import BackToHome from '@/components/common/BackToHome';
-import WechatPromo from '@/components/common/WechatPromo';
-import LobsterLoading from '@/components/common/LobsterLoading';
-import LoginButton from '@/components/common/LoginButton';
-import UtilityHeader from '@/components/common/UtilityHeader';
-import { ToolLogo } from '@/components/common/ToolLogo';
-import { SponsorBadge, isSponsorActive } from '@/components/common/SponsorBadge';
-import { HomeBanner, HomeInlineAd, ToolDetailAd } from '@/components/common/AdBanner';
+import AnimatedLobster from '@/components/site/common/AnimatedLobster';
+import BackButton from '@/components/site/common/BackButton';
+import BackToHome from '@/components/site/common/BackToHome';
+import WechatPromo from '@/components/site/common/WechatPromo';
+import LobsterLoading from '@/components/site/common/LobsterLoading';
+import LoginButton from '@/components/site/common/LoginButton';
+import UtilityHeader from '@/components/site/common/UtilityHeader';
+import { ToolLogo } from '@/components/site/common/ToolLogo';
+import { SponsorBadge, isSponsorActive } from '@/components/site/common/SponsorBadge';
+import { HomeBanner, HomeInlineAd, ToolDetailAd } from '@/components/site/common/AdBanner';
 
 // Lucide 图标
 import { IconName } from 'lucide-react';

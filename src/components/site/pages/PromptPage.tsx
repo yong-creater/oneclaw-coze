@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMenu } from '@/components/common/MenuProvider';
+import { useMenu } from '@/components/site/common/MenuProvider';
 import {
   Search, Wand2, Eye, Copy, Check, ChevronDown, ChevronUp,
   ShoppingBag, BookOpen, Camera, Image, LayoutTemplate, Video,

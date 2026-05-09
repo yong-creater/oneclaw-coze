@@ -19,7 +19,7 @@ import {
   Wand2,
   X,
 } from 'lucide-react';
-import { useMenu } from '@/components/common/MenuProvider';
+import { useMenu } from '@/components/site/common/MenuProvider';
 
 // ========== 类型定义 ==========
 interface Generation {

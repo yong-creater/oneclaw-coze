@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
-import { Providers } from '@/components/common/Providers';
+import { Providers } from '@/components/site/common/Providers';
 import './globals.css';
 
 // 提取域名，移除协议前缀

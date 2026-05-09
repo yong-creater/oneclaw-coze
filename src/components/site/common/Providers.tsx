@@ -1,7 +1,7 @@
 'use client';
 
 import { UserProvider, useUser } from '@/contexts/UserContext';
-import LoginModal from '@/components/common/LoginModal';
+import LoginModal from '@/components/site/common/LoginModal';
 import { SWRConfig } from 'swr';
 
 function UserAuthWrapper({ children }: { children: React.ReactNode }) {

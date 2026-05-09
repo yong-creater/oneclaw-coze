@@ -8,8 +8,8 @@ import {
   Eye, Palette, X, ChevronDown, Settings2
 } from 'lucide-react';
 
-import { UtilityCard, FormField, PrimaryButton, ActionButton } from '../common/UtilityComponents';
-import LoginButton from '../common/LoginButton';
+import { UtilityCard, FormField, PrimaryButton, ActionButton } from '@/components/site/common/UtilityComponents';
+import LoginButton from '@/components/site/common/LoginButton';
 import { ResumePreview, templates, ResumeData, ResumeTemplateType } from './ResumeTemplates';
 import { exportResumeToPDF, parseResumeFromAI, generateSampleResumeData } from '@/lib/resumeExport';
 import { useToolModelConfig } from '@/hooks/useToolModelConfig';

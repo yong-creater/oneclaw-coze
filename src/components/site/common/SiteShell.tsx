@@ -1,8 +1,8 @@
 'use client';
 
-import { MenuProvider } from '@/components/common/MenuProvider';
-import SiteSidebar from '@/components/common/SiteSidebar';
-import SiteFooter from '@/components/common/SiteFooter';
+import { MenuProvider } from '@/components/site/common/MenuProvider';
+import SiteSidebar from '@/components/site/common/SiteSidebar';
+import SiteFooter from '@/components/site/common/SiteFooter';
 
 function PageSwitcher({ children }: { children: React.ReactNode }) {
   const marginLeft = 88;

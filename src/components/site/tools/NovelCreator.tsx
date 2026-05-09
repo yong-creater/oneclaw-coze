@@ -9,7 +9,7 @@ import {
   Settings2, Star, BookOpen, MessageSquare, RefreshCw,
   Crown
 } from 'lucide-react';
-import LoginButton from '@/components/common/LoginButton';
+import LoginButton from '@/components/site/common/LoginButton';
 
 import JSZip from 'jszip';
 import {

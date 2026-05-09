@@ -1,5 +1,5 @@
-import BackToHome from '@/components/common/BackToHome';
-import WechatPromo from '@/components/common/WechatPromo';
+import BackToHome from '@/components/site/common/BackToHome';
+import WechatPromo from '@/components/site/common/WechatPromo';
 
 export const metadata = {
   title: '关于 OneClaw - AI 商业内容生成平台',

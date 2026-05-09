@@ -11,8 +11,8 @@ import {
   Loader2, QrCode, Mail, Lock, User, 
   Smartphone, AlertCircle, CheckCircle
 } from 'lucide-react';
-import LoginButton from '@/components/common/LoginButton';
-import BackToHome from '@/components/common/BackToHome';
+import LoginButton from '@/components/site/common/LoginButton';
+import BackToHome from '@/components/site/common/BackToHome';
 
 export default function LoginPage() {
   const router = useRouter();

@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import CreateWorkbench from '@/components/pages/CreateWorkbench';
+import CreateWorkbench from '@/components/site/pages/CreateWorkbench';
 
 function CreateLoading() {
   return (

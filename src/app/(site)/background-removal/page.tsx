@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import WechatPromo from '@/components/common/WechatPromo';
+import WechatPromo from '@/components/site/common/WechatPromo';
 
 import { 
   Scissors, Upload, Loader2, Download, 

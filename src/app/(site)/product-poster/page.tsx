@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import WechatPromo from '@/components/common/WechatPromo';
+import WechatPromo from '@/components/site/common/WechatPromo';
 
 import { Sparkles, Download, Loader2, ChevronDown, ChevronUp, Image, ShoppingBag, Check } from 'lucide-react';
 import { toast } from 'sonner';

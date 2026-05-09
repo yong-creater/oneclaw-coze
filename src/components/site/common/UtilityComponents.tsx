@@ -9,6 +9,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+/* ========== UtilityCard ========== */
+
 interface UtilityCardProps {
   title: string;
   icon?: ReactNode;
@@ -26,7 +28,6 @@ export function UtilityCard({
 }: UtilityCardProps) {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-      {/* 标题栏 */}
       <div className={`px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r ${gradient} bg-opacity-5`}>
         <div className="flex items-center gap-2">
           {icon && (
@@ -39,14 +40,14 @@ export function UtilityCard({
           </h2>
         </div>
       </div>
-      
-      {/* 内容区 */}
       <div className={className}>
         {children}
       </div>
     </div>
   );
 }
+
+/* ========== UtilitySection ========== */
 
 interface UtilitySectionProps {
   children: ReactNode;
@@ -60,6 +61,8 @@ export function UtilitySection({ children, className = '' }: UtilitySectionProps
     </div>
   );
 }
+
+/* ========== FormField ========== */
 
 interface FormFieldProps {
   label: string;
@@ -82,6 +85,8 @@ export function FormField({ label, required, hint, children }: FormFieldProps) {
     </div>
   );
 }
+
+/* ========== PrimaryButton ========== */
 
 interface PrimaryButtonProps {
   children: ReactNode;
@@ -124,6 +129,8 @@ export function PrimaryButton({
   );
 }
 
+/* ========== ActionButton ========== */
+
 interface ActionButtonProps {
   children: ReactNode;
   onClick?: () => void;
@@ -160,7 +167,8 @@ export function ActionButton({
   );
 }
 
-// 统一的下拉框样式
+/* ========== SelectField ========== */
+
 interface SelectOption {
   value: string;
   label: string;
@@ -201,7 +209,8 @@ export function SelectField({ label, value, onChange, options, placeholder, icon
   );
 }
 
-// 统一的文本框样式
+/* ========== TextareaField ========== */
+
 interface TextareaFieldProps {
   value: string;
   onChange: (value: string) => void;
@@ -224,75 +233,5 @@ export function TextareaField({ value, onChange, placeholder, rows = 6, classNam
           : 'border-2 border-transparent focus:outline-none focus:border-[#7B61FF]'
       }`}
     />
-  );
-}
-
-// 统一的模式切换按钮组
-interface ModeToggleProps {
-  modes: { value: string; label: string }[];
-  value: string;
-  onChange: (value: string) => void;
-  color?: string;
-}
-
-export function ModeToggle({ modes, value, onChange, color = 'orange' }: ModeToggleProps) {
-  return (
-    <div className="flex gap-2">
-      {modes.map(mode => (
-        <button
-          key={mode.value}
-          onClick={() => onChange(mode.value)}
-          className={`os-btn-capsule ${value === mode.value ? 'os-btn-capsule-active' : ''}`}
-        >
-          {mode.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// 统一的标签样式
-interface TagProps {
-  children: ReactNode;
-  color?: 'orange' | 'blue' | 'green' | 'purple' | 'gray';
-}
-
-export function Tag({ children, color = 'purple' }: TagProps) {
-  const colorClasses = {
-    orange: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    blue: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    green: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    purple: 'bg-[#7B61FF]/10 text-[#7B61FF] dark:bg-[#7B61FF]/20 dark:text-[#A78BFA]',
-    gray: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-  };
-  const bgClass = colorClasses[color];
-
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${bgClass}`}>
-      {children}
-    </span>
-  );
-}
-
-// 统一的成功/错误提示
-interface AlertProps {
-  type: 'success' | 'error' | 'warning' | 'info';
-  children: ReactNode;
-  icon?: ReactNode;
-}
-
-export function Alert({ type, children, icon }: AlertProps) {
-  const typeClasses = {
-    success: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800',
-    error: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
-    warning: 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-    info: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800',
-  };
-
-  return (
-    <div className={`flex items-center gap-2 p-4 rounded-xl border ${typeClasses[type]}`}>
-      {icon && <span className="[&>svg]:w-5 [&>svg]:h-5 flex-shrink-0">{icon}</span>}
-      <span className="text-sm">{children}</span>
-    </div>
   );
 }

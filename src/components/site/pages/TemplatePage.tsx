@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ArrowRight, Star, Tag } from 'lucide-react';
-import { useMenu } from '@/components/common/MenuProvider';
+import { useMenu } from '@/components/site/common/MenuProvider';
 
 // ========== 类型定义 ==========
 interface Template {

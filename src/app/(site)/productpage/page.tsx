@@ -1,6 +1,6 @@
 'use client';
 
-import ProductPageGenerator from '@/components/tools/ProductPageGenerator';
+import ProductPageGenerator from '@/components/site/tools/ProductPageGenerator';
 
 export default function ProductPage() {
   return (

@@ -8,8 +8,8 @@ import {
   Shield, Palette, FileText, Zap, RefreshCw, X
 } from 'lucide-react';
 
-import { PrimaryButton, ActionButton } from '../common/UtilityComponents';
-import LoginButton from '@/components/common/LoginButton';
+import { PrimaryButton, ActionButton } from '@/components/site/common/UtilityComponents';
+import LoginButton from '@/components/site/common/LoginButton';
 import { useToolModelConfig } from '@/hooks/useToolModelConfig';
 import {
   Select,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import WechatPromo from '@/components/common/WechatPromo';
+import WechatPromo from '@/components/site/common/WechatPromo';
 
 import { Sparkles, Copy, Check, Image, Download, Loader2, RefreshCw, ThumbsUp, Star } from 'lucide-react';
 import { toast } from 'sonner';

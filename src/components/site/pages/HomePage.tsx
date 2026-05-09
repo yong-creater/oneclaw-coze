@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMenu } from '@/components/common/MenuProvider';
+import { useMenu } from '@/components/site/common/MenuProvider';
 import {
   ArrowRight,
   Wand2,

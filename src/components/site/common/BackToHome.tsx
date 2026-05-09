@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { SiteLogo } from '@/components/common/SiteLogo';
+import { SiteLogo } from '@/components/site/common/SiteLogo';
 
 interface BackToHomeProps {
   label?: string;
