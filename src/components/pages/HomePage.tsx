@@ -186,7 +186,7 @@ export default function HomePage() {
                   className="os-studio-cta"
                 >
                   <Wand2 className="w-5 h-5" />
-                  {isLoading ? '生成中...' : '开始生成'}
+                  <span>{isLoading ? '生成中...' : '开始生成'}</span>
                 </button>
               </div>
             </div>
