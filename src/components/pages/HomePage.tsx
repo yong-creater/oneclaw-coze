@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
-  Upload,
   ArrowRight,
   Wand2,
   TrendingUp,
@@ -17,13 +16,15 @@ import {
   Scissors,
   PenTool,
   FileText,
+  ImagePlus,
+  Upload,
 } from 'lucide-react';
 
 // ===== AI 工具匹配规则 =====
 interface ToolMatch {
   slug: string;
   name: string;
-  type: string;       // gen type id for /create
+  type: string;
   icon: React.ReactNode;
   keywords: string[];
   description: string;
@@ -91,12 +92,24 @@ const recommendChips = [
   { label: '带货口播脚本', example: '零食带货口播脚本，3分钟节奏紧凑' },
 ];
 
+// ===== Placeholder 轮播文案 =====
+const placeholderTexts = [
+  '帮我生成小红书护肤封面',
+  '生成高级感耳机商品图',
+  '做一张夏日饮品海报',
+  '生成高级感 AI 写真',
+  '帮我做电商白底主图',
+  '生成穿搭种草封面图',
+  '做一张数码产品详情页',
+  '生成零食种草笔记图',
+];
+
 // ===== 右侧预览图 =====
 const showcaseExamples = [
   { title: '商品主图', category: '商品图', image: '/case-lipstick-main.png' },
   { title: '小红书封面', category: '小红书', image: '/demo-card-lifestyle.jpg' },
   { title: '详情页片段', category: '详情页', image: '/case-ecommerce.jpg' },
-  { title: '视频封面', category: '视频脚本', image: '/demo-scene.jpg' },
+  { title: 'AI写真', category: 'AI写真', image: '/demo-scene.jpg' },
 ];
 
 // ===== 热门案例 =====
@@ -137,7 +150,7 @@ function matchTool(input: string): ToolMatch | null {
     let score = 0;
     for (const kw of tool.keywords) {
       if (lower.includes(kw)) {
-        score += kw.length; // longer keyword match = higher score
+        score += kw.length;
       }
     }
     if (score > bestScore) {
@@ -155,6 +168,7 @@ export default function HomePage() {
   const [inputText, setInputText] = useState('');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
   // AI 需求识别状态
   const [phase, setPhase] = useState<IdentifyPhase>('idle');
@@ -162,11 +176,31 @@ export default function HomePage() {
   const [identifyStep, setIdentifyStep] = useState(0);
   const [isJumping, setIsJumping] = useState(false);
 
+  // Placeholder 轮播
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [placeholderVisible, setPlaceholderVisible] = useState(true);
+
+  // 拖拽状态
+  const [isDragOver, setIsDragOver] = useState(false);
+
   // 识别文案轮播
   const identifySteps = [
     '正在理解你的需求...',
     '正在匹配最佳工具...',
   ];
+
+  // Placeholder 自动轮播
+  useEffect(() => {
+    if (inputText.trim()) return; // 有内容时停止轮播
+    const interval = setInterval(() => {
+      setPlaceholderVisible(false);
+      setTimeout(() => {
+        setPlaceholderIndex((prev) => (prev + 1) % placeholderTexts.length);
+        setPlaceholderVisible(true);
+      }, 300);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [inputText]);
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -176,18 +210,40 @@ export default function HomePage() {
     }
   }, [pendingInput, consumePendingInput]);
 
+  // ===== 拖拽上传 =====
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => setUploadedImage(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
   // ===== AI 需求识别 + 跳转 =====
   const handleStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
 
-    // 开始 AI 识别流程
     setPhase('identifying');
     setIdentifyStep(0);
 
-    // Step 1: "正在理解你的需求..."
     setTimeout(() => setIdentifyStep(1), 800);
 
-    // Step 2: 匹配结果
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool) {
@@ -198,7 +254,6 @@ export default function HomePage() {
       }
     }, 1800);
 
-    // Step 3: 自动跳转（匹配成功时）
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool) {
@@ -214,7 +269,6 @@ export default function HomePage() {
     }, 3000);
   }, [inputText, uploadedImage, phase, router]);
 
-  // 匹配成功但用户不想等，手动跳转
   const handleJumpNow = useCallback(() => {
     if (!matchedTool) return;
     setIsJumping(true);
@@ -227,12 +281,10 @@ export default function HomePage() {
     router.push(`/create?${params.toString()}`);
   }, [matchedTool, inputText, uploadedImage, router]);
 
-  // 无匹配时，跳转到工具库
   const handleBrowseTools = useCallback(() => {
     router.push('/tools');
   }, [router]);
 
-  // 无匹配时，仍然跳转到工作台（自动识别模式）
   const handleAutoCreate = useCallback(() => {
     setIsJumping(true);
     const params = new URLSearchParams({
@@ -243,7 +295,6 @@ export default function HomePage() {
     router.push(`/create?${params.toString()}`);
   }, [inputText, uploadedImage, router]);
 
-  // 重置识别状态
   const resetIdentify = useCallback(() => {
     setPhase('idle');
     setMatchedTool(null);
@@ -251,7 +302,6 @@ export default function HomePage() {
     setIsJumping(false);
   }, []);
 
-  // Ctrl+Enter 快捷键
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault();
@@ -259,13 +309,11 @@ export default function HomePage() {
     }
   }, [handleStartCreate]);
 
-  // Chip 点击
   const handleChipClick = useCallback((example: string) => {
     setInputText(example);
     resetIdentify();
   }, [resetIdentify]);
 
-  // 上传图片
   const handleUploadClick = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
@@ -273,14 +321,12 @@ export default function HomePage() {
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // 预览用 data URL，跳转时传给工作台
     const reader = new FileReader();
     reader.onload = () => setUploadedImage(reader.result as string);
     reader.readAsDataURL(file);
     e.target.value = '';
   }, []);
 
-  // 删除上传图片
   const removeUploadedImage = useCallback(() => {
     setUploadedImage(null);
   }, []);
@@ -289,40 +335,47 @@ export default function HomePage() {
     <div className="os-page">
       {/* ==================== Hero 创作区 ==================== */}
       <div className="os-hero">
+        {/* 噪点纹理 */}
+        <div className="os-hero-noise" />
+
         {/* 内容层 */}
         <div className="relative z-10 flex flex-col items-center w-full max-w-[1100px] mx-auto px-4">
 
           {/* 主标题 */}
           <h1 className="os-hero-title">
-            上传图片，一键生成<span className="gradient-text">高质量内容</span>
+            上传图片，一键生成<br className="hidden sm:inline" /><span className="gradient-text">高质量内容</span>
           </h1>
 
           {/* 副标题 */}
           <p className="os-hero-subtitle">
-            商品图、详情页、小红书、视频脚本，<br className="sm:hidden" />简单输入需求就能生成。
+            商品图、小红书、详情页、AI写真、<br className="sm:hidden" />封面海报等内容，<br className="hidden sm:inline" />简单输入需求即可生成。
           </p>
 
-          {/* ===== AI 输入工作台 — 左右分栏 ===== */}
+          {/* ===== AI 创作输入区 — 左右分栏 ===== */}
           <div className="os-studio mt-10">
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
-              <h3 className="os-studio-label">你想生成什么？</h3>
+              {/* AI 创作描述框 */}
               <div className="os-studio-input-area">
-                <div className="relative">
-                  {!inputText && !uploadedImage && (
-                    <div className="os-studio-placeholder" onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}>
-                      <p className="os-studio-placeholder-example">例如：上传一张耳机图，生成电商主图、卖点图和场景图</p>
-                    </div>
-                  )}
-                  <textarea
-                    value={inputText}
-                    onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
-                    onKeyDown={handleKeyDown}
-                    placeholder=""
-                    className="os-studio-textarea"
-                    rows={6}
-                  />
-                </div>
+                {/* 轮播 placeholder */}
+                {!inputText && !uploadedImage && (
+                  <div
+                    className={`os-studio-placeholder ${placeholderVisible ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
+                    onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
+                  >
+                    <p className="os-studio-placeholder-example">
+                      {placeholderTexts[placeholderIndex]}
+                    </p>
+                  </div>
+                )}
+                <textarea
+                  value={inputText}
+                  onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
+                  onKeyDown={handleKeyDown}
+                  placeholder=""
+                  className="os-studio-textarea"
+                  rows={8}
+                />
 
                 {/* 上传图片预览 */}
                 {uploadedImage && (
@@ -335,20 +388,42 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* 底部工具栏 */}
-              <div className="os-studio-toolbar">
-                <div className="flex items-center gap-2">
+              {/* 拖拽上传区域 */}
+              {!uploadedImage && (
+                <div
+                  ref={dropZoneRef}
+                  className={`os-dropzone ${isDragOver ? 'os-dropzone-active' : ''}`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  onClick={handleUploadClick}
+                >
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     className="hidden"
                     onChange={handleFileChange}
                   />
-                  <button className="os-studio-tool-btn" onClick={handleUploadClick}>
-                    <Upload className="w-4 h-4" />
-                    <span>上传图片</span>
-                  </button>
+                  <div className="os-dropzone-icon">
+                    <ImagePlus className="w-6 h-6" />
+                  </div>
+                  <div className="os-dropzone-text">
+                    <span className="os-dropzone-title">上传参考图片（可选）</span>
+                    <span className="os-dropzone-formats">支持 JPG / PNG / WEBP</span>
+                  </div>
+                </div>
+              )}
+
+              {/* 底部工具栏 */}
+              <div className="os-studio-toolbar">
+                <div className="flex items-center gap-2">
+                  {uploadedImage && (
+                    <button className="os-studio-tool-btn" onClick={handleUploadClick}>
+                      <Upload className="w-4 h-4" />
+                      <span>换一张</span>
+                    </button>
+                  )}
                   <span className="text-[12px] text-slate-300 ml-1">{inputText.length} / 500</span>
                 </div>
                 <button
@@ -356,15 +431,15 @@ export default function HomePage() {
                   disabled={!inputText.trim() || phase !== 'idle'}
                   className="os-studio-cta"
                 >
-                  <Sparkles className="w-5 h-5" />
-                  <span>{phase === 'idle' ? '开始创作' : '识别中...'}</span>
+                  <Wand2 className="w-5 h-5" />
+                  <span>{phase === 'idle' ? '立即开始创作' : '识别中...'}</span>
+                  <ArrowRight className="w-4 h-4 ml-1" />
                 </button>
               </div>
 
               {/* ===== AI 识别状态浮层 ===== */}
               {phase !== 'idle' && (
                 <div className="os-identify-overlay">
-                  {/* 识别中 */}
                   {phase === 'identifying' && (
                     <div className="os-identify-loading">
                       <div className="os-identify-spinner" />
@@ -372,7 +447,6 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  {/* 匹配成功 */}
                   {phase === 'matched' && matchedTool && (
                     <div className="os-identify-matched">
                       <div className="os-identify-matched-icon">
@@ -392,7 +466,6 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  {/* 无匹配 */}
                   {phase === 'no-match' && (
                     <div className="os-identify-nomatch">
                       <div className="os-identify-nomatch-info">
@@ -425,27 +498,27 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* 右侧：AI 生成效果预览 (35%) */}
+            {/* 右侧：AI 创作灵感 (35%) */}
             <div className="os-studio-showcase">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm">✨</span>
-                <span className="text-[13px] font-medium text-slate-500">生成效果预览</span>
+              <div className="os-showcase-header">
+                <div className="os-showcase-title-row">
+                  <span className="os-showcase-emoji">✨</span>
+                  <span className="os-showcase-title">AI 创作灵感</span>
+                </div>
+                <span className="os-showcase-subtitle">看看别人正在生成什么</span>
               </div>
-              <p className="text-[11px] text-slate-400 mb-4">根据你的需求自动生成对应内容</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="os-showcase-grid">
                 {showcaseExamples.map((example, idx) => (
                   <div key={idx} className="os-showcase-item group">
                     <img
                       src={example.image}
                       alt={example.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      className="os-showcase-img"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                      <span className="inline-block text-[11px] font-medium text-white/90 bg-white/20 backdrop-blur-sm px-2 py-0.5 rounded-full">
-                        {example.category}
-                      </span>
+                    <div className="os-showcase-overlay" />
+                    <div className="os-showcase-label-wrap">
+                      <span className="os-showcase-category">{example.category}</span>
                     </div>
                   </div>
                 ))}
