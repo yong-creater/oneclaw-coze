@@ -14,6 +14,10 @@ import {
   ChevronDown,
   Check,
   AlertCircle,
+  ZoomIn,
+  Copy,
+  FolderOpen,
+  RefreshCw,
 } from 'lucide-react';
 
 // ===== 生成类型 =====
@@ -46,7 +50,15 @@ const GEN_STEPS = [
 interface GenResult {
   url: string;
   label: string;
-  type: string;
+  type: string; // 'image' | 'text'
+  textContent?: string;
+}
+
+// ===== Toast 通知 =====
+interface Toast {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
 }
 
 // ===== 生成状态 =====
@@ -70,9 +82,24 @@ export default function CreateWorkbench() {
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // 结果交互状态
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const stepTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const toastIdRef = useRef(0);
+
+  // ===== Toast 工具 =====
+  const showToast = useCallback((message: string, type: Toast['type'] = 'success') => {
+    const id = ++toastIdRef.current;
+    setToasts(prev => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 3000);
+  }, []);
 
   // 如果从首页带入了 prompt，自动聚焦输入框
   useEffect(() => {
@@ -115,7 +142,6 @@ export default function CreateWorkbench() {
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim() && uploadedImages.length === 0) return;
 
-    // 清理旧计时器
     stepTimerRef.current.forEach(t => clearTimeout(t));
     stepTimerRef.current = [];
 
@@ -123,8 +149,9 @@ export default function CreateWorkbench() {
     setCurrentStep(0);
     setResults([]);
     setErrorMsg('');
+    setActiveIndex(0);
+    setShowLightbox(false);
 
-    // 按顺序轮播步骤，每步间隔 800ms
     GEN_STEPS.forEach((_, i) => {
       const timer = setTimeout(() => {
         setCurrentStep(i + 1);
@@ -133,18 +160,18 @@ export default function CreateWorkbench() {
     });
 
     // TODO: 替换为真实 API 调用
-    // 当前使用模拟生成
     try {
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         const totalTimer = setTimeout(resolve, 5500);
         stepTimerRef.current.push(totalTimer);
       });
 
-      // 模拟生成结果
       const currentType = GEN_TYPES.find(t => t.id === genType) || GEN_TYPES[0];
       const mockResults: GenResult[] = [
-        { url: '/case-lipstick-main.png', label: '生成结果 1', type: currentType.label },
-        { url: '/demo-card-lifestyle.jpg', label: '生成结果 2', type: currentType.label },
+        { url: '/case-lipstick-main.png', label: '生成结果 1', type: 'image' },
+        { url: '/demo-card-lifestyle.jpg', label: '生成结果 2', type: 'image' },
+        { url: '/demo-scene.jpg', label: '生成结果 3', type: 'image' },
+        { url: '/case-ecommerce.jpg', label: '生成结果 4', type: 'image' },
       ];
 
       setResults(mockResults);
@@ -166,13 +193,62 @@ export default function CreateWorkbench() {
       link.download = filename;
       link.click();
       window.URL.revokeObjectURL(blobUrl);
+      showToast('下载成功');
     } catch {
-      window.open(url, '_blank');
+      showToast('下载失败，请重试', 'error');
     }
-  }, []);
+  }, [showToast]);
+
+  // ===== 下载全部 =====
+  const handleDownloadAll = useCallback(() => {
+    const imageResults = results.filter(r => r.type === 'image');
+    imageResults.forEach((r, i) => {
+      setTimeout(() => handleDownload(r.url, `${r.label}.png`), i * 400);
+    });
+  }, [results, handleDownload]);
+
+  // ===== 保存到作品 =====
+  const handleSaveToProjects = useCallback(() => {
+    // TODO: 调用保存 API
+    showToast('已保存到作品');
+  }, [showToast]);
+
+  // ===== 复制文本 =====
+  const handleCopyText = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      showToast('已复制到剪贴板');
+    } catch {
+      showToast('复制失败', 'error');
+    }
+  }, [showToast]);
+
+  // ===== 设为封面 =====
+  const handleSetAsCover = useCallback((index: number) => {
+    setActiveIndex(index);
+    showToast('已设为封面');
+  }, [showToast]);
+
+  // ===== 继续优化 =====
+  const handleContinueOptimize = useCallback(() => {
+    const activeResult = results[activeIndex];
+    if (activeResult) {
+      setPrompt(prev => `${prev}\n\n请在此基础上继续优化：${activeResult.label}`);
+      setStatus('idle');
+      setResults([]);
+      textareaRef.current?.focus();
+    }
+  }, [results, activeIndex]);
 
   // ===== 当前生成类型 =====
   const currentGenType = GEN_TYPES.find(t => t.id === genType) || GEN_TYPES[0];
+
+  // ===== 当前选中结果 =====
+  const activeResult = results[activeIndex] || null;
+  const hasImageResults = results.some(r => r.type === 'image');
+  const hasTextResults = results.some(r => r.type === 'text');
+  const imageResults = results.filter(r => r.type === 'image');
+  const textResults = results.filter(r => r.type === 'text');
 
   // ===== 计算进度百分比 =====
   const progressPercent = status === 'generating'
@@ -182,6 +258,20 @@ export default function CreateWorkbench() {
   return (
     <div className="os-page">
       <div className="page-container">
+
+        {/* ===== Toast 通知 ===== */}
+        {toasts.length > 0 && (
+          <div className="os-wb-toast-container">
+            {toasts.map(t => (
+              <div key={t.id} className={`os-wb-toast os-wb-toast-${t.type}`}>
+                {t.type === 'success' && <Check className="w-4 h-4 text-emerald-500" />}
+                {t.type === 'error' && <AlertCircle className="w-4 h-4 text-red-400" />}
+                {t.type === 'info' && <Sparkles className="w-4 h-4 text-blue-400" />}
+                <span>{t.message}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* ===== 顶部：生成类型标识 ===== */}
         <div className="flex items-center justify-between mb-6">
@@ -288,7 +378,6 @@ export default function CreateWorkbench() {
               {results.length > 0 && status !== 'generating' && (
                 <button
                   onClick={handleGenerate}
-                  disabled={false}
                   className="os-wb-secondary-btn"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -304,7 +393,6 @@ export default function CreateWorkbench() {
             {/* ===== 生成中状态 ===== */}
             {status === 'generating' && (
               <div className="os-wb-generating">
-                {/* 标题 + 当前步骤 */}
                 <div className="os-wb-gen-header">
                   <div className="os-wb-gen-icon-wrap">
                     <Loader2 className="w-5 h-5 text-white animate-spin" />
@@ -314,26 +402,16 @@ export default function CreateWorkbench() {
                     <p className="text-sm text-slate-500 mt-0.5">{GEN_STEPS[currentStep - 1]?.text || GEN_STEPS[0].text}</p>
                   </div>
                 </div>
-
-                {/* 进度条 */}
                 <div className="os-wb-progress-track">
-                  <div
-                    className="os-wb-progress-fill"
-                    style={{ width: `${progressPercent}%` }}
-                  />
+                  <div className="os-wb-progress-fill" style={{ width: `${progressPercent}%` }} />
                 </div>
-
-                {/* 步骤列表 */}
                 <div className="os-wb-step-list">
                   {GEN_STEPS.map((step, idx) => {
                     const stepNum = idx + 1;
                     const isCompleted = currentStep > stepNum;
                     const isCurrent = currentStep === stepNum;
                     return (
-                      <div
-                        key={step.id}
-                        className={`os-wb-step-item ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}
-                      >
+                      <div key={step.id} className={`os-wb-step-item ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
                         <div className={`os-wb-step-dot ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
                           {isCompleted ? <Check className="w-3 h-3" /> : stepNum}
                         </div>
@@ -344,8 +422,6 @@ export default function CreateWorkbench() {
                     );
                   })}
                 </div>
-
-                {/* Skeleton 占位 */}
                 <div className="os-wb-skeleton-area">
                   <div className="os-wb-skeleton" style={{ height: '200px' }} />
                   <div className="grid grid-cols-2 gap-3">
@@ -364,10 +440,7 @@ export default function CreateWorkbench() {
                 </div>
                 <h3 className="text-base font-semibold text-slate-800 mt-4">生成失败</h3>
                 <p className="text-sm text-slate-500 mt-1.5">{errorMsg || '生成失败，请稍后重试'}</p>
-                <button
-                  onClick={handleGenerate}
-                  className="os-wb-retry-btn mt-6"
-                >
+                <button onClick={handleGenerate} className="os-wb-retry-btn mt-6">
                   <RotateCcw className="w-4 h-4" />
                   <span>重新生成</span>
                 </button>
@@ -387,93 +460,236 @@ export default function CreateWorkbench() {
               </div>
             )}
 
-            {/* ===== 生成结果 ===== */}
-            {status === 'success' && results.length > 0 && (
+            {/* ===== 图片结果展示 ===== */}
+            {status === 'success' && hasImageResults && (
+              <div className="os-wb-results">
+                {/* 标题栏 */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-slate-700">生成结果</span>
+                    <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{currentGenType.label}</span>
+                    <span className="text-[11px] text-slate-400">{imageResults.length} 张</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={handleSaveToProjects} className="os-wb-action-btn">
+                      <FolderOpen className="w-3.5 h-3.5" />
+                      <span>保存到作品</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 大图预览区 */}
+                {activeResult && activeResult.type === 'image' && (
+                  <div className="os-wb-preview-main group">
+                    <img
+                      src={activeResult.url}
+                      alt={activeResult.label}
+                      className="os-wb-preview-img"
+                    />
+                    {/* 图片操作浮层 */}
+                    <div className="os-wb-preview-overlay">
+                      <div className="os-wb-preview-actions">
+                        <button
+                          onClick={() => setShowLightbox(true)}
+                          className="os-wb-preview-action"
+                          title="放大查看"
+                        >
+                          <ZoomIn className="w-4 h-4" />
+                          <span>放大</span>
+                        </button>
+                        <button
+                          onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)}
+                          className="os-wb-preview-action"
+                          title="下载图片"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>下载</span>
+                        </button>
+                        <button
+                          onClick={() => handleSetAsCover(activeIndex)}
+                          className="os-wb-preview-action"
+                          title="设为封面"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span>设为封面</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 多图缩略图行 */}
+                {imageResults.length > 1 && (
+                  <div className="os-wb-thumb-row">
+                    {imageResults.map((result, idx) => {
+                      const globalIdx = results.indexOf(result);
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveIndex(globalIdx)}
+                          className={`os-wb-thumb-item ${activeIndex === globalIdx ? 'active' : ''}`}
+                        >
+                          <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
+                          {activeIndex === globalIdx && (
+                            <div className="os-wb-thumb-active-indicator">
+                              <Check className="w-3 h-3 text-white" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* 底部操作栏 */}
+                <div className="os-wb-bottom-bar">
+                  <div className="flex items-center gap-2">
+                    <button onClick={handleContinueOptimize} className="os-wb-action-btn">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>继续优化</span>
+                    </button>
+                    <button onClick={handleGenerate} className="os-wb-action-btn">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>重新生成</span>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={handleDownloadAll} className="os-wb-action-btn">
+                      <Download className="w-3.5 h-3.5" />
+                      <span>下载全部</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ===== 文本结果展示 ===== */}
+            {status === 'success' && hasTextResults && (
               <div className="os-wb-results">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-slate-700">生成结果</span>
                     <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{currentGenType.label}</span>
                   </div>
-                  <button
-                    onClick={() => {/* TODO: 保存到作品 */}}
-                    className="os-wb-action-btn"
-                  >
-                    <Save className="w-3.5 h-3.5" />
+                  <button onClick={handleSaveToProjects} className="os-wb-action-btn">
+                    <FolderOpen className="w-3.5 h-3.5" />
                     <span>保存到作品</span>
                   </button>
                 </div>
 
-                {/* 主图 */}
-                {results[0] && (
-                  <div className="os-wb-result-main group">
-                    <img src={results[0].url} alt={results[0].label} className="w-full h-full object-cover" />
-                    <div className="os-wb-result-overlay">
+                {textResults.map((result, idx) => (
+                  <div key={idx} className="os-wb-text-card">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-slate-400 font-medium">{result.label}</span>
                       <button
-                        onClick={() => handleDownload(results[0].url, `${results[0].label}.png`)}
-                        className="os-wb-result-action"
+                        onClick={() => handleCopyText(result.textContent || '')}
+                        className="os-wb-action-btn text-xs"
                       >
-                        <Download className="w-4 h-4" />
-                        <span>下载</span>
+                        <Copy className="w-3 h-3" />
+                        <span>复制</span>
                       </button>
+                    </div>
+                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+                      {result.textContent || '暂无文本内容'}
+                    </p>
+                  </div>
+                ))}
+
+                {/* 如果同时有图片结果，展示图片缩略图 */}
+                {hasImageResults && (
+                  <div className="mt-4">
+                    <div className="text-xs text-slate-400 font-medium mb-2">图片结果</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {imageResults.map((result, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => { setActiveIndex(idx); setShowLightbox(true); }}
+                          className="os-wb-thumb-item-sm"
+                        >
+                          <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
 
-                {/* 多图结果 */}
-                {results.length > 1 && (
-                  <div className="grid grid-cols-2 gap-3 mt-3">
-                    {results.slice(1).map((result, idx) => (
-                      <div key={idx} className="os-wb-result-thumb group">
-                        <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
-                        <div className="os-wb-result-overlay">
-                          <button
-                            onClick={() => handleDownload(result.url, `${result.label}.png`)}
-                            className="os-wb-result-action"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            <span>下载</span>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                <div className="os-wb-bottom-bar">
+                  <div className="flex items-center gap-2">
+                    <button onClick={handleContinueOptimize} className="os-wb-action-btn">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>继续优化</span>
+                    </button>
+                    <button onClick={handleGenerate} className="os-wb-action-btn">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>重新生成</span>
+                    </button>
                   </div>
-                )}
-
-                {/* 底部操作栏 */}
-                <div className="flex items-center gap-3 mt-5 pt-4 border-t border-slate-100">
-                  <button
-                    onClick={() => {/* TODO: 继续优化 */}}
-                    className="os-wb-action-btn"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>继续优化</span>
-                  </button>
-                  <button
-                    onClick={() => handleGenerate()}
-                    disabled={false}
-                    className="os-wb-action-btn"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>重新生成</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      results.forEach((r, i) => {
-                        setTimeout(() => handleDownload(r.url, `${r.label}.png`), i * 300);
-                      });
-                    }}
-                    className="os-wb-action-btn ml-auto"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>下载全部</span>
-                  </button>
                 </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Lightbox 放大查看 ===== */}
+      {showLightbox && activeResult && activeResult.type === 'image' && (
+        <div className="os-wb-lightbox" onClick={() => setShowLightbox(false)}>
+          <div className="os-wb-lightbox-content" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setShowLightbox(false)}
+              className="os-wb-lightbox-close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <img
+              src={activeResult.url}
+              alt={activeResult.label}
+              className="os-wb-lightbox-img"
+            />
+            <div className="os-wb-lightbox-actions">
+              <button
+                onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)}
+                className="os-wb-lightbox-btn"
+              >
+                <Download className="w-4 h-4" />
+                <span>下载 PNG</span>
+              </button>
+              <button
+                onClick={() => { handleSetAsCover(activeIndex); setShowLightbox(false); }}
+                className="os-wb-lightbox-btn"
+              >
+                <Check className="w-4 h-4" />
+                <span>设为封面</span>
+              </button>
+              <button
+                onClick={() => { handleSaveToProjects(); setShowLightbox(false); }}
+                className="os-wb-lightbox-btn"
+              >
+                <FolderOpen className="w-4 h-4" />
+                <span>保存到作品</span>
+              </button>
+            </div>
+            {/* 缩略图切换 */}
+            {imageResults.length > 1 && (
+              <div className="os-wb-lightbox-thumbs">
+                {imageResults.map((r, idx) => {
+                  const globalIdx = results.indexOf(r);
+                  return (
+                    <button
+                      key={idx}
+                      onClick={(e) => { e.stopPropagation(); setActiveIndex(globalIdx); }}
+                      className={`os-wb-lightbox-thumb ${activeIndex === globalIdx ? 'active' : ''}`}
+                    >
+                      <img src={r.url} alt={r.label} className="w-full h-full object-cover" />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
