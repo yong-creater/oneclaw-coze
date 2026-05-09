@@ -188,15 +188,25 @@ export default function CreateWorkbench() {
 
     const images = uploads.map(u => u.url);
 
-    // Step animation
-    const steps: GenStep[] = ['understanding', 'analyzing', 'matching', 'generating', 'optimizing'];
-    for (const s of steps) {
-      setStep(s);
-      await new Promise(r => setTimeout(r, s === 'generating' ? 1500 : 800));
-    }
+    // Run step animation and real API in parallel
+    const stepAnim = async () => {
+      const steps: GenStep[] = ['understanding', 'analyzing', 'matching'];
+      for (const s of steps) {
+        setStep(s);
+        await new Promise(r => setTimeout(r, 700));
+      }
+    };
 
     try {
-      const res = await callGenerateAPI(toolSlug, inputText, images, selectedStyle, selectedSubtype, count, ratio);
+      // Start both step animation and API call simultaneously
+      const [, res] = await Promise.all([
+        stepAnim(),
+        callGenerateAPI(toolSlug, inputText, images, selectedStyle, selectedSubtype, count, ratio),
+      ]);
+      setStep('generating');
+      await new Promise(r => setTimeout(r, 500));
+      setStep('optimizing');
+      await new Promise(r => setTimeout(r, 600));
       setResults(res);
       setStep('done');
     } catch (err) {
