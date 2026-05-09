@@ -1640,388 +1640,314 @@ body {
 }
 
 /* ===== AI 需求识别状态浮层 ===== */
-.os-identify-overlay {
-  position: absolute;
+/* ===== 全页 AI 分析浮层 ===== */
+.os-ai-overlay {
+  position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24px);
-  border-radius: 20px;
-  z-index: 20;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 32px;
-  animation: fadeIn 0.3s ease;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(20px);
+  animation: osAiFadeIn 0.5s ease;
+}
+
+@keyframes osAiFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 中心卡片 */
+.os-ai-card {
+  position: relative;
+  width: 560px;
+  max-width: 90vw;
+  padding: 48px 40px;
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 20px 80px rgba(120,120,255,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
   overflow: hidden;
+  animation: osAiCardIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* 背景光效 */
-.os-identify-glow {
+@keyframes osAiCardIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* 卡片背景光效 */
+.os-ai-card-glow {
   position: absolute;
-  top: -40%;
-  left: -20%;
-  width: 140%;
-  height: 100%;
-  background: radial-gradient(ellipse at center, rgba(120,120,255,0.08), transparent 60%);
+  top: -60%;
+  left: -30%;
+  width: 160%;
+  height: 120%;
+  background: radial-gradient(ellipse at center, rgba(120,120,255,0.06), transparent 55%);
   pointer-events: none;
-  animation: identifyGlowPulse 3s ease-in-out infinite;
+  animation: osAiGlowPulse 4s ease-in-out infinite;
 }
 
-@keyframes identifyGlowPulse {
+@keyframes osAiGlowPulse {
   0%, 100% { opacity: 0.6; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.05); }
+  50% { opacity: 1; transform: scale(1.03); }
 }
 
 /* ===== 分析阶段 ===== */
-.os-identify-analyzing {
+.os-ai-analyzing {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 28px;
   width: 100%;
   position: relative;
   z-index: 1;
+  animation: osAiMsgFade 0.4s ease;
 }
 
-.os-identify-analyzing-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+@keyframes osAiMsgFade {
+  from { opacity: 0; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+/* 图片扫描区 */
+.os-ai-scan-area {
   position: relative;
-}
-
-.os-identify-pulse-ring {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8f7cff, #7aa8ff);
-  position: relative;
-  flex-shrink: 0;
-}
-.os-identify-pulse-ring::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid rgba(120,120,255,0.25);
-  animation: identifyPulseRing 1.5s ease-in-out infinite;
-}
-.os-identify-pulse-ring::after {
-  content: '';
-  position: absolute;
-  inset: -12px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(120,120,255,0.12);
-  animation: identifyPulseRing 1.5s ease-in-out infinite 0.3s;
-}
-
-@keyframes identifyPulseRing {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.4; }
-}
-
-.os-identify-analyzing-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(15, 23, 42, 0.82);
-  letter-spacing: -0.01em;
-}
-
-/* 4步分析进度 */
-.os-identify-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  max-width: 280px;
-}
-
-.os-identify-step {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  transition: all 0.4s ease;
-}
-
-.os-identify-step-icon {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.4s ease;
-}
-
-.os-identify-step-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(15, 23, 42, 0.15);
-  display: block;
-}
-
-/* Pending state */
-.os-identify-step-pending {
-  color: rgba(15, 23, 42, 0.25);
-}
-.os-identify-step-pending .os-identify-step-icon {
-  background: rgba(15, 23, 42, 0.04);
-}
-
-/* Active state */
-.os-identify-step-active {
-  color: rgba(15, 23, 42, 0.72);
-}
-.os-identify-step-active .os-identify-step-icon {
-  background: rgba(120,120,255,0.1);
-}
-.os-identify-step-active .os-identify-step-dot {
-  background: #8f7cff;
-  animation: identifyStepDot 0.8s ease-in-out infinite;
-}
-
-@keyframes identifyStepDot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.4); opacity: 0.6; }
-}
-
-/* Done state */
-.os-identify-step-done {
-  color: rgba(15, 23, 42, 0.55);
-}
-.os-identify-step-done .os-identify-step-icon {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10B981;
-}
-
-.os-identify-step-text {
-  font-weight: 500;
-}
-
-/* 进度条 */
-.os-identify-progress-bar {
-  width: 100%;
-  max-width: 280px;
-  height: 3px;
-  background: rgba(15, 23, 42, 0.06);
-  border-radius: 999px;
+  width: 200px;
+  height: 150px;
+  border-radius: 20px;
   overflow: hidden;
+  box-shadow: 0 8px 32px rgba(120,120,255,0.08);
 }
 
-.os-identify-progress-fill {
+.os-ai-scan-img {
+  width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, #8f7cff, #7aa8ff);
-  border-radius: 999px;
-  transition: width 0.5s ease;
+  object-fit: cover;
+  animation: osAiImgZoom 6s ease-in-out infinite;
 }
 
-/* Shimmer 扫光 */
-.os-identify-shimmer {
+@keyframes osAiImgZoom {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* 扫描线 */
+.os-ai-scan-line {
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(120,120,255,0.04), transparent);
-  animation: identifyShimmer 2s ease-in-out infinite;
-  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: osAiScanLine 2.5s infinite;
 }
 
-@keyframes identifyShimmer {
+@keyframes osAiScanLine {
   0% { left: -100%; }
   100% { left: 100%; }
 }
 
-/* ===== 匹配结果 ===== */
-.os-identify-result {
+/* Shimmer */
+.os-ai-scan-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(120,120,255,0.06) 50%, transparent 60%);
+  animation: osAiShimmer 3s infinite;
+}
+
+@keyframes osAiShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* 动态文案 */
+.os-ai-msg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+}
+
+.os-ai-msg {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(15, 23, 42, 0.72);
+  letter-spacing: -0.01em;
+  animation: osAiMsgFade 0.4s ease;
+}
+
+/* 呼吸脉冲点 */
+.os-ai-pulse-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.os-ai-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8f7cff;
+  animation: osAiPulseDot 1.4s ease-in-out infinite;
+}
+
+@keyframes osAiPulseDot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ===== 匹配成功 ===== */
+.os-ai-matched {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-  width: 100%;
+  gap: 16px;
   position: relative;
   z-index: 1;
-  animation: identifyResultIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: osAiMatchedIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes identifyResultIn {
-  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+@keyframes osAiMatchedIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.os-identify-result-icon {
-  width: 48px;
-  height: 48px;
+.os-ai-matched-check {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: linear-gradient(135deg, #8f7cff, #7aa8ff);
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 8px 28px rgba(120,120,255,0.25);
-  animation: identifyIconPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  animation: osAiCheckPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
 }
 
-@keyframes identifyIconPop {
+@keyframes osAiCheckPop {
   from { transform: scale(0); }
   to { transform: scale(1); }
 }
 
-.os-identify-result-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.os-identify-result-label {
-  font-size: 12px;
+.os-ai-matched-label {
+  font-size: 13px;
   color: rgba(15, 23, 42, 0.4);
   font-weight: 500;
 }
 
-.os-identify-result-tool {
-  font-size: 18px;
+.os-ai-matched-tool {
+  font-size: 32px;
   font-weight: 700;
   color: #8f7cff;
   display: flex;
   align-items: center;
+  letter-spacing: -0.02em;
 }
 
-/* 推荐信息 */
-.os-identify-recommend {
+.os-ai-matched-recs {
   display: flex;
-  gap: 20px;
-  padding: 12px 20px;
+  gap: 24px;
+  padding: 14px 24px;
   background: rgba(120,120,255,0.04);
-  border-radius: 14px;
-  border: 1px solid rgba(120,120,255,0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(120,120,255,0.06);
 }
 
-.os-identify-rec-item {
+.os-ai-matched-rec {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
 }
 
-.os-identify-rec-label {
+.os-ai-matched-rec-label {
   font-size: 11px;
-  color: rgba(15, 23, 42, 0.35);
+  color: rgba(15, 23, 42, 0.3);
   font-weight: 500;
 }
 
-.os-identify-rec-value {
-  font-size: 13px;
+.os-ai-matched-rec-value {
+  font-size: 14px;
   color: rgba(15, 23, 42, 0.72);
   font-weight: 600;
 }
 
-/* 立即前往按钮 */
-.os-identify-goto-btn {
-  display: flex;
-  align-items: center;
-  padding: 12px 32px;
-  background: linear-gradient(135deg, #8f7cff, #7aa8ff);
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 8px 28px rgba(120,120,255,0.2);
+.os-ai-matched-redirect {
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.3);
+  animation: osAiRedirectPulse 2s ease-in-out infinite;
 }
-.os-identify-goto-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(120,120,255,0.32);
-}
-.os-identify-goto-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
+
+@keyframes osAiRedirectPulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
 }
 
 /* ===== 无匹配 ===== */
-.os-identify-nomatch {
+.os-ai-nomatch {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  width: 100%;
   position: relative;
   z-index: 1;
-  animation: identifyResultIn 0.4s ease;
+  animation: osAiMatchedIn 0.4s ease;
 }
 
-.os-identify-nomatch-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.os-identify-nomatch-icon-wrap {
-  width: 36px;
-  height: 36px;
+.os-ai-nomatch-icon {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: rgba(120,120,255,0.08);
+  background: rgba(120,120,255,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #8f7cff;
-  flex-shrink: 0;
 }
 
-.os-identify-nomatch-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.os-identify-nomatch-title {
-  font-size: 15px;
+.os-ai-nomatch-title {
+  font-size: 16px;
   font-weight: 600;
   color: rgba(15, 23, 42, 0.78);
 }
 
-.os-identify-nomatch-desc {
+.os-ai-nomatch-desc {
   font-size: 12px;
-  color: rgba(15, 23, 42, 0.45);
+  color: rgba(15, 23, 42, 0.4);
 }
 
-.os-identify-nomatch-tools {
+.os-ai-nomatch-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
 }
 
-.os-identify-nomatch-tag {
+.os-ai-nomatch-tag {
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
   background: rgba(120,120,255,0.05);
-  border: 1px solid rgba(120,120,255,0.1);
+  border: 1px solid rgba(120,120,255,0.08);
   border-radius: 999px;
   font-size: 12px;
   font-weight: 500;
-  color: rgba(120,120,255,0.8);
-  transition: all 0.2s ease;
-}
-.os-identify-nomatch-tag:hover {
-  background: rgba(120,120,255,0.08);
-  border-color: rgba(120,120,255,0.18);
+  color: rgba(120,120,255,0.75);
 }
 
-.os-identify-nomatch-actions {
+.os-ai-nomatch-actions {
   display: flex;
   gap: 10px;
   margin-top: 4px;
 }
 
-.os-identify-auto-btn {
+.os-ai-nomatch-primary {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -2034,17 +1960,17 @@ body {
   border: none;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 6px 20px rgba(120,120,255,0.2);
+  box-shadow: 0 6px 20px rgba(120,120,255,0.18);
 }
-.os-identify-auto-btn:hover {
+.os-ai-nomatch-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(120,120,255,0.3);
+  box-shadow: 0 8px 28px rgba(120,120,255,0.28);
 }
 
-.os-identify-browse-btn {
+.os-ai-nomatch-secondary {
   padding: 10px 22px;
   background: rgba(255,255,255,0.8);
-  border: 1.5px solid rgba(120,120,255,0.15);
+  border: 1.5px solid rgba(120,120,255,0.12);
   border-radius: 12px;
   font-size: 13px;
   font-weight: 500;
@@ -2052,22 +1978,21 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.os-identify-browse-btn:hover {
-  border-color: rgba(120,120,255,0.3);
-  background: rgba(120,120,255,0.04);
+.os-ai-nomatch-secondary:hover {
+  border-color: rgba(120,120,255,0.25);
 }
 
-.os-identify-cancel-btn {
+.os-ai-nomatch-ghost {
   padding: 10px 16px;
   background: transparent;
   border: none;
   font-size: 13px;
-  color: rgba(15, 23, 42, 0.35);
+  color: rgba(15, 23, 42, 0.3);
   cursor: pointer;
   transition: color 0.2s ease;
 }
-.os-identify-cancel-btn:hover {
-  color: rgba(15, 23, 42, 0.6);
+.os-ai-nomatch-ghost:hover {
+  color: rgba(15, 23, 42, 0.55);
 }
 
 /* ===== 上传图片预览 — 多图横向排列 ===== */

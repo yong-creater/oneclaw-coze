@@ -208,31 +208,31 @@ export default function HomePage() {
   const [showcaseIndex, setShowcaseIndex] = useState(0);
   const [showcaseFading, setShowcaseFading] = useState(false);
 
-  // 识别文案轮播 — 4步，每秒切换
-  const identifySteps = [
-    '正在识别内容类型',
-    '正在分析参考图片',
-    '正在匹配适合风格',
-    '正在推荐最佳创作工具',
+  // 识别文案轮播 — 单行动态文案，每2秒切换
+  const identifyMessages = [
+    '正在理解你的创意需求…',
+    '正在分析参考图片风格…',
+    '正在匹配最佳创作方式…',
+    'OneClaw 正在为你生成专业方案…',
   ];
 
   // 推荐风格映射
   interface StyleRecommendation { style: string; ratio: string; count: string; }
   function getStyleRecommendation(tool: ToolMatch | null, input: string): StyleRecommendation {
-    if (!tool) return { style: '自动匹配', ratio: '3:4', count: '4\u5f20' };
+    if (!tool) return { style: '自动匹配', ratio: '3:4', count: '4张' };
     const lower = input.toLowerCase();
     const map: Record<string, StyleRecommendation> = {
-      'product-generator': { style: '\u79d1\u6280\u611f\u6781\u7b80\u98ce', ratio: '3:4', count: '4\u5f20' },
-      'xiaohongshu-generator': { style: '\u6e05\u65b0\u6c1b\u56f4\u611f', ratio: '4:5', count: '3\u5f20' },
-      'ai-photo': { style: '\u9ad8\u7ea7\u8d28\u611f\u5927\u7247', ratio: '3:4', count: '6\u5f20' },
-      'background-removal': { style: '\u5e72\u51c0\u767d\u5e95', ratio: '1:1', count: '1\u5f20' },
-      'product-page': { style: '\u54c1\u724c\u8c03\u6027\u6392\u7248', ratio: '3:4', count: '1\u4efd' },
-      'novel': { style: '\u6587\u5b66\u521b\u4f5c', ratio: '-', count: '1\u7bc7' },
+      'product-generator': { style: '科技感极简风', ratio: '3:4', count: '4张' },
+      'xiaohongshu-generator': { style: '清新氛围感', ratio: '4:5', count: '3张' },
+      'ai-photo': { style: '高级质感大片', ratio: '3:4', count: '6张' },
+      'background-removal': { style: '干净白底', ratio: '1:1', count: '1张' },
+      'product-page': { style: '品牌调性排版', ratio: '3:4', count: '1份' },
+      'novel': { style: '文学创作', ratio: '-', count: '1篇' },
     };
-    const rec = map[tool.slug] || { style: '\u81ea\u52a8\u5339\u914d', ratio: '3:4', count: '4\u5f20' };
-    if (lower.includes('\u6df1\u8272') || lower.includes('\u6697\u9ed1') || lower.includes('\u79d1\u6280')) rec.style = '\u6df1\u8272\u79d1\u6280\u98ce';
-    if (lower.includes('\u6e05\u65b0') || lower.includes('\u590f\u65e5') || lower.includes('\u6587\u827a')) rec.style = '\u6e05\u65b0\u6587\u827a\u98ce';
-    if (lower.includes('\u6d77\u62a5') || lower.includes('\u5c01\u9762')) { rec.ratio = '3:4'; rec.count = '3\u5f20'; }
+    const rec = map[tool.slug] || { style: '自动匹配', ratio: '3:4', count: '4张' };
+    if (lower.includes('深色') || lower.includes('暗黑') || lower.includes('科技')) rec.style = '深色科技\u98ce';
+    if (lower.includes('清新') || lower.includes('夏日') || lower.includes('文艺')) rec.style = '清新文艺\u98ce';
+    if (lower.includes('海报') || lower.includes('封面')) { rec.ratio = '3:4'; rec.count = '3张'; }
     return rec;
   }
 
@@ -308,19 +308,19 @@ export default function HomePage() {
     }
   }, [addImageFiles]);
 
-  // ===== AI 需求识别 + 跳转 =====
+  // ===== AI 需求识别 + 自动跳转 =====
   const handleStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
 
     setPhase('identifying');
     setIdentifyStep(0);
 
-    // 4步识别，每步1秒
-    setTimeout(() => setIdentifyStep(1), 1000);
-    setTimeout(() => setIdentifyStep(2), 2000);
-    setTimeout(() => setIdentifyStep(3), 3000);
+    // 4条文案，每2秒切换
+    setTimeout(() => setIdentifyStep(1), 2000);
+    setTimeout(() => setIdentifyStep(2), 4000);
+    setTimeout(() => setIdentifyStep(3), 6000);
 
-    // 4秒后出结果
+    // 8秒后出结果
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool) {
@@ -329,9 +329,9 @@ export default function HomePage() {
       } else {
         setPhase('no-match');
       }
-    }, 4000);
+    }, 8000);
 
-    // 结果展示1.5秒后自动跳转
+    // 结果展示1秒后自动跳转
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool) {
@@ -344,7 +344,7 @@ export default function HomePage() {
         if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
         router.push(`/create?${params.toString()}`);
       }
-    }, 5500);
+    }, 9000);
   }, [inputText, uploadedImages, phase, router]);
 
   const handleJumpNow = useCallback(() => {
@@ -553,120 +553,7 @@ export default function HomePage() {
                 </button>
               </div>
 
-              {/* ===== AI 识别状态浮层 ===== */}
-              {phase !== 'idle' && (
-                <div className="os-identify-overlay">
-                  {/* 背景光效 */}
-                  <div className="os-identify-glow" />
 
-                  {phase === 'identifying' && (
-                    <div className="os-identify-analyzing">
-                      {/* 顶部标题 */}
-                      <div className="os-identify-analyzing-header">
-                        <div className="os-identify-pulse-ring" />
-                        <span className="os-identify-analyzing-title">AI 正在理解你的创作需求\u2026</span>
-                      </div>
-
-                      {/* 4步分析进度 */}
-                      <div className="os-identify-steps">
-                        {identifySteps.map((step, idx) => (
-                          <div
-                            key={idx}
-                            className={`os-identify-step ${idx < identifyStep ? 'os-identify-step-done' : idx === identifyStep ? 'os-identify-step-active' : 'os-identify-step-pending'}`}
-                          >
-                            <span className="os-identify-step-icon">
-                              {idx < identifyStep ? <Check className="w-3 h-3" /> : <span className="os-identify-step-dot" />}
-                            </span>
-                            <span className="os-identify-step-text">{step}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* 进度条 */}
-                      <div className="os-identify-progress-bar">
-                        <div className="os-identify-progress-fill" style={{ width: `${((identifyStep + 1) / identifySteps.length) * 100}%` }} />
-                      </div>
-
-                      {/* Shimmer 扫光 */}
-                      <div className="os-identify-shimmer" />
-                    </div>
-                  )}
-
-                  {phase === 'matched' && matchedTool && (
-                    <div className="os-identify-result">
-                      {/* 匹配成功标识 */}
-                      <div className="os-identify-result-icon">
-                        <Check className="w-5 h-5 text-white" />
-                      </div>
-
-                      {/* 匹配信息 */}
-                      <div className="os-identify-result-info">
-                        <span className="os-identify-result-label">\u5df2\u4e3a\u4f60\u5339\u914d</span>
-                        <span className="os-identify-result-tool">
-                          {matchedTool.icon}
-                          <span className="ml-1.5">{matchedTool.name}</span>
-                        </span>
-                      </div>
-
-                      {/* 推荐信息 */}
-                      <div className="os-identify-recommend">
-                        <div className="os-identify-rec-item">
-                          <span className="os-identify-rec-label">\u63a8\u8350\u98ce\u683c</span>
-                          <span className="os-identify-rec-value">{getStyleRecommendation(matchedTool, inputText).style}</span>
-                        </div>
-                        <div className="os-identify-rec-item">
-                          <span className="os-identify-rec-label">\u63a8\u8350\u6bd4\u4f8b</span>
-                          <span className="os-identify-rec-value">{getStyleRecommendation(matchedTool, inputText).ratio}</span>
-                        </div>
-                        <div className="os-identify-rec-item">
-                          <span className="os-identify-rec-label">\u751f\u6210\u6570\u91cf</span>
-                          <span className="os-identify-rec-value">{getStyleRecommendation(matchedTool, inputText).count}</span>
-                        </div>
-                      </div>
-
-                      {/* 立即前往按钮 */}
-                      <button onClick={handleJumpNow} className="os-identify-goto-btn" disabled={isJumping}>
-                        {isJumping ? '\u8df3\u8f6c\u4e2d...' : '\u7acb\u5373\u524d\u5f80'}
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </button>
-                    </div>
-                  )}
-
-                  {phase === 'no-match' && (
-                    <div className="os-identify-nomatch">
-                      <div className="os-identify-nomatch-header">
-                        <div className="os-identify-nomatch-icon-wrap">
-                          <Sparkles className="w-4 h-4" />
-                        </div>
-                        <div className="os-identify-nomatch-info">
-                          <span className="os-identify-nomatch-title">\u6682\u672a\u5339\u914d\u5230\u4e13\u5c5e\u5de5\u5177</span>
-                          <span className="os-identify-nomatch-desc">OneClaw \u5f53\u524d\u66f4\u64c5\u957f\uff1a</span>
-                        </div>
-                      </div>
-                      <div className="os-identify-nomatch-tools">
-                        {TOOL_MATCHES.map(tool => (
-                          <span key={tool.slug} className="os-identify-nomatch-tag">
-                            {tool.icon}
-                            <span className="ml-1">{tool.name.replace('AI', '').replace('\u751f\u6210\u5668', '').replace('\u5de5\u574a', '')}</span>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="os-identify-nomatch-actions">
-                        <button onClick={handleAutoCreate} className="os-identify-auto-btn">
-                          <Sparkles className="w-3.5 h-3.5" />
-                          <span>\u81ea\u52a8\u8bc6\u522b\u521b\u4f5c</span>
-                        </button>
-                        <button onClick={handleBrowseTools} className="os-identify-browse-btn">
-                          \u6d4f\u89c8\u5de5\u5177\u5e93
-                        </button>
-                        <button onClick={resetIdentify} className="os-identify-cancel-btn">
-                          \u8fd4\u56de\u4fee\u6539
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* 右侧：AI 创作灵感 (35%) */}
@@ -784,6 +671,103 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ===== 全页 AI 分析浮层 ===== */}
+      {phase !== 'idle' && (
+        <div className="os-ai-overlay">
+          <div className="os-ai-card">
+            {/* 背景光效 */}
+            <div className="os-ai-card-glow" />
+
+            {phase === 'identifying' && (
+              <div className="os-ai-analyzing" key={`msg-${identifyStep}`}>
+                {/* 上传图片扫描区域 */}
+                {uploadedImages.length > 0 && (
+                  <div className="os-ai-scan-area">
+                    <img src={uploadedImages[0]} alt="参考图" className="os-ai-scan-img" />
+                    <div className="os-ai-scan-line" />
+                    <div className="os-ai-scan-shimmer" />
+                  </div>
+                )}
+
+                {/* 动态文案 — 一次一句 */}
+                <div className="os-ai-msg-wrap">
+                  <span className="os-ai-msg">{identifyMessages[identifyStep]}</span>
+                </div>
+
+                {/* 呼吸脉冲点 */}
+                <div className="os-ai-pulse-dots">
+                  <span className="os-ai-pulse-dot" style={{ animationDelay: '0s' }} />
+                  <span className="os-ai-pulse-dot" style={{ animationDelay: '0.4s' }} />
+                  <span className="os-ai-pulse-dot" style={{ animationDelay: '0.8s' }} />
+                </div>
+              </div>
+            )}
+
+            {phase === 'matched' && matchedTool && (
+              <div className="os-ai-matched">
+                {/* 成功标识 */}
+                <div className="os-ai-matched-check">
+                  <Check className="w-6 h-6 text-white" />
+                </div>
+
+                {/* 标题 */}
+                <span className="os-ai-matched-label">OneClaw 已为你匹配最佳创作工具</span>
+
+                {/* 大号工具名 */}
+                <span className="os-ai-matched-tool">
+                  {matchedTool.icon}
+                  <span className="ml-2">{matchedTool.name}</span>
+                </span>
+
+                {/* 推荐信息 */}
+                <div className="os-ai-matched-recs">
+                  <div className="os-ai-matched-rec">
+                    <span className="os-ai-matched-rec-label">推荐风格</span>
+                    <span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).style}</span>
+                  </div>
+                  <div className="os-ai-matched-rec">
+                    <span className="os-ai-matched-rec-label">推荐比例</span>
+                    <span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).ratio}</span>
+                  </div>
+                  <div className="os-ai-matched-rec">
+                    <span className="os-ai-matched-rec-label">生成数量</span>
+                    <span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).count}</span>
+                  </div>
+                </div>
+
+                {/* 自动跳转提示 */}
+                <span className="os-ai-matched-redirect">正在进入创作工作台…</span>
+              </div>
+            )}
+
+            {phase === 'no-match' && (
+              <div className="os-ai-nomatch">
+                <div className="os-ai-nomatch-icon">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <span className="os-ai-nomatch-title">暂未匹配到专属工具</span>
+                <span className="os-ai-nomatch-desc">OneClaw 当前更擅长：</span>
+                <div className="os-ai-nomatch-tags">
+                  {TOOL_MATCHES.map(tool => (
+                    <span key={tool.slug} className="os-ai-nomatch-tag">
+                      {tool.icon}
+                      <span className="ml-1">{tool.name.replace('AI', '').replace('生成器', '').replace('工坊', '')}</span>
+                    </span>
+                  ))}
+                </div>
+                <div className="os-ai-nomatch-actions">
+                  <button onClick={handleAutoCreate} className="os-ai-nomatch-primary">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>自动识别创作</span>
+                  </button>
+                  <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览工具库</button>
+                  <button onClick={resetIdentify} className="os-ai-nomatch-ghost">返回修改</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
