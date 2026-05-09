@@ -1457,7 +1457,7 @@ body {
 }
 .os-studio-placeholder {
   position: absolute;
-  top: 24px;
+  top: 50px;
   left: 24px;
   right: 24px;
   pointer-events: none;
