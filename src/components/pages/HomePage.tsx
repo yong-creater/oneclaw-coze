@@ -140,6 +140,8 @@ const hotResults = [
   },
 ];
 
+const MAX_UPLOAD_IMAGES = 5;
+
 // ===== 工具匹配算法 =====
 function matchTool(input: string): ToolMatch | null {
   const lower = input.toLowerCase();
@@ -166,7 +168,7 @@ export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
   const router = useRouter();
   const [inputText, setInputText] = useState('');
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
@@ -189,9 +191,9 @@ export default function HomePage() {
     '正在匹配最佳工具...',
   ];
 
-  // Placeholder 自动轮播
+  // Placeholder 自动轮播 — 用 CSS opacity 过渡避免布局抖动
   useEffect(() => {
-    if (inputText.trim()) return; // 有内容时停止轮播
+    if (inputText.trim()) return;
     const interval = setInterval(() => {
       setPlaceholderVisible(false);
       setTimeout(() => {
@@ -210,6 +212,23 @@ export default function HomePage() {
     }
   }, [pendingInput, consumePendingInput]);
 
+  // ===== 多图上传辅助 =====
+  const addImageFiles = useCallback((files: FileList | File[]) => {
+    const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
+    const remaining = MAX_UPLOAD_IMAGES - uploadedImages.length;
+    const toProcess = fileArray.slice(0, remaining);
+    toProcess.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setUploadedImages(prev => {
+          if (prev.length >= MAX_UPLOAD_IMAGES) return prev;
+          return [...prev, reader.result as string];
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  }, [uploadedImages.length]);
+
   // ===== 拖拽上传 =====
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -227,13 +246,10 @@ export default function HomePage() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = () => setUploadedImage(reader.result as string);
-      reader.readAsDataURL(file);
+    if (e.dataTransfer.files?.length) {
+      addImageFiles(e.dataTransfer.files);
     }
-  }, []);
+  }, [addImageFiles]);
 
   // ===== AI 需求识别 + 跳转 =====
   const handleStartCreate = useCallback(() => {
@@ -263,11 +279,11 @@ export default function HomePage() {
           type: tool.type,
           toolId: tool.slug,
         });
-        if (uploadedImage) params.set('image', uploadedImage);
+        if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
         router.push(`/create?${params.toString()}`);
       }
     }, 3000);
-  }, [inputText, uploadedImage, phase, router]);
+  }, [inputText, uploadedImages, phase, router]);
 
   const handleJumpNow = useCallback(() => {
     if (!matchedTool) return;
@@ -277,9 +293,9 @@ export default function HomePage() {
       type: matchedTool.type,
       toolId: matchedTool.slug,
     });
-    if (uploadedImage) params.set('image', uploadedImage);
+    if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
     router.push(`/create?${params.toString()}`);
-  }, [matchedTool, inputText, uploadedImage, router]);
+  }, [matchedTool, inputText, uploadedImages, router]);
 
   const handleBrowseTools = useCallback(() => {
     router.push('/tools');
@@ -291,9 +307,9 @@ export default function HomePage() {
       prompt: inputText.trim(),
       type: 'auto',
     });
-    if (uploadedImage) params.set('image', uploadedImage);
+    if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
     router.push(`/create?${params.toString()}`);
-  }, [inputText, uploadedImage, router]);
+  }, [inputText, uploadedImages, router]);
 
   const resetIdentify = useCallback(() => {
     setPhase('idle');
@@ -319,17 +335,17 @@ export default function HomePage() {
   }, []);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setUploadedImage(reader.result as string);
-    reader.readAsDataURL(file);
+    if (e.target.files && e.target.files.length > 0) {
+      addImageFiles(e.target.files);
+    }
     e.target.value = '';
+  }, [addImageFiles]);
+
+  const removeImage = useCallback((index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  const removeUploadedImage = useCallback(() => {
-    setUploadedImage(null);
-  }, []);
+  const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
 
   return (
     <div className="os-page">
@@ -357,39 +373,40 @@ export default function HomePage() {
             <div className="os-studio-input">
               {/* AI 创作描述框 */}
               <div className="os-studio-input-area">
-                {/* 轮播 placeholder */}
-                {!inputText && !uploadedImage && (
-                  <div
-                    className={`os-studio-placeholder ${placeholderVisible ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
-                    onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
-                  >
-                    <p className="os-studio-placeholder-example">
-                      {placeholderTexts[placeholderIndex]}
-                    </p>
-                  </div>
-                )}
+                {/* 轮播 placeholder — 始终占位，避免布局抖动 */}
+                <div
+                  className={`os-studio-placeholder ${placeholderVisible && !inputText ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
+                  onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
+                >
+                  <p className="os-studio-placeholder-example">
+                    {placeholderTexts[placeholderIndex]}
+                  </p>
+                </div>
                 <textarea
                   value={inputText}
                   onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
                   onKeyDown={handleKeyDown}
                   placeholder=""
                   className="os-studio-textarea"
-                  rows={8}
                 />
 
-                {/* 上传图片预览 */}
-                {uploadedImage && (
-                  <div className="os-upload-preview">
-                    <img src={uploadedImage} alt="已上传" className="os-upload-preview-img" />
-                    <button onClick={removeUploadedImage} className="os-upload-preview-remove">
-                      <X />
-                    </button>
+                {/* 上传图片预览 — 多图横向排列 */}
+                {uploadedImages.length > 0 && (
+                  <div className="os-upload-previews">
+                    {uploadedImages.map((img, idx) => (
+                      <div key={idx} className="os-upload-preview-item">
+                        <img src={img} alt={`参考图${idx + 1}`} className="os-upload-preview-img" />
+                        <button onClick={() => removeImage(idx)} className="os-upload-preview-remove">
+                          <X />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
 
-              {/* 拖拽上传区域 */}
-              {!uploadedImage && (
+              {/* 拖拽上传区域 — 有图时仍可继续上传 */}
+              {canUploadMore && (
                 <div
                   ref={dropZoneRef}
                   className={`os-dropzone ${isDragOver ? 'os-dropzone-active' : ''}`}
@@ -402,15 +419,33 @@ export default function HomePage() {
                     ref={fileInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
+                    multiple
                     className="hidden"
                     onChange={handleFileChange}
                   />
                   <div className="os-dropzone-icon">
-                    <ImagePlus className="w-6 h-6" />
+                    <ImagePlus className="w-5 h-5" />
                   </div>
                   <div className="os-dropzone-text">
-                    <span className="os-dropzone-title">上传参考图片（可选）</span>
-                    <span className="os-dropzone-formats">支持 JPG / PNG / WEBP</span>
+                    <span className="os-dropzone-title">
+                      {uploadedImages.length > 0 ? '继续添加参考图' : '上传参考图片（可选）'}
+                    </span>
+                    <span className="os-dropzone-formats">
+                      支持 JPG / PNG / WEBP{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ' · 最多 5 张'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* 已达上限提示 */}
+              {!canUploadMore && (
+                <div className="os-dropzone os-dropzone-full">
+                  <div className="os-dropzone-icon">
+                    <Check className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div className="os-dropzone-text">
+                    <span className="os-dropzone-title">已选 {MAX_UPLOAD_IMAGES} 张参考图</span>
+                    <span className="os-dropzone-formats">点击已有图片的 × 可移除</span>
                   </div>
                 </div>
               )}
@@ -418,12 +453,6 @@ export default function HomePage() {
               {/* 底部工具栏 */}
               <div className="os-studio-toolbar">
                 <div className="flex items-center gap-2">
-                  {uploadedImage && (
-                    <button className="os-studio-tool-btn" onClick={handleUploadClick}>
-                      <Upload className="w-4 h-4" />
-                      <span>换一张</span>
-                    </button>
-                  )}
                   <span className="text-[12px] text-slate-300 ml-1">{inputText.length} / 500</span>
                 </div>
                 <button

@@ -1347,7 +1347,6 @@ body {
   box-shadow: 0 24px 80px rgba(109, 94, 246, 0.07), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
   padding: 32px;
   border: 1px solid rgba(124, 108, 255, 0.06);
-  animation: studioGlow 6s ease-in-out infinite;
 }
 
 /* 左侧输入区 */
@@ -1361,12 +1360,14 @@ body {
   background: rgba(248, 250, 252, 0.6);
   border-radius: 20px;
   padding: 24px;
-  min-height: 260px;
+  height: 260px;
   border: 1.5px solid rgba(226, 232, 240, 0.5);
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  contain: layout style paint;
 }
 .os-studio-input-area:hover {
   border-color: rgba(109, 94, 246, 0.15);
@@ -1377,7 +1378,7 @@ body {
 }
 .os-studio-textarea {
   width: 100%;
-  min-height: 200px;
+  flex: 1;
   padding: 0;
   background: transparent;
   border: none;
@@ -1754,38 +1755,50 @@ body {
   color: rgba(15, 23, 42, 0.65);
 }
 
-/* ===== 上传图片预览 ===== */
-.os-upload-preview {
+/* ===== 上传图片预览 — 多图横向排列 ===== */
+.os-upload-previews {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(226, 232, 240, 0.4);
+}
+.os-upload-preview-item {
   position: relative;
-  margin-top: 8px;
-  display: inline-block;
+  flex-shrink: 0;
 }
 .os-upload-preview-img {
-  width: 80px;
-  height: 80px;
+  width: 64px;
+  height: 64px;
   object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid rgba(124, 108, 255, 0.15);
+  border-radius: 10px;
+  border: 1.5px solid rgba(124, 108, 255, 0.12);
+  transition: border-color 0.2s;
+}
+.os-upload-preview-img:hover {
+  border-color: rgba(124, 108, 255, 0.3);
 }
 .os-upload-preview-remove {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 20px;
-  height: 20px;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.65);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 9px;
   transition: background 0.2s;
+  padding: 0;
 }
 .os-upload-preview-remove:hover {
-  background: rgba(220, 38, 38, 0.8);
+  background: rgba(220, 38, 38, 0.85);
 }
 
 /* ===== Animations ===== */
