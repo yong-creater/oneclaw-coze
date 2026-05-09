@@ -1,6 +1,6 @@
 /* ===== AI Rail 导航栏 ===== */
 .os-rail {
-  width: 72px;
+  width: 80px;
   background: rgba(255,255,255,0.72);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -9,8 +9,8 @@
 }
 
 .os-rail-logo {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 10px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -24,7 +24,7 @@
 }
 
 .os-rail-item {
-  width: 52px;
+  width: 56px;
   height: 52px;
   border-radius: 14px;
   display: flex;
@@ -47,16 +47,20 @@
   background: rgba(120,120,255,0.10);
   color: #6D5EF6;
 }
+
+/* 选中态 — 左侧竖线指示器（栏内侧，紧贴导航栏左边缘） */
 .os-rail-item-active::before {
   content: '';
   position: absolute;
-  left: -10px;
+  left: -12px;
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
   height: 20px;
   border-radius: 0 3px 3px 0;
   background: linear-gradient(180deg, #7C6CFB, #5B5CF6);
+  /* 确保超出 aside 左边缘也能显示 */
+  z-index: 1;
 }
 
 .os-rail-item-text {
@@ -93,4 +97,3 @@
   box-shadow: 0 12px 40px rgba(0,0,0,0.08);
   overflow: hidden;
 }
-
