@@ -500,13 +500,13 @@ body {
   50% { box-shadow: 0 24px 80px rgba(109, 94, 246, 0.10), 0 0 100px rgba(124, 108, 255, 0.06); }
 }
 
-/* Hero section — 透明通道，继承 body 全局渐变 + 顶部径向光晕 */
+/* Hero section — 透明通道，继承全局背景 + 顶部柔和径向光晕 */
 .os-hero {
   position: relative;
   overflow: hidden;
   padding-top: 64px;
   padding-bottom: 48px;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124, 108, 255, 0.12), transparent 70%);
+  background: transparent;
 }
 
 /* 噪点纹理 */
@@ -530,19 +530,19 @@ body {
   z-index: 0;
 }
 .os-hero-glow-1 {
-  width: 600px;
-  height: 400px;
-  top: -10%;
-  left: 15%;
-  background: radial-gradient(ellipse at center, rgba(139, 113, 255, 0.10), transparent 70%);
+  width: 900px;
+  height: 600px;
+  top: -20%;
+  left: 5%;
+  background: radial-gradient(ellipse at center, rgba(139, 113, 255, 0.13), transparent 65%);
   animation: orbDrift 16s ease-in-out infinite;
 }
 .os-hero-glow-2 {
-  width: 500px;
-  height: 350px;
-  bottom: -5%;
-  right: 10%;
-  background: radial-gradient(ellipse at center, rgba(91, 140, 255, 0.08), transparent 70%);
+  width: 700px;
+  height: 500px;
+  bottom: -15%;
+  right: 0%;
+  background: radial-gradient(ellipse at center, rgba(91, 140, 255, 0.09), transparent 65%);
   animation: orbDrift2 20s ease-in-out infinite;
 }
 
@@ -1406,15 +1406,16 @@ body {
 
 .os-studio {
   display: grid;
-  grid-template-columns: 62% 38%;
+  grid-template-columns: 65% 35%;
   gap: 28px;
-  background: rgba(255, 255, 255, 0.78);
+  background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
   border-radius: 28px;
   box-shadow: 0 24px 80px rgba(109, 94, 246, 0.07), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
   padding: 32px;
   border: 1px solid rgba(124, 108, 255, 0.06);
+  animation: studioGlow 6s ease-in-out infinite;
 }
 
 /* 左侧输入区 */
@@ -1436,13 +1437,15 @@ body {
   flex-direction: column;
   overflow: hidden;
   contain: layout style paint;
+  box-shadow: 0 4px 24px rgba(109, 94, 246, 0.04);
 }
 .os-studio-input-area:hover {
-  border-color: rgba(109, 94, 246, 0.15);
+  border-color: rgba(109, 94, 246, 0.2);
+  box-shadow: 0 8px 32px rgba(109, 94, 246, 0.06);
 }
 .os-studio-input-area:focus-within {
-  border-color: rgba(109, 94, 246, 0.35);
-  box-shadow: 0 0 0 4px rgba(109, 94, 246, 0.08), 0 0 40px rgba(124, 108, 255, 0.06);
+  border-color: rgba(109, 94, 246, 0.45);
+  box-shadow: 0 0 0 4px rgba(109, 94, 246, 0.10), 0 0 60px rgba(124, 108, 255, 0.10), 0 12px 40px rgba(109, 94, 246, 0.08);
 }
 .os-studio-textarea {
   width: 100%;
@@ -1488,6 +1491,25 @@ body {
   line-height: 1.75;
 }
 
+/* 输入框内部 AI 引导提示 */
+.os-studio-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 16px;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+.os-studio-input-area:focus-within .os-studio-hints {
+  opacity: 0.25;
+}
+.os-studio-hint-item {
+  font-size: 13px;
+  font-weight: 400;
+  color: #94A3B8;
+  white-space: nowrap;
+}
+
 /* ===== 拖拽上传区域 ===== */
 .os-dropzone {
   display: flex;
@@ -1530,27 +1552,6 @@ body {
   flex-direction: column;
   gap: 2px;
 }
-.os-dropzone-content {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-.os-dropzone-caps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.os-dropzone-cap {
-  font-size: 11px;
-  color: #7B61FF;
-  background: rgba(124, 92, 255, 0.06);
-  padding: 2px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-  font-weight: 500;
-}
 .os-dropzone-title {
   font-size: 14px;
   font-weight: 500;
@@ -1590,7 +1591,7 @@ body {
   background: rgba(109, 94, 246, 0.08);
 }
 
-/* 开始创作 CTA — 60px 高 / 渐变紫色 + 发光效果 */
+/* 开始创作 CTA — 60px 高 / 渐变紫色 + 发光效果 + 渐变流动 */
 .os-studio-cta {
   display: inline-flex;
   align-items: center;
@@ -1602,6 +1603,7 @@ body {
   border: none;
   border-radius: 18px;
   background: linear-gradient(135deg, #8B6CFF 0%, #5B6CF6 50%, #5B8CFF 100%);
+  background-size: 200% 200%;
   color: #fff;
   font-size: 17px;
   font-weight: 700;
@@ -1611,6 +1613,12 @@ body {
   overflow: hidden;
   box-shadow: 0 12px 36px rgba(124, 92, 255, 0.25), 0 0 60px rgba(124, 108, 255, 0.08);
   letter-spacing: 0.02em;
+  animation: ctaGradientFlow 4s ease infinite;
+}
+@keyframes ctaGradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 .os-studio-cta::before {
   content: '';
@@ -1623,7 +1631,7 @@ body {
 }
 .os-studio-cta:hover {
   transform: translateY(-3px);
-  box-shadow: 0 20px 50px rgba(124, 92, 255, 0.35), 0 0 80px rgba(124, 108, 255, 0.15);
+  box-shadow: 0 20px 50px rgba(124, 92, 255, 0.40), 0 0 100px rgba(124, 108, 255, 0.20);
 }
 .os-studio-cta:hover::before {
   opacity: 1;
@@ -1907,35 +1915,25 @@ body {
 .os-showcase-header {
   margin-bottom: 16px;
 }
-.os-showcase-title-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.os-showcase-emoji {
-  font-size: 16px;
-}
 .os-showcase-title {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
-  color: #334155;
-}
-.os-showcase-subtitle {
-  font-size: 12px;
   color: #94A3B8;
-  margin-top: 2px;
-  margin-left: 22px;
+  letter-spacing: 0.03em;
 }
 
-/* 主展示区 — 高亮案例 */
+/* 主展示区 — 高亮案例（缩小，不抢主视觉） */
 .os-showcase-featured {
   position: relative;
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
   aspect-ratio: 4/3;
   background: #F1F5F9;
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.06);
+  transition: opacity 0.4s ease, transform 0.4s ease, box-shadow 0.3s ease;
+}
+.os-showcase-featured:hover {
+  box-shadow: 0 8px 32px rgba(109, 94, 246, 0.12);
 }
 .os-showcase-fading {
   opacity: 0.3;
@@ -1983,10 +1981,10 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 14px 16px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 .os-showcase-featured-category {
   display: inline-block;
@@ -2025,18 +2023,18 @@ body {
 .os-showcase-thumbs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  margin-top: 8px;
 }
 .os-showcase-thumb {
   position: relative;
-  border-radius: 12px;
+  border-radius: 10px;
   overflow: hidden;
   aspect-ratio: 4/3;
   background: #F1F5F9;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.04);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.03);
 }
 .os-showcase-thumb:hover {
   transform: translateY(-2px);

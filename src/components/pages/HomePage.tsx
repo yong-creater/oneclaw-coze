@@ -83,14 +83,12 @@ const TOOL_MATCHES: ToolMatch[] = [
 // ===== AI 需求识别状态 =====
 type IdentifyPhase = 'idle' | 'identifying' | 'matched' | 'no-match';
 
-// ===== 试试这些创作 — pills 标签 =====
+// ===== 试试这些创作 — pills 标签（精简到4个） =====
 const tryChips = [
-  { label: '🔥 高级商品图', prompt: '帮我生成高级感耳机商品图，白底高级感，多角度展示' },
+  { label: '🔥 商品主图', prompt: '帮我生成高级感耳机商品图，白底高级感，多角度展示' },
   { label: '🔥 小红书封面', prompt: '生成小红书护肤封面，夏日清新风格' },
   { label: '🔥 AI写真', prompt: '生成高级感AI写真头像，氛围感大片' },
   { label: '🔥 海报设计', prompt: '做一张夏日饮品海报，清新文艺风格' },
-  { label: '🔥 电商详情页', prompt: '生成电商详情页长图，极简卖点排版' },
-  { label: '🔥 穿搭封面', prompt: '生成小红书穿搭封面图，街头潮流风格' },
 ];
 
 // ===== Placeholder 轮播文案 =====
@@ -162,14 +160,6 @@ const hotResults = [
 ];
 
 const MAX_UPLOAD_IMAGES = 5;
-
-// ===== 上传区能力标签 =====
-const uploadCapabilities = [
-  '商品参考图',
-  '风格参考图',
-  '多图融合',
-  '图片重绘',
-];
 
 // ===== 工具匹配算法 =====
 function matchTool(input: string): ToolMatch | null {
@@ -421,7 +411,7 @@ export default function HomePage() {
 
           {/* ===== AI 创作输入区 — 左右分栏 ===== */}
           <div className="os-studio mt-10">
-            {/* 左侧：输入区 (60%) */}
+            {/* 左侧：输入区 (65%) */}
             <div className="os-studio-input">
               {/* AI 创作描述框 */}
               <div className="os-studio-input-area">
@@ -433,6 +423,14 @@ export default function HomePage() {
                   <p className="os-studio-placeholder-example">
                     {placeholderTexts[placeholderIndex]}
                   </p>
+                  {!inputText && (
+                    <div className="os-studio-hints">
+                      <span className="os-studio-hint-item">✓ 高级耳机商品图</span>
+                      <span className="os-studio-hint-item">✓ 小红书护肤封面</span>
+                      <span className="os-studio-hint-item">✓ 夏日饮品海报</span>
+                      <span className="os-studio-hint-item">✓ AI 写真头像</span>
+                    </div>
+                  )}
                 </div>
                 <textarea
                   value={inputText}
@@ -478,21 +476,13 @@ export default function HomePage() {
                   <div className="os-dropzone-icon">
                     <ImagePlus className="w-5 h-5" />
                   </div>
-                  <div className="os-dropzone-content">
-                    <div className="os-dropzone-text">
-                      <span className="os-dropzone-title">
-                        {uploadedImages.length > 0 ? '继续添加参考图' : '上传参考图片（可选）'}
-                      </span>
-                      <span className="os-dropzone-formats">
-                        支持 JPG / PNG / WEBP{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ' · 最多 5 张'}
-                      </span>
-                    </div>
-                    {/* 能力标签 */}
-                    <div className="os-dropzone-caps">
-                      {uploadCapabilities.map(cap => (
-                        <span key={cap} className="os-dropzone-cap">✓ {cap}</span>
-                      ))}
-                    </div>
+                  <div className="os-dropzone-text">
+                    <span className="os-dropzone-title">
+                      {uploadedImages.length > 0 ? '继续添加参考图' : '上传参考图片'}
+                    </span>
+                    <span className="os-dropzone-formats">
+                      支持拖拽上传{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ''}
+                    </span>
                   </div>
                 </div>
               )}
@@ -605,14 +595,10 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* 右侧：AI 创作灵感 (38%) */}
+            {/* 右侧：AI 创作灵感 (35%) */}
             <div className="os-studio-showcase">
               <div className="os-showcase-header">
-                <div className="os-showcase-title-row">
-                  <span className="os-showcase-emoji">✨</span>
-                  <span className="os-showcase-title">AI 创作灵感</span>
-                </div>
-                <span className="os-showcase-subtitle">看看别人正在生成什么</span>
+                <span className="os-showcase-title">AI 创作灵感</span>
               </div>
 
               {/* 主展示区 — 当前高亮案例 */}
