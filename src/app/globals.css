@@ -1491,24 +1491,6 @@ body {
   line-height: 1.75;
 }
 
-/* 输入框内部 AI 引导提示 */
-.os-studio-hints {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 16px;
-  margin-top: 16px;
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
-}
-.os-studio-input-area:focus-within .os-studio-hints {
-  opacity: 0.25;
-}
-.os-studio-hint-item {
-  font-size: 13px;
-  font-weight: 400;
-  color: #94A3B8;
-  white-space: nowrap;
-}
 
 /* ===== 拖拽上传区域 ===== */
 .os-dropzone {

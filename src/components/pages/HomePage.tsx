@@ -423,14 +423,7 @@ export default function HomePage() {
                   <p className="os-studio-placeholder-example">
                     {placeholderTexts[placeholderIndex]}
                   </p>
-                  {!inputText && (
-                    <div className="os-studio-hints">
-                      <span className="os-studio-hint-item">✓ 高级耳机商品图</span>
-                      <span className="os-studio-hint-item">✓ 小红书护肤封面</span>
-                      <span className="os-studio-hint-item">✓ 夏日饮品海报</span>
-                      <span className="os-studio-hint-item">✓ AI 写真头像</span>
-                    </div>
-                  )}
+
                 </div>
                 <textarea
                   value={inputText}
