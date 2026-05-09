@@ -12,6 +12,8 @@ import {
   Sparkles,
   X,
   ChevronDown,
+  Check,
+  AlertCircle,
 } from 'lucide-react';
 
 // ===== 生成类型 =====
@@ -30,12 +32,25 @@ const GEN_TYPES: GenType[] = [
   { id: 'detail', label: '详情页', icon: '📋' },
 ];
 
+// ===== 生成步骤 =====
+const GEN_STEPS = [
+  { id: 1, text: '正在理解你的需求' },
+  { id: 2, text: '正在分析图片内容' },
+  { id: 3, text: '正在匹配生成方式' },
+  { id: 4, text: '正在生成结果' },
+  { id: 5, text: '正在优化细节' },
+  { id: 6, text: '即将完成' },
+];
+
 // ===== 生成结果 =====
 interface GenResult {
   url: string;
   label: string;
   type: string;
 }
+
+// ===== 生成状态 =====
+type GenStatus = 'idle' | 'generating' | 'success' | 'failed';
 
 export default function CreateWorkbench() {
   const searchParams = useSearchParams();
@@ -49,13 +64,15 @@ export default function CreateWorkbench() {
   const [prompt, setPrompt] = useState(initialPrompt);
   const [genType, setGenType] = useState(initialType);
   const [uploadedImages, setUploadedImages] = useState<string[]>(initialImage ? [initialImage] : []);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatingStep, setGeneratingStep] = useState('');
+  const [status, setStatus] = useState<GenStatus>('idle');
+  const [currentStep, setCurrentStep] = useState(0);
   const [results, setResults] = useState<GenResult[]>([]);
   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const stepTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // 如果从首页带入了 prompt，自动聚焦输入框
   useEffect(() => {
@@ -64,6 +81,13 @@ export default function CreateWorkbench() {
       textareaRef.current.setSelectionRange(initialPrompt.length, initialPrompt.length);
     }
   }, [initialPrompt]);
+
+  // 清理步骤计时器
+  useEffect(() => {
+    return () => {
+      stepTimerRef.current.forEach(t => clearTimeout(t));
+    };
+  }, []);
 
   // ===== 图片上传 =====
   const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,46 +114,45 @@ export default function CreateWorkbench() {
   // ===== 开始生成 =====
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim() && uploadedImages.length === 0) return;
-    setIsGenerating(true);
+
+    // 清理旧计时器
+    stepTimerRef.current.forEach(t => clearTimeout(t));
+    stepTimerRef.current = [];
+
+    setStatus('generating');
+    setCurrentStep(0);
     setResults([]);
-    setGeneratingStep('AI 正在理解你的需求…');
+    setErrorMsg('');
 
-    // 阶段文案
-    const steps = [
-      'AI 正在理解你的需求…',
-      '正在分析图片内容…',
-      '正在匹配最佳生成方案…',
-      '正在生成内容…',
-      '正在优化结果…',
-    ];
+    // 按顺序轮播步骤，每步间隔 800ms
+    GEN_STEPS.forEach((_, i) => {
+      const timer = setTimeout(() => {
+        setCurrentStep(i + 1);
+      }, (i + 1) * 800);
+      stepTimerRef.current.push(timer);
+    });
 
-    for (let i = 1; i < steps.length; i++) {
-      await new Promise<void>(r => setTimeout(r, 600));
-      setGeneratingStep(steps[i]);
+    // TODO: 替换为真实 API 调用
+    // 当前使用模拟生成
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const totalTimer = setTimeout(resolve, 5500);
+        stepTimerRef.current.push(totalTimer);
+      });
+
+      // 模拟生成结果
+      const currentType = GEN_TYPES.find(t => t.id === genType) || GEN_TYPES[0];
+      const mockResults: GenResult[] = [
+        { url: '/case-lipstick-main.png', label: '生成结果 1', type: currentType.label },
+        { url: '/demo-card-lifestyle.jpg', label: '生成结果 2', type: currentType.label },
+      ];
+
+      setResults(mockResults);
+      setStatus('success');
+    } catch {
+      setStatus('failed');
+      setErrorMsg('生成失败，请稍后重试');
     }
-
-    // TODO: 调用统一生成 API
-    // 当前使用占位结果展示工作台 UI
-    await new Promise<void>(r => setTimeout(r, 800));
-
-    // 模拟生成结果（后续替换为真实 API 调用）
-    const currentType = GEN_TYPES.find(t => t.id === genType) || GEN_TYPES[0];
-    const mockResults: GenResult[] = [
-      {
-        url: '/case-lipstick-main.png',
-        label: '生成结果 1',
-        type: currentType.label,
-      },
-      {
-        url: '/demo-card-lifestyle.jpg',
-        label: '生成结果 2',
-        type: currentType.label,
-      },
-    ];
-
-    setResults(mockResults);
-    setGeneratingStep('');
-    setIsGenerating(false);
   }, [prompt, uploadedImages, genType]);
 
   // ===== 下载图片 =====
@@ -150,6 +173,11 @@ export default function CreateWorkbench() {
 
   // ===== 当前生成类型 =====
   const currentGenType = GEN_TYPES.find(t => t.id === genType) || GEN_TYPES[0];
+
+  // ===== 计算进度百分比 =====
+  const progressPercent = status === 'generating'
+    ? Math.min(100, Math.round((currentStep / GEN_STEPS.length) * 100))
+    : status === 'success' ? 100 : 0;
 
   return (
     <div className="os-page">
@@ -248,19 +276,19 @@ export default function CreateWorkbench() {
             <div className="flex gap-3">
               <button
                 onClick={handleGenerate}
-                disabled={isGenerating || (!prompt.trim() && uploadedImages.length === 0)}
+                disabled={status === 'generating' || (!prompt.trim() && uploadedImages.length === 0)}
                 className="os-wb-gen-btn flex-1"
               >
-                {isGenerating ? (
+                {status === 'generating' ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /><span>生成中…</span></>
                 ) : (
                   <><Wand2 className="w-4 h-4" /><span>开始生成</span></>
                 )}
               </button>
-              {results.length > 0 && (
+              {results.length > 0 && status !== 'generating' && (
                 <button
                   onClick={handleGenerate}
-                  disabled={isGenerating}
+                  disabled={false}
                   className="os-wb-secondary-btn"
                 >
                   <RotateCcw className="w-4 h-4" />
@@ -273,26 +301,81 @@ export default function CreateWorkbench() {
           {/* ====== 右侧：结果面板 ====== */}
           <div className="os-wb-right">
 
-            {/* 生成中状态 */}
-            {isGenerating && (
+            {/* ===== 生成中状态 ===== */}
+            {status === 'generating' && (
               <div className="os-wb-generating">
-                <div className="flex items-center gap-2 mb-4">
-                  <Loader2 className="w-5 h-5 text-purple-500 animate-spin" />
-                  <span className="text-sm font-medium text-slate-600">{generatingStep}</span>
+                {/* 标题 + 当前步骤 */}
+                <div className="os-wb-gen-header">
+                  <div className="os-wb-gen-icon-wrap">
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  </div>
+                  <div className="os-wb-gen-title-area">
+                    <h3 className="text-base font-semibold text-slate-800">AI 正在生成</h3>
+                    <p className="text-sm text-slate-500 mt-0.5">{GEN_STEPS[currentStep - 1]?.text || GEN_STEPS[0].text}</p>
+                  </div>
                 </div>
-                {/* 进度骨架 */}
-                <div className="space-y-3">
-                  <div className="os-wb-skeleton" style={{ height: '220px' }} />
+
+                {/* 进度条 */}
+                <div className="os-wb-progress-track">
+                  <div
+                    className="os-wb-progress-fill"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+
+                {/* 步骤列表 */}
+                <div className="os-wb-step-list">
+                  {GEN_STEPS.map((step, idx) => {
+                    const stepNum = idx + 1;
+                    const isCompleted = currentStep > stepNum;
+                    const isCurrent = currentStep === stepNum;
+                    return (
+                      <div
+                        key={step.id}
+                        className={`os-wb-step-item ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}
+                      >
+                        <div className={`os-wb-step-dot ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
+                          {isCompleted ? <Check className="w-3 h-3" /> : stepNum}
+                        </div>
+                        <span className={`os-wb-step-text ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
+                          {step.text}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Skeleton 占位 */}
+                <div className="os-wb-skeleton-area">
+                  <div className="os-wb-skeleton" style={{ height: '200px' }} />
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="os-wb-skeleton" style={{ height: '140px' }} />
-                    <div className="os-wb-skeleton" style={{ height: '140px' }} />
+                    <div className="os-wb-skeleton" style={{ height: '130px' }} />
+                    <div className="os-wb-skeleton" style={{ height: '130px' }} />
                   </div>
                 </div>
               </div>
             )}
 
-            {/* 无结果默认态 */}
-            {!isGenerating && results.length === 0 && (
+            {/* ===== 生成失败状态 ===== */}
+            {status === 'failed' && (
+              <div className="os-wb-failed">
+                <div className="os-wb-failed-icon-wrap">
+                  <AlertCircle className="w-8 h-8 text-red-400" />
+                </div>
+                <h3 className="text-base font-semibold text-slate-800 mt-4">生成失败</h3>
+                <p className="text-sm text-slate-500 mt-1.5">{errorMsg || '生成失败，请稍后重试'}</p>
+                <button
+                  onClick={handleGenerate}
+                  className="os-wb-retry-btn mt-6"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>重新生成</span>
+                </button>
+              </div>
+            )}
+
+            {/* ===== 无结果默认态 ===== */}
+            {status === 'idle' && results.length === 0 && (
               <div className="os-wb-empty">
                 <div className="w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center mb-4">
                   <Sparkles className="w-7 h-7 text-purple-400" />
@@ -304,8 +387,8 @@ export default function CreateWorkbench() {
               </div>
             )}
 
-            {/* 生成结果 */}
-            {!isGenerating && results.length > 0 && (
+            {/* ===== 生成结果 ===== */}
+            {status === 'success' && results.length > 0 && (
               <div className="os-wb-results">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
@@ -368,7 +451,7 @@ export default function CreateWorkbench() {
                   </button>
                   <button
                     onClick={() => handleGenerate()}
-                    disabled={isGenerating}
+                    disabled={false}
                     className="os-wb-action-btn"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
