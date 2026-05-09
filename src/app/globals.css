@@ -308,17 +308,14 @@ body {
 /*  参考：Linear / Framer / Claude / Arc — 极简 / 柔和 / 统一 / 沉浸  */
 /*  核心原则：整个 main 内容区共享同一个背景，无断层 */
 
-/* ---- main 画布 — 全局渐变底色 ---- */
+/* ---- main 画布 — 统一全局渐变底色（从顶到底无断层） ---- */
 .os-main-canvas {
   position: relative;
   background: linear-gradient(
-    170deg,
+    180deg,
     #F7F8FF 0%,
-    #F4F1FF 20%,
-    #EEF2FF 40%,
-    #F0EDFF 60%,
-    #F5F7FF 80%,
-    #F7F8FF 100%
+    #F4F1FF 45%,
+    #F8FAFC 100%
   );
   padding: 0 40px;
 }
@@ -349,13 +346,13 @@ body {
   filter: blur(120px);
 }
 
-/* 顶部中央 — 主光斑（淡紫） */
+/* 顶部中央 — 主光晕（用户指定：rgba(124,92,255,0.14) 透明55%） */
 .os-global-orb-top {
   width: 900px;
-  height: 600px;
+  height: 700px;
   top: -15%;
-  left: 30%;
-  background: radial-gradient(ellipse at center, rgba(123, 97, 255, 0.08) 0%, rgba(123, 97, 255, 0.03) 40%, transparent 70%);
+  left: 25%;
+  background: radial-gradient(ellipse at center, rgba(124, 92, 255, 0.14) 0%, rgba(124, 92, 255, 0.05) 35%, transparent 55%);
   animation: orbDrift 20s ease-in-out infinite;
 }
 
@@ -489,48 +486,16 @@ body {
   50% { box-shadow: 0 0 32px rgba(123, 97, 255, 0.16), 0 0 64px rgba(123, 97, 255, 0.05); }
 }
 
-/* ---- 旧装饰元素（已废弃，保留兼容） ---- */
-.os-hero-bg { position: relative; overflow: hidden; }
-.os-hero-bg::before,
-.os-hero-bg::after { display: none; }
+/* ---- 旧装饰元素（已废弃） ---- */
 
-/* Hero section — AI atmosphere background */
+/* Hero section — 透明通道，继承 os-main-canvas 全局渐变 + os-global-bg 光晕 */
 .os-hero {
   position: relative;
   overflow: hidden;
-  margin-left: -40px;
-  margin-right: -40px;
-  padding-left: 40px;
-  padding-right: 40px;
-  background: radial-gradient(circle at top center, rgba(109, 94, 246, 0.14), transparent 60%);
 }
-.os-hero::before {
-  content: '';
-  position: absolute;
-  top: -10%;
-  right: -5%;
-  width: 700px;
-  height: 700px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(109, 94, 246, 0.18), rgba(91, 92, 246, 0.06) 50%, transparent 70%);
-  filter: blur(120px);
-  opacity: 0.35;
-  pointer-events: none;
-  z-index: 0;
-}
+.os-hero::before,
 .os-hero::after {
-  content: '';
-  position: absolute;
-  top: 5%;
-  left: -8%;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.12), transparent 65%);
-  filter: blur(100px);
-  opacity: 0.25;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 .os-card::before {
   content: '';

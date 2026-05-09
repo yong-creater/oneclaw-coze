@@ -141,13 +141,13 @@ export default function HomePage() {
 
           {/* 主标题 */}
           <h1 className="text-center font-bold !text-[72px] !leading-[1.1] !tracking-[-0.03em]">
-            一句需求，<br className="sm:hidden" />直接生成{' '}
-            <span className="gradient-text">结果</span>
+            上传图片或输入想法，<br className="sm:hidden" />AI 帮你直接生成{' '}
+            <span className="gradient-text">内容</span>
           </h1>
 
           {/* 副标题 */}
           <p className="text-center text-[24px] text-[#6B7280] mt-4 max-w-[880px] leading-[1.6]">
-            上传图片或输入一句话，OneClaw 自动匹配最佳 AI 工作流。
+            商品图、详情页、小红书、视频脚本，简单几步就能生成。
           </p>
 
           {/* ===== AI 输入工作台 — 左右分栏 ===== */}
@@ -313,7 +313,7 @@ export default function HomePage() {
       </div>
 
       {/* ==================== 热门创作结果 — AI 结果流 ==================== */}
-      <section className="relative bg-white/60 backdrop-blur-sm rounded-t-[40px] animate-fade-slide-up !mt-[120px] pt-20 pb-8 -mx-10 px-10" style={{ animationDelay: '0.15s' }}>
+      <section className="relative animate-fade-slide-up !mt-[120px] pt-20 pb-8" style={{ animationDelay: '0.15s' }}>
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
