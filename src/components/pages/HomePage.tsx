@@ -50,52 +50,28 @@ const sceneItems: SceneItem[] = [
 // 热门创作结果数据
 const hotResults = [
   {
-    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=600&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=450&fit=crop&auto=format&q=80',
     type: '商品图',
-    prompt: '高级护肤品主图，白底高级感',
-    tags: ['GPT-Image-2', '商业风'],
+    title: '高级护肤品主图',
+    examplePrompt: '帮我生成高级护肤品商品图，白底高级感',
   },
   {
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=600&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=450&fit=crop&auto=format&q=80',
     type: '小红书',
-    prompt: '夏日穿搭种草图，清新文艺风格',
-    tags: ['GPT-Image-2', '小红书'],
+    title: '夏日穿搭种草图',
+    examplePrompt: '生成小红书穿搭种草图，清新文艺风格',
   },
   {
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=600&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop&auto=format&q=80',
     type: '详情页',
-    prompt: '家居好物卖点长图，极简风格',
-    tags: ['GPT-Image-2', '电商'],
+    title: '家居好物卖点长图',
+    examplePrompt: '生成家居好物详情长图，极简风格',
   },
   {
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=450&fit=crop&auto=format&q=80',
     type: '商品图',
-    prompt: '数码产品主图，深色科技风',
-    tags: ['GPT-Image-2', '科技感'],
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=600&fit=crop&auto=format&q=80',
-    type: '小红书',
-    prompt: '美妆种草封面，高级质感',
-    tags: ['GPT-Image-2', '美妆'],
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?w=600&h=600&fit=crop&auto=format&q=80',
-    type: '视频脚本',
-    prompt: '零食带货口播脚本，3分钟',
-    tags: ['GPT-4o', '带货'],
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop&auto=format&q=80',
-    type: '商品图',
-    prompt: '手表产品主图，极简商务风',
-    tags: ['GPT-Image-2', '商务风'],
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&h=600&fit=crop&auto=format&q=80',
-    type: '详情页',
-    prompt: '笔记本电脑详情页，科技风格',
-    tags: ['GPT-Image-2', '数码'],
+    title: '数码产品主图',
+    examplePrompt: '生成数码产品商品主图，深色科技风',
   },
 ];
 
@@ -286,33 +262,43 @@ export default function HomePage() {
         </div>
 
         {/* 4列规则网格 */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="os-result-grid">
           {hotResults.map((item, idx) => (
             <div
               key={idx}
               className="os-result-card group cursor-pointer"
-              onClick={() => router.push('/tools')}
+              onClick={() => {
+                setInputText(item.examplePrompt);
+                document.querySelector('.os-studio-input-area')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }}
             >
-              {/* 大图区域 */}
+              {/* 图片区域 */}
               <div className="os-result-card-image">
                 <img
                   src={item.image}
-                  alt={item.prompt}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  alt={item.title}
+                  className="os-result-card-img"
                 />
-                {/* 类型标签 — 悬浮在图片上 */}
+                {/* 类型标签 */}
                 <span className="os-result-card-type">{item.type}</span>
-              </div>
-              {/* 信息区 */}
-              <div className="os-result-card-info">
-                {/* 用户需求 */}
-                <p className="os-result-card-prompt">{item.prompt}</p>
-                {/* 生成标签 */}
-                <div className="os-result-card-tags">
-                  {item.tags.map((tag) => (
-                    <span key={tag} className="os-result-card-tag">{tag}</span>
-                  ))}
+                {/* Hover 浮层 */}
+                <div className="os-result-card-overlay">
+                  <button
+                    className="os-result-card-cta"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setInputText(item.examplePrompt);
+                      document.querySelector('.os-studio-input-area')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                  >
+                    <Wand2 className="w-3.5 h-3.5" />
+                    <span>用这个生成</span>
+                  </button>
                 </div>
+              </div>
+              {/* 标题 */}
+              <div className="os-result-card-info">
+                <p className="os-result-card-title">{item.title}</p>
               </div>
             </div>
           ))}

@@ -673,34 +673,44 @@ body {
 
 /* ==================== Creator OS 热门创作结果卡片 ==================== */
 
+/* ── 热门生成案例 ───────────────────── */
+.os-result-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
 .os-result-card {
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: none;
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06);
+  border-radius: 24px;
+  box-shadow: 0 10px 34px rgba(124, 92, 255, 0.08);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .os-result-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(99, 102, 241, 0.12), 0 0 24px rgba(123, 97, 255, 0.06);
+  box-shadow: 0 16px 48px rgba(124, 92, 255, 0.14);
 }
 
 /* 图片区域 */
 .os-result-card-image {
   position: relative;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: 20px 20px 0 0;
   background: #F8FAFC;
 }
-.os-result-card-image img {
+.os-result-card-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.os-result-card:hover .os-result-card-img {
+  transform: scale(1.03);
 }
 
 /* 类型标签 — 悬浮在图片右上角 */
@@ -718,43 +728,60 @@ body {
   padding: 3px 10px;
   border-radius: 999px;
   letter-spacing: 0.02em;
+  z-index: 2;
 }
 
-/* 信息区 */
-.os-result-card-info {
-  padding: 14px 16px 16px;
-}
-
-/* 用户需求 */
-.os-result-card-prompt {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-/* 标签行 */
-.os-result-card-tags {
+/* Hover 浮层 */
+.os-result-card-overlay {
+  position: absolute;
+  inset: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+.os-result-card:hover .os-result-card-overlay {
+  opacity: 1;
 }
 
-/* 单个标签 */
-.os-result-card-tag {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 500;
-  color: #7B61FF;
-  background: rgba(123, 97, 255, 0.08);
-  padding: 2px 8px;
-  border-radius: 999px;
-  line-height: 1.6;
+/* 用这个生成按钮 */
+.os-result-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #7C6CFF 0%, #5B5DE6 100%);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.os-result-card-cta:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(124, 92, 255, 0.45);
+}
+
+/* 标题区 */
+.os-result-card-info {
+  padding: 14px 18px 16px;
+}
+.os-result-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── 创作场景入口卡片 ───────────────────── */
