@@ -1,881 +1,725 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Upload,
-  Loader2,
-  Download,
-  RotateCcw,
-  Save,
-  Sparkles,
-  X,
-  ChevronDown,
-  Check,
-  AlertCircle,
-  ZoomIn,
-  Copy,
-  FolderOpen,
-  RefreshCw,
-  ArrowRight,
-  Image as ImageIcon,
-  Wand2,
+  Sparkles, Upload, Image as ImageIcon, Download, ZoomIn,
+  Check, RefreshCw, Copy, ChevronDown, ChevronUp, X,
+  FolderOpen, Lightbulb, RotateCcw, Minus, Plus, Palette, Ratio
 } from 'lucide-react';
-import { getToolWorkflow, slugToGenType, genTypeToSlug, type ToolWorkflowConfig, type GuideStep } from '@/lib/tool-workflow-config';
+import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig, type ToolCase } from '@/lib/tool-workflow-config';
 
-// ===== 生成步骤 =====
-const GEN_STEPS = [
-  { id: 1, text: '正在理解你的需求' },
-  { id: 2, text: '正在分析图片内容' },
-  { id: 3, text: '正在匹配生成方式' },
-  { id: 4, text: '正在生成结果' },
-  { id: 5, text: '正在优化细节' },
-  { id: 6, text: '即将完成' },
-];
-
-// ===== 生成结果 =====
+// ===== 生成结果类型 =====
 interface GenResult {
-  url: string;
+  type: 'image' | 'text';
+  url?: string;
   label: string;
-  type: string;
   textContent?: string;
 }
 
-// ===== Toast 通知 =====
-interface Toast {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'info';
+// ===== 生成步骤 =====
+const GEN_STEPS = [
+  { text: '正在理解需求…', percent: 15 },
+  { text: '正在分析参考图…', percent: 35 },
+  { text: '正在生成内容…', percent: 60 },
+  { text: '正在优化细节…', percent: 85 },
+  { text: '即将完成…', percent: 95 },
+];
+
+// ===== 默认案例 =====
+const FALLBACK_CASES: ToolCase[] = [
+  { image: '/case-lipstick-main.png', title: '商品图案例', desc: '高级感电商主图' },
+  { image: '/demo-card-lifestyle.jpg', title: '封面案例', desc: '氛围感内容封面' },
+  { image: '/demo-scene.jpg', title: '场景图案例', desc: '生活化场景展示' },
+];
+
+// ===== 灵感提示 =====
+const PROMPT_TIPS: Record<string, string[]> = {
+  'product-generator': [
+    '白底主图 + 柔和阴影 = 点击率翻倍',
+    '场景图选择与产品调性一致的环境',
+    '细节图展示材质质感更容易转化',
+  ],
+  'xiaohongshu-generator': [
+    '3:4 竖图是小红书封面黄金比例',
+    '标题用大字 + 纯色背景更吸睛',
+    '第一张图决定点击率，要放最强视觉',
+  ],
+  'ai-photo': [
+    '上传清晰的正面照效果最好',
+    '港风适合暖色调，日系适合冷色调',
+    '证件照建议浅色背景 + 自然光',
+  ],
+  default: [
+    '描述越具体，生成效果越好',
+    '可以上传参考图指定风格方向',
+    '尝试不同风格选项对比效果',
+  ],
+};
+
+// ===== 创作上下文 =====
+interface CreateContext {
+  prompt?: string;
+  uploadedImages?: { id: string; url: string; fileName: string; type?: string; size?: number }[];
+  matchedTool?: string;
+  analysisResult?: Record<string, unknown>;
+  autoGenerate?: boolean;
+  fromHome?: boolean;
 }
 
-// ===== 生成状态 =====
-type GenStatus = 'idle' | 'guiding' | 'generating' | 'success' | 'failed';
+function getContext(): CreateContext | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem('oneclaw_create_context');
+    if (!raw) return null;
+    const ctx = JSON.parse(raw) as CreateContext;
+    // 读取后立即关闭 autoGenerate 防止刷新重复生成
+    if (ctx.autoGenerate) {
+      ctx.autoGenerate = false;
+      sessionStorage.setItem('oneclaw_create_context', JSON.stringify({ ...ctx, autoGenerate: false }));
+    }
+    return ctx;
+  } catch { return null; }
+}
 
 export default function CreateWorkbench() {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ===== 从 sessionStorage 读取首页传入的上下文 =====
-  const getContext = useCallback((): { prompt: string; type: string; toolId: string; images: string[]; autoGenerate: boolean } => {
-    try {
-      const stored = sessionStorage.getItem('oneclaw_create_context');
-      if (stored) {
-        const ctx = JSON.parse(stored);
-        if (ctx.autoGenerate) {
-          ctx.autoGenerate = false;
-          try { sessionStorage.setItem('oneclaw_create_context', JSON.stringify(ctx)); } catch {}
-        } else {
-          sessionStorage.removeItem('oneclaw_create_context');
-        }
-        return {
-          prompt: ctx.prompt || '',
-          type: ctx.type || 'auto',
-          toolId: ctx.matchedTool || '',
-          images: Array.isArray(ctx.uploadedImages) ? ctx.uploadedImages : [],
-          autoGenerate: !!ctx.autoGenerate,
-        };
-      }
-    } catch {}
-    return {
-      prompt: searchParams.get('prompt') || '',
-      type: searchParams.get('type') || 'auto',
-      toolId: searchParams.get('toolId') || '',
-      images: [],
-      autoGenerate: false,
-    };
-  }, [searchParams]);
+  // ===== 读取上下文 =====
+  const ctxRef = useRef(getContext());
+  const urlType = searchParams.get('type') || '';
+  const urlPrompt = searchParams.get('prompt') || '';
 
-  const context = useRef(getContext()).current;
-  const initialPrompt = context.prompt;
-  const initialType = context.type;
-  const shouldAutoGenerate = context.autoGenerate;
-
-  // ===== 当前工具配置 =====
-  const resolvedSlug = genTypeToSlug(slugToGenType(initialType));
-  const [currentSlug, setCurrentSlug] = useState(resolvedSlug || 'product-generator');
-  const toolConfig = getToolWorkflow(currentSlug);
+  // ===== 初始工具 =====
+  const initToolSlug = ctxRef.current?.matchedTool
+    || (urlType ? (getAllToolWorkflows().find(t => slugToGenType(t.slug) === urlType)?.slug || 'product-generator') : 'product-generator');
+  const toolConfig = getToolWorkflow(initToolSlug) || getToolWorkflow('product-generator')!;
 
   // ===== 状态 =====
-  const [prompt, setPrompt] = useState(initialPrompt);
-  const [uploadedImages, setUploadedImages] = useState<string[]>(context.images);
-  const [status, setStatus] = useState<GenStatus>(shouldAutoGenerate ? 'generating' : 'idle');
-  const [currentStep, setCurrentStep] = useState(0);
+  const [genType, setGenType] = useState(initToolSlug);
+  const [currentTool, setCurrentTool] = useState(toolConfig);
+  const [prompt, setPrompt] = useState(ctxRef.current?.prompt || urlPrompt || '');
+  const [uploadedImages, setUploadedImages] = useState<(File & { preview: string })[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>(
+    ctxRef.current?.uploadedImages?.map((img: { url: string }) => img.url).filter(Boolean) || []
+  );
+  const [status, setStatus] = useState<'idle' | 'generating' | 'success' | 'failed'>('idle');
   const [results, setResults] = useState<GenResult[]>([]);
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [guideAnswers, setGuideAnswers] = useState<Record<string, string>>({});
-
-  // 结果交互状态
   const [activeIndex, setActiveIndex] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [errorMsg, setErrorMsg] = useState('');
   const [showLightbox, setShowLightbox] = useState(false);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [selectedStyle, setSelectedStyle] = useState('');
+  const [selectedRatio, setSelectedRatio] = useState(currentTool.defaultRatio);
+  const [genCount, setGenCount] = useState(currentTool.defaultCount);
+  const [showToolDropdown, setShowToolDropdown] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const stepTimerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const toastIdRef = useRef(0);
+  const shouldAutoGenerate = !!(ctxRef.current?.autoGenerate || ctxRef.current?.fromHome);
   const autoGenTriggered = useRef(false);
-
-  // ===== Toast 工具 =====
-  const showToast = useCallback((message: string, type: Toast['type'] = 'success') => {
-    const id = ++toastIdRef.current;
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3000);
-  }, []);
-
-  // 清理步骤计时器
-  useEffect(() => {
-    return () => {
-      stepTimerRef.current.forEach(t => clearTimeout(t));
-    };
-  }, []);
-
-  // ===== 图片上传 =====
-  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    const maxFiles = toolConfig?.steps.find(s => s.type === 'upload')?.maxFiles || 5;
-    const newImages: string[] = [];
-    for (const file of Array.from(files).slice(0, maxFiles - uploadedImages.length)) {
-      const reader = new FileReader();
-      const dataUrl = await new Promise<string>((resolve) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
-      newImages.push(dataUrl);
-    }
-    setUploadedImages(prev => [...prev, ...newImages].slice(0, maxFiles));
-    e.target.value = '';
-  }, [uploadedImages.length, toolConfig]);
-
-  const removeImage = useCallback((index: number) => {
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
-  }, []);
-
-  // ===== 引导步骤选择 =====
-  const handleGuideSelect = useCallback((stepId: string, value: string) => {
-    setGuideAnswers(prev => ({ ...prev, [stepId]: value }));
-  }, []);
-
-  // ===== 判断引导是否完成 =====
-  const isGuideComplete = useCallback((): boolean => {
-    if (!toolConfig) return !!prompt.trim() || uploadedImages.length > 0;
-    const requiredSteps = toolConfig.steps.filter(s => !s.optional);
-    return requiredSteps.every(step => {
-      if (step.type === 'upload') return uploadedImages.length > 0;
-      if (step.type === 'select') return !!guideAnswers[step.id];
-      if (step.type === 'input') return !!prompt.trim();
-      return true;
-    });
-  }, [toolConfig, uploadedImages, guideAnswers, prompt]);
-
-  // ===== 步骤动画（UI 展示用，不阻塞真实 API） =====
-  const startStepAnimation = useCallback(() => {
-    stepTimerRef.current.forEach(t => clearTimeout(t));
-    stepTimerRef.current = [];
-    setCurrentStep(0);
-    GEN_STEPS.forEach((_, i) => {
-      const timer = setTimeout(() => {
-        setCurrentStep(prev => Math.min(prev, i + 1));
-      }, (i + 1) * 1200);
-      stepTimerRef.current.push(timer);
-    });
-  }, []);
-
-  const clearStepAnimation = useCallback(() => {
-    stepTimerRef.current.forEach(t => clearTimeout(t));
-    stepTimerRef.current = [];
-  }, []);
-
-  // ===== 真实生成：调用后端 API =====
-  const callGenerateAPI = useCallback(async (toolSlug: string, genPrompt: string, images: string[], answers: Record<string, string>): Promise<GenResult[]> => {
-    // 1. 图片生成类工具 → /api/images/generate
-    if (['product-generator', 'xiaohongshu-generator', 'portrait-generator'].includes(toolSlug)) {
-      const res = await fetch('/api/images/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: genPrompt,
-          images,
-          toolSlug,
-          style: answers.style || answers.scene || '',
-          ratio: answers.ratio || answers.format || '',
-          count: 4,
-        }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `生成请求失败 (${res.status})`);
-      }
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-        return data.images.map((img: { url?: string; base64?: string }, i: number) => ({
-          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
-          label: `${toolConfig?.name || 'AI'} 结果 ${i + 1}`,
-          type: 'image',
-        }));
-      }
-      if (data.data?.images && Array.isArray(data.data.images) && data.data.images.length > 0) {
-        return data.data.images.map((img: { url?: string; base64?: string }, i: number) => ({
-          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
-          label: `${toolConfig?.name || 'AI'} 结果 ${i + 1}`,
-          type: 'image',
-        }));
-      }
-      throw new Error(data.error || '生成接口未返回有效结果');
-    }
-
-    // 2. 智能抠图 → /api/images/process
-    if (toolSlug === 'remove-bg') {
-      const res = await fetch('/api/images/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'remove-bg',
-          image: images[0] || '',
-          background: answers.background || 'transparent',
-        }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `抠图请求失败 (${res.status})`);
-      }
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      const resultUrl = data.url || data.data?.url || (data.base64 ? `data:image/png;base64,${data.base64}` : '');
-      if (!resultUrl) throw new Error('抠图接口未返回有效结果');
-      return [{ url: resultUrl, label: '抠图结果', type: 'image' }];
-    }
-
-    // 3. 详情页生成 → /api/product-page/generate
-    if (toolSlug === 'detail-page') {
-      const res = await fetch('/api/product-page/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: genPrompt,
-          images,
-          style: answers.style || '',
-          modules: answers.modules || '',
-        }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `详情页生成失败 (${res.status})`);
-      }
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-        return data.images.map((img: { url?: string; base64?: string }, i: number) => ({
-          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
-          label: `详情页结果 ${i + 1}`,
-          type: 'image',
-        }));
-      }
-      if (data.data?.images && Array.isArray(data.data.images) && data.data.images.length > 0) {
-        return data.data.images.map((img: { url?: string; base64?: string }, i: number) => ({
-          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
-          label: `详情页结果 ${i + 1}`,
-          type: 'image',
-        }));
-      }
-      // 详情页可能返回 HTML 内容
-      if (data.html || data.data?.html) {
-        return [{ url: '', label: '详情页预览', type: 'text', textContent: data.html || data.data.html }];
-      }
-      throw new Error(data.error || '详情页生成接口未返回有效结果');
-    }
-
-    // 4. 小说创作 → /api/novel/generate-script
-    if (toolSlug === 'novel') {
-      const res = await fetch('/api/novel/generate-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: genPrompt,
-          style: answers.genre || answers.style || '',
-          length: answers.length || 'medium',
-        }),
-      });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `小说生成失败 (${res.status})`);
-      }
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      const textContent = data.script || data.data?.script || data.content || data.data?.content || '';
-      if (!textContent) throw new Error('小说生成接口未返回有效内容');
-      return [{ url: '', label: '小说内容', type: 'text', textContent }];
-    }
-
-    // 5. 兜底：尝试通用图片生成
-    const res = await fetch('/api/images/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: genPrompt, images, toolSlug, count: 4 }),
-    });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `生成请求失败 (${res.status})`);
-    }
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-      return data.images.map((img: { url?: string; base64?: string }, i: number) => ({
-        url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
-        label: `结果 ${i + 1}`, type: 'image',
-      }));
-    }
-    if (data.data?.images && Array.isArray(data.data.images) && data.data.images.length > 0) {
-      return data.data.images.map((img: { url?: string; base64?: string }, i: number) => ({
-        url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
-        label: `结果 ${i + 1}`, type: 'image',
-      }));
-    }
-    throw new Error('生成接口未返回有效结果');
-  }, [toolConfig]);
-
-  // ===== 开始生成 =====
-  const handleGenerate = useCallback(async () => {
-    if (!prompt.trim() && uploadedImages.length === 0 && Object.keys(guideAnswers).length === 0) return;
-
-    setStatus('generating');
-    setResults([]);
-    setErrorMsg('');
-    setActiveIndex(0);
-    setShowLightbox(false);
-
-    // 启动步骤动画（仅 UI）
-    startStepAnimation();
-
-    try {
-      // 调用真实 API
-      const realResults = await callGenerateAPI(currentSlug, prompt, uploadedImages, guideAnswers);
-
-      // API 返回后清除步骤动画
-      clearStepAnimation();
-      setCurrentStep(GEN_STEPS.length);
-
-      if (realResults.length > 0) {
-        setResults(realResults);
-        setStatus('success');
-      } else {
-        throw new Error('生成接口返回空结果');
-      }
-    } catch (err: unknown) {
-      clearStepAnimation();
-      const errorMessage = err instanceof Error ? err.message : '生成失败，请稍后重试';
-      console.error('[CreateWorkbench] 生成失败:', errorMessage);
-      setErrorMsg(errorMessage);
-      setStatus('failed');
-    }
-  }, [prompt, uploadedImages, guideAnswers, currentSlug, startStepAnimation, clearStepAnimation, callGenerateAPI]);
-
-  // ===== 自动生成 =====
-  useEffect(() => {
-    if (shouldAutoGenerate && !autoGenTriggered.current && (initialPrompt.trim() || context.images.length > 0)) {
-      autoGenTriggered.current = true;
-      const timer = setTimeout(() => {
-        handleGenerate();
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [shouldAutoGenerate, initialPrompt, context.images.length, handleGenerate]);
-
-  // ===== 下载图片 =====
-  const handleDownload = useCallback(async (url: string, filename: string) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = filename;
-      link.click();
-      window.URL.revokeObjectURL(blobUrl);
-      showToast('下载成功');
-    } catch {
-      showToast('下载失败，请重试', 'error');
-    }
-  }, [showToast]);
-
-  const handleDownloadAll = useCallback(() => {
-    const imageResults = results.filter(r => r.type === 'image');
-    imageResults.forEach((r, i) => {
-      setTimeout(() => handleDownload(r.url, `${r.label}.png`), i * 400);
-    });
-  }, [results, handleDownload]);
-
-  const handleSaveToProjects = useCallback(() => {
-    showToast('已保存到作品');
-  }, [showToast]);
-
-  const handleCopyText = useCallback(async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      showToast('已复制到剪贴板');
-    } catch {
-      showToast('复制失败', 'error');
-    }
-  }, [showToast]);
-
-  const handleSetAsCover = useCallback((index: number) => {
-    setActiveIndex(index);
-    showToast('已设为封面');
-  }, [showToast]);
-
-  const handleContinueOptimize = useCallback(() => {
-    const activeResult = results[activeIndex];
-    if (activeResult) {
-      setPrompt(prev => `${prev}\n\n请在此基础上继续优化：${activeResult.label}`);
-      setStatus('idle');
-      setResults([]);
-    }
-  }, [results, activeIndex]);
+  const stepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const activeResult = results[activeIndex];
+  const imageResults = results.filter(r => r.type === 'image');
+  const hasImageResults = imageResults.length > 0;
+  const hasTextResults = results.some(r => r.type === 'text');
 
   // ===== 切换工具 =====
   const handleToolChange = useCallback((slug: string) => {
-    setCurrentSlug(slug);
-    setShowTypeDropdown(false);
-    // 切换工具时不自动生成，保留已上传图片和输入
-    if (status === 'generating') return;
-  }, [status]);
+    const cfg = getToolWorkflow(slug);
+    if (!cfg) return;
+    setGenType(slug);
+    setCurrentTool(cfg);
+    setSelectedRatio(cfg.defaultRatio);
+    setGenCount(cfg.defaultCount);
+    setSelectedStyle('');
+    setSelectedOptions({});
+    setShowToolDropdown(false);
+    setStatus('idle');
+    setResults([]);
+  }, []);
 
-  // ===== 计算进度 =====
-  const progressPercent = status === 'generating'
-    ? Math.min(100, Math.round((currentStep / GEN_STEPS.length) * 100))
-    : status === 'success' ? 100 : 0;
+  // ===== 步骤动画 =====
+  const startStepAnimation = useCallback(() => {
+    let step = 0;
+    setCurrentStep(0);
+    setProgressPercent(5);
+    stepTimerRef.current = setInterval(() => {
+      step++;
+      if (step < GEN_STEPS.length) {
+        setCurrentStep(step);
+        setProgressPercent(GEN_STEPS[step].percent);
+      }
+    }, 2200);
+  }, []);
 
-  const activeResult = results[activeIndex] || null;
-  const hasImageResults = results.some(r => r.type === 'image');
-  const hasTextResults = results.some(r => r.type === 'text');
-  const imageResults = results.filter(r => r.type === 'image');
-  const textResults = results.filter(r => r.type === 'text');
+  const clearStepAnimation = useCallback(() => {
+    if (stepTimerRef.current) { clearInterval(stepTimerRef.current); stepTimerRef.current = null; }
+  }, []);
 
-  // ===== 全部工具列表（用于切换下拉） =====
-  const allTools = getAllToolWorkflowsSimple();
+  // ===== 真实 API 调用 =====
+  const callGenerateAPI = useCallback(async (toolSlug: string, userPrompt: string, images: string[], opts: Record<string, string>): Promise<GenResult[]> => {
+    const genTypeSlug = slugToGenType(toolSlug);
+
+    // 抠图 → images/process
+    if (genTypeSlug === 'removebg' && images.length > 0) {
+      const res = await fetch('/api/images/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'remove-bg', image: images[0] }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || '抠图生成失败');
+      return [{ type: 'image', url: data.data?.url || data.result?.url || images[0], label: '抠图结果' }];
+    }
+
+    // 详情页 → product-page/generate
+    if (genTypeSlug === 'detail') {
+      const res = await fetch('/api/product-page/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userPrompt, images, style: opts.style || selectedStyle, modules: ['hero', 'features', 'specs'] }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || '详情页生成失败');
+      const urls = data.data?.urls || data.data?.images || (data.data?.url ? [data.data.url] : []);
+      return urls.map((url: string, i: number) => ({ type: 'image', url, label: `详情页-${i + 1}` }));
+    }
+
+    // 小说 → novel/generate-script
+    if (genTypeSlug === 'novel') {
+      const res = await fetch('/api/novel/generate-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userPrompt, genre: opts.genre || 'romance' }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || '小说生成失败');
+      return [{ type: 'text', label: '小说内容', textContent: data.data?.content || data.data?.script || data.data?.text || '生成完成' }];
+    }
+
+    // 简历 → llm/generate
+    if (genTypeSlug === 'resume') {
+      const res = await fetch('/api/llm/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userPrompt, type: 'resume' }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || '简历优化失败');
+      return [{ type: 'text', label: '优化简历', textContent: data.data?.content || data.data?.text || '优化完成' }];
+    }
+
+    // 默认 → images/generate（商品图/小红书/写真等）
+    const res = await fetch('/api/images/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: userPrompt,
+        images,
+        toolSlug,
+        count: genCount || 4,
+        ratio: selectedRatio || '1:1',
+        style: opts.style || selectedStyle || '',
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || '图片生成失败');
+    const urls: string[] = data.data?.urls || data.data?.images || (data.data?.url ? [data.data.url] : []);
+    return urls.map((url: string, i: number) => ({ type: 'image' as const, url, label: `生成结果-${i + 1}` }));
+  }, [genCount, selectedRatio, selectedStyle]);
+
+  // ===== 生成主函数 =====
+  const handleGenerate = useCallback(async () => {
+    const finalPrompt = prompt.trim();
+    const allImages = [...uploadedImageUrls];
+    if (!finalPrompt && allImages.length === 0) {
+      setToast({ msg: '请输入创作需求或上传参考图', type: 'info' });
+      return;
+    }
+    setStatus('generating');
+    setResults([]);
+    setActiveIndex(0);
+    setErrorMsg('');
+    startStepAnimation();
+
+    try {
+      const apiResults = await callGenerateAPI(genType, finalPrompt, allImages, selectedOptions);
+      clearStepAnimation();
+      setProgressPercent(100);
+      if (apiResults.length > 0) {
+        setResults(apiResults);
+        setActiveIndex(0);
+        setStatus('success');
+      } else {
+        setStatus('failed');
+        setErrorMsg('生成结果为空，请重试');
+      }
+    } catch (err: unknown) {
+      clearStepAnimation();
+      setStatus('failed');
+      setErrorMsg(err instanceof Error ? err.message : '生成失败，请稍后重试');
+      console.error('[CreateWorkbench] 生成错误:', err);
+    }
+  }, [prompt, uploadedImageUrls, genType, selectedOptions, callGenerateAPI, startStepAnimation, clearStepAnimation]);
+
+  // ===== 自动生成 =====
+  useEffect(() => {
+    if (shouldAutoGenerate && !autoGenTriggered.current && (prompt || uploadedImageUrls.length > 0)) {
+      autoGenTriggered.current = true;
+      const timer = setTimeout(() => handleGenerate(), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldAutoGenerate, prompt, uploadedImageUrls.length, handleGenerate]);
+
+  // ===== 上传 =====
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const newFiles = files.map(f => Object.assign(f, { preview: URL.createObjectURL(f) }));
+    setUploadedImages(prev => [...prev, ...newFiles].slice(0, 5));
+    setUploadedImageUrls(prev => [...prev, ...newFiles.map(f => f.preview)].slice(0, 5));
+    if (e.target.value) e.target.value = '';
+  };
+
+  const removeImage = (idx: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== idx));
+    setUploadedImageUrls(prev => prev.filter((_, i) => i !== idx));
+  };
+
+  // ===== 操作 =====
+  const handleDownload = async (url: string, filename: string) => {
+    try {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl; a.download = filename; a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch { setToast({ msg: '下载失败', type: 'error' }); }
+  };
+
+  const handleCopyText = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => setToast({ msg: '已复制', type: 'success' }));
+  };
+
+  const handleSaveToProjects = () => setToast({ msg: '已保存到作品集', type: 'success' });
+  const handleContinueOptimize = () => { setStatus('idle'); setResults([]); };
+  const handleSetAsCover = (idx: number) => { setActiveIndex(idx); setToast({ msg: '已设为封面', type: 'success' }); };
+  const handleDownloadAll = () => { imageResults.forEach((r, i) => setTimeout(() => handleDownload(r.url!, `${r.label}.png`), i * 500)); };
+
+  // ===== Toast =====
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  // ===== 比例选项 =====
+  const ratioOptions = ['1:1', '3:4', '4:5', '4:3', '16:9', '2:3'];
+
+  // ===== 灵感提示 =====
+  const tips = PROMPT_TIPS[genType] || PROMPT_TIPS.default;
 
   return (
-    <div className="os-page">
-      <div className="page-container">
+    <div className="os-ws-page">
+      {/* ===== 顶部工具栏 ===== */}
+      <header className="os-ws-header">
+        <div className="os-ws-header-left">
+          <div className="os-ws-tool-switcher" onClick={() => setShowToolDropdown(!showToolDropdown)}>
+            <span className="os-ws-tool-icon">{currentTool.icon}</span>
+            <span className="os-ws-tool-name">{currentTool.name}</span>
+            <ChevronDown className="w-4 h-4 text-slate-400" />
+          </div>
+          <span className="os-ws-tool-desc">{currentTool.description}</span>
+        </div>
+        <div className="os-ws-header-right">
+          {status === 'idle' && results.length === 0 && (
+            <button onClick={handleGenerate} className="os-ws-gen-btn" disabled={!prompt && uploadedImageUrls.length === 0}>
+              <Sparkles className="w-4 h-4" />
+              <span>开始创作</span>
+            </button>
+          )}
+        </div>
 
-        {/* ===== Toast 通知 ===== */}
-        {toasts.length > 0 && (
-          <div className="os-wb-toast-container">
-            {toasts.map(t => (
-              <div key={t.id} className={`os-wb-toast os-wb-toast-${t.type}`}>
-                {t.type === 'success' && <Check className="w-4 h-4 text-emerald-500" />}
-                {t.type === 'error' && <AlertCircle className="w-4 h-4 text-red-400" />}
-                {t.type === 'info' && <Sparkles className="w-4 h-4 text-blue-400" />}
-                <span>{t.message}</span>
-              </div>
+        {/* 工具下拉 */}
+        {showToolDropdown && (
+          <div className="os-ws-dropdown">
+            {getAllToolWorkflows().map(t => (
+              <button key={t.slug} className={`os-ws-dropdown-item ${t.slug === genType ? 'active' : ''}`} onClick={() => handleToolChange(t.slug)}>
+                <span>{t.icon}</span>
+                <span>{t.name}</span>
+              </button>
             ))}
           </div>
         )}
+      </header>
 
-        {/* ===== 顶部：已选择工具 + 切换 ===== */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <div className="os-aw-tool-badge">
-                <span className="text-base">{toolConfig?.icon || '🤖'}</span>
-              </div>
-              <div>
-                <div className="text-xs text-slate-400">已选择</div>
-                <div className="text-sm font-semibold text-slate-800">{toolConfig?.name || 'AI 创作工具'}</div>
-              </div>
+      {/* ===== 三栏主体 ===== */}
+      <div className="os-ws-body">
+        {/* ===== 左栏：控制区 ===== */}
+        <aside className="os-ws-left">
+          {/* 问候语 */}
+          <div className="os-ws-section">
+            <div className="os-ws-greeting">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              <span>{currentTool.greeting}</span>
             </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowTypeDropdown(!showTypeDropdown)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white border border-slate-200 hover:border-purple-300 transition-colors text-xs text-slate-400"
-              >
-                <span>切换</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-              {showTypeDropdown && (
-                <div className="absolute top-full left-0 mt-1.5 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-20 min-w-[180px]">
-                  {allTools.map(t => (
-                    <button
-                      key={t.slug}
-                      onClick={() => handleToolChange(t.slug)}
-                      className={`flex items-center gap-2 w-full px-3.5 py-2 text-sm text-left hover:bg-slate-50 transition-colors ${currentSlug === t.slug ? 'text-purple-600 bg-purple-50/50' : 'text-slate-600'}`}
-                    >
-                      <span>{t.icon}</span>
-                      <span>{t.name}</span>
-                    </button>
+          </div>
+
+          {/* 输入框 */}
+          <div className="os-ws-section">
+            <label className="os-ws-label">创作描述</label>
+            <textarea
+              className="os-ws-textarea"
+              placeholder="描述你想生成的内容…"
+              value={prompt}
+              onChange={e => setPrompt(e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          {/* 上传区 */}
+          <div className="os-ws-section">
+            <label className="os-ws-label">上传参考图</label>
+            <div className="os-ws-upload-area" onClick={() => fileInputRef.current?.click()}>
+              {uploadedImages.length === 0 ? (
+                <div className="os-ws-upload-empty">
+                  <Upload className="w-5 h-5 text-slate-400" />
+                  <span>点击或拖拽上传</span>
+                  <span className="os-ws-upload-hint">JPG / PNG / WEBP</span>
+                </div>
+              ) : (
+                <div className="os-ws-upload-grid">
+                  {uploadedImages.map((img, idx) => (
+                    <div key={idx} className="os-ws-upload-thumb">
+                      <img src={img.preview} alt="" />
+                      <button className="os-ws-upload-remove" onClick={e => { e.stopPropagation(); removeImage(idx); }}>
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
                   ))}
+                  {uploadedImages.length < 5 && (
+                    <div className="os-ws-upload-add">
+                      <Plus className="w-4 h-4 text-slate-400" />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
+            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
           </div>
-        </div>
 
-        {/* ===== 主体：左右分栏 ===== */}
-        <div className="os-wb-layout">
-
-          {/* ====== 左侧：AI 引导式输入 ====== */}
-          <div className="os-wb-left">
-
-            {/* AI 问候语 */}
-            <div className="os-aw-greeting">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>{toolConfig?.greeting || '告诉我你想生成什么？'}</span>
+          {/* 引导选项 */}
+          {currentTool.steps.filter(s => s.type === 'select').map(step => (
+            <div className="os-ws-section" key={step.id}>
+              <label className="os-ws-label">{step.label}</label>
+              <div className="os-ws-options">
+                {step.options?.map(opt => (
+                  <button
+                    key={opt.value}
+                    className={`os-ws-option ${selectedOptions[step.id] === opt.value ? 'active' : ''}`}
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, [step.id]: opt.value }))}
+                  >
+                    {opt.icon && <span className="os-ws-option-icon">{opt.icon}</span>}
+                    <span>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
+          ))}
 
-            {/* 动态引导步骤 */}
-            {toolConfig && toolConfig.steps.map((step) => (
-              <div key={step.id} className="os-aw-step">
-                {/* 步骤标签 */}
-                <div className="os-aw-step-label">
-                  {step.optional && <span className="os-aw-step-optional">可选</span>}
-                  {step.label}
-                </div>
+          {/* 风格选择 */}
+          {currentTool.styleOptions.length > 0 && (
+            <div className="os-ws-section">
+              <label className="os-ws-label">
+                <Palette className="w-3.5 h-3.5" />
+                风格
+              </label>
+              <div className="os-ws-chips">
+                {currentTool.styleOptions.map(s => (
+                  <button key={s.value} className={`os-ws-chip ${selectedStyle === s.value ? 'active' : ''}`} onClick={() => setSelectedStyle(s.value)}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-                {/* 上传类步骤 */}
-                {step.type === 'upload' && (
-                  <div>
-                    {uploadedImages.length > 0 ? (
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {uploadedImages.map((img, idx) => (
-                          <div key={idx} className="relative group w-20 h-20 rounded-xl overflow-hidden border-2 border-purple-100">
-                            <img src={img} alt={`上传图 ${idx + 1}`} className="w-full h-full object-cover" />
-                            <button
-                              onClick={() => removeImage(idx)}
-                              className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="os-aw-upload-area"
-                    >
-                      <ImageIcon className="w-5 h-5 text-slate-300" />
-                      <span className="text-sm text-slate-400">
-                        {step.placeholder || '点击上传或拖拽图片'}
-                      </span>
-                      <span className="text-[11px] text-slate-300">
-                        JPG / PNG，最多{step.maxFiles || 5}张
-                      </span>
-                    </button>
-                  </div>
-                )}
-
-                {/* 选择类步骤 */}
-                {step.type === 'select' && step.options && (
-                  <div className="os-aw-options">
-                    {step.options.map(opt => (
-                      <button
-                        key={opt.value}
-                        onClick={() => handleGuideSelect(step.id, opt.value)}
-                        className={`os-aw-option ${guideAnswers[step.id] === opt.value ? 'active' : ''}`}
-                      >
-                        {opt.icon && <span className="text-sm">{opt.icon}</span>}
-                        <span>{opt.label}</span>
+          {/* 输出规格（折叠） */}
+          <div className="os-ws-section">
+            <button className="os-ws-adv-toggle" onClick={() => setShowAdvanced(!showAdvanced)}>
+              <Ratio className="w-3.5 h-3.5" />
+              <span>输出规格</span>
+              {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+            {showAdvanced && (
+              <div className="os-ws-adv-content">
+                <div className="os-ws-spec-row">
+                  <span className="os-ws-spec-label">比例</span>
+                  <div className="os-ws-ratio-group">
+                    {ratioOptions.map(r => (
+                      <button key={r} className={`os-ws-ratio-btn ${selectedRatio === r ? 'active' : ''}`} onClick={() => setSelectedRatio(r)}>
+                        {r}
                       </button>
                     ))}
                   </div>
-                )}
-
-                {/* 输入类步骤 */}
-                {step.type === 'input' && (
-                  <textarea
-                    value={prompt}
-                    onChange={e => setPrompt(e.target.value.slice(0, 500))}
-                    placeholder={step.placeholder || '请输入…'}
-                    className="os-wb-textarea"
-                    rows={3}
-                  />
-                )}
-              </div>
-            ))}
-
-            {/* 无工具配置时 fallback 到原始输入 */}
-            {!toolConfig && (
-              <div className="os-aw-step">
-                <div className="os-aw-step-label">你的需求</div>
-                <textarea
-                  value={prompt}
-                  onChange={e => setPrompt(e.target.value.slice(0, 500))}
-                  placeholder="描述你想生成的内容，例如：生成高级电商商品主图和场景图"
-                  className="os-wb-textarea"
-                  rows={5}
-                />
+                </div>
+                <div className="os-ws-spec-row">
+                  <span className="os-ws-spec-label">数量</span>
+                  <div className="os-ws-count-group">
+                    <button className="os-ws-count-btn" onClick={() => setGenCount(Math.max(1, genCount - 1))}><Minus className="w-3.5 h-3.5" /></button>
+                    <span className="os-ws-count-val">{genCount}</span>
+                    <button className="os-ws-count-btn" onClick={() => setGenCount(Math.min(8, genCount + 1))}><Plus className="w-3.5 h-3.5" /></button>
+                  </div>
+                </div>
               </div>
             )}
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*,.heic,.heif"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-
-            {/* 开始生成按钮 */}
-            <div className="mt-auto pt-4">
-              <button
-                onClick={handleGenerate}
-                disabled={status === 'generating' || !isGuideComplete()}
-                className="os-wb-gen-btn w-full"
-              >
-                {status === 'generating' ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /><span>生成中…</span></>
-                ) : (
-                  <>
-                    <Wand2 className="w-4 h-4" />
-                    <span>开始生成</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                  </>
-                )}
-              </button>
-              {results.length > 0 && status !== 'generating' && (
-                <button
-                  onClick={handleGenerate}
-                  className="os-wb-secondary-btn w-full mt-2"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>重新生成</span>
-                </button>
-              )}
-            </div>
           </div>
 
-          {/* ====== 右侧：结果 / 案例 ====== */}
-          <div className="os-wb-right">
+          {/* 生成按钮（左栏底部固定） */}
+          {status !== 'generating' && (
+            <button onClick={handleGenerate} className="os-ws-gen-btn-full" disabled={!prompt && uploadedImageUrls.length === 0}>
+              <Sparkles className="w-4 h-4" />
+              <span>{status === 'failed' ? '重新生成' : '开始创作'}</span>
+            </button>
+          )}
+          {status === 'generating' && (
+            <div className="os-ws-gen-cancel" onClick={() => { clearStepAnimation(); setStatus('idle'); }}>
+              取消生成
+            </div>
+          )}
+        </aside>
 
-            {/* ===== 生成中状态 ===== */}
-            {status === 'generating' && (
-              <div className="os-wb-generating">
-                <div className="os-wb-gen-header">
-                  <div className="os-wb-gen-icon-wrap">
-                    <Loader2 className="w-5 h-5 text-white animate-spin" />
-                  </div>
-                  <div className="os-wb-gen-title-area">
-                    <h3 className="text-base font-semibold text-slate-800">AI 正在生成</h3>
-                    <p className="text-sm text-slate-500 mt-0.5">{GEN_STEPS[currentStep - 1]?.text || GEN_STEPS[0].text}</p>
-                  </div>
-                </div>
-                <div className="os-wb-progress-track">
-                  <div className="os-wb-progress-fill" style={{ width: `${progressPercent}%` }} />
-                </div>
-                <div className="os-wb-skeleton-area">
-                  <div className="os-wb-skeleton" style={{ height: '200px' }} />
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="os-wb-skeleton" style={{ height: '130px' }} />
-                    <div className="os-wb-skeleton" style={{ height: '130px' }} />
-                  </div>
+        {/* ===== 中栏：结果区 ===== */}
+        <main className="os-ws-center">
+          {/* 生成中 */}
+          {status === 'generating' && (
+            <div className="os-ws-generating">
+              <div className="os-ws-gen-pulse" />
+              <div className="os-ws-gen-info">
+                <h3 className="text-base font-semibold text-slate-800">AI 正在生成</h3>
+                <p className="text-sm text-slate-500 mt-0.5">{GEN_STEPS[currentStep]?.text || GEN_STEPS[0].text}</p>
+              </div>
+              <div className="os-ws-progress-track">
+                <div className="os-ws-progress-fill" style={{ width: `${progressPercent}%` }} />
+              </div>
+              <div className="os-ws-skeleton-area">
+                <div className="os-ws-skeleton" style={{ height: '260px' }} />
+                <div className="grid grid-cols-2 gap-3 mt-3">
+                  <div className="os-ws-skeleton" style={{ height: '130px' }} />
+                  <div className="os-ws-skeleton" style={{ height: '130px' }} />
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* ===== 生成失败状态 ===== */}
-            {status === 'failed' && (
-              <div className="os-wb-failed">
-                <div className="os-wb-failed-icon-wrap">
-                  <AlertCircle className="w-8 h-8 text-red-400" />
-                </div>
-                <h3 className="text-base font-semibold text-slate-800 mt-4">生成失败</h3>
-                <p className="text-sm text-slate-500 mt-1.5">{errorMsg || '生成失败，请稍后重试'}</p>
-                <button onClick={handleGenerate} className="os-wb-retry-btn mt-6">
-                  <RotateCcw className="w-4 h-4" />
-                  <span>重新生成</span>
-                </button>
+          {/* 生成失败 */}
+          {status === 'failed' && (
+            <div className="os-ws-failed">
+              <div className="os-ws-failed-icon"><RotateCcw className="w-8 h-8 text-red-400" /></div>
+              <h3 className="text-base font-semibold text-slate-800 mt-4">生成失败</h3>
+              <p className="text-sm text-slate-500 mt-1.5">{errorMsg || '生成失败，请稍后重试'}</p>
+              <button onClick={handleGenerate} className="os-ws-retry-btn mt-6">
+                <RefreshCw className="w-4 h-4" /><span>重新生成</span>
+              </button>
+            </div>
+          )}
+
+          {/* 空闲状态：展示工具案例 */}
+          {status === 'idle' && results.length === 0 && (
+            <div className="os-ws-idle">
+              <div className="os-ws-idle-header">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span>{currentTool.name}创作案例</span>
               </div>
-            )}
-
-            {/* ===== 空状态：展示工具案例 ===== */}
-            {status === 'idle' && results.length === 0 && (
-              <div className="os-aw-cases">
-                <div className="os-aw-cases-header">
-                  <Sparkles className="w-4 h-4 text-purple-400" />
-                  <span>{toolConfig?.name || 'AI'}创作案例</span>
-                </div>
-                <div className="os-aw-cases-grid">
-                  {(toolConfig?.cases || FALLBACK_CASES).map((c, idx) => (
-                    <div key={idx} className="os-aw-case-card">
-                      <div className="os-aw-case-img">
-                        {c.image ? (
-                          <img src={c.image} alt={c.title} />
-                        ) : (
-                          <div className="os-aw-case-img-fallback">
-                            <ImageIcon className="w-6 h-6 text-slate-300" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="os-aw-case-info">
-                        <div className="os-aw-case-title">{c.title}</div>
-                        <div className="os-aw-case-desc">{c.desc}</div>
-                      </div>
+              <div className="os-ws-idle-cases">
+                {(currentTool.cases.length > 0 ? currentTool.cases : FALLBACK_CASES).map((c, idx) => (
+                  <div key={idx} className="os-ws-idle-case">
+                    <div className="os-ws-idle-case-img">
+                      {c.image ? <img src={c.image} alt={c.title} /> : <div className="os-ws-idle-case-fallback"><ImageIcon className="w-8 h-8 text-slate-300" /></div>}
                     </div>
-                  ))}
-                </div>
-                <div className="os-aw-cases-hint">
-                  完成左侧创作引导后，AI 将自动为你生成
-                </div>
-              </div>
-            )}
-
-            {/* ===== 图片结果展示 ===== */}
-            {status === 'success' && hasImageResults && (
-              <div className="os-wb-results">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">生成结果</span>
-                    <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{toolConfig?.name || 'AI'}</span>
-                    <span className="text-[11px] text-slate-400">{imageResults.length} 张</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={handleSaveToProjects} className="os-wb-action-btn">
-                      <FolderOpen className="w-3.5 h-3.5" />
-                      <span>保存到作品</span>
-                    </button>
-                  </div>
-                </div>
-
-                {activeResult && activeResult.type === 'image' && (
-                  <div className="os-wb-preview-main group">
-                    <img src={activeResult.url} alt={activeResult.label} className="os-wb-preview-img" />
-                    <div className="os-wb-preview-overlay">
-                      <div className="os-wb-preview-actions">
-                        <button onClick={() => setShowLightbox(true)} className="os-wb-preview-action" title="放大查看">
-                          <ZoomIn className="w-4 h-4" /><span>放大</span>
-                        </button>
-                        <button onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)} className="os-wb-preview-action" title="下载图片">
-                          <Download className="w-4 h-4" /><span>下载</span>
-                        </button>
-                        <button onClick={() => handleSetAsCover(activeIndex)} className="os-wb-preview-action" title="设为封面">
-                          <Check className="w-4 h-4" /><span>设为封面</span>
-                        </button>
-                      </div>
+                    <div className="os-ws-idle-case-info">
+                      <div className="os-ws-idle-case-title">{c.title}</div>
+                      <div className="os-ws-idle-case-desc">{c.desc}</div>
                     </div>
-                  </div>
-                )}
-
-                {imageResults.length > 1 && (
-                  <div className="os-wb-thumb-row">
-                    {imageResults.map((result, idx) => {
-                      const globalIdx = results.indexOf(result);
-                      return (
-                        <button key={idx} onClick={() => setActiveIndex(globalIdx)} className={`os-wb-thumb-item ${activeIndex === globalIdx ? 'active' : ''}`}>
-                          <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
-                          {activeIndex === globalIdx && (
-                            <div className="os-wb-thumb-active-indicator">
-                              <Check className="w-3 h-3 text-white" />
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <div className="os-wb-bottom-bar">
-                  <div className="flex items-center gap-2">
-                    <button onClick={handleContinueOptimize} className="os-wb-action-btn">
-                      <Sparkles className="w-3.5 h-3.5" /><span>继续优化</span>
-                    </button>
-                    <button onClick={handleGenerate} className="os-wb-action-btn">
-                      <RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span>
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={handleDownloadAll} className="os-wb-action-btn">
-                      <Download className="w-3.5 h-3.5" /><span>下载全部</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ===== 文本结果展示 ===== */}
-            {status === 'success' && hasTextResults && (
-              <div className="os-wb-results">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-slate-700">生成结果</span>
-                    <span className="text-[11px] text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">{toolConfig?.name || 'AI'}</span>
-                  </div>
-                  <button onClick={handleSaveToProjects} className="os-wb-action-btn">
-                    <FolderOpen className="w-3.5 h-3.5" /><span>保存到作品</span>
-                  </button>
-                </div>
-
-                {textResults.map((result, idx) => (
-                  <div key={idx} className="os-wb-text-card">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-slate-400 font-medium">{result.label}</span>
-                      <button onClick={() => handleCopyText(result.textContent || '')} className="os-wb-action-btn text-xs">
-                        <Copy className="w-3 h-3" /><span>复制</span>
-                      </button>
-                    </div>
-                    <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-                      {result.textContent || '暂无文本内容'}
-                    </p>
                   </div>
                 ))}
+              </div>
+              <div className="os-ws-idle-hint">完成左侧创作引导后，AI 将自动为你生成</div>
+            </div>
+          )}
 
-                {hasImageResults && (
-                  <div className="mt-4">
-                    <div className="text-xs text-slate-400 font-medium mb-2">图片结果</div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {imageResults.map((result, idx) => (
-                        <button key={idx} onClick={() => { setActiveIndex(idx); setShowLightbox(true); }} className="os-wb-thumb-item-sm">
-                          <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="os-wb-bottom-bar">
-                  <div className="flex items-center gap-2">
-                    <button onClick={handleContinueOptimize} className="os-wb-action-btn">
-                      <Sparkles className="w-3.5 h-3.5" /><span>继续优化</span>
-                    </button>
-                    <button onClick={handleGenerate} className="os-wb-action-btn">
-                      <RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span>
-                    </button>
-                  </div>
+          {/* 图片结果 */}
+          {status === 'success' && hasImageResults && (
+            <div className="os-ws-results">
+              <div className="os-ws-results-bar">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-700">生成结果</span>
+                  <span className="os-ws-results-badge">{currentTool.name}</span>
+                  <span className="text-[11px] text-slate-400">{imageResults.length} 张</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={handleSaveToProjects} className="os-ws-action-btn"><FolderOpen className="w-3.5 h-3.5" /><span>保存到作品</span></button>
                 </div>
               </div>
-            )}
 
+              {activeResult && activeResult.type === 'image' && (
+                <div className="os-ws-preview-main group">
+                  <img src={activeResult.url} alt={activeResult.label} className="os-ws-preview-img" />
+                  <div className="os-ws-preview-overlay">
+                    <div className="os-ws-preview-actions">
+                      <button onClick={() => setShowLightbox(true)} className="os-ws-preview-action" title="放大"><ZoomIn className="w-4 h-4" /><span>放大</span></button>
+                      <button onClick={() => handleDownload(activeResult.url!, `${activeResult.label}.png`)} className="os-ws-preview-action" title="下载"><Download className="w-4 h-4" /><span>下载</span></button>
+                      <button onClick={() => handleSetAsCover(activeIndex)} className="os-ws-preview-action" title="设为封面"><Check className="w-4 h-4" /><span>封面</span></button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {imageResults.length > 1 && (
+                <div className="os-ws-thumb-row">
+                  {imageResults.map((result, idx) => {
+                    const globalIdx = results.indexOf(result);
+                    return (
+                      <button key={idx} onClick={() => setActiveIndex(globalIdx)} className={`os-ws-thumb-item ${activeIndex === globalIdx ? 'active' : ''}`}>
+                        <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
+                        {activeIndex === globalIdx && <div className="os-ws-thumb-indicator"><Check className="w-3 h-3 text-white" /></div>}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="os-ws-bottom-bar">
+                <div className="flex items-center gap-2">
+                  <button onClick={handleContinueOptimize} className="os-ws-action-btn"><Sparkles className="w-3.5 h-3.5" /><span>继续优化</span></button>
+                  <button onClick={handleGenerate} className="os-ws-action-btn"><RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span></button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={handleDownloadAll} className="os-ws-action-btn"><Download className="w-3.5 h-3.5" /><span>下载全部</span></button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 文本结果 */}
+          {status === 'success' && hasTextResults && (
+            <div className="os-ws-results">
+              <div className="os-ws-results-bar">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-slate-700">生成结果</span>
+                  <span className="os-ws-results-badge">{currentTool.name}</span>
+                </div>
+                <button onClick={handleSaveToProjects} className="os-ws-action-btn"><FolderOpen className="w-3.5 h-3.5" /><span>保存到作品</span></button>
+              </div>
+              {results.filter(r => r.type === 'text').map((result, idx) => (
+                <div key={idx} className="os-ws-text-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-slate-400 font-medium">{result.label}</span>
+                    <button onClick={() => handleCopyText(result.textContent || '')} className="os-ws-action-btn text-xs"><Copy className="w-3 h-3" /><span>复制</span></button>
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{result.textContent || '暂无文本内容'}</p>
+                </div>
+              ))}
+              {hasImageResults && (
+                <div className="mt-4">
+                  <div className="text-xs text-slate-400 font-medium mb-2">图片结果</div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {imageResults.map((result, idx) => (
+                      <button key={idx} onClick={() => { setActiveIndex(idx); setShowLightbox(true); }} className="os-ws-thumb-item-sm">
+                        <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="os-ws-bottom-bar">
+                <div className="flex items-center gap-2">
+                  <button onClick={handleContinueOptimize} className="os-ws-action-btn"><Sparkles className="w-3.5 h-3.5" /><span>继续优化</span></button>
+                  <button onClick={handleGenerate} className="os-ws-action-btn"><RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span></button>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+
+        {/* ===== 右栏：灵感区 ===== */}
+        <aside className="os-ws-right">
+          {/* 热门风格 */}
+          {currentTool.styleOptions.length > 0 && (
+            <div className="os-ws-insp-section">
+              <div className="os-ws-insp-title">
+                <Palette className="w-3.5 h-3.5 text-purple-400" />
+                <span>热门风格</span>
+              </div>
+              <div className="os-ws-insp-styles">
+                {currentTool.styleOptions.map(s => (
+                  <button key={s.value} className={`os-ws-insp-style ${selectedStyle === s.value ? 'active' : ''}`} onClick={() => setSelectedStyle(s.value)}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 灵感案例 */}
+          <div className="os-ws-insp-section">
+            <div className="os-ws-insp-title">
+              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+              <span>灵感案例</span>
+            </div>
+            <div className="os-ws-insp-cases">
+              {(currentTool.cases.length > 0 ? currentTool.cases : FALLBACK_CASES).map((c, idx) => (
+                <div key={idx} className="os-ws-insp-case">
+                  <div className="os-ws-insp-case-img">
+                    {c.image ? <img src={c.image} alt={c.title} /> : <div className="os-ws-insp-case-fallback"><ImageIcon className="w-5 h-5 text-slate-300" /></div>}
+                  </div>
+                  <div className="os-ws-insp-case-info">
+                    <div className="os-ws-insp-case-title">{c.title}</div>
+                    <div className="os-ws-insp-case-desc">{c.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+
+          {/* Prompt 灵感 */}
+          <div className="os-ws-insp-section">
+            <div className="os-ws-insp-title">
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <span>创作技巧</span>
+            </div>
+            <div className="os-ws-insp-tips">
+              {tips.map((tip, idx) => (
+                <div key={idx} className="os-ws-insp-tip">{tip}</div>
+              ))}
+            </div>
+          </div>
+        </aside>
       </div>
 
-      {/* ===== Lightbox 放大查看 ===== */}
+      {/* ===== Lightbox ===== */}
       {showLightbox && activeResult && activeResult.type === 'image' && (
-        <div className="os-wb-lightbox" onClick={() => setShowLightbox(false)}>
-          <div className="os-wb-lightbox-content" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowLightbox(false)} className="os-wb-lightbox-close">
-              <X className="w-5 h-5" />
-            </button>
-            <img src={activeResult.url} alt={activeResult.label} className="os-wb-lightbox-img" />
-            <div className="os-wb-lightbox-actions">
-              <button onClick={() => handleDownload(activeResult.url, `${activeResult.label}.png`)} className="os-wb-lightbox-btn">
-                <Download className="w-4 h-4" /><span>下载 PNG</span>
-              </button>
-              <button onClick={() => { handleSetAsCover(activeIndex); setShowLightbox(false); }} className="os-wb-lightbox-btn">
-                <Check className="w-4 h-4" /><span>设为封面</span>
-              </button>
-              <button onClick={() => { handleSaveToProjects(); setShowLightbox(false); }} className="os-wb-lightbox-btn">
-                <FolderOpen className="w-4 h-4" /><span>保存到作品</span>
-              </button>
+        <div className="os-ws-lightbox" onClick={() => setShowLightbox(false)}>
+          <div className="os-ws-lightbox-content" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowLightbox(false)} className="os-ws-lightbox-close"><X className="w-5 h-5" /></button>
+            <img src={activeResult.url} alt={activeResult.label} className="os-ws-lightbox-img" />
+            <div className="os-ws-lightbox-actions">
+              <button onClick={() => handleDownload(activeResult.url!, `${activeResult.label}.png`)} className="os-ws-lightbox-btn"><Download className="w-4 h-4" /><span>下载 PNG</span></button>
+              <button onClick={() => { handleSetAsCover(activeIndex); setShowLightbox(false); }} className="os-ws-lightbox-btn"><Check className="w-4 h-4" /><span>设为封面</span></button>
+              <button onClick={() => { handleSaveToProjects(); setShowLightbox(false); }} className="os-ws-lightbox-btn"><FolderOpen className="w-4 h-4" /><span>保存到作品</span></button>
             </div>
             {imageResults.length > 1 && (
-              <div className="os-wb-lightbox-thumbs">
+              <div className="os-ws-lightbox-thumbs">
                 {imageResults.map((r, idx) => {
                   const globalIdx = results.indexOf(r);
                   return (
-                    <button key={idx} onClick={(e) => { e.stopPropagation(); setActiveIndex(globalIdx); }} className={`os-wb-lightbox-thumb ${activeIndex === globalIdx ? 'active' : ''}`}>
+                    <button key={idx} onClick={e => { e.stopPropagation(); setActiveIndex(globalIdx); }} className={`os-ws-lightbox-thumb ${activeIndex === globalIdx ? 'active' : ''}`}>
                       <img src={r.url} alt={r.label} className="w-full h-full object-cover" />
                     </button>
                   );
@@ -885,26 +729,16 @@ export default function CreateWorkbench() {
           </div>
         </div>
       )}
+
+      {/* ===== Toast ===== */}
+      {toast && (
+        <div className={`os-ws-toast os-ws-toast-${toast.type}`}>
+          <span>{toast.msg}</span>
+        </div>
+      )}
+
+      {/* ===== 全局点击关闭下拉 ===== */}
+      {showToolDropdown && <div className="os-ws-overlay" onClick={() => setShowToolDropdown(false)} />}
     </div>
   );
 }
-
-// ===== 简单工具列表（切换下拉用） =====
-function getAllToolWorkflowsSimple() {
-  return [
-    { slug: 'product-generator', name: 'AI商品图', icon: '📦' },
-    { slug: 'xiaohongshu-generator', name: '小红书爆款', icon: '📕' },
-    { slug: 'ai-photo', name: 'AI写真', icon: '📸' },
-    { slug: 'background-removal', name: '智能抠图', icon: '✂️' },
-    { slug: 'product-page', name: '商品详情页', icon: '📋' },
-    { slug: 'novel', name: '小说创作', icon: '📖' },
-    { slug: 'resume-optimizer', name: '简历优化', icon: '📝' },
-  ];
-}
-
-// ===== 兜底案例 =====
-const FALLBACK_CASES = [
-  { image: '/case-lipstick-main.png', title: '商品图案例', desc: '高级感电商主图' },
-  { image: '/demo-card-lifestyle.jpg', title: '封面案例', desc: '氛围感内容封面' },
-  { image: '/demo-scene.jpg', title: '场景图案例', desc: '生活化场景展示' },
-];
