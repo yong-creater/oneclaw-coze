@@ -1,0 +1,47 @@
+/* ==================== Creator OS 标签系统 ==================== */
+
+/* ==================== Creator OS 页面布局 ==================== */
+
+/* 页面容器 — 透明通道，背景由 os-main-canvas 提供 */
+
+/* 页面主标题 H1 */
+.os-h1 {
+  font-size: var(--typo-h1-size);
+  font-weight: var(--typo-h1-weight);
+  color: var(--typo-h1-color);
+  line-height: var(--typo-h1-line-height);
+  letter-spacing: -0.02em;
+}
+
+
+/* 卡片标题 H3 */
+.os-h3 {
+  font-size: var(--typo-h3-size);
+  font-weight: var(--typo-h3-weight);
+  color: var(--typo-h3-color);
+  letter-spacing: -0.01em;
+}
+
+/* 正文 */
+.os-body {
+  font-size: var(--typo-body-size);
+  font-weight: var(--typo-body-weight);
+  color: var(--typo-body-color);
+  line-height: var(--typo-body-line-height);
+}
+
+/* 辅助说明 */
+.os-caption {
+  font-size: var(--typo-caption-size);
+  font-weight: var(--typo-caption-weight);
+  color: var(--typo-caption-color);
+}
+
+/* 模块副标题 */
+.os-section-desc {
+  font-size: var(--typo-caption-size);
+  color: var(--typo-caption-color);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+

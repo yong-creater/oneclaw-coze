@@ -1,0 +1,156 @@
+/* ==================== Creator OS 卡片系统 ==================== */
+
+/* 标准卡片 */
+.os-card {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: none;
+  border-radius: 24px;
+  padding: var(--spacing-card-padding);
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.os-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.10), 0 0 20px rgba(123, 97, 255, 0.06);
+}
+
+/* 静态卡片（不浮起） */
+.os-card-static {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: none;
+  border-radius: 24px;
+  padding: var(--spacing-card-padding);
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+
+/* 卡片图标背景 - 渐变 */
+.os-icon-bg {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ==================== Creator OS 热门创作结果卡片 ==================== */
+
+/* ── 热门生成案例 ───────────────────── */
+.os-result-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.os-result-card {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 10px 34px rgba(124, 92, 255, 0.08);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.os-result-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(124, 92, 255, 0.14);
+}
+
+/* 图片区域 */
+.os-result-card-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #F8FAFC;
+}
+.os-result-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+.os-result-card:hover .os-result-card-img {
+  transform: scale(1.03);
+}
+
+/* 类型标签 — 悬浮在图片右上角 */
+.os-result-card-type {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  background: rgba(123, 97, 255, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  z-index: 2;
+}
+
+/* Hover 浮层 */
+.os-result-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+.os-result-card:hover .os-result-card-overlay {
+  opacity: 1;
+}
+
+/* 用这个生成按钮 */
+.os-result-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #7C6CFF 0%, #5B5DE6 100%);
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.os-result-card-cta:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(124, 92, 255, 0.45);
+}
+
+/* 标题区 */
+.os-result-card-info {
+  padding: 14px 18px 16px;
+}
+.os-result-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+

@@ -1,0 +1,285 @@
+/* ==================== Creator OS 输入系统 ==================== */
+
+.os-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  background: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  font-size: 14px;
+  color: #1E293B;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.os-input::placeholder {
+  color: #94A3B8;
+}
+.os-input:hover {
+  border-color: #D1D5DB;
+}
+.os-input:focus {
+  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08), 0 4px 16px rgba(123, 97, 255, 0.06);
+}
+
+/* 搜索输入框 */
+.os-search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px 0 40px;
+  background: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  font-size: 14px;
+  color: #1E293B;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.os-search-input::placeholder {
+  color: #94A3B8;
+}
+.os-search-input:hover {
+  border-color: #D1D5DB;
+}
+.os-search-input:focus {
+  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08), 0 4px 16px rgba(123, 97, 255, 0.06);
+}
+
+/* Textarea — 卖点/描述等 */
+.os-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  border: none;
+  border-radius: 16px;
+  font-size: var(--typo-body-size);
+  line-height: 1.6;
+  color: var(--text-primary);
+  resize: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.os-textarea::placeholder {
+  color: #94A3B8;
+}
+.os-textarea:hover {
+  border-color: #D1D5DB;
+}
+.os-textarea:focus {
+  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08), 0 4px 16px rgba(123, 97, 255, 0.06);
+}
+
+/* 上传区域 — AI 创作风格 */
+.os-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  padding: 32px;
+  background: #F8FAFC;
+  border: 2px dashed #D1D5DB;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.os-upload:hover {
+  background: rgba(123, 97, 255, 0.03);
+  border-color: #7B61FF;
+}
+
+/* ---- 灵感建议 chips ---- */
+.os-chips-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1320px;
+  width: 100%;
+}
+.os-chips-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #B0B8C8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.os-chips-list {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.os-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(124, 92, 255, 0.08);
+  color: #94A3B8;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.os-chip:hover {
+  background: rgba(124, 92, 255, 0.08);
+  border-color: rgba(124, 92, 255, 0.18);
+  color: #6D5EF6;
+  transform: translateY(-1px);
+}
+
+/* ---- 试试这些创作 — pills 标签 ---- */
+.os-try-chips-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.os-try-chips-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(20, 20, 20, 0.25);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.os-try-chips-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.os-try-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(120, 120, 255, 0.08);
+  color: rgba(20, 20, 20, 0.45);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.os-try-chip:hover {
+  background: rgba(120, 120, 255, 0.06);
+  border-color: rgba(120, 120, 255, 0.18);
+  color: #6D5EF6;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(120, 120, 255, 0.08);
+}
+
+/* 输入区能力按钮 — 复用 Capsule Button */
+
+.os-studio {
+  display: grid;
+  grid-template-columns: 68% 32%;
+  gap: 28px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 28px;
+  box-shadow: 0 10px 40px rgba(120, 120, 255, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  padding: 32px;
+  border: 1px solid rgba(120, 120, 255, 0.08);
+  animation: studioGlow 6s ease-in-out infinite;
+}
+
+/* 左侧输入区 */
+.os-studio-input {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+.os-studio-input-area {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 24px;
+  height: 240px;
+  border: 1px solid rgba(120, 120, 255, 0.08);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  contain: layout style paint;
+  box-shadow: 0 10px 40px rgba(120, 120, 255, 0.06);
+}
+.os-studio-input-area:hover {
+  border-color: rgba(120, 120, 255, 0.18);
+  box-shadow: 0 12px 44px rgba(120, 120, 255, 0.09);
+}
+.os-studio-input-area:focus-within {
+  border-color: rgba(120, 120, 255, 0.35);
+  box-shadow: 0 0 0 4px rgba(120, 120, 255, 0.08), 0 0 60px rgba(120, 120, 255, 0.10), 0 14px 44px rgba(120, 120, 255, 0.08);
+}
+.os-studio-textarea-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+.os-studio-textarea {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  line-height: 1.75;
+  color: #1E293B;
+  resize: none;
+  outline: none;
+  position: relative;
+  z-index: 2;
+}
+.os-studio-textarea::placeholder {
+  color: transparent;
+}
+/* AI 引导提示 */
+.os-studio-ai-hint {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(20, 20, 20, 0.35);
+  margin-bottom: 8px;
+  display: block;
+  flex-shrink: 0;
+  letter-spacing: 0.01em;
+}
+/* placeholder 示例文本 — 轮播动画，叠在 textarea 上方 */
+.os-studio-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 1;
+  padding: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.os-studio-placeholder-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.os-studio-placeholder-hidden {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.os-studio-placeholder-example {
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(20, 20, 20, 0.32);
+  margin: 0;
+  line-height: 1.75;
+}
+
+
