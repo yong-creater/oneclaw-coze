@@ -416,7 +416,7 @@ export default function HomePage() {
 
           {/* 副标题 */}
           <p className="os-hero-subtitle">
-            商品图、小红书、详情页、AI写真、<br className="sm:hidden" />封面海报等内容，<br className="hidden sm:inline" />简单输入需求即可生成。
+            商品图、小红书、详情页、AI写真、封面海报等内容，简单输入需求即可生成。
           </p>
 
           {/* ===== AI 创作输入区 — 左右分栏 ===== */}
