@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Flame, FolderOpen, Wrench, Info, MessageCircle } from 'lucide-react';
+import { Sparkles, Flame, FolderOpen, Wrench, LogIn, User, Crown, LogOut } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
+import { useUser } from '@/contexts/UserContext';
 
 interface NavItem {
   icon: React.ElementType;
@@ -19,14 +20,10 @@ const NAV_ITEMS: NavItem[] = [
   { icon: Wrench,   label: '工具库', href: '/tools' },
 ];
 
-const BOTTOM_ITEMS: NavItem[] = [
-  { icon: Info,          label: '关于', href: '/about' },
-  { icon: MessageCircle, label: '公众号', href: '#wechat' },
-];
-
 export default function SiteSidebar() {
   const pathname = usePathname();
-  const [showQR, setShowQR] = useState(false);
+  const { user, authenticated, logout, setShowLoginModal } = useUser();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   function isActive(href: string): boolean {
     if (href === '/') return pathname === '/';
@@ -59,58 +56,70 @@ export default function SiteSidebar() {
         })}
       </nav>
 
-      {/* ===== 底部 ===== */}
+      {/* ===== 底部：登录 / 用户头像 ===== */}
       <div className="os-dock-bottom">
-        {BOTTOM_ITEMS.map((item) => {
-          const Icon = item.icon;
-          if (item.href === '#wechat') {
-            return (
-              <button
-                key="wechat"
-                className="os-dock-item"
-                title="微信公众号"
-                onClick={() => setShowQR(!showQR)}
-                type="button"
-              >
-                <Icon className="os-dock-icon" strokeWidth={1.8} />
-                <span className="os-dock-label">公众号</span>
-              </button>
-            );
-          }
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="os-dock-item"
-              title={item.label}
+        {!authenticated ? (
+          <button
+            className="os-dock-item"
+            title="登录"
+            onClick={() => setShowLoginModal(true)}
+            type="button"
+          >
+            <LogIn className="os-dock-icon" strokeWidth={1.8} />
+            <span className="os-dock-label">登录</span>
+          </button>
+        ) : (
+          <div className="relative">
+            <button
+              className="os-dock-avatar-btn"
+              title={user?.nickname || '用户'}
+              onClick={() => setShowDropdown(!showDropdown)}
+              type="button"
             >
-              <Icon className="os-dock-icon" strokeWidth={1.8} />
-              <span className="os-dock-label">{item.label}</span>
-            </Link>
-          );
-        })}
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="" className="os-dock-avatar-img" />
+              ) : (
+                <div className="os-dock-avatar-fallback">
+                  {user?.nickname?.slice(0, 1).toUpperCase() || 'U'}
+                </div>
+              )}
+            </button>
 
-        {/* 备案信息 */}
-        <div className="os-dock-icp" title="渝ICP备2026004291号-2">
-          ICP
-        </div>
-      </div>
-
-      {/* ===== 公众号二维码浮窗 ===== */}
-      {showQR && (
-        <div className="os-dock-qr-popup">
-          <div className="os-dock-qr-card">
-            <img
-              src="/wechat-qrcode.jpg"
-              alt="微信公众号二维码"
-              className="os-dock-qr-img"
-            />
-            <p className="os-dock-qr-text">扫码关注公众号</p>
-            <p className="os-dock-qr-sub">获取 AI 创作灵感</p>
+            {/* 用户下拉菜单 */}
+            {showDropdown && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+                <div className="os-dock-user-menu">
+                  <Link
+                    href="/projects"
+                    onClick={() => setShowDropdown(false)}
+                    className="os-dock-user-menu-item"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    <span>我的作品</span>
+                  </Link>
+                  <Link
+                    href="/membership"
+                    onClick={() => setShowDropdown(false)}
+                    className="os-dock-user-menu-item"
+                  >
+                    <Crown className="w-4 h-4 text-[#FFB84D]" />
+                    <span>会员中心</span>
+                  </Link>
+                  <hr className="my-1 border-slate-100" />
+                  <button
+                    onClick={() => { setShowDropdown(false); logout(); }}
+                    className="os-dock-user-menu-item text-red-500"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>退出登录</span>
+                  </button>
+                </div>
+              </>
+            )}
           </div>
-          <div className="os-dock-qr-arrow" />
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }

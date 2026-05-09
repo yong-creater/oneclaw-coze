@@ -52,7 +52,7 @@
   -webkit-backdrop-filter: blur(20px);
   /* 右侧极轻分割线 */
   border-right: 1px solid rgba(120, 110, 255, 0.06);
-  /* 不裁切子元素溢出（QR 浮窗等） */
+  /* 不裁切子元素溢出（用户菜单等） */
   overflow: visible;
 }
 
@@ -103,6 +103,7 @@
   outline: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  color: inherit;
 }
 
 /* ── 图标 ── */
@@ -159,7 +160,7 @@
   color: #FFFFFF;
 }
 
-/* ── 底部区域 ── */
+/* ── 底部区域（登录 / 头像） ── */
 .os-dock-bottom {
   display: flex;
   flex-direction: column;
@@ -169,82 +170,100 @@
   padding-top: 12px;
 }
 
-/* 底部按钮更小巧 */
+/* 底部按钮与导航按钮同尺寸 */
 .os-dock-bottom .os-dock-item {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
 }
 .os-dock-bottom .os-dock-icon {
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
 }
 .os-dock-bottom .os-dock-label {
-  font-size: 8px;
+  font-size: 9px;
 }
 
-/* ── ICP 备案标记 ── */
-.os-dock-icp {
-  font-size: 8px;
+/* ── 用户头像按钮 ── */
+.os-dock-avatar-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid rgba(120, 110, 255, 0.15);
+  transition: all 0.25s ease;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.os-dock-avatar-btn:hover {
+  border-color: rgba(120, 110, 255, 0.35);
+  transform: scale(1.08);
+  box-shadow: 0 4px 16px rgba(120, 110, 255, 0.12);
+}
+
+.os-dock-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.os-dock-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7B6DFF, #6EA8FF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
   font-weight: 600;
-  color: rgba(20, 20, 20, 0.2);
-  margin-top: 8px;
-  letter-spacing: 0.05em;
-  cursor: default;
 }
 
-/* ── 公众号二维码浮窗 ── */
-.os-dock-qr-popup {
-  position: fixed;
+/* ── 用户下拉菜单 ── */
+.os-dock-user-menu {
+  position: absolute;
   left: 92px;
-  bottom: 48px;
-  z-index: 50;
-  animation: osDockQrIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.os-dock-qr-card {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 12px 48px rgba(120, 110, 255, 0.1),
+  bottom: 0;
+  width: 160px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(120, 110, 255, 0.12),
               0 2px 8px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  text-align: center;
-}
-.os-dock-qr-img {
-  width: 140px;
-  height: 140px;
-  border-radius: 14px;
-  object-fit: cover;
-  display: block;
-  margin: 0 auto;
-}
-.os-dock-qr-text {
-  font-size: 12px;
-  color: rgba(20, 20, 20, 0.6);
-  margin-top: 10px;
-  line-height: 1.4;
-}
-.os-dock-qr-sub {
-  font-size: 11px;
-  color: rgba(20, 20, 20, 0.4);
-  margin-top: 2px;
-  line-height: 1.3;
-}
-.os-dock-qr-arrow {
-  position: absolute;
-  left: -6px;
-  top: 50%;
-  transform: translateY(-50%) rotate(45deg);
-  width: 12px;
-  height: 12px;
-  background: rgba(255, 255, 255, 0.92);
-  border-left: 1px solid rgba(255, 255, 255, 0.6);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  padding: 6px;
+  z-index: 50;
+  animation: osDockMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes osDockQrIn {
+.os-dock-user-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: rgba(20, 20, 20, 0.72);
+  text-decoration: none;
+  transition: background 0.15s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+.os-dock-user-menu-item:hover {
+  background: rgba(120, 110, 255, 0.06);
+}
+
+@keyframes osDockMenuIn {
   from {
     opacity: 0;
     transform: translateX(-8px) scale(0.96);
@@ -286,22 +305,19 @@
     border-radius: 14px;
   }
   .os-dock-bottom {
-    display: none;
+    margin-top: 0;
+    padding-top: 0;
+    flex-direction: row;
   }
-  .os-dock-qr-popup {
-    left: 50%;
+  .os-dock-bottom .os-dock-item {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+  }
+  .os-dock-user-menu {
+    left: auto;
+    right: 8px;
     bottom: 76px;
-    transform: translateX(-50%);
-  }
-  .os-dock-qr-arrow {
-    left: 50%;
-    top: auto;
-    bottom: -6px;
-    transform: translateX(-50%) rotate(-45deg);
-    border-left: none;
-    border-bottom: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.6);
-    border-top: 1px solid rgba(255, 255, 255, 0.6);
   }
   /* 页面不再需要左侧偏移，改为底部留空给 Dock */
   .os-dock-page {
