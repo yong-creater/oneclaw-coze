@@ -169,48 +169,208 @@ export default function CreateWorkbench() {
     });
   }, [toolConfig, uploadedImages, guideAnswers, prompt]);
 
+  // ===== 步骤动画（UI 展示用，不阻塞真实 API） =====
+  const startStepAnimation = useCallback(() => {
+    stepTimerRef.current.forEach(t => clearTimeout(t));
+    stepTimerRef.current = [];
+    setCurrentStep(0);
+    GEN_STEPS.forEach((_, i) => {
+      const timer = setTimeout(() => {
+        setCurrentStep(prev => Math.min(prev, i + 1));
+      }, (i + 1) * 1200);
+      stepTimerRef.current.push(timer);
+    });
+  }, []);
+
+  const clearStepAnimation = useCallback(() => {
+    stepTimerRef.current.forEach(t => clearTimeout(t));
+    stepTimerRef.current = [];
+  }, []);
+
+  // ===== 真实生成：调用后端 API =====
+  const callGenerateAPI = useCallback(async (toolSlug: string, genPrompt: string, images: string[], answers: Record<string, string>): Promise<GenResult[]> => {
+    // 1. 图片生成类工具 → /api/images/generate
+    if (['product-generator', 'xiaohongshu-generator', 'portrait-generator'].includes(toolSlug)) {
+      const res = await fetch('/api/images/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: genPrompt,
+          images,
+          toolSlug,
+          style: answers.style || answers.scene || '',
+          ratio: answers.ratio || answers.format || '',
+          count: 4,
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `生成请求失败 (${res.status})`);
+      }
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+        return data.images.map((img: { url?: string; base64?: string }, i: number) => ({
+          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
+          label: `${toolConfig?.name || 'AI'} 结果 ${i + 1}`,
+          type: 'image',
+        }));
+      }
+      if (data.data?.images && Array.isArray(data.data.images) && data.data.images.length > 0) {
+        return data.data.images.map((img: { url?: string; base64?: string }, i: number) => ({
+          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
+          label: `${toolConfig?.name || 'AI'} 结果 ${i + 1}`,
+          type: 'image',
+        }));
+      }
+      throw new Error(data.error || '生成接口未返回有效结果');
+    }
+
+    // 2. 智能抠图 → /api/images/process
+    if (toolSlug === 'remove-bg') {
+      const res = await fetch('/api/images/process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'remove-bg',
+          image: images[0] || '',
+          background: answers.background || 'transparent',
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `抠图请求失败 (${res.status})`);
+      }
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const resultUrl = data.url || data.data?.url || (data.base64 ? `data:image/png;base64,${data.base64}` : '');
+      if (!resultUrl) throw new Error('抠图接口未返回有效结果');
+      return [{ url: resultUrl, label: '抠图结果', type: 'image' }];
+    }
+
+    // 3. 详情页生成 → /api/product-page/generate
+    if (toolSlug === 'detail-page') {
+      const res = await fetch('/api/product-page/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: genPrompt,
+          images,
+          style: answers.style || '',
+          modules: answers.modules || '',
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `详情页生成失败 (${res.status})`);
+      }
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+        return data.images.map((img: { url?: string; base64?: string }, i: number) => ({
+          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
+          label: `详情页结果 ${i + 1}`,
+          type: 'image',
+        }));
+      }
+      if (data.data?.images && Array.isArray(data.data.images) && data.data.images.length > 0) {
+        return data.data.images.map((img: { url?: string; base64?: string }, i: number) => ({
+          url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
+          label: `详情页结果 ${i + 1}`,
+          type: 'image',
+        }));
+      }
+      // 详情页可能返回 HTML 内容
+      if (data.html || data.data?.html) {
+        return [{ url: '', label: '详情页预览', type: 'text', textContent: data.html || data.data.html }];
+      }
+      throw new Error(data.error || '详情页生成接口未返回有效结果');
+    }
+
+    // 4. 小说创作 → /api/novel/generate-script
+    if (toolSlug === 'novel') {
+      const res = await fetch('/api/novel/generate-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: genPrompt,
+          style: answers.genre || answers.style || '',
+          length: answers.length || 'medium',
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `小说生成失败 (${res.status})`);
+      }
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const textContent = data.script || data.data?.script || data.content || data.data?.content || '';
+      if (!textContent) throw new Error('小说生成接口未返回有效内容');
+      return [{ url: '', label: '小说内容', type: 'text', textContent }];
+    }
+
+    // 5. 兜底：尝试通用图片生成
+    const res = await fetch('/api/images/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: genPrompt, images, toolSlug, count: 4 }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `生成请求失败 (${res.status})`);
+    }
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (data.images && Array.isArray(data.images) && data.images.length > 0) {
+      return data.images.map((img: { url?: string; base64?: string }, i: number) => ({
+        url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
+        label: `结果 ${i + 1}`, type: 'image',
+      }));
+    }
+    if (data.data?.images && Array.isArray(data.data.images) && data.data.images.length > 0) {
+      return data.data.images.map((img: { url?: string; base64?: string }, i: number) => ({
+        url: img.url || (img.base64 ? `data:image/png;base64,${img.base64}` : ''),
+        label: `结果 ${i + 1}`, type: 'image',
+      }));
+    }
+    throw new Error('生成接口未返回有效结果');
+  }, [toolConfig]);
+
   // ===== 开始生成 =====
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim() && uploadedImages.length === 0 && Object.keys(guideAnswers).length === 0) return;
 
-    stepTimerRef.current.forEach(t => clearTimeout(t));
-    stepTimerRef.current = [];
-
     setStatus('generating');
-    setCurrentStep(0);
     setResults([]);
     setErrorMsg('');
     setActiveIndex(0);
     setShowLightbox(false);
 
-    GEN_STEPS.forEach((_, i) => {
-      const timer = setTimeout(() => {
-        setCurrentStep(i + 1);
-      }, (i + 1) * 800);
-      stepTimerRef.current.push(timer);
-    });
+    // 启动步骤动画（仅 UI）
+    startStepAnimation();
 
     try {
-      await new Promise<void>((resolve) => {
-        const totalTimer = setTimeout(resolve, 5500);
-        stepTimerRef.current.push(totalTimer);
-      });
+      // 调用真实 API
+      const realResults = await callGenerateAPI(currentSlug, prompt, uploadedImages, guideAnswers);
 
-      const toolLabel = toolConfig?.name || 'AI';
-      const mockResults: GenResult[] = [
-        { url: '/case-lipstick-main.png', label: `${toolLabel}结果 1`, type: 'image' },
-        { url: '/demo-card-lifestyle.jpg', label: `${toolLabel}结果 2`, type: 'image' },
-        { url: '/demo-scene.jpg', label: `${toolLabel}结果 3`, type: 'image' },
-        { url: '/case-ecommerce.jpg', label: `${toolLabel}结果 4`, type: 'image' },
-      ];
+      // API 返回后清除步骤动画
+      clearStepAnimation();
+      setCurrentStep(GEN_STEPS.length);
 
-      setResults(mockResults);
-      setStatus('success');
-    } catch {
+      if (realResults.length > 0) {
+        setResults(realResults);
+        setStatus('success');
+      } else {
+        throw new Error('生成接口返回空结果');
+      }
+    } catch (err: unknown) {
+      clearStepAnimation();
+      const errorMessage = err instanceof Error ? err.message : '生成失败，请稍后重试';
+      console.error('[CreateWorkbench] 生成失败:', errorMessage);
+      setErrorMsg(errorMessage);
       setStatus('failed');
-      setErrorMsg('生成失败，请稍后重试');
     }
-  }, [prompt, uploadedImages, guideAnswers, toolConfig]);
+  }, [prompt, uploadedImages, guideAnswers, currentSlug, startStepAnimation, clearStepAnimation, callGenerateAPI]);
 
   // ===== 自动生成 =====
   useEffect(() => {
