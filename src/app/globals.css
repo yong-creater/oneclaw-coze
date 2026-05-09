@@ -1454,6 +1454,11 @@ body {
   display: block;
   flex-shrink: 0;
   letter-spacing: 0.01em;
+  transition: opacity 0.2s ease;
+}
+.os-studio-ai-hint-hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 .os-studio-placeholder {
   position: absolute;
@@ -1472,6 +1477,8 @@ body {
 .os-studio-placeholder-hidden {
   opacity: 0;
   transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 .os-studio-placeholder-example {
   font-size: 16px;

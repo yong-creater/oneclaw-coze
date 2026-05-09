@@ -438,8 +438,8 @@ export default function HomePage() {
             <div className="os-studio-input">
               {/* AI 创作描述框 */}
               <div className="os-studio-input-area">
-                {/* 顶部 AI 引导文字 */}
-                <span className="os-studio-ai-hint">AI 正在等待你的创意…</span>
+                {/* 顶部 AI 引导文字 — 有输入时隐藏但保持占位 */}
+                <span className={`os-studio-ai-hint${inputText ? ' os-studio-ai-hint-hidden' : ''}`}>AI 正在等待你的创意…</span>
                 {/* 轮播 placeholder — 始终占位，避免布局抖动 */}
                 <div
                   className={`os-studio-placeholder ${placeholderVisible && !inputText ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
