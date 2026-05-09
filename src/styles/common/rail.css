@@ -1,16 +1,11 @@
 /* ============================================================
-   AI Dock — 轻悬浮导航栏
-   风格：Claude / Linear / Arc Browser 轻量 AI Dock
+   AI Dock — 左侧轻悬浮导航
+   风格：选中竖线 + 28px图标 + 深色Logo
    ============================================================ */
 
 /* ── 页面主内容区（与 Dock 配合） ── */
-/*
- * .os-dock-page  — <main> 根容器，给 Dock 让出左侧空间
- * .os-dock-page-inner — 内容+Footer 的纵向 flex 壳
- * .os-content — 页面内部统一内容容器（居中、限宽、统一 padding）
- */
 .os-dock-page {
-  margin-left: 84px;                    /* dock 宽 80px + 4px 呼吸间距 */
+  margin-left: 88px;                    /* dock 宽 84px + 4px 呼吸间距 */
   min-height: 100vh;
   position: relative;
   transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -39,38 +34,38 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 80px;
+  width: 84px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 0 16px;
+  padding: 24px 0 16px;
   z-index: 40;
-  /* 超轻毛玻璃，几乎透明 */
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  /* 超轻毛玻璃 */
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   /* 右侧极轻分割线 */
-  border-right: 1px solid rgba(120, 110, 255, 0.06);
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
   /* 不裁切子元素溢出（用户菜单等） */
   overflow: visible;
 }
 
-/* ── Logo ── */
+/* ── Logo — 左上角固定，深色，点击回首页 ── */
 .os-dock-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  margin-bottom: 28px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
   cursor: pointer;
 }
 .os-dock-logo:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(120, 110, 255, 0.12);
+  transform: scale(1.05);
+  opacity: 0.85;
 }
 
 /* ── 主导航区 ── */
@@ -78,86 +73,102 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   flex: 0;
 }
 
 /* ── 导航按钮 ── */
 .os-dock-item {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 56px;
-  height: 56px;
-  border-radius: 18px;
+  height: 60px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  /* 轻毛玻璃 */
-  background: rgba(255, 255, 255, 0.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  /* 极轻边框 */
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
   text-decoration: none;
   outline: none;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   color: inherit;
+  gap: 12px;
 }
 
-/* ── 图标 ── */
+/* ── 选中竖线指示器 ── */
+.os-dock-indicator {
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 24px;
+  border-radius: 0 4px 4px 0;
+  background: #5EC2FF;
+  box-shadow: 0 0 8px rgba(94, 194, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: osIndicatorIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes osIndicatorIn {
+  from {
+    opacity: 0;
+    height: 0;
+  }
+  to {
+    opacity: 1;
+    height: 24px;
+  }
+}
+
+/* ── 图标 28px ── */
 .os-dock-icon {
-  width: 20px;
-  height: 20px;
-  color: #7C8192;
-  transition: color 0.25s ease, transform 0.25s ease;
+  width: 28px;
+  height: 28px;
+  color: #8B8FA3;
+  transition: color 0.2s ease;
   flex-shrink: 0;
 }
 
 /* ── 文字标签 ── */
 .os-dock-label {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 500;
-  color: #7C8192;
-  margin-top: 2px;
+  color: #8B8FA3;
   line-height: 1;
   letter-spacing: 0.02em;
-  transition: color 0.25s ease;
+  transition: color 0.2s ease;
   white-space: nowrap;
 }
 
 /* ── Hover ── */
 .os-dock-item:hover {
-  background: rgba(120, 110, 255, 0.06);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(120, 110, 255, 0.08);
-  border-color: rgba(120, 110, 255, 0.1);
+  background: rgba(94, 194, 255, 0.06);
 }
 .os-dock-item:hover .os-dock-icon {
-  color: #6B5FFF;
+  color: #5EC2FF;
 }
 .os-dock-item:hover .os-dock-label {
-  color: #6B5FFF;
+  color: #5EC2FF;
 }
 
-/* ── Active 选中态（胶囊渐变） ── */
+/* ── Active 选中态 ── */
 .os-dock-item-active {
-  background: linear-gradient(135deg, #7B6DFF, #6EA8FF);
-  border-color: transparent;
-  box-shadow: 0 6px 24px rgba(123, 109, 255, 0.18);
-  transform: translateY(0);
+  background: rgba(94, 194, 255, 0.08);
 }
 .os-dock-item-active:hover {
-  background: linear-gradient(135deg, #7B6DFF, #6EA8FF);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(123, 109, 255, 0.22);
+  background: rgba(94, 194, 255, 0.12);
 }
 .os-dock-item-active .os-dock-icon {
-  color: #FFFFFF;
+  color: #5EC2FF;
 }
 .os-dock-item-active .os-dock-label {
-  color: #FFFFFF;
+  color: #5EC2FF;
+  font-weight: 600;
 }
 
 /* ── 底部区域（登录 / 头像） ── */
@@ -165,79 +176,73 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin-top: auto;
   padding-top: 12px;
 }
 
-/* 底部按钮与导航按钮同尺寸 */
-.os-dock-bottom .os-dock-item {
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-}
-.os-dock-bottom .os-dock-icon {
-  width: 20px;
-  height: 20px;
-}
-.os-dock-bottom .os-dock-label {
-  font-size: 9px;
-}
-
 /* ── 用户头像按钮 ── */
 .os-dock-avatar-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px solid rgba(120, 110, 255, 0.15);
-  transition: all 0.25s ease;
-  background: transparent;
-  padding: 0;
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 56px;
+  height: 60px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  padding: 0;
+  gap: 12px;
+  transition: background 0.2s ease;
 }
 .os-dock-avatar-btn:hover {
-  border-color: rgba(120, 110, 255, 0.35);
-  transform: scale(1.08);
-  box-shadow: 0 4px 16px rgba(120, 110, 255, 0.12);
+  background: rgba(94, 194, 255, 0.06);
+}
+
+.os-dock-avatar-label {
+  font-size: 11px;
+  color: #8B8FA3;
+  margin-top: 4px;
 }
 
 .os-dock-avatar-img {
-  width: 100%;
-  height: 100%;
+  width: 28px;
+  height: 28px;
   object-fit: cover;
   border-radius: 50%;
+  border: 2px solid rgba(94, 194, 255, 0.2);
 }
 
 .os-dock-avatar-fallback {
-  width: 100%;
-  height: 100%;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #7B6DFF, #6EA8FF);
+  background: linear-gradient(135deg, #5EC2FF, #7B6DFF);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 600;
+  border: 2px solid rgba(94, 194, 255, 0.2);
 }
 
 /* ── 用户下拉菜单 ── */
 .os-dock-user-menu {
   position: absolute;
-  left: 92px;
+  left: 96px;
   bottom: 0;
   width: 160px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(120, 110, 255, 0.12),
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08),
               0 2px 8px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.06);
   padding: 6px;
   z-index: 50;
   animation: osDockMenuIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -260,7 +265,7 @@
   text-align: left;
 }
 .os-dock-user-menu-item:hover {
-  background: rgba(120, 110, 255, 0.06);
+  background: rgba(94, 194, 255, 0.06);
 }
 
 @keyframes osDockMenuIn {
@@ -288,7 +293,7 @@
     flex-direction: row;
     padding: 0 12px;
     border-right: none;
-    border-top: 1px solid rgba(120, 110, 255, 0.06);
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
   }
   .os-dock-logo {
     display: none;
@@ -302,17 +307,34 @@
   .os-dock-item {
     width: 52px;
     height: 48px;
-    border-radius: 14px;
+    border-radius: 10px;
+    gap: 4px;
+  }
+  .os-dock-icon {
+    width: 22px;
+    height: 22px;
+  }
+  .os-dock-label {
+    font-size: 10px;
+  }
+  /* 竖线在底部导航中隐藏 */
+  .os-dock-indicator {
+    display: none;
   }
   .os-dock-bottom {
     margin-top: 0;
     padding-top: 0;
     flex-direction: row;
   }
-  .os-dock-bottom .os-dock-item {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
+  .os-dock-avatar-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+  }
+  .os-dock-avatar-img,
+  .os-dock-avatar-fallback {
+    width: 22px;
+    height: 22px;
   }
   .os-dock-user-menu {
     left: auto;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Flame, FolderOpen, Wrench, LogIn, User, LogOut } from 'lucide-react';
+import { Sparkles, Flame, FolderOpen, Wrench, LogIn, LogOut } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -32,9 +32,9 @@ export default function SiteSidebar() {
 
   return (
     <aside className="os-dock">
-      {/* ===== Logo ===== */}
+      {/* ===== Logo — 左上角固定，点击回首页 ===== */}
       <Link href="/" className="os-dock-logo" aria-label="OneClaw 首页">
-        <SiteLogo size={32} />
+        <SiteLogo size={36} />
       </Link>
 
       {/* ===== 主导航 ===== */}
@@ -49,6 +49,8 @@ export default function SiteSidebar() {
               className={`os-dock-item ${active ? 'os-dock-item-active' : ''}`}
               title={item.label}
             >
+              {/* 选中竖线指示器 */}
+              {active && <span className="os-dock-indicator" />}
               <Icon className="os-dock-icon" strokeWidth={1.8} />
               <span className="os-dock-label">{item.label}</span>
             </Link>
@@ -83,6 +85,7 @@ export default function SiteSidebar() {
                   {user?.nickname?.slice(0, 1).toUpperCase() || 'U'}
                 </div>
               )}
+              <span className="os-dock-label os-dock-avatar-label">我的</span>
             </button>
 
             {/* 用户下拉菜单 */}
