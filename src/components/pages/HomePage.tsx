@@ -8,7 +8,6 @@ import {
   ArrowRight,
   Wand2,
   TrendingUp,
-  type LucideIcon,
 } from 'lucide-react';
 
 // 灵感建议 chips — 点击自动填充输入框
@@ -27,33 +26,18 @@ const showcaseExamples = [
   { title: '视频封面', category: '视频脚本', image: '/demo-scene.jpg' },
 ];
 
-// 创作方向选择
-interface SceneItem {
-  image: string;
-  title: string;
-  desc: string;
-  fillPrompt: string;
+// 精选工具 — 从后台 API 动态获取
+interface UtilityTool {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string;
+  description: string;
+  cover_image: string | null;
+  color: string;
+  sort_order: number;
+  use_cases: { title: string; desc: string }[];
 }
-const sceneItems: SceneItem[] = [
-  {
-    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=640&h=360&fit=crop&auto=format&q=80',
-    title: '高级商品主图',
-    desc: '上传产品图，自动生成高级电商主图和场景图。',
-    fillPrompt: '帮我生成高级电商商品主图和场景图',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=640&h=360&fit=crop&auto=format&q=80',
-    title: '小红书封面',
-    desc: '自动生成小红书封面和种草风格图片。',
-    fillPrompt: '帮我生成小红书种草封面',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=640&h=360&fit=crop&auto=format&q=80',
-    title: '商品详情页',
-    desc: '自动生成电商详情长图和卖点排版。',
-    fillPrompt: '帮我生成电商商品详情页和卖点排版',
-  },
-];
 
 // 热门创作结果数据
 const hotResults = [
@@ -88,6 +72,19 @@ export default function HomePage() {
   const router = useRouter();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [utilityTools, setUtilityTools] = useState<UtilityTool[]>([]);
+
+  // 从后台 API 获取精选工具
+  useEffect(() => {
+    fetch('/api/utility-tools')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.tools)) {
+          setUtilityTools(data.tools);
+        }
+      })
+      .catch(err => console.error('[HomePage] Failed to fetch utility tools:', err));
+  }, []);
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -226,21 +223,27 @@ export default function HomePage() {
             </div>
 
             <div className="os-scene-row">
-              {sceneItems.map((scene) => (
+              {utilityTools.map((tool) => (
                 <button
-                  key={scene.title}
+                  key={tool.slug}
                   onClick={() => {
-                    setInputText(scene.fillPrompt);
+                    setInputText(tool.description);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className="os-scene-card group"
                 >
                   <div className="os-scene-card-img">
-                    <img src={scene.image} alt={scene.title} />
+                    {tool.cover_image ? (
+                      <img src={tool.cover_image} alt={tool.name} />
+                    ) : (
+                      <div className="os-scene-card-placeholder">
+                        <span className="text-2xl">{tool.name.charAt(0)}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="os-scene-card-body">
-                    <span className="os-scene-card-title">{scene.title}</span>
-                    <span className="os-scene-card-desc">{scene.desc}</span>
+                    <span className="os-scene-card-title">{tool.name}</span>
+                    <span className="os-scene-card-desc">{tool.description}</span>
                   </div>
                 </button>
               ))}

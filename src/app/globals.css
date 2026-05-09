@@ -785,16 +785,16 @@ body {
 }
 
 /* ── 创作场景入口卡片 ───────────────────── */
-/* --- Scene Cards: 横向轻量创作方向 --- */
+/* --- Scene Cards: 精选工具展示（6列） --- */
 /* ==================== 场景结果卡片 ==================== */
 .os-scene-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 24px;
-  max-width: 1060px;
+  gap: 20px;
+  max-width: 1240px;
   margin: 0 auto;
 }
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .os-scene-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -807,7 +807,7 @@ body {
 .os-scene-card {
   display: flex;
   flex-direction: column;
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   background: rgba(255,255,255,0.82);
   border: 1px solid rgba(124,92,255,0.08);
@@ -823,22 +823,55 @@ body {
 .os-scene-card-img {
   width: 100%;
   aspect-ratio: 16 / 10;
+  overflow: hidden;
+  position: relative;
+}
+.os-scene-card-img img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+.os-scene-card:hover .os-scene-card-img img {
+  transform: scale(1.03);
+}
+.os-scene-card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #EDE9FE, #DDD6FE);
+  color: #7C6CFF;
+  font-weight: 700;
 }
 .os-scene-card-body {
-  padding: 20px 22px;
+  padding: 16px 18px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 .os-scene-card-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #1E293B;
   line-height: 1.3;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .os-scene-card-desc {
-  font-size: 13px;
+  font-size: 12px;
   color: #64748B;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ==================== Creator OS 按钮系统 ==================== */
