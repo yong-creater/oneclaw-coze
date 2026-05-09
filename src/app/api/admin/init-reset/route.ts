@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/auth';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 仅用于开发环境初始化场景：重置管理员密码
 // 生产环境应该禁用此API
 export async function POST(request: NextRequest) {
+  // 验证管理员身份
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+
   try {
     // 检查是否为开发环境
     if (process.env.COZE_PROJECT_ENV === 'PROD') {

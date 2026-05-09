@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/auth';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 获取精选工具使用统计
 export async function GET(request: NextRequest) {
+  // 验证管理员身份
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+
   try {
     const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);

@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdminAuth } from '@/lib/auth';
 import { syncUtilityTools, UTILITY_TOOLS } from '../init-data/route';
 
 // POST - 同步工具到数据库
 export async function POST(request: NextRequest) {
+  // 验证管理员身份
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
+  }
+
   try {
     // 获取管理员 Supabase 客户端（简化版本，使用环境变量）
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-// 检查Supabase配置
-const isConfigured = supabaseUrl && supabaseKey;
-const supabase = isConfigured ? createClient(supabaseUrl, supabaseKey) : null;
+import { requireAdminAuth } from '@/lib/auth';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 保存使用记录
 export async function POST(request: NextRequest) {
-  // 如果未配置Supabase，返回成功但不保存
-  if (!isConfigured || !supabase) {
-    return NextResponse.json({ success: true, message: 'Supabase not configured, log not saved' });
+  // 验证管理员身份
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
   }
 
   try {
@@ -22,11 +17,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '缺少工具类型' }, { status: 400 });
     }
 
+    const client = getSupabaseClient();
+
     // 获取客户端信息
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('utility_usage_logs')
       .insert({
         tool_type,
@@ -48,7 +45,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    // 网络不可达时降级返回成功（不影响业务流程）
     console.error('保存使用记录异常:', error);
     return NextResponse.json({ success: true, message: 'Log saved locally (DB unreachable)' });
   }
@@ -56,18 +52,10 @@ export async function POST(request: NextRequest) {
 
 // 获取使用记录列表
 export async function GET(request: NextRequest) {
-  // 如果未配置Supabase，返回空数据
-  if (!isConfigured || !supabase) {
-    return NextResponse.json({
-      success: true,
-      data: [],
-      pagination: { page: 1, limit: 20, total: 0, total_pages: 0 },
-      stats: {
-        resume: { total: 0, success: 0, failed: 0 },
-        novel: { total: 0, success: 0, failed: 0 },
-        product_page: { total: 0, success: 0, failed: 0 }
-      }
-    });
+  // 验证管理员身份
+  const auth = await requireAdminAuth(request);
+  if (auth.error) {
+    return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
   }
 
   try {
@@ -79,7 +67,9 @@ export async function GET(request: NextRequest) {
     const start_date = searchParams.get('start_date');
     const end_date = searchParams.get('end_date');
 
-    let query = supabase!
+    const client = getSupabaseClient();
+
+    let query = client
       .from('utility_usage_logs')
       .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
@@ -105,7 +95,6 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('获取使用记录失败:', error);
-      // Supabase不可达时降级返回空数据（不影响后台页面加载）
       return NextResponse.json({
         success: true,
         data: [],
@@ -119,7 +108,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 获取统计数据
-    let statsFilteredQuery = supabase!
+    let statsFilteredQuery = client
       .from('utility_usage_logs')
       .select('tool_type, status');
 
@@ -154,7 +143,6 @@ export async function GET(request: NextRequest) {
       stats: toolStats
     });
   } catch (error) {
-    // 网络不可达时降级返回空数据
     console.error('获取使用记录异常:', error);
     return NextResponse.json({
       success: true,
