@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flame, Sparkles, FolderOpen, Wrench, LogIn, LogOut } from 'lucide-react';
+import { Sparkles, Flame, FolderOpen, Wrench, LogIn, LogOut, User } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -13,12 +13,12 @@ interface NavItem {
   href: string;
 }
 
-/* 灵感 → 创作 → 作品 → 工具库 */
+/* 创作 → 灵感 → 作品 → 工具库 */
 const NAV_ITEMS: NavItem[] = [
-  { icon: Sparkles, label: '创作', href: '/' },
-  { icon: Flame,    label: '灵感', href: '/prompts' },
-  { icon: FolderOpen, label: '作品', href: '/projects' },
-  { icon: Wrench,   label: '工具库', href: '/tools' },
+  { icon: Sparkles,  label: '创作',   href: '/' },
+  { icon: Flame,     label: '灵感',   href: '/prompts' },
+  { icon: FolderOpen,label: '作品',   href: '/projects' },
+  { icon: Wrench,    label: '工具库', href: '/tools' },
 ];
 
 export default function SiteSidebar() {
@@ -33,7 +33,7 @@ export default function SiteSidebar() {
 
   return (
     <aside className="os-dock">
-      {/* ===== Logo — 左上角固定，点击回首页 ===== */}
+      {/* ===== Logo ===== */}
       <Link href="/" className="os-dock-logo" aria-label="OneClaw 首页">
         <SiteLogo size={36} />
       </Link>
@@ -50,27 +50,26 @@ export default function SiteSidebar() {
               className={`os-dock-item ${active ? 'os-dock-item-active' : ''}`}
               title={item.label}
             >
-              <Icon className="os-dock-icon" strokeWidth={1.6} />
+              <Icon className="os-dock-icon" strokeWidth={1.5} />
               <span className="os-dock-label">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* ===== 底部：登录 / 用户头像 ===== */}
+      {/* ===== 底部：登录 / 我的 ===== */}
       <div className="os-dock-bottom">
         {!authenticated ? (
           <button
-            className="os-dock-item"
+            className="os-dock-login-btn"
             title="登录"
             onClick={() => setShowLoginModal(true)}
             type="button"
           >
-            <LogIn className="os-dock-icon" strokeWidth={1.6} />
-            <span className="os-dock-label">登录</span>
+            <LogIn className="os-dock-login-icon" strokeWidth={1.5} />
           </button>
         ) : (
-          <div className="relative">
+          <div className="os-dock-avatar-wrap">
             <button
               className="os-dock-avatar-btn"
               title={user?.nickname || '用户'}
@@ -81,13 +80,11 @@ export default function SiteSidebar() {
                 <img src={user.avatar_url} alt="" className="os-dock-avatar-img" />
               ) : (
                 <div className="os-dock-avatar-fallback">
-                  {user?.nickname?.slice(0, 1).toUpperCase() || 'U'}
+                  <User className="w-4 h-4" />
                 </div>
               )}
-              <span className="os-dock-label os-dock-avatar-label">我的</span>
             </button>
 
-            {/* 用户下拉菜单 */}
             {showDropdown && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
