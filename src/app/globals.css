@@ -320,6 +320,12 @@ body {
     #F5F7FF 80%,
     #F7F8FF 100%
   );
+  padding: 0 40px;
+}
+@media (max-width: 768px) {
+  .os-main-canvas {
+    padding: 0 12px;
+  }
 }
 
 /* ---- 全局背景层 — fixed 定位覆盖右侧内容区 ---- */
@@ -377,7 +383,13 @@ body {
 .os-page {
   position: relative;
   background: transparent;
-  padding: 0 56px;
+  padding: 40px 0;
+  min-height: 100vh;
+}
+@media (max-width: 768px) {
+  .os-page {
+    padding: 24px 0;
+  }
 }
 
 /* ---- 页面级氛围装饰层（光带+微粒）---- */
@@ -486,10 +498,10 @@ body {
 .os-hero {
   position: relative;
   overflow: hidden;
-  margin-left: -56px;
-  margin-right: -56px;
-  padding-left: 56px;
-  padding-right: 56px;
+  margin-left: -40px;
+  margin-right: -40px;
+  padding-left: 40px;
+  padding-right: 40px;
   background: radial-gradient(circle at top center, rgba(109, 94, 246, 0.14), transparent 60%);
 }
 .os-hero::before {
@@ -1581,16 +1593,6 @@ body {
 /* ==================== Creator OS 页面布局 ==================== */
 
 /* 页面容器 — 透明通道，背景由 os-main-canvas 提供 */
-.os-page {
-  padding: 40px 0;
-  position: relative;
-  min-height: 100vh;
-}
-@media (max-width: 768px) {
-  .os-page {
-    padding: 24px 16px;
-  }
-}
 
 /* 页面主标题 H1 */
 .os-h1 {
