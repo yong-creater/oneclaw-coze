@@ -233,7 +233,7 @@ export default function HomePage() {
       </div>
 
       {/* ==================== 热门创作结果 — AI 结果流 ==================== */}
-      <section className="os-section animate-fade-slide-up !mt-[100px]" style={{ animationDelay: '0.15s' }}>
+      <section className="relative bg-white/60 backdrop-blur-sm rounded-t-[40px] animate-fade-slide-up !mt-[100px] pt-16 pb-8 -mx-4 px-4" style={{ animationDelay: '0.15s' }}>
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">

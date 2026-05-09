@@ -480,6 +480,41 @@ body {
 .os-hero-bg { position: relative; overflow: hidden; }
 .os-hero-bg::before,
 .os-hero-bg::after { display: none; }
+
+/* Hero section — AI atmosphere background */
+.os-hero {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at top center, rgba(109, 94, 246, 0.14), transparent 60%);
+}
+.os-hero::before {
+  content: '';
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(109, 94, 246, 0.18), rgba(91, 92, 246, 0.06) 50%, transparent 70%);
+  filter: blur(120px);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+.os-hero::after {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: -8%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.12), transparent 65%);
+  filter: blur(100px);
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+}
 .os-card::before {
   content: '';
   position: absolute;
