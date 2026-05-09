@@ -150,7 +150,7 @@ export default function HomePage() {
           </p>
 
           {/* ===== AI 输入工作台 — 左右分栏 ===== */}
-          <div className="os-studio mt-10">
+          <div className="os-studio mt-12">
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
               <h3 className="os-studio-label">你想生成什么？</h3>

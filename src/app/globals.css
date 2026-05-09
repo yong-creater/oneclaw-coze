@@ -295,9 +295,9 @@ body {
   animation: staggerIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* 渐变文字 */
+/* 渐变文字 — 仅高亮关键词 */
 .gradient-text {
-  background: linear-gradient(135deg, #111827 0%, #6D5EF6 100%);
+  background: linear-gradient(135deg, #7C6CFF 0%, #5B5DE6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -505,8 +505,9 @@ body {
 .os-hero {
   position: relative;
   overflow: hidden;
-  padding-top: 64px;
-  padding-bottom: 48px;
+  padding-top: 56px;
+  padding-bottom: 32px;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124, 108, 255, 0.10), transparent 70%);
 }
 .os-hero::before,
 .os-hero::after {
@@ -516,32 +517,33 @@ body {
 /* ---- Hero 标题 & 副标题 ---- */
 .os-hero-title {
   text-align: center;
-  font-size: 72px;
-  line-height: 1.1;
+  font-size: clamp(56px, 6vw, 92px);
+  line-height: 1.05;
   font-weight: 700;
-  letter-spacing: -0.03em;
-  max-width: 1000px;
+  letter-spacing: -0.04em;
+  max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
 }
 @media (max-width: 768px) {
   .os-hero-title {
-    font-size: 42px;
+    font-size: 36px;
   }
 }
 .os-hero-subtitle {
   text-align: center;
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: 500;
   line-height: 1.6;
-  color: #6B7280;
-  max-width: 680px;
+  color: rgba(15, 23, 42, 0.72);
+  max-width: 720px;
   margin-left: auto;
   margin-right: auto;
   margin-top: 16px;
 }
 @media (max-width: 768px) {
   .os-hero-subtitle {
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 
