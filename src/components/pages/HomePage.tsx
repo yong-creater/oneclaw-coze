@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
@@ -73,17 +73,34 @@ export default function HomePage() {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [utilityTools, setUtilityTools] = useState<UtilityTool[]>([]);
+  const studioInputRef = useRef<HTMLDivElement>(null);
 
-  // 从后台 API 获取精选工具
+  // 从后台 API 获取精选工具（带缓存，5分钟内不重复请求）
   useEffect(() => {
+    const CACHE_KEY = 'oneclaw_utility_tools_cache';
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TTL) {
+          setUtilityTools(data);
+          return;
+        }
+      }
+    } catch {}
+
     fetch('/api/utility-tools')
       .then(res => res.json())
       .then(data => {
         if (data.success && Array.isArray(data.tools)) {
           setUtilityTools(data.tools);
+          try {
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: data.tools, timestamp: Date.now() }));
+          } catch {}
         }
       })
-      .catch(err => console.error('[HomePage] Failed to fetch utility tools:', err));
+      .catch(() => {}); // silent fail - graceful degradation
   }, []);
 
   // 消费模板/提示词填充
@@ -135,7 +152,7 @@ export default function HomePage() {
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
               <h3 className="os-studio-label">你想生成什么？</h3>
-              <div className="os-studio-input-area">
+              <div className="os-studio-input-area" ref={studioInputRef}>
                 <div className="relative">
                   {!inputText && (
                     <div className="os-studio-placeholder" onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}>
@@ -186,6 +203,7 @@ export default function HomePage() {
                       src={example.image}
                       alt={example.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-2.5">
@@ -223,6 +241,9 @@ export default function HomePage() {
             </div>
 
             <div className="os-scene-row">
+              {utilityTools.length === 0 && (
+                <div className="col-span-full text-center py-8 text-slate-400 text-sm">加载精选工具中...</div>
+              )}
               {utilityTools.map((tool) => (
                 <button
                   key={tool.slug}
@@ -234,7 +255,7 @@ export default function HomePage() {
                 >
                   <div className="os-scene-card-img">
                     {tool.cover_image ? (
-                      <img src={tool.cover_image} alt={tool.name} />
+                      <img src={tool.cover_image} alt={tool.name} loading="lazy" />
                     ) : (
                       <div className="os-scene-card-placeholder">
                         <span className="text-2xl">{tool.name.charAt(0)}</span>
@@ -279,7 +300,7 @@ export default function HomePage() {
               className="os-result-card group cursor-pointer"
               onClick={() => {
                 setInputText(item.examplePrompt);
-                document.querySelector('.os-studio-input-area')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                studioInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
               }}
             >
               {/* 图片区域 */}
@@ -288,6 +309,7 @@ export default function HomePage() {
                   src={item.image}
                   alt={item.title}
                   className="os-result-card-img"
+                  loading="lazy"
                 />
                 {/* 类型标签 */}
                 <span className="os-result-card-type">{item.type}</span>
@@ -298,7 +320,7 @@ export default function HomePage() {
                     onClick={(e) => {
                       e.stopPropagation();
                       setInputText(item.examplePrompt);
-                      document.querySelector('.os-studio-input-area')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      studioInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }}
                   >
                     <Wand2 className="w-3.5 h-3.5" />

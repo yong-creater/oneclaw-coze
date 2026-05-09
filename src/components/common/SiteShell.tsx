@@ -22,15 +22,11 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
           {/* 柔和光带 */}
           <div className="os-light-band os-light-band-primary os-atmo-band-top" />
           <div className="os-light-band os-light-band-secondary os-atmo-band-mid" />
-          {/* 漂浮微粒 */}
+          {/* 漂浮微粒（缩减至4个优化性能） */}
           <div className="os-mote os-mote-purple os-mote-1" />
           <div className="os-mote os-mote-cyan os-mote-2" />
           <div className="os-mote os-mote-blue os-mote-3" />
           <div className="os-mote os-mote-purple os-mote-4" />
-          <div className="os-mote os-mote-cyan os-mote-5" />
-          <div className="os-mote os-mote-blue os-mote-6" />
-          <div className="os-mote os-mote-purple os-mote-7" />
-          <div className="os-mote os-mote-cyan os-mote-8" />
         </div>
         <div style={{ position: 'relative', zIndex: 1 }}>
           {children}

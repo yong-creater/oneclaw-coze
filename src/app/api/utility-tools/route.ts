@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-export const revalidate = 0;
+// 5分钟服务端缓存 — 工具配置变更不频繁
+export const revalidate = 300;
 
 // 前台公开接口 - 获取活跃的工具列表
 export async function GET() {
@@ -16,19 +17,17 @@ export async function GET() {
     if (error) {
       console.error('[utility-tools] Supabase query error:', JSON.stringify(error));
       return NextResponse.json({ success: false, error: error.message, tools: [] }, {
-        headers: { 'Cache-Control': 'no-store' }
+        headers: { 'Cache-Control': 'public, max-age=60' }
       });
     }
 
-    console.log('[utility-tools] Fetched tools:', data?.length || 0);
-
     return NextResponse.json({ success: true, tools: data || [] }, {
-      headers: { 'Cache-Control': 'no-store' }
+      headers: { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=600' }
     });
   } catch (err) {
     console.error('[utility-tools] Catch error:', err);
     return NextResponse.json({ success: false, error: String(err), tools: [] }, {
-      headers: { 'Cache-Control': 'no-store' }
+      headers: { 'Cache-Control': 'public, max-age=60' }
     });
   }
 }

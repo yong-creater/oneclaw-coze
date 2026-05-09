@@ -333,6 +333,7 @@ body {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: layout style paint;
 }
 
 /* 全局模糊光斑 — 超大、超柔、超低透明度 */
@@ -402,14 +403,6 @@ body {
   }
 }
 
-/* ---- 页面级氛围装饰层（光带+微粒）---- */
-.os-page-atmo {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-}
 
 /* ---- 柔光球动画关键帧 ---- */
 @keyframes orbDrift {
@@ -438,6 +431,7 @@ body {
   pointer-events: none;
   will-change: transform, opacity;
   filter: blur(100px);
+  contain: layout style paint;
 }
 /* 紫色光带 — 页面中偏上 */
 .os-light-band-primary {
@@ -471,6 +465,7 @@ body {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
+  will-change: transform, opacity;
   animation: moteRise var(--dur, 7s) ease-in-out infinite;
   animation-delay: var(--delay, 0s);
 }
@@ -498,8 +493,6 @@ body {
   0%, 100% { box-shadow: 0 0 24px rgba(123, 97, 255, 0.10), 0 0 48px rgba(123, 97, 255, 0.03); }
   50% { box-shadow: 0 0 32px rgba(123, 97, 255, 0.16), 0 0 64px rgba(123, 97, 255, 0.05); }
 }
-
-/* ---- 旧装饰元素（已废弃） ---- */
 
 /* Hero section — 透明通道，继承 os-main-canvas 全局渐变 + os-global-bg 光晕 */
 .os-hero {
@@ -564,26 +557,6 @@ body {
   opacity: 1;
 }
 
-/* ---- 场景卡片封面微妙光泽 ---- */
-.os-scene-cover {
-  position: relative;
-  overflow: hidden;
-}
-.os-scene-cover::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.12) 0%, transparent 50%);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.os-scene-cover:hover::after {
-  opacity: 1;
-}
 
 /* ---- Hero 氛围定位 ---- */
 
@@ -602,10 +575,7 @@ body {
 .os-mote-2 { top: 25%; right: 15%; --dur: 8.5s; --delay: 1.2s; }
 .os-mote-3 { top: 48%; left: 5%; --dur: 6.5s; --delay: 2.8s; }
 .os-mote-4 { top: 60%; right: 8%; --dur: 9s; --delay: 0.5s; }
-.os-mote-5 { top: 35%; left: 22%; --dur: 7.5s; --delay: 1.8s; }
-.os-mote-6 { top: 70%; right: 25%; --dur: 8s; --delay: 3.5s; }
-.os-mote-7 { top: 20%; left: 40%; --dur: 9.5s; --delay: 4.2s; }
-.os-mote-8 { top: 55%; right: 35%; --dur: 7s; --delay: 2s; }
+/* Reduced from 8 to 4 motes for performance */
 
 /* ==================== Creator OS 卡片系统 ==================== */
 
@@ -638,33 +608,12 @@ body {
   box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
 }
 
-/* 卡片图片区域 */
-.os-card-image {
-  aspect-ratio: 16 / 10;
-  border-radius: 20px;
-  overflow: hidden;
-  background: #F8FAFC;
-}
-.os-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
 /* 卡片图标背景 - 渐变 */
 .os-icon-bg {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.os-icon-bg-sm {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1020,40 +969,6 @@ body {
 
 /* ==================== Creator OS 输入系统 ==================== */
 
-/* AI 主输入框 — 首页 Hero / Prompt Workspace 风格 */
-.os-ai-input {
-  width: 100%;
-  min-height: 140px;
-  padding: 24px;
-  background: transparent;
-  border: none;
-  border-radius: 20px;
-  font-size: var(--typo-body-size);
-  line-height: var(--typo-body-line-height);
-  color: var(--text-primary);
-  resize: none;
-  outline: none;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.os-ai-input::placeholder {
-  color: #94A3B8;
-  font-size: 15px;
-}
-/* AI 输入框外壳 — 玻璃拟态 */
-.os-ai-input-shell {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.06);
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.os-ai-input-shell:focus-within {
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.08), 0 12px 48px rgba(99, 102, 241, 0.10);
-  border-color: rgba(123, 97, 255, 0.2);
-}
-
-/* 普通输入框 — 商品名/标题/搜索 */
 .os-input {
   width: 100%;
   height: 44px;
@@ -1061,8 +976,8 @@ body {
   background: #FFFFFF;
   border: none;
   border-radius: 16px;
-  font-size: var(--typo-body-size);
-  color: var(--text-primary);
+  font-size: 14px;
+  color: #1E293B;
   outline: none;
   transition: all 0.2s ease;
 }
@@ -1144,186 +1059,7 @@ body {
 
 /* 输入区能力按钮 — 复用 Capsule Button */
 
-/* ---- AI Workspace 工作台 ---- */
-.os-workspace {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: none;
-  border-radius: 32px;
-  box-shadow:
-    0 4px 32px rgba(15, 23, 42, 0.05),
-    0 0 0 0.5px rgba(255, 255, 255, 0.6) inset;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  max-width: 1320px;
-  margin: 0 auto;
-}
-.os-workspace:focus-within {
-  background: rgba(255, 255, 255, 0.85);
-  box-shadow:
-    0 0 0 1px rgba(123, 97, 255, 0.08),
-    0 12px 48px rgba(123, 97, 255, 0.1),
-    0 0 80px rgba(123, 97, 255, 0.04);
-}
-
-/* 中间输入区 — 420px 高度，40px padding */
-.os-workspace-body {
-  padding: 40px 40px 0;
-}
-.os-workspace-textarea {
-  width: 100%;
-  min-height: 300px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  font-size: 16px;
-  line-height: 1.8;
-  color: var(--text-primary);
-  resize: none;
-  outline: none;
-}
-.os-workspace-textarea::placeholder {
-  color: #B0B8C8;
-  font-size: 16px;
-  line-height: 1.8;
-  white-space: pre-line;
-}
-
-/* 底部工具栏 */
-.os-workspace-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 40px 28px;
-}
-.os-workspace-tool-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 16px;
-  color: #94A3B8;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  outline: none;
-}
-.os-workspace-tool-btn:hover {
-  color: #7B61FF;
-  background: rgba(123, 97, 255, 0.06);
-}
-.os-workspace-counter {
-  font-size: 12px;
-  color: #CBD5E1;
-  font-variant-numeric: tabular-nums;
-  margin-left: 8px;
-}
-
-/* 开始创作按钮 — 56px 高 / 18px 圆角 / 紫蓝渐变 */
-.os-cta-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 56px;
-  padding: 0 32px;
-  border: none;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #111827 0%, #6366F1 100%);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-.os-cta-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, #8B71FF 0%, #6B9CFF 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.os-cta-btn:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 32px rgba(123, 97, 255, 0.3),
-    0 0 64px rgba(123, 97, 255, 0.12);
-}
-.os-cta-btn:hover::before {
-  opacity: 1;
-}
-.os-cta-btn:active {
-  transform: translateY(0) scale(0.98);
-}
-.os-cta-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
-}
-.os-cta-btn > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* ==================== AI 创作工作台 (Studio Layout) ==================== */
-
-/* ---- 推荐创作 chips ---- */
-.os-chips-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: 1320px;
-  width: 100%;
-}
-.os-chips-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #B0B8C8;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.os-chips-list {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.os-chip {
-  display: inline-flex;
-  align-items: center;
-  height: 28px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(124, 92, 255, 0.08);
-  color: #94A3B8;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  white-space: nowrap;
-}
-.os-chip:hover {
-  background: rgba(124, 92, 255, 0.08);
-  border-color: rgba(124, 92, 255, 0.18);
-  color: #6D5EF6;
-  transform: translateY(-1px);
-}
-
-/* ---- AI 创作工作台 — 左右分栏 ---- */
 .os-studio {
-  width: 100%;
-  max-width: 1180px;
-  min-height: 420px;
   display: grid;
   grid-template-columns: 65% 35%;
   gap: 24px;
@@ -1502,20 +1238,6 @@ body {
 }
 
 /* ---- 渐入动画 ---- */
-@keyframes fadeSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.animate-fade-slide-up {
-  animation: fadeSlideUp 0.5s ease-out forwards;
-  opacity: 0;
-}
 
 /* ==================== Creator OS 标签系统 ==================== */
 
@@ -1532,13 +1254,6 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* 模块标题 H2 */
-.os-section-title {
-  font-size: var(--typo-h2-size);
-  font-weight: var(--typo-h2-weight);
-  color: var(--typo-h2-color);
-  letter-spacing: -0.02em;
-}
 
 /* 卡片标题 H3 */
 .os-h3 {
@@ -1610,14 +1325,6 @@ body {
   flex-shrink: 0;
 }
 
-/* 菜单区 */
-.os-rail-menu {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
 
 /* 单个菜单项 */
 .os-rail-item {
@@ -1648,37 +1355,10 @@ body {
   box-shadow: 0 8px 24px rgba(124,92,255,0.18);
 }
 
-.os-rail-item-icon {
-  width: 22px;
-  height: 22px;
-  color: rgba(30,30,40,0.55);
-  transition: color 0.2s ease;
-}
 
-.os-rail-item-active .os-rail-item-icon {
-  color: #6D5EF6;
-}
 
-.os-rail-item-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(30,30,40,0.55);
-  line-height: 1;
-  transition: color 0.2s ease;
-}
 
-.os-rail-item-active .os-rail-item-label {
-  color: #6D5EF6;
-}
 
-/* 底部用户区 */
-.os-rail-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
 
 .os-rail-avatar {
   width: 36px;
@@ -1701,22 +1381,9 @@ body {
   color: #6D5EF6;
 }
 
-.os-rail-status {
-  font-size: 10px;
-  color: rgba(30,30,40,0.35);
-  text-align: center;
-  line-height: 1.2;
-}
 
 /* ==================== 移动端适配 ==================== */
 
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
 
 @media (max-width: 640px) {
   button, a {
