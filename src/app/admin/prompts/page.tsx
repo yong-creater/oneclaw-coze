@@ -401,25 +401,32 @@ export default function AdminInspirationPage() {
 
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingId ? '编辑灵感' : '新增灵感'}</DialogTitle>
+        <DialogContent className="sm:max-w-xl p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-0">
+            <DialogTitle className="text-lg">{editingId ? '编辑灵感' : '新增灵感'}</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              {editingId ? '修改灵感内容，保存后前台即时生效' : '添加新的灵感案例，发布后前台可见'}
+            </p>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="px-6 py-4 space-y-5">
+            {/* 标题 */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">标题 <span className="text-red-400">*</span></label>
+              <Input
+                value={form.title}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="例：夏日护肤封面"
+                className="w-full"
+              />
+            </div>
+
+            {/* 分类 + 状态 */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">标题 *</label>
-                <Input
-                  value={form.title}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, title: e.target.value }))}
-                  placeholder="例：夏日护肤封面"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1 block">分类</label>
+                <label className="text-sm font-medium mb-1.5 block">分类</label>
                 <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="选择分类" />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map(c => (
@@ -428,55 +435,70 @@ export default function AdminInspirationPage() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">灵感内容 / Prompt *</label>
-              <Textarea
-                value={form.content}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, content: e.target.value }))}
-                placeholder="输入灵感提示词内容..."
-                rows={6}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">标签（逗号分隔）</label>
-                <Input
-                  value={form.tags}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, tags: e.target.value }))}
-                  placeholder="例：电商, 夏日, 清新"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-1 block">状态</label>
+                <label className="text-sm font-medium mb-1.5 block">状态</label>
                 <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v as 'published' | 'draft' }))}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="published">已发布</SelectItem>
-                    <SelectItem value="draft">草稿</SelectItem>
+                    <SelectItem value="published">
+                      <span className="flex items-center gap-1.5"><Eye className="w-3.5 h-3.5 text-green-600" /> 已发布</span>
+                    </SelectItem>
+                    <SelectItem value="draft">
+                      <span className="flex items-center gap-1.5"><EyeOff className="w-3.5 h-3.5 text-slate-400" /> 草稿</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="is_featured"
-                checked={form.is_featured}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, is_featured: e.target.checked }))}
-                className="rounded border-slate-300"
+
+            {/* 灵感内容 */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">灵感内容 <span className="text-red-400">*</span></label>
+              <Textarea
+                value={form.content}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, content: e.target.value }))}
+                placeholder="输入灵感提示词内容，描述你想要生成的画面效果..."
+                rows={5}
+                className="w-full resize-none"
               />
-              <label htmlFor="is_featured" className="text-sm">设为推荐（前台优先展示）</label>
+            </div>
+
+            {/* 标签 */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">标签</label>
+              <Input
+                value={form.tags}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, tags: e.target.value }))}
+                placeholder="用逗号分隔，例：电商, 夏日, 清新"
+                className="w-full"
+              />
+            </div>
+
+            {/* 推荐 */}
+            <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={form.is_featured}
+                onClick={() => setForm(f => ({ ...f, is_featured: !f.is_featured }))}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${form.is_featured ? 'bg-amber-400' : 'bg-slate-300'}`}
+              >
+                <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition-transform ${form.is_featured ? 'translate-x-4' : 'translate-x-0'}`} />
+              </button>
+              <div>
+                <p className="text-sm font-medium">设为推荐</p>
+                <p className="text-xs text-muted-foreground">推荐灵感会在前台优先展示</p>
+              </div>
             </div>
           </div>
-          <DialogFooter>
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-slate-50/50 dark:bg-slate-800/30">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>取消</Button>
             <Button onClick={handleSave} disabled={saving || !form.title.trim() || !form.content.trim()} className="bg-orange-500 hover:bg-orange-600 text-white">
-              {saving ? '保存中...' : '保存'}
+              {saving ? '保存中...' : editingId ? '保存修改' : '添加灵感'}
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
