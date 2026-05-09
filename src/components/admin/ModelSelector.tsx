@@ -58,7 +58,6 @@ export function ModelSelector({
   // 弹框打开时，根据 currentProviderId/currentModelName 回显选中状态
   useEffect(() => {
     if (!open) return;
-    console.log('[ModelSelector] 弹框打开, currentProviderId:', currentProviderId, 'currentModelName:', currentModelName);
 
     // 回显当前选中：确定模型类型并设置选中状态
     if (currentProviderId && currentModelName) {
@@ -86,7 +85,6 @@ export function ModelSelector({
 
   // Tab 点击处理
   const handleTabClick = (type: string) => {
-    console.log('[ModelSelector] Tab 点击:', type);
     setSelectedType(type);
     setSelectedProviderId(null);
     setSelectedModel(null);
@@ -94,7 +92,6 @@ export function ModelSelector({
 
   // 当前类型的模型
   const currentTypeProviders = providers[selectedType] || [];
-  console.log('[ModelSelector] 当前类型:', selectedType, '提供商数量:', currentTypeProviders.length);
 
   // 扁平化模型列表
   const allModels: Array<{ provider: ModelProvider; model: Model }> = [];
@@ -225,7 +222,6 @@ export function ModelSelector({
                   <button
                     key={`${provider.id}-${model.name}`}
                     onClick={() => {
-                      console.log('[ModelSelector] 选择模型:', model.name);
                       setSelectedProviderId(provider.id);
                       setSelectedModel(model.name);
                     }}
