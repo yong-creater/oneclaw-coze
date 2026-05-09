@@ -440,23 +440,24 @@ export default function HomePage() {
               <div className="os-studio-input-area">
                 {/* 顶部 AI 引导文字 — 有输入时收起 */}
                 <span className={`os-studio-ai-hint${inputText ? ' os-studio-ai-hint-hidden' : ''}`}>AI 正在等待你的创意…</span>
-                {/* 轮播 placeholder — 始终占位，避免布局抖动 */}
-                <div
-                  className={`os-studio-placeholder ${placeholderVisible && !inputText ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
-                  onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
-                >
-                  <p className="os-studio-placeholder-example">
-                    {placeholderTexts[placeholderIndex]}
-                  </p>
-
+                {/* 输入区域：placeholder + textarea 叠加 */}
+                <div className="os-studio-textarea-wrap">
+                  <div
+                    className={`os-studio-placeholder ${placeholderVisible && !inputText ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
+                    onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
+                  >
+                    <p className="os-studio-placeholder-example">
+                      {placeholderTexts[placeholderIndex]}
+                    </p>
+                  </div>
+                  <textarea
+                    value={inputText}
+                    onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
+                    onKeyDown={handleKeyDown}
+                    placeholder=""
+                    className="os-studio-textarea"
+                  />
                 </div>
-                <textarea
-                  value={inputText}
-                  onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
-                  onKeyDown={handleKeyDown}
-                  placeholder=""
-                  className="os-studio-textarea"
-                />
 
                 {/* 上传图片预览 — 多图横向排列 */}
                 {uploadedImages.length > 0 && (

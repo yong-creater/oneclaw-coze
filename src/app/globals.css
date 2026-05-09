@@ -1428,9 +1428,14 @@ body {
   border-color: rgba(120, 120, 255, 0.35);
   box-shadow: 0 0 0 4px rgba(120, 120, 255, 0.08), 0 0 60px rgba(120, 120, 255, 0.10), 0 14px 44px rgba(120, 120, 255, 0.08);
 }
+.os-studio-textarea-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
 .os-studio-textarea {
   width: 100%;
-  flex: 1;
+  height: 100%;
   padding: 0;
   background: transparent;
   border: none;
@@ -1445,7 +1450,7 @@ body {
 .os-studio-textarea::placeholder {
   color: transparent;
 }
-/* placeholder 示例文本 — 轮播动画 */
+/* AI 引导提示 */
 .os-studio-ai-hint {
   font-size: 14px;
   font-weight: 400;
@@ -1462,11 +1467,12 @@ body {
   height: 0;
   margin-bottom: 0;
 }
+/* placeholder 示例文本 — 轮播动画，叠在 textarea 上方 */
 .os-studio-placeholder {
   position: absolute;
-  top: 50px;
-  left: 24px;
-  right: 24px;
+  top: 0;
+  left: 0;
+  right: 0;
   pointer-events: none;
   z-index: 1;
   padding: 0;
