@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Flame, FolderOpen, Wrench, LogIn, User, Crown, LogOut } from 'lucide-react';
+import { Sparkles, Flame, FolderOpen, Wrench, LogIn, User, LogOut } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -97,14 +97,6 @@ export default function SiteSidebar() {
                   >
                     <FolderOpen className="w-4 h-4" />
                     <span>我的作品</span>
-                  </Link>
-                  <Link
-                    href="/membership"
-                    onClick={() => setShowDropdown(false)}
-                    className="os-dock-user-menu-item"
-                  >
-                    <Crown className="w-4 h-4 text-[#FFB84D]" />
-                    <span>会员中心</span>
                   </Link>
                   <hr className="my-1 border-slate-100" />
                   <button

@@ -7,7 +7,6 @@ import {
   Wrench,
   Lightbulb,
   Users,
-  ShoppingCart,
   ChevronDown,
   LogOut,
   Menu,
@@ -43,9 +42,8 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { name: '精选工具', href: '/admin/utility-tools', icon: Wrench },
-  { name: '灵感库', href: '/admin/inspiration', icon: Lightbulb },
-  { name: '会员管理', href: '/admin/members', icon: Users },
-  { name: '订单管理', href: '/admin/orders', icon: ShoppingCart },
+  { name: '灵感库', href: '/admin/prompts', icon: Lightbulb },
+  { name: '用户管理', href: '/admin/users', icon: Users },
   { name: '模型提供商', href: '/admin/model-providers', icon: Grid3X3 },
 ];
 

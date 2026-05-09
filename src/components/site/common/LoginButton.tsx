@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@/contexts/UserContext';
-import { LogOut, User, Crown, ChevronDown } from 'lucide-react';
+import { LogOut, User, FolderOpen } from 'lucide-react';
 
 export default function LoginButton() {
   const { user, authenticated, logout, setShowLoginModal } = useUser();
@@ -37,9 +37,7 @@ export default function LoginButton() {
         )}
         <div className="min-w-0 flex-1 text-left">
           <div className="text-xs font-medium text-slate-700 truncate">{user?.nickname || '用户'}</div>
-          <div className="text-[10px] text-slate-400">免费版</div>
         </div>
-        <ChevronDown className="w-3 h-3 text-slate-400 shrink-0" />
       </button>
 
       {/* 下拉菜单 */}
@@ -51,12 +49,12 @@ export default function LoginButton() {
           />
           <div className="absolute left-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
             <Link
-              href="/membership"
+              href="/projects"
               onClick={() => setShowDropdown(false)}
               className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
             >
-              <Crown className="w-4 h-4 text-[#FFB84D]" />
-              会员中心
+              <FolderOpen className="w-4 h-4" />
+              我的作品
             </Link>
             <Link
               href="/workspace"
