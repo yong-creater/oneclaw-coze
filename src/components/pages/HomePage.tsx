@@ -17,7 +17,6 @@ import {
   PenTool,
   FileText,
   ImagePlus,
-  Upload,
 } from 'lucide-react';
 
 // ===== AI 工具匹配规则 =====
@@ -84,32 +83,54 @@ const TOOL_MATCHES: ToolMatch[] = [
 // ===== AI 需求识别状态 =====
 type IdentifyPhase = 'idle' | 'identifying' | 'matched' | 'no-match';
 
-// ===== 灵感建议 =====
-const recommendChips = [
-  { label: '生成高级耳机主图', example: '帮我生成高级耳机主图，白底高级感，多角度展示' },
-  { label: '护肤品极简白底图', example: '护肤品极简白底图，高端质感，柔光效果' },
-  { label: '小红书爆款封面', example: '小红书爆款封面，夏日护肤推荐，清新风格' },
-  { label: '带货口播脚本', example: '零食带货口播脚本，3分钟节奏紧凑' },
+// ===== 试试这些创作 — pills 标签 =====
+const tryChips = [
+  { label: '🔥 高级商品图', prompt: '帮我生成高级感耳机商品图，白底高级感，多角度展示' },
+  { label: '🔥 小红书封面', prompt: '生成小红书护肤封面，夏日清新风格' },
+  { label: '🔥 AI写真', prompt: '生成高级感AI写真头像，氛围感大片' },
+  { label: '🔥 海报设计', prompt: '做一张夏日饮品海报，清新文艺风格' },
+  { label: '🔥 电商详情页', prompt: '生成电商详情页长图，极简卖点排版' },
+  { label: '🔥 穿搭封面', prompt: '生成小红书穿搭封面图，街头潮流风格' },
 ];
 
 // ===== Placeholder 轮播文案 =====
 const placeholderTexts = [
-  '帮我生成小红书护肤封面',
   '生成高级感耳机商品图',
+  '生成小红书护肤封面',
+  '生成 AI 写真头像',
+  '生成高级咖啡海报',
+  '生成电商详情页长图',
+  '生成高级时尚大片',
   '做一张夏日饮品海报',
-  '生成高级感 AI 写真',
-  '帮我做电商白底主图',
   '生成穿搭种草封面图',
-  '做一张数码产品详情页',
-  '生成零食种草笔记图',
 ];
 
-// ===== 右侧预览图 =====
+// ===== 右侧预览图 — 带生成描述 =====
 const showcaseExamples = [
-  { title: '商品主图', category: '商品图', image: '/case-lipstick-main.png' },
-  { title: '小红书封面', category: '小红书', image: '/demo-card-lifestyle.jpg' },
-  { title: '详情页片段', category: '详情页', image: '/case-ecommerce.jpg' },
-  { title: 'AI写真', category: 'AI写真', image: '/demo-scene.jpg' },
+  {
+    title: '商品主图',
+    category: '商品图',
+    image: '/case-lipstick-main.png',
+    generating: '夏日护肤封面',
+  },
+  {
+    title: '小红书封面',
+    category: '小红书',
+    image: '/demo-card-lifestyle.jpg',
+    generating: '高级感耳机主图',
+  },
+  {
+    title: '详情页片段',
+    category: '详情页',
+    image: '/case-ecommerce.jpg',
+    generating: '小红书穿搭大片',
+  },
+  {
+    title: 'AI写真',
+    category: 'AI写真',
+    image: '/demo-scene.jpg',
+    generating: '高级咖啡海报',
+  },
 ];
 
 // ===== 热门案例 =====
@@ -141,6 +162,14 @@ const hotResults = [
 ];
 
 const MAX_UPLOAD_IMAGES = 5;
+
+// ===== 上传区能力标签 =====
+const uploadCapabilities = [
+  '商品参考图',
+  '风格参考图',
+  '多图融合',
+  '图片重绘',
+];
 
 // ===== 工具匹配算法 =====
 function matchTool(input: string): ToolMatch | null {
@@ -185,6 +214,10 @@ export default function HomePage() {
   // 拖拽状态
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // 右侧案例轮播
+  const [showcaseIndex, setShowcaseIndex] = useState(0);
+  const [showcaseFading, setShowcaseFading] = useState(false);
+
   // 识别文案轮播
   const identifySteps = [
     '正在理解你的需求...',
@@ -203,6 +236,18 @@ export default function HomePage() {
     }, 3000);
     return () => clearInterval(interval);
   }, [inputText]);
+
+  // 右侧案例自动轮播 — 5秒切换，淡入淡出
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowcaseFading(true);
+      setTimeout(() => {
+        setShowcaseIndex((prev) => (prev + 1) % showcaseExamples.length);
+        setShowcaseFading(false);
+      }, 400);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -325,8 +370,8 @@ export default function HomePage() {
     }
   }, [handleStartCreate]);
 
-  const handleChipClick = useCallback((example: string) => {
-    setInputText(example);
+  const handleChipClick = useCallback((prompt: string) => {
+    setInputText(prompt);
     resetIdentify();
   }, [resetIdentify]);
 
@@ -347,6 +392,9 @@ export default function HomePage() {
 
   const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
 
+  // 当前展示的案例
+  const currentShowcase = showcaseExamples[showcaseIndex];
+
   return (
     <div className="os-page">
       {/* ==================== Hero 创作区 ==================== */}
@@ -354,12 +402,16 @@ export default function HomePage() {
         {/* 噪点纹理 */}
         <div className="os-hero-noise" />
 
-        {/* 内容层 */}
-        <div className="relative z-10 flex flex-col items-center w-full max-w-[1100px] mx-auto px-4">
+        {/* 氛围光斑 */}
+        <div className="os-hero-glow-orb os-hero-glow-1" />
+        <div className="os-hero-glow-orb os-hero-glow-2" />
 
-          {/* 主标题 */}
+        {/* 内容层 */}
+        <div className="relative z-10 flex flex-col items-center w-full max-w-[1200px] mx-auto px-4">
+
+          {/* 主标题 — PC端单行 nowrap，移动端允许换行 */}
           <h1 className="os-hero-title">
-            上传图片，一键生成<br className="hidden sm:inline" /><span className="gradient-text">高质量内容</span>
+            上传图片，一键生成<span className="gradient-text">高质量内容</span>
           </h1>
 
           {/* 副标题 */}
@@ -405,7 +457,7 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* 拖拽上传区域 — 有图时仍可继续上传 */}
+              {/* 拖拽上传区域 — 带能力说明 */}
               {canUploadMore && (
                 <div
                   ref={dropZoneRef}
@@ -426,13 +478,21 @@ export default function HomePage() {
                   <div className="os-dropzone-icon">
                     <ImagePlus className="w-5 h-5" />
                   </div>
-                  <div className="os-dropzone-text">
-                    <span className="os-dropzone-title">
-                      {uploadedImages.length > 0 ? '继续添加参考图' : '上传参考图片（可选）'}
-                    </span>
-                    <span className="os-dropzone-formats">
-                      支持 JPG / PNG / WEBP{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ' · 最多 5 张'}
-                    </span>
+                  <div className="os-dropzone-content">
+                    <div className="os-dropzone-text">
+                      <span className="os-dropzone-title">
+                        {uploadedImages.length > 0 ? '继续添加参考图' : '上传参考图片（可选）'}
+                      </span>
+                      <span className="os-dropzone-formats">
+                        支持 JPG / PNG / WEBP{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ' · 最多 5 张'}
+                      </span>
+                    </div>
+                    {/* 能力标签 */}
+                    <div className="os-dropzone-caps">
+                      {uploadCapabilities.map(cap => (
+                        <span key={cap} className="os-dropzone-cap">✓ {cap}</span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -446,6 +506,24 @@ export default function HomePage() {
                   <div className="os-dropzone-text">
                     <span className="os-dropzone-title">已选 {MAX_UPLOAD_IMAGES} 张参考图</span>
                     <span className="os-dropzone-formats">点击已有图片的 × 可移除</span>
+                  </div>
+                </div>
+              )}
+
+              {/* 试试这些创作 — pills 标签 */}
+              {!inputText.trim() && phase === 'idle' && (
+                <div className="os-try-chips-bar">
+                  <span className="os-try-chips-label">试试这些创作</span>
+                  <div className="os-try-chips-list">
+                    {tryChips.map((chip) => (
+                      <button
+                        key={chip.label}
+                        className="os-try-chip"
+                        onClick={() => handleChipClick(chip.prompt)}
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
@@ -527,7 +605,7 @@ export default function HomePage() {
               )}
             </div>
 
-            {/* 右侧：AI 创作灵感 (35%) */}
+            {/* 右侧：AI 创作灵感 (38%) */}
             <div className="os-studio-showcase">
               <div className="os-showcase-header">
                 <div className="os-showcase-title-row">
@@ -536,40 +614,51 @@ export default function HomePage() {
                 </div>
                 <span className="os-showcase-subtitle">看看别人正在生成什么</span>
               </div>
-              <div className="os-showcase-grid">
+
+              {/* 主展示区 — 当前高亮案例 */}
+              <div className={`os-showcase-featured ${showcaseFading ? 'os-showcase-fading' : ''}`}>
+                <div className="os-showcase-featured-img-wrap">
+                  <img
+                    src={currentShowcase.image}
+                    alt={currentShowcase.title}
+                    className="os-showcase-featured-img"
+                  />
+                  {/* shimmer 扫光 */}
+                  <div className="os-showcase-shimmer" />
+                  <div className="os-showcase-featured-overlay" />
+                  <div className="os-showcase-featured-info">
+                    <span className="os-showcase-featured-category">{currentShowcase.category}</span>
+                    <span className="os-showcase-featured-generating">
+                      <span className="os-showcase-gen-dot" />
+                      正在生成：{currentShowcase.generating}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 缩略图列表 */}
+              <div className="os-showcase-thumbs">
                 {showcaseExamples.map((example, idx) => (
-                  <div key={idx} className="os-showcase-item group">
-                    <img
-                      src={example.image}
-                      alt={example.title}
-                      className="os-showcase-img"
-                      loading="lazy"
-                    />
-                    <div className="os-showcase-overlay" />
-                    <div className="os-showcase-label-wrap">
-                      <span className="os-showcase-category">{example.category}</span>
-                    </div>
+                  <div
+                    key={idx}
+                    className={`os-showcase-thumb ${idx === showcaseIndex ? 'os-showcase-thumb-active' : ''}`}
+                    onClick={() => {
+                      setShowcaseFading(true);
+                      setTimeout(() => {
+                        setShowcaseIndex(idx);
+                        setShowcaseFading(false);
+                      }, 300);
+                    }}
+                  >
+                    <img src={example.image} alt={example.title} className="os-showcase-thumb-img" />
+                    <span className="os-showcase-thumb-label">{example.category}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* ===== 灵感建议 chips ===== */}
-          <div className="os-chips-bar mt-6">
-            <span className="os-chips-label">灵感建议</span>
-            <div className="os-chips-list">
-              {recommendChips.map((chip) => (
-                <button
-                  key={chip.label}
-                  className="os-chip"
-                  onClick={() => handleChipClick(chip.example)}
-                >
-                  {chip.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* ===== 旧的灵感建议 chips — 移除，已由试试这些创作替代 ===== */}
 
         </div>
       </div>
