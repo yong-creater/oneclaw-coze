@@ -11,14 +11,12 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
-// 推荐创作场景 chips — 点击自动填充输入框
+// 灵感建议 chips — 点击自动填充输入框
 const recommendChips = [
-  { label: '商品图', example: '帮我生成高级护肤品商品图，白底高级感' },
-  { label: '详情页', example: '数码产品详情页，极简科技风格' },
-  { label: '小红书', example: '小红书种草图，夏日护肤推荐' },
-  { label: '视频脚本', example: '零食带货视频脚本，3分钟口播' },
-  { label: 'AI 写真', example: '生成个人职业形象照，商务高级感' },
-  { label: '带货文案', example: '美白精华种草文案，适合小红书发布' },
+  { label: '生成高级耳机主图', example: '帮我生成高级耳机主图，白底高级感，多角度展示' },
+  { label: '护肤品极简白底图', example: '护肤品极简白底图，高端质感，柔光效果' },
+  { label: '小红书爆款封面', example: '小红书爆款封面，夏日护肤推荐，清新风格' },
+  { label: '带货口播脚本', example: '零食带货口播脚本，3分钟节奏紧凑' },
 ];
 
 // 示例结果数据 — 使用本地高质量静态图片
@@ -216,9 +214,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ===== 推荐创作场景 chips ===== */}
+          {/* ===== 灵感建议 chips ===== */}
           <div className="os-chips-bar mt-6">
-            <span className="os-chips-label">推荐创作</span>
+            <span className="os-chips-label">灵感建议</span>
             <div className="os-chips-list">
               {recommendChips.map((chip) => (
                 <button
