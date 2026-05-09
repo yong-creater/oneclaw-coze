@@ -1057,6 +1057,49 @@ body {
   border-color: #7B61FF;
 }
 
+/* ---- 灵感建议 chips ---- */
+.os-chips-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1320px;
+  width: 100%;
+}
+.os-chips-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #B0B8C8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.os-chips-list {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.os-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(124, 92, 255, 0.08);
+  color: #94A3B8;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+.os-chip:hover {
+  background: rgba(124, 92, 255, 0.08);
+  border-color: rgba(124, 92, 255, 0.18);
+  color: #6D5EF6;
+  transform: translateY(-1px);
+}
+
 /* 输入区能力按钮 — 复用 Capsule Button */
 
 .os-studio {
