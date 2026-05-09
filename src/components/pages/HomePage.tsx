@@ -392,10 +392,6 @@ export default function HomePage() {
         {/* 噪点纹理 */}
         <div className="os-hero-noise" />
 
-        {/* 氛围光斑 */}
-        <div className="os-hero-glow-orb os-hero-glow-1" />
-        <div className="os-hero-glow-orb os-hero-glow-2" />
-
         {/* 内容层 */}
         <div className="relative z-10 flex flex-col items-center w-full max-w-[1200px] mx-auto px-4">
 

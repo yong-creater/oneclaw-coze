@@ -140,7 +140,10 @@ html {
 
 body {
   @apply font-sans;
-  background: linear-gradient(170deg, #F7F8FC 0%, #EEF2FF 100%);
+  background:
+    radial-gradient(circle at top center, rgba(120,120,255,0.12), transparent 45%),
+    linear-gradient(180deg, #f7f7fc 0%, #f5f4fb 100%);
+  background-attachment: fixed;
 }
 
 .dark body {
@@ -503,7 +506,7 @@ body {
 /* Hero section — 透明通道，继承全局背景 + 顶部柔和径向光晕 */
 .os-hero {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   padding-top: 64px;
   padding-bottom: 48px;
   background: transparent;
@@ -521,31 +524,7 @@ body {
   z-index: 0;
 }
 
-/* Hero 氛围光斑 — 浅紫渐变 */
-.os-hero-glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(80px);
-  z-index: 0;
-}
-.os-hero-glow-1 {
-  width: 900px;
-  height: 600px;
-  top: -20%;
-  left: 5%;
-  background: radial-gradient(ellipse at center, rgba(139, 113, 255, 0.13), transparent 65%);
-  animation: orbDrift 16s ease-in-out infinite;
-}
-.os-hero-glow-2 {
-  width: 700px;
-  height: 500px;
-  bottom: -15%;
-  right: 0%;
-  background: radial-gradient(ellipse at center, rgba(91, 140, 255, 0.09), transparent 65%);
-  animation: orbDrift2 20s ease-in-out infinite;
-}
-
+/* Hero 光斑已移除 — 统一使用全局 os-global-bg 光斑，避免独立光斑被裁切导致断层 */
 .os-hero::before {
   display: none;
 }
@@ -1893,6 +1872,7 @@ body {
 .os-studio-showcase {
   display: flex;
   flex-direction: column;
+  padding: 24px;
 }
 .os-showcase-header {
   margin-bottom: 16px;
@@ -1907,7 +1887,7 @@ body {
 /* 主展示区 — 高亮案例（缩小，不抢主视觉） */
 .os-showcase-featured {
   position: relative;
-  border-radius: 16px;
+  border-radius: 28px;
   overflow: hidden;
   aspect-ratio: 4/3;
   background: #F1F5F9;
@@ -2005,14 +1985,14 @@ body {
 .os-showcase-thumbs {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 12px;
 }
 .os-showcase-thumb {
   position: relative;
-  border-radius: 10px;
+  border-radius: 16px;
   overflow: hidden;
-  aspect-ratio: 4/3;
+  height: 72px;
   background: #F1F5F9;
   cursor: pointer;
   transition: all 0.3s ease;
