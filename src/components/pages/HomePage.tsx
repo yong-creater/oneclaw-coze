@@ -8,11 +8,6 @@ import {
   ArrowRight,
   Wand2,
   TrendingUp,
-  Package,
-  LayoutTemplate,
-  BookOpen,
-  Video,
-  Camera,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -34,17 +29,30 @@ const showcaseExamples = [
 
 // 创作方向选择
 interface SceneItem {
-  icon: LucideIcon;
+  image: string;
   title: string;
   desc: string;
-  href: string;
+  fillPrompt: string;
 }
 const sceneItems: SceneItem[] = [
-  { icon: Package, title: '商品图', desc: '主图 / 场景图 / 卖点图', href: '/product-generator' },
-  { icon: LayoutTemplate, title: '详情页', desc: '商品详情长图', href: '/productpage' },
-  { icon: BookOpen, title: '小红书', desc: '封面 / 标题 / 标签', href: '/xiaohongshu-generator' },
-  { icon: Video, title: '视频脚本', desc: '口播 / 分镜 / 带货', href: '' },
-  { icon: Camera, title: 'AI 写真', desc: '高级感人物写真', href: '/ai-photo' },
+  {
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=640&h=360&fit=crop&auto=format&q=80',
+    title: '高级商品主图',
+    desc: '上传产品图，自动生成高级电商主图和场景图。',
+    fillPrompt: '帮我生成高级电商商品主图和场景图',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=640&h=360&fit=crop&auto=format&q=80',
+    title: '小红书封面',
+    desc: '自动生成小红书封面和种草风格图片。',
+    fillPrompt: '帮我生成小红书种草封面',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=640&h=360&fit=crop&auto=format&q=80',
+    title: '商品详情页',
+    desc: '自动生成电商详情长图和卖点排版。',
+    fillPrompt: '帮我生成电商商品详情页和卖点排版',
+  },
 ];
 
 // 热门创作结果数据
@@ -210,33 +218,32 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ===== 选择创作方向 ===== */}
+          {/* ===== 你可以这样生成 ===== */}
           <div className="w-full mt-12 pb-14">
             <div className="text-center mb-7">
-              <h2 className="text-lg font-semibold text-slate-700">选择内容类型</h2>
-              <p className="text-[13px] text-slate-400 mt-1.5">选一个类型，AI 会帮你生成对应内容。</p>
+              <h2 className="text-lg font-semibold text-slate-700">你可以这样生成</h2>
+              <p className="text-[13px] text-slate-400 mt-1.5">上传图片或输入一句话，AI 自动帮你完成。</p>
             </div>
 
             <div className="os-scene-row">
-              {sceneItems.map((scene) => {
-                const Icon = scene.icon;
-                const handleClick = () => {
-                  if (scene.href) router.push(scene.href);
-                };
-                return (
-                  <button
-                    key={scene.title}
-                    onClick={handleClick}
-                    className="os-scene-card group"
-                  >
-                    <div className="os-scene-card-icon">
-                      <Icon className="w-[22px] h-[22px]" />
-                    </div>
+              {sceneItems.map((scene) => (
+                <button
+                  key={scene.title}
+                  onClick={() => {
+                    setInputText(scene.fillPrompt);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="os-scene-card group"
+                >
+                  <div className="os-scene-card-img">
+                    <img src={scene.image} alt={scene.title} />
+                  </div>
+                  <div className="os-scene-card-body">
                     <span className="os-scene-card-title">{scene.title}</span>
                     <span className="os-scene-card-desc">{scene.desc}</span>
-                  </button>
-                );
-              })}
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         </div>
