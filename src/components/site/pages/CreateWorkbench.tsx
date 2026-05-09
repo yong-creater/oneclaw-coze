@@ -33,6 +33,7 @@ async function callGenerateAPI(
   slug: string, prompt: string, images: string[],
   style: string, subtype: string, count: number, ratio: string
 ): Promise<GeneratedImage[]> {
+  // 统一使用 tool_id 从数据库读取模型配置，按 providerSlug 分发
   const genType = slugToGenType(slug);
   let url = '';
   let body: Record<string, unknown> = {};
@@ -41,24 +42,29 @@ async function callGenerateAPI(
     case 'product':
     case 'xiaohongshu':
     case 'aiphoto':
+      // 所有图片生成类工具统一走 /api/images/generate，通过 tool_id 区分
       url = '/api/images/generate';
-      body = { prompt, images, style, count, ratio, type: genType };
+      body = { prompt, images, style, subtype, count, ratio, tool_id: slug };
       break;
     case 'removebg':
+      // 抠图走 /api/images/process
       url = '/api/images/process';
-      body = { images, operation: 'remove-background', subtype };
+      body = { images, operation: 'remove-background', subtype, tool_id: 'background-removal' };
       break;
     case 'detail':
-      url = '/api/product-page/generate';
-      body = { prompt, images, style, modules: [subtype || 'full'] };
+      // 商品详情页也走图片生成，通过 tool_id 指定
+      url = '/api/images/generate';
+      body = { prompt, images, style, subtype: subtype || 'full', tool_id: 'product-page' };
       break;
     case 'novel':
+      // 小说脚本走 LLM
       url = '/api/novel/generate-script';
-      body = { prompt, genre: subtype || style, style };
+      body = { text: prompt, genre: subtype || style, style };
       break;
     default:
+      // 兜底：走图片生成
       url = '/api/images/generate';
-      body = { prompt, images, style, count, ratio, type: genType };
+      body = { prompt, images, style, subtype, count, ratio, tool_id: slug };
   }
 
   const res = await fetch(url, {
@@ -72,12 +78,35 @@ async function callGenerateAPI(
     throw new Error(err.error || `生成失败 (${res.status})`);
   }
 
+  // 检查是否是流式响应（LLM）
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('text/event-stream') || contentType.includes('text/plain')) {
+    const text = await res.text();
+    if (text) {
+      // 将文本内容包装为 GeneratedImage 格式（用 data URL）
+      return [{ url: `data:text/plain;charset=utf-8,${encodeURIComponent(text)}` }];
+    }
+    return [];
+  }
+
+  // JSON 响应
   const data = await res.json();
 
+  // 统一响应格式：{ success, imageUrls } 或 { content }
+  if (data.success && data.imageUrls) {
+    return data.imageUrls.map((u: string) => ({ url: u }));
+  }
+  if (data.success && data.content) {
+    return [{ url: `data:text/plain;charset=utf-8,${encodeURIComponent(data.content)}` }];
+  }
+  if (data.content) {
+    return [{ url: `data:text/plain;charset=utf-8,${encodeURIComponent(data.content)}` }];
+  }
+  // 兼容旧格式
   if (data.images) return data.images;
   if (data.data?.images) return data.data.images;
   if (data.data?.url) return [{ url: data.data.url }];
-  if (data.data?.content) return [{ url: `data:text/plain;base64,${btoa(encodeURIComponent(data.data.content))}` }];
+  if (data.data?.content) return [{ url: `data:text/plain;charset=utf-8,${encodeURIComponent(data.data.content)}` }];
   if (Array.isArray(data.data)) return data.data;
 
   return [];
