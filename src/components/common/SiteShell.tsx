@@ -1,12 +1,10 @@
 'use client';
 
-import { MenuProvider, useMenu } from '@/components/common/MenuProvider';
+import { MenuProvider } from '@/components/common/MenuProvider';
 import SiteSidebar from '@/components/common/SiteSidebar';
 
 function PageSwitcher({ children }: { children: React.ReactNode }) {
-  const { sidebarExpanded } = useMenu();
-
-  const marginLeft = sidebarExpanded ? 240 : 68;
+  const marginLeft = 88;
 
   return (
     <>

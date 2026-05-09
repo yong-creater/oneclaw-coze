@@ -3,12 +3,9 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 // ========== 类型 ==========
-export type MenuId = 'home' | 'tools' | 'template' | 'prompt' | 'project';
+export type MenuId = 'create' | 'inspire' | 'projects';
 
 interface MenuContextType {
-  sidebarExpanded: boolean;
-  toggleSidebar: () => void;
-  setSidebarExpanded: (v: boolean) => void;
   pendingInput: string | null;
   setPendingInput: (input: string | null) => void;
   consumePendingInput: () => string | null;
@@ -27,17 +24,8 @@ export function useMenu() {
 
 // ========== Provider ==========
 export function MenuProvider({ children }: { children: React.ReactNode }) {
-  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [pendingInput, setPendingInput] = useState<string | null>(null);
   const [activeToolRoute, setActiveToolRouteState] = useState<string | null>(null);
-
-  const toggleSidebar = useCallback(() => {
-    setSidebarExpanded(prev => !prev);
-  }, []);
-
-  const setSidebarExpandedCB = useCallback((v: boolean) => {
-    setSidebarExpanded(v);
-  }, []);
 
   const consumePendingInput = useCallback(() => {
     const input = pendingInput;
@@ -51,9 +39,6 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <MenuContext.Provider value={{
-      sidebarExpanded,
-      toggleSidebar,
-      setSidebarExpanded: setSidebarExpandedCB,
       pendingInput,
       setPendingInput,
       consumePendingInput,
