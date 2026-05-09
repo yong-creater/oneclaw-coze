@@ -208,11 +208,33 @@ export default function HomePage() {
   const [showcaseIndex, setShowcaseIndex] = useState(0);
   const [showcaseFading, setShowcaseFading] = useState(false);
 
-  // 识别文案轮播
+  // 识别文案轮播 — 4步，每秒切换
   const identifySteps = [
-    '正在理解你的需求...',
-    '正在匹配最佳工具...',
+    '正在识别内容类型',
+    '正在分析参考图片',
+    '正在匹配适合风格',
+    '正在推荐最佳创作工具',
   ];
+
+  // 推荐风格映射
+  interface StyleRecommendation { style: string; ratio: string; count: string; }
+  function getStyleRecommendation(tool: ToolMatch | null, input: string): StyleRecommendation {
+    if (!tool) return { style: '自动匹配', ratio: '3:4', count: '4\u5f20' };
+    const lower = input.toLowerCase();
+    const map: Record<string, StyleRecommendation> = {
+      'product-generator': { style: '\u79d1\u6280\u611f\u6781\u7b80\u98ce', ratio: '3:4', count: '4\u5f20' },
+      'xiaohongshu-generator': { style: '\u6e05\u65b0\u6c1b\u56f4\u611f', ratio: '4:5', count: '3\u5f20' },
+      'ai-photo': { style: '\u9ad8\u7ea7\u8d28\u611f\u5927\u7247', ratio: '3:4', count: '6\u5f20' },
+      'background-removal': { style: '\u5e72\u51c0\u767d\u5e95', ratio: '1:1', count: '1\u5f20' },
+      'product-page': { style: '\u54c1\u724c\u8c03\u6027\u6392\u7248', ratio: '3:4', count: '1\u4efd' },
+      'novel': { style: '\u6587\u5b66\u521b\u4f5c', ratio: '-', count: '1\u7bc7' },
+    };
+    const rec = map[tool.slug] || { style: '\u81ea\u52a8\u5339\u914d', ratio: '3:4', count: '4\u5f20' };
+    if (lower.includes('\u6df1\u8272') || lower.includes('\u6697\u9ed1') || lower.includes('\u79d1\u6280')) rec.style = '\u6df1\u8272\u79d1\u6280\u98ce';
+    if (lower.includes('\u6e05\u65b0') || lower.includes('\u590f\u65e5') || lower.includes('\u6587\u827a')) rec.style = '\u6e05\u65b0\u6587\u827a\u98ce';
+    if (lower.includes('\u6d77\u62a5') || lower.includes('\u5c01\u9762')) { rec.ratio = '3:4'; rec.count = '3\u5f20'; }
+    return rec;
+  }
 
   // Placeholder 自动轮播 — 用 CSS opacity 过渡避免布局抖动
   useEffect(() => {
@@ -293,8 +315,12 @@ export default function HomePage() {
     setPhase('identifying');
     setIdentifyStep(0);
 
-    setTimeout(() => setIdentifyStep(1), 800);
+    // 4步识别，每步1秒
+    setTimeout(() => setIdentifyStep(1), 1000);
+    setTimeout(() => setIdentifyStep(2), 2000);
+    setTimeout(() => setIdentifyStep(3), 3000);
 
+    // 4秒后出结果
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool) {
@@ -303,8 +329,9 @@ export default function HomePage() {
       } else {
         setPhase('no-match');
       }
-    }, 1800);
+    }, 4000);
 
+    // 结果展示1.5秒后自动跳转
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool) {
@@ -317,7 +344,7 @@ export default function HomePage() {
         if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
         router.push(`/create?${params.toString()}`);
       }
-    }, 3000);
+    }, 5500);
   }, [inputText, uploadedImages, phase, router]);
 
   const handleJumpNow = useCallback(() => {
@@ -528,56 +555,111 @@ export default function HomePage() {
               {/* ===== AI 识别状态浮层 ===== */}
               {phase !== 'idle' && (
                 <div className="os-identify-overlay">
+                  {/* 背景光效 */}
+                  <div className="os-identify-glow" />
+
                   {phase === 'identifying' && (
-                    <div className="os-identify-loading">
-                      <div className="os-identify-spinner" />
-                      <span className="os-identify-text">{identifySteps[identifyStep]}</span>
+                    <div className="os-identify-analyzing">
+                      {/* 顶部标题 */}
+                      <div className="os-identify-analyzing-header">
+                        <div className="os-identify-pulse-ring" />
+                        <span className="os-identify-analyzing-title">AI 正在理解你的创作需求\u2026</span>
+                      </div>
+
+                      {/* 4步分析进度 */}
+                      <div className="os-identify-steps">
+                        {identifySteps.map((step, idx) => (
+                          <div
+                            key={idx}
+                            className={`os-identify-step ${idx < identifyStep ? 'os-identify-step-done' : idx === identifyStep ? 'os-identify-step-active' : 'os-identify-step-pending'}`}
+                          >
+                            <span className="os-identify-step-icon">
+                              {idx < identifyStep ? <Check className="w-3 h-3" /> : <span className="os-identify-step-dot" />}
+                            </span>
+                            <span className="os-identify-step-text">{step}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* 进度条 */}
+                      <div className="os-identify-progress-bar">
+                        <div className="os-identify-progress-fill" style={{ width: `${((identifyStep + 1) / identifySteps.length) * 100}%` }} />
+                      </div>
+
+                      {/* Shimmer 扫光 */}
+                      <div className="os-identify-shimmer" />
                     </div>
                   )}
 
                   {phase === 'matched' && matchedTool && (
-                    <div className="os-identify-matched">
-                      <div className="os-identify-matched-icon">
-                        <Check className="w-4 h-4 text-white" />
+                    <div className="os-identify-result">
+                      {/* 匹配成功标识 */}
+                      <div className="os-identify-result-icon">
+                        <Check className="w-5 h-5 text-white" />
                       </div>
-                      <div className="os-identify-matched-info">
-                        <span className="os-identify-matched-label">已为你匹配</span>
-                        <span className="os-identify-matched-name">
+
+                      {/* 匹配信息 */}
+                      <div className="os-identify-result-info">
+                        <span className="os-identify-result-label">\u5df2\u4e3a\u4f60\u5339\u914d</span>
+                        <span className="os-identify-result-tool">
                           {matchedTool.icon}
                           <span className="ml-1.5">{matchedTool.name}</span>
                         </span>
                       </div>
-                      <button onClick={handleJumpNow} className="os-identify-jump-btn" disabled={isJumping}>
-                        {isJumping ? '跳转中...' : '立即前往'}
-                        <ArrowRight className="w-3.5 h-3.5 ml-1" />
+
+                      {/* 推荐信息 */}
+                      <div className="os-identify-recommend">
+                        <div className="os-identify-rec-item">
+                          <span className="os-identify-rec-label">\u63a8\u8350\u98ce\u683c</span>
+                          <span className="os-identify-rec-value">{getStyleRecommendation(matchedTool, inputText).style}</span>
+                        </div>
+                        <div className="os-identify-rec-item">
+                          <span className="os-identify-rec-label">\u63a8\u8350\u6bd4\u4f8b</span>
+                          <span className="os-identify-rec-value">{getStyleRecommendation(matchedTool, inputText).ratio}</span>
+                        </div>
+                        <div className="os-identify-rec-item">
+                          <span className="os-identify-rec-label">\u751f\u6210\u6570\u91cf</span>
+                          <span className="os-identify-rec-value">{getStyleRecommendation(matchedTool, inputText).count}</span>
+                        </div>
+                      </div>
+
+                      {/* 立即前往按钮 */}
+                      <button onClick={handleJumpNow} className="os-identify-goto-btn" disabled={isJumping}>
+                        {isJumping ? '\u8df3\u8f6c\u4e2d...' : '\u7acb\u5373\u524d\u5f80'}
+                        <ArrowRight className="w-4 h-4 ml-1" />
                       </button>
                     </div>
                   )}
 
                   {phase === 'no-match' && (
                     <div className="os-identify-nomatch">
-                      <div className="os-identify-nomatch-info">
-                        <span className="os-identify-nomatch-title">未找到完全匹配的工具</span>
-                        <span className="os-identify-nomatch-desc">OneClaw 当前更擅长：</span>
+                      <div className="os-identify-nomatch-header">
+                        <div className="os-identify-nomatch-icon-wrap">
+                          <Sparkles className="w-4 h-4" />
+                        </div>
+                        <div className="os-identify-nomatch-info">
+                          <span className="os-identify-nomatch-title">\u6682\u672a\u5339\u914d\u5230\u4e13\u5c5e\u5de5\u5177</span>
+                          <span className="os-identify-nomatch-desc">OneClaw \u5f53\u524d\u66f4\u64c5\u957f\uff1a</span>
+                        </div>
                       </div>
                       <div className="os-identify-nomatch-tools">
                         {TOOL_MATCHES.map(tool => (
                           <span key={tool.slug} className="os-identify-nomatch-tag">
                             {tool.icon}
-                            <span className="ml-1">{tool.name.replace('AI', '').replace('生成器', '').replace('工坊', '')}</span>
+                            <span className="ml-1">{tool.name.replace('AI', '').replace('\u751f\u6210\u5668', '').replace('\u5de5\u574a', '')}</span>
                           </span>
                         ))}
                       </div>
                       <div className="os-identify-nomatch-actions">
                         <button onClick={handleAutoCreate} className="os-identify-auto-btn">
                           <Sparkles className="w-3.5 h-3.5" />
-                          <span>自动识别创作</span>
+                          <span>\u81ea\u52a8\u8bc6\u522b\u521b\u4f5c</span>
                         </button>
                         <button onClick={handleBrowseTools} className="os-identify-browse-btn">
-                          浏览工具库
+                          \u6d4f\u89c8\u5de5\u5177\u5e93
                         </button>
                         <button onClick={resetIdentify} className="os-identify-cancel-btn">
-                          返回修改
+                          \u8fd4\u56de\u4fee\u6539
                         </button>
                       </div>
                     </div>
