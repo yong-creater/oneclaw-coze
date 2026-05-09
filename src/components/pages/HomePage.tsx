@@ -411,6 +411,8 @@ export default function HomePage() {
             <div className="os-studio-input">
               {/* AI 创作描述框 */}
               <div className="os-studio-input-area">
+                {/* 顶部 AI 引导文字 */}
+                <span className="os-studio-ai-hint">AI 正在等待你的创意…</span>
                 {/* 轮播 placeholder — 始终占位，避免布局抖动 */}
                 <div
                   className={`os-studio-placeholder ${placeholderVisible && !inputText ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
@@ -467,7 +469,7 @@ export default function HomePage() {
                   </div>
                   <div className="os-dropzone-text">
                     <span className="os-dropzone-title">
-                      {uploadedImages.length > 0 ? '继续添加参考图' : '上传参考图片'}
+                      {uploadedImages.length > 0 ? '继续添加参考图' : '添加灵感参考（可选）'}
                     </span>
                     <span className="os-dropzone-formats">
                       支持拖拽上传{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ''}
@@ -609,6 +611,12 @@ export default function HomePage() {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* 正在生成描述 */}
+              <div className="os-showcase-gen-label">
+                <span className="os-showcase-gen-dot-sm" />
+                <span>正在生成：{currentShowcase.generating}</span>
               </div>
 
               {/* 缩略图列表 */}
