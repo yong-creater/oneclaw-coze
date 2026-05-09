@@ -62,7 +62,7 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       {
         id: 'scene',
         type: 'select',
-        label: '你想生成哪种商品图？',
+        label: '生成类型',
         options: [
           { value: 'white-bg', label: '白底主图', icon: '⬜' },
           { value: 'lifestyle', label: '场景图', icon: '🏞️' },
@@ -93,9 +93,9 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
   },
   {
     slug: 'xiaohongshu-generator',
-    name: '小红书爆款',
+    name: '小红书封面',
     icon: '📕',
-    description: '爆款小红书内容一键生成',
+    description: '爆款小红书封面一键生成',
     greeting: '你想做什么类型的小红书内容？',
     steps: [
       {
@@ -108,22 +108,11 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       {
         id: 'niche',
         type: 'select',
-        label: '选择你的赛道',
+        label: '风格标签',
         options: [
-          { value: 'beauty', label: '美妆护肤', icon: '💄' },
-          { value: 'fashion', label: '穿搭时尚', icon: '👗' },
-          { value: 'food', label: '美食饮品', icon: '🍽️' },
-          { value: 'lifestyle', label: '生活方式', icon: '✨' },
-        ],
-      },
-      {
-        id: 'content_type',
-        type: 'select',
-        label: '需要封面还是整套内容？',
-        options: [
-          { value: 'cover', label: '封面图', icon: '🖼️' },
-          { value: 'carousel', label: '整套图文', icon: '📑' },
-          { value: 'copy', label: '文案+封面', icon: '📝' },
+          { value: 'beauty', label: '美妆', icon: '💄' },
+          { value: 'fashion', label: '穿搭', icon: '👗' },
+          { value: 'lifestyle', label: '生活', icon: '✨' },
         ],
       },
       {
@@ -164,12 +153,11 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       {
         id: 'style',
         type: 'select',
-        label: '选择写真风格',
+        label: '风格标签',
         options: [
-          { value: 'id-photo', label: '证件照', icon: '🪪' },
-          { value: 'artistic', label: '艺术写真', icon: '🎨' },
-          { value: 'couples', label: '情侣写真', icon: '💑' },
-          { value: 'creative', label: '创意写真', icon: '✨' },
+          { value: 'korean', label: '韩系', icon: '🇰🇷' },
+          { value: 'retro', label: '复古', icon: '📼' },
+          { value: 'film', label: '胶片', icon: '🎞️' },
         ],
       },
       {
@@ -181,16 +169,62 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       },
     ],
     cases: [
-      { image: '/demo-card-lifestyle.jpg', title: '港风艺术写真', desc: '复古氛围感大片' },
-      { image: '/demo-scene.jpg', title: '日系清新写真', desc: '自然光线下的人像' },
-      { image: '/case-lipstick-main.png', title: '韩系证件照', desc: '精致职业形象' },
+      { image: '/demo-card-lifestyle.jpg', title: '韩系清新写真', desc: '自然光线下的人像' },
+      { image: '/demo-scene.jpg', title: '复古胶片写真', desc: '怀旧氛围感大片' },
+      { image: '/case-lipstick-main.png', title: '高级质感写真', desc: '棚拍质感大片' },
     ],
     defaultRatio: '3:4',
     defaultCount: 6,
     styleOptions: [
-      { value: 'hk-retro', label: '港风复古' },
-      { value: 'jp-fresh', label: '日系清新' },
-      { value: 'kr-elegant', label: '韩系高级' },
+      { value: 'korean-fresh', label: '韩系清新' },
+      { value: 'retro-film', label: '复古胶片' },
+      { value: 'luxury', label: '高级质感' },
+    ],
+  },
+  {
+    slug: 'poster-design',
+    name: '海报设计',
+    icon: '🎨',
+    description: 'AI一键生成品牌海报和营销图',
+    greeting: '你想设计什么类型的海报？',
+    steps: [
+      {
+        id: 'upload',
+        type: 'upload',
+        label: '上传参考图或素材（可选）',
+        placeholder: '上传Logo、产品图或风格参考',
+        maxFiles: 5,
+        optional: true,
+      },
+      {
+        id: 'template',
+        type: 'select',
+        label: '风格模板',
+        options: [
+          { value: 'minimal', label: '简约', icon: '◻️' },
+          { value: 'premium', label: '高级', icon: '✨' },
+          { value: 'lifestyle', label: '生活场景', icon: '🏡' },
+        ],
+      },
+      {
+        id: 'description',
+        type: 'input',
+        label: '描述海报内容和用途',
+        placeholder: '例如：618促销活动海报，科技产品发布海报…',
+      },
+    ],
+    cases: [
+      { image: '/case-ecommerce.jpg', title: '科技产品海报', desc: '简约高级风格' },
+      { image: '/demo-card-lifestyle.jpg', title: '品牌活动海报', desc: '生活场景风格' },
+      { image: '/case-lipstick-main.png', title: '促销海报', desc: '高级质感风格' },
+    ],
+    defaultRatio: '3:4',
+    defaultCount: 2,
+    styleOptions: [
+      { value: 'minimal', label: '简约风格' },
+      { value: 'premium', label: '高级质感' },
+      { value: 'lifestyle', label: '生活场景' },
+      { value: 'festive', label: '节日氛围' },
     ],
   },
   {
@@ -309,36 +343,6 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       { value: 'epic', label: '史诗风格' },
     ],
   },
-  {
-    slug: 'resume-optimizer',
-    name: '简历优化',
-    icon: '📝',
-    description: 'STAR法则优化简历，HR直接约面试',
-    greeting: '上传你的简历或描述工作经历',
-    steps: [
-      {
-        id: 'upload',
-        type: 'upload',
-        label: '上传简历（可选）',
-        placeholder: '上传你的简历文件或截图',
-        maxFiles: 3,
-        optional: true,
-      },
-      {
-        id: 'description',
-        type: 'input',
-        label: '描述你的工作经历',
-        placeholder: '例如：3年产品经理经验，负责过电商和社交产品…',
-      },
-    ],
-    cases: [
-      { image: '/cover-resume.png', title: '产品经理简历', desc: 'STAR法则优化' },
-      { image: '/cover-novel.png', title: '设计师简历', desc: '作品集式排版' },
-    ],
-    defaultRatio: 'text',
-    defaultCount: 1,
-    styleOptions: [],
-  },
 ];
 
 // ===== 查找工具配置 =====
@@ -357,12 +361,12 @@ export function slugToGenType(slug: string): string {
     'product-generator': 'product',
     'xiaohongshu-generator': 'xiaohongshu',
     'ai-photo': 'aiphoto',
+    'poster-design': 'product',
     'background-removal': 'removebg',
     'product-page': 'detail',
     'productpage': 'detail',
     'product-poster': 'product',
     'novel': 'novel',
-    'resume-optimizer': 'resume',
   };
   return map[slug] || slug;
 }
@@ -376,7 +380,7 @@ export function genTypeToSlug(genType: string): string {
     'removebg': 'background-removal',
     'detail': 'product-page',
     'novel': 'novel',
-    'resume': 'resume-optimizer',
+    'poster': 'poster-design',
   };
   return map[genType] || genType;
 }

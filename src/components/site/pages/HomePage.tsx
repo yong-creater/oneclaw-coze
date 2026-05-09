@@ -15,8 +15,9 @@ import {
   X,
   Scissors,
   PenTool,
-  FileText,
+  Palette, FileText,
   ImagePlus,
+  LayoutTemplate,
 } from 'lucide-react';
 
 // ===== AI 工具匹配规则 =====
@@ -36,6 +37,7 @@ const TOOL_ROUTES: Record<string, string> = {
   'ai-photo': 'aiphoto',
   'background-removal': 'removebg',
   'product-page': 'detail',
+  'poster-design': 'poster',
   'novel': 'novel',
 };
 
@@ -116,6 +118,14 @@ const TOOL_MATCHES: ToolMatch[] = [
     icon: <FileText className="w-4 h-4" />,
     keywords: ['详情页', '详情', '长图', '卖点', '规格', '参数', '详情页设计', '产品详情', '宝贝详情'],
     description: '自动生成电商详情长图和卖点排版',
+  },
+  {
+    slug: 'poster-design',
+    name: '海报设计生成器',
+    type: 'poster',
+    icon: <Palette className="w-4 h-4" />,
+    keywords: ['海报', '海报设计', '宣传图', '活动海报', '品牌海报', '促销海报', '节日海报', '音乐节', '创意海报'],
+    description: '一键生成品牌宣传海报和活动海报',
   },
   {
     slug: 'novel',
