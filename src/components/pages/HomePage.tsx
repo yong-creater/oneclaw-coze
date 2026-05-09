@@ -135,9 +135,9 @@ export default function HomePage() {
   return (
     <div className="os-page">
       {/* ==================== Hero 创作区 ==================== */}
-      <div className="os-hero pt-[80px] pb-[48px]">
+      <div className="os-hero">
         {/* 内容层 */}
-        <div className="relative z-10 flex flex-col items-center w-full max-w-[1280px] mx-auto px-4">
+        <div className="relative z-10 flex flex-col items-center w-full max-w-[1100px] mx-auto px-4">
 
           {/* 主标题 */}
           <h1 className="os-hero-title">
@@ -268,6 +268,7 @@ export default function HomePage() {
 
       {/* ==================== 热门创作结果 — AI 结果流 ==================== */}
       <section className="relative animate-fade-slide-up !mt-[64px] pt-20 pb-8" style={{ animationDelay: '0.15s' }}>
+        <div className="max-w-[1440px] mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
@@ -316,6 +317,7 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+        </div>{/* /max-width container */}
       </section>
 
     </div>

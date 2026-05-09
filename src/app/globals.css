@@ -317,11 +317,9 @@ body {
     #F4F1FF 45%,
     #F8FAFC 100%
   );
-  padding: 0 40px;
 }
 @media (max-width: 768px) {
   .os-main-canvas {
-    padding: 0 12px;
   }
 }
 
@@ -377,15 +375,30 @@ body {
 }
 
 /* ---- 页面内容区 — 透明通道，让全局背景透出 ---- */
+/* ---- 统一页面容器 — 防止大屏无限拉宽 ---- */
+.page-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding-left: 32px;
+  padding-right: 32px;
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .page-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
 .os-page {
   position: relative;
   background: transparent;
-  padding: 40px 0;
+  padding: 40px 32px;
   min-height: 100vh;
 }
 @media (max-width: 768px) {
   .os-page {
-    padding: 24px 0;
+    padding: 24px 16px;
   }
 }
 
@@ -492,6 +505,8 @@ body {
 .os-hero {
   position: relative;
   overflow: hidden;
+  padding-top: 72px;
+  padding-bottom: 56px;
 }
 .os-hero::before,
 .os-hero::after {
@@ -505,6 +520,9 @@ body {
   line-height: 1.1;
   font-weight: 700;
   letter-spacing: -0.03em;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 @media (max-width: 768px) {
   .os-hero-title {
@@ -517,6 +535,8 @@ body {
   line-height: 1.6;
   color: #6B7280;
   max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 16px;
 }
 @media (max-width: 768px) {
@@ -740,8 +760,10 @@ body {
 .os-scene-row {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  gap: 24px;
   flex-wrap: wrap;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 .os-scene-card {
   display: flex;
@@ -1075,7 +1097,7 @@ body {
     0 0 0 0.5px rgba(255, 255, 255, 0.6) inset;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
 }
 .os-workspace:focus-within {
