@@ -29,6 +29,52 @@ interface ToolMatch {
   description: string;
 }
 
+// ===== 工具路由映射（slug → 对应 create 页面 type） =====
+const TOOL_ROUTES: Record<string, string> = {
+  'product-generator': 'product',
+  'xiaohongshu-generator': 'xiaohongshu',
+  'ai-photo': 'aiphoto',
+  'background-removal': 'removebg',
+  'product-page': 'detail',
+  'novel': 'novel',
+};
+
+// ===== 跳转上下文存储 key =====
+const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
+
+// ===== 跳转上下文结构 =====
+interface CreateContext {
+  prompt: string;
+  uploadedImages: string[];
+  matchedTool: string;
+  type: string;
+  analysisResult: {
+    tool: string;
+    style: string;
+    ratio: string;
+    count: string;
+  };
+}
+
+// ===== 保存上下文到 sessionStorage 并跳转到 /create =====
+function navigateToCreate(
+  router: ReturnType<typeof useRouter>,
+  context: CreateContext,
+) {
+  try {
+    sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
+  } catch {
+    // sessionStorage 写入失败时降级为 URL 参数（不传图片）
+    console.warn('sessionStorage write failed, falling back to URL params');
+  }
+  const params = new URLSearchParams({
+    prompt: context.prompt,
+    type: context.type,
+    toolId: context.matchedTool,
+  });
+  router.push(`/create?${params.toString()}`);
+}
+
 const TOOL_MATCHES: ToolMatch[] = [
   {
     slug: 'product-generator',
@@ -334,29 +380,43 @@ export default function HomePage() {
     // 结果展示1秒后自动跳转
     setTimeout(() => {
       const tool = matchTool(inputText);
-      if (tool) {
+      if (tool && TOOL_ROUTES[tool.slug]) {
         setIsJumping(true);
-        const params = new URLSearchParams({
+        const rec = getStyleRecommendation(tool, inputText);
+        navigateToCreate(router, {
           prompt: inputText.trim(),
-          type: tool.type,
-          toolId: tool.slug,
+          uploadedImages,
+          matchedTool: tool.slug,
+          type: TOOL_ROUTES[tool.slug],
+          analysisResult: {
+            tool: tool.slug,
+            style: rec.style,
+            ratio: rec.ratio,
+            count: rec.count,
+          },
         });
-        if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
-        router.push(`/create?${params.toString()}`);
       }
     }, 9000);
   }, [inputText, uploadedImages, phase, router]);
 
   const handleJumpNow = useCallback(() => {
     if (!matchedTool) return;
+    const routeType = TOOL_ROUTES[matchedTool.slug];
+    if (!routeType) return;
     setIsJumping(true);
-    const params = new URLSearchParams({
+    const rec = getStyleRecommendation(matchedTool, inputText);
+    navigateToCreate(router, {
       prompt: inputText.trim(),
-      type: matchedTool.type,
-      toolId: matchedTool.slug,
+      uploadedImages,
+      matchedTool: matchedTool.slug,
+      type: routeType,
+      analysisResult: {
+        tool: matchedTool.slug,
+        style: rec.style,
+        ratio: rec.ratio,
+        count: rec.count,
+      },
     });
-    if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
-    router.push(`/create?${params.toString()}`);
   }, [matchedTool, inputText, uploadedImages, router]);
 
   const handleBrowseTools = useCallback(() => {
@@ -365,12 +425,20 @@ export default function HomePage() {
 
   const handleAutoCreate = useCallback(() => {
     setIsJumping(true);
-    const params = new URLSearchParams({
+    const firstTool = TOOL_MATCHES[0];
+    const routeType = TOOL_ROUTES[firstTool.slug] || 'auto';
+    navigateToCreate(router, {
       prompt: inputText.trim(),
-      type: 'auto',
+      uploadedImages,
+      matchedTool: firstTool.slug,
+      type: routeType,
+      analysisResult: {
+        tool: firstTool.slug,
+        style: '自动匹配',
+        ratio: '3:4',
+        count: '4张',
+      },
     });
-    if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
-    router.push(`/create?${params.toString()}`);
   }, [inputText, uploadedImages, router]);
 
   const resetIdentify = useCallback(() => {
@@ -683,12 +751,29 @@ export default function HomePage() {
 
             {phase === 'identifying' && (
               <div className="os-ai-analyzing" key={`msg-${identifyStep}`}>
-                {/* 上传图片扫描区域 */}
+                {/* 上传图片扫描区域 — 支持多图展示 */}
                 {uploadedImages.length > 0 && (
                   <div className="os-ai-scan-area">
-                    <img src={uploadedImages[0]} alt="参考图" className="os-ai-scan-img" />
+                    {uploadedImages.length === 1 ? (
+                      /* 单图：大图展示 */
+                      <div className="os-ai-scan-single">
+                        <img src={uploadedImages[0]} alt="参考图" className="os-ai-scan-img" />
+                      </div>
+                    ) : (
+                      /* 多图：网格展示 */
+                      <div className={`os-ai-scan-grid os-ai-scan-grid-${Math.min(uploadedImages.length, 5)}`}>
+                        {uploadedImages.slice(0, 5).map((img, idx) => (
+                          <div key={idx} className="os-ai-scan-grid-item">
+                            <img src={img} alt={`参考图${idx + 1}`} className="os-ai-scan-grid-img" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="os-ai-scan-line" />
                     <div className="os-ai-scan-shimmer" />
+                    {uploadedImages.length > 1 && (
+                      <span className="os-ai-scan-count">已上传 {uploadedImages.length} 张参考图</span>
+                    )}
                   </div>
                 )}
 
@@ -751,24 +836,34 @@ export default function HomePage() {
                 <span className="os-ai-nomatch-title">我们为你推荐这些创作方式</span>
                 <span className="os-ai-nomatch-desc">当前需求不够明确，你可以选择一个方向继续创作</span>
                 <div className="os-ai-nomatch-tags">
-                  {TOOL_MATCHES.map(tool => (
-                    <button
-                      key={tool.slug}
-                      className="os-ai-nomatch-tag os-ai-nomatch-tag-clickable"
-                      onClick={() => {
-                        const params = new URLSearchParams({
-                          prompt: inputText.trim(),
-                          type: tool.type,
-                          toolId: tool.slug,
-                        });
-                        if (uploadedImages.length > 0) params.set('images', JSON.stringify(uploadedImages));
-                        router.push(`/create?${params.toString()}`);
-                      }}
-                    >
-                      {tool.icon}
-                      <span className="ml-1">{tool.name.replace('AI', '').replace('生成器', '').replace('工坊', '')}</span>
-                    </button>
-                  ))}
+                  {TOOL_MATCHES.map(tool => {
+                    const routeType = TOOL_ROUTES[tool.slug];
+                    return (
+                      <button
+                        key={tool.slug}
+                        className="os-ai-nomatch-tag os-ai-nomatch-tag-clickable"
+                        onClick={() => {
+                          if (!routeType) return;
+                          const rec = getStyleRecommendation(tool, inputText);
+                          navigateToCreate(router, {
+                            prompt: inputText.trim(),
+                            uploadedImages,
+                            matchedTool: tool.slug,
+                            type: routeType,
+                            analysisResult: {
+                              tool: tool.slug,
+                              style: rec.style,
+                              ratio: rec.ratio,
+                              count: rec.count,
+                            },
+                          });
+                        }}
+                      >
+                        {tool.icon}
+                        <span className="ml-1">{tool.name.replace('AI', '').replace('生成器', '').replace('工坊', '')}</span>
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="os-ai-nomatch-actions">
                   <button onClick={handleAutoCreate} className="os-ai-nomatch-primary">

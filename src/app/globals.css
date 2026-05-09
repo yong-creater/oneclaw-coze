@@ -1718,11 +1718,58 @@ body {
   box-shadow: 0 8px 32px rgba(120,120,255,0.08);
 }
 
+.os-ai-scan-single {
+  width: 100%;
+  height: 100%;
+}
+
 .os-ai-scan-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   animation: osAiImgZoom 6s ease-in-out infinite;
+}
+
+/* 多图网格布局 */
+.os-ai-scan-grid {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(120,120,255,0.04);
+}
+
+.os-ai-scan-grid-2 { grid-template-columns: 1fr 1fr; }
+.os-ai-scan-grid-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.os-ai-scan-grid-3 .os-ai-scan-grid-item:first-child { grid-row: 1 / -1; }
+.os-ai-scan-grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.os-ai-scan-grid-5 { grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; }
+.os-ai-scan-grid-5 .os-ai-scan-grid-item:first-child { grid-column: 1 / -1; }
+
+.os-ai-scan-grid-item {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.os-ai-scan-grid-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: osAiImgZoom 6s ease-in-out infinite;
+}
+
+.os-ai-scan-count {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(4px);
+  padding: 2px 8px;
+  border-radius: 10px;
+  z-index: 3;
 }
 
 @keyframes osAiImgZoom {

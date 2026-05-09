@@ -67,11 +67,39 @@ type GenStatus = 'idle' | 'generating' | 'success' | 'failed';
 export default function CreateWorkbench() {
   const searchParams = useSearchParams();
 
+  // ===== 从 sessionStorage 读取首页传入的上下文 =====
+  const getContext = useCallback((): { prompt: string; type: string; toolId: string; images: string[] } => {
+    try {
+      const stored = sessionStorage.getItem('oneclaw_create_context');
+      if (stored) {
+        const ctx = JSON.parse(stored);
+        // 读取后清除，避免刷新时重复
+        sessionStorage.removeItem('oneclaw_create_context');
+        return {
+          prompt: ctx.prompt || '',
+          type: ctx.type || 'auto',
+          toolId: ctx.matchedTool || '',
+          images: Array.isArray(ctx.uploadedImages) ? ctx.uploadedImages : [],
+        };
+      }
+    } catch {
+      // sessionStorage 不可用时降级为 URL 参数
+    }
+    // 降级：从 URL 参数读取
+    return {
+      prompt: searchParams.get('prompt') || '',
+      type: searchParams.get('type') || 'auto',
+      toolId: searchParams.get('toolId') || '',
+      images: [],
+    };
+  }, [searchParams]);
+
+  const context = useRef(getContext()).current;
+
   // ===== 从首页/工具库传入的参数 =====
-  const initialPrompt = searchParams.get('prompt') || '';
-  const initialType = searchParams.get('type') || 'auto';
-  const initialImage = searchParams.get('image') || '';
-  const toolId = searchParams.get('toolId') || '';
+  const initialPrompt = context.prompt;
+  const initialType = context.type;
+  const toolId = context.toolId;
 
   // slug → genType 映射
   const slugToGenType = (slug: string): string => {
@@ -80,8 +108,10 @@ export default function CreateWorkbench() {
       'xiaohongshu-generator': 'xiaohongshu',
       'ai-photo': 'aiphoto',
       'background-removal': 'removebg',
+      'product-page': 'detail',
       'productpage': 'detail',
       'product-poster': 'product',
+      'novel': 'novel',
     };
     return map[slug] || slug;
   };
@@ -89,7 +119,7 @@ export default function CreateWorkbench() {
   // ===== 状态 =====
   const [prompt, setPrompt] = useState(initialPrompt);
   const [genType, setGenType] = useState(slugToGenType(initialType));
-  const [uploadedImages, setUploadedImages] = useState<string[]>(initialImage ? [initialImage] : []);
+  const [uploadedImages, setUploadedImages] = useState<string[]>(context.images);
   const [status, setStatus] = useState<GenStatus>('idle');
   const [currentStep, setCurrentStep] = useState(0);
   const [results, setResults] = useState<GenResult[]>([]);
