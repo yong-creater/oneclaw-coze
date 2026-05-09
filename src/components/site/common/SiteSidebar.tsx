@@ -15,8 +15,8 @@ interface NavItem {
 
 /* 灵感 → 创作 → 作品 → 工具库 */
 const NAV_ITEMS: NavItem[] = [
-  { icon: Flame,    label: '灵感', href: '/prompts' },
   { icon: Sparkles, label: '创作', href: '/' },
+  { icon: Flame,    label: '灵感', href: '/prompts' },
   { icon: FolderOpen, label: '作品', href: '/projects' },
   { icon: Wrench,   label: '工具库', href: '/tools' },
 ];
