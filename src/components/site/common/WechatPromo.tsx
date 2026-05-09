@@ -1,21 +1,34 @@
 'use client';
 
-import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MessageCircle } from 'lucide-react';
 
 interface WechatPromoProps {
   className?: string;
 }
 
 export default function WechatPromo({ className = '' }: WechatPromoProps) {
+  const [qrCodeUrl, setQrCodeUrl] = useState('/wechat-qrcode.jpg');
+
+  useEffect(() => {
+    fetch('/api/wechat/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.qrCodeUrl) {
+          setQrCodeUrl(data.qrCodeUrl);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className={`max-w-7xl mx-auto px-4 ${className}`}>
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 py-6 border-t border-slate-200 dark:border-slate-700">
         {/* 品牌 + 公众号信息 */}
         <div className="flex items-center gap-4">
-          <Image 
-            src="/wechat-qrcode.jpg" 
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src={qrCodeUrl} 
             alt="微信公众号" 
             width={64}
             height={64}

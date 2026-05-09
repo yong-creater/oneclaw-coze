@@ -1,4 +1,23 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
 export default function SiteFooter() {
+  const [qrCodeUrl, setQrCodeUrl] = useState('/wechat-qrcode.jpg');
+
+  useEffect(() => {
+    fetch('/api/wechat/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.qrCodeUrl) {
+          setQrCodeUrl(data.qrCodeUrl);
+        }
+      })
+      .catch(() => {
+        // fallback 到静态文件
+      });
+  }, []);
+
   return (
     <footer className="os-footer">
       <div className="os-footer-inner">
@@ -15,7 +34,7 @@ export default function SiteFooter() {
         <div className="os-footer-qr">
           <div className="os-footer-qr-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/wechat-qrcode.jpg" alt="微信公众号" />
+            <img src={qrCodeUrl} alt="微信公众号" />
           </div>
           <span className="os-footer-qr-label">
             扫码关注公众号
