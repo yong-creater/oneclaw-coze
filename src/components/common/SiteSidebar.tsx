@@ -7,6 +7,7 @@ import {
   Sparkles,
   Flame,
   FolderOpen,
+  Wrench,
   LogOut,
   Crown,
   Settings,
@@ -14,7 +15,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 
-// ========== 导航菜单 — 极简 3 项 ==========
+// ========== 导航菜单 — 4 项 ==========
 const menuList: Array<{
   id: string;
   name: string;
@@ -24,6 +25,7 @@ const menuList: Array<{
   { id: 'create', name: '创作', icon: Sparkles, path: '/' },
   { id: 'inspire', name: '灵感', icon: Flame, path: '/prompts' },
   { id: 'projects', name: '作品', icon: FolderOpen, path: '/projects' },
+  { id: 'tools', name: '工具库', icon: Wrench, path: '/tools' },
 ];
 
 // ========== 从 pathname 推导当前菜单 ID ==========
@@ -37,10 +39,12 @@ function getMenuIdFromPath(pathname: string): string {
     pathname.startsWith('/novel') ||
     pathname.startsWith('/resume') ||
     pathname.startsWith('/productpage') ||
-    pathname.startsWith('/tools') ||
     pathname.startsWith('/templates')
   ) {
     return 'create';
+  }
+  if (pathname.startsWith('/tools')) {
+    return 'tools';
   }
   if (pathname.startsWith('/prompts')) {
     return 'inspire';

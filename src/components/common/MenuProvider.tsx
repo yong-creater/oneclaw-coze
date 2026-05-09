@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 // ========== 类型 ==========
-export type MenuId = 'create' | 'inspire' | 'projects';
+export type MenuId = 'create' | 'inspire' | 'projects' | 'tools';
 
 interface MenuContextType {
   pendingInput: string | null;

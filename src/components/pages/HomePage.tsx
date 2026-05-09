@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMenu } from '@/components/common/MenuProvider';
 import {
@@ -25,19 +25,6 @@ const showcaseExamples = [
   { title: '详情页片段', category: '详情页', image: '/case-ecommerce.jpg' },
   { title: '视频封面', category: '视频脚本', image: '/demo-scene.jpg' },
 ];
-
-// 精选工具 — 从后台 API 动态获取
-interface UtilityTool {
-  id: number;
-  name: string;
-  slug: string;
-  icon: string;
-  description: string;
-  cover_image: string | null;
-  color: string;
-  sort_order: number;
-  use_cases: { title: string; desc: string }[];
-}
 
 // 热门创作结果数据
 const hotResults = [
@@ -72,36 +59,7 @@ export default function HomePage() {
   const router = useRouter();
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [utilityTools, setUtilityTools] = useState<UtilityTool[]>([]);
   const studioInputRef = useRef<HTMLDivElement>(null);
-
-  // 从后台 API 获取精选工具（带缓存，5分钟内不重复请求）
-  useEffect(() => {
-    const CACHE_KEY = 'oneclaw_utility_tools_cache';
-    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-    try {
-      const cached = sessionStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_TTL) {
-          setUtilityTools(data);
-          return;
-        }
-      }
-    } catch {}
-
-    fetch('/api/utility-tools')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && Array.isArray(data.tools)) {
-          setUtilityTools(data.tools);
-          try {
-            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data: data.tools, timestamp: Date.now() }));
-          } catch {}
-        }
-      })
-      .catch(() => {}); // silent fail - graceful degradation
-  }, []);
 
   // 消费模板/提示词填充
   useEffect(() => {
@@ -233,43 +191,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ===== 你可以这样生成 ===== */}
-          <div className="w-full mt-12 pb-14">
-            <div className="text-center mb-7">
-              <h2 className="text-lg font-semibold text-slate-700">你可以这样生成</h2>
-              <p className="text-[13px] text-slate-400 mt-1.5">上传图片或输入一句话，AI 自动帮你完成。</p>
-            </div>
 
-            <div className="os-scene-row">
-              {utilityTools.length === 0 && (
-                <div className="col-span-full text-center py-8 text-slate-400 text-sm">加载精选工具中...</div>
-              )}
-              {utilityTools.map((tool) => (
-                <button
-                  key={tool.slug}
-                  onClick={() => {
-                    setInputText(tool.description);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className="os-scene-card group"
-                >
-                  <div className="os-scene-card-img">
-                    {tool.cover_image ? (
-                      <img src={tool.cover_image} alt={tool.name} loading="lazy" />
-                    ) : (
-                      <div className="os-scene-card-placeholder">
-                        <span className="text-2xl">{tool.name.charAt(0)}</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="os-scene-card-body">
-                    <span className="os-scene-card-title">{tool.name}</span>
-                    <span className="os-scene-card-desc">{tool.description}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
