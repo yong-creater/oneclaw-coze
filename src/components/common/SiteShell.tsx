@@ -2,6 +2,7 @@
 
 import { MenuProvider } from '@/components/common/MenuProvider';
 import SiteSidebar from '@/components/common/SiteSidebar';
+import SiteFooter from '@/components/common/SiteFooter';
 
 function PageSwitcher({ children }: { children: React.ReactNode }) {
   const marginLeft = 88;
@@ -28,8 +29,11 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
           <div className="os-mote os-mote-blue os-mote-3" />
           <div className="os-mote os-mote-purple os-mote-4" />
         </div>
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          {children}
+        <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1 }}>
+            {children}
+          </div>
+          <SiteFooter />
         </div>
       </main>
     </>
