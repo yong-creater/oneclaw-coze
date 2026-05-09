@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Sparkles, Plus, Pencil, Trash2, Search, RefreshCw } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, RefreshCw, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -36,31 +36,55 @@ import { Sparkles, Plus, Pencil, Trash2, Search, RefreshCw } from 'lucide-react'
 interface InspirationItem {
   id: number;
   title: string;
-  description: string;
   content: string;
   category: string;
-  tags: string[];
+  tags: string[] | null;
+  author: string | null;
+  uses: number;
+  likes: number;
   is_featured: boolean;
-  use_count: number;
+  status: string;
+  tool_id: number | null;
   created_at: string;
   updated_at: string;
+}
+
+interface Pagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 const CATEGORIES = [
-  '商品图', '小红书', 'AI写真', '海报设计', '详情页', '视频',
-  '电商', '美食', '穿搭', '美妆', '数码', '家居',
+  { value: '场景描述', label: '场景描述' },
+  { value: '风格迁移', label: '风格迁移' },
+  { value: '角色扮演', label: '角色扮演' },
+  { value: '特效制作', label: '特效制作' },
+  { value: '商品图', label: '商品图' },
+  { value: '小红书', label: '小红书' },
+  { value: 'AI写真', label: 'AI写真' },
+  { value: '海报设计', label: '海报设计' },
+  { value: '详情页', label: '详情页' },
+  { value: '视频', label: '视频' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'all', label: '全部状态' },
+  { value: 'published', label: '已发布' },
+  { value: 'draft', label: '草稿' },
 ];
 
 const DEFAULT_FORM = {
   title: '',
-  description: '',
   content: '',
-  category: '商品图',
+  category: '场景描述',
   tags: '',
   is_featured: false,
+  status: 'published' as 'published' | 'draft',
 };
 
 /* ------------------------------------------------------------------ */
@@ -71,6 +95,8 @@ export default function AdminInspirationPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [pagination, setPagination] = useState<Pagination>({ page: 1, pageSize: 20, total: 0, totalPages: 0 });
 
   // Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -83,25 +109,30 @@ export default function AdminInspirationPage() {
   const [deleting, setDeleting] = useState(false);
 
   /* ---- Fetch ---- */
-  const fetchItems = useCallback(async () => {
+  const fetchItems = useCallback(async (page = 1) => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (search) params.set('search', search);
       if (filterCategory !== 'all') params.set('category', filterCategory);
-      const res = await fetch(`/api/prompts?${params}`);
+      if (filterStatus !== 'all') params.set('status', filterStatus);
+      params.set('page', String(page));
+      params.set('pageSize', '20');
+
+      const res = await fetch(`/api/admin/prompts?${params}`);
       const data = await res.json();
       if (data.success) {
         setItems(data.data || []);
+        setPagination(data.pagination || { page: 1, pageSize: 20, total: 0, totalPages: 0 });
       }
     } catch (err) {
       console.error('Failed to fetch inspiration items:', err);
     } finally {
       setLoading(false);
     }
-  }, [search, filterCategory]);
+  }, [search, filterCategory, filterStatus]);
 
-  useEffect(() => { fetchItems(); }, [fetchItems]);
+  useEffect(() => { fetchItems(1); }, [fetchItems]);
 
   /* ---- Form handlers ---- */
   const openCreate = () => {
@@ -114,11 +145,11 @@ export default function AdminInspirationPage() {
     setEditingId(item.id);
     setForm({
       title: item.title,
-      description: item.description || '',
       content: item.content,
       category: item.category,
-      tags: (item.tags || []).join(', '),
+      tags: Array.isArray(item.tags) ? item.tags.join(', ') : '',
       is_featured: item.is_featured,
+      status: item.status as 'published' | 'draft',
     });
     setDialogOpen(true);
   };
@@ -129,13 +160,13 @@ export default function AdminInspirationPage() {
     try {
       const payload = {
         title: form.title.trim(),
-        description: form.description.trim(),
         content: form.content.trim(),
         category: form.category,
         tags: form.tags.split(/[,，]/).map(t => t.trim()).filter(Boolean),
         is_featured: form.is_featured,
+        status: form.status,
       };
-      const url = editingId ? `/api/prompts/${editingId}` : '/api/prompts';
+      const url = editingId ? `/api/admin/prompts/${editingId}` : '/api/admin/prompts';
       const method = editingId ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -145,7 +176,7 @@ export default function AdminInspirationPage() {
       const data = await res.json();
       if (data.success) {
         setDialogOpen(false);
-        fetchItems();
+        fetchItems(editingId ? pagination.page : 1);
       } else {
         alert(data.error || '保存失败');
       }
@@ -161,11 +192,13 @@ export default function AdminInspirationPage() {
     if (!deleteId) return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/prompts/${deleteId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/admin/prompts/${deleteId}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
         setDeleteId(null);
-        fetchItems();
+        fetchItems(pagination.page);
+      } else {
+        alert(data.error || '删除失败');
       }
     } catch (err) {
       console.error('Delete failed:', err);
@@ -174,11 +207,37 @@ export default function AdminInspirationPage() {
     }
   };
 
-  /* ---- Stats ---- */
-  const stats = {
-    total: items.length,
-    featured: items.filter(i => i.is_featured).length,
-    categories: [...new Set(items.map(i => i.category))].length,
+  const toggleFeatured = async (item: InspirationItem) => {
+    try {
+      const res = await fetch(`/api/admin/prompts/${item.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_featured: !item.is_featured }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchItems(pagination.page);
+      }
+    } catch (err) {
+      console.error('Toggle featured failed:', err);
+    }
+  };
+
+  const toggleStatus = async (item: InspirationItem) => {
+    try {
+      const newStatus = item.status === 'published' ? 'draft' : 'published';
+      const res = await fetch(`/api/admin/prompts/${item.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchItems(pagination.page);
+      }
+    } catch (err) {
+      console.error('Toggle status failed:', err);
+    }
   };
 
   /* ---- Render ---- */
@@ -188,52 +247,17 @@ export default function AdminInspirationPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">灵感库管理</h2>
-          <p className="text-sm text-muted-foreground">管理前台灵感案例库的内容，包括提示词模板和创作灵感</p>
+          <p className="text-sm text-muted-foreground">
+            管理前台灵感案例库内容 · 共 {pagination.total} 条
+          </p>
         </div>
         <Button onClick={openCreate} className="bg-orange-500 hover:bg-orange-600 text-white">
           <Plus className="w-4 h-4 mr-1" /> 新增灵感
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-blue-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.total}</p>
-              <p className="text-xs text-muted-foreground">灵感总数</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.featured}</p>
-              <p className="text-xs text-muted-foreground">精选推荐</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.categories}</p>
-              <p className="text-xs text-muted-foreground">分类数</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Filters */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -244,17 +268,27 @@ export default function AdminInspirationPage() {
           />
         </div>
         <Select value={filterCategory} onValueChange={setFilterCategory}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-36">
             <SelectValue placeholder="全部分类" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">全部分类</SelectItem>
             {CATEGORIES.map(c => (
-              <SelectItem key={c} value={c}>{c}</SelectItem>
+              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Button variant="outline" size="icon" onClick={fetchItems}>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-32">
+            <SelectValue placeholder="全部状态" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map(s => (
+              <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="icon" onClick={() => fetchItems(pagination.page)}>
           <RefreshCw className="w-4 h-4" />
         </Button>
       </div>
@@ -267,65 +301,69 @@ export default function AdminInspirationPage() {
               <TableRow>
                 <TableHead className="w-12">ID</TableHead>
                 <TableHead>标题</TableHead>
-                <TableHead>分类</TableHead>
-                <TableHead>标签</TableHead>
+                <TableHead className="w-24">分类</TableHead>
+                <TableHead className="w-36">标签</TableHead>
                 <TableHead className="w-16">推荐</TableHead>
-                <TableHead className="w-16">使用次数</TableHead>
+                <TableHead className="w-16">状态</TableHead>
+                <TableHead className="w-20">使用/点赞</TableHead>
                 <TableHead className="w-28">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     加载中...
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     暂无灵感内容，点击右上角新增
                   </TableCell>
                 </TableRow>
               ) : (
                 items.map(item => (
                   <TableRow key={item.id}>
-                    <TableCell className="text-muted-foreground">{item.id}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">{item.id}</TableCell>
                     <TableCell>
-                      <div>
-                        <p className="font-medium">{item.title}</p>
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.description}</p>
-                        )}
-                      </div>
+                      <p className="font-medium text-sm line-clamp-1">{item.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.content}</p>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{item.category}</Badge>
+                      <Badge variant="secondary" className="text-xs">{item.category}</Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {(item.tags || []).slice(0, 3).map((tag: string) => (
-                          <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                        {(item.tags || []).slice(0, 2).map((tag: string) => (
+                          <Badge key={tag} variant="outline" className="text-xs py-0">{tag}</Badge>
                         ))}
-                        {(item.tags || []).length > 3 && (
-                          <Badge variant="outline" className="text-xs">+{item.tags.length - 3}</Badge>
+                        {(item.tags || []).length > 2 && (
+                          <Badge variant="outline" className="text-xs py-0">+{(item.tags || []).length - 2}</Badge>
                         )}
                       </div>
                     </TableCell>
                     <TableCell>
-                      {item.is_featured ? (
-                        <Badge className="bg-amber-100 text-amber-700">推荐</Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                      <button onClick={() => toggleFeatured(item)} className="cursor-pointer">
+                        <Star className={`w-4 h-4 ${item.is_featured ? 'fill-amber-400 text-amber-400' : 'text-slate-300 hover:text-amber-300'}`} />
+                      </button>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{item.use_count || 0}</TableCell>
+                    <TableCell>
+                      <button onClick={() => toggleStatus(item)} className="cursor-pointer">
+                        <Badge className={`text-xs cursor-pointer ${item.status === 'published' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
+                          {item.status === 'published' ? '已发布' : '草稿'}
+                        </Badge>
+                      </button>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {item.uses || 0} / {item.likes || 0}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(item)}>
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(item)} title="编辑">
                           <Pencil className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)} className="text-red-500 hover:text-red-600">
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)} className="text-red-500 hover:text-red-600" title="删除">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -338,6 +376,33 @@ export default function AdminInspirationPage() {
         </CardContent>
       </Card>
 
+      {/* Pagination */}
+      {pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            第 {pagination.page} / {pagination.totalPages} 页，共 {pagination.total} 条
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={pagination.page <= 1}
+              onClick={() => fetchItems(pagination.page - 1)}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={pagination.page >= pagination.totalPages}
+              onClick={() => fetchItems(pagination.page + 1)}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Create / Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-2xl">
@@ -347,7 +412,7 @@ export default function AdminInspirationPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">标题</label>
+                <label className="text-sm font-medium mb-1 block">标题 *</label>
                 <Input
                   value={form.title}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, title: e.target.value }))}
@@ -362,22 +427,14 @@ export default function AdminInspirationPage() {
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map(c => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium mb-1 block">简介</label>
-              <Input
-                value={form.description}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="一句话描述这个灵感案例"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">灵感内容 / Prompt</label>
+              <label className="text-sm font-medium mb-1 block">灵感内容 / Prompt *</label>
               <Textarea
                 value={form.content}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, content: e.target.value }))}
@@ -385,13 +442,27 @@ export default function AdminInspirationPage() {
                 rows={6}
               />
             </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">标签（逗号分隔）</label>
-              <Input
-                value={form.tags}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, tags: e.target.value }))}
-                placeholder="例：电商, 夏日, 清新"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">标签（逗号分隔）</label>
+                <Input
+                  value={form.tags}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, tags: e.target.value }))}
+                  placeholder="例：电商, 夏日, 清新"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">状态</label>
+                <Select value={form.status} onValueChange={v => setForm(f => ({ ...f, status: v as 'published' | 'draft' }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="published">已发布</SelectItem>
+                    <SelectItem value="draft">草稿</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <input
