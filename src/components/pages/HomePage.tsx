@@ -7,7 +7,6 @@ import {
   Upload,
   ArrowRight,
   Wand2,
-  Lightbulb,
   TrendingUp,
   Package,
   LayoutTemplate,
@@ -136,19 +135,18 @@ export default function HomePage() {
   return (
     <div className="os-page">
       {/* ==================== Hero 创作区 ==================== */}
-      <div className="os-hero pt-[72px] pb-[56px]">
+      <div className="os-hero pt-[80px] pb-[48px]">
         {/* 内容层 */}
         <div className="relative z-10 flex flex-col items-center w-full max-w-[1280px] mx-auto px-4">
 
           {/* 主标题 */}
-          <h1 className="text-center font-bold !text-[72px] !leading-[1.1] !tracking-[-0.03em]">
-            上传图片或输入想法，<br className="sm:hidden" />AI 帮你直接生成{' '}
-            <span className="gradient-text">内容</span>
+          <h1 className="os-hero-title">
+            一键生成<span className="gradient-text">商品图</span>、小红书和视频内容
           </h1>
 
           {/* 副标题 */}
-          <p className="text-center text-[24px] text-[#6B7280] mt-4 max-w-[880px] leading-[1.6]">
-            商品图、详情页、小红书、视频脚本，简单几步就能生成。
+          <p className="os-hero-subtitle">
+            不会写 Prompt 也没关系，<br className="sm:hidden" />上传图片，AI 自动帮你生成。
           </p>
 
           {/* ===== AI 输入工作台 — 左右分栏 ===== */}
@@ -179,21 +177,6 @@ export default function HomePage() {
                   <button className="os-studio-tool-btn">
                     <Upload className="w-4 h-4" />
                     <span>上传图片</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      const ideas = [
-                        '帮我生成高级护肤品商品图，白底高级感',
-                        '数码产品详情页，极简科技风格',
-                        '小红书种草图，夏日护肤推荐',
-                        '零食带货视频脚本，3分钟口播',
-                      ];
-                      setInputText(ideas[Math.floor(Math.random() * ideas.length)]);
-                    }}
-                    className="os-studio-tool-btn"
-                  >
-                    <Lightbulb className="w-4 h-4" />
-                    <span>灵感推荐</span>
                   </button>
                   <span className="text-[12px] text-slate-300 ml-1">{inputText.length} / 500</span>
                 </div>
@@ -284,7 +267,7 @@ export default function HomePage() {
       </div>
 
       {/* ==================== 热门创作结果 — AI 结果流 ==================== */}
-      <section className="relative animate-fade-slide-up !mt-[120px] pt-20 pb-8" style={{ animationDelay: '0.15s' }}>
+      <section className="relative animate-fade-slide-up !mt-[64px] pt-20 pb-8" style={{ animationDelay: '0.15s' }}>
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
