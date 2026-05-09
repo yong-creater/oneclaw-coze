@@ -150,7 +150,7 @@ export default function HomePage() {
           </p>
 
           {/* ===== AI 输入工作台 — 左右分栏 ===== */}
-          <div className="os-studio mt-12">
+          <div className="os-studio mt-10">
             {/* 左侧：输入区 (60%) */}
             <div className="os-studio-input">
               <h3 className="os-studio-label">描述你想生成的内容</h3>
@@ -235,7 +235,7 @@ export default function HomePage() {
           </div>
 
           {/* ===== 选择创作方向 ===== */}
-          <div className="w-full mt-12">
+          <div className="w-full mt-8">
             <div className="text-center mb-7">
               <h2 className="text-lg font-semibold text-slate-700">选择你想生成的内容</h2>
               <p className="text-[13px] text-slate-400 mt-1.5">不知道怎么写？选择一个方向，AI 会帮你自动生成。</p>
@@ -267,7 +267,7 @@ export default function HomePage() {
       </div>
 
       {/* ==================== 热门创作结果 — AI 结果流 ==================== */}
-      <section className="relative animate-fade-slide-up !mt-[64px] pt-20 pb-8" style={{ animationDelay: '0.15s' }}>
+      <section className="relative animate-fade-slide-up mt-10 pt-14 pb-8" style={{ animationDelay: '0.15s' }}>
         <div className="max-w-[1440px] mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

@@ -505,8 +505,8 @@ body {
 .os-hero {
   position: relative;
   overflow: hidden;
-  padding-top: 72px;
-  padding-bottom: 56px;
+  padding-top: 64px;
+  padding-bottom: 48px;
 }
 .os-hero::before,
 .os-hero::after {
@@ -758,20 +758,28 @@ body {
 /* ── 创作场景入口卡片 ───────────────────── */
 /* --- Scene Cards: 横向轻量创作方向 --- */
 .os-scene-row {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  max-width: 1280px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 20px;
+  max-width: 1240px;
   margin: 0 auto;
+}
+@media (max-width: 900px) {
+  .os-scene-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .os-scene-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 .os-scene-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 220px;
-  height: 130px;
-  padding: 24px;
+  height: 120px;
+  padding: 22px 24px;
   border-radius: 24px;
   background: rgba(255,255,255,0.72);
   backdrop-filter: blur(20px);
