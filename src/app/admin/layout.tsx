@@ -41,6 +41,7 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
+  { name: '仪表盘', href: '/admin', icon: Home },
   { name: '精选工具', href: '/admin/utility-tools', icon: Wrench },
   { name: '灵感库', href: '/admin/prompts', icon: Lightbulb },
   { name: '用户管理', href: '/admin/users', icon: Users },
