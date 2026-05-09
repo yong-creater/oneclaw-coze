@@ -68,18 +68,24 @@ export default function CreateWorkbench() {
   const searchParams = useSearchParams();
 
   // ===== 从 sessionStorage 读取首页传入的上下文 =====
-  const getContext = useCallback((): { prompt: string; type: string; toolId: string; images: string[] } => {
+  const getContext = useCallback((): { prompt: string; type: string; toolId: string; images: string[]; autoGenerate: boolean } => {
     try {
       const stored = sessionStorage.getItem('oneclaw_create_context');
       if (stored) {
         const ctx = JSON.parse(stored);
-        // 读取后清除，避免刷新时重复
-        sessionStorage.removeItem('oneclaw_create_context');
+        // 读取后标记为已消费（防止刷新重复自动生成）
+        if (ctx.autoGenerate) {
+          ctx.autoGenerate = false;
+          try { sessionStorage.setItem('oneclaw_create_context', JSON.stringify(ctx)); } catch {}
+        } else {
+          sessionStorage.removeItem('oneclaw_create_context');
+        }
         return {
           prompt: ctx.prompt || '',
           type: ctx.type || 'auto',
           toolId: ctx.matchedTool || '',
           images: Array.isArray(ctx.uploadedImages) ? ctx.uploadedImages : [],
+          autoGenerate: !!ctx.autoGenerate,
         };
       }
     } catch {
@@ -91,6 +97,7 @@ export default function CreateWorkbench() {
       type: searchParams.get('type') || 'auto',
       toolId: searchParams.get('toolId') || '',
       images: [],
+      autoGenerate: false,
     };
   }, [searchParams]);
 
@@ -100,6 +107,7 @@ export default function CreateWorkbench() {
   const initialPrompt = context.prompt;
   const initialType = context.type;
   const toolId = context.toolId;
+  const shouldAutoGenerate = context.autoGenerate;
 
   // slug → genType 映射
   const slugToGenType = (slug: string): string => {
@@ -225,6 +233,19 @@ export default function CreateWorkbench() {
       setErrorMsg('生成失败，请稍后重试');
     }
   }, [prompt, uploadedImages, genType]);
+
+  // ===== 自动生成（从首页 AI 分析完成后跳转过来时触发） =====
+  const autoGenTriggered = useRef(false);
+  useEffect(() => {
+    if (shouldAutoGenerate && !autoGenTriggered.current && (initialPrompt.trim() || context.images.length > 0)) {
+      autoGenTriggered.current = true;
+      // 延迟触发，确保组件状态已稳定
+      const timer = setTimeout(() => {
+        handleGenerate();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldAutoGenerate, initialPrompt, context.images.length, handleGenerate]);
 
   // ===== 下载图片 =====
   const handleDownload = useCallback(async (url: string, filename: string) => {

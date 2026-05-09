@@ -48,6 +48,7 @@ interface CreateContext {
   uploadedImages: string[];
   matchedTool: string;
   type: string;
+  autoGenerate: boolean;
   analysisResult: {
     tool: string;
     style: string;
@@ -388,6 +389,7 @@ export default function HomePage() {
           uploadedImages,
           matchedTool: tool.slug,
           type: TOOL_ROUTES[tool.slug],
+          autoGenerate: true,
           analysisResult: {
             tool: tool.slug,
             style: rec.style,
@@ -410,6 +412,7 @@ export default function HomePage() {
       uploadedImages,
       matchedTool: matchedTool.slug,
       type: routeType,
+      autoGenerate: true,
       analysisResult: {
         tool: matchedTool.slug,
         style: rec.style,
@@ -432,6 +435,7 @@ export default function HomePage() {
       uploadedImages,
       matchedTool: firstTool.slug,
       type: routeType,
+      autoGenerate: true,
       analysisResult: {
         tool: firstTool.slug,
         style: '自动匹配',
@@ -850,6 +854,7 @@ export default function HomePage() {
                             uploadedImages,
                             matchedTool: tool.slug,
                             type: routeType,
+                            autoGenerate: true,
                             analysisResult: {
                               tool: tool.slug,
                               style: rec.style,
