@@ -3,666 +3,537 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Sparkles, Upload, Image as ImageIcon, Download, ZoomIn,
-  Check, RefreshCw, Copy, ChevronDown, ChevronUp, X,
-  FolderOpen, Lightbulb, RotateCcw, Minus, Plus, Palette, Ratio
+  Sparkles, Upload, ImagePlus, X, ChevronDown,
+  Download, RotateCcw, ZoomIn, Loader2, Check,
+  ArrowRight, Lightbulb, Wand2, ImageIcon
 } from 'lucide-react';
-import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig, type ToolCase } from '@/lib/tool-workflow-config';
+import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
 
-// ===== 生成结果类型 =====
-interface GenResult {
-  type: 'image' | 'text';
-  url?: string;
-  label: string;
-  textContent?: string;
-}
+// ===== 类型 =====
+interface GeneratedImage { url: string; }
+interface UploadItem { id: string; url: string; name: string; }
 
-// ===== 生成步骤 =====
-const GEN_STEPS = [
-  { text: '正在理解需求…', percent: 15 },
-  { text: '正在分析参考图…', percent: 35 },
-  { text: '正在生成内容…', percent: 60 },
-  { text: '正在优化细节…', percent: 85 },
-  { text: '即将完成…', percent: 95 },
-];
+type GenStep = 'idle' | 'understanding' | 'analyzing' | 'matching' | 'generating' | 'optimizing' | 'done' | 'error';
 
-// ===== 默认案例 =====
-const FALLBACK_CASES: ToolCase[] = [
-  { image: '/case-lipstick-main.png', title: '商品图案例', desc: '高级感电商主图' },
-  { image: '/demo-card-lifestyle.jpg', title: '封面案例', desc: '氛围感内容封面' },
-  { image: '/demo-scene.jpg', title: '场景图案例', desc: '生活化场景展示' },
-];
-
-// ===== 灵感提示 =====
-const PROMPT_TIPS: Record<string, string[]> = {
-  'product-generator': [
-    '白底主图 + 柔和阴影 = 点击率翻倍',
-    '场景图选择与产品调性一致的环境',
-    '细节图展示材质质感更容易转化',
-  ],
-  'xiaohongshu-generator': [
-    '3:4 竖图是小红书封面黄金比例',
-    '标题用大字 + 纯色背景更吸睛',
-    '第一张图决定点击率，要放最强视觉',
-  ],
-  'ai-photo': [
-    '上传清晰的正面照效果最好',
-    '港风适合暖色调，日系适合冷色调',
-    '证件照建议浅色背景 + 自然光',
-  ],
-  default: [
-    '描述越具体，生成效果越好',
-    '可以上传参考图指定风格方向',
-    '尝试不同风格选项对比效果',
-  ],
+const STEP_LABELS: Record<GenStep, string> = {
+  idle: '等待开始',
+  understanding: '理解需求',
+  analyzing: '分析图片',
+  matching: '匹配生成方式',
+  generating: '生成结果',
+  optimizing: '优化细节',
+  done: '完成',
+  error: '生成失败',
 };
 
-// ===== 创作上下文 =====
-interface CreateContext {
-  prompt?: string;
-  uploadedImages?: { id: string; url: string; fileName: string; type?: string; size?: number }[];
-  matchedTool?: string;
-  analysisResult?: Record<string, unknown>;
-  autoGenerate?: boolean;
-  fromHome?: boolean;
+const STEP_ORDER: GenStep[] = ['understanding', 'analyzing', 'matching', 'generating', 'optimizing', 'done'];
+
+// ===== 生成 API =====
+async function callGenerateAPI(
+  slug: string, prompt: string, images: string[],
+  style: string, subtype: string, count: number, ratio: string
+): Promise<GeneratedImage[]> {
+  const genType = slugToGenType(slug);
+  let url = '';
+  let body: Record<string, unknown> = {};
+
+  switch (genType) {
+    case 'product':
+    case 'xiaohongshu':
+    case 'aiphoto':
+      url = '/api/images/generate';
+      body = { prompt, images, style, count, ratio, type: genType };
+      break;
+    case 'removebg':
+      url = '/api/images/process';
+      body = { images, operation: 'remove-background', subtype };
+      break;
+    case 'detail':
+      url = '/api/product-page/generate';
+      body = { prompt, images, style, modules: [subtype || 'full'] };
+      break;
+    case 'novel':
+      url = '/api/novel/generate-script';
+      body = { prompt, genre: subtype || style, style };
+      break;
+    default:
+      url = '/api/images/generate';
+      body = { prompt, images, style, count, ratio, type: genType };
+  }
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: '请求失败' }));
+    throw new Error(err.error || `生成失败 (${res.status})`);
+  }
+
+  const data = await res.json();
+
+  if (data.images) return data.images;
+  if (data.data?.images) return data.data.images;
+  if (data.data?.url) return [{ url: data.data.url }];
+  if (data.data?.content) return [{ url: `data:text/plain;base64,${btoa(encodeURIComponent(data.data.content))}` }];
+  if (Array.isArray(data.data)) return data.data;
+
+  return [];
 }
 
-function getContext(): { ctx: CreateContext; shouldAuto: boolean } | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = sessionStorage.getItem('oneclaw_create_context');
-    if (!raw) return null;
-    const ctx = JSON.parse(raw) as CreateContext;
-    // 在修改前保存原始 autoGenerate 值
-    const shouldAuto = !!(ctx.autoGenerate || ctx.fromHome);
-    // 读取后立即关闭 autoGenerate 防止刷新重复生成
-    if (ctx.autoGenerate) {
-      ctx.autoGenerate = false;
-      sessionStorage.setItem('oneclaw_create_context', JSON.stringify({ ...ctx, autoGenerate: false }));
-    }
-    return { ctx, shouldAuto };
-  } catch { return null; }
-}
-
+// ===== 组件 =====
 export default function CreateWorkbench() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ===== 读取上下文 =====
-  const parsedCtx = useRef(getContext());
-  const ctxRef = useRef(parsedCtx.current?.ctx || null);
-  const urlType = searchParams.get('type') || '';
-  const urlPrompt = searchParams.get('prompt') || '';
+  // --- Context ---
+  const CREATE_KEY = 'oneclaw_create_context';
+  const parsedCtx = useRef<{ shouldAuto?: boolean; fromHome?: boolean; matchedTool?: string; prompt?: string; images?: string[] } | null>(null);
 
-  // ===== 初始工具 =====
-  const initToolSlug = ctxRef.current?.matchedTool
-    || (urlType ? (getAllToolWorkflows().find(t => slugToGenType(t.slug) === urlType)?.slug || 'product-generator') : 'product-generator');
-  const toolConfig = getToolWorkflow(initToolSlug) || getToolWorkflow('product-generator')!;
-
-  // ===== 状态 =====
-  const [genType, setGenType] = useState(initToolSlug);
-  const [currentTool, setCurrentTool] = useState(toolConfig);
-  const [prompt, setPrompt] = useState(ctxRef.current?.prompt || urlPrompt || '');
-  const [uploadedImages, setUploadedImages] = useState<(File & { preview: string })[]>([]);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>(
-    ctxRef.current?.uploadedImages?.map((img: { url: string }) => img.url).filter(Boolean) || []
-  );
-  const [status, setStatus] = useState<'idle' | 'generating' | 'success' | 'failed'>('idle');
-  const [results, setResults] = useState<GenResult[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
-  const [progressPercent, setProgressPercent] = useState(0);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [showLightbox, setShowLightbox] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
-  const [selectedStyle, setSelectedStyle] = useState('');
-  const [selectedRatio, setSelectedRatio] = useState(currentTool.defaultRatio);
-  const [genCount, setGenCount] = useState(currentTool.defaultCount);
-  const [showToolDropdown, setShowToolDropdown] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
-
-  const shouldAutoGenerate = !!(parsedCtx.current?.shouldAuto);
-  const autoGenTriggered = useRef(false);
-  const stepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const activeResult = results[activeIndex];
-  const imageResults = results.filter(r => r.type === 'image');
-  const hasImageResults = imageResults.length > 0;
-  const hasTextResults = results.some(r => r.type === 'text');
-
-  // ===== 切换工具 =====
-  const handleToolChange = useCallback((slug: string) => {
-    const cfg = getToolWorkflow(slug);
-    if (!cfg) return;
-    setGenType(slug);
-    setCurrentTool(cfg);
-    setSelectedRatio(cfg.defaultRatio);
-    setGenCount(cfg.defaultCount);
-    setSelectedStyle('');
-    setSelectedOptions({});
-    setShowToolDropdown(false);
-    setStatus('idle');
-    setResults([]);
-  }, []);
-
-  // ===== 步骤动画 =====
-  const startStepAnimation = useCallback(() => {
-    let step = 0;
-    setCurrentStep(0);
-    setProgressPercent(5);
-    stepTimerRef.current = setInterval(() => {
-      step++;
-      if (step < GEN_STEPS.length) {
-        setCurrentStep(step);
-        setProgressPercent(GEN_STEPS[step].percent);
-      }
-    }, 2200);
-  }, []);
-
-  const clearStepAnimation = useCallback(() => {
-    if (stepTimerRef.current) { clearInterval(stepTimerRef.current); stepTimerRef.current = null; }
-  }, []);
-
-  // ===== 真实 API 调用 =====
-  const callGenerateAPI = useCallback(async (toolSlug: string, userPrompt: string, images: string[], opts: Record<string, string>): Promise<GenResult[]> => {
-    const genTypeSlug = slugToGenType(toolSlug);
-
-    // 抠图 → images/process
-    if (genTypeSlug === 'removebg' && images.length > 0) {
-      const res = await fetch('/api/images/process', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'remove-bg', image: images[0] }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || '抠图生成失败');
-      return [{ type: 'image', url: data.data?.url || data.result?.url || images[0], label: '抠图结果' }];
-    }
-
-    // 详情页 → product-page/generate
-    if (genTypeSlug === 'detail') {
-      const res = await fetch('/api/product-page/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userPrompt, images, style: opts.style || selectedStyle, modules: ['hero', 'features', 'specs'] }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || '详情页生成失败');
-      const urls = data.data?.urls || data.data?.images || (data.data?.url ? [data.data.url] : []);
-      return urls.map((url: string, i: number) => ({ type: 'image', url, label: `详情页-${i + 1}` }));
-    }
-
-    // 小说 → novel/generate-script
-    if (genTypeSlug === 'novel') {
-      const res = await fetch('/api/novel/generate-script', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userPrompt, genre: opts.genre || 'romance' }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || '小说生成失败');
-      return [{ type: 'text', label: '小说内容', textContent: data.data?.content || data.data?.script || data.data?.text || '生成完成' }];
-    }
-
-    // 简历 → llm/generate
-    if (genTypeSlug === 'resume') {
-      const res = await fetch('/api/llm/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: userPrompt, type: 'resume' }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || '简历优化失败');
-      return [{ type: 'text', label: '优化简历', textContent: data.data?.content || data.data?.text || '优化完成' }];
-    }
-
-    // 默认 → images/generate（商品图/小红书/写真等）
-    const res = await fetch('/api/images/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt: userPrompt,
-        images,
-        toolSlug,
-        count: genCount || 4,
-        ratio: selectedRatio || '1:1',
-        style: opts.style || selectedStyle || '',
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || '图片生成失败');
-    const urls: string[] = data.data?.urls || data.data?.images || (data.data?.url ? [data.data.url] : []);
-    return urls.map((url: string, i: number) => ({ type: 'image' as const, url, label: `生成结果-${i + 1}` }));
-  }, [genCount, selectedRatio, selectedStyle]);
-
-  // ===== 生成主函数 =====
-  const handleGenerate = useCallback(async () => {
-    const finalPrompt = prompt.trim();
-    const allImages = [...uploadedImageUrls];
-    if (!finalPrompt && allImages.length === 0) {
-      setToast({ msg: '请输入创作需求或上传参考图', type: 'info' });
-      return;
-    }
-    setStatus('generating');
-    setResults([]);
-    setActiveIndex(0);
-    setErrorMsg('');
-    startStepAnimation();
-
+  const getContext = useCallback(() => {
     try {
-      const apiResults = await callGenerateAPI(genType, finalPrompt, allImages, selectedOptions);
-      clearStepAnimation();
-      setProgressPercent(100);
-      if (apiResults.length > 0) {
-        setResults(apiResults);
-        setActiveIndex(0);
-        setStatus('success');
-      } else {
-        setStatus('failed');
-        setErrorMsg('生成结果为空，请重试');
-      }
-    } catch (err: unknown) {
-      clearStepAnimation();
-      setStatus('failed');
-      setErrorMsg(err instanceof Error ? err.message : '生成失败，请稍后重试');
-      console.error('[CreateWorkbench] 生成错误:', err);
-    }
-  }, [prompt, uploadedImageUrls, genType, selectedOptions, callGenerateAPI, startStepAnimation, clearStepAnimation]);
+      const raw = sessionStorage.getItem(CREATE_KEY);
+      if (!raw) return null;
+      const ctx = JSON.parse(raw);
+      parsedCtx.current = {
+        shouldAuto: ctx.autoGenerate === true,
+        fromHome: ctx.fromHome === true,
+        matchedTool: ctx.matchedTool,
+        prompt: ctx.prompt,
+        images: ctx.uploadedImages?.map((i: Record<string, string>) => i.url || i).filter(Boolean),
+      };
+      ctx.autoGenerate = false;
+      sessionStorage.setItem(CREATE_KEY, JSON.stringify(ctx));
+      return ctx;
+    } catch { return null; }
+  }, []);
 
-  // ===== 自动生成 =====
+  // --- State ---
+  const [toolSlug, setToolSlug] = useState('product-generator');
+  const [inputText, setInputText] = useState('');
+  const [uploads, setUploads] = useState<UploadItem[]>([]);
+  const [selectedSubtype, setSelectedSubtype] = useState('');
+  const [selectedStyle, setSelectedStyle] = useState('');
+  const [count, setCount] = useState(4);
+  const [ratio, setRatio] = useState('1:1');
+
+  const [step, setStep] = useState<GenStep>('idle');
+  const [results, setResults] = useState<GeneratedImage[]>([]);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [lightboxIdx, setLightboxIdx] = useState(-1);
+
+  const autoGenTriggered = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- Config ---
+  const config = getToolWorkflow(toolSlug);
+
+  // --- Init ---
   useEffect(() => {
-    if (shouldAutoGenerate && !autoGenTriggered.current && (prompt || uploadedImageUrls.length > 0)) {
+    const ctx = getContext();
+    const urlSlug = searchParams.get('tool');
+    const slug = ctx?.matchedTool || urlSlug || 'product-generator';
+    setToolSlug(slug);
+
+    if (ctx?.prompt) setInputText(ctx.prompt);
+    if (ctx?.images?.length) {
+      setUploads(ctx.images.map((url: string, i: number) => ({ id: `ctx-${i}`, url, name: `参考图${i + 1}` })));
+    }
+
+    const toolConf = getToolWorkflow(slug);
+    if (toolConf) {
+      setCount(toolConf.defaultCount);
+      setRatio(toolConf.defaultRatio);
+      if (toolConf.styleOptions.length > 0) setSelectedStyle(toolConf.styleOptions[0].value);
+      if (toolConf.steps[1]?.options?.length) setSelectedSubtype(toolConf.steps[1].options[0].value);
+    }
+  }, [searchParams, getContext]);
+
+  // --- Auto generate ---
+  useEffect(() => {
+    if (autoGenTriggered.current) return;
+    const should = parsedCtx.current?.shouldAuto || parsedCtx.current?.fromHome;
+    if (should && (inputText || uploads.length > 0)) {
       autoGenTriggered.current = true;
-      const timer = setTimeout(() => handleGenerate(), 300);
+      const timer = setTimeout(() => handleGenerate(), 600);
       return () => clearTimeout(timer);
     }
-  }, [shouldAutoGenerate, prompt, uploadedImageUrls.length, handleGenerate]);
+  }, [inputText, uploads]);
 
-  // ===== 上传 =====
+  // --- Upload ---
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    const newFiles = files.map(f => Object.assign(f, { preview: URL.createObjectURL(f) }));
-    setUploadedImages(prev => [...prev, ...newFiles].slice(0, 5));
-    setUploadedImageUrls(prev => [...prev, ...newFiles.map(f => f.preview)].slice(0, 5));
-    if (e.target.value) e.target.value = '';
+    const files = e.target.files;
+    if (!files) return;
+    Array.from(files).slice(0, 5 - uploads.length).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const url = ev.target?.result as string;
+        setUploads(prev => [...prev, { id: `${Date.now()}-${file.name}`, url, name: file.name }]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
   };
 
-  const removeImage = (idx: number) => {
-    setUploadedImages(prev => prev.filter((_, i) => i !== idx));
-    setUploadedImageUrls(prev => prev.filter((_, i) => i !== idx));
-  };
+  const removeUpload = (id: string) => setUploads(prev => prev.filter(u => u.id !== id));
 
-  // ===== 操作 =====
-  const handleDownload = async (url: string, filename: string) => {
+  // --- Generate ---
+  const handleGenerate = async () => {
+    if (!inputText.trim() && uploads.length === 0) return;
+    setErrorMsg('');
+    setResults([]);
+    autoGenTriggered.current = true;
+
+    const images = uploads.map(u => u.url);
+
+    // Step animation
+    const steps: GenStep[] = ['understanding', 'analyzing', 'matching', 'generating', 'optimizing'];
+    for (const s of steps) {
+      setStep(s);
+      await new Promise(r => setTimeout(r, s === 'generating' ? 1500 : 800));
+    }
+
     try {
-      const resp = await fetch(url);
-      const blob = await resp.blob();
+      const res = await callGenerateAPI(toolSlug, inputText, images, selectedStyle, selectedSubtype, count, ratio);
+      setResults(res);
+      setStep('done');
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : '生成失败，请重试');
+      setStep('error');
+    }
+  };
+
+  const handleRegenerate = () => handleGenerate();
+
+  // --- Download ---
+  const handleDownload = async (url: string, idx: number) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = blobUrl; a.download = filename; a.click();
+      a.href = blobUrl;
+      a.download = `${config?.name || 'oneclaw'}-${idx + 1}.png`;
+      a.click();
       URL.revokeObjectURL(blobUrl);
-    } catch { setToast({ msg: '下载失败', type: 'error' }); }
+    } catch { /* ignore */ }
   };
 
-  const handleCopyText = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => setToast({ msg: '已复制', type: 'success' }));
+  // --- Tool switch ---
+  const handleToolSwitch = (slug: string) => {
+    setToolSlug(slug);
+    const tc = getToolWorkflow(slug);
+    if (tc) {
+      setCount(tc.defaultCount);
+      setRatio(tc.defaultRatio);
+      if (tc.styleOptions.length > 0) setSelectedStyle(tc.styleOptions[0].value);
+      else setSelectedStyle('');
+      if (tc.steps[1]?.options?.length) setSelectedSubtype(tc.steps[1].options[0].value);
+      else setSelectedSubtype('');
+    }
+    setStep('idle');
+    setResults([]);
   };
 
-  const handleSaveToProjects = () => setToast({ msg: '已保存到作品集', type: 'success' });
-  const handleContinueOptimize = () => { setStatus('idle'); setResults([]); };
-  const handleSetAsCover = (idx: number) => { setActiveIndex(idx); setToast({ msg: '已设为封面', type: 'success' }); };
-  const handleDownloadAll = () => { imageResults.forEach((r, i) => setTimeout(() => handleDownload(r.url!, `${r.label}.png`), i * 500)); };
+  // --- Step progress ---
+  const currentStepIdx = step === 'idle' ? -1 : step === 'error' ? STEP_ORDER.indexOf('generating') : STEP_ORDER.indexOf(step);
 
-  // ===== Toast =====
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(t);
-  }, [toast]);
+  // --- All tools for switcher ---
+  const allTools = getAllToolWorkflows() as ToolWorkflowConfig[];
 
-  // ===== 比例选项 =====
-  const ratioOptions = ['1:1', '3:4', '4:5', '4:3', '16:9', '2:3'];
-
-  // ===== 灵感提示 =====
-  const tips = PROMPT_TIPS[genType] || PROMPT_TIPS.default;
-
+  // --- Render ---
   return (
     <div className="os-ws-page">
-      {/* ===== 顶部工具栏 ===== */}
-      <header className="os-ws-header">
+      {/* Header */}
+      <div className="os-ws-header">
         <div className="os-ws-header-left">
-          <div className="os-ws-tool-switcher" onClick={() => setShowToolDropdown(!showToolDropdown)}>
-            <span className="os-ws-tool-icon">{currentTool.icon}</span>
-            <span className="os-ws-tool-name">{currentTool.name}</span>
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+          <span className="os-ws-tool-icon">{config?.icon || '✨'}</span>
+          <div>
+            <h1 className="os-ws-tool-name">{config?.name || 'AI创作'}</h1>
+            <p className="os-ws-tool-desc">{config?.description || '上传图片或输入需求，AI自动生成'}</p>
           </div>
-          <span className="os-ws-tool-desc">{currentTool.description}</span>
         </div>
         <div className="os-ws-header-right">
-          {status === 'idle' && results.length === 0 && (
-            <button onClick={handleGenerate} className="os-ws-gen-btn" disabled={!prompt && uploadedImageUrls.length === 0}>
-              <Sparkles className="w-4 h-4" />
-              <span>开始创作</span>
-            </button>
-          )}
-        </div>
-
-        {/* 工具下拉 */}
-        {showToolDropdown && (
-          <div className="os-ws-dropdown">
-            {getAllToolWorkflows().map(t => (
-              <button key={t.slug} className={`os-ws-dropdown-item ${t.slug === genType ? 'active' : ''}`} onClick={() => handleToolChange(t.slug)}>
-                <span>{t.icon}</span>
-                <span>{t.name}</span>
-              </button>
+          <select
+            value={toolSlug}
+            onChange={e => handleToolSwitch(e.target.value)}
+            className="os-ws-tool-select"
+          >
+            {allTools.map(t => (
+              <option key={t.slug} value={t.slug}>{t.icon} {t.name}</option>
             ))}
-          </div>
-        )}
-      </header>
+          </select>
+        </div>
+      </div>
 
-      {/* ===== 三栏主体 ===== */}
+      {/* Body: 3-column */}
       <div className="os-ws-body">
-        {/* ===== 左栏：控制区 ===== */}
-        <aside className="os-ws-left">
-          {/* 问候语 */}
-          <div className="os-ws-section">
-            <div className="os-ws-greeting">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>{currentTool.greeting}</span>
-            </div>
+        {/* ====== LEFT: Control Panel ====== */}
+        <div className="os-ws-left">
+          {/* Greeting */}
+          <div className="os-ws-greeting">
+            <Sparkles className="w-4 h-4 text-[#7B6DFF]" />
+            <span>{config?.greeting || '你想生成什么？'}</span>
           </div>
 
-          {/* 输入框 */}
+          {/* Text Input */}
           <div className="os-ws-section">
-            <label className="os-ws-label">创作描述</label>
+            <label className="os-ws-label">描述你的需求</label>
             <textarea
-              className="os-ws-textarea"
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
               placeholder="描述你想生成的内容…"
-              value={prompt}
-              onChange={e => setPrompt(e.target.value)}
+              className="os-ws-textarea"
               rows={3}
             />
           </div>
 
-          {/* 上传区 */}
+          {/* Image Upload */}
           <div className="os-ws-section">
-            <label className="os-ws-label">上传参考图</label>
-            <div className="os-ws-upload-area" onClick={() => fileInputRef.current?.click()}>
-              {uploadedImages.length === 0 ? (
-                <div className="os-ws-upload-empty">
-                  <Upload className="w-5 h-5 text-slate-400" />
-                  <span>点击或拖拽上传</span>
-                  <span className="os-ws-upload-hint">JPG / PNG / WEBP</span>
+            <label className="os-ws-label">
+              <Upload className="w-3.5 h-3.5" /> 上传参考图
+              {uploads.length > 0 && <span className="os-ws-count-badge">{uploads.length}/5</span>}
+            </label>
+            <div className="os-ws-upload-area">
+              {uploads.map(u => (
+                <div key={u.id} className="os-ws-upload-thumb">
+                  <img src={u.url} alt={u.name} />
+                  <button className="os-ws-upload-remove" onClick={() => removeUpload(u.id)}>
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
-              ) : (
-                <div className="os-ws-upload-grid">
-                  {uploadedImages.map((img, idx) => (
-                    <div key={idx} className="os-ws-upload-thumb">
-                      <img src={img.preview} alt="" />
-                      <button className="os-ws-upload-remove" onClick={e => { e.stopPropagation(); removeImage(idx); }}>
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                  {uploadedImages.length < 5 && (
-                    <div className="os-ws-upload-add">
-                      <Plus className="w-4 h-4 text-slate-400" />
-                    </div>
-                  )}
-                </div>
+              ))}
+              {uploads.length < 5 && (
+                <button className="os-ws-upload-add" onClick={() => fileInputRef.current?.click()}>
+                  <ImagePlus className="w-5 h-5" />
+                  <span>添加图片</span>
+                </button>
               )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
-            <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
           </div>
 
-          {/* 引导选项 */}
-          {currentTool.steps.filter(s => s.type === 'select').map(step => (
-            <div className="os-ws-section" key={step.id}>
-              <label className="os-ws-label">{step.label}</label>
-              <div className="os-ws-options">
-                {step.options?.map(opt => (
+          {/* Subtype Selection */}
+          {config?.steps[1]?.options && config.steps[1].options.length > 0 && (
+            <div className="os-ws-section">
+              <label className="os-ws-label">{config.steps[1].label}</label>
+              <div className="os-ws-chips">
+                {config.steps[1].options.map(opt => (
                   <button
                     key={opt.value}
-                    className={`os-ws-option ${selectedOptions[step.id] === opt.value ? 'active' : ''}`}
-                    onClick={() => setSelectedOptions(prev => ({ ...prev, [step.id]: opt.value }))}
+                    className={`os-ws-chip ${selectedSubtype === opt.value ? 'os-ws-chip-active' : ''}`}
+                    onClick={() => setSelectedSubtype(opt.value)}
                   >
-                    {opt.icon && <span className="os-ws-option-icon">{opt.icon}</span>}
-                    <span>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-
-          {/* 风格选择 */}
-          {currentTool.styleOptions.length > 0 && (
-            <div className="os-ws-section">
-              <label className="os-ws-label">
-                <Palette className="w-3.5 h-3.5" />
-                风格
-              </label>
-              <div className="os-ws-chips">
-                {currentTool.styleOptions.map(s => (
-                  <button key={s.value} className={`os-ws-chip ${selectedStyle === s.value ? 'active' : ''}`} onClick={() => setSelectedStyle(s.value)}>
-                    {s.label}
+                    {opt.icon && <span className="mr-1">{opt.icon}</span>}
+                    {opt.label}
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* 输出规格（折叠） */}
-          <div className="os-ws-section">
-            <button className="os-ws-adv-toggle" onClick={() => setShowAdvanced(!showAdvanced)}>
-              <Ratio className="w-3.5 h-3.5" />
-              <span>输出规格</span>
-              {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            </button>
-            {showAdvanced && (
-              <div className="os-ws-adv-content">
-                <div className="os-ws-spec-row">
-                  <span className="os-ws-spec-label">比例</span>
-                  <div className="os-ws-ratio-group">
-                    {ratioOptions.map(r => (
-                      <button key={r} className={`os-ws-ratio-btn ${selectedRatio === r ? 'active' : ''}`} onClick={() => setSelectedRatio(r)}>
-                        {r}
-                      </button>
+          {/* Style Tags */}
+          {config?.styleOptions && config.styleOptions.length > 0 && (
+            <div className="os-ws-section">
+              <label className="os-ws-label">风格选择</label>
+              <div className="os-ws-chips">
+                {config.styleOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    className={`os-ws-chip ${selectedStyle === opt.value ? 'os-ws-chip-active' : ''}`}
+                    onClick={() => setSelectedStyle(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Count & Ratio */}
+          <div className="os-ws-section os-ws-row">
+            <div className="os-ws-field">
+              <label className="os-ws-label">数量</label>
+              <div className="os-ws-number">
+                <button onClick={() => setCount(Math.max(1, count - 1))}>-</button>
+                <span>{count}</span>
+                <button onClick={() => setCount(Math.min(8, count + 1))}>+</button>
+              </div>
+            </div>
+            <div className="os-ws-field">
+              <label className="os-ws-label">比例</label>
+              <select value={ratio} onChange={e => setRatio(e.target.value)} className="os-ws-ratio-select">
+                <option value="1:1">1:1</option>
+                <option value="3:4">3:4</option>
+                <option value="4:5">4:5</option>
+                <option value="16:9">16:9</option>
+                <option value="2:3">2:3</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Generate Button */}
+          <button
+            className="os-ws-gen-btn"
+            onClick={handleGenerate}
+            disabled={step !== 'idle' && step !== 'done' && step !== 'error'}
+          >
+            {step === 'idle' || step === 'done' || step === 'error' ? (
+              <>
+                <Wand2 className="w-4 h-4" />
+                {step === 'done' ? '重新生成' : step === 'error' ? '重新生成' : '开始创作'}
+              </>
+            ) : (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {STEP_LABELS[step]}
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* ====== CENTER: Step Progress + Results ====== */}
+        <div className="os-ws-center">
+          {/* Step Progress Bar */}
+          {step !== 'idle' && (
+            <div className="os-ws-steps">
+              {STEP_ORDER.map((s, i) => {
+                const isActive = i === currentStepIdx;
+                const isDone = i < currentStepIdx;
+                const isPending = i > currentStepIdx;
+                return (
+                  <div key={s} className="os-ws-step-item">
+                    <div className={`os-ws-step-dot ${isDone ? 'done' : isActive ? 'active' : 'pending'}`}>
+                      {isDone ? <Check className="w-3 h-3" /> : isActive ? <Loader2 className="w-3 h-3 animate-spin" /> : <span>{i + 1}</span>}
+                    </div>
+                    <span className={`os-ws-step-label ${isActive ? 'active' : isDone ? 'done' : 'pending'}`}>
+                      {STEP_LABELS[s]}
+                    </span>
+                    {i < STEP_ORDER.length - 1 && (
+                      <div className={`os-ws-step-line ${isDone ? 'done' : isActive ? 'active' : 'pending'}`} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Results Area */}
+          <div className="os-ws-results">
+            {step === 'idle' && results.length === 0 && (
+              <div className="os-ws-idle">
+                <div className="os-ws-idle-icon">
+                  <ImageIcon className="w-10 h-10 text-slate-300" />
+                </div>
+                <p className="os-ws-idle-text">在左侧输入需求，AI将为你生成内容</p>
+                {config?.cases && config.cases.length > 0 && (
+                  <div className="os-ws-idle-cases">
+                    {config.cases.map((c, i) => (
+                      <div key={i} className="os-ws-idle-case">
+                        <div className="os-ws-idle-case-img">
+                          <ImageIcon className="w-8 h-8 text-slate-200" />
+                        </div>
+                        <div className="os-ws-idle-case-info">
+                          <span className="os-ws-idle-case-title">{c.title}</span>
+                          <span className="os-ws-idle-case-desc">{c.desc}</span>
+                        </div>
+                      </div>
                     ))}
                   </div>
+                )}
+              </div>
+            )}
+
+            {step !== 'idle' && step !== 'done' && step !== 'error' && results.length === 0 && (
+              <div className="os-ws-generating">
+                <div className="os-ws-gen-spinner" />
+                <p className="os-ws-gen-text">{STEP_LABELS[step]}…</p>
+              </div>
+            )}
+
+            {step === 'error' && (
+              <div className="os-ws-error">
+                <p>{errorMsg}</p>
+                <button className="os-ws-error-btn" onClick={handleRegenerate}>
+                  <RotateCcw className="w-4 h-4" /> 重新生成
+                </button>
+              </div>
+            )}
+
+            {(step === 'done' || results.length > 0) && (
+              <div className="os-ws-done">
+                <div className="os-ws-grid">
+                  {results.map((img, i) => (
+                    <div key={i} className="os-ws-result-card" onClick={() => setLightboxIdx(i)}>
+                      <img src={img.url} alt={`结果 ${i + 1}`} />
+                      <div className="os-ws-result-overlay">
+                        <button onClick={e => { e.stopPropagation(); handleDownload(img.url, i); }}>
+                          <Download className="w-4 h-4" />
+                        </button>
+                        <button onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}>
+                          <ZoomIn className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="os-ws-spec-row">
-                  <span className="os-ws-spec-label">数量</span>
-                  <div className="os-ws-count-group">
-                    <button className="os-ws-count-btn" onClick={() => setGenCount(Math.max(1, genCount - 1))}><Minus className="w-3.5 h-3.5" /></button>
-                    <span className="os-ws-count-val">{genCount}</span>
-                    <button className="os-ws-count-btn" onClick={() => setGenCount(Math.min(8, genCount + 1))}><Plus className="w-3.5 h-3.5" /></button>
-                  </div>
+                <div className="os-ws-done-actions">
+                  <button className="os-ws-done-btn" onClick={handleRegenerate}>
+                    <RotateCcw className="w-4 h-4" /> 重新生成
+                  </button>
+                  <button className="os-ws-done-btn secondary" onClick={() => fileInputRef.current?.click()}>
+                    <ImagePlus className="w-4 h-4" /> 添加参考图
+                  </button>
                 </div>
               </div>
             )}
           </div>
+        </div>
 
-          {/* 生成按钮（左栏底部固定） */}
-          {status !== 'generating' && (
-            <button onClick={handleGenerate} className="os-ws-gen-btn-full" disabled={!prompt && uploadedImageUrls.length === 0}>
-              <Sparkles className="w-4 h-4" />
-              <span>{status === 'failed' ? '重新生成' : '开始创作'}</span>
-            </button>
-          )}
-          {status === 'generating' && (
-            <div className="os-ws-gen-cancel" onClick={() => { clearStepAnimation(); setStatus('idle'); }}>
-              取消生成
-            </div>
-          )}
-        </aside>
+        {/* ====== RIGHT: Inspiration ====== */}
+        <div className="os-ws-right">
+          <div className="os-ws-right-title">
+            <Lightbulb className="w-4 h-4 text-[#7B6DFF]" />
+            灵感参考
+          </div>
 
-        {/* ===== 中栏：结果区 ===== */}
-        <main className="os-ws-center">
-          {/* 生成中 */}
-          {status === 'generating' && (
-            <div className="os-ws-generating">
-              <div className="os-ws-gen-pulse" />
-              <div className="os-ws-gen-info">
-                <h3 className="text-base font-semibold text-slate-800">AI 正在生成</h3>
-                <p className="text-sm text-slate-500 mt-0.5">{GEN_STEPS[currentStep]?.text || GEN_STEPS[0].text}</p>
-              </div>
-              <div className="os-ws-progress-track">
-                <div className="os-ws-progress-fill" style={{ width: `${progressPercent}%` }} />
-              </div>
-              <div className="os-ws-skeleton-area">
-                <div className="os-ws-skeleton" style={{ height: '260px' }} />
-                <div className="grid grid-cols-2 gap-3 mt-3">
-                  <div className="os-ws-skeleton" style={{ height: '130px' }} />
-                  <div className="os-ws-skeleton" style={{ height: '130px' }} />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 生成失败 */}
-          {status === 'failed' && (
-            <div className="os-ws-failed">
-              <div className="os-ws-failed-icon"><RotateCcw className="w-8 h-8 text-red-400" /></div>
-              <h3 className="text-base font-semibold text-slate-800 mt-4">生成失败</h3>
-              <p className="text-sm text-slate-500 mt-1.5">{errorMsg || '生成失败，请稍后重试'}</p>
-              <button onClick={handleGenerate} className="os-ws-retry-btn mt-6">
-                <RefreshCw className="w-4 h-4" /><span>重新生成</span>
-              </button>
-            </div>
-          )}
-
-          {/* 空闲状态：展示工具案例 */}
-          {status === 'idle' && results.length === 0 && (
-            <div className="os-ws-idle">
-              <div className="os-ws-idle-header">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <span>{currentTool.name}创作案例</span>
-              </div>
-              <div className="os-ws-idle-cases">
-                {(currentTool.cases.length > 0 ? currentTool.cases : FALLBACK_CASES).map((c, idx) => (
-                  <div key={idx} className="os-ws-idle-case">
-                    <div className="os-ws-idle-case-img">
-                      {c.image ? <img src={c.image} alt={c.title} /> : <div className="os-ws-idle-case-fallback"><ImageIcon className="w-8 h-8 text-slate-300" /></div>}
-                    </div>
-                    <div className="os-ws-idle-case-info">
-                      <div className="os-ws-idle-case-title">{c.title}</div>
-                      <div className="os-ws-idle-case-desc">{c.desc}</div>
-                    </div>
+          {/* Cases from config */}
+          {config?.cases && config.cases.length > 0 && (
+            <div className="os-ws-inspire-cases">
+              {config.cases.map((c, i) => (
+                <div key={i} className="os-ws-inspire-card">
+                  <div className="os-ws-inspire-img">
+                    <ImageIcon className="w-6 h-6 text-slate-200" />
                   </div>
-                ))}
-              </div>
-              <div className="os-ws-idle-hint">完成左侧创作引导后，AI 将自动为你生成</div>
-            </div>
-          )}
-
-          {/* 图片结果 */}
-          {status === 'success' && hasImageResults && (
-            <div className="os-ws-results">
-              <div className="os-ws-results-bar">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-700">生成结果</span>
-                  <span className="os-ws-results-badge">{currentTool.name}</span>
-                  <span className="text-[11px] text-slate-400">{imageResults.length} 张</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={handleSaveToProjects} className="os-ws-action-btn"><FolderOpen className="w-3.5 h-3.5" /><span>保存到作品</span></button>
-                </div>
-              </div>
-
-              {activeResult && activeResult.type === 'image' && (
-                <div className="os-ws-preview-main group">
-                  <img src={activeResult.url} alt={activeResult.label} className="os-ws-preview-img" />
-                  <div className="os-ws-preview-overlay">
-                    <div className="os-ws-preview-actions">
-                      <button onClick={() => setShowLightbox(true)} className="os-ws-preview-action" title="放大"><ZoomIn className="w-4 h-4" /><span>放大</span></button>
-                      <button onClick={() => handleDownload(activeResult.url!, `${activeResult.label}.png`)} className="os-ws-preview-action" title="下载"><Download className="w-4 h-4" /><span>下载</span></button>
-                      <button onClick={() => handleSetAsCover(activeIndex)} className="os-ws-preview-action" title="设为封面"><Check className="w-4 h-4" /><span>封面</span></button>
-                    </div>
+                  <div className="os-ws-inspire-info">
+                    <span className="os-ws-inspire-title">{c.title}</span>
+                    <span className="os-ws-inspire-desc">{c.desc}</span>
                   </div>
-                </div>
-              )}
-
-              {imageResults.length > 1 && (
-                <div className="os-ws-thumb-row">
-                  {imageResults.map((result, idx) => {
-                    const globalIdx = results.indexOf(result);
-                    return (
-                      <button key={idx} onClick={() => setActiveIndex(globalIdx)} className={`os-ws-thumb-item ${activeIndex === globalIdx ? 'active' : ''}`}>
-                        <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
-                        {activeIndex === globalIdx && <div className="os-ws-thumb-indicator"><Check className="w-3 h-3 text-white" /></div>}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              <div className="os-ws-bottom-bar">
-                <div className="flex items-center gap-2">
-                  <button onClick={handleContinueOptimize} className="os-ws-action-btn"><Sparkles className="w-3.5 h-3.5" /><span>继续优化</span></button>
-                  <button onClick={handleGenerate} className="os-ws-action-btn"><RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span></button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={handleDownloadAll} className="os-ws-action-btn"><Download className="w-3.5 h-3.5" /><span>下载全部</span></button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 文本结果 */}
-          {status === 'success' && hasTextResults && (
-            <div className="os-ws-results">
-              <div className="os-ws-results-bar">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-700">生成结果</span>
-                  <span className="os-ws-results-badge">{currentTool.name}</span>
-                </div>
-                <button onClick={handleSaveToProjects} className="os-ws-action-btn"><FolderOpen className="w-3.5 h-3.5" /><span>保存到作品</span></button>
-              </div>
-              {results.filter(r => r.type === 'text').map((result, idx) => (
-                <div key={idx} className="os-ws-text-card">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-slate-400 font-medium">{result.label}</span>
-                    <button onClick={() => handleCopyText(result.textContent || '')} className="os-ws-action-btn text-xs"><Copy className="w-3 h-3" /><span>复制</span></button>
-                  </div>
-                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{result.textContent || '暂无文本内容'}</p>
                 </div>
               ))}
-              {hasImageResults && (
-                <div className="mt-4">
-                  <div className="text-xs text-slate-400 font-medium mb-2">图片结果</div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {imageResults.map((result, idx) => (
-                      <button key={idx} onClick={() => { setActiveIndex(idx); setShowLightbox(true); }} className="os-ws-thumb-item-sm">
-                        <img src={result.url} alt={result.label} className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="os-ws-bottom-bar">
-                <div className="flex items-center gap-2">
-                  <button onClick={handleContinueOptimize} className="os-ws-action-btn"><Sparkles className="w-3.5 h-3.5" /><span>继续优化</span></button>
-                  <button onClick={handleGenerate} className="os-ws-action-btn"><RefreshCw className="w-3.5 h-3.5" /><span>重新生成</span></button>
-                </div>
-              </div>
             </div>
           )}
-        </main>
 
-        {/* ===== 右栏：灵感区 ===== */}
-        <aside className="os-ws-right">
-          {/* 热门风格 */}
-          {currentTool.styleOptions.length > 0 && (
-            <div className="os-ws-insp-section">
-              <div className="os-ws-insp-title">
-                <Palette className="w-3.5 h-3.5 text-purple-400" />
-                <span>热门风格</span>
-              </div>
-              <div className="os-ws-insp-styles">
-                {currentTool.styleOptions.map(s => (
-                  <button key={s.value} className={`os-ws-insp-style ${selectedStyle === s.value ? 'active' : ''}`} onClick={() => setSelectedStyle(s.value)}>
+          {/* Style suggestions */}
+          {config?.styleOptions && config.styleOptions.length > 0 && (
+            <div className="os-ws-right-section">
+              <span className="os-ws-right-label">推荐风格</span>
+              <div className="os-ws-inspire-tags">
+                {config.styleOptions.map(s => (
+                  <button
+                    key={s.value}
+                    className={`os-ws-inspire-tag ${selectedStyle === s.value ? 'active' : ''}`}
+                    onClick={() => setSelectedStyle(s.value)}
+                  >
                     {s.label}
                   </button>
                 ))}
@@ -670,78 +541,47 @@ export default function CreateWorkbench() {
             </div>
           )}
 
-          {/* 灵感案例 */}
-          <div className="os-ws-insp-section">
-            <div className="os-ws-insp-title">
-              <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
-              <span>灵感案例</span>
+          {/* Quick subtype suggestions */}
+          {config?.steps[1]?.options && (
+            <div className="os-ws-right-section">
+              <span className="os-ws-right-label">快速类型</span>
+              <div className="os-ws-inspire-tags">
+                {config.steps[1].options.map(o => (
+                  <button
+                    key={o.value}
+                    className={`os-ws-inspire-tag ${selectedSubtype === o.value ? 'active' : ''}`}
+                    onClick={() => setSelectedSubtype(o.value)}
+                  >
+                    {o.icon && <span className="mr-1">{o.icon}</span>}
+                    {o.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="os-ws-insp-cases">
-              {(currentTool.cases.length > 0 ? currentTool.cases : FALLBACK_CASES).map((c, idx) => (
-                <div key={idx} className="os-ws-insp-case">
-                  <div className="os-ws-insp-case-img">
-                    {c.image ? <img src={c.image} alt={c.title} /> : <div className="os-ws-insp-case-fallback"><ImageIcon className="w-5 h-5 text-slate-300" /></div>}
-                  </div>
-                  <div className="os-ws-insp-case-info">
-                    <div className="os-ws-insp-case-title">{c.title}</div>
-                    <div className="os-ws-insp-case-desc">{c.desc}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Prompt 灵感 */}
-          <div className="os-ws-insp-section">
-            <div className="os-ws-insp-title">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span>创作技巧</span>
-            </div>
-            <div className="os-ws-insp-tips">
-              {tips.map((tip, idx) => (
-                <div key={idx} className="os-ws-insp-tip">{tip}</div>
-              ))}
-            </div>
-          </div>
-        </aside>
+          )}
+        </div>
       </div>
 
-      {/* ===== Lightbox ===== */}
-      {showLightbox && activeResult && activeResult.type === 'image' && (
-        <div className="os-ws-lightbox" onClick={() => setShowLightbox(false)}>
-          <div className="os-ws-lightbox-content" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowLightbox(false)} className="os-ws-lightbox-close"><X className="w-5 h-5" /></button>
-            <img src={activeResult.url} alt={activeResult.label} className="os-ws-lightbox-img" />
-            <div className="os-ws-lightbox-actions">
-              <button onClick={() => handleDownload(activeResult.url!, `${activeResult.label}.png`)} className="os-ws-lightbox-btn"><Download className="w-4 h-4" /><span>下载 PNG</span></button>
-              <button onClick={() => { handleSetAsCover(activeIndex); setShowLightbox(false); }} className="os-ws-lightbox-btn"><Check className="w-4 h-4" /><span>设为封面</span></button>
-              <button onClick={() => { handleSaveToProjects(); setShowLightbox(false); }} className="os-ws-lightbox-btn"><FolderOpen className="w-4 h-4" /><span>保存到作品</span></button>
-            </div>
-            {imageResults.length > 1 && (
-              <div className="os-ws-lightbox-thumbs">
-                {imageResults.map((r, idx) => {
-                  const globalIdx = results.indexOf(r);
-                  return (
-                    <button key={idx} onClick={e => { e.stopPropagation(); setActiveIndex(globalIdx); }} className={`os-ws-lightbox-thumb ${activeIndex === globalIdx ? 'active' : ''}`}>
-                      <img src={r.url} alt={r.label} className="w-full h-full object-cover" />
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+      {/* ====== Lightbox ====== */}
+      {lightboxIdx >= 0 && results[lightboxIdx] && (
+        <div className="os-ws-lightbox" onClick={() => setLightboxIdx(-1)}>
+          <button className="os-ws-lightbox-close" onClick={() => setLightboxIdx(-1)}>
+            <X className="w-6 h-6" />
+          </button>
+          <img src={results[lightboxIdx].url} alt="预览" onClick={e => e.stopPropagation()} />
+          <div className="os-ws-lightbox-thumbs" onClick={e => e.stopPropagation()}>
+            {results.map((img, i) => (
+              <img
+                key={i}
+                src={img.url}
+                alt={`缩略图 ${i + 1}`}
+                className={`os-ws-lightbox-thumb ${i === lightboxIdx ? 'active' : ''}`}
+                onClick={() => setLightboxIdx(i)}
+              />
+            ))}
           </div>
         </div>
       )}
-
-      {/* ===== Toast ===== */}
-      {toast && (
-        <div className={`os-ws-toast os-ws-toast-${toast.type}`}>
-          <span>{toast.msg}</span>
-        </div>
-      )}
-
-      {/* ===== 全局点击关闭下拉 ===== */}
-      {showToolDropdown && <div className="os-ws-overlay" onClick={() => setShowToolDropdown(false)} />}
     </div>
   );
 }
