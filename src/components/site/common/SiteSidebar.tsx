@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Flame, FolderOpen, Wrench, LogIn, LogOut } from 'lucide-react';
+import { Flame, Sparkles, FolderOpen, Wrench, LogIn, LogOut } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -13,9 +13,10 @@ interface NavItem {
   href: string;
 }
 
+/* 灵感 → 创作 → 作品 → 工具库 */
 const NAV_ITEMS: NavItem[] = [
-  { icon: Sparkles, label: '创作', href: '/' },
   { icon: Flame,    label: '灵感', href: '/prompts' },
+  { icon: Sparkles, label: '创作', href: '/' },
   { icon: FolderOpen, label: '作品', href: '/projects' },
   { icon: Wrench,   label: '工具库', href: '/tools' },
 ];
@@ -49,9 +50,7 @@ export default function SiteSidebar() {
               className={`os-dock-item ${active ? 'os-dock-item-active' : ''}`}
               title={item.label}
             >
-              {/* 选中竖线指示器 */}
-              {active && <span className="os-dock-indicator" />}
-              <Icon className="os-dock-icon" strokeWidth={1.8} />
+              <Icon className="os-dock-icon" strokeWidth={1.6} />
               <span className="os-dock-label">{item.label}</span>
             </Link>
           );
@@ -67,7 +66,7 @@ export default function SiteSidebar() {
             onClick={() => setShowLoginModal(true)}
             type="button"
           >
-            <LogIn className="os-dock-icon" strokeWidth={1.8} />
+            <LogIn className="os-dock-icon" strokeWidth={1.6} />
             <span className="os-dock-label">登录</span>
           </button>
         ) : (
