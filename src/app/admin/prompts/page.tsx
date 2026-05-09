@@ -20,15 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Plus, Pencil, Trash2, Search, RefreshCw, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, RefreshCw, Star, ChevronLeft, ChevronRight, Eye, EyeOff, Copy } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -72,6 +64,19 @@ const CATEGORIES = [
   { value: '视频', label: '视频' },
 ];
 
+const CATEGORY_COLORS: Record<string, string> = {
+  '商品图': 'bg-orange-100 text-orange-700',
+  '小红书': 'bg-rose-100 text-rose-700',
+  'AI写真': 'bg-violet-100 text-violet-700',
+  '海报设计': 'bg-blue-100 text-blue-700',
+  '详情页': 'bg-emerald-100 text-emerald-700',
+  '视频': 'bg-cyan-100 text-cyan-700',
+  '场景描述': 'bg-amber-100 text-amber-700',
+  '风格迁移': 'bg-pink-100 text-pink-700',
+  '角色扮演': 'bg-indigo-100 text-indigo-700',
+  '特效制作': 'bg-purple-100 text-purple-700',
+};
+
 const STATUS_OPTIONS = [
   { value: 'all', label: '全部状态' },
   { value: 'published', label: '已发布' },
@@ -81,7 +86,7 @@ const STATUS_OPTIONS = [
 const DEFAULT_FORM = {
   title: '',
   content: '',
-  category: '场景描述',
+  category: '商品图',
   tags: '',
   is_featured: false,
   status: 'published' as 'published' | 'draft',
@@ -215,9 +220,7 @@ export default function AdminInspirationPage() {
         body: JSON.stringify({ is_featured: !item.is_featured }),
       });
       const data = await res.json();
-      if (data.success) {
-        fetchItems(pagination.page);
-      }
+      if (data.success) fetchItems(pagination.page);
     } catch (err) {
       console.error('Toggle featured failed:', err);
     }
@@ -232,12 +235,14 @@ export default function AdminInspirationPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       const data = await res.json();
-      if (data.success) {
-        fetchItems(pagination.page);
-      }
+      if (data.success) fetchItems(pagination.page);
     } catch (err) {
       console.error('Toggle status failed:', err);
     }
+  };
+
+  const copyContent = (content: string) => {
+    navigator.clipboard.writeText(content).catch(() => {});
   };
 
   /* ---- Render ---- */
@@ -293,88 +298,79 @@ export default function AdminInspirationPage() {
         </Button>
       </div>
 
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">ID</TableHead>
-                <TableHead>标题</TableHead>
-                <TableHead className="w-24">分类</TableHead>
-                <TableHead className="w-36">标签</TableHead>
-                <TableHead className="w-16">推荐</TableHead>
-                <TableHead className="w-16">状态</TableHead>
-                <TableHead className="w-20">使用/点赞</TableHead>
-                <TableHead className="w-28">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    加载中...
-                  </TableCell>
-                </TableRow>
-              ) : items.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    暂无灵感内容，点击右上角新增
-                  </TableCell>
-                </TableRow>
-              ) : (
-                items.map(item => (
-                  <TableRow key={item.id}>
-                    <TableCell className="text-muted-foreground text-xs">{item.id}</TableCell>
-                    <TableCell>
-                      <p className="font-medium text-sm line-clamp-1">{item.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.content}</p>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">{item.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {(item.tags || []).slice(0, 2).map((tag: string) => (
-                          <Badge key={tag} variant="outline" className="text-xs py-0">{tag}</Badge>
-                        ))}
-                        {(item.tags || []).length > 2 && (
-                          <Badge variant="outline" className="text-xs py-0">+{(item.tags || []).length - 2}</Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <button onClick={() => toggleFeatured(item)} className="cursor-pointer">
-                        <Star className={`w-4 h-4 ${item.is_featured ? 'fill-amber-400 text-amber-400' : 'text-slate-300 hover:text-amber-300'}`} />
-                      </button>
-                    </TableCell>
-                    <TableCell>
-                      <button onClick={() => toggleStatus(item)} className="cursor-pointer">
-                        <Badge className={`text-xs cursor-pointer ${item.status === 'published' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                          {item.status === 'published' ? '已发布' : '草稿'}
+      {/* Card List */}
+      {loading ? (
+        <div className="text-center py-12 text-muted-foreground">加载中...</div>
+      ) : items.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">暂无灵感内容，点击右上角新增</div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {items.map(item => (
+            <Card key={item.id} className="group relative hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                {/* Top row: category + status + featured + actions */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge className={`text-xs ${CATEGORY_COLORS[item.category] || 'bg-slate-100 text-slate-700'}`}>
+                      {item.category}
+                    </Badge>
+                    <button onClick={() => toggleStatus(item)} className="cursor-pointer" title={item.status === 'published' ? '点击下架' : '点击发布'}>
+                      {item.status === 'published' ? (
+                        <Badge className="text-xs cursor-pointer bg-green-100 text-green-700 hover:bg-green-200">
+                          <Eye className="w-3 h-3 mr-0.5" /> 已发布
                         </Badge>
-                      </button>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {item.uses || 0} / {item.likes || 0}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(item)} title="编辑">
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(item.id)} className="text-red-500 hover:text-red-600" title="删除">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                      ) : (
+                        <Badge className="text-xs cursor-pointer bg-slate-100 text-slate-500 hover:bg-slate-200">
+                          <EyeOff className="w-3 h-3 mr-0.5" /> 草稿
+                        </Badge>
+                      )}
+                    </button>
+                    <button onClick={() => toggleFeatured(item)} className="cursor-pointer" title={item.is_featured ? '取消推荐' : '设为推荐'}>
+                      <Star className={`w-4 h-4 ${item.is_featured ? 'fill-amber-400 text-amber-400' : 'text-slate-300 hover:text-amber-300'}`} />
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyContent(item.content)} title="复制内容">
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(item)} title="编辑">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => setDeleteId(item.id)} title="删除">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h3 className="font-medium text-sm line-clamp-1 mb-1">{item.title}</h3>
+
+                {/* Content preview */}
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-2 leading-relaxed">
+                  {item.content}
+                </p>
+
+                {/* Bottom row: tags + stats */}
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap gap-1">
+                    {(item.tags || []).slice(0, 3).map((tag: string) => (
+                      <span key={tag} className="text-xs text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                    {(item.tags || []).length > 3 && (
+                      <span className="text-xs text-slate-400">+{(item.tags || []).length - 3}</span>
+                    )}
+                  </div>
+                  <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                    {item.uses || 0} 次使用 · {item.likes || 0} 赞
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
       {pagination.totalPages > 1 && (
