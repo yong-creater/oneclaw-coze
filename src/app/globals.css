@@ -1454,11 +1454,13 @@ body {
   display: block;
   flex-shrink: 0;
   letter-spacing: 0.01em;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease, height 0.15s ease, margin 0.15s ease;
+  overflow: hidden;
 }
 .os-studio-ai-hint-hidden {
   opacity: 0;
-  visibility: hidden;
+  height: 0;
+  margin-bottom: 0;
 }
 .os-studio-placeholder {
   position: absolute;
