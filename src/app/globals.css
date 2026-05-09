@@ -500,13 +500,13 @@ body {
   50% { box-shadow: 0 24px 80px rgba(109, 94, 246, 0.10), 0 0 100px rgba(124, 108, 255, 0.06); }
 }
 
-/* Hero section — 透明通道，继承 os-main-canvas 全局渐变 + os-global-bg 光晕 */
+/* Hero section — 透明通道，继承 body 全局渐变 + 顶部径向光晕 */
 .os-hero {
   position: relative;
   overflow: hidden;
   padding-top: 64px;
   padding-bottom: 48px;
-  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124, 108, 255, 0.12), transparent 70%);
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124, 108, 255, 0.12), transparent 70%);
 }
 
 /* 噪点纹理 */
@@ -546,8 +546,7 @@ body {
   animation: orbDrift2 20s ease-in-out infinite;
 }
 
-.os-hero::before,
-.os-hero::after {
+.os-hero::before {
   display: none;
 }
 
