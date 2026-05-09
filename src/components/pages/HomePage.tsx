@@ -9,10 +9,12 @@ import {
   Wand2,
   Lightbulb,
   TrendingUp,
+  Package,
   LayoutTemplate,
   BookOpen,
   Video,
   Camera,
+  type LucideIcon,
 } from 'lucide-react';
 
 // 灵感建议 chips — 点击自动填充输入框
@@ -31,20 +33,19 @@ const showcaseExamples = [
   { title: '视频封面', category: '视频脚本', image: '/demo-scene.jpg' },
 ];
 
-// 主推荐场景
-const heroScene = {
-  title: '商品图生成',
-  desc: '上传商品图，自动生成主图、场景图和卖点图。',
-  href: '/product-generator',
-  image: '/case-lipstick-main.png',
-};
-
-// 轻量创作方向
-const quickScenes = [
-  { icon: LayoutTemplate, title: '详情页', desc: '生成商品详情长图', href: '/productpage', live: true },
-  { icon: BookOpen, title: '小红书', desc: '生成封面、标题和标签', href: '/xiaohongshu-generator', live: true },
-  { icon: Video, title: '视频脚本', desc: '生成口播和带货脚本', href: '', live: false },
-  { icon: Camera, title: 'AI 写真', desc: '生成高级感人物写真', href: '/ai-photo', live: true },
+// 创作方向选择
+interface SceneItem {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  href: string;
+}
+const sceneItems: SceneItem[] = [
+  { icon: Package, title: '商品图', desc: '主图、场景图、卖点图', href: '/product-generator' },
+  { icon: LayoutTemplate, title: '详情页', desc: '商品详情长图', href: '/productpage' },
+  { icon: BookOpen, title: '小红书', desc: '封面、标题和标签', href: '/xiaohongshu-generator' },
+  { icon: Video, title: '视频脚本', desc: '口播和带货脚本', href: '' },
+  { icon: Camera, title: 'AI 写真', desc: '高级感人物写真', href: '/ai-photo' },
 ];
 
 // 热门创作结果数据
@@ -250,63 +251,33 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ===== AI 推荐创作方向 ===== */}
-          <div className="w-full mt-14">
-            <div className="text-center mb-8">
-              <h2 className="text-xl font-semibold text-slate-700">AI 推荐创作方向</h2>
-              <p className="text-[13px] text-slate-400 mt-1.5">选择一个方向，OneClaw 自动匹配最佳 AI 工作流。</p>
+          {/* ===== 选择创作方向 ===== */}
+          <div className="w-full mt-12">
+            <div className="text-center mb-7">
+              <h2 className="text-lg font-semibold text-slate-700">选择你想生成的内容</h2>
+              <p className="text-[13px] text-slate-400 mt-1.5">不知道怎么写？选择一个方向，AI 会帮你自动生成。</p>
             </div>
 
-            <div className="os-scene-grid">
-              {/* 左侧主推荐 — 商品图 */}
-              <button
-                onClick={() => router.push(heroScene.href)}
-                className="os-scene-hero group"
-              >
-                <div className="os-scene-hero-preview">
-                  <img
-                    src={heroScene.image}
-                    alt={heroScene.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="os-scene-hero-overlay" />
-                </div>
-                <div className="os-scene-hero-content">
-                  <h3 className="os-scene-hero-title">{heroScene.title}</h3>
-                  <p className="os-scene-hero-desc">{heroScene.desc}</p>
-                  <span className="os-scene-hero-cta">立即生成</span>
-                </div>
-              </button>
-
-              {/* 右侧轻量入口 */}
-              <div className="os-scene-quick-grid">
-                {quickScenes.map((scene) => {
-                  const Icon = scene.icon;
-                  const handleClick = () => {
-                    if (scene.live && scene.href) {
-                      router.push(scene.href);
-                    }
-                  };
-                  return (
-                    <button
-                      key={scene.title}
-                      onClick={handleClick}
-                      className="os-scene-quick group"
-                    >
-                      <div className="os-scene-quick-icon">
-                        <Icon className="w-[18px] h-[18px]" />
-                      </div>
-                      <div className="os-scene-quick-text">
-                        <span className="os-scene-quick-title">
-                          {scene.title}
-                          {!scene.live && <span className="os-scene-quick-badge">即将上线</span>}
-                        </span>
-                        <span className="os-scene-quick-desc">{scene.desc}</span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+            <div className="os-scene-row">
+              {sceneItems.map((scene) => {
+                const Icon = scene.icon;
+                const handleClick = () => {
+                  if (scene.href) router.push(scene.href);
+                };
+                return (
+                  <button
+                    key={scene.title}
+                    onClick={handleClick}
+                    className="os-scene-card group"
+                  >
+                    <div className="os-scene-card-icon">
+                      <Icon className="w-[22px] h-[22px]" />
+                    </div>
+                    <span className="os-scene-card-title">{scene.title}</span>
+                    <span className="os-scene-card-desc">{scene.desc}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

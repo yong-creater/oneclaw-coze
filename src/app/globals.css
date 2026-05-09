@@ -708,206 +708,59 @@ body {
 }
 
 /* ── 创作场景入口卡片 ───────────────────── */
-/* --- Scene Hero: 主推荐卡片 --- */
-/* --- Scene Grid: 左右分栏布局 --- */
-.os-scene-grid {
-  display: grid;
-  grid-template-columns: 40% 1fr;
-  gap: 24px;
-  align-items: stretch;
+/* --- Scene Cards: 横向轻量创作方向 --- */
+.os-scene-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
-@media (max-width: 768px) {
-  .os-scene-grid { grid-template-columns: 1fr; }
-}
-
-.os-scene-hero {
+.os-scene-card {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 32px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, rgba(109,94,246,0.08) 0%, rgba(91,92,246,0.03) 100%);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(109,94,246,0.12);
-  box-shadow: 0 8px 40px rgba(109,94,246,0.06);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-height: 280px;
-  position: relative;
-  overflow: hidden;
-}
-.os-scene-hero:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(109,94,246,0.12);
-  border-color: rgba(109,94,246,0.20);
-}
-
-/* 预览图片容器 */
-.os-scene-hero-preview {
-  position: absolute;
-  top: 24px;
-  right: 24px;
-  width: 140px;
-  height: 140px;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  opacity: 0.85;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-.os-scene-hero-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.os-scene-hero:hover .os-scene-hero-preview {
-  opacity: 1;
-}
-
-/* 内容区域 — 左下区域，避开右上预览图 */
-.os-scene-hero-content {
-  position: relative;
-  z-index: 2;
-  max-width: 60%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  height: 100%;
-}
-
-/* 图片遮罩 — 预览图底部渐变，增强文字可读性 */
-.os-scene-hero-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  background: linear-gradient(to top, rgba(248,246,255,0.8), transparent);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.os-scene-hero-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: rgba(109,94,246,0.10);
-  display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
-  transition: all 0.3s ease;
-}
-.os-scene-hero:hover .os-scene-hero-icon {
-  background: rgba(109,94,246,0.16);
-  transform: scale(1.05);
-}
-.os-scene-hero-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1E293B;
-  line-height: 1.3;
-  margin-bottom: 6px;
-}
-.os-scene-hero-desc {
-  font-size: 14px;
-  color: #64748B;
-  line-height: 1.5;
-  margin-bottom: 20px;
-  max-width: 240px;
-}
-.os-scene-hero-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 44px;
-  padding: 0 24px;
-  border-radius: 14px;
-  background: #6D5EF6;
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(109,94,246,0.20);
-  width: fit-content;
-}
-.os-scene-hero-cta:hover {
-  background: #5B4FE0;
-  box-shadow: 0 8px 24px rgba(109,94,246,0.30);
-  transform: translateY(-1px);
-}
-
-/* --- Scene Quick Grid: 2×2 网格 --- */
-.os-scene-quick-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  align-items: stretch;
-}
-
-/* --- Scene Quick: 轻量入口卡片 --- */
-.os-scene-quick {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 18px;
-  border-radius: 18px;
+  width: 220px;
+  min-height: 130px;
+  padding: 24px 16px;
+  border-radius: 24px;
   background: rgba(255,255,255,0.72);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.6);
-  box-shadow: 0 4px 20px rgba(99,102,241,0.04);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(124,92,255,0.08);
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
+  transition: all 0.25s ease;
+  gap: 8px;
 }
-.os-scene-quick:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(109,94,246,0.08);
-  border-color: rgba(109,94,246,0.15);
+.os-scene-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(124,92,255,0.12);
+  border-color: rgba(124,92,255,0.18);
 }
-.os-scene-quick-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgba(109,94,246,0.08);
+.os-scene-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(124,92,255,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
+  color: #7C5CFF;
+  transition: all 0.25s ease;
 }
-.os-scene-quick:hover .os-scene-quick-icon {
-  background: rgba(109,94,246,0.14);
+.os-scene-card:hover .os-scene-card-icon {
+  background: rgba(124,92,255,0.14);
+  transform: scale(1.08);
 }
-.os-scene-quick-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
-.os-scene-quick-title {
-  font-size: 14px;
+.os-scene-card-title {
+  font-size: 15px;
   font-weight: 600;
   color: #1E293B;
   line-height: 1.3;
 }
-.os-scene-quick-desc {
+.os-scene-card-desc {
   font-size: 12px;
   color: #94A3B8;
   line-height: 1.4;
-}
-.os-scene-quick-badge {
-  font-size: 9px;
-  font-weight: 500;
-  color: #94A3B8;
-  background: rgba(241,245,249,0.8);
-  padding: 2px 6px;
-  border-radius: 6px;
-  flex-shrink: 0;
 }
 
 /* ==================== Creator OS 按钮系统 ==================== */
