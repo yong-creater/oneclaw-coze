@@ -139,6 +139,7 @@ export default function PromptPage() {
 
   return (
     <div className="os-page">
+      <div className="os-content">
       {/* Header */}
       <div className="mb-6 animate-fade-slide-up">
         <h1 className="os-h1">灵感案例库</h1>
@@ -289,6 +290,7 @@ export default function PromptPage() {
           })}
         </div>
       )}
+      </div>{/* end os-content */}
     </div>
   );
 }

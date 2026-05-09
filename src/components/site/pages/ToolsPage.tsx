@@ -96,7 +96,7 @@ export default function ToolsPage() {
 
   return (
     <div className="os-page">
-      <div className="page-container">
+      <div className="os-content">
         {/* ---- 页面标题 ---- */}
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-2.5 mb-3">

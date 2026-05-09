@@ -164,7 +164,8 @@ export default function ProjectPage() {
   };
 
   return (
-    <div className="os-page page-container">
+    <div className="os-page">
+      <div className="os-content">
       {/* Toast 通知 */}
       {toasts.length > 0 && (
         <div className="os-wb-toast-container">
@@ -415,6 +416,7 @@ export default function ProjectPage() {
           </div>
         );
       })()}
+      </div>{/* end os-content */}
     </div>
   );
 }

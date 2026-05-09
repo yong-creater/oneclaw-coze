@@ -492,7 +492,7 @@ export default function HomePage() {
         <div className="os-hero-noise" />
 
         {/* 内容层 */}
-        <div className="relative z-10 flex flex-col items-center w-full max-w-[1200px] mx-auto px-4">
+        <div className="relative z-10 flex flex-col items-center w-full os-content">
 
           {/* 主标题 — PC端单行 nowrap，移动端允许换行 */}
           <h1 className="os-hero-title">
@@ -693,7 +693,7 @@ export default function HomePage() {
 
       {/* ==================== 热门创作结果 ==================== */}
       <section className="relative animate-fade-slide-up mt-16 pb-8" style={{ animationDelay: '0.15s' }}>
-        <div className="max-w-[1440px] mx-auto">
+        <div className="os-content">
           <div className="flex items-center justify-between mb-8">
             <div>
               <div className="flex items-center gap-3">

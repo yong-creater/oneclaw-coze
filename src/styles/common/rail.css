@@ -3,6 +3,37 @@
    风格：Claude / Linear / Arc Browser 轻量 AI Dock
    ============================================================ */
 
+/* ── 页面主内容区（与 Dock 配合） ── */
+/*
+ * .os-dock-page  — <main> 根容器，给 Dock 让出左侧空间
+ * .os-dock-page-inner — 内容+Footer 的纵向 flex 壳
+ * .os-content — 页面内部统一内容容器（居中、限宽、统一 padding）
+ */
+.os-dock-page {
+  margin-left: 84px;                    /* dock 宽 80px + 4px 呼吸间距 */
+  min-height: 100vh;
+  position: relative;
+  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+.os-dock-page-inner {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 统一页面内容容器 ── */
+.os-content {
+  max-width: 1440px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 48px;
+  padding-right: 48px;
+}
+
 /* ── Dock 容器 ── */
 .os-dock {
   position: fixed;
@@ -226,6 +257,7 @@
 
 /* ── 响应式 ── */
 @media (max-width: 768px) {
+  /* Dock 变为底部导航 */
   .os-dock {
     position: fixed;
     top: auto;
@@ -270,5 +302,14 @@
     border-bottom: none;
     border-right: 1px solid rgba(255, 255, 255, 0.6);
     border-top: 1px solid rgba(255, 255, 255, 0.6);
+  }
+  /* 页面不再需要左侧偏移，改为底部留空给 Dock */
+  .os-dock-page {
+    margin-left: 0;
+    padding-bottom: 64px;
+  }
+  .os-content {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }

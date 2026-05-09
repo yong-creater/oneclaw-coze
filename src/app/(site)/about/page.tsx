@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="page-container" style={{ paddingTop: 32, paddingBottom: 60 }}>
+    <div className="os-content" style={{ paddingTop: 32, paddingBottom: 60 }}>
       <BackToHome />
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
         {/* 标题 */}
