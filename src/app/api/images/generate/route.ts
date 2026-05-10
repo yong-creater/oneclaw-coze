@@ -112,8 +112,17 @@ export async function POST(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', session.user_id)
       .gte('created_at', today.toISOString());
-    const DAILY_FREE_LIMIT = 3;
-    if ((todayCount || 0) >= DAILY_FREE_LIMIT) {
+    // 从数据库读取配额配置
+    const { data: settingData } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'daily_generation_limit')
+      .single();
+    const config = (settingData?.value as { limit?: number; unlimited?: boolean }) || {};
+    const isUnlimited = config.unlimited === true;
+    const DAILY_FREE_LIMIT = isUnlimited ? -1 : (config.limit ?? 3);
+
+    if (!isUnlimited && (todayCount || 0) >= DAILY_FREE_LIMIT) {
       return NextResponse.json({ 
         success: false, 
         error: `今日免费生成次数已用完（${DAILY_FREE_LIMIT}次/天），请明天再试或升级会员` 

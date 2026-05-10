@@ -362,8 +362,8 @@ export default function HomePage() {
   // 实际执行创作流程（登录后可能被回调）
   const doStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
-    // 每日免费次数检查
-    if (dailyQuota !== null && dailyQuota <= 0) {
+    // 每日免费次数检查（-2=无限制跳过，-1=未登录/未知不阻止）
+    if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota <= 0) {
       alert('今日免费生成次数已用完，明天再来吧！');
       return;
     }

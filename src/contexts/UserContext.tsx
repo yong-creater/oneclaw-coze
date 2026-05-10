@@ -19,7 +19,7 @@ interface UserContextType {
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
   requireAuth: (callback?: () => void) => boolean;
-  /** 每日免费生成剩余次数（-1=未登录, null=加载中） */
+  /** 每日免费生成剩余次数（-1=未登录, -2=无限制, null=加载中） */
   dailyQuota: number | null;
   /** 刷新每日配额 */
   refreshQuota: () => Promise<void>;
@@ -92,7 +92,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const res = await fetch('/api/quota/daily-generations', { credentials: 'include', signal: abortRef.current?.signal });
       const data = await res.json();
       if (data.remaining !== undefined) {
-        setDailyQuota(data.remaining);
+        setDailyQuota(data.unlimited ? -2 : data.remaining);
       }
     } catch (err: unknown) {
       // AbortError is expected on unmount

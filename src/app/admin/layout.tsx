@@ -14,6 +14,7 @@ import {
   Loader2,
   Grid3X3,
   Home,
+  Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +47,7 @@ const menuItems: MenuItem[] = [
   { name: '灵感库', href: '/admin/prompts', icon: Lightbulb },
   { name: '用户管理', href: '/admin/users', icon: Users },
   { name: '模型提供商', href: '/admin/model-providers', icon: Grid3X3 },
+  { name: '站点配置', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminLayout({

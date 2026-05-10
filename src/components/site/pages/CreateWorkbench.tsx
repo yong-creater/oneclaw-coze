@@ -542,8 +542,8 @@ export default function CreateWorkbench() {
       return;
     }
 
-    // 每日免费次数检查（dailyQuota=0 表示用完，-1 表示未登录/未知，不阻止）
-    if (dailyQuota === 0) {
+    // 每日免费次数检查（-2=无限制跳过，-1=未登录/未知不阻止，0=用完）
+    if (dailyQuota !== -2 && dailyQuota === 0) {
       setErrorMsg('今日免费生成次数已用完，明天再来吧！');
       return;
     }

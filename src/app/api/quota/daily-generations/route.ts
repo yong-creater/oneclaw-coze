@@ -33,15 +33,25 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: '查询失败' }, { status: 500 });
     }
 
-    const DAILY_FREE_LIMIT = 3;
+    // 从数据库读取配置（支持后台动态调整）
+    const { data: settingData } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', 'daily_generation_limit')
+      .single();
+
+    const config = (settingData?.value as { limit?: number; unlimited?: boolean }) || {};
+    const isUnlimited = config.unlimited === true;
+    const DAILY_FREE_LIMIT = isUnlimited ? -1 : (config.limit ?? 3);
     const used = count ?? 0;
-    const remaining = Math.max(0, DAILY_FREE_LIMIT - used);
+    const remaining = isUnlimited ? 999 : Math.max(0, DAILY_FREE_LIMIT - used);
 
     return NextResponse.json({
-      limit: DAILY_FREE_LIMIT,
+      limit: isUnlimited ? -1 : DAILY_FREE_LIMIT,
       used,
       remaining,
-      canGenerate: remaining > 0,
+      unlimited: isUnlimited,
+      canGenerate: isUnlimited || remaining > 0,
     });
   } catch (err) {
     console.error('[quota] error:', err);
