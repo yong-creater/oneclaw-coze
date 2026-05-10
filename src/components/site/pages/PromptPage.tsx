@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Star, Eye, Heart, Sparkles, SlidersHorizontal, X } from 'lucide-react';
+import { Search, Star, Eye, Heart, Sparkles, X } from 'lucide-react';
 import { getInspirations, getInspirationCategories } from '@/lib/tool-workflow-config';
 import type { InspirationItem } from '@/lib/tool-workflow-config';
 import { useRouter } from 'next/navigation';
@@ -58,7 +58,6 @@ export default function InspirationPage() {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
-  const [showFilter, setShowFilter] = useState(false);
   const [filterStyle, setFilterStyle] = useState('');
 
   // Load favorites from localStorage
@@ -152,15 +151,15 @@ export default function InspirationPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex-1 relative">
+        <div className="mb-5">
+          <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="搜索你想生成的内容，例如: 商品图、小红书、AI写真..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-sm hover:border-purple-300 focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-sm hover:border-purple-300 focus:outline-none focus:border-purple-500 transition-colors"
             />
             {search && (
               <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -168,30 +167,23 @@ export default function InspirationPage() {
               </button>
             )}
           </div>
-          <button
-            onClick={() => setShowFilter(!showFilter)}
-            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border-2 text-sm transition-colors ${showFilter ? 'border-purple-400 bg-purple-50 text-purple-600' : 'border-slate-200 bg-white text-slate-600 hover:border-purple-300'}`}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            筛选
-          </button>
         </div>
 
-        {/* Category Tags */}
-        <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
-          <button
-            onClick={() => setActiveCategory('全部')}
-            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              activeCategory === '全部'
-                ? 'bg-gradient-to-r from-[#7C6CFF] to-[#9B87FF] text-white shadow-md shadow-purple-200'
-                : 'bg-white text-slate-600 border border-slate-200 hover:border-purple-300'
-            }`}
-          >
-            全部 {items.length > 0 ? items.length : ''}
-          </button>
-          {categories.map(cat => {
-            const count = cat.count;
-            return (
+        {/* 类型筛选 */}
+        <div className="mb-3">
+          <div className="text-xs text-slate-400 mb-1.5">类型</div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            <button
+              onClick={() => setActiveCategory('全部')}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                activeCategory === '全部'
+                  ? 'bg-gradient-to-r from-[#7C6CFF] to-[#9B87FF] text-white shadow-md shadow-purple-200'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:border-purple-300'
+              }`}
+            >
+              全部 {items.length > 0 ? items.length : ''}
+            </button>
+            {categories.map(cat => (
               <button
                 key={cat.label}
                 onClick={() => setActiveCategory(cat.label)}
@@ -201,35 +193,41 @@ export default function InspirationPage() {
                     : 'bg-white text-slate-600 border border-slate-200 hover:border-purple-300'
                 }`}
               >
-                {cat.label} {count}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Style filter bar */}
-        {showFilter && uniqueStyles.length > 0 && (
-          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
-            <span className="text-xs text-slate-400 flex-shrink-0">风格:</span>
-            <button
-              onClick={() => setFilterStyle('')}
-              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs transition-all ${
-                !filterStyle ? 'bg-purple-100 text-purple-600' : 'bg-slate-50 text-slate-500 hover:bg-purple-50'
-              }`}
-            >
-              全部
-            </button>
-            {uniqueStyles.map(style => (
-              <button
-                key={style}
-                onClick={() => setFilterStyle(style)}
-                className={`flex-shrink-0 px-3 py-1 rounded-full text-xs transition-all ${
-                  filterStyle === style ? 'bg-purple-100 text-purple-600' : 'bg-slate-50 text-slate-500 hover:bg-purple-50'
-                }`}
-              >
-                {style}
+                {cat.label} {cat.count}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* 风格筛选 */}
+        {uniqueStyles.length > 0 && (
+          <div className="mb-4">
+            <div className="text-xs text-slate-400 mb-1.5">风格</div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <button
+                onClick={() => setFilterStyle('')}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  !filterStyle
+                    ? 'bg-gradient-to-r from-[#7C6CFF] to-[#9B87FF] text-white shadow-md shadow-purple-200'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-purple-300'
+                }`}
+              >
+                全部
+              </button>
+              {uniqueStyles.map(style => (
+                <button
+                  key={style}
+                  onClick={() => setFilterStyle(style)}
+                  className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    filterStyle === style
+                      ? 'bg-gradient-to-r from-[#7C6CFF] to-[#9B87FF] text-white shadow-md shadow-purple-200'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:border-purple-300'
+                  }`}
+                >
+                  {style}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
