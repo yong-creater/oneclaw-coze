@@ -364,8 +364,8 @@ export default function HomePage() {
   // 实际执行创作流程（登录后可能被回调）
   const doStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
-    // 每日免费次数检查（-2=无限制跳过，-1=未登录/未知不阻止）
-    if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota <= 0) {
+    // 每日免费次数检查（-2=无限制跳过，-1=未登录不阻止，null=加载中不阻止）
+    if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
       showAlert('今日免费额度已用完', '注册登录后可继续生成作品，并同步保存你的创作记录。', 'quota-exhausted');
       requireAuth();
       return;

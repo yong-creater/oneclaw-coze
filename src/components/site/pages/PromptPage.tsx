@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, Eye, Heart, Bookmark, Copy, Search, Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
+import { useModal } from '@/contexts/ModalContext';
 
 /* ---------- 数据类型 ---------- */
 interface Prompt {
@@ -86,7 +87,8 @@ function Pill({
 /* ==================== 灵感库页面 ==================== */
 export default function PromptPage() {
   const router = useRouter();
-  const { requireAuth } = useUser();
+  const { requireAuth, dailyQuota } = useUser();
+  const { showAlert } = useModal();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('全部');
@@ -171,6 +173,13 @@ const categoryCounts = useMemo(() => {
   const handleGen = useCallback(
     (e: React.MouseEvent, p: Prompt) => {
       e.stopPropagation();
+
+      // 每日额度检查（-2=无限制跳过，-1=未登录不阻止，null=加载中不阻止）
+      if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
+        showAlert('今日免费额度已用完', '注册登录后可继续生成作品，并同步保存你的创作记录。', 'quota-exhausted');
+        return;
+      }
+
       // 优先使用 category 映射到有效 slug，忽略数据库中无效的 tool_slug
       const VALID_SLUGS = ['product-generator', 'xiaohongshu-generator', 'ai-photo'];
       const slug = CATEGORY_TOOL_MAP[p.category]
@@ -194,7 +203,7 @@ const categoryCounts = useMemo(() => {
       // 已登录时 requireAuth 返回 true，需要手动执行跳转
       router.push(targetUrl);
     },
-    [router, requireAuth]
+    [router, requireAuth, dailyQuota, showAlert]
   );
 
   /* ---- 加载中 ---- */

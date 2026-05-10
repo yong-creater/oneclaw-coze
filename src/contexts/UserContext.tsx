@@ -60,7 +60,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('oneclaw_user_id', data.data.user_id);
         }
         // 登录状态确认后，获取配额
-        fetchQuota();
+        await fetchQuota();
       } else {
         setUser(null);
         setDailyQuota(-1); // 未登录
@@ -109,6 +109,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const login = async () => {
     await checkAuth();
+    // 等待配额数据加载完成
+    await fetchQuota();
     setShowLoginModal(false);
 
     // 登录成功后，执行暂存的回调

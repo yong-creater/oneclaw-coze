@@ -333,9 +333,19 @@ export default function CreateWorkbench() {
     if (!parsedCtx.current.shouldAuto || autoGenTriggered.current) return;
     // loading 中，等 checkAuth 完成后再执行
     if (loading) return;
+    // 配额仍在加载中，等配额数据到达后再执行
+    if (user && dailyQuota === null) return;
 
     const p = genParamsRef.current;
     if (!p.inputText && p.uploads.length === 0) return; // 等 inputText 设置好
+
+    // 已登录但额度用完：弹窗提示，不触发生成
+    if (user && dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
+      autoGenTriggered.current = true;
+      parsedCtx.current.shouldAuto = false;
+      showAlert('今日免费额度已用完', '今日免费生成次数已达上限，明天再来吧！升级会员可获取更多额度。', 'quota-exhausted');
+      return;
+    }
 
     // 未登录：弹登录弹窗，暂存回调，登录后自动继续
     if (!user) {
@@ -351,7 +361,7 @@ export default function CreateWorkbench() {
     }, 800);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText, toolSlug, user, loading]);
+  }, [inputText, toolSlug, user, loading, dailyQuota]);
 
   // ===== 加载中文案轮播 =====
   const subtypeLabel = config.subtypeOptions?.find(s => s.value === selectedSubtype)?.label || '';
@@ -544,9 +554,9 @@ export default function CreateWorkbench() {
       return;
     }
 
-    // 每日免费次数检查（-2=无限制跳过，-1=未登录/未知不阻止，0=用完）
-    if (dailyQuota !== -2 && dailyQuota === 0) {
-      setErrorMsg('今日免费生成次数已用完，明天再来吧！');
+    // 每日免费次数检查（-2=无限制跳过，-1=未登录/未知不阻止，0=用完，null=加载中不阻止）
+    if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
+      showAlert('今日免费额度已用完', '今日免费生成次数已达上限，明天再来吧！升级会员可获取更多额度。', 'quota-exhausted');
       return;
     }
 
