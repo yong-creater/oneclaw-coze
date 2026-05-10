@@ -440,7 +440,7 @@ export default function CreateWorkbench() {
             pollTask(tid);
           } else if (task.status === 'completed') {
             setStep('done');
-            setImages((task.result_images || []).map((url: string, i: number) => ({ id: `${i}`, url })));
+            setImages((task.result_images || []).map((img: { url: string }, i: number) => ({ id: `${i}`, url: img.url })));
           } else if (task.status === 'failed') {
             setStep('error');
             setErrorMsg(task.error_message || '生成失败');
@@ -504,7 +504,7 @@ export default function CreateWorkbench() {
         return;
       }
 
-      const taskId = createData.task.taskId;
+      const taskId = createData.task.task_id || createData.task.taskId;
       setCurrentTaskId(taskId);
 
       // Update URL with taskId (no page reload)

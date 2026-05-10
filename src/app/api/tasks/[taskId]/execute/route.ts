@@ -150,13 +150,14 @@ export async function POST(
       .update({ progress: 80, updated_at: new Date().toISOString() })
       .eq('task_id', taskId);
 
-    // 7. 保存结果
+    // 7. 保存结果（result_images 统一为 [{url: string}] 格式）
+    const formattedResults = resultImages.map(url => ({ url }));
     const { error: updateError } = await supabase
       .from('generation_tasks')
       .update({
         status: 'completed',
         progress: 100,
-        result_images: resultImages,
+        result_images: formattedResults,
         completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
