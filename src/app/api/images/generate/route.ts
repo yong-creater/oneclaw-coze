@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
     const hasImage = imageArray.length > 0;
     const referenceImage = hasImage ? imageArray[0] : undefined;
 
-    // 构建工具专属增强提示词
-    const { fullPrompt: finalPrompt } = buildPrompt({
+    // 构建工具专属增强提示词（含guardrail负面词）
+    const promptResult = buildPrompt({
       prompt: prompt || '',
       toolType: effectiveToolId,
       style,
@@ -94,15 +94,16 @@ export async function POST(request: NextRequest) {
 
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
 
-    // 并行生成多张图片
+    // 并行生成多张图片（传入负面词增强质量控制）
     const promises = Array.from({ length: effectiveCount }, () =>
       generateWithModel(
-        finalPrompt,
+        promptResult.fullPrompt,
         model || 'coze-image',
         finalSize,
         customHeaders,
         effectiveToolId,
-        referenceImage
+        referenceImage,
+        promptResult.negativePrompt
       )
     );
 

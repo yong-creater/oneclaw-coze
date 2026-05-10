@@ -174,7 +174,8 @@ async function generateWithOpenAICompatible(
   size: string,
   apiUrl: string,
   apiKey: string,
-  image?: string | string[]
+  image?: string | string[],
+  negativePrompt?: string
 ): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> {
   try {
     if (!apiKey) {
@@ -207,6 +208,7 @@ async function generateWithOpenAICompatible(
         n: 1,
         response_format: 'url',
         size: imageSize,
+        ...(negativePrompt ? { negative_prompt: negativePrompt } : {}),
       };
 
       const response = await fetch(`${fullApiUrl}/images/generations`, {
@@ -393,7 +395,8 @@ export async function generateWithModel(
   size: string = '2K',
   customHeaders: Record<string, string> = {},
   toolId?: string,
-  image?: string | string[]
+  image?: string | string[],
+  negativePrompt?: string
 ): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> {
   // 如果传入了 toolId，优先从工具配置获取模型
   if (toolId) {
@@ -407,8 +410,14 @@ export async function generateWithModel(
         if (isCoze) {
           // ===== Coze SDK 路径（支持文生图+图生图）=====
           const client = createCozeClient(customHeaders);
+          // Build effective prompt with negative terms appended
+          let effectivePrompt = prompt;
+          if (negativePrompt) {
+            effectivePrompt = `${prompt}. Avoid: ${negativePrompt}`;
+          }
+          
           const requestParams: ImageGenerationRequest = {
-            prompt,
+            prompt: effectivePrompt,
             size,
             watermark: false,
           };
@@ -461,7 +470,8 @@ export async function generateWithModel(
             size,
             config.apiUrl,
             config.apiKey,
-            image
+            image,
+            negativePrompt
           );
         }
       }
@@ -477,9 +487,15 @@ export async function generateWithModel(
   const isCozeModel = model.includes('coze') || model.includes('doubao') || model.includes('seedream');
   
   if (isCozeModel) {
+    // Build effective prompt with negative terms appended
+    let effectivePrompt = prompt;
+    if (negativePrompt) {
+      effectivePrompt = `${prompt}. Avoid: ${negativePrompt}`;
+    }
+    
     const client = createCozeClient(customHeaders);
     const requestParams: ImageGenerationRequest = {
-      prompt,
+      prompt: effectivePrompt,
       size,
       watermark: false,
     };
@@ -521,7 +537,7 @@ export async function generateWithModel(
     // 非 coze 模型，尝试从环境变量读取 4sapi 配置
     const apiKey = process.env.API4S_KEY || '';
     const apiUrl = process.env.API4S_URL || 'https://4sapi.com';
-    return await generateWithOpenAICompatible(prompt, model, size, apiUrl, apiKey, image);
+    return await generateWithOpenAICompatible(prompt, model, size, apiUrl, apiKey, image, negativePrompt);
   }
 }
 

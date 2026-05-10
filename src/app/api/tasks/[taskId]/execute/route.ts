@@ -1,163 +1,211 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
+import { buildPrompt } from '@/lib/prompt-engine';
+import { normalizePrompt, buildNegativePrompt, validateGenerationResult, getMaxRetries } from '@/lib/generation-guardrail';
 import { generateWithModel } from '@/lib/model-selector';
-import { buildPrompt, ratioToSize } from '@/lib/prompt-engine';
+import { RATIO_TO_SIZE } from '@/lib/prompt-engine';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabase = getSupabaseClient();
 
-// POST /api/tasks/[taskId]/execute — 执行任务
+/**
+ * POST /api/tasks/[taskId]/execute
+ * 执行任务生成（带 Guardrail 自动重试）
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   const { taskId } = await params;
 
-  try {
-    // 1. 获取任务（带锁：只有 pending 状态可执行）
-    const { data: task, error } = await supabase
-      .from('generation_tasks')
-      .select('*')
-      .eq('task_id', taskId)
+  // 1. 获取任务，原子锁（只有 pending 可执行）
+  const { data: task, error: fetchErr } = await supabase
+    .from('generation_tasks')
+    .select('*')
+    .eq('task_id', taskId)
+    .single();
+
+  if (fetchErr || !task) {
+    return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+  }
+
+  if (task.status !== 'pending') {
+    return NextResponse.json({ error: `任务状态为 ${task.status}，不可重复执行` }, { status: 409 });
+  }
+
+  // 2. 原子更新 status → generating
+  const { error: lockErr } = await supabase
+    .from('generation_tasks')
+    .update({ status: 'generating', started_at: new Date().toISOString() })
+    .eq('task_id', taskId)
+    .eq('status', 'pending'); // 乐观锁
+
+  if (lockErr) {
+    return NextResponse.json({ error: '任务已被执行' }, { status: 409 });
+  }
+
+  // 3. 获取模型配置
+  const toolSlug = task.tool_type || 'product-generator';
+
+  let modelConfig: { model: string; providerSlug: string; apiUrl: string; apiKey: string } | null = null;
+
+  // 从 utility_tools 表获取模型配置
+  const { data: utilTool } = await supabase
+    .from('utility_tools')
+    .select('model_provider_id, model_name')
+    .eq('slug', toolSlug)
+    .single();
+
+  if (utilTool?.model_provider_id) {
+    const { data: provider } = await supabase
+      .from('model_providers')
+      .select('slug, api_url, api_key')
+      .eq('id', utilTool.model_provider_id)
       .single();
 
-    if (error || !task) {
-      return NextResponse.json({ error: '任务不存在' }, { status: 404 });
+    if (provider && utilTool.model_name) {
+      modelConfig = {
+        model: utilTool.model_name,
+        providerSlug: provider.slug,
+        apiUrl: provider.api_url,
+        apiKey: provider.api_key,
+      };
     }
+  }
 
-    if (task.status !== 'pending') {
-      return NextResponse.json({
-        error: `任务状态为 ${task.status}，不可重复执行`,
-        task,
-      }, { status: 400 });
-    }
+  // 4. 构建 Prompt（使用 Prompt Engine + Guardrail）
+  const userPrompt = task.prompt || '';
+  const style = task.style || undefined;
+  const ratio = task.ratio || '1:1';
+  const layoutMode = task.layout_mode || undefined;
 
-    // 2. 原子更新：pending → generating
-    const { error: lockError } = await supabase
-      .from('generation_tasks')
-      .update({
-        status: 'generating',
-        progress: 10,
-        started_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq('task_id', taskId)
-      .eq('status', 'pending'); // 乐观锁
+  // 4a. Prompt Normalization（清洗用户输入）
+  const cleanedPrompt = normalizePrompt(userPrompt);
 
-    if (lockError) {
-      return NextResponse.json({ error: '任务已被锁定' }, { status: 409 });
-    }
+  // 4b. 构建 Guardrail 增强后的 Prompt
+  const promptResult = buildPrompt({
+    prompt: cleanedPrompt,
+    toolType: toolSlug,
+    style,
+    ratio,
+    layoutMode,
+    hasImage: !!(task.uploaded_images && (task.uploaded_images as string[]).length > 0),
+  });
 
-    // 3. 构建生成参数（使用独立 Prompt Engine）
-    const { fullPrompt, toolLabel } = buildPrompt({
-      prompt: (task.prompt as string) || '',
-      toolType: (task.tool_type as string) || '',
-      style: (task.style as string) || undefined,
-      subtype: (task.generation_type as string) || undefined,
-      ratio: (task.ratio as string) || undefined,
-      layoutMode: (task.layout_mode as string) || undefined,
-      hasImage: !!((task.uploaded_images as Array<{ url: string }>)?.length),
-      count: (task.count as number) || 1,
-    });
-    const uploadedImages = (task.uploaded_images as Array<{ url: string }>) || [];
-    const count = (task.count as number) || 1;
-    const ratio = (task.ratio as string) || '1:1';
-    const size = ratioToSize(ratio);
+  const finalPrompt = promptResult.fullPrompt;
+  const negativePrompt = promptResult.negativePrompt || buildNegativePrompt(toolSlug);
+  const size = RATIO_TO_SIZE[ratio] || '1024x1024';
 
-    // 4. 更新进度
-    await supabase
-      .from('generation_tasks')
-      .update({ progress: 30, updated_at: new Date().toISOString() })
-      .eq('task_id', taskId);
+  // 5. 生成循环（带自动重试）
+  const maxRetries = getMaxRetries();
+  let lastError = '';
+  let resultImages: Array<{ url: string }> = [];
 
-    // 5. 调用模型生成
-    let resultImages: string[] = [];
-
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      const images = uploadedImages.map((img) => img.url).filter(Boolean);
-      const generateResult = await generateWithModel(
-        fullPrompt,
-        'coze-image',
+      // 更新进度
+      if (attempt > 0) {
+        await supabase
+          .from('generation_tasks')
+          .update({
+            progress: Math.min(90, 30 + attempt * 25),
+            error_message: attempt > 0 ? `第${attempt}次重试中...` : null,
+          })
+          .eq('task_id', taskId);
+      } else {
+        await supabase
+          .from('generation_tasks')
+          .update({ progress: 30 })
+          .eq('task_id', taskId);
+      }
+
+      // 调用模型生成
+      // Build custom headers for API auth
+      const customHeaders: Record<string, string> = {};
+      if (modelConfig?.apiKey) {
+        customHeaders['Authorization'] = `Bearer ${modelConfig.apiKey}`;
+      }
+      if (modelConfig?.apiUrl) {
+        customHeaders['X-Api-Url'] = modelConfig.apiUrl;
+      }
+
+      const result = await generateWithModel(
+        finalPrompt,
+        modelConfig?.model,
         size,
-        {},
-        task.tool_type as string,
-        images.length > 0 ? images : undefined
+        customHeaders,
+        toolSlug,
+        (task.uploaded_images as string[])?.[0] || undefined,
+        negativePrompt,
       );
 
-      resultImages = generateResult.imageUrls || [];
-    } catch (genErr) {
-      // 生成失败
-      await supabase
-        .from('generation_tasks')
-        .update({
-          status: 'failed',
-          error_message: genErr instanceof Error ? genErr.message : '生成失败',
-          progress: 0,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('task_id', taskId);
+      // 检查生成结果
+      if (result.success && result.imageUrls && result.imageUrls.length > 0) {
+        const imageUrls = result.imageUrls;
 
-      return NextResponse.json({
-        success: false,
-        error: '生成失败',
-        task: { ...task, status: 'failed' },
-      }, { status: 500 });
+        // 4c. 结果验证（Guardrail validateGenerationResult）
+        const validation = validateGenerationResult(imageUrls, toolSlug, task.count || 1);
+
+        if (validation.passed) {
+          // 验证通过，使用此结果
+          resultImages = imageUrls.map((url: string) => ({ url }));
+          break;
+        } else if (validation.shouldRetry && attempt < maxRetries) {
+          console.warn(`[Execute] 生成质量验证失败(第${attempt + 1}次): ${validation.issues.join(', ')}，将重试`);
+          lastError = '生成质量不达标，正在重试...';
+          continue;
+        } else {
+          // 验证不通过但已达到最大重试次数，仍然保存结果
+          console.warn(`[Execute] 生成质量验证失败(达到最大重试次数): ${validation.issues.join(', ')}，仍保存结果`);
+          resultImages = imageUrls.map((url: string) => ({ url }));
+          break;
+        }
+      } else {
+        lastError = result.error || '模型生成返回空结果';
+        console.warn(`[Execute] 生成失败(第${attempt + 1}次): ${lastError}`);
+        if (attempt < maxRetries) continue;
+      }
+    } catch (genErr: any) {
+      lastError = genErr.message || '未知生成错误';
+      console.error(`[Execute] 生成异常(第${attempt + 1}次):`, lastError);
+      if (attempt < maxRetries) continue;
     }
+  }
 
-    // 6. 更新进度
+  // 6. 更新最终状态
+  if (resultImages.length > 0) {
     await supabase
-      .from('generation_tasks')
-      .update({ progress: 80, updated_at: new Date().toISOString() })
-      .eq('task_id', taskId);
-
-    // 7. 保存结果（result_images 统一为 [{url: string}] 格式）
-    const formattedResults = resultImages.map(url => ({ url }));
-    const { error: updateError } = await supabase
       .from('generation_tasks')
       .update({
         status: 'completed',
         progress: 100,
-        result_images: formattedResults,
+        result_images: resultImages,
+        model_used: modelConfig?.model || 'unknown',
         completed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        error_message: null,
       })
       .eq('task_id', taskId);
 
-    if (updateError) {
-      console.error('[Task Execute] 保存结果失败:', updateError);
-    }
+    return NextResponse.json({
+      success: true,
+      taskId,
+      status: 'completed',
+      resultImages,
+    });
+  } else {
+    await supabase
+      .from('generation_tasks')
+      .update({
+        status: 'failed',
+        error_message: lastError || '生成失败，请重试',
+        completed_at: new Date().toISOString(),
+      })
+      .eq('task_id', taskId);
 
-    // 8. 也保存到 user_generations（作品库）
-    const userId = task.user_id as string;
-    if (userId && resultImages.length > 0) {
-      const insertData = resultImages.map((url, idx) => ({
-        user_id: userId,
-        tool_type: task.tool_type,
-        prompt: task.prompt || '',
-        image_url: url,
-        parameters: {
-          style: task.style,
-          ratio: task.ratio,
-          count,
-          task_id: taskId,
-        },
-        title: `${toolLabel} #${idx + 1}`,
-      }));
-
-      const { error: genError } = await supabase
-        .from('user_generations')
-        .insert(insertData);
-
-      if (genError) {
-        console.error('[Task Execute] 写入作品库失败:', genError);
-      }
-    }
-
-    return NextResponse.json({ success: true, taskId, resultImages });
-  } catch (err) {
-    console.error('[Task Execute] error:', err);
-    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+    return NextResponse.json({
+      success: false,
+      taskId,
+      status: 'failed',
+      error: lastError || '生成失败，请重试',
+    });
   }
 }

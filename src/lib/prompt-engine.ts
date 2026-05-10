@@ -10,6 +10,15 @@
  *   小红书封面 → 像真正爆款封面
  */
 
+import {
+  normalizePrompt,
+  getAnchorPrompt,
+  buildNegativePrompt as guardrailNegativePrompt,
+  shouldRetry,
+  getMaxRetries,
+  type GuardrailResult,
+} from './generation-guardrail';
+
 // ============================================================
 // 类型定义
 // ============================================================
@@ -36,6 +45,8 @@ export interface PromptInput {
 export interface PromptOutput {
   /** 最终拼好的 prompt */
   fullPrompt: string;
+  /** 负面 prompt（禁止词，用于支持 negative_prompt 的模型） */
+  negativePrompt: string;
   /** 是否为图生图模式（有参考图） */
   isImageToImage: boolean;
   /** 识别到的工具名（中文） */
@@ -385,24 +396,37 @@ const TOOL_LABELS: Record<string, string> = {
 };
 
 export function buildPrompt(input: PromptInput): PromptOutput {
+  // ---- Step 1: Prompt Normalization（去除用户输入中的风险词）----
+  const cleanedPrompt = normalizePrompt(input.prompt);
+
+  // ---- Step 2: 构建工具专属 Prompt（使用规范化后的输入）----
+  const normalizedInput = { ...input, prompt: cleanedPrompt };
   let fullPrompt: string;
 
   switch (input.toolType) {
     case 'product-generator':
-      fullPrompt = buildProductPrompt(input);
+      fullPrompt = buildProductPrompt(normalizedInput);
       break;
     case 'ai-photo':
-      fullPrompt = buildPortraitPrompt(input);
+      fullPrompt = buildPortraitPrompt(normalizedInput);
       break;
     case 'xiaohongshu-generator':
-      fullPrompt = buildXiaohongshuPrompt(input);
+      fullPrompt = buildXiaohongshuPrompt(normalizedInput);
       break;
     default:
-      fullPrompt = buildGenericPrompt(input);
+      fullPrompt = buildGenericPrompt(normalizedInput);
   }
+
+  // ---- Step 3: 注入风格锚点（防止风格漂移）----
+  const anchor = getAnchorPrompt(input.toolType);
+  fullPrompt = `${anchor}\n${fullPrompt}`;
+
+  // ---- Step 4: 生成负面 Prompt（禁止词）----
+  const negativePrompt = guardrailNegativePrompt(input.toolType);
 
   return {
     fullPrompt,
+    negativePrompt,
     isImageToImage: !!input.hasImage,
     toolLabel: TOOL_LABELS[input.toolType] || 'AI生成',
   };
@@ -493,3 +517,7 @@ export function ratioToSize(ratio: string | undefined, fallback: string = '2K'):
   if (!ratio) return fallback;
   return RATIO_TO_SIZE[ratio] || fallback;
 }
+
+// Re-export guardrail functions for use in execute routes
+export { shouldRetry, getMaxRetries, normalizePrompt, getAnchorPrompt };
+export type { GuardrailResult };
