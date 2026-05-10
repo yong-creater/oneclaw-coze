@@ -628,8 +628,10 @@ export default function CreateWorkbench() {
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* 生成按钮 */}
+          {/* 生成按钮 — sticky bottom */}
+          <div className="os-ws-generate-wrap">
             <button
               className="os-ws-generate-btn"
               onClick={handleGenerate}
