@@ -83,9 +83,13 @@
 
 .os-page {
   position: relative;
-  background: transparent;
-  padding: 40px 0;
+  background: #F7F7FB;
+  padding: 48px 0;
   min-height: 100vh;
+  /* 极轻微紫灰渐变光晕 */
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(124,108,255,0.12), transparent 40%),
+    linear-gradient(180deg, #F7F7FB 0%, #F5F5FA 100%);
 }
 @media (max-width: 768px) {
   .os-page {

@@ -108,7 +108,7 @@
   transform: translateY(0) scale(0.98);
 }
 
-/* 胶囊按钮 (Capsule) - 能力标签/分类/Prompt推荐 */
+/* 胶囊按钮 (Capsule) - 统一分类筛选标签 */
 .os-btn-capsule {
   display: inline-flex;
   align-items: center;
@@ -116,29 +116,88 @@
   gap: 6px;
   height: 36px;
   padding: 0 16px;
-  background: #F3F6FB;
-  border: 1px solid transparent;
+  background: #FFFFFF;
+  border: 1px solid #E6E8F0;
   color: #6B7280;
   font-size: 13px;
   font-weight: 500;
   border-radius: 999px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s ease;
   cursor: pointer;
   outline: none;
 }
 .os-btn-capsule:hover {
-  background: rgba(123, 97, 255, 0.06);
-  color: #7B61FF;
-  border-color: rgba(123, 97, 255, 0.15);
+  background: rgba(124,108,255,0.04);
+  color: #7C6CFF;
+  border-color: rgba(124,108,255,0.15);
   transform: translateY(-1px);
 }
 .os-btn-capsule-active {
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.1), rgba(91, 140, 255, 0.06));
-  color: #7B61FF;
-  border-color: rgba(123, 97, 255, 0.2);
-  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.15);
+  background: linear-gradient(135deg, #7C6CFF 0%, #5EC2FF 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(124,108,255,0.25);
 }
 .os-btn-capsule:active {
   transform: scale(0.97);
+}
+/* 胶囊按钮内数字弱化 */
+.os-btn-capsule-count {
+  font-size: 11px;
+  opacity: 0.55;
+  margin-left: 2px;
+}
+.os-btn-capsule-active .os-btn-capsule-count {
+  opacity: 0.75;
+}
+
+/* 主按钮 — 统一紫蓝渐变 */
+.os-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7C6CFF 0%, #5EC2FF 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  outline: none;
+}
+.os-btn-primary:hover {
+  box-shadow: 0 8px 24px rgba(124,108,255,0.30);
+  transform: translateY(-1px);
+}
+.os-btn-primary:active {
+  transform: scale(0.97);
+}
+
+/* 次按钮 — 白底边框 */
+.os-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: #6B7280;
+  font-size: 15px;
+  font-weight: 500;
+  border: 1px solid #E6E8F0;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  outline: none;
+}
+.os-btn-secondary:hover {
+  border-color: rgba(124,108,255,0.25);
+  color: #7C6CFF;
+  transform: translateY(-1px);
 }
 

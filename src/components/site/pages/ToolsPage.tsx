@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Wrench } from 'lucide-react';
+import { Search, Package, Camera, FileText, Scissors, Image as ImageIcon, Sparkles, X } from 'lucide-react';
 import { getToolWorkflow } from '@/lib/tool-workflow-config';
 
 interface UtilityTool {
@@ -17,30 +17,55 @@ interface UtilityTool {
   use_cases: { title: string; desc: string }[];
 }
 
-/* ---- 工具元数据（封面图 fallback + 价值描述） ---- */
+/* ---- 工具元数据 — 统一封面图 + 价值描述 + 标签 + lucide 图标 ---- */
 const TOOL_META: Record<string, {
   cover: string;
   valueProp: string;
+  tags: string[];
+  icon: React.ComponentType<{ className?: string }>;
+  sortOrder: number;
 }> = {
   'product-generator': {
     cover: '/case-lipstick-main.png',
     valueProp: '上传商品图，秒变高级电商主图',
+    tags: ['电商', '商品主图'],
+    icon: Package,
+    sortOrder: 1,
   },
   'ai-photo': {
     cover: '/demo-card-lifestyle.jpg',
     valueProp: '一键生成氛围感写真大片',
+    tags: ['人像', '写真'],
+    icon: Camera,
+    sortOrder: 2,
   },
-  'background-removal': {
-    cover: '/case-ecommerce.jpg',
-    valueProp: '一键智能抠图，3秒出白底图',
+  'xiaohongshu-generator': {
+    cover: '/demo-card-lifestyle.jpg',
+    valueProp: '爆款小红书封面一键生成',
+    tags: ['小红书', '种草'],
+    icon: FileText,
+    sortOrder: 3,
+  },
+  'product-poster': {
+    cover: '/case-lipstick-main.png',
+    valueProp: '生成营销海报与品牌视觉图',
+    tags: ['营销', '海报'],
+    icon: ImageIcon,
+    sortOrder: 4,
   },
   'product-page': {
     cover: '/case-lipstick-main.png',
     valueProp: '自动生成电商详情页长图',
+    tags: ['电商', '详情页'],
+    icon: FileText,
+    sortOrder: 5,
   },
-  'xiaohongshu-generator': {
-    cover: '/demo-card-lifestyle.jpg',
-    valueProp: '爆款小红书内容一键生成',
+  'background-removal': {
+    cover: '/case-ecommerce.jpg',
+    valueProp: '快速去背景，生成白底图',
+    tags: ['抠图', '白底图'],
+    icon: Scissors,
+    sortOrder: 6,
   },
 };
 
@@ -76,7 +101,14 @@ export default function ToolsPage() {
       .catch(() => {});
   }, []);
 
-  const filtered = tools.filter(t => {
+  // 按 sortOrder 排序，核心工具优先
+  const sortedTools = [...tools].sort((a, b) => {
+    const aOrder = TOOL_META[a.slug]?.sortOrder ?? 99;
+    const bOrder = TOOL_META[b.slug]?.sortOrder ?? 99;
+    return aOrder - bOrder;
+  });
+
+  const filtered = sortedTools.filter(t => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -90,41 +122,41 @@ export default function ToolsPage() {
   return (
     <div className="os-page">
       <div className="os-content">
-        {/* ---- 页面标题 ---- */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-2.5 mb-3">
-            <Wrench className="w-5 h-5 text-[#5B5CF6]" />
-            <h1 className="text-2xl font-bold text-slate-800">AI 创作工具</h1>
-          </div>
-          <p className="text-sm text-slate-400">
-            选择你想生成的内容，快速获得商业级结果。
-          </p>
+        {/* Page Title */}
+        <div className="os-page-header">
+          <h1 className="os-page-title">AI 创作工具</h1>
+          <p className="os-page-subtitle">选择你想生成的内容，快速获得商业级结果</p>
         </div>
 
-        {/* ---- 搜索 ---- */}
-        <div className="max-w-md mx-auto mb-10">
+        {/* Search */}
+        <div className="max-w-lg mb-8 relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="搜索工具，比如商品图、小红书、写真…"
-            className="w-full px-4 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-sm text-slate-700 placeholder:text-slate-400 hover:border-orange-400 focus:outline-none focus:border-orange-500 transition-colors"
+            className="os-search-input"
           />
+          {search && (
+            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2">
+              <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
+            </button>
+          )}
         </div>
 
-        {/* ---- 工具卡片网格 ---- */}
+        {/* Tool Cards Grid — 3 columns */}
         <div className="os-tl-grid">
           {filtered.map(tool => {
             const meta = TOOL_META[tool.slug];
             const coverSrc = tool.cover_image || meta?.cover || '';
+            const LucideIcon = meta?.icon || Sparkles;
 
             return (
               <button
                 key={tool.slug}
                 onClick={() => {
-                  // 使用 sessionStorage 传递上下文，避免 URL 过长被浏览器拦截
                   try {
-                    // 从工具配置读取默认参数
                     const toolConf = getToolWorkflow(tool.slug);
                     sessionStorage.setItem('oneclaw_create_context', JSON.stringify({
                       prompt: '',
@@ -141,20 +173,22 @@ export default function ToolsPage() {
                         industry: '',
                         output_type: tool.name,
                       },
-                      autoGenerate: false,  // 工具库进入不自动生成，等用户完成引导
+                      autoGenerate: false,
                     }));
                   } catch {}
                   router.push('/create');
                 }}
                 className="os-tl-card"
               >
-                {/* 封面图 */}
+                {/* Cover Image — 16:9 */}
                 <div className="os-tl-card-cover">
                   {coverSrc ? (
                     <img src={coverSrc} alt={tool.name} loading="lazy" />
                   ) : (
                     <div className="os-tl-card-fallback">
-                      <span className="text-3xl font-semibold text-white/60">{tool.name[0]}</span>
+                      <div className="os-tl-card-fallback-icon">
+                        <LucideIcon className="w-6 h-6" />
+                      </div>
                     </div>
                   )}
                   {/* hover CTA */}
@@ -169,6 +203,14 @@ export default function ToolsPage() {
                   <p className="os-tl-card-value">
                     {meta?.valueProp || tool.description || 'AI 帮你高效完成'}
                   </p>
+                  {/* 适合场景标签 */}
+                  {meta?.tags && meta.tags.length > 0 && (
+                    <div className="os-tl-card-tags">
+                      {meta.tags.map(tag => (
+                        <span key={tag} className="os-tl-card-tag">{tag}</span>
+                      ))}
+                    </div>
+                  )}
                   <span className="os-tl-card-action">立即生成</span>
                 </div>
               </button>
@@ -176,10 +218,12 @@ export default function ToolsPage() {
           })}
         </div>
 
-        {/* ---- 空搜索 ---- */}
+        {/* Empty search */}
         {filtered.length === 0 && tools.length > 0 && (
-          <div className="text-center py-16 text-slate-400 text-sm">
-            没有找到匹配的工具，换个关键词试试？
+          <div className="os-empty">
+            <div className="os-empty-icon"><Search className="w-8 h-8" /></div>
+            <div className="os-empty-title">没有找到匹配的工具</div>
+            <div className="os-empty-desc">换个关键词试试？</div>
           </div>
         )}
       </div>
