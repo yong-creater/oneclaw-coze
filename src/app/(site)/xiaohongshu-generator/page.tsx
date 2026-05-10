@@ -25,6 +25,19 @@ export default function XiaohongshuGeneratorPage() {
 
   // 从 URL 参数读取模板数据
   useEffect(() => {
+    // 优先从 sessionStorage 读取首页传递的数据
+    try {
+      const raw = sessionStorage.getItem('oneclaw_create_context');
+      if (raw) {
+        sessionStorage.removeItem('oneclaw_create_context');
+        const ctx = JSON.parse(raw);
+        if (ctx.prompt) {
+          setKeyword(ctx.prompt);
+          return; // 首页数据优先，不读 URL
+        }
+      }
+    } catch { /* ignore */ }
+
     const params = new URLSearchParams(window.location.search);
     const templateContent = params.get('template_content');
     

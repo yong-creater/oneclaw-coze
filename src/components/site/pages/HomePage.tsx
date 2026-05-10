@@ -16,6 +16,15 @@ import {
 import { useMenu } from '@/components/site/common/MenuProvider';
 
 // ===== 导航到创作页 =====
+const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
+
+// 工具 slug → 页面路由映射
+const TOOL_ROUTE_MAP: Record<string, string> = {
+  'product-generator': '/product-generator',
+  'xiaohongshu-generator': '/xiaohongshu-generator',
+  'ai-photo': '/ai-photo',
+};
+
 function navigateToCreate(
   router: ReturnType<typeof useRouter>,
   opts: {
@@ -27,17 +36,33 @@ function navigateToCreate(
     analysisResult?: { tool: string; style: string; ratio: string; count: string };
   }
 ) {
+  // 写入 sessionStorage，确保图片等大数据不丢失
+  const context: Record<string, unknown> = {};
+  if (opts.prompt) context.prompt = opts.prompt;
+  if (opts.uploadedImages && opts.uploadedImages.length > 0) {
+    context.images = opts.uploadedImages.map((url, i) => ({
+      id: `upload-${Date.now()}-${i}`,
+      url,
+      name: `参考图${i + 1}`,
+    }));
+  }
+  if (opts.matchedTool) context.toolSlug = opts.matchedTool;
+  if (opts.autoGenerate) context.autoGenerate = true;
+  if (opts.analysisResult) context.analysisResult = opts.analysisResult;
+  sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
+
+  // 路由到对应工具详情页（而非 /create）
+  const targetRoute = (opts.matchedTool && TOOL_ROUTE_MAP[opts.matchedTool]) || '/create';
   const params = new URLSearchParams();
   if (opts.prompt) params.set('prompt', opts.prompt);
   if (opts.matchedTool) params.set('tool', opts.matchedTool);
-  if (opts.type) params.set('type', opts.type);
   if (opts.autoGenerate) params.set('auto', '1');
   if (opts.analysisResult) {
     params.set('style', opts.analysisResult.style);
     params.set('ratio', opts.analysisResult.ratio);
     params.set('count', opts.analysisResult.count);
   }
-  router.push(`/create?${params.toString()}`);
+  router.push(`${targetRoute}?${params.toString()}`);
 }
 
 // ===== 工具匹配 =====
@@ -54,11 +79,7 @@ const TOOL_MATCHES: ToolMatch[] = [
   { slug: 'ai-photo', name: 'AI写真工坊', icon: '📸', keywords: ['写真', '人像', '头像', '照片', '肖像', '氛围', '风格'] },
 ];
 
-const TOOL_ROUTES: Record<string, string> = {
-  'product-generator': 'product',
-  'xiaohongshu-generator': 'xiaohongshu',
-  'ai-photo': 'photo',
-};
+
 
 // ===== AI 需求识别状态 =====
 type IdentifyPhase = 'idle' | 'identifying' | 'matched' | 'no-match';
@@ -277,12 +298,12 @@ export default function HomePage() {
     }, 8000);
     setTimeout(() => {
       const tool = matchTool(inputText);
-      if (tool && TOOL_ROUTES[tool.slug]) {
+      if (tool && TOOL_ROUTE_MAP[tool.slug]) {
         setIsJumping(true);
         const rec = getStyleRecommendation(tool, inputText);
         navigateToCreate(router, {
           prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
-          type: TOOL_ROUTES[tool.slug], autoGenerate: true,
+          autoGenerate: true,
           analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
         });
       }
@@ -291,13 +312,12 @@ export default function HomePage() {
 
   const handleJumpNow = useCallback(() => {
     if (!matchedTool) return;
-    const routeType = TOOL_ROUTES[matchedTool.slug];
-    if (!routeType) return;
+    if (!TOOL_ROUTE_MAP[matchedTool.slug]) return;
     setIsJumping(true);
     const rec = getStyleRecommendation(matchedTool, inputText);
     navigateToCreate(router, {
       prompt: inputText.trim(), uploadedImages, matchedTool: matchedTool.slug,
-      type: routeType, autoGenerate: true,
+      autoGenerate: true,
       analysisResult: { tool: matchedTool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
     });
   }, [matchedTool, inputText, uploadedImages, router]);
@@ -308,10 +328,9 @@ export default function HomePage() {
     if (!matchedTool) return;
     setIsJumping(true);
     const rec = getStyleRecommendation(matchedTool, inputText);
-    const routeType = TOOL_ROUTES[matchedTool.slug] || 'auto';
     navigateToCreate(router, {
       prompt: inputText.trim(), uploadedImages, matchedTool: matchedTool.slug,
-      type: routeType, autoGenerate: true,
+      autoGenerate: true,
       analysisResult: { tool: matchedTool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
     });
   }, [inputText, uploadedImages, router, matchedTool]);
@@ -605,17 +624,16 @@ export default function HomePage() {
                 <span className="os-ai-nomatch-desc">当前需求不够明确，你可以选择一个方向继续创作</span>
                 <div className="os-ai-nomatch-tags">
                   {TOOL_MATCHES.map(tool => {
-                    const routeType = TOOL_ROUTES[tool.slug];
                     return (
                       <button
                         key={tool.slug}
                         className="os-ai-nomatch-tag os-ai-nomatch-tag-clickable"
                         onClick={() => {
-                          if (!routeType) return;
+                          if (!TOOL_ROUTE_MAP[tool.slug]) return;
                           const rec = getStyleRecommendation(tool, inputText);
                           navigateToCreate(router, {
                             prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
-                            type: routeType, autoGenerate: true,
+                            autoGenerate: true,
                             analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
                           });
                         }}

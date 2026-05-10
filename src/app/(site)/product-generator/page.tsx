@@ -62,6 +62,23 @@ export default function ProductDetailGeneratorPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // ===== 从首页接收数据 =====
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('oneclaw_create_context');
+      if (!raw) return;
+      sessionStorage.removeItem('oneclaw_create_context');
+      const ctx = JSON.parse(raw);
+      // 填入 prompt → 商品名称
+      if (ctx.prompt) setProductName(ctx.prompt);
+      // 填入参考图
+      if (ctx.images && Array.isArray(ctx.images) && ctx.images.length > 0) {
+        const urls: string[] = ctx.images.map((img: { url?: string }) => img.url).filter(Boolean);
+        if (urls.length > 0) setUploadedImages(prev => [...urls, ...prev]);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   // ===== 多图上传 =====
   // HEIC → JPEG 转换（解决iPhone默认HEIC格式）
   const convertHeicToJpeg = async (file: File): Promise<File> => {

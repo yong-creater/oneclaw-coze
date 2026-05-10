@@ -59,8 +59,41 @@ export default function AIPhotoPage() {
   const [modelError, setModelError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 从 URL 参数读取模板数据
+  // 从 URL 参数或 sessionStorage 读取数据
   useEffect(() => {
+    // 优先从 sessionStorage 读取首页传递的数据
+    let homeCtx: { prompt?: string; images?: { url: string }[]; analysisResult?: { style?: string } } | null = null;
+    try {
+      const raw = sessionStorage.getItem('oneclaw_create_context');
+      if (raw) {
+        sessionStorage.removeItem('oneclaw_create_context');
+        homeCtx = JSON.parse(raw);
+        // 填入参考图（从 URL 获取并转为 File）
+        if (homeCtx?.images && homeCtx.images.length > 0) {
+          const imgUrl = homeCtx.images[0].url;
+          if (imgUrl) {
+            fetch(imgUrl)
+              .then(r => r.blob())
+              .then(blob => {
+                const file = new File([blob], '参考图.jpg', { type: blob.type || 'image/jpeg' });
+                setSelectedFile(file);
+                setPreviewUrl(imgUrl);
+              })
+              .catch(() => { /* 静默失败 */ });
+          }
+        }
+        // 填入风格
+        if (homeCtx?.analysisResult?.style) {
+          const styleId = homeCtx.analysisResult.style.toLowerCase();
+          const matchedStyle = PHOTO_STYLES.find(s =>
+            s.id === styleId || s.name.includes(homeCtx!.analysisResult!.style!)
+          );
+          if (matchedStyle) setSelectedStyle(matchedStyle.id);
+        }
+      }
+    } catch { /* ignore */ }
+
+    // 再读 URL 模板参数
     const params = new URLSearchParams(window.location.search);
     const templateContent = params.get('template_content');
     const templateName = params.get('template_name');
@@ -69,8 +102,8 @@ export default function AIPhotoPage() {
       try {
         const data = JSON.parse(decodeURIComponent(templateContent));
         
-        // 如果模板有风格设置，应用风格
-        if (data.style) {
+        // 如果模板有风格设置，应用风格（首页数据优先）
+        if (data.style && !homeCtx?.analysisResult?.style) {
           const styleId = data.style.toLowerCase();
           const matchedStyle = PHOTO_STYLES.find(s => 
             s.id === styleId || s.name.includes(data.style)
