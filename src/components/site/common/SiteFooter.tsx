@@ -1,25 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-
 export default function SiteFooter() {
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('/api/wechat/config')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.qrCodeUrl) {
-          setQrCodeUrl(data.qrCodeUrl);
-        } else {
-          // API 未返回有效 URL，使用静态文件兜底
-          setQrCodeUrl('/wechat-qrcode.jpg');
-        }
-      })
-      .catch(() => {
-        setQrCodeUrl('/wechat-qrcode.jpg');
-      });
-  }, []);
+  // 直接使用后端代理接口返回二维码图片，无需前端 fetch
+  const qrCodeSrc = '/api/wechat/qrcode-image';
 
   return (
     <footer className="os-footer">
@@ -37,11 +20,7 @@ export default function SiteFooter() {
         <div className="os-footer-qr">
           <div className="os-footer-qr-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {qrCodeUrl ? (
-              <img src={qrCodeUrl} alt="微信公众号" />
-            ) : (
-              <div className="w-full h-full bg-slate-100 animate-pulse rounded" />
-            )}
+            <img src={qrCodeSrc} alt="微信公众号" />
           </div>
           <span className="os-footer-qr-label">
             扫码关注公众号
