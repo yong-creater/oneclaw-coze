@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Sparkles, Star, Eye, Heart } from 'lucide-react';
+import { Sparkles, Star, ChevronRight } from 'lucide-react';
 import {
   getInspirations,
   getInspirationCategories,
@@ -13,9 +13,11 @@ interface InspirationLibraryProps {
   currentTool?: string;
   /** 点击灵感卡片，填充参数并可选触发生成 */
   onUseInspiration: (item: InspirationItem) => void;
+  /** 是否为左侧面板紧凑模式 */
+  compact?: boolean;
 }
 
-export default function InspirationLibrary({ currentTool, onUseInspiration }: InspirationLibraryProps) {
+export default function InspirationLibrary({ currentTool, onUseInspiration, compact = false }: InspirationLibraryProps) {
   const categories = getInspirationCategories();
   const [activeCategory, setActiveCategory] = useState(currentTool ? getCategoryByTool(currentTool) : '全部');
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -35,9 +37,51 @@ export default function InspirationLibrary({ currentTool, onUseInspiration }: In
     });
   }, []);
 
+  // 紧凑模式：左侧面板卡片
+  if (compact) {
+    return (
+      <div className="os-insp-compact">
+        {/* 标题 */}
+        <div className="os-insp-compact-header">
+          <div className="os-insp-compact-title-row">
+            <Sparkles className="os-insp-compact-icon" />
+            <span className="os-insp-compact-title">灵感参考</span>
+            <span className="os-insp-compact-count">{items.length}</span>
+          </div>
+        </div>
+
+        {/* 筛选栏：横向滚动 */}
+        <div className="os-insp-compact-filters">
+          {categories.map(cat => (
+            <button
+              key={cat.label}
+              className={`os-insp-compact-filter ${activeCategory === cat.label ? 'active' : ''}`}
+              onClick={() => setActiveCategory(cat.label)}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        {/* 灵感卡片：竖向列表 */}
+        <div className="os-insp-compact-list">
+          {items.slice(0, 6).map(item => (
+            <CompactInspirationCard
+              key={item.id}
+              item={item}
+              isFavorite={favorites.has(item.id)}
+              onFavorite={toggleFavorite}
+              onUse={onUseInspiration}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // 完整模式（暂不使用，保留以防未来需要）
   return (
     <div className="os-insp">
-      {/* 标题栏 */}
       <div className="os-insp-header">
         <div className="os-insp-title-row">
           <div className="os-insp-title-left">
@@ -47,8 +91,6 @@ export default function InspirationLibrary({ currentTool, onUseInspiration }: In
           </div>
         </div>
       </div>
-
-      {/* 分类筛选 */}
       <div className="os-insp-filters">
         {categories.map(cat => (
           <button
@@ -61,69 +103,70 @@ export default function InspirationLibrary({ currentTool, onUseInspiration }: In
           </button>
         ))}
       </div>
-
-      {/* 灵感卡片区 */}
       <div className="os-insp-grid">
         {items.map(item => (
-          <InspirationCard
-            key={item.id}
-            item={item}
-            isFavorite={favorites.has(item.id)}
-            onFavorite={toggleFavorite}
-            onUse={onUseInspiration}
-          />
+          <div key={item.id} className="os-insp-card" onClick={() => onUseInspiration(item)}>
+            <div className="os-insp-card-img-wrap">
+              <img src={item.image} alt={item.title} className="os-insp-card-img" loading="lazy" />
+              <span className="os-insp-card-badge">{item.categoryLabel}</span>
+              <button
+                className={`os-insp-card-star ${favorites.has(item.id) ? 'favorited' : ''}`}
+                onClick={e => toggleFavorite(item.id, e)}
+              >
+                <Star fill={favorites.has(item.id) ? '#FFD700' : 'none'} stroke={favorites.has(item.id) ? '#FFD700' : '#fff'} />
+              </button>
+            </div>
+            <div className="os-insp-card-body">
+              <h4 className="os-insp-card-title">{item.title}</h4>
+              <p className="os-insp-card-desc">{item.desc}</p>
+              <div className="os-insp-card-tags">
+                {item.tags.slice(0, 3).map(tag => (
+                  <span key={tag} className="os-insp-card-tag">#{tag}</span>
+                ))}
+              </div>
+              <button className="os-insp-card-cta" onClick={e => { e.stopPropagation(); onUseInspiration(item); }}>
+                <Sparkles /> 生成同款
+              </button>
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
 }
 
-// ===== 单张灵感卡片 =====
-interface CardProps {
+// ===== 紧凑灵感卡片（左侧面板用） =====
+interface CompactCardProps {
   item: InspirationItem;
   isFavorite: boolean;
   onFavorite: (id: string, e: React.MouseEvent) => void;
   onUse: (item: InspirationItem) => void;
 }
 
-function InspirationCard({ item, isFavorite, onFavorite, onUse }: CardProps) {
+function CompactInspirationCard({ item, isFavorite, onFavorite, onUse }: CompactCardProps) {
   return (
-    <div className="os-insp-card" onClick={() => onUse(item)}>
-      {/* 图片区 */}
-      <div className="os-insp-card-img-wrap">
-        <img src={item.image} alt={item.title} className="os-insp-card-img" loading="lazy" />
-        {/* 分类标签 */}
-        <span className="os-insp-card-badge">{item.categoryLabel}</span>
-        {/* 收藏 */}
+    <div className="os-insp-compact-card" onClick={() => onUse(item)}>
+      {/* 缩略图 */}
+      <div className="os-insp-compact-card-img">
+        <img src={item.image} alt={item.title} loading="lazy" />
+        <span className="os-insp-compact-card-badge">{item.categoryLabel}</span>
         <button
-          className={`os-insp-card-star ${isFavorite ? 'favorited' : ''}`}
+          className={`os-insp-compact-card-star ${isFavorite ? 'favorited' : ''}`}
           onClick={e => onFavorite(item.id, e)}
         >
-          <Star fill={isFavorite ? '#FFD700' : 'none'} stroke={isFavorite ? '#FFD700' : '#fff'} />
+          <Star fill={isFavorite ? '#FFD700' : 'none'} stroke={isFavorite ? '#FFD700' : 'rgba(255,255,255,0.8)'} />
         </button>
       </div>
 
-      {/* 信息区 */}
-      <div className="os-insp-card-body">
-        <h4 className="os-insp-card-title">{item.title}</h4>
-        <p className="os-insp-card-desc">{item.desc}</p>
-
-        {/* 标签 */}
-        <div className="os-insp-card-tags">
-          {item.tags.map(tag => (
-            <span key={tag} className="os-insp-card-tag">#{tag}</span>
-          ))}
+      {/* 信息 */}
+      <div className="os-insp-compact-card-body">
+        <div className="os-insp-compact-card-info">
+          <h4 className="os-insp-compact-card-title">{item.title}</h4>
+          <p className="os-insp-compact-card-desc">{item.desc}</p>
         </div>
-
-        {/* 互动指标 */}
-        <div className="os-insp-card-meta">
-          <span className="os-insp-card-stat"><Eye /> {Math.floor(Math.random() * 500 + 100)}</span>
-          <span className="os-insp-card-stat"><Heart /> {Math.floor(Math.random() * 80 + 10)}</span>
-        </div>
-
-        {/* 生成同款按钮 */}
-        <button className="os-insp-card-cta" onClick={e => { e.stopPropagation(); onUse(item); }}>
-          <Sparkles /> 生成同款
+        <button className="os-insp-compact-card-cta" onClick={e => { e.stopPropagation(); onUse(item); }}>
+          <Sparkles />
+          <ChevronRight />
         </button>
       </div>
     </div>

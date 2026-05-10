@@ -531,23 +531,25 @@ export default function CreateWorkbench() {
                 <><Sparkles /> 开始生成</>
               )}
             </button>
+
+            {/* 灵感参考 */}
+            <div className="os-ws-inspiration-section">
+              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} compact />
+            </div>
           </div>
         </div>
 
         {/* ----- CENTER (Visual Focus) ----- */}
         <div className="os-ws-center">
 
-          {/* 空状态 + 灵感库 */}
+          {/* 空状态 */}
           {step === 'idle' && images.length === 0 && (
-            <div className="os-ws-center-scroll">
-              <div className="os-ws-empty-compact">
-                <div className="os-ws-empty-icon">
-                  <ImageIcon />
-                </div>
-                <h3>{config.name}</h3>
-                <p>{config.description || '在左侧输入描述和上传参考图，或从下方灵感库选取'}</p>
+            <div className="os-ws-empty">
+              <div className="os-ws-empty-icon">
+                <ImageIcon />
               </div>
-              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} />
+              <h3>{config.name}</h3>
+              <p>{config.description || '在左侧输入描述和上传参考图，或从灵感库选取'}</p>
             </div>
           )}
 
@@ -587,49 +589,45 @@ export default function CreateWorkbench() {
             </div>
           )}
 
-          {/* 生成结果 + 灵感库 */}
+          {/* 生成结果 */}
           {step === 'done' && images.length > 0 && (
-            <div className="os-ws-center-scroll">
-              <div className="os-ws-results">
-                {/* 图片网格 */}
-                <div className={layoutClass}>
-                  {images.map((img, idx) => (
-                    <div key={idx} className="os-ws-img-card" onClick={() => setLightboxIdx(idx)}>
-                      <img src={img.url} alt={`生成结果 ${idx + 1}`} loading="lazy" />
-                      <div className="os-ws-img-overlay">
-                        <button
-                          className="os-ws-img-action os-ws-img-action-primary"
-                          onClick={e => { e.stopPropagation(); handleDownload(img.url, idx); }}
-                        >
-                          <Download /> 下载
-                        </button>
-                        <button
-                          className="os-ws-img-action os-ws-img-action-secondary"
-                          onClick={e => { e.stopPropagation(); setLightboxIdx(idx); }}
-                        >
-                          <ZoomIn /> 查看
-                        </button>
-                      </div>
+            <div className="os-ws-results">
+              {/* 图片网格 */}
+              <div className={layoutClass}>
+                {images.map((img, idx) => (
+                  <div key={idx} className="os-ws-img-card" onClick={() => setLightboxIdx(idx)}>
+                    <img src={img.url} alt={`生成结果 ${idx + 1}`} loading="lazy" />
+                    <div className="os-ws-img-overlay">
+                      <button
+                        className="os-ws-img-action os-ws-img-action-primary"
+                        onClick={e => { e.stopPropagation(); handleDownload(img.url, idx); }}
+                      >
+                        <Download /> 下载
+                      </button>
+                      <button
+                        className="os-ws-img-action os-ws-img-action-secondary"
+                        onClick={e => { e.stopPropagation(); setLightboxIdx(idx); }}
+                      >
+                        <ZoomIn /> 查看
+                      </button>
                     </div>
-                  ))}
-                </div>
-
-                {/* 操作栏 */}
-                <div className="os-ws-result-actions">
-                  <button className="os-ws-result-btn" onClick={handleGenerate}>
-                    <RotateCcw /> 重新生成
-                  </button>
-                  <button
-                    className={`os-ws-result-btn ${saved ? 'os-ws-result-btn-saved' : 'os-ws-result-btn-primary'}`}
-                    onClick={handleSave}
-                    disabled={saved}
-                  >
-                    {saved ? <><BookmarkCheck /> 已保存</> : <><BookmarkPlus /> 保存到作品库</>}
-                  </button>
-                </div>
+                  </div>
+                ))}
               </div>
-              {/* 结果下方灵感库 */}
-              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} />
+
+              {/* 操作栏 */}
+              <div className="os-ws-result-actions">
+                <button className="os-ws-result-btn" onClick={handleGenerate}>
+                  <RotateCcw /> 重新生成
+                </button>
+                <button
+                  className={`os-ws-result-btn ${saved ? 'os-ws-result-btn-saved' : 'os-ws-result-btn-primary'}`}
+                  onClick={handleSave}
+                  disabled={saved}
+                >
+                  {saved ? <><BookmarkCheck /> 已保存</> : <><BookmarkPlus /> 保存到作品库</>}
+                </button>
+              </div>
             </div>
           )}
         </div>
