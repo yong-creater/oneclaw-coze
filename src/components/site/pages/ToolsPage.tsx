@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Wrench } from 'lucide-react';
+import { getToolWorkflow } from '@/lib/tool-workflow-config';
 
 interface UtilityTool {
   id: number;
@@ -123,6 +124,8 @@ export default function ToolsPage() {
                 onClick={() => {
                   // 使用 sessionStorage 传递上下文，避免 URL 过长被浏览器拦截
                   try {
+                    // 从工具配置读取默认参数
+                    const toolConf = getToolWorkflow(tool.slug);
                     sessionStorage.setItem('oneclaw_create_context', JSON.stringify({
                       prompt: '',
                       type: tool.slug,
@@ -133,6 +136,8 @@ export default function ToolsPage() {
                         tool: tool.slug,
                         confidence: 1.0,
                         style: meta?.valueProp || '',
+                        ratio: toolConf?.defaultRatio || '',
+                        count: toolConf?.defaultCount ? String(toolConf.defaultCount) : '',
                         industry: '',
                         output_type: tool.name,
                       },

@@ -171,26 +171,27 @@ export default function CreateWorkbench() {
 
   // --- Init ---
   useEffect(() => {
-    const ctx = getContext();
-    // URL 参数：优先 tool，其次 type/toolId（灵感页面/首页用 type 或 toolId）
+    getContext();
+    // 从 parsedCtx（持久化，不受 Strict Mode 二次调用影响）或 URL 读取参数
+    const savedCtx = parsedCtx.current;
     const urlSlug = searchParams.get('tool') || searchParams.get('type') || searchParams.get('toolId');
     const urlPrompt = searchParams.get('prompt');
     const urlStyle = searchParams.get('style');
     const urlRatio = searchParams.get('ratio');
-    const slug = ctx?.matchedTool || urlSlug || 'product-generator';
+    const slug = savedCtx?.matchedTool || urlSlug || 'product-generator';
     setToolSlug(slug);
 
-    // Prompt 来源：context > URL 参数
-    const effectivePrompt = ctx?.prompt || urlPrompt || '';
+    // Prompt 来源：parsedCtx > URL 参数
+    const effectivePrompt = savedCtx?.prompt || urlPrompt || '';
     if (effectivePrompt) setInputText(effectivePrompt);
-    if (ctx?.images?.length) {
-      setUploads(ctx.images.map((url: string, i: number) => ({ id: `ctx-${i}`, url, name: `参考图${i + 1}` })));
+    if (savedCtx?.images?.length) {
+      setUploads(savedCtx.images.map((url: string, i: number) => ({ id: `ctx-${i}`, url, name: `参考图${i + 1}` })));
     }
 
     const toolConf = getToolWorkflow(slug);
     if (toolConf) {
       // 从 analysisResult（首页推荐）或 URL 参数读取推荐参数，覆盖默认值
-      const analysis = ctx?.analysisResult || parsedCtx.current?.analysisResult;
+      const analysis = savedCtx?.analysisResult;
       const recStyle = urlStyle || analysis?.style;
       const recRatio = urlRatio || analysis?.ratio;
       const recCount = analysis?.count;
