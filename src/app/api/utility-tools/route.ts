@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseClient } from '@/storage/database/supabase-client';
 
-// 短缓存，确保数据更新后能快速生效
-export const revalidate = 60;
+// 生产环境为只读文件系统，ISR 缓存写入会 EROFS 报错；
+// 且 ISR 可能在 RLS 修复前缓存空数据，导致页面空白。
+// 强制动态渲染，每次请求都从数据库读取最新数据。
+export const dynamic = 'force-dynamic';
 
 // 前台公开接口 - 获取活跃的工具列表
 export async function GET() {
