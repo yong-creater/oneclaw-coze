@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 export default function SiteFooter() {
-  const [qrCodeUrl, setQrCodeUrl] = useState('/wechat-qrcode.jpg');
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/wechat/config')
@@ -11,10 +11,13 @@ export default function SiteFooter() {
       .then(data => {
         if (data.success && data.qrCodeUrl) {
           setQrCodeUrl(data.qrCodeUrl);
+        } else {
+          // API 未返回有效 URL，使用静态文件兜底
+          setQrCodeUrl('/wechat-qrcode.jpg');
         }
       })
       .catch(() => {
-        // fallback 到静态文件
+        setQrCodeUrl('/wechat-qrcode.jpg');
       });
   }, []);
 
@@ -34,7 +37,11 @@ export default function SiteFooter() {
         <div className="os-footer-qr">
           <div className="os-footer-qr-card">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrCodeUrl} alt="微信公众号" />
+            {qrCodeUrl ? (
+              <img src={qrCodeUrl} alt="微信公众号" />
+            ) : (
+              <div className="w-full h-full bg-slate-100 animate-pulse rounded" />
+            )}
           </div>
           <span className="os-footer-qr-label">
             扫码关注公众号

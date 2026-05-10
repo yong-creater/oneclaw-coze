@@ -8,7 +8,7 @@ interface WechatPromoProps {
 }
 
 export default function WechatPromo({ className = '' }: WechatPromoProps) {
-  const [qrCodeUrl, setQrCodeUrl] = useState('/wechat-qrcode.jpg');
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/wechat/config')
@@ -16,9 +16,13 @@ export default function WechatPromo({ className = '' }: WechatPromoProps) {
       .then(data => {
         if (data.success && data.qrCodeUrl) {
           setQrCodeUrl(data.qrCodeUrl);
+        } else {
+          setQrCodeUrl('/wechat-qrcode.jpg');
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setQrCodeUrl('/wechat-qrcode.jpg');
+      });
   }, []);
 
   return (
@@ -27,13 +31,17 @@ export default function WechatPromo({ className = '' }: WechatPromoProps) {
         {/* 品牌 + 公众号信息 */}
         <div className="flex items-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img 
-            src={qrCodeUrl} 
-            alt="微信公众号" 
-            width={64}
-            height={64}
-            className="w-16 h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
-          />
+          {qrCodeUrl ? (
+            <img 
+              src={qrCodeUrl} 
+              alt="微信公众号" 
+              width={64}
+              height={64}
+              className="w-16 h-16 rounded-lg shadow-sm object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-16 h-16 bg-slate-100 animate-pulse rounded-lg flex-shrink-0" />
+          )}
           <div>
             <h3 className="font-bold text-slate-900 dark:text-white">欢迎关注公众号</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
