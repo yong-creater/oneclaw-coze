@@ -241,14 +241,19 @@ export default function CreateWorkbench() {
     const ctx = parsedCtx.current;
     const slug = urlSlug || ctx?.toolSlug || 'product-generator';
 
-    if (slug && slug !== 'product-generator') {
+    // 无论是哪个工具，只要 URL 指定了 slug，都应用配置
+    if (slug) {
       const tc = getToolWorkflow(slug);
       if (tc) {
-        setToolSlug(slug);
-        setSelectedSubtype(tc.subtypeOptions?.[0]?.value || '');
-        setSelectedStyle(tc.styleOptions?.[0]?.value || '');
-        setCount(tc.defaultCount || 4);
-        setRatio(tc.defaultRatio || '1:1');
+        // 只有 slug 变化时才 setToolSlug（避免同值触发重渲染）
+        if (slug !== toolSlug) {
+          setToolSlug(slug);
+          // 切换工具时重置为工具默认值
+          setSelectedSubtype(tc.subtypeOptions?.[0]?.value || '');
+          setSelectedStyle(tc.styleOptions?.[0]?.value || '');
+          setCount(tc.defaultCount || 4);
+          setRatio(tc.defaultRatio || '1:1');
+        }
       }
     }
 
@@ -301,18 +306,25 @@ export default function CreateWorkbench() {
   }, [searchParams]);
 
   // ===== 自动生成 =====
+  // 当 shouldAuto 被设置时，等待 inputText 同步到 ref 后自动触发生成
+  // 使用 inputText 作为依赖确保 prompt 已设置到 state → ref 中
+  const autoGenTriggered = useRef(false);
   useEffect(() => {
-    if (!parsedCtx.current.shouldAuto) return;
+    // searchParams 变化时重置（用户从不同灵感跳转时需要重新触发）
+    autoGenTriggered.current = false;
+  }, [searchParams]);
+  useEffect(() => {
+    if (!parsedCtx.current.shouldAuto || autoGenTriggered.current) return;
+    const p = genParamsRef.current;
+    if (!p.inputText && p.uploads.length === 0) return; // 等 inputText 设置好
+    autoGenTriggered.current = true;
     parsedCtx.current.shouldAuto = false;
     const timer = setTimeout(() => {
-      const p = genParamsRef.current;
-      if (p.inputText || p.uploads.length > 0) {
-        handleGenerate();
-      }
+      handleGenerate();
     }, 800);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toolSlug]);
+  }, [inputText, toolSlug]);
 
   // ===== 加载中文案轮播 =====
   const subtypeLabel = config.subtypeOptions?.find(s => s.value === selectedSubtype)?.label || '';
@@ -491,8 +503,8 @@ export default function CreateWorkbench() {
     // 登录拦截：未登录时弹出登录弹窗，登录后继续执行
     if (!requireAuth(handleGenerate)) return;
 
-    // 每日免费次数检查
-    if (dailyQuota !== null && dailyQuota <= 0) {
+    // 每日免费次数检查（dailyQuota=0 表示用完，-1 表示未登录/未知，不阻止）
+    if (dailyQuota === 0) {
       setErrorMsg('今日免费生成次数已用完，明天再来吧！');
       return;
     }

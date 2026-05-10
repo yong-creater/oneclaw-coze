@@ -45,6 +45,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkAuth = async () => {
+    let authenticatedUser: User | null = null;
     try {
       abortRef.current?.abort();
       const ac = new AbortController();
@@ -53,6 +54,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
 
       if (data.success && data.authenticated) {
+        authenticatedUser = data.data;
         setUser(data.data);
         if (typeof window !== 'undefined' && data.data?.user_id) {
           localStorage.setItem('oneclaw_user_id', data.data.user_id);
@@ -71,6 +73,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setDailyQuota(-1);
     } finally {
       setLoading(false);
+
+      // loading 结束后，如果有暂存的回调且已登录，自动执行
+      // （场景：loading 中点击"开始生成"，checkAuth 完成后发现已登录，应继续执行）
+      const action = pendingActionRef.current;
+      if (action && authenticatedUser) {
+        pendingActionRef.current = null;
+        setTimeout(() => action(), 100);
+      } else if (action && !authenticatedUser) {
+        // loading 结束后未登录，弹出登录弹窗
+        setShowLoginModal(true);
+      }
     }
   };
 
@@ -119,6 +132,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // 检查是否需要登录
   const requireAuth = (callback?: () => void): boolean => {
+    // loading 中暂存回调，等 checkAuth 完成后自动执行
+    if (loading) {
+      if (callback) {
+        pendingActionRef.current = callback;
+      }
+      return false;
+    }
     if (!user) {
       // 暂存回调：登录成功后自动执行
       if (callback) {
