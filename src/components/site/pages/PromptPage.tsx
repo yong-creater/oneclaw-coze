@@ -125,10 +125,28 @@ export default function PromptPage() {
       '视频封面': 'product-generator',
     };
     const typeSlug = typeSlugMap[type] || 'product-generator';
+
+    // 根据 prompt 的 tags 推测推荐 style
+    const tags = (prompt.tags || []).map(t => t.toLowerCase());
+    let recStyle = '';
+    if (typeSlug === 'ai-photo') {
+      if (tags.some(t => t.includes('韩系') || t.includes('清新') || t.includes('自然'))) recStyle = 'korean';
+      else if (tags.some(t => t.includes('复古') || t.includes('胶片') || t.includes('怀旧'))) recStyle = 'vintage';
+      else if (tags.some(t => t.includes('质感') || t.includes('高级') || t.includes('杂志'))) recStyle = 'premium';
+    } else if (typeSlug === 'product-generator') {
+      if (tags.some(t => t.includes('场景') || t.includes('氛围'))) recStyle = 'scene';
+      else if (tags.some(t => t.includes('白底') || t.includes('简洁') || t.includes('干净'))) recStyle = 'white';
+      else if (tags.some(t => t.includes('模特') || t.includes('人物'))) recStyle = 'model';
+    } else if (typeSlug === 'xiaohongshu-generator') {
+      if (tags.some(t => t.includes('种草') || t.includes('推荐'))) recStyle = 'grass';
+      else if (tags.some(t => t.includes('教程') || t.includes('攻略'))) recStyle = 'tutorial';
+    }
+
     const params = new URLSearchParams({
       prompt: prompt.content,
       type: typeSlug,
     });
+    if (recStyle) params.set('style', recStyle);
     router.push(`/create?${params.toString()}`);
   };
 

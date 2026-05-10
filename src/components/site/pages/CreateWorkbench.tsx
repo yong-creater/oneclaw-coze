@@ -114,7 +114,14 @@ export default function CreateWorkbench() {
 
   // --- Context ---
   const CREATE_KEY = 'oneclaw_create_context';
-  const parsedCtx = useRef<{ shouldAuto?: boolean; fromHome?: boolean; matchedTool?: string; prompt?: string; images?: string[] } | null>(null);
+  const parsedCtx = useRef<{
+    shouldAuto?: boolean;
+    fromHome?: boolean;
+    matchedTool?: string;
+    prompt?: string;
+    images?: string[];
+    analysisResult?: { tool?: string; style?: string; ratio?: string; count?: string; industry?: string; output_type?: string };
+  } | null>(null);
 
   const getContext = useCallback(() => {
     try {
@@ -129,6 +136,7 @@ export default function CreateWorkbench() {
           matchedTool: ctx.matchedTool,
           prompt: ctx.prompt,
           images: ctx.uploadedImages?.map((i: Record<string, string>) => i.url || i).filter(Boolean),
+          analysisResult: ctx.analysisResult,
         };
       }
       // 一次性消费：删除 sessionStorage 项，防止重复读取
@@ -167,6 +175,8 @@ export default function CreateWorkbench() {
     // URL 参数：优先 tool，其次 type/toolId（灵感页面/首页用 type 或 toolId）
     const urlSlug = searchParams.get('tool') || searchParams.get('type') || searchParams.get('toolId');
     const urlPrompt = searchParams.get('prompt');
+    const urlStyle = searchParams.get('style');
+    const urlRatio = searchParams.get('ratio');
     const slug = ctx?.matchedTool || urlSlug || 'product-generator';
     setToolSlug(slug);
 
@@ -179,10 +189,56 @@ export default function CreateWorkbench() {
 
     const toolConf = getToolWorkflow(slug);
     if (toolConf) {
-      setCount(toolConf.defaultCount);
-      setRatio(toolConf.defaultRatio);
-      if (toolConf.styleOptions.length > 0) setSelectedStyle(toolConf.styleOptions[0].value);
-      if (toolConf.steps[1]?.options?.length) setSelectedSubtype(toolConf.steps[1].options[0].value);
+      // 从 analysisResult（首页推荐）或 URL 参数读取推荐参数，覆盖默认值
+      const analysis = ctx?.analysisResult || parsedCtx.current?.analysisResult;
+      const recStyle = urlStyle || analysis?.style;
+      const recRatio = urlRatio || analysis?.ratio;
+      const recCount = analysis?.count;
+
+      // 匹配推荐 style 到 styleOptions
+      let matchedStyle = toolConf.styleOptions.length > 0 ? toolConf.styleOptions[0].value : '';
+      if (recStyle && toolConf.styleOptions.length > 0) {
+        const found = toolConf.styleOptions.find(s =>
+          s.value.toLowerCase() === recStyle.toLowerCase() ||
+          s.label.toLowerCase() === recStyle.toLowerCase() ||
+          s.label.includes(recStyle) ||
+          recStyle.includes(s.label)
+        );
+        if (found) matchedStyle = found.value;
+      }
+
+      // 匹配推荐 ratio
+      let matchedRatio = toolConf.defaultRatio;
+      if (recRatio) {
+        const r = recRatio.replace(/\s/g, '');
+        const validRatios = ['1:1', '3:4', '4:3', '16:9', '9:16'];
+        if (validRatios.includes(r)) matchedRatio = r;
+      }
+
+      // 匹配推荐 count
+      let matchedCount = toolConf.defaultCount;
+      if (recCount) {
+        const c = parseInt(recCount, 10);
+        if (c > 0 && c <= 8) matchedCount = c;
+      }
+
+      setCount(matchedCount);
+      setRatio(matchedRatio);
+      if (matchedStyle) setSelectedStyle(matchedStyle);
+      // 匹配推荐 subtype（行业分类）
+      const recIndustry = analysis?.industry;
+      if (recIndustry && toolConf.steps[1]?.options?.length) {
+        const foundSub = toolConf.steps[1].options.find(o =>
+          o.value.toLowerCase() === recIndustry.toLowerCase() ||
+          o.label.toLowerCase() === recIndustry.toLowerCase() ||
+          o.label.includes(recIndustry) ||
+          recIndustry.includes(o.label)
+        );
+        if (foundSub) setSelectedSubtype(foundSub.value);
+        else setSelectedSubtype(toolConf.steps[1].options[0].value);
+      } else if (toolConf.steps[1]?.options?.length) {
+        setSelectedSubtype(toolConf.steps[1].options[0].value);
+      }
     }
 
     // 当 URL 带 prompt 参数时（来自灵感页面），标记自动生成
