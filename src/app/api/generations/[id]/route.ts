@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-// 使用Coze内置的环境变量
-const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 获取用户ID的辅助函数
 function getUserId(request: NextRequest): string | null {
@@ -12,7 +8,7 @@ function getUserId(request: NextRequest): string | null {
     try {
       const payload = JSON.parse(Buffer.from(tokenCookie.value.split('.')[1], 'base64').toString());
       return payload.user_id || payload.sub || null;
-    } catch (e) {
+    } catch {
       // ignore
     }
   }
@@ -33,7 +29,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase
       .from('user_generations')
       .select('*')
@@ -66,7 +62,7 @@ export async function DELETE(
 
     const { id } = await params;
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = getSupabaseClient();
     const { error } = await supabase
       .from('user_generations')
       .delete()

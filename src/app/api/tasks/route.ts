@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyUserToken } from '@/lib/user-auth';
 import { randomUUID } from 'crypto';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 async function getUserId(request: NextRequest): Promise<string | null> {
   const tokenCookie = request.cookies.get('user_token');
@@ -33,6 +28,8 @@ export async function POST(request: NextRequest) {
     if (!toolType) {
       return NextResponse.json({ error: '缺少工具类型' }, { status: 400 });
     }
+
+    const supabase = getSupabaseClient();
 
     // 并发检查：免费用户同时只能有1个generating任务
     const { data: activeTasks } = await supabase
@@ -94,7 +91,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 50);
 
-    let query = supabase
+    let query = getSupabaseClient()
       .from('generation_tasks')
       .select('*')
       .eq('user_id', userId)

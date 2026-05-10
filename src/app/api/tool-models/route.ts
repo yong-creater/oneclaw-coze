@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // 工具ID映射到数据库tool_id
 const TOOL_ID_MAP: Record<string, string> = {
@@ -42,33 +39,31 @@ export async function GET(request: NextRequest) {
     const dbToolId = TOOL_ID_MAP[toolId] || toolId;
 
     // 尝试从数据库获取
-    if (supabaseUrl && supabaseKey) {
-      try {
-        const supabase = createClient(supabaseUrl, supabaseKey);
-        const { data, error } = await supabase
-          .from('tool_model_configs')
-          .select('*')
-          .eq('tool_id', dbToolId)
-          .eq('is_active', true)
-          .single();
+    try {
+      const supabase = getSupabaseClient();
+      const { data, error } = await supabase
+        .from('tool_model_configs')
+        .select('*')
+        .eq('tool_id', dbToolId)
+        .eq('is_active', true)
+        .single();
 
-        if (!error && data) {
-          return NextResponse.json({
-            success: true,
-            config: {
-              tool_id: data.tool_id,
-              tool_name: data.tool_name,
-              tool_type: data.tool_type,
-              default_model: data.default_model,
-              model_source: data.model_source,
-              is_free: data.is_free,
-              config_params: data.config_params,
-            }
-          });
-        }
-      } catch (e) {
-        console.error('Database query failed, using defaults');
+      if (!error && data) {
+        return NextResponse.json({
+          success: true,
+          config: {
+            tool_id: data.tool_id,
+            tool_name: data.tool_name,
+            tool_type: data.tool_type,
+            default_model: data.default_model,
+            model_source: data.model_source,
+            is_free: data.is_free,
+            config_params: data.config_params,
+          }
+        });
       }
+    } catch {
+      console.error('Database query failed, using defaults');
     }
 
     // 使用默认配置

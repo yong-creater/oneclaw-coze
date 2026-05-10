@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { requireAdminAuth } from '@/lib/auth';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-// 检查Supabase配置
-const isConfigured = supabaseUrl && supabaseKey;
-const supabase = isConfigured ? createClient(supabaseUrl, supabaseKey) : null;
 
 // 获取单条使用记录详情
 export async function GET(
@@ -20,9 +13,7 @@ export async function GET(
     return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
   }
   
-  if (!isConfigured || !supabase) {
-    return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
-  }
+  const supabase = getSupabaseClient();
 
   try {
     const { id } = await params;
@@ -55,9 +46,7 @@ export async function DELETE(
     return NextResponse.json({ success: false, error: auth.error }, { status: 401 });
   }
   
-  if (!isConfigured || !supabase) {
-    return NextResponse.json({ error: 'Supabase not configured' }, { status: 500 });
-  }
+  const supabase = getSupabaseClient();
 
   try {
     const { id } = await params;

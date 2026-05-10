@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyUserToken } from '@/lib/user-auth';
 
 // 禁用缓存，确保数据实时性
 export const dynamic = 'force-dynamic';
-
-// 使用Coze内置的环境变量
-const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
-
-// 创建 supabase 客户端
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 // 获取用户ID的辅助函数（使用 verifyUserToken 验证 JWT）
 async function getUserId(request: NextRequest): Promise<string | null> {
@@ -34,9 +27,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 });
     }
 
-    if (!supabase) {
-      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
-    }
+    const supabase = getSupabaseClient();
 
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
@@ -92,9 +83,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 });
     }
 
-    if (!supabase) {
-      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
-    }
+    const supabase = getSupabaseClient();
 
     const body = await request.json();
     const { tool_id, tool_name, tool_type, input_params, output_content, title, thumbnail, usage_type } = body;
@@ -143,9 +132,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '请先登录' }, { status: 401 });
     }
 
-    if (!supabase) {
-      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
-    }
+    const supabase = getSupabaseClient();
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

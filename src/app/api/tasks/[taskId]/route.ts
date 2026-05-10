@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { verifyUserToken } from '@/lib/user-auth';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 async function getUserId(request: NextRequest): Promise<string | null> {
   const tokenCookie = request.cookies.get('user_token');
@@ -31,6 +26,8 @@ export async function GET(
   }
 
   try {
+    const supabase = getSupabaseClient();
+
     const { data, error } = await supabase
       .from('generation_tasks')
       .select('*')
@@ -66,6 +63,8 @@ export async function POST(
   }
 
   try {
+    const supabase = getSupabaseClient();
+
     const { data: task, error } = await supabase
       .from('generation_tasks')
       .select('*')

@@ -1,18 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 import { requireAdminAuth } from '@/lib/auth';
-
-// 获取 Supabase 客户端
-function getSupabase() {
-  const supabaseUrl = process.env.COZE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || '';
-  
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error('Supabase configuration is missing');
-  }
-  
-  return createClient(supabaseUrl, supabaseKey);
-}
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdminAuth(request);
@@ -20,7 +8,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: '未授权' }, { status: 401 });
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseClient();
   
   // 获取所有模型提供商
   const { data: providers, error } = await supabase
@@ -55,7 +43,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '缺少必填字段' }, { status: 400 });
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseClient();
   
   const { data, error } = await supabase
     .from('model_providers')
@@ -91,7 +79,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: '缺少ID' }, { status: 400 });
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseClient();
   
   // 如果传入了新的 api_key 才更新
   const updateData: any = {};
@@ -129,7 +117,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '缺少ID' }, { status: 400 });
   }
 
-  const supabase = getSupabase();
+  const supabase = getSupabaseClient();
   
   // 检查是否为系统内置provider，不允许删除
   const { data: provider } = await supabase
