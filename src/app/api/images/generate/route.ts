@@ -111,7 +111,8 @@ export async function POST(request: NextRequest) {
       .from('generation_tasks')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', session.user_id)
-      .gte('created_at', today.toISOString());
+      .gte('created_at', today.toISOString())
+      .in('status', ['completed', 'generating']);
     // 从数据库读取配额配置
     const { data: settingData } = await supabase
       .from('site_settings')

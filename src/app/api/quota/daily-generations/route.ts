@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('user_id', session.user_id)
       .gte('created_at', todayStart.toISOString())
-      .in('status', ['completed', 'generating', 'pending']);
+      .in('status', ['completed', 'generating']);
 
     if (countErr) {
       console.error('[quota] count error:', countErr);

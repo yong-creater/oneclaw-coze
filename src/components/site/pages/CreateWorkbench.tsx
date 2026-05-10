@@ -195,6 +195,8 @@ export default function CreateWorkbench() {
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const executeAbortRef = useRef<AbortController | null>(null); // execute 请求独立 AbortController，避免被 poll 取消
+  const pollStartRef = useRef<number | null>(null); // 轮询开始时间，用于超时检测
 
   // ----- Refs -----
   const parsedCtx = useRef<{
@@ -417,6 +419,15 @@ export default function CreateWorkbench() {
   // ===== 生成 =====
   // ===== 任务轮询 =====
   const pollTask = useCallback(async (taskId: string) => {
+    // 记录轮询开始时间
+    if (!pollStartRef.current) pollStartRef.current = Date.now();
+    // 总超时保护：3 分钟仍未完成则终止
+    if (Date.now() - pollStartRef.current > 180000) {
+      setStep('error');
+      setErrorMsg('生成超时，请重试');
+      pollStartRef.current = null;
+      return;
+    }
     // 每次 poll 创建新的 AbortController，组件卸载时统一取消
     abortRef.current?.abort();
     const ac = new AbortController();
@@ -433,9 +444,24 @@ export default function CreateWorkbench() {
       }
       const task = data.task;
       switch (task.status) {
-        case 'pending':
+        case 'pending': {
           setStep('creating');
+          // 如果任务 pending 超过 15 秒，说明 execute 可能未触发，重新执行
+          const createdTime = new Date(task.created_at).getTime();
+          const elapsed = Date.now() - createdTime;
+          if (elapsed > 15000) {
+            console.warn('[Poll] 任务 pending 超过 15 秒，重新触发 execute');
+            const execAc = new AbortController();
+            executeAbortRef.current = execAc;
+            fetchWithTimeout(`/api/tasks/${taskId}/execute`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              signal: execAc.signal,
+            }, 60000).catch(() => {});
+          }
           break;
+        }
         case 'generating':
           setStep('generating');
           break;
@@ -469,11 +495,13 @@ export default function CreateWorkbench() {
               setSaved(true);
             } catch { /* auto-save failure is non-critical */ }
           }
+          pollStartRef.current = null;
           return; // Stop polling
         }
         case 'failed':
           setStep('error');
           setErrorMsg(task.error_message || '生成失败，请重试');
+          pollStartRef.current = null;
           return; // Stop polling
       }
       // Continue polling
@@ -491,6 +519,7 @@ export default function CreateWorkbench() {
     return () => {
       if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
       abortRef.current?.abort();
+      executeAbortRef.current?.abort();
     };
   }, []);
 
@@ -553,9 +582,11 @@ export default function CreateWorkbench() {
     setImages([]);
     setSaved(false);
     setErrorMsg('');
+    pollStartRef.current = null; // 重置轮询计时
 
-    // 取消之前的 pending 请求
+    // 取消之前的 pending 请求（包括 execute 和 poll）
     abortRef.current?.abort();
+    executeAbortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
     const { signal } = ac;
@@ -599,13 +630,15 @@ export default function CreateWorkbench() {
 
       setStep('generating');
 
-      // 2. 执行任务（异步，不等待完成，带超时避免挂起）
+      // 2. 执行任务（独立 AbortController，不受 poll 取消影响）
+      const execAc = new AbortController();
+      executeAbortRef.current = execAc;
       fetchWithTimeout(`/api/tasks/${taskId}/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        signal,
-      }, 30000).catch(() => { /* execute runs server-side */ });
+        signal: execAc.signal,
+      }, 60000).catch(() => { /* execute runs server-side */ });
 
       // 3. 开始轮询
       pollTask(taskId);
