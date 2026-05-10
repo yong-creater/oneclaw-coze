@@ -139,6 +139,7 @@ export default function ToolsPage() {
                     const toolConf = getToolWorkflow(tool.slug);
                     sessionStorage.setItem('oneclaw_create_context', JSON.stringify({
                       prompt: '',
+                      toolSlug: tool.slug,
                       type: tool.slug,
                       toolId: String(tool.id),
                       uploadedImages: [],
@@ -155,7 +156,7 @@ export default function ToolsPage() {
                       autoGenerate: false,
                     }));
                   } catch {}
-                  router.push('/create');
+                  router.push(`/create?tool=${tool.slug}`);
                 }}
                 className="os-tl-card"
               >
