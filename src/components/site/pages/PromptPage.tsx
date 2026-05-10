@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Search, Star, Eye, Heart, Sparkles, X, Copy } from 'lucide-react';
+import { Search, Star, Eye, Heart, Sparkles, X, Copy, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 /* ------------------------------------------------------------------ */
@@ -10,20 +10,19 @@ import { useRouter } from 'next/navigation';
 interface PromptItem {
   id: number;
   title: string;
-  content: string;
+  description: string;
   category: string;
-  tags: string[] | null;
-  uses: number;
-  likes: number;
-  views: number;
+  style: string;
+  tags: string[];
+  prompt_text: string;
   image: string | null;
-  style: string | null;
-  tool_slug: string | null;
-  is_featured: boolean;
+  tool_slug: string;
+  views: number;
+  likes: number;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Shared pill button (outside render to avoid react-hooks/static)    */
+/*  Pill — extracted outside render to avoid react-hooks rule          */
 /* ------------------------------------------------------------------ */
 function Pill({ label, count, active, onClick }: { label: string; count?: number; active: boolean; onClick: () => void }) {
   return (
@@ -38,98 +37,98 @@ function Pill({ label, count, active, onClick }: { label: string; count?: number
 }
 
 /* ------------------------------------------------------------------ */
+/*  Random aspect ratios for masonry feel                              */
+/* ------------------------------------------------------------------ */
+const ASPECT_RATIOS = ['4/3', '3/4', '4/5', '16/9', '1/1'];
+
+function getCardAspect(id: number): string {
+  return ASPECT_RATIOS[id % ASPECT_RATIOS.length];
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tool label map                                                     */
+/* ------------------------------------------------------------------ */
+const TOOL_LABELS: Record<string, string> = {
+  'product-generator': 'AI商品图',
+  'ai-photo': 'AI写真',
+  'xiaohongshu-generator': '小红书封面',
+};
+
+/* ------------------------------------------------------------------ */
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
-export default function InspirationPage() {
+export default function PromptPage() {
   const router = useRouter();
   const [items, setItems] = useState<PromptItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [filterStyle, setFilterStyle] = useState('');
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
-  // Load favorites from localStorage
+  /* ---- Data ---- */
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (activeCategory && activeCategory !== '全部') params.set('category', activeCategory);
+    if (filterStyle) params.set('style', filterStyle);
+
+    fetch(`/api/prompts?${params.toString()}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.prompts)) setItems(data.prompts);
+        else if (Array.isArray(data)) setItems(data);
+      })
+      .catch(() => {});
+  }, [activeCategory, filterStyle]);
+
+  /* ---- Favorites from localStorage ---- */
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('insp_favorites');
-      if (saved) setFavorites(new Set(JSON.parse(saved)));
+      const stored = localStorage.getItem('oneclaw_fav_prompts');
+      if (stored) setFavorites(new Set(JSON.parse(stored)));
     } catch {}
   }, []);
 
-  // Save favorites
-  const toggleFavorite = (id: number) => {
+  const toggleFav = useCallback((id: number) => {
     setFavorites(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
-      localStorage.setItem('insp_favorites', JSON.stringify([...next]));
+      try { localStorage.setItem('oneclaw_fav_prompts', JSON.stringify([...next])); } catch {}
       return next;
     });
-  };
+  }, []);
 
-  // Copy prompt content
-  const handleCopy = (item: PromptItem) => {
-    navigator.clipboard.writeText(item.content || item.title).then(() => {
-      setCopiedId(item.id);
-      setTimeout(() => setCopiedId(null), 1500);
-    }).catch(() => {});
-  };
-
-  /* ---- Fetch ---- */
-  const fetchItems = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (search) params.set('search', search);
-      const res = await fetch(`/api/prompts?${params}`);
-      const data = await res.json();
-      if (data.success) setItems(data.prompts || []);
-    } catch (err) {
-      console.error('Failed to fetch inspirations:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [search]);
-
-  useEffect(() => { fetchItems(); }, [fetchItems]);
-
-  /* ---- Derived categories ---- */
+  /* ---- Derived ---- */
   const categories = useMemo(() => {
     const map = new Map<string, number>();
-    items.forEach(item => {
-      const c = item.category || '其他';
-      map.set(c, (map.get(c) || 0) + 1);
-    });
-    return Array.from(map.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([label, count]) => ({ label, count }));
+    items.forEach(it => { if (it.category) map.set(it.category, (map.get(it.category) || 0) + 1); });
+    return [...map.entries()].map(([label, count]) => ({ label, count }));
   }, [items]);
 
-  /* ---- Unique styles ---- */
   const uniqueStyles = useMemo(() => {
-    const set = new Set<string>();
-    items.forEach(item => { if (item.style) set.add(item.style); });
-    return Array.from(set);
+    const s = new Set<string>();
+    items.forEach(it => { if (it.style) s.add(it.style); });
+    return [...s];
   }, [items]);
 
-  /* ---- Filter ---- */
-  const filteredItems = useMemo(() => {
-    return items.filter(item => {
-      if (activeCategory !== '全部' && item.category !== activeCategory) return false;
-      if (filterStyle && item.style !== filterStyle) return false;
+  const filtered = useMemo(() => {
+    return items.filter(it => {
+      if (search) {
+        const q = search.toLowerCase();
+        if (!it.title?.toLowerCase().includes(q) && !it.description?.toLowerCase().includes(q)) return false;
+      }
       return true;
     });
-  }, [items, activeCategory, filterStyle]);
+  }, [items, search]);
 
-  /* ---- Generate similar ---- */
-  const handleGenerate = (item: PromptItem) => {
-    const params = new URLSearchParams();
-    if (item.tool_slug) params.set('toolId', item.tool_slug);
-    if (item.content) params.set('prompt', item.content);
-    if (item.style) params.set('style', item.style);
-    router.push(`/create?${params.toString()}`);
-  };
+  /* ---- Generate same ---- */
+  const handleGenerate = useCallback((item: PromptItem) => {
+    router.push(`/create?tool=${item.tool_slug || 'product-generator'}`);
+  }, [router]);
+
+  /* ---- Copy prompt ---- */
+  const handleCopy = useCallback((text: string) => {
+    navigator.clipboard.writeText(text).catch(() => {});
+  }, []);
 
   /* ---- Render ---- */
   return (
@@ -141,14 +140,14 @@ export default function InspirationPage() {
           <p className="os-page-subtitle">从优质案例中获取灵感，一键生成同款内容</p>
         </div>
 
-        {/* Search Bar */}
-        <div className="relative mb-6">
+        {/* Search */}
+        <div className="max-w-lg mb-6 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="搜索你想生成的内容，例如: 商品图、小红书、AI写真..."
+            onChange={e => setSearch(e.target.value)}
+            placeholder="搜索灵感，比如：高级质感、极简风格…"
             className="os-search-input"
           />
           {search && (
@@ -158,7 +157,7 @@ export default function InspirationPage() {
           )}
         </div>
 
-        {/* 类型筛选 */}
+        {/* Type Filters */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-2 scrollbar-hide">
           <Pill label="全部" count={items.length} active={activeCategory === '全部'} onClick={() => setActiveCategory('全部')} />
           {categories.map(cat => (
@@ -166,9 +165,9 @@ export default function InspirationPage() {
           ))}
         </div>
 
-        {/* 风格筛选 */}
+        {/* Style Filters */}
         {uniqueStyles.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-6 scrollbar-hide">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-8 scrollbar-hide">
             <Pill label="全部" active={!filterStyle} onClick={() => setFilterStyle('')} />
             {uniqueStyles.map(style => (
               <Pill key={style} label={style} active={filterStyle === style} onClick={() => setFilterStyle(style)} />
@@ -176,112 +175,70 @@ export default function InspirationPage() {
           </div>
         )}
 
-        {/* Card Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[1,2,3,4,5,6,7,8].map(i => (
-              <div key={i} className="bg-white rounded-[24px] overflow-hidden shadow-[0_18px_40px_rgba(31,41,55,0.06)] animate-pulse">
-                <div className="aspect-[4/3] bg-slate-100" />
-                <div className="p-5 space-y-3">
-                  <div className="h-4 bg-slate-100 rounded w-3/4" />
-                  <div className="h-3 bg-slate-50 rounded w-full" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filteredItems.length === 0 ? (
-          <div className="os-empty">
-            <div className="os-empty-icon"><Sparkles className="w-8 h-8" /></div>
-            <div className="os-empty-title">暂无灵感内容</div>
-            <div className="os-empty-desc">换个关键词或分类试试？</div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredItems.map(item => {
-              const isFav = favorites.has(item.id);
-              const isCopied = copiedId === item.id;
+        {/* Masonry Grid */}
+        <div className="os-masonry">
+          {filtered.map(item => {
+            const hasImg = !!item.image;
+            const aspect = hasImg ? undefined : getCardAspect(item.id);
 
-              return (
-                <div
-                  key={item.id}
-                  className="os-card-static overflow-hidden group"
-                  style={{ padding: 0 }}
-                >
-                  {/* Cover Image — 4:3 */}
-                  <div className="relative aspect-[4/3] overflow-hidden" style={{ borderRadius: '20px 20px 0 0' }}>
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+            return (
+              <div key={item.id} className="os-masonry-item">
+                <div className="os-masonry-card">
+                  {/* Image */}
+                  <div className="os-masonry-img-wrap" style={aspect ? { aspectRatio: aspect } : undefined}>
+                    {hasImg ? (
+                      <img src={item.image!} alt={item.title} loading="lazy" className="os-masonry-img" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-[#F4F0FF] to-[#EEF7FF] flex items-center justify-center">
-                        <Sparkles className="w-8 h-8 text-[#7C6CFF]/30" />
+                      <div className="os-masonry-img-fallback">
+                        <Sparkles className="w-5 h-5" />
                       </div>
                     )}
-                    {/* Category badge — unified tag */}
-                    <span className="os-tag absolute top-3 left-3">
-                      {item.category}
-                    </span>
-                    {/* Favorite button */}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/20 backdrop-blur-sm flex items-center justify-center hover:bg-black/40 transition-colors"
-                    >
-                      <Star className={`w-4 h-4 ${isFav ? 'fill-amber-400 text-amber-400' : 'text-white'}`} />
+                    {/* Hover overlay */}
+                    <div className="os-masonry-hover">
+                      <button className="os-masonry-hover-btn" onClick={() => handleGenerate(item)}>
+                        <Wand2 className="w-4 h-4" />生成同款
+                      </button>
+                      <button className="os-masonry-hover-btn" onClick={() => handleCopy(item.prompt_text || item.description)}>
+                        <Copy className="w-4 h-4" />查看 Prompt
+                      </button>
+                      <button className="os-masonry-hover-btn" onClick={() => toggleFav(item.id)}>
+                        <Heart className={`w-4 h-4 ${favorites.has(item.id) ? 'fill-red-400 text-red-400' : ''}`} />
+                        {favorites.has(item.id) ? '已收藏' : '收藏'}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Card Info */}
+                  <div className="os-masonry-info">
+                    {/* Tool type tag */}
+                    {item.tool_slug && (
+                      <span className="os-card-tag">{TOOL_LABELS[item.tool_slug] || item.tool_slug}</span>
+                    )}
+                    <h3 className="os-masonry-title">{item.title}</h3>
+                    {/* Always-visible generate button */}
+                    <button className="os-masonry-gen-btn" onClick={() => handleGenerate(item)}>
+                      <Wand2 className="w-3.5 h-3.5" />生成同款
                     </button>
                   </div>
-
-                  {/* Content */}
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-[#1F2937] line-clamp-1 mb-1">{item.title}</h3>
-                    <p className="text-sm text-[#7B8496] line-clamp-2 mb-3 leading-relaxed">{item.content}</p>
-
-                    {/* Tags */}
-                    {item.tags && item.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {item.tags.slice(0, 3).map(tag => (
-                          <span key={tag} className="os-tag">#{tag}</span>
-                        ))}
-                        {item.tags.length > 3 && (
-                          <span className="text-xs text-[#A0A8B8]">+{item.tags.length - 3}</span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Stats — 弱化 */}
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="flex items-center gap-1 text-xs text-[#A0A8B8]">
-                        <Eye className="w-3 h-3" /> {item.views || 0}
-                      </span>
-                      <span className="flex items-center gap-1 text-xs text-[#A0A8B8]">
-                        <Heart className="w-3 h-3" /> {item.likes || 0}
-                      </span>
-                    </div>
-
-                    {/* Bottom actions */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleGenerate(item)}
-                        className="os-btn-primary flex-1 text-sm"
-                        style={{ height: 38, fontSize: 13, borderRadius: 12 }}
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        生成同款
-                      </button>
-                      <button
-                        onClick={() => handleCopy(item)}
-                        className="w-9 h-9 flex items-center justify-center rounded-xl border border-[#E6E8F0] text-[#6B7280] hover:text-[#7C6CFF] hover:border-[rgba(124,108,255,0.25)] transition-colors"
-                        title="复制 Prompt"
-                      >
-                        <Copy className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
                 </div>
-              );
-            })}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Empty */}
+        {filtered.length === 0 && items.length > 0 && (
+          <div className="os-empty">
+            <div className="os-empty-icon"><Search className="w-8 h-8" /></div>
+            <div className="os-empty-title">没有找到匹配的灵感</div>
+            <div className="os-empty-desc">换个关键词试试？</div>
+          </div>
+        )}
+        {items.length === 0 && (
+          <div className="os-empty">
+            <div className="os-empty-icon"><Sparkles className="w-8 h-8" /></div>
+            <div className="os-empty-title">灵感库正在建设中</div>
+            <div className="os-empty-desc">稍后再来看看</div>
           </div>
         )}
       </div>

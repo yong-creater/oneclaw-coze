@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Package, Camera, FileText, Sparkles, X } from 'lucide-react';
+import { Search, Package, Camera, BookImage, Sparkles, X } from 'lucide-react';
 import { getToolWorkflow } from '@/lib/tool-workflow-config';
 
 interface UtilityTool {
@@ -43,7 +43,7 @@ const TOOL_META: Record<string, {
     cover: '/demo-card-lifestyle.jpg',
     valueProp: '爆款小红书封面一键生成',
     tags: ['小红书', '种草'],
-    icon: FileText,
+    icon: BookImage,
     sortOrder: 3,
   },
 };
@@ -80,7 +80,6 @@ export default function ToolsPage() {
       .catch(() => {});
   }, []);
 
-  // 按 sortOrder 排序，核心工具优先；只保留3个已知工具
   const ALLOWED_SLUGS = new Set(Object.keys(TOOL_META));
   const sortedTools = [...tools].filter(t => ALLOWED_SLUGS.has(t.slug)).sort((a, b) => {
     const aOrder = TOOL_META[a.slug]?.sortOrder ?? 99;
@@ -125,7 +124,7 @@ export default function ToolsPage() {
           )}
         </div>
 
-        {/* Tool Cards Grid — 3 columns */}
+        {/* Tool Cards Grid — 4 columns */}
         <div className="os-tl-grid">
           {filtered.map(tool => {
             const meta = TOOL_META[tool.slug];
@@ -160,7 +159,7 @@ export default function ToolsPage() {
                 }}
                 className="os-tl-card"
               >
-                {/* Cover Image — 16:9 */}
+                {/* Cover Image */}
                 <div className="os-tl-card-cover">
                   {coverSrc ? (
                     <img src={coverSrc} alt={tool.name} loading="lazy" />
@@ -171,10 +170,6 @@ export default function ToolsPage() {
                       </div>
                     </div>
                   )}
-                  {/* hover CTA */}
-                  <div className="os-tl-card-hover">
-                    <span className="os-tl-card-hover-btn">立即生成</span>
-                  </div>
                 </div>
 
                 {/* 文字区 */}
@@ -183,7 +178,6 @@ export default function ToolsPage() {
                   <p className="os-tl-card-value">
                     {meta?.valueProp || tool.description || 'AI 帮你高效完成'}
                   </p>
-                  {/* 适合场景标签 */}
                   {meta?.tags && meta.tags.length > 0 && (
                     <div className="os-tl-card-tags">
                       {meta.tags.map(tag => (

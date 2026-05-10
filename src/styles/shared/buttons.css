@@ -1,20 +1,20 @@
 /* ==================== Creator OS 按钮系统 ==================== */
 
-/* 主按钮 - 蓝紫渐变 (Primary) */
+/* 主按钮 - 蓝紫渐变 */
 .os-btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   height: 44px;
-  padding: var(--spacing-btn-py) var(--spacing-btn-px);
+  padding: 0 28px;
   color: white;
-  font-size: var(--typo-btn-size);
-  font-weight: var(--typo-btn-weight);
-  border-radius: 16px;
-  background: linear-gradient(135deg, #111827 0%, #6366F1 100%);
-  box-shadow: 0 2px 16px -2px rgba(123, 97, 255, 0.35);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7B61FF 0%, #5EA9FF 100%);
+  box-shadow: 0 2px 16px -2px rgba(123, 97, 255, 0.30);
+  transition: all 0.25s ease;
   cursor: pointer;
   border: none;
   outline: none;
@@ -23,12 +23,12 @@
 }
 .os-btn-primary:hover {
   background: linear-gradient(135deg, #8B71FF 0%, #6B9CFF 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px -4px rgba(123, 97, 255, 0.5), 0 0 20px rgba(123, 97, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px -4px rgba(123, 97, 255, 0.40);
 }
 .os-btn-primary:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.3);
+  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.30);
 }
 .os-btn-primary:disabled {
   opacity: 0.5;
@@ -36,168 +36,93 @@
   transform: none;
   box-shadow: none;
 }
-.os-btn-primary::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.35s ease;
-  pointer-events: none;
-}
-.os-btn-primary:hover::after {
-  opacity: 1;
-}
 
-/* 次要按钮 (Secondary) */
+/* 次要按钮 - 白底轻边框 */
 .os-btn-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   height: 44px;
-  padding: var(--spacing-btn-py) var(--spacing-btn-px);
-  background: white;
-  border: 1px solid var(--border-default);
-  color: #374151;
-  font-size: var(--typo-btn-size);
+  padding: 0 28px;
+  color: #475569;
+  font-size: 15px;
   font-weight: 500;
-  border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #E6E8F0;
+  box-shadow: 0 2px 8px rgba(80,80,120,0.04);
+  transition: all 0.25s ease;
   cursor: pointer;
   outline: none;
 }
 .os-btn-secondary:hover {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+  border-color: rgba(123,97,255,0.25);
+  color: #7B61FF;
+  box-shadow: 0 4px 14px rgba(123,97,255,0.08);
 }
 .os-btn-secondary:active {
-  transform: translateY(0) scale(0.98);
-  background: #F3F4F6;
+  transform: scale(0.98);
 }
 
-/* 幽灵按钮 (Ghost) */
+/* 幽灵按钮 */
 .os-btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
-  background: transparent;
-  border: none;
-  color: #6B7280;
+  height: 36px;
+  padding: 0 14px;
+  color: #64748B;
   font-size: 13px;
   font-weight: 500;
-  border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 10px;
+  background: transparent;
+  border: none;
   cursor: pointer;
+  transition: all 0.15s ease;
   outline: none;
 }
 .os-btn-ghost:hover {
-  background: rgba(123, 97, 255, 0.05);
+  background: rgba(123,97,255,0.06);
   color: #7B61FF;
-  transform: translateY(-1px);
-}
-.os-btn-ghost:active {
-  transform: translateY(0) scale(0.98);
 }
 
-/* 胶囊按钮 (Capsule) - 统一分类筛选标签 */
+/* 胶囊筛选按钮 */
 .os-btn-capsule {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  height: 36px;
+  height: 34px;
   padding: 0 16px;
-  background: #FFFFFF;
-  border: 1px solid #E6E8F0;
-  color: #6B7280;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.80);
+  border: 1px solid rgba(238,240,245,0.80);
+  color: #64748B;
   font-size: 13px;
   font-weight: 500;
-  border-radius: 999px;
-  transition: all 0.22s ease;
   cursor: pointer;
-  outline: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .os-btn-capsule:hover {
-  background: rgba(124,108,255,0.04);
-  color: #7C6CFF;
-  border-color: rgba(124,108,255,0.15);
-  transform: translateY(-1px);
+  border-color: rgba(123,97,255,0.20);
+  color: #7B61FF;
+  background: rgba(255,255,255,0.95);
 }
 .os-btn-capsule-active {
-  background: linear-gradient(135deg, #7C6CFF 0%, #5EC2FF 100%);
-  color: #fff;
-  border-color: transparent;
-  box-shadow: 0 4px 14px rgba(124,108,255,0.25);
+  background: rgba(123,97,255,0.10);
+  border-color: rgba(123,97,255,0.25);
+  color: #7B61FF;
+  font-weight: 600;
 }
-.os-btn-capsule:active {
-  transform: scale(0.97);
-}
-/* 胶囊按钮内数字弱化 */
 .os-btn-capsule-count {
   font-size: 11px;
-  opacity: 0.55;
+  color: #A0A8B8;
   margin-left: 2px;
 }
 .os-btn-capsule-active .os-btn-capsule-count {
-  opacity: 0.75;
+  color: rgba(123,97,255,0.60);
 }
-
-/* 主按钮 — 统一紫蓝渐变 */
-.os-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 24px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #7C6CFF 0%, #5EC2FF 100%);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.22s ease;
-  outline: none;
-}
-.os-btn-primary:hover {
-  box-shadow: 0 8px 24px rgba(124,108,255,0.30);
-  transform: translateY(-1px);
-}
-.os-btn-primary:active {
-  transform: scale(0.97);
-}
-
-/* 次按钮 — 白底边框 */
-.os-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 24px;
-  border-radius: 14px;
-  background: #FFFFFF;
-  color: #6B7280;
-  font-size: 15px;
-  font-weight: 500;
-  border: 1px solid #E6E8F0;
-  cursor: pointer;
-  transition: all 0.22s ease;
-  outline: none;
-}
-.os-btn-secondary:hover {
-  border-color: rgba(124,108,255,0.25);
-  color: #7C6CFF;
-  transform: translateY(-1px);
-}
-
