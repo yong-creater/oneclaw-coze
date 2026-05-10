@@ -121,15 +121,18 @@ export default function CreateWorkbench() {
       const raw = sessionStorage.getItem(CREATE_KEY);
       if (!raw) return null;
       const ctx = JSON.parse(raw);
-      parsedCtx.current = {
-        shouldAuto: ctx.autoGenerate === true,
-        fromHome: ctx.fromHome === true,
-        matchedTool: ctx.matchedTool,
-        prompt: ctx.prompt,
-        images: ctx.uploadedImages?.map((i: Record<string, string>) => i.url || i).filter(Boolean),
-      };
-      ctx.autoGenerate = false;
-      sessionStorage.setItem(CREATE_KEY, JSON.stringify(ctx));
+      // 只在 shouldAuto 尚未被消费时设置，防止多次调用覆盖为 false
+      if (!parsedCtx.current?.shouldAuto) {
+        parsedCtx.current = {
+          shouldAuto: ctx.autoGenerate === true,
+          fromHome: ctx.fromHome === true,
+          matchedTool: ctx.matchedTool,
+          prompt: ctx.prompt,
+          images: ctx.uploadedImages?.map((i: Record<string, string>) => i.url || i).filter(Boolean),
+        };
+      }
+      // 一次性消费：删除 sessionStorage 项，防止重复读取
+      sessionStorage.removeItem(CREATE_KEY);
       return ctx;
     } catch { return null; }
   }, []);
@@ -150,6 +153,10 @@ export default function CreateWorkbench() {
 
   const autoGenTriggered = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- 用 ref 保存最新生成参数，避免 useEffect 闭包捕获旧值 ---
+  const genParamsRef = useRef({ toolSlug, inputText, uploads, selectedStyle, selectedSubtype, count, ratio });
+  genParamsRef.current = { toolSlug, inputText, uploads, selectedStyle, selectedSubtype, count, ratio };
 
   // --- Config ---
   const config = getToolWorkflow(toolSlug);
@@ -181,10 +188,45 @@ export default function CreateWorkbench() {
     const should = parsedCtx.current?.shouldAuto || parsedCtx.current?.fromHome;
     if (should && (inputText || uploads.length > 0)) {
       autoGenTriggered.current = true;
-      const timer = setTimeout(() => handleGenerate(), 600);
+      // 延迟执行，确保所有 state（toolSlug/style 等）都已提交
+      const timer = setTimeout(() => {
+        const p = genParamsRef.current;
+        if (!p.inputText.trim() && p.uploads.length === 0) return;
+
+        const images = p.uploads.map(u => u.url);
+        setStep('understanding');
+        setErrorMsg('');
+        setResults([]);
+
+        const stepAnim = async () => {
+          const steps: GenStep[] = ['understanding', 'analyzing', 'matching'];
+          for (const s of steps) {
+            setStep(s);
+            await new Promise(r => setTimeout(r, 700));
+          }
+        };
+
+        (async () => {
+          try {
+            const [, res] = await Promise.all([
+              stepAnim(),
+              callGenerateAPI(p.toolSlug, p.inputText, images, p.selectedStyle, p.selectedSubtype, p.count, p.ratio),
+            ]);
+            setStep('generating');
+            await new Promise(r => setTimeout(r, 500));
+            setStep('optimizing');
+            await new Promise(r => setTimeout(r, 600));
+            setResults(res);
+            setStep('done');
+          } catch (err) {
+            setErrorMsg(err instanceof Error ? err.message : '生成失败，请重试');
+            setStep('error');
+          }
+        })();
+      }, 800);
       return () => clearTimeout(timer);
     }
-  }, [inputText, uploads]);
+  }, [inputText, uploads, toolSlug]);
 
   // --- Upload ---
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
