@@ -20,9 +20,9 @@ const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
 
 // 工具 slug → 页面路由映射
 const TOOL_ROUTE_MAP: Record<string, string> = {
-  'product-generator': '/product-generator',
-  'xiaohongshu-generator': '/xiaohongshu-generator',
-  'ai-photo': '/ai-photo',
+  'product-generator': '/create?tool=product-generator',
+  'xiaohongshu-generator': '/create?tool=xiaohongshu-generator',
+  'ai-photo': '/create?tool=ai-photo',
 };
 
 function navigateToCreate(
