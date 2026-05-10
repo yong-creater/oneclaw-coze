@@ -359,10 +359,15 @@ export default function ProjectPage() {
   const handleDeleteConfirm = useCallback(async () => {
     if (deleteTarget == null) return;
     try {
-      await fetch(`/api/generations?id=${deleteTarget}`, { method: 'DELETE' });
+      const res = await fetch(`/api/generations?id=${deleteTarget}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || '删除失败，请重试');
+        return;
+      }
       setGenerations((prev) => prev.filter((g) => g.id !== deleteTarget));
     } catch {
-      /* empty */
+      alert('网络错误，请重试');
     } finally {
       setDeleteTarget(null);
     }

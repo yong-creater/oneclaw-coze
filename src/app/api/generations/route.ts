@@ -133,3 +133,41 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '服务器错误' }, { status: 500 });
   }
 }
+
+// DELETE - 删除生成记录（支持 ?id=xxx 查询参数）
+export async function DELETE(request: NextRequest) {
+  try {
+    const userId = await getUserId(request);
+
+    if (!userId) {
+      return NextResponse.json({ error: '请先登录' }, { status: 401 });
+    }
+
+    if (!supabase) {
+      return NextResponse.json({ error: '数据库未配置' }, { status: 500 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: '请提供记录ID' }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('user_generations')
+      .delete()
+      .eq('id', parseInt(id))
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Delete error:', error);
+      return NextResponse.json({ error: '删除失败' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error:', error);
+    return NextResponse.json({ error: '服务器错误' }, { status: 500 });
+  }
+}
