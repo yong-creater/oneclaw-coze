@@ -534,7 +534,7 @@ export default function CreateWorkbench() {
 
             {/* 灵感参考 */}
             <div className="os-ws-inspiration-section">
-              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} compact />
+              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} />
             </div>
           </div>
         </div>

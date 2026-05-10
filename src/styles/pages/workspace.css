@@ -781,7 +781,8 @@
   }
 }
 
-/* ====== INSPIRATION LIBRARY - COMPACT (Left Panel) ====== */
+
+/* ====== INSPIRATION LIBRARY - Left Panel (高级视觉版) ====== */
 
 /* Section wrapper in left panel */
 .os-ws-inspiration-section {
@@ -791,147 +792,158 @@
 }
 
 /* Container */
-.os-insp-compact {
+.os-insp-panel {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 /* Header */
-.os-insp-compact-header {
+.os-insp-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 2px;
 }
-.os-insp-compact-title-row {
+.os-insp-panel-title-row {
   display: flex;
   align-items: center;
   gap: 5px;
 }
-.os-insp-compact-icon {
-  width: 15px;
-  height: 15px;
+.os-insp-panel-icon {
+  width: 14px;
+  height: 14px;
   color: #7C6CFF;
 }
-.os-insp-compact-title {
+.os-insp-panel-title {
   font-size: 13px;
   font-weight: 600;
   color: #333;
 }
-.os-insp-compact-count {
-  font-size: 11px;
+.os-insp-panel-count {
+  font-size: 10px;
   color: #999;
   background: #f5f5f5;
-  padding: 0 7px;
-  border-radius: 10px;
-  line-height: 18px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  line-height: 16px;
 }
 
-/* Filters: horizontal scroll */
-.os-insp-compact-filters {
+/* Filter tabs */
+.os-insp-panel-filters {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
 }
-.os-insp-compact-filters::-webkit-scrollbar {
+.os-insp-panel-filters::-webkit-scrollbar {
   display: none;
 }
-.os-insp-compact-filter {
+.os-insp-panel-filter {
   display: inline-flex;
   align-items: center;
-  padding: 4px 12px;
-  border-radius: 8px;
-  border: 1px solid #eee;
-  background: #fff;
-  font-size: 11px;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s;
   white-space: nowrap;
+  padding: 3px 9px;
+  border-radius: 8px;
+  border: none;
+  background: #fff;
+  color: #666;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
   flex-shrink: 0;
 }
-.os-insp-compact-filter:hover {
-  border-color: #c4b8ff;
-  background: rgba(124,108,255,0.04);
+.os-insp-panel-filter:hover {
+  background: linear-gradient(135deg, rgba(124,108,255,0.06), rgba(155,135,255,0.06));
   color: #7C6CFF;
+  box-shadow: 0 0 0 1px rgba(124,108,255,0.2);
 }
-.os-insp-compact-filter.active {
+.os-insp-panel-filter.active {
   background: linear-gradient(135deg, #7C6CFF, #9B87FF);
-  border-color: transparent;
   color: #fff;
-  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(124,108,255,0.3);
 }
 
 /* Card list */
-.os-insp-compact-list {
+.os-insp-panel-cards {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.08) transparent;
+}
+.os-insp-panel-cards::-webkit-scrollbar {
+  width: 3px;
+}
+.os-insp-panel-cards::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 3px;
 }
 
-/* Compact card */
-.os-insp-compact-card {
-  display: flex;
-  gap: 10px;
-  padding: 8px;
-  border-radius: 8px;
+/* Card */
+.os-insp-panel-card {
   background: #fff;
-  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.06);
   cursor: pointer;
   transition: all 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.04);
 }
-.os-insp-compact-card:hover {
-  border-color: rgba(124,108,255,0.3);
-  background: rgba(124,108,255,0.02);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+.os-insp-panel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
-/* Card image (thumbnail) */
-.os-insp-compact-card-img {
+/* Card image */
+.os-insp-panel-card-img {
   position: relative;
-  width: 72px;
-  height: 72px;
-  min-width: 72px;
-  border-radius: 6px;
+  width: 100%;
+  aspect-ratio: 16/10;
   overflow: hidden;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #f5f0ff 0%, #ede9fe 50%, #e0e7ff 100%);
 }
-.os-insp-compact-card-img img {
+.os-insp-panel-card-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.2s;
+  transition: transform 0.3s ease;
 }
-.os-insp-compact-card:hover .os-insp-compact-card-img img {
-  transform: scale(1.05);
+.os-insp-panel-card:hover .os-insp-panel-card-img img {
+  transform: scale(1.04);
 }
 
 /* Card badge */
-.os-insp-compact-card-badge {
+.os-insp-panel-card-badge {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  padding: 1px 5px;
-  border-radius: 3px;
+  top: 6px;
+  left: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
   background: linear-gradient(135deg, #7C6CFF, #9B87FF);
   color: #fff;
   font-size: 9px;
   font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 /* Card star */
-.os-insp-compact-card-star {
+.os-insp-panel-card-star {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 20px;
-  height: 20px;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,0.25);
+  background: rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -939,93 +951,122 @@
   transition: all 0.2s;
   padding: 0;
 }
-.os-insp-compact-card-star svg {
-  width: 10px;
-  height: 10px;
+.os-insp-panel-card-star svg {
+  width: 12px;
+  height: 12px;
 }
-.os-insp-compact-card-star:hover {
-  background: rgba(0,0,0,0.4);
+.os-insp-panel-card-star:hover {
+  background: rgba(0,0,0,0.5);
 }
-.os-insp-compact-card-star.favorited {
-  background: rgba(255,215,0,0.3);
+.os-insp-panel-card-star.favorited {
+  background: rgba(255,215,0,0.4);
 }
 
 /* Card body */
-.os-insp-compact-card-body {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
-  gap: 6px;
-  min-width: 0;
+.os-insp-panel-card-body {
+  padding: 8px 10px 10px;
 }
-.os-insp-compact-card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.os-insp-compact-card-title {
+.os-insp-panel-card-title {
   font-size: 12px;
   font-weight: 600;
   color: #333;
-  margin: 0;
+  margin: 0 0 2px;
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.os-insp-compact-card-desc {
-  font-size: 11px;
+.os-insp-panel-card-desc {
+  font-size: 10px;
   color: #999;
-  margin: 0;
+  margin: 0 0 6px;
   line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* CTA button */
-.os-insp-compact-card-cta {
+/* Card tags */
+.os-insp-panel-card-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.os-insp-panel-card-tag {
+  font-size: 9px;
+  color: #7C6CFF;
+  background: rgba(124,108,255,0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* Card footer */
+.os-insp-panel-card-footer {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.os-insp-panel-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.os-insp-panel-card-stat {
+  display: inline-flex;
+  align-items: center;
   gap: 2px;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
+  font-size: 9px;
+  color: #bbb;
+}
+.os-insp-panel-card-stat svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* CTA button */
+.os-insp-panel-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 10px;
   border-radius: 6px;
   border: none;
   background: linear-gradient(135deg, #7C6CFF, #9B87FF);
   color: #fff;
+  font-size: 10px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  padding: 0;
+  white-space: nowrap;
 }
-.os-insp-compact-card-cta:hover {
+.os-insp-panel-card-cta:hover {
   filter: brightness(1.08);
-  box-shadow: 0 2px 6px rgba(124,108,255,0.3);
+  box-shadow: 0 2px 8px rgba(124,108,255,0.35);
 }
-.os-insp-compact-card-cta svg {
-  width: 12px;
-  height: 12px;
+.os-insp-panel-card-cta svg {
+  width: 10px;
+  height: 10px;
 }
 
 /* ====== INSPIRATION RESPONSIVE (Left Panel) ====== */
 @media (max-width: 768px) {
-  .os-insp-compact-list {
+  .os-insp-panel-cards {
     flex-direction: row;
     overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
     gap: 10px;
     padding-bottom: 4px;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
-  .os-insp-compact-list::-webkit-scrollbar {
+  .os-insp-panel-cards::-webkit-scrollbar {
     display: none;
   }
-  .os-insp-compact-card {
-    min-width: 220px;
+  .os-insp-panel-card {
+    min-width: 200px;
     flex-shrink: 0;
   }
 }
