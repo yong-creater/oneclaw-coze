@@ -41,6 +41,10 @@ export interface ToolWorkflowConfig {
   defaultCount: number;
   /** 生成风格选项 */
   styleOptions: { value: string; label: string }[];
+  /** 子类型选项（如白底/场景/细节等） */
+  subtypeOptions?: { value: string; label: string }[];
+  /** 子类型区域标签 */
+  subtypeLabel?: string;
 }
 
 // ===== 全部工具配置 =====
@@ -90,6 +94,13 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       { value: 'minimal', label: '极简风格' },
       { value: 'lifestyle', label: '生活场景' },
     ],
+    subtypeLabel: '生成类型',
+    subtypeOptions: [
+      { value: 'white-bg', label: '白底主图' },
+      { value: 'lifestyle', label: '场景图' },
+      { value: 'detail', label: '细节展示' },
+      { value: 'group', label: '组合搭配' },
+    ],
   },
   {
     slug: 'xiaohongshu-generator',
@@ -135,6 +146,12 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       { value: 'premium', label: '高级质感' },
       { value: 'cute', label: '甜美可爱' },
     ],
+    subtypeLabel: '内容类型',
+    subtypeOptions: [
+      { value: 'beauty', label: '美妆' },
+      { value: 'fashion', label: '穿搭' },
+      { value: 'lifestyle', label: '生活' },
+    ],
   },
   {
     slug: 'ai-photo',
@@ -179,6 +196,12 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       { value: 'korean-fresh', label: '韩系清新' },
       { value: 'retro-film', label: '复古胶片' },
       { value: 'luxury', label: '高级质感' },
+    ],
+    subtypeLabel: '写真风格',
+    subtypeOptions: [
+      { value: 'portrait', label: '单人写真' },
+      { value: 'couple', label: '双人写真' },
+      { value: 'group', label: '多人写真' },
     ],
   },
   {
@@ -226,6 +249,12 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       { value: 'lifestyle', label: '生活场景' },
       { value: 'festive', label: '节日氛围' },
     ],
+    subtypeLabel: '海报类型',
+    subtypeOptions: [
+      { value: 'minimal', label: '简约' },
+      { value: 'premium', label: '高级' },
+      { value: 'lifestyle', label: '生活场景' },
+    ],
   },
   {
     slug: 'background-removal',
@@ -260,6 +289,12 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
     defaultRatio: '1:1',
     defaultCount: 1,
     styleOptions: [],
+    subtypeLabel: '背景类型',
+    subtypeOptions: [
+      { value: 'transparent', label: '透明背景' },
+      { value: 'white', label: '白色背景' },
+      { value: 'custom', label: '自定义颜色' },
+    ],
   },
   {
     slug: 'product-page',
@@ -304,6 +339,12 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       { value: 'premium', label: '高端质感' },
       { value: 'tech', label: '科技简约' },
       { value: 'cute', label: '清新甜美' },
+    ],
+    subtypeLabel: '详情页类型',
+    subtypeOptions: [
+      { value: 'full', label: '完整详情页' },
+      { value: 'highlight', label: '卖点提炼页' },
+      { value: 'compare', label: '对比展示页' },
     ],
   },
 ];
