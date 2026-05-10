@@ -7,8 +7,9 @@ import {
   Download, RotateCcw, ZoomIn, Loader2, Check,
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck
 } from 'lucide-react';
-import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
+import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig, type InspirationItem } from '@/lib/tool-workflow-config';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
+import InspirationLibrary from '@/components/site/common/InspirationLibrary';
 
 // ===== 类型 =====
 interface GeneratedImage { url: string; }
@@ -357,6 +358,22 @@ export default function CreateWorkbench() {
     } catch { /* silently fail */ }
   };
 
+  // ===== 使用灵感 =====
+  const handleUseInspiration = useCallback((item: InspirationItem) => {
+    // 切换到对应工具
+    if (item.toolSlug !== toolSlug) {
+      handleToolSwitch(item.toolSlug);
+    }
+    // 填充参数
+    setInputText(item.desc);
+    if (item.style) setSelectedStyle(item.style);
+    if (item.subtype) setSelectedSubtype(item.subtype);
+    if (item.ratio && VALID_RATIOS.includes(item.ratio)) setRatio(item.ratio);
+    if (item.count >= 1 && item.count <= 8) setCount(item.count);
+    // 自动触发生成
+    setTimeout(() => handleGenerate(), 300);
+  }, [toolSlug]);
+
   // ===== 渲染 =====
   const isGenerating = !['idle', 'done', 'error'].includes(step);
   const layoutClass = TOOL_LAYOUT[toolSlug] || 'os-ws-layout-default';
@@ -520,14 +537,17 @@ export default function CreateWorkbench() {
         {/* ----- CENTER (Visual Focus) ----- */}
         <div className="os-ws-center">
 
-          {/* 空状态 */}
+          {/* 空状态 + 灵感库 */}
           {step === 'idle' && images.length === 0 && (
-            <div className="os-ws-empty">
-              <div className="os-ws-empty-icon">
-                <ImageIcon />
+            <div className="os-ws-center-scroll">
+              <div className="os-ws-empty-compact">
+                <div className="os-ws-empty-icon">
+                  <ImageIcon />
+                </div>
+                <h3>{config.name}</h3>
+                <p>{config.description || '在左侧输入描述和上传参考图，或从下方灵感库选取'}</p>
               </div>
-              <h3>{config.name}</h3>
-              <p>{config.description || '在左侧输入描述和上传参考图，点击开始生成'}</p>
+              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} />
             </div>
           )}
 
@@ -567,45 +587,49 @@ export default function CreateWorkbench() {
             </div>
           )}
 
-          {/* 生成结果 */}
+          {/* 生成结果 + 灵感库 */}
           {step === 'done' && images.length > 0 && (
-            <div className="os-ws-results">
-              {/* 图片网格 */}
-              <div className={layoutClass}>
-                {images.map((img, idx) => (
-                  <div key={idx} className="os-ws-img-card" onClick={() => setLightboxIdx(idx)}>
-                    <img src={img.url} alt={`生成结果 ${idx + 1}`} loading="lazy" />
-                    <div className="os-ws-img-overlay">
-                      <button
-                        className="os-ws-img-action os-ws-img-action-primary"
-                        onClick={e => { e.stopPropagation(); handleDownload(img.url, idx); }}
-                      >
-                        <Download /> 下载
-                      </button>
-                      <button
-                        className="os-ws-img-action os-ws-img-action-secondary"
-                        onClick={e => { e.stopPropagation(); setLightboxIdx(idx); }}
-                      >
-                        <ZoomIn /> 查看
-                      </button>
+            <div className="os-ws-center-scroll">
+              <div className="os-ws-results">
+                {/* 图片网格 */}
+                <div className={layoutClass}>
+                  {images.map((img, idx) => (
+                    <div key={idx} className="os-ws-img-card" onClick={() => setLightboxIdx(idx)}>
+                      <img src={img.url} alt={`生成结果 ${idx + 1}`} loading="lazy" />
+                      <div className="os-ws-img-overlay">
+                        <button
+                          className="os-ws-img-action os-ws-img-action-primary"
+                          onClick={e => { e.stopPropagation(); handleDownload(img.url, idx); }}
+                        >
+                          <Download /> 下载
+                        </button>
+                        <button
+                          className="os-ws-img-action os-ws-img-action-secondary"
+                          onClick={e => { e.stopPropagation(); setLightboxIdx(idx); }}
+                        >
+                          <ZoomIn /> 查看
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {/* 操作栏 */}
-              <div className="os-ws-result-actions">
-                <button className="os-ws-result-btn" onClick={handleGenerate}>
-                  <RotateCcw /> 重新生成
-                </button>
-                <button
-                  className={`os-ws-result-btn ${saved ? 'os-ws-result-btn-saved' : 'os-ws-result-btn-primary'}`}
-                  onClick={handleSave}
-                  disabled={saved}
-                >
-                  {saved ? <><BookmarkCheck /> 已保存</> : <><BookmarkPlus /> 保存到作品库</>}
-                </button>
+                {/* 操作栏 */}
+                <div className="os-ws-result-actions">
+                  <button className="os-ws-result-btn" onClick={handleGenerate}>
+                    <RotateCcw /> 重新生成
+                  </button>
+                  <button
+                    className={`os-ws-result-btn ${saved ? 'os-ws-result-btn-saved' : 'os-ws-result-btn-primary'}`}
+                    onClick={handleSave}
+                    disabled={saved}
+                  >
+                    {saved ? <><BookmarkCheck /> 已保存</> : <><BookmarkPlus /> 保存到作品库</>}
+                  </button>
+                </div>
               </div>
+              {/* 结果下方灵感库 */}
+              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} />
             </div>
           )}
         </div>

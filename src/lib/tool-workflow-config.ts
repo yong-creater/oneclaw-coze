@@ -386,3 +386,77 @@ export function genTypeToSlug(genType: string): string {
   };
   return map[genType] || genType;
 }
+
+// ===== 灵感库数据 =====
+export interface InspirationItem {
+  id: string;
+  /** 所属工具 slug */
+  toolSlug: string;
+  /** 展示图片 URL */
+  image: string;
+  /** 标题 */
+  title: string;
+  /** 风格/场景描述 */
+  desc: string;
+  /** 推荐风格 value */
+  style: string;
+  /** 推荐子类型 value */
+  subtype: string;
+  /** 推荐比例 */
+  ratio: string;
+  /** 推荐数量 */
+  count: number;
+  /** 关键词标签 */
+  tags: string[];
+  /** 分类标签文字 */
+  categoryLabel: string;
+}
+
+const INSPIRATIONS: InspirationItem[] = [
+  // ===== 商品图 =====
+  { id: 'p1', toolSlug: 'product-generator', image: '/case-lipstick-main.png', title: '口红白底主图', desc: '高级质感白底商品图', style: 'premium', subtype: 'white-bg', ratio: '1:1', count: 4, tags: ['白底', '高级感', '美妆'], categoryLabel: '商品图' },
+  { id: 'p2', toolSlug: 'product-generator', image: '/case-ecommerce.jpg', title: '耳机场景图', desc: '生活化场景展示', style: 'lifestyle', subtype: 'lifestyle', ratio: '1:1', count: 4, tags: ['场景', '科技', '生活'], categoryLabel: '商品图' },
+  { id: 'p3', toolSlug: 'product-generator', image: '/demo-card-lifestyle.jpg', title: '护肤品组合图', desc: '多品搭配展示', style: 'minimal', subtype: 'group', ratio: '1:1', count: 4, tags: ['组合', '简约', '护肤'], categoryLabel: '商品图' },
+  { id: 'p4', toolSlug: 'product-generator', image: '/demo-scene.jpg', title: '商品细节特写', desc: '细节展示突出品质', style: 'premium', subtype: 'detail', ratio: '1:1', count: 4, tags: ['细节', '品质', '特写'], categoryLabel: '商品图' },
+
+  // ===== 小红书封面 =====
+  { id: 'x1', toolSlug: 'xiaohongshu-generator', image: '/demo-card-lifestyle.jpg', title: '护肤品种草封面', desc: '清新夏日风格', style: 'fresh', subtype: 'beauty', ratio: '3:4', count: 4, tags: ['种草', '清新', '美妆'], categoryLabel: '小红书' },
+  { id: 'x2', toolSlug: 'xiaohongshu-generator', image: '/case-lipstick-main.png', title: '口红试色封面', desc: '高级质感大片', style: 'premium', subtype: 'beauty', ratio: '3:4', count: 4, tags: ['试色', '高级', '彩妆'], categoryLabel: '小红书' },
+  { id: 'x3', toolSlug: 'xiaohongshu-generator', image: '/demo-scene.jpg', title: '穿搭推荐封面', desc: '氛围感日常穿搭', style: 'fresh', subtype: 'fashion', ratio: '3:4', count: 4, tags: ['穿搭', '氛围感', '日常'], categoryLabel: '小红书' },
+  { id: 'x4', toolSlug: 'xiaohongshu-generator', image: '/case-ecommerce.jpg', title: '生活好物分享', desc: '甜美可爱风格', style: 'cute', subtype: 'lifestyle', ratio: '3:4', count: 4, tags: ['好物', '可爱', '分享'], categoryLabel: '小红书' },
+
+  // ===== AI写真 =====
+  { id: 'a1', toolSlug: 'ai-photo', image: '/demo-card-lifestyle.jpg', title: '韩系清新写真', desc: '自然光线下的人像', style: 'korean-fresh', subtype: 'portrait', ratio: '3:4', count: 6, tags: ['韩系', '清新', '人像'], categoryLabel: 'AI写真' },
+  { id: 'a2', toolSlug: 'ai-photo', image: '/demo-scene.jpg', title: '复古胶片写真', desc: '怀旧氛围感大片', style: 'retro-film', subtype: 'portrait', ratio: '3:4', count: 6, tags: ['复古', '胶片', '氛围'], categoryLabel: 'AI写真' },
+  { id: 'a3', toolSlug: 'ai-photo', image: '/case-lipstick-main.png', title: '高级质感写真', desc: '棚拍质感大片', style: 'luxury', subtype: 'portrait', ratio: '3:4', count: 6, tags: ['高级', '质感', '棚拍'], categoryLabel: 'AI写真' },
+  { id: 'a4', toolSlug: 'ai-photo', image: '/case-ecommerce.jpg', title: '双人复古写真', desc: '复古风格双人照', style: 'retro-film', subtype: 'couple', ratio: '4:5', count: 4, tags: ['双人', '复古', '情侣'], categoryLabel: 'AI写真' },
+
+  // ===== 海报设计 =====
+  { id: 'h1', toolSlug: 'poster-design', image: '/case-ecommerce.jpg', title: '科技产品海报', desc: '简约高级风格', style: 'minimal', subtype: 'minimal', ratio: '3:4', count: 2, tags: ['科技', '简约', '产品'], categoryLabel: '海报' },
+  { id: 'h2', toolSlug: 'poster-design', image: '/demo-card-lifestyle.jpg', title: '品牌活动海报', desc: '生活场景风格', style: 'lifestyle', subtype: 'lifestyle', ratio: '3:4', count: 2, tags: ['品牌', '活动', '生活'], categoryLabel: '海报' },
+  { id: 'h3', toolSlug: 'poster-design', image: '/case-lipstick-main.png', title: '促销活动海报', desc: '节日氛围风格', style: 'festive', subtype: 'premium', ratio: '9:16', count: 2, tags: ['促销', '节日', '活动'], categoryLabel: '海报' },
+  { id: 'h4', toolSlug: 'poster-design', image: '/demo-scene.jpg', title: '高级质感海报', desc: '高端品牌宣传', style: 'premium', subtype: 'premium', ratio: '3:4', count: 2, tags: ['高端', '品牌', '质感'], categoryLabel: '海报' },
+
+  // ===== 智能抠图 =====
+  { id: 'b1', toolSlug: 'background-removal', image: '/case-ecommerce.jpg', title: '商品抠图', desc: '一键去除复杂背景', style: '', subtype: 'white', ratio: '1:1', count: 1, tags: ['抠图', '白底', '商品'], categoryLabel: '抠图' },
+  { id: 'b2', toolSlug: 'background-removal', image: '/demo-scene.jpg', title: '人物抠图', desc: '精准人物边缘处理', style: '', subtype: 'transparent', ratio: '1:1', count: 1, tags: ['抠图', '透明', '人物'], categoryLabel: '抠图' },
+
+  // ===== 商品详情页 =====
+  { id: 'd1', toolSlug: 'product-page', image: '/case-lipstick-main.png', title: '口红详情页', desc: '高端美妆详情页', style: 'premium', subtype: 'full', ratio: '2:3', count: 1, tags: ['美妆', '高端', '详情页'], categoryLabel: '详情页' },
+  { id: 'd2', toolSlug: 'product-page', image: '/case-ecommerce.jpg', title: '耳机详情页', desc: '科技产品长图', style: 'tech', subtype: 'full', ratio: '2:3', count: 1, tags: ['科技', '简约', '长图'], categoryLabel: '详情页' },
+  { id: 'd3', toolSlug: 'product-page', image: '/demo-card-lifestyle.jpg', title: '护肤品卖点页', desc: '成分展示提炼页', style: 'cute', subtype: 'highlight', ratio: '2:3', count: 1, tags: ['护肤', '卖点', '成分'], categoryLabel: '详情页' },
+];
+
+export function getInspirations(toolSlug?: string): InspirationItem[] {
+  if (!toolSlug) return INSPIRATIONS;
+  return INSPIRATIONS.filter(i => i.toolSlug === toolSlug);
+}
+
+export function getInspirationCategories(): { label: string; count: number }[] {
+  const map = new Map<string, number>();
+  INSPIRATIONS.forEach(i => {
+    const c = i.categoryLabel;
+    map.set(c, (map.get(c) || 0) + 1);
+  });
+  return [{ label: '全部', count: INSPIRATIONS.length }, ...Array.from(map.entries()).map(([label, count]) => ({ label, count }))];
+}
