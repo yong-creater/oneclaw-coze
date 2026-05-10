@@ -361,9 +361,16 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  background: #f1f5f9;
 }
-.os-insp-card-v2:hover .os-insp-card-cover {
-  /* slight zoom via filter for text contrast */
+.os-insp-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+.os-insp-card-v2:hover .os-insp-card-img {
+  transform: scale(1.05);
 }
 
 /* Badge */
