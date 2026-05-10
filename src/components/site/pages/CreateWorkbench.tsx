@@ -6,7 +6,8 @@ import {
   Sparkles, Upload, X,
   Download, RotateCcw, ZoomIn, Loader2, Check,
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck,
-  History, BookOpen, Wand2
+  History, BookOpen, Wand2,
+  Package, BookImage, Camera, Palette, Scissors, FileText
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
 import { useUser } from '@/contexts/UserContext';
@@ -54,6 +55,26 @@ const TOOL_ACCENT: Record<string, string> = {
   'poster-design': '#06B6D4',
   'background-removal': '#8B5CF6',
   'product-page': '#10B981',
+};
+
+// ===== 工具 Lucide 图标映射 =====
+const TOOL_LUCIDE_ICON: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number }>> = {
+  'product-generator': Package,
+  'xiaohongshu-generator': BookImage,
+  'ai-photo': Camera,
+  'poster-design': Palette,
+  'background-removal': Scissors,
+  'product-page': FileText,
+};
+
+// ===== 工具标题和描述（弱化后台感） =====
+const TOOL_HEADER: Record<string, { title: string; desc: string }> = {
+  'product-generator': { title: 'AI 商品图生成器', desc: '生成高质感电商视觉图' },
+  'xiaohongshu-generator': { title: '小红书封面生成器', desc: '一键生成爆款封面' },
+  'ai-photo': { title: 'AI 写真生成器', desc: '生成氛围感写真大片' },
+  'poster-design': { title: 'AI 海报设计器', desc: '生成营销海报与品牌视觉图' },
+  'background-removal': { title: 'AI 智能抠图', desc: '快速去背景，生成白底图' },
+  'product-page': { title: 'AI 商品详情页生成器', desc: '自动生成电商详情页长图' },
 };
 
 // ===== 工具布局 ===== (CSS class suffix for canvas image sizing)
@@ -421,32 +442,34 @@ export default function CreateWorkbench() {
   const sizeSuffix = TOOL_SIZE[toolSlug] || 'default';
   const shimmerSize = TOOL_SHIMMER[toolSlug] || { w: 340, h: 340 };
   const currentStepIdx = STEP_ORDER.indexOf(step);
+  const HeaderIcon = TOOL_LUCIDE_ICON[toolSlug] || Package;
+  const headerInfo = TOOL_HEADER[toolSlug] || { title: config.name, desc: config.description };
 
   return (
     <div className="os-ws-page" style={{ '--ws-accent': accent } as React.CSSProperties}>
-      {/* ===== HEADER ===== */}
+      {/* ===== HEADER — lightweight context bar ===== */}
       <div className="os-ws-header">
         <div className="os-ws-header-left">
-          <div className="os-ws-tool-icon">{config.icon}</div>
-          <div className="os-ws-tool-info">
-            <h1 className="os-ws-tool-title">{config.name}</h1>
-            <p className="os-ws-tool-desc">{config.description}</p>
+          <div className="os-ws-header-tool-icon">
+            <HeaderIcon size={18} strokeWidth={1.6} />
+          </div>
+          <div className="os-ws-header-tool-info">
+            <h1 className="os-ws-header-tool-name">{headerInfo.title}</h1>
+            <span className="os-ws-header-tool-desc">{headerInfo.desc}</span>
           </div>
         </div>
-        <div className="os-ws-header-right">
+        <div className="os-ws-header-actions">
           <button
-            className="os-ws-header-action"
             onClick={() => {/* TODO: 历史记录 */}}
             title="历史记录"
           >
-            <History size={18} />
+            <History size={16} />
           </button>
           <button
-            className="os-ws-header-action"
             onClick={() => {/* TODO: 使用指南 */}}
             title="使用指南"
           >
-            <BookOpen size={18} />
+            <BookOpen size={16} />
           </button>
         </div>
       </div>

@@ -9,75 +9,83 @@
   background: #f7f7f8;
 }
 
-/* Header bar */
+/* Header — lightweight context bar, blends into canvas */
 .os-ws-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  height: 72px;
-  background: #fff;
-  border-bottom: 1px solid #EEF0F5;
+  padding: 0 20px;
+  height: 56px;
+  background: rgba(250, 250, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   flex-shrink: 0;
   z-index: 10;
+  /* No border — merges with canvas */
 }
 .os-ws-header-left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 .os-ws-header-tool-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #F4F0FF;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 .os-ws-header-tool-icon svg {
-  width: 20px;
-  height: 20px;
-  color: #7B6DFF;
+  width: 18px;
+  height: 18px;
+  color: #8B90A0;
+  stroke-width: 1.6;
 }
 .os-ws-header-tool-info {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: baseline;
+  gap: 8px;
 }
 .os-ws-header-tool-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1F2937;
+  font-size: 15px;
+  font-weight: 600;
+  color: #3D3A54;
   line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 .os-ws-header-tool-desc {
   font-size: 13px;
-  color: #8A94A6;
+  color: #A8A3BE;
   line-height: 1.2;
+  font-weight: 400;
 }
 .os-ws-header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 .os-ws-header-actions button {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 13px;
-  color: #6B7280;
+  color: #A8A3BE;
   transition: all 0.2s;
+  padding: 0;
 }
 .os-ws-header-actions button:hover {
-  background: #F3F4F6;
-  color: #374151;
+  background: rgba(123,109,255,0.06);
+  color: #7B6DFF;
+}
+.os-ws-header-actions button svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Body: Left panel + Center area */
