@@ -25,7 +25,6 @@ export default function SiteSidebar() {
   const pathname = usePathname();
   const { user, authenticated, logout, setShowLoginModal } = useUser();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showQrPopup, setShowQrPopup] = useState(false);
 
   function isActive(href: string): boolean {
     if (href === '/') return pathname === '/';
@@ -58,87 +57,59 @@ export default function SiteSidebar() {
         })}
       </nav>
 
-      {/* ===== 底部固定区域：二维码 + 关于我们 + 登录 ===== */}
+      {/* ===== 底部：登录 / 我的 ===== */}
       <div className="os-dock-bottom">
-        {/* 公众号二维码缩略图 */}
-        <div
-          className="os-dock-qr"
-          onMouseEnter={() => setShowQrPopup(true)}
-          onMouseLeave={() => setShowQrPopup(false)}
-          onClick={() => setShowQrPopup(!showQrPopup)}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/api/wechat/qrcode-image" alt="公众号" />
-        </div>
-
-        {/* 二维码弹窗 — 作为 os-dock-bottom 的子元素，CSS 绝对定位到右侧 */}
-        {showQrPopup && (
-          <div className="os-dock-qr-popup">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/api/wechat/qrcode-image" alt="微信公众号" />
-            <div className="os-dock-qr-popup-label">
-              扫码关注公众号获取 AI 创作灵感
-            </div>
-          </div>
-        )}
-
-        {/* 关于我们 */}
-        <Link href="/about" className="os-dock-about">关于我们</Link>
-
-        {/* 登录 / 用户 */}
-        <div className="os-dock-auth">
-          {!authenticated ? (
+        {!authenticated ? (
+          <button
+            className="os-dock-login-btn"
+            title="登录"
+            onClick={() => setShowLoginModal(true)}
+            type="button"
+          >
+            <LogIn className="os-dock-login-icon" strokeWidth={1.5} />
+          </button>
+        ) : (
+          <div className="os-dock-avatar-wrap">
             <button
-              className="os-dock-login-btn"
-              title="登录"
-              onClick={() => setShowLoginModal(true)}
+              className="os-dock-avatar-btn"
+              title={user?.nickname || '用户'}
+              onClick={() => setShowDropdown(!showDropdown)}
               type="button"
             >
-              <LogIn className="os-dock-login-icon" strokeWidth={1.5} />
-            </button>
-          ) : (
-            <div className="os-dock-avatar-wrap">
-              <button
-                className="os-dock-avatar-btn"
-                title={user?.nickname || '用户'}
-                onClick={() => setShowDropdown(!showDropdown)}
-                type="button"
-              >
-                {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="" className="os-dock-avatar-img" />
-                ) : (
-                  <div className="os-dock-avatar-fallback">
-                    <User className="w-4 h-4" />
-                  </div>
-                )}
-              </button>
-
-              {showDropdown && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-                  <div className="os-dock-user-menu">
-                    <Link
-                      href="/projects"
-                      onClick={() => setShowDropdown(false)}
-                      className="os-dock-user-menu-item"
-                    >
-                      <FolderOpen className="w-4 h-4" />
-                      <span>我的作品</span>
-                    </Link>
-                    <hr className="my-1 border-slate-100" />
-                    <button
-                      onClick={() => { setShowDropdown(false); logout(); }}
-                      className="os-dock-user-menu-item text-red-500"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>退出登录</span>
-                    </button>
-                  </div>
-                </>
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="" className="os-dock-avatar-img" />
+              ) : (
+                <div className="os-dock-avatar-fallback">
+                  <User className="w-4 h-4" />
+                </div>
               )}
-            </div>
-          )}
-        </div>
+            </button>
+
+            {showDropdown && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
+                <div className="os-dock-user-menu">
+                  <Link
+                    href="/projects"
+                    onClick={() => setShowDropdown(false)}
+                    className="os-dock-user-menu-item"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    <span>我的作品</span>
+                  </Link>
+                  <hr className="my-1 border-slate-100" />
+                  <button
+                    onClick={() => { setShowDropdown(false); logout(); }}
+                    className="os-dock-user-menu-item text-red-500"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>退出登录</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </aside>
   );

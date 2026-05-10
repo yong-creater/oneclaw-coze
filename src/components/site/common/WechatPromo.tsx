@@ -7,6 +7,7 @@ interface WechatPromoProps {
 }
 
 export default function WechatPromo({ className = '' }: WechatPromoProps) {
+  // 直接使用后端代理接口返回二维码图片，无需前端 fetch
   const qrCodeSrc = '/api/wechat/qrcode-image';
 
   return (
@@ -30,13 +31,14 @@ export default function WechatPromo({ className = '' }: WechatPromoProps) {
           </div>
         </div>
         
-        {/* 关于我们 */}
-        <Link
-          href="/about"
-          className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          关于我们
-        </Link>
+        {/* 底部链接 */}
+        <div className="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
+          <span className="text-slate-500 dark:text-slate-400">OneClaw - AI卖货内容生成器</span>
+          <span className="text-slate-300 dark:text-slate-600">|</span>
+          <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer" className="hover:text-orange-500 transition-colors">
+            渝ICP备2026004291号-2
+          </a>
+        </div>
       </div>
     </div>
   );

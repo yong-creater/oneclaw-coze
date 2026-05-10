@@ -1,7 +1,11 @@
-/* ===== Site Footer — 极简风格 ===== */
+/* ===== Site Footer — AI SaaS 风格 ===== */
 .os-footer {
   margin-top: auto;
-  padding: 28px 0 32px;
+  padding: 36px 0 0;
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(120,120,255,0.08);
 }
 
 .os-footer-inner {
@@ -9,31 +13,128 @@
   margin: 0 auto;
   padding: 0 48px;
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+/* 左侧：品牌 + 关于我们 */
+.os-footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 340px;
+}
+
+.os-footer-logo {
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(20,20,20,0.72);
+  letter-spacing: -0.02em;
+}
+
+.os-footer-desc {
+  font-size: 12px;
+  line-height: 1.7;
+  color: rgba(20,20,20,0.4);
+  margin: 0;
+}
+
+.os-footer-about-link {
+  display: inline-block;
+  font-size: 13px;
+  color: rgba(20,20,20,0.45);
+  text-decoration: none;
+  margin-top: 4px;
+  transition: color 0.2s ease;
+}
+.os-footer-about-link:hover {
+  color: rgba(20,20,20,0.7);
+}
+
+/* 右侧：公众号二维码 */
+.os-footer-qr {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
-.os-footer-brand {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(20, 20, 20, 0.35);
-  letter-spacing: -0.01em;
+.os-footer-qr-card {
+  width: 160px;
+  height: 160px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(120,120,255,0.08);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.os-footer-sep {
-  font-size: 13px;
-  color: rgba(20, 20, 20, 0.2);
+.os-footer-qr-card img {
+  width: 140px;
+  height: 140px;
+  border-radius: 8px;
+  object-fit: cover;
 }
 
-.os-footer-tagline {
+.os-footer-qr-label {
   font-size: 12px;
-  color: rgba(20, 20, 20, 0.28);
+  line-height: 1.6;
+  color: rgba(20,20,20,0.45);
+  text-align: center;
+}
+
+/* 底部：版权备案（独立一行） */
+.os-footer-bottom {
+  max-width: 1280px;
+  margin: 32px auto 0;
+  padding: 14px 48px 20px;
+  border-top: 1px solid rgba(120,120,255,0.06);
+  text-align: center;
+  font-size: 12px;
+  color: rgba(20,20,20,0.35);
+}
+
+.os-footer-bottom a {
+  color: rgba(20,20,20,0.35);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.os-footer-bottom a:hover {
+  color: rgba(20,20,20,0.6);
 }
 
 /* 响应式 */
 @media (max-width: 768px) {
   .os-footer-inner {
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
     padding: 0 20px;
+  }
+  .os-footer-left {
+    max-width: 100%;
+    text-align: center;
+    align-items: center;
+  }
+  .os-footer-qr-card {
+    width: 140px;
+    height: 140px;
+  }
+  .os-footer-qr-card img {
+    width: 120px;
+    height: 120px;
+  }
+  .os-footer-bottom {
+    padding: 14px 20px 16px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  button:active, a:active {
+    opacity: 0.8;
   }
 }
