@@ -15,10 +15,6 @@ interface DailyLimitConfig {
   unlimited: boolean;
 }
 
-interface SettingsData {
-  daily_generation_limit: DailyLimitConfig;
-}
-
 export default function AdminSettingsPage() {
   const [config, setConfig] = useState<DailyLimitConfig>({ limit: 3, unlimited: false });
   const [loading, setLoading] = useState(true);
@@ -29,9 +25,12 @@ export default function AdminSettingsPage() {
     try {
       const res = await fetch('/api/admin/settings');
       if (!res.ok) throw new Error('获取配置失败');
-      const data: SettingsData = await res.json();
-      if (data.daily_generation_limit) {
-        setConfig(data.daily_generation_limit);
+      const json = await res.json();
+      // API 返回 { success: true, data: [{ key, value, description }] }
+      const rows: Array<{ key: string; value: DailyLimitConfig }> = json.data || [];
+      const dailyLimitRow = rows.find((r) => r.key === 'daily_generation_limit');
+      if (dailyLimitRow?.value) {
+        setConfig(dailyLimitRow.value);
       }
     } catch (err) {
       toast.error('获取配置失败');
@@ -54,14 +53,15 @@ export default function AdminSettingsPage() {
     setSaving(true);
     try {
       const res = await fetch('/api/admin/settings', {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           key: 'daily_generation_limit',
           value: { limit: config.unlimited ? -1 : config.limit, unlimited: config.unlimited },
         }),
       });
-      if (!res.ok) throw new Error('保存失败');
+      const json = await res.json();
+      if (!res.ok || !json.success) throw new Error(json.error || '保存失败');
       toast.success('配置已保存，立即生效');
       await fetchSettings();
     } catch {
