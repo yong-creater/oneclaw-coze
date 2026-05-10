@@ -96,9 +96,9 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
         if (onSuccess) {
           onSuccess(data.user);
         }
+        // 关闭弹窗（不刷新页面，由 UserContext.login 处理 pendingAction）
         setTimeout(() => {
           onOpenChange(false);
-          window.location.reload();
         }, 500);
       } else {
         setError(data.error || '登录失败');
@@ -132,9 +132,9 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
         if (onSuccess) {
           onSuccess(data.user);
         }
+        // 关闭弹窗（不刷新页面）
         setTimeout(() => {
           onOpenChange(false);
-          window.location.reload();
         }, 500);
       } else {
         setError(data.error || '登录失败');
@@ -172,8 +172,8 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
               <Mail className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">欢迎来到 OneClaw</h2>
-              <p className="text-sm text-white/80 mt-0.5">邮箱验证码登录，无需密码</p>
+              <h2 className="text-xl font-bold text-white">登录后开始创作</h2>
+              <p className="text-sm text-white/80 mt-0.5">登录后即可生成内容、保存作品，并在任务中心查看进度</p>
             </div>
           </div>
         </div>

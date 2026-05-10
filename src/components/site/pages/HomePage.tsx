@@ -14,6 +14,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
+import { useUser } from '@/contexts/UserContext';
 
 // ===== 布局模式识别（模块级，供 createTaskAndNavigate 和组件内部共用） =====
 const LAYOUT_KEYWORDS = [
@@ -266,6 +267,7 @@ function matchTool(input: string): ToolMatch | null {
 export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
   const router = useRouter();
+  const { requireAuth, dailyQuota } = useUser();
   const [inputText, setInputText] = useState('');
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -357,8 +359,14 @@ export default function HomePage() {
     if (e.dataTransfer.files?.length) addImageFiles(e.dataTransfer.files);
   }, [addImageFiles]);
 
-  const handleStartCreate = useCallback(() => {
+  // 实际执行创作流程（登录后可能被回调）
+  const doStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
+    // 每日免费次数检查
+    if (dailyQuota !== null && dailyQuota <= 0) {
+      alert('今日免费生成次数已用完，明天再来吧！');
+      return;
+    }
     phaseRef.current = 'identifying'; setPhase('identifying');
     // 轻量过渡：1.2秒后创建任务并跳转工具页
     const navTimer = setTimeout(async () => {
@@ -367,8 +375,9 @@ export default function HomePage() {
       if (!tool) tool = TOOL_MATCHES[0];
       setIsJumping(true);
       const rec = getStyleRecommendation(tool, inputText);
+      const cleanedPrompt = stripLayoutKeywords(inputText.trim());
       const err = await createTaskAndNavigate(router, {
-        prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
+        prompt: cleanedPrompt, uploadedImages, matchedTool: tool.slug,
         autoGenerate: true,
         analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count, layoutMode: rec.layoutMode },
       });
@@ -385,7 +394,14 @@ export default function HomePage() {
         router.push('/create?tool=product-generator');
       }
     }, 4000);
-  }, [inputText, uploadedImages, phase, router]);
+  }, [inputText, uploadedImages, phase, router, dailyQuota]);
+
+  // 登录拦截 + 创作入口
+  const handleStartCreate = useCallback(() => {
+    if (!inputText.trim() || phase !== 'idle') return;
+    if (!requireAuth(doStartCreate)) return;
+    doStartCreate();
+  }, [doStartCreate, inputText, phase, requireAuth]);
 
   const handleBrowseTools = useCallback(() => { router.push('/tools'); }, [router]);
 

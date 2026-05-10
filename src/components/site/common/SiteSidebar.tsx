@@ -23,7 +23,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function SiteSidebar() {
   const pathname = usePathname();
-  const { user, authenticated, logout, setShowLoginModal } = useUser();
+  const { user, authenticated, logout, setShowLoginModal, requireAuth } = useUser();
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeTaskCount, setActiveTaskCount] = useState(0);
 
@@ -64,12 +64,16 @@ export default function SiteSidebar() {
         {NAV_ITEMS.map((item) => {
           const active = isActive(item.href);
           const Icon = item.icon;
+          const needsAuth = item.href === '/projects';
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`os-dock-item ${active ? 'os-dock-item-active' : ''}`}
               title={item.label}
+              onClick={(e) => {
+                if (needsAuth && !requireAuth(undefined)) { e.preventDefault(); }
+              }}
             >
               <Icon className="os-dock-icon" strokeWidth={1.5} />
               <span className="os-dock-label">{item.label}</span>
@@ -84,6 +88,9 @@ export default function SiteSidebar() {
           href="/projects?tab=tasks"
           className="os-dock-task-indicator"
           title={`${activeTaskCount} 个任务生成中`}
+          onClick={(e) => {
+            if (!requireAuth(undefined)) { e.preventDefault(); }
+          }}
         >
           <div className="os-dock-task-dot" />
           <span className="os-dock-task-text">{activeTaskCount} 生成中</span>

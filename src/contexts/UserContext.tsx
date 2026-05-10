@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 
 interface User {
   user_id: string;
@@ -19,6 +19,10 @@ interface UserContextType {
   showLoginModal: boolean;
   setShowLoginModal: (show: boolean) => void;
   requireAuth: (callback?: () => void) => boolean;
+  /** 每日免费生成剩余次数（-1=未登录, null=加载中） */
+  dailyQuota: number | null;
+  /** 刷新每日配额 */
+  refreshQuota: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | null>(null);
@@ -27,6 +31,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [dailyQuota, setDailyQuota] = useState<number | null>(null);
+
+  // 存储：登录成功后需要自动执行的回调
+  const pendingActionRef = useRef<(() => void) | null>(null);
 
   // 检查登录状态
   useEffect(() => {
@@ -37,36 +45,65 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       const res = await fetch('/api/auth');
       const data = await res.json();
-      
+
       if (data.success && data.authenticated) {
         setUser(data.data);
-        // 同时更新 localStorage
         if (typeof window !== 'undefined' && data.data?.user_id) {
           localStorage.setItem('oneclaw_user_id', data.data.user_id);
         }
+        // 登录状态确认后，获取配额
+        fetchQuota();
       } else {
         setUser(null);
-        // 清除 localStorage
+        setDailyQuota(-1); // 未登录
         if (typeof window !== 'undefined') {
           localStorage.removeItem('oneclaw_user_id');
         }
       }
-    } catch (err) {
+    } catch {
       setUser(null);
+      setDailyQuota(-1);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchQuota = async () => {
+    try {
+      const res = await fetch('/api/quota/daily-generations', { credentials: 'include' });
+      const data = await res.json();
+      if (data.remaining !== undefined) {
+        setDailyQuota(data.remaining);
+      }
+    } catch {
+      // 静默失败
+    }
+  };
+
+  const refreshQuota = async () => {
+    if (user) {
+      await fetchQuota();
     }
   };
 
   const login = async () => {
     await checkAuth();
     setShowLoginModal(false);
+
+    // 登录成功后，执行暂存的回调
+    const action = pendingActionRef.current;
+    pendingActionRef.current = null;
+    if (action) {
+      // 使用 setTimeout 确保状态更新完成后再执行
+      setTimeout(() => action(), 100);
+    }
   };
 
   const logout = async () => {
     try {
       await fetch('/api/auth', { method: 'DELETE' });
       setUser(null);
+      setDailyQuota(-1);
     } catch (err) {
       console.error('登出失败:', err);
     }
@@ -75,6 +112,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // 检查是否需要登录
   const requireAuth = (callback?: () => void): boolean => {
     if (!user) {
+      // 暂存回调：登录成功后自动执行
+      if (callback) {
+        pendingActionRef.current = callback;
+      }
       setShowLoginModal(true);
       return false;
     }
@@ -91,7 +132,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       logout,
       showLoginModal,
       setShowLoginModal,
-      requireAuth
+      requireAuth,
+      dailyQuota,
+      refreshQuota,
     }}>
       {children}
     </UserContext.Provider>

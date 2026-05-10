@@ -133,7 +133,7 @@ function ratioToAspect(ratio: string): string {
 export default function CreateWorkbench() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { authenticated, setShowLoginModal } = useUser();
+  const { authenticated, setShowLoginModal, requireAuth, dailyQuota, refreshQuota } = useUser();
 
   // ----- 工具 -----
   const allTools = getAllToolWorkflows();
@@ -379,6 +379,8 @@ export default function CreateWorkbench() {
             setSelectedIdx(0);
           }
           setStep('done');
+          // 刷新每日配额
+          refreshQuota();
           // Auto-save to user_generations
           if (authenticated && urls.length > 0) {
             try {
@@ -460,6 +462,15 @@ export default function CreateWorkbench() {
     if (!p.inputText && p.uploads.length === 0) return;
     if (step === 'creating' || step === 'generating') return; // 防重复点击
 
+    // 登录拦截：未登录时弹出登录弹窗，登录后继续执行
+    if (!requireAuth(handleGenerate)) return;
+
+    // 每日免费次数检查
+    if (dailyQuota !== null && dailyQuota <= 0) {
+      setErrorMsg('今日免费生成次数已用完，明天再来吧！');
+      return;
+    }
+
     setStep('creating');
     setImages([]);
     setSaved(false);
@@ -520,6 +531,8 @@ export default function CreateWorkbench() {
 
   // ===== 下载 =====
   const handleDownload = async (url: string, idx: number) => {
+    // 登录拦截
+    if (!requireAuth(() => handleDownload(url, idx))) return;
     try {
       const resp = await fetch(url);
       const blob = await resp.blob();
@@ -534,10 +547,8 @@ export default function CreateWorkbench() {
 
   // ===== 保存到作品库 =====
   const handleSave = async () => {
-    if (!authenticated) {
-      setShowLoginModal(true);
-      return;
-    }
+    // 登录拦截
+    if (!requireAuth(handleSave)) return;
     if (images.length === 0) {
       alert('暂无可保存的作品');
       return;

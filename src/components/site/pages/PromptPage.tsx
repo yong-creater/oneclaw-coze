@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, Eye, Heart, Bookmark, Copy, Search, Loader2 } from 'lucide-react';
+import { useUser } from '@/contexts/UserContext';
 
 /* ---------- 数据类型 ---------- */
 interface Prompt {
@@ -68,6 +69,7 @@ function Pill({
 /* ==================== 灵感库页面 ==================== */
 export default function PromptPage() {
   const router = useRouter();
+  const { requireAuth } = useUser();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('全部');
@@ -134,9 +136,11 @@ export default function PromptPage() {
     (e: React.MouseEvent, p: Prompt) => {
       e.stopPropagation();
       const slug = p.tool_slug || 'product-generator';
+      // 登录拦截：未登录时弹出登录弹窗，登录后继续执行
+      if (!requireAuth(() => router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(p.content || p.title)}`))) return;
       router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(p.content || p.title)}`);
     },
-    [router]
+    [router, requireAuth]
   );
 
   /* ---- 加载中 ---- */
