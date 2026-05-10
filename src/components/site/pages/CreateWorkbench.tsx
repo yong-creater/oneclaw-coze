@@ -8,6 +8,7 @@ import {
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
+import { SiteLogo } from '@/components/site/common/SiteLogo';
 
 // ===== 类型 =====
 interface GeneratedImage { url: string; }
@@ -365,10 +366,7 @@ export default function CreateWorkbench() {
       {/* ===== HEADER ===== */}
       <div className="os-ws-header">
         <div className="os-ws-header-left">
-          <a href="/" className="os-ws-header-logo">
-            <span style={{ fontSize: 20 }}>🦞</span>
-            <span>OneClaw</span>
-          </a>
+          <SiteLogo size={28} showText href="/" />
           <div className="os-ws-tool-selector" onClick={() => {
             const idx = allTools.findIndex(t => t.slug === toolSlug);
             const next = allTools[(idx + 1) % allTools.length];
