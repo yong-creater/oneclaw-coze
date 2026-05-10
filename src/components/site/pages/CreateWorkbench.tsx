@@ -3,13 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
-  Sparkles, Upload, X, ChevronDown,
+  Sparkles, Upload, X,
   Download, RotateCcw, ZoomIn, Loader2, Check,
-  ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck
+  ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck,
+  History, BookOpen
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
 import { useUser } from '@/contexts/UserContext';
-import { SiteLogo } from '@/components/site/common/SiteLogo';
 
 // ===== 类型 =====
 interface GeneratedImage { url: string; }
@@ -389,15 +389,27 @@ export default function CreateWorkbench() {
       {/* ===== HEADER ===== */}
       <div className="os-ws-header">
         <div className="os-ws-header-left">
-          <SiteLogo size={28} showText href="/" />
-          <div className="os-ws-tool-selector" onClick={() => {
-            const idx = allTools.findIndex(t => t.slug === toolSlug);
-            const next = allTools[(idx + 1) % allTools.length];
-            handleToolSwitch(next.slug);
-          }}>
-            <span>{config.icon} {config.name}</span>
-            <ChevronDown />
+          <div className="os-ws-tool-icon">{config.icon}</div>
+          <div className="os-ws-tool-info">
+            <h1 className="os-ws-tool-title">{config.name}</h1>
+            <p className="os-ws-tool-desc">{config.description}</p>
           </div>
+        </div>
+        <div className="os-ws-header-right">
+          <button
+            className="os-ws-header-action"
+            onClick={() => {/* TODO: 历史记录 */}}
+            title="历史记录"
+          >
+            <History size={18} />
+          </button>
+          <button
+            className="os-ws-header-action"
+            onClick={() => {/* TODO: 使用指南 */}}
+            title="使用指南"
+          >
+            <BookOpen size={18} />
+          </button>
         </div>
       </div>
 

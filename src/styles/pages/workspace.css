@@ -14,7 +14,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 24px;
+  padding: 0 24px;
+  height: 72px;
   background: #fff;
   border-bottom: 1px solid #EEF0F5;
   flex-shrink: 0;
@@ -23,44 +24,60 @@
 .os-ws-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
-.os-ws-header-logo {
+.os-ws-header-tool-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #F4F0FF;
   display: flex;
   align-items: center;
-  gap: 8px;
-  text-decoration: none;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.os-ws-header-logo img {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+.os-ws-header-tool-icon svg {
+  width: 20px;
+  height: 20px;
+  color: #7B6DFF;
 }
-.os-ws-header-logo span {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
+.os-ws-header-tool-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-.os-ws-tool-selector {
+.os-ws-header-tool-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1.2;
+}
+.os-ws-header-tool-desc {
+  font-size: 13px;
+  color: #8A94A6;
+  line-height: 1.2;
+}
+.os-ws-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.os-ws-header-actions button {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #e5e5e5;
-  background: #fafafa;
+  border: none;
+  background: transparent;
   cursor: pointer;
   font-size: 13px;
-  color: #555;
+  color: #6B7280;
   transition: all 0.2s;
 }
-.os-ws-tool-selector:hover {
-  border-color: var(--ws-accent, #7B6DFF);
-  color: var(--ws-accent, #7B6DFF);
-}
-.os-ws-tool-selector svg {
-  width: 14px;
-  height: 14px;
+.os-ws-header-actions button:hover {
+  background: #F3F4F6;
+  color: #374151;
 }
 
 /* Body: Left panel + Center area */
