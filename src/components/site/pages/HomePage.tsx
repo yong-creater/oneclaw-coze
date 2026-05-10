@@ -20,9 +20,9 @@ const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
 
 // 工具 slug → 页面路由映射
 const TOOL_ROUTE_MAP: Record<string, string> = {
-  'product-generator': '/create?tool=product-generator',
-  'xiaohongshu-generator': '/create?tool=xiaohongshu-generator',
-  'ai-photo': '/create?tool=ai-photo',
+  'product-generator': '/create',
+  'xiaohongshu-generator': '/create',
+  'ai-photo': '/create',
 };
 
 function navigateToCreate(
@@ -49,7 +49,12 @@ function navigateToCreate(
   if (opts.matchedTool) context.toolSlug = opts.matchedTool;
   if (opts.autoGenerate) context.autoGenerate = true;
   if (opts.analysisResult) context.analysisResult = opts.analysisResult;
-  sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
+  try {
+    sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
+  } catch (e) {
+    // sessionStorage 配额不足时忽略，不影响跳转
+    console.warn('sessionStorage write failed:', e);
+  }
 
   // 路由到对应工具详情页（而非 /create）
   const targetRoute = (opts.matchedTool && TOOL_ROUTE_MAP[opts.matchedTool]) || '/create';
@@ -282,23 +287,22 @@ export default function HomePage() {
     if (!inputText.trim() || phase !== 'idle') return;
     setPhase('identifying');
     // 轻量过渡：1.2秒后直接跳转工具页
-    setTimeout(() => {
+    const navTimer = setTimeout(() => {
       let tool = matchTool(inputText);
       // 未匹配到工具时，默认使用 AI 商品图生成器
       if (!tool) tool = TOOL_MATCHES[0];
-      if (TOOL_ROUTE_MAP[tool.slug]) {
-        setIsJumping(true);
-        const rec = getStyleRecommendation(tool, inputText);
-        navigateToCreate(router, {
-          prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
-          autoGenerate: true,
-          analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
-        });
-      } else {
-        // 兜底：跳转通用创作页
-        router.push('/create');
-      }
+      setIsJumping(true);
+      const rec = getStyleRecommendation(tool, inputText);
+      navigateToCreate(router, {
+        prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
+        autoGenerate: true,
+        analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
+      });
     }, 1200);
+    // 兜底：2.5秒后若仍在 identifying 阶段，强制跳转
+    setTimeout(() => {
+      router.push('/create?tool=product-generator');
+    }, 2500);
   }, [inputText, uploadedImages, phase, router]);
 
   const handleBrowseTools = useCallback(() => { router.push('/tools'); }, [router]);
