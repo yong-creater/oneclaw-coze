@@ -4,6 +4,7 @@ import { buildPrompt } from '@/lib/prompt-engine';
 import { normalizePrompt, buildNegativePrompt, validateGenerationResult, getMaxRetries } from '@/lib/generation-guardrail';
 import { generateWithModel } from '@/lib/model-selector';
 import { RATIO_TO_SIZE } from '@/lib/prompt-engine';
+import { HeaderUtils } from 'coze-coding-dev-sdk';
 
 const supabase = getSupabaseClient();
 
@@ -119,8 +120,9 @@ export async function POST(
       }
 
       // 调用模型生成
-      // Build custom headers for API auth
-      const customHeaders: Record<string, string> = {};
+      // Build custom headers: MUST forward auth headers from original request for Coze SDK
+      const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
+      // Also add API key/URL for OpenAI-compatible providers
       if (modelConfig?.apiKey) {
         customHeaders['Authorization'] = `Bearer ${modelConfig.apiKey}`;
       }
@@ -160,13 +162,34 @@ export async function POST(
           break;
         }
       } else {
-        lastError = result.error || '模型生成返回空结果';
-        console.warn(`[Execute] 生成失败(第${attempt + 1}次): ${lastError}`);
+        const rawErr = result.error || '模型生成返回空结果';
+        if (rawErr.includes('403') || rawErr.includes('Forbidden')) {
+          lastError = '模型服务暂时不可用，请稍后重试';
+        } else if (rawErr.includes('429') || rawErr.includes('Too Many')) {
+          lastError = '生成次数已达上限，请稍后再试';
+        } else if (rawErr.includes('timeout') || rawErr.includes('ETIMEDOUT')) {
+          lastError = '生成超时，请检查网络后重试';
+        } else {
+          lastError = rawErr;
+        }
+        console.warn(`[Execute] 生成失败(第${attempt + 1}次): ${rawErr}`);
         if (attempt < maxRetries) continue;
       }
     } catch (genErr: any) {
-      lastError = genErr.message || '未知生成错误';
-      console.error(`[Execute] 生成异常(第${attempt + 1}次):`, lastError);
+      const rawMsg = genErr.message || '未知生成错误';
+      // 对用户友好的错误消息
+      if (rawMsg.includes('403') || rawMsg.includes('Forbidden')) {
+        lastError = '模型服务暂时不可用，请稍后重试';
+      } else if (rawMsg.includes('429') || rawMsg.includes('Too Many')) {
+        lastError = '生成次数已达上限，请稍后再试';
+      } else if (rawMsg.includes('timeout') || rawMsg.includes('ETIMEDOUT')) {
+        lastError = '生成超时，请检查网络后重试';
+      } else if (rawMsg.includes('ENOTFOUND') || rawMsg.includes('ECONNREFUSED')) {
+        lastError = '网络连接异常，请稍后重试';
+      } else {
+        lastError = rawMsg;
+      }
+      console.error(`[Execute] 生成异常(第${attempt + 1}次):`, rawMsg);
       if (attempt < maxRetries) continue;
     }
   }
