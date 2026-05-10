@@ -7,7 +7,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 72px;
+  width: 80px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -227,11 +227,24 @@
    页面容器 — Dock 右侧主内容
    ================================================================ */
 
-/* 根容器：推过 Dock 宽度 + 32px 间距 */
+/* 根容器：推过 Dock 宽度 + 24px 间距 */
 .os-dock-page {
-  margin-left: 104px; /* 72px Dock + 32px gap */
+  margin-left: 104px; /* 80px Dock + 24px gap */
   min-height: 100vh;
   transition: margin-left 0.2s;
+}
+
+/* 工作台模式：紧贴 Dock，1px 分割线代替间距，无氛围背景 */
+.os-dock-page-workbench {
+  margin-left: 80px !important; /* 80px Dock，无 gap */
+  background: #fff !important;
+}
+
+.os-dock-page-inner-workbench {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
 }
 
 /* 内容 + Footer 纵向排列 */

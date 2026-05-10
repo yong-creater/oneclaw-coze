@@ -8,9 +8,26 @@ import SiteFooter from '@/components/site/common/SiteFooter';
 // 不显示 Footer 的页面路径
 const FOOTLESS_PATHS = ['/create'];
 
+// 全屏工作台页面（紧贴侧边栏，无间距）
+const WORKBENCH_PATHS = ['/create'];
+
 function PageSwitcher({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const hideFooter = FOOTLESS_PATHS.some(p => pathname.startsWith(p));
+  const isWorkbench = WORKBENCH_PATHS.some(p => pathname.startsWith(p));
+
+  if (isWorkbench) {
+    return (
+      <>
+        <SiteSidebar />
+        <main className="os-dock-page os-dock-page-workbench">
+          <div className="os-dock-page-inner os-dock-page-inner-workbench">
+            {children}
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <>

@@ -16,7 +16,7 @@
   justify-content: space-between;
   padding: 12px 24px;
   background: #fff;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
+  border-bottom: 1px solid #EEF0F5;
   flex-shrink: 0;
   z-index: 10;
 }
@@ -72,10 +72,10 @@
 
 /* ---------- Left Panel ---------- */
 .os-ws-left {
-  width: 280px;
-  min-width: 280px;
+  width: 320px;
+  min-width: 320px;
   background: #fff;
-  border-right: 1px solid rgba(0,0,0,0.06);
+  border-right: 1px solid #EEF0F5;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -748,7 +748,7 @@
     width: 100%;
     min-width: 0;
     border-right: none;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+    border-bottom: 1px solid #EEF0F5;
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease;
