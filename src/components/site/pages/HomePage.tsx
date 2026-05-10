@@ -2,107 +2,68 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMenu } from '@/components/site/common/MenuProvider';
 import {
-  ArrowRight,
   Wand2,
-  TrendingUp,
-  Sparkles,
-  Check,
-  Package,
-  BookOpen,
-  Heart,
-  X,
-  PenTool,
+  ArrowRight,
   ImagePlus,
-  LayoutTemplate,
+  X,
+  Check,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
 } from 'lucide-react';
+import { useMenu } from '@/components/site/common/MenuProvider';
 
-// ===== AI 工具匹配规则 =====
-interface ToolMatch {
-  slug: string;
-  name: string;
-  type: string;
-  icon: React.ReactNode;
-  keywords: string[];
-  description: string;
-}
-
-// ===== 工具路由映射（slug → 对应 create 页面 type） =====
-const TOOL_ROUTES: Record<string, string> = {
-  'product-generator': 'product',
-  'xiaohongshu-generator': 'xiaohongshu',
-  'ai-photo': 'aiphoto',
-};
-
-// ===== 跳转上下文存储 key =====
-const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
-
-// ===== 跳转上下文结构 =====
-interface CreateContext {
-  prompt: string;
-  uploadedImages: string[];
-  matchedTool: string;
-  type: string;
-  autoGenerate: boolean;
-  analysisResult: {
-    tool: string;
-    style: string;
-    ratio: string;
-    count: string;
-  };
-}
-
-// ===== 保存上下文到 sessionStorage 并跳转到 /create =====
+// ===== 导航到创作页 =====
 function navigateToCreate(
   router: ReturnType<typeof useRouter>,
-  context: CreateContext,
-) {
-  try {
-    sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
-  } catch {
-    // sessionStorage 写入失败时降级为 URL 参数（不传图片）
-    console.warn('sessionStorage write failed, falling back to URL params');
+  opts: {
+    prompt?: string;
+    uploadedImages?: string[];
+    matchedTool?: string;
+    type?: string;
+    autoGenerate?: boolean;
+    analysisResult?: { tool: string; style: string; ratio: string; count: string };
   }
-  const params = new URLSearchParams({
-    prompt: context.prompt,
-    type: context.type,
-    toolId: context.matchedTool,
-  });
+) {
+  const params = new URLSearchParams();
+  if (opts.prompt) params.set('prompt', opts.prompt);
+  if (opts.matchedTool) params.set('tool', opts.matchedTool);
+  if (opts.type) params.set('type', opts.type);
+  if (opts.autoGenerate) params.set('auto', '1');
+  if (opts.analysisResult) {
+    params.set('style', opts.analysisResult.style);
+    params.set('ratio', opts.analysisResult.ratio);
+    params.set('count', opts.analysisResult.count);
+  }
   router.push(`/create?${params.toString()}`);
 }
 
+// ===== 工具匹配 =====
+interface ToolMatch {
+  slug: string;
+  name: string;
+  icon: string;
+  keywords: string[];
+}
+
 const TOOL_MATCHES: ToolMatch[] = [
-  {
-    slug: 'product-generator',
-    name: 'AI商品图生成器',
-    type: 'product',
-    icon: <Package className="w-4 h-4" />,
-    keywords: ['商品图', '商品主图', '主图', '电商图', '淘宝图', '产品图', '白底图', '场景图', '卖点图', '电商', '淘宝', '京东', '拼多多', '商品照', '产品照', '耳机', '手机壳', '护肤品', '零食', '服装'],
-    description: '3秒生成可直接用于淘宝/小红书的高级商品图',
-  },
-  {
-    slug: 'xiaohongshu-generator',
-    name: '小红书爆款生成器',
-    type: 'xiaohongshu',
-    icon: <BookOpen className="w-4 h-4" />,
-    keywords: ['小红书', '种草', '封面', '笔记', '爆款', '涨粉', '好物推荐', '测评', '分享', '穿搭', '美妆', '护肤'],
-    description: '爆款小红书内容一键生成，涨粉必备神器',
-  },
-  {
-    slug: 'ai-photo',
-    name: 'AI写真生成器',
-    type: 'aiphoto',
-    icon: <Heart className="w-4 h-4" />,
-    keywords: ['写真', '人像', '肖像', '自拍', '头像', '氛围感', '大片', '证件照', '形象照', '个人照'],
-    description: '一键生成氛围感写真大片，朋友圈C位担当',
-  },
+  { slug: 'product-generator', name: 'AI商品图生成器', icon: '🛍', keywords: ['商品', '产品', '主图', '白底', '电商', '带货', '宝贝', 'listing'] },
+  { slug: 'xiaohongshu-generator', name: '小红书封面生成器', icon: '📕', keywords: ['小红书', '封面', '种草', '笔记', '穿搭', '护肤', '美妆', '封面图'] },
+  { slug: 'ai-photo', name: 'AI写真工坊', icon: '📸', keywords: ['写真', '人像', '头像', '照片', '肖像', '氛围', '风格'] },
 ];
+
+const TOOL_ROUTES: Record<string, string> = {
+  'product-generator': 'product',
+  'xiaohongshu-generator': 'xiaohongshu',
+  'ai-photo': 'photo',
+};
 
 // ===== AI 需求识别状态 =====
 type IdentifyPhase = 'idle' | 'identifying' | 'matched' | 'no-match';
 
-// ===== 试试这些创作 — pills 标签（精简到4个） =====
+// ===== 试试这些创作 =====
 const tryChips = [
   { label: '商品主图', prompt: '帮我生成高级感耳机商品图，白底高级感，多角度展示' },
   { label: '小红书封面', prompt: '生成小红书护肤封面，夏日清新风格' },
@@ -119,7 +80,7 @@ const placeholderTexts = [
   '生成穿搭种草封面图',
 ];
 
-// ===== 右侧预览图 — 带生成描述 =====
+// ===== 右侧案例展示 =====
 const showcaseExamples = [
   {
     title: '商品主图',
@@ -150,28 +111,40 @@ const showcaseExamples = [
 // ===== 热门案例 =====
 const hotResults = [
   {
-    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=450&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=750&fit=crop&auto=format&q=80',
     type: '商品图',
     title: '高级护肤品主图',
     examplePrompt: '帮我生成高级护肤品商品图，白底高级感',
   },
   {
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=450&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=750&fit=crop&auto=format&q=80',
     type: '小红书',
     title: '夏日穿搭种草图',
     examplePrompt: '生成小红书穿搭种草图，清新文艺风格',
   },
   {
-    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=750&fit=crop&auto=format&q=80',
     type: 'AI写真',
     title: '氛围感写真大片',
     examplePrompt: '生成高级氛围感写真，柔和光影',
   },
   {
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=450&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=750&fit=crop&auto=format&q=80',
     type: '商品图',
     title: '数码产品主图',
     examplePrompt: '生成数码产品商品主图，深色科技风',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=750&fit=crop&auto=format&q=80',
+    type: '商品图',
+    title: '极简手表商品图',
+    examplePrompt: '生成极简手表商品主图，高级质感',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=600&h=750&fit=crop&auto=format&q=80',
+    type: 'AI写真',
+    title: '时尚杂志大片',
+    examplePrompt: '生成时尚杂志风格写真，杂志封面质感',
   },
 ];
 
@@ -182,20 +155,13 @@ function matchTool(input: string): ToolMatch | null {
   const lower = input.toLowerCase();
   let bestMatch: ToolMatch | null = null;
   let bestScore = 0;
-
   for (const tool of TOOL_MATCHES) {
     let score = 0;
     for (const kw of tool.keywords) {
-      if (lower.includes(kw)) {
-        score += kw.length;
-      }
+      if (lower.includes(kw)) score += kw.length;
     }
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = tool;
-    }
+    if (score > bestScore) { bestScore = score; bestMatch = tool; }
   }
-
   return bestMatch;
 }
 
@@ -206,25 +172,18 @@ export default function HomePage() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  // AI 需求识别状态
   const [phase, setPhase] = useState<IdentifyPhase>('idle');
   const [matchedTool, setMatchedTool] = useState<ToolMatch | null>(null);
   const [identifyStep, setIdentifyStep] = useState(0);
   const [isJumping, setIsJumping] = useState(false);
-
-  // Placeholder 轮播
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
-
-  // 拖拽状态
   const [isDragOver, setIsDragOver] = useState(false);
-
-  // 右侧案例轮播
   const [showcaseIndex, setShowcaseIndex] = useState(0);
   const [showcaseFading, setShowcaseFading] = useState(false);
 
-  // 识别文案轮播 — 单行动态文案，每2秒切换
   const identifyMessages = [
     '正在理解你的创意需求…',
     '正在分析参考图片风格…',
@@ -232,7 +191,6 @@ export default function HomePage() {
     'OneClaw 正在为你生成专业方案…',
   ];
 
-  // 推荐风格映射
   interface StyleRecommendation { style: string; ratio: string; count: string; }
   function getStyleRecommendation(tool: ToolMatch | null, input: string): StyleRecommendation {
     if (!tool) return { style: 'premium', ratio: '3:4', count: '4' };
@@ -243,21 +201,19 @@ export default function HomePage() {
       'ai-photo': { style: 'luxury', ratio: '3:4', count: '6' },
     };
     const rec = map[tool.slug] ? { ...map[tool.slug] } : { style: 'premium', ratio: '3:4', count: '4' };
-    // 根据用户输入动态调整 style
     if (lower.includes('深色') || lower.includes('暗黑') || lower.includes('科技')) rec.style = 'tech';
-    if (lower.includes('清新') || lower.includes('夏日') || lower.includes('文艺') || lower.includes('自然')) rec.style = 'fresh';
-    if (lower.includes('极简') || lower.includes('简约') || lower.includes('干净')) rec.style = 'minimal';
+    if (lower.includes('清新') || lower.includes('夏日') || lower.includes('文艺')) rec.style = 'fresh';
+    if (lower.includes('极简') || lower.includes('简约')) rec.style = 'minimal';
     if (lower.includes('高级') || lower.includes('质感') || lower.includes('大片')) rec.style = 'premium';
-    if (lower.includes('可爱') || lower.includes('甜美') || lower.includes('少女')) rec.style = 'cute';
-    if (lower.includes('复古') || lower.includes('胶片') || lower.includes('怀旧')) rec.style = 'retro-film';
-    if (lower.includes('韩系') || lower.includes('韩风') || lower.includes('清新写真')) rec.style = 'korean-fresh';
-    if (lower.includes('节日') || lower.includes('圣诞') || lower.includes('新年')) rec.style = 'festive';
-    if (lower.includes('生活') || lower.includes('场景') || lower.includes('日常')) rec.style = 'lifestyle';
+    if (lower.includes('可爱') || lower.includes('甜美')) rec.style = 'cute';
+    if (lower.includes('复古') || lower.includes('胶片')) rec.style = 'retro-film';
+    if (lower.includes('韩系') || lower.includes('韩风')) rec.style = 'korean-fresh';
+    if (lower.includes('节日') || lower.includes('圣诞')) rec.style = 'festive';
+    if (lower.includes('生活') || lower.includes('场景')) rec.style = 'lifestyle';
     if (lower.includes('海报') || lower.includes('封面')) { rec.ratio = '3:4'; rec.count = '3'; }
     return rec;
   }
 
-  // Placeholder 自动轮播 — 用 CSS opacity 过渡避免布局抖动
   useEffect(() => {
     if (inputText.trim()) return;
     const interval = setInterval(() => {
@@ -270,7 +226,6 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [inputText]);
 
-  // 右侧案例自动轮播 — 5秒切换，淡入淡出
   useEffect(() => {
     const interval = setInterval(() => {
       setShowcaseFading(true);
@@ -282,15 +237,10 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-  // 消费模板/提示词填充
   useEffect(() => {
-    if (pendingInput) {
-      setInputText(pendingInput);
-      consumePendingInput();
-    }
+    if (pendingInput) { setInputText(pendingInput); consumePendingInput(); }
   }, [pendingInput, consumePendingInput]);
 
-  // ===== 多图上传辅助 =====
   const addImageFiles = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
     const remaining = MAX_UPLOAD_IMAGES - uploadedImages.length;
@@ -307,69 +257,33 @@ export default function HomePage() {
     });
   }, [uploadedImages.length]);
 
-  // ===== 拖拽上传 =====
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-  }, []);
-
+  const handleDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(true); }, []);
+  const handleDragLeave = useCallback((e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); setIsDragOver(false); }, []);
   const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragOver(false);
-    if (e.dataTransfer.files?.length) {
-      addImageFiles(e.dataTransfer.files);
-    }
+    e.preventDefault(); e.stopPropagation(); setIsDragOver(false);
+    if (e.dataTransfer.files?.length) addImageFiles(e.dataTransfer.files);
   }, [addImageFiles]);
 
-  // ===== AI 需求识别 + 自动跳转 =====
   const handleStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
-
-    setPhase('identifying');
-    setIdentifyStep(0);
-
-    // 4条文案，每2秒切换
+    setPhase('identifying'); setIdentifyStep(0);
     setTimeout(() => setIdentifyStep(1), 2000);
     setTimeout(() => setIdentifyStep(2), 4000);
     setTimeout(() => setIdentifyStep(3), 6000);
-
-    // 8秒后出结果
     setTimeout(() => {
       const tool = matchTool(inputText);
-      if (tool) {
-        setMatchedTool(tool);
-        setPhase('matched');
-      } else {
-        setPhase('no-match');
-      }
+      if (tool) { setMatchedTool(tool); setPhase('matched'); }
+      else { setPhase('no-match'); }
     }, 8000);
-
-    // 结果展示1秒后自动跳转
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool && TOOL_ROUTES[tool.slug]) {
         setIsJumping(true);
         const rec = getStyleRecommendation(tool, inputText);
         navigateToCreate(router, {
-          prompt: inputText.trim(),
-          uploadedImages,
-          matchedTool: tool.slug,
-          type: TOOL_ROUTES[tool.slug],
-          autoGenerate: true,
-          analysisResult: {
-            tool: tool.slug,
-            style: rec.style,
-            ratio: rec.ratio,
-            count: rec.count,
-          },
+          prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
+          type: TOOL_ROUTES[tool.slug], autoGenerate: true,
+          analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
         });
       }
     }, 9000);
@@ -382,23 +296,13 @@ export default function HomePage() {
     setIsJumping(true);
     const rec = getStyleRecommendation(matchedTool, inputText);
     navigateToCreate(router, {
-      prompt: inputText.trim(),
-      uploadedImages,
-      matchedTool: matchedTool.slug,
-      type: routeType,
-      autoGenerate: true,
-      analysisResult: {
-        tool: matchedTool.slug,
-        style: rec.style,
-        ratio: rec.ratio,
-        count: rec.count,
-      },
+      prompt: inputText.trim(), uploadedImages, matchedTool: matchedTool.slug,
+      type: routeType, autoGenerate: true,
+      analysisResult: { tool: matchedTool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
     });
   }, [matchedTool, inputText, uploadedImages, router]);
 
-  const handleBrowseTools = useCallback(() => {
-    router.push('/tools');
-  }, [router]);
+  const handleBrowseTools = useCallback(() => { router.push('/tools'); }, [router]);
 
   const handleAutoCreate = useCallback(() => {
     if (!matchedTool) return;
@@ -406,314 +310,235 @@ export default function HomePage() {
     const rec = getStyleRecommendation(matchedTool, inputText);
     const routeType = TOOL_ROUTES[matchedTool.slug] || 'auto';
     navigateToCreate(router, {
-      prompt: inputText.trim(),
-      uploadedImages,
-      matchedTool: matchedTool.slug,
-      type: routeType,
-      autoGenerate: true,
-      analysisResult: {
-        tool: matchedTool.slug,
-        style: rec.style,
-        ratio: rec.ratio,
-        count: rec.count,
-      },
+      prompt: inputText.trim(), uploadedImages, matchedTool: matchedTool.slug,
+      type: routeType, autoGenerate: true,
+      analysisResult: { tool: matchedTool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
     });
-  }, [inputText, uploadedImages, router]);
+  }, [inputText, uploadedImages, router, matchedTool]);
 
   const resetIdentify = useCallback(() => {
-    setPhase('idle');
-    setMatchedTool(null);
-    setIdentifyStep(0);
-    setIsJumping(false);
+    setPhase('idle'); setMatchedTool(null); setIdentifyStep(0); setIsJumping(false);
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault();
-      handleStartCreate();
-    }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); handleStartCreate(); }
   }, [handleStartCreate]);
 
-  const handleChipClick = useCallback((prompt: string) => {
-    setInputText(prompt);
-    resetIdentify();
-  }, [resetIdentify]);
-
-  const handleUploadClick = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
+  const handleChipClick = useCallback((prompt: string) => { setInputText(prompt); resetIdentify(); }, [resetIdentify]);
+  const handleUploadClick = useCallback(() => { fileInputRef.current?.click(); }, []);
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      addImageFiles(e.target.files);
-    }
+    if (e.target.files && e.target.files.length > 0) addImageFiles(e.target.files);
     e.target.value = '';
   }, [addImageFiles]);
-
   const removeImage = useCallback((index: number) => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   }, []);
-
   const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
 
-  // 当前展示的案例
   const currentShowcase = showcaseExamples[showcaseIndex];
+
+  // Carousel scroll
+  const scrollCarousel = useCallback((dir: 'left' | 'right') => {
+    if (!carouselRef.current) return;
+    const scrollAmount = 280;
+    carouselRef.current.scrollBy({ left: dir === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+  }, []);
 
   return (
     <div className="os-page">
-      {/* ==================== Hero 创作区 ==================== */}
+      {/* ==================== Hero 创作区 — 左右分栏 ==================== */}
       <div className="os-hero">
-        {/* 噪点纹理 */}
         <div className="os-hero-noise" />
+        <div className="os-hero-inner">
 
-        {/* 内容层 */}
-        <div className="relative z-10 flex flex-col items-center w-full os-content">
+          {/* ===== 左侧内容区 ===== */}
+          <div className="os-hero-left">
+            <h1 className="os-hero-left-title">
+              上传图片<br />一键生成<span className="gradient-text">高质量内容</span>
+            </h1>
+            <p className="os-hero-left-subtitle">
+              商品图、小红书、AI写真等内容，简单输入需求即可生成。
+            </p>
 
-          {/* 主标题 — PC端单行 nowrap，移动端允许换行 */}
-          <h1 className="os-hero-title">
-            上传图片，一键生成<span className="gradient-text">高质量内容</span>
-          </h1>
-
-          {/* 副标题 */}
-          <p className="os-hero-subtitle">
-            商品图、小红书、AI写真等内容，简单输入需求即可生成。
-          </p>
-
-          {/* ===== AI 创作输入区 — 左右分栏 ===== */}
-          <div className="os-studio mt-10">
-            {/* 左侧：输入区 (65%) */}
-            <div className="os-studio-input">
-              {/* AI 创作描述框 */}
-              <div className="os-studio-input-area">
-                {/* 顶部 AI 引导文字 — 有输入时完全移除，杜绝重叠 */}
-                {!inputText && <span className="os-studio-ai-hint">描述你想生成的内容…</span>}
-                {/* 输入区域：placeholder + textarea 叠加 */}
-                <div className="os-studio-textarea-wrap">
-                  {/* placeholder 仅在无输入时渲染，彻底避免文字重叠 */}
-                  {!inputText && (
-                    <div
-                      className={`os-studio-placeholder ${placeholderVisible ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
-                      onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
-                    >
-                      <p className="os-studio-placeholder-example">
-                        {placeholderTexts[placeholderIndex]}
-                      </p>
-                    </div>
-                  )}
-                  <textarea
-                    value={inputText}
-                    onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
-                    onKeyDown={handleKeyDown}
-                    placeholder=""
-                    className="os-studio-textarea"
-                  />
-                </div>
-
-                {/* 上传图片预览 — 多图横向排列 */}
-                {uploadedImages.length > 0 && (
-                  <div className="os-upload-previews">
-                    {uploadedImages.map((img, idx) => (
-                      <div key={idx} className="os-upload-preview-item">
-                        <img src={img} alt={`参考图${idx + 1}`} className="os-upload-preview-img" />
-                        <button onClick={() => removeImage(idx)} className="os-upload-preview-remove">
-                          <X />
-                        </button>
-                      </div>
-                    ))}
+            {/* 输入框 */}
+            <div className="os-hero-input-area">
+              {!inputText && <span className="os-studio-ai-hint">描述你想生成的内容…</span>}
+              <div className="os-studio-textarea-wrap">
+                {!inputText && (
+                  <div
+                    className={`os-studio-placeholder ${placeholderVisible ? 'os-studio-placeholder-visible' : 'os-studio-placeholder-hidden'}`}
+                    onClick={() => document.querySelector<HTMLTextAreaElement>('.os-studio-textarea')?.focus()}
+                  >
+                    <p className="os-studio-placeholder-example">{placeholderTexts[placeholderIndex]}</p>
                   </div>
                 )}
+                <textarea
+                  value={inputText}
+                  onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
+                  onKeyDown={handleKeyDown}
+                  placeholder=""
+                  className="os-studio-textarea"
+                />
               </div>
 
-              {/* 拖拽上传区域 — 带能力说明 */}
-              {canUploadMore && (
-                <div
-                  ref={dropZoneRef}
-                  className={`os-dropzone ${isDragOver ? 'os-dropzone-active' : ''}`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={handleUploadClick}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <div className="os-dropzone-icon">
-                    <ImagePlus className="w-5 h-5" />
-                  </div>
-                  <div className="os-dropzone-text">
-                    <span className="os-dropzone-title">
-                      {uploadedImages.length > 0 ? '继续添加参考图' : '添加灵感参考（可选）'}
-                    </span>
-                    <span className="os-dropzone-formats">
-                      点击或拖拽上传{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ' · 支持 JPG / PNG / WebP'}
-                    </span>
-                  </div>
+              {uploadedImages.length > 0 && (
+                <div className="os-upload-previews">
+                  {uploadedImages.map((img, idx) => (
+                    <div key={idx} className="os-upload-preview-item">
+                      <img src={img} alt={`参考图${idx + 1}`} className="os-upload-preview-img" />
+                      <button onClick={() => removeImage(idx)} className="os-upload-preview-remove"><X /></button>
+                    </div>
+                  ))}
                 </div>
               )}
-
-              {/* 已达上限提示 */}
-              {!canUploadMore && (
-                <div className="os-dropzone os-dropzone-full">
-                  <div className="os-dropzone-icon">
-                    <Check className="w-5 h-5 text-emerald-500" />
-                  </div>
-                  <div className="os-dropzone-text">
-                    <span className="os-dropzone-title">已选 {MAX_UPLOAD_IMAGES} 张参考图</span>
-                    <span className="os-dropzone-formats">点击已有图片的 × 可移除</span>
-                  </div>
-                </div>
-              )}
-
-              {/* 试试这些创作 — pills 标签 */}
-              {!inputText.trim() && phase === 'idle' && (
-                <div className="os-try-chips-bar">
-                  <span className="os-try-chips-label">试试这些创作</span>
-                  <div className="os-try-chips-list">
-                    {tryChips.map((chip) => (
-                      <button
-                        key={chip.label}
-                        className="os-try-chip"
-                        onClick={() => handleChipClick(chip.prompt)}
-                      >
-                        {chip.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 底部工具栏 */}
-              <div className="os-studio-toolbar">
-                <div className="flex items-center gap-2">
-                  <span className="text-[12px] text-slate-300 ml-1">{inputText.length} / 500</span>
-                </div>
-                <button
-                  onClick={handleStartCreate}
-                  disabled={!inputText.trim() || phase !== 'idle'}
-                  className="os-studio-cta"
-                >
-                  <Wand2 className="w-5 h-5" />
-                  <span>{phase === 'idle' ? '立即开始创作' : '识别中...'}</span>
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </button>
-              </div>
-
-
             </div>
 
-            {/* 右侧：AI 创作灵感 (35%) */}
-            <div className="os-studio-showcase">
-              <div className="os-showcase-header">
-                <span className="os-showcase-title">AI 创作灵感</span>
-              </div>
-
-              {/* 主展示区 — 当前高亮案例 */}
-              <div className={`os-showcase-featured ${showcaseFading ? 'os-showcase-fading' : ''}`}>
-                <div className="os-showcase-featured-img-wrap">
-                  <img
-                    src={currentShowcase.image}
-                    alt={currentShowcase.title}
-                    className="os-showcase-featured-img"
-                  />
-                  {/* shimmer 扫光 */}
-                  <div className="os-showcase-shimmer" />
-                  <div className="os-showcase-featured-overlay" />
-                  <div className="os-showcase-featured-info">
-                    <span className="os-showcase-featured-category">{currentShowcase.category}</span>
-                    <span className="os-showcase-featured-generating">
-                      <span className="os-showcase-gen-dot" />
-                      正在生成：{currentShowcase.generating}
-                    </span>
-                  </div>
+            {/* 上传区 */}
+            {canUploadMore && (
+              <div
+                ref={dropZoneRef}
+                className={`os-dropzone ${isDragOver ? 'os-dropzone-active' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={handleUploadClick}
+              >
+                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleFileChange} />
+                <div className="os-dropzone-icon"><ImagePlus className="w-5 h-5" /></div>
+                <div className="os-dropzone-text">
+                  <span className="os-dropzone-title">{uploadedImages.length > 0 ? '继续添加参考图' : '添加灵感参考（可选）'}</span>
+                  <span className="os-dropzone-formats">点击或拖拽上传{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ' · 支持 JPG / PNG / WebP'}</span>
                 </div>
               </div>
-
-              {/* 正在生成描述 */}
-              <div className="os-showcase-gen-label">
-                <span className="os-showcase-gen-dot-sm" />
-                <span>正在生成：{currentShowcase.generating}</span>
+            )}
+            {!canUploadMore && (
+              <div className="os-dropzone os-dropzone-full">
+                <div className="os-dropzone-icon"><Check className="w-5 h-5 text-emerald-500" /></div>
+                <div className="os-dropzone-text">
+                  <span className="os-dropzone-title">已选 {MAX_UPLOAD_IMAGES} 张参考图</span>
+                  <span className="os-dropzone-formats">点击已有图片的 × 可移除</span>
+                </div>
               </div>
+            )}
 
-              {/* 缩略图列表 */}
-              <div className="os-showcase-thumbs">
-                {showcaseExamples.map((example, idx) => (
-                  <div
-                    key={idx}
-                    className={`os-showcase-thumb ${idx === showcaseIndex ? 'os-showcase-thumb-active' : ''}`}
-                    onClick={() => {
-                      setShowcaseFading(true);
-                      setTimeout(() => {
-                        setShowcaseIndex(idx);
-                        setShowcaseFading(false);
-                      }, 300);
-                    }}
-                  >
-                    <img src={example.image} alt={example.title} className="os-showcase-thumb-img" />
-                    <span className="os-showcase-thumb-label">{example.category}</span>
-                  </div>
-                ))}
+            {/* 试试这些创作 */}
+            {!inputText.trim() && phase === 'idle' && (
+              <div className="os-hero-chips">
+                <span className="os-hero-chips-label">试试这些创作</span>
+                <div className="os-hero-chips-list">
+                  {tryChips.map((chip) => (
+                    <button key={chip.label} className="os-hero-chip" onClick={() => handleChipClick(chip.prompt)}>
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* CTA 按钮 */}
+            <button
+              onClick={handleStartCreate}
+              disabled={!inputText.trim() || phase !== 'idle'}
+              className="os-hero-cta"
+            >
+              <Wand2 className="w-5 h-5" />
+              <span>{phase === 'idle' ? '立即开始创作' : '识别中...'}</span>
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </button>
+            <span className="text-[12px] text-slate-300 mt-2 ml-1">{inputText.length} / 500</span>
           </div>
 
-          {/* ===== 旧的灵感建议 chips — 移除，已由试试这些创作替代 ===== */}
-
+          {/* ===== 右侧案例区 ===== */}
+          <div className="os-hero-right">
+            <div className="os-showcase-header">
+              <span className="os-showcase-title">AI 创作灵感</span>
+            </div>
+            <div className={`os-showcase-featured ${showcaseFading ? 'os-showcase-fading' : ''}`}>
+              <div className="os-showcase-featured-img-wrap">
+                <img src={currentShowcase.image} alt={currentShowcase.title} className="os-showcase-featured-img" />
+                <div className="os-showcase-shimmer" />
+                <div className="os-showcase-featured-overlay" />
+                <div className="os-showcase-featured-info">
+                  <span className="os-showcase-featured-category">{currentShowcase.category}</span>
+                  <span className="os-showcase-featured-generating">
+                    <span className="os-showcase-gen-dot" />
+                    正在生成：{currentShowcase.generating}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="os-showcase-gen-label">
+              <span className="os-showcase-gen-dot-sm" />
+              <span>正在生成：{currentShowcase.generating}</span>
+            </div>
+            <div className="os-showcase-thumbs">
+              {showcaseExamples.map((example, idx) => (
+                <div
+                  key={idx}
+                  className={`os-showcase-thumb ${idx === showcaseIndex ? 'os-showcase-thumb-active' : ''}`}
+                  onClick={() => {
+                    setShowcaseFading(true);
+                    setTimeout(() => { setShowcaseIndex(idx); setShowcaseFading(false); }, 300);
+                  }}
+                >
+                  <img src={example.image} alt={example.title} className="os-showcase-thumb-img" />
+                  <span className="os-showcase-thumb-label">{example.category}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ==================== 热门创作结果 ==================== */}
-      <section className="relative animate-fade-slide-up mt-16 pb-8" style={{ animationDelay: '0.15s' }}>
+      {/* ==================== 热门生成案例 — 横向轮播 ==================== */}
+      <section className="os-hot-section">
         <div className="os-content">
-          <div className="flex items-center justify-between mb-8">
+          <div className="os-hot-header">
             <div>
-              <div className="flex items-center gap-3">
+              <div className="os-hot-title-row">
                 <TrendingUp className="w-5 h-5 text-[#7B61FF]/60" />
-                <h2 className="text-xl font-semibold text-slate-700">热门生成案例</h2>
+                <h2 className="os-hot-title">热门生成案例</h2>
               </div>
-              <p className="text-[13px] text-slate-400 mt-1.5 ml-8">看看 OneClaw 能生成哪些内容</p>
+              <p className="os-hot-subtitle">看看 OneClaw 能生成哪些内容</p>
             </div>
-            <button
-              onClick={() => router.push('/tools')}
-              className="text-sm text-slate-400 hover:text-[#7B61FF] transition-colors flex items-center gap-1"
-            >
-              查看更多 <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            <div className="os-hot-nav">
+              <button onClick={() => scrollCarousel('left')} className="os-hot-nav-btn"><ChevronLeft className="w-5 h-5" /></button>
+              <button onClick={() => scrollCarousel('right')} className="os-hot-nav-btn"><ChevronRight className="w-5 h-5" /></button>
+              <button onClick={() => router.push('/tools')} className="os-hot-more">
+                查看更多 <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          <div className="os-result-grid">
+          <div className="os-hot-carousel" ref={carouselRef}>
             {hotResults.map((item, idx) => (
               <div
                 key={idx}
-                className="os-result-card group cursor-pointer"
+                className="os-hot-card"
                 onClick={() => {
                   const params = new URLSearchParams({ prompt: item.examplePrompt });
                   router.push(`/create?${params.toString()}`);
                 }}
               >
-                <div className="os-result-card-image">
-                  <img src={item.image} alt={item.title} className="os-result-card-img" loading="lazy" />
-                  <span className="os-result-card-type">{item.type}</span>
-                  <div className="os-result-card-overlay">
+                <div className="os-hot-card-img-wrap">
+                  <img src={item.image} alt={item.title} className="os-hot-card-img" loading="lazy" />
+                  <div className="os-hot-card-hover">
                     <button
-                      className="os-result-card-cta"
+                      className="os-hot-card-cta"
                       onClick={(e) => {
                         e.stopPropagation();
                         const params = new URLSearchParams({ prompt: item.examplePrompt });
                         router.push(`/create?${params.toString()}`);
                       }}
                     >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      <span>用这个生成</span>
+                      <Wand2 className="w-4 h-4" />
+                      <span>生成同款</span>
                     </button>
                   </div>
                 </div>
-                <div className="os-result-card-info">
-                  <p className="os-result-card-title">{item.title}</p>
+                <div className="os-hot-card-info">
+                  <span className="os-hot-card-type">{item.type}</span>
+                  <p className="os-hot-card-title">{item.title}</p>
                 </div>
               </div>
             ))}
@@ -725,21 +550,16 @@ export default function HomePage() {
       {phase !== 'idle' && (
         <div className="os-ai-overlay">
           <div className="os-ai-card">
-            {/* 背景光效 */}
             <div className="os-ai-card-glow" />
-
             {phase === 'identifying' && (
               <div className="os-ai-analyzing" key={`msg-${identifyStep}`}>
-                {/* 上传图片扫描区域 — 支持多图展示 */}
                 {uploadedImages.length > 0 && (
                   <div className="os-ai-scan-area">
                     {uploadedImages.length === 1 ? (
-                      /* 单图：大图展示 */
                       <div className="os-ai-scan-single">
                         <img src={uploadedImages[0]} alt="参考图" className="os-ai-scan-img" />
                       </div>
                     ) : (
-                      /* 多图：网格展示 */
                       <div className={`os-ai-scan-grid os-ai-scan-grid-${Math.min(uploadedImages.length, 5)}`}>
                         {uploadedImages.slice(0, 5).map((img, idx) => (
                           <div key={idx} className="os-ai-scan-grid-item">
@@ -750,18 +570,12 @@ export default function HomePage() {
                     )}
                     <div className="os-ai-scan-line" />
                     <div className="os-ai-scan-shimmer" />
-                    {uploadedImages.length > 1 && (
-                      <span className="os-ai-scan-count">已上传 {uploadedImages.length} 张参考图</span>
-                    )}
+                    {uploadedImages.length > 1 && <span className="os-ai-scan-count">已上传 {uploadedImages.length} 张参考图</span>}
                   </div>
                 )}
-
-                {/* 动态文案 — 一次一句 */}
                 <div className="os-ai-msg-wrap">
                   <span className="os-ai-msg">{identifyMessages[identifyStep]}</span>
                 </div>
-
-                {/* 呼吸脉冲点 */}
                 <div className="os-ai-pulse-dots">
                   <span className="os-ai-pulse-dot" style={{ animationDelay: '0s' }} />
                   <span className="os-ai-pulse-dot" style={{ animationDelay: '0.4s' }} />
@@ -769,49 +583,22 @@ export default function HomePage() {
                 </div>
               </div>
             )}
-
             {phase === 'matched' && matchedTool && (
               <div className="os-ai-matched">
-                {/* 成功标识 */}
-                <div className="os-ai-matched-check">
-                  <Check className="w-6 h-6 text-white" />
-                </div>
-
-                {/* 标题 */}
+                <div className="os-ai-matched-check"><Check className="w-6 h-6 text-white" /></div>
                 <span className="os-ai-matched-label">OneClaw 已为你匹配最佳创作工具</span>
-
-                {/* 大号工具名 */}
-                <span className="os-ai-matched-tool">
-                  {matchedTool.icon}
-                  <span className="ml-2">{matchedTool.name}</span>
-                </span>
-
-                {/* 推荐信息 */}
+                <span className="os-ai-matched-tool">{matchedTool.icon}<span className="ml-2">{matchedTool.name}</span></span>
                 <div className="os-ai-matched-recs">
-                  <div className="os-ai-matched-rec">
-                    <span className="os-ai-matched-rec-label">推荐风格</span>
-                    <span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).style}</span>
-                  </div>
-                  <div className="os-ai-matched-rec">
-                    <span className="os-ai-matched-rec-label">推荐比例</span>
-                    <span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).ratio}</span>
-                  </div>
-                  <div className="os-ai-matched-rec">
-                    <span className="os-ai-matched-rec-label">生成数量</span>
-                    <span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).count}</span>
-                  </div>
+                  <div className="os-ai-matched-rec"><span className="os-ai-matched-rec-label">推荐风格</span><span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).style}</span></div>
+                  <div className="os-ai-matched-rec"><span className="os-ai-matched-rec-label">推荐比例</span><span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).ratio}</span></div>
+                  <div className="os-ai-matched-rec"><span className="os-ai-matched-rec-label">生成数量</span><span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).count}</span></div>
                 </div>
-
-                {/* 自动跳转提示 */}
                 <span className="os-ai-matched-redirect">正在进入创作工作台…</span>
               </div>
             )}
-
             {phase === 'no-match' && (
               <div className="os-ai-nomatch">
-                <div className="os-ai-nomatch-icon">
-                  <Sparkles className="w-5 h-5" />
-                </div>
+                <div className="os-ai-nomatch-icon"><Sparkles className="w-5 h-5" /></div>
                 <span className="os-ai-nomatch-title">我们为你推荐这些创作方式</span>
                 <span className="os-ai-nomatch-desc">当前需求不够明确，你可以选择一个方向继续创作</span>
                 <div className="os-ai-nomatch-tags">
@@ -825,17 +612,9 @@ export default function HomePage() {
                           if (!routeType) return;
                           const rec = getStyleRecommendation(tool, inputText);
                           navigateToCreate(router, {
-                            prompt: inputText.trim(),
-                            uploadedImages,
-                            matchedTool: tool.slug,
-                            type: routeType,
-                            autoGenerate: true,
-                            analysisResult: {
-                              tool: tool.slug,
-                              style: rec.style,
-                              ratio: rec.ratio,
-                              count: rec.count,
-                            },
+                            prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
+                            type: routeType, autoGenerate: true,
+                            analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
                           });
                         }}
                       >
@@ -846,9 +625,7 @@ export default function HomePage() {
                   })}
                 </div>
                 <div className="os-ai-nomatch-actions">
-                  <button onClick={handleAutoCreate} className="os-ai-nomatch-primary">
-                    选择第一个推荐工具继续
-                  </button>
+                  <button onClick={handleAutoCreate} className="os-ai-nomatch-primary">选择第一个推荐工具继续</button>
                   <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览全部工具</button>
                   <button onClick={resetIdentify} className="os-ai-nomatch-ghost">返回修改需求</button>
                 </div>

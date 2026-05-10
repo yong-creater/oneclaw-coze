@@ -1,84 +1,93 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Package, Camera, BookImage } from 'lucide-react';
+import { ArrowRight, Sparkles, Image as ImageIcon, Camera, Layout } from 'lucide-react';
+import BackToHome from '@/components/site/common/BackToHome';
 
-/* ---------- tool data — with real case images ---------- */
-const TOOLS = [
+/* ---------- 工具数据 ---------- */
+interface Tool {
+  slug: string;
+  name: string;
+  desc: string;
+  cover: string;
+  tags: string[];
+  icon: React.ElementType;
+}
+
+const TOOLS: Tool[] = [
   {
     slug: 'product-generator',
     name: 'AI 商品图生成器',
-    desc: '上传商品图，一键生成高质感电商主图、场景图、白底图',
-    tags: ['电商', '商品图', '白底图'],
+    desc: '上传商品照片，一键生成高级感商业场景图，支持多风格多比例批量输出',
     cover: '/case-lipstick-main.png',
-    icon: Package,
+    tags: ['电商', '商品图', '批量'],
+    icon: ImageIcon,
   },
   {
     slug: 'xiaohongshu-generator',
     name: '小红书封面生成器',
-    desc: '一键生成爆款小红书封面，吸引更多点击与关注',
-    tags: ['小红书', '封面', '社交'],
+    desc: '智能生成小红书爆款封面，自动排版配色，提升笔记点击率',
     cover: '/demo-card-lifestyle.jpg',
-    icon: BookImage,
+    tags: ['小红书', '封面', '爆款'],
+    icon: Layout,
   },
   {
     slug: 'ai-photo',
     name: 'AI 写真生成器',
-    desc: '生成氛围感人像写真，多种风格随心选择',
-    tags: ['写真', '人像', '氛围感'],
+    desc: '上传人像照片，生成专业级写真大片，多种风格一键切换',
     cover: '/demo-scene.jpg',
+    tags: ['写真', '人像', '风格'],
     icon: Camera,
   },
 ];
 
+/* ==================== 工具库页面 ==================== */
 export default function ToolsPage() {
   const router = useRouter();
 
   return (
     <div className="os-page">
       <div className="os-page-inner">
-        <h1 className="os-page-title">AI 创作工具</h1>
-        <p className="os-page-subtitle">选择你想生成的内容，快速获得商业级结果</p>
+        <BackToHome />
+        <h1 className="os-page-title">工具库</h1>
+        <p className="os-page-subtitle">专业 AI 创作工具，一键生成高质量内容</p>
 
-        {/* 3 列卡片网格 */}
+        {/* 3列卡片网格 */}
         <div className="os-tool-grid">
-          {TOOLS.map(tool => {
+          {TOOLS.map((tool) => {
             const Icon = tool.icon;
             return (
-              <div key={tool.slug} className="os-tool-card">
-                {/* 封面图区 — 真实 AI 案例图 */}
+              <div
+                key={tool.slug}
+                className="os-tool-card"
+                onClick={() => router.push(`/create?tool=${tool.slug}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') router.push(`/create?tool=${tool.slug}`);
+                }}
+              >
+                {/* 封面图 — 260px */}
                 <div className="os-tool-card-img">
-                  <img
-                    src={tool.cover}
-                    alt={tool.name}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                  {/* fallback: icon + 渐变底色 */}
-                  <div className="os-tool-card-img-fallback">
-                    <Icon style={{ width: 56, height: 56, color: 'rgba(123,97,255,0.35)' }} strokeWidth={1.2} />
-                  </div>
+                  <img src={tool.cover} alt={tool.name} />
                 </div>
 
                 {/* 信息区 */}
                 <div className="os-tool-card-body">
-                  <h3 className="os-tool-card-title">{tool.name}</h3>
-                  <p className="os-tool-card-desc">{tool.desc}</p>
+                  <div className="os-tool-card-title">{tool.name}</div>
+                  <div className="os-tool-card-desc">{tool.desc}</div>
                   <div className="os-tool-card-tags">
-                    {tool.tags.map(tag => (
-                      <span key={tag} className="os-card-tag">{tag}</span>
+                    {tool.tags.map((t) => (
+                      <span key={t} className="os-card-tag">{t}</span>
                     ))}
                   </div>
+                  {/* CTA — 54px 紫蓝渐变 */}
+                  <button className="os-tool-card-cta" type="button">
+                    <Sparkles style={{ width: 20, height: 20 }} />
+                    立即生成
+                    <ArrowRight style={{ width: 18, height: 18 }} />
+                  </button>
                 </div>
-
-                {/* CTA 渐变 glow 按钮 */}
-                <button
-                  className="os-tool-card-cta"
-                  onClick={() => router.push(`/create?tool=${tool.slug}`)}
-                >
-                  ✨ 开始创作
-                </button>
               </div>
             );
           })}

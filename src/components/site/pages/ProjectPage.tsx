@@ -1,289 +1,242 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImagePlus, Download, Eye, Sparkles, Trash2, Loader2, X, ImageIcon } from 'lucide-react';
-import { useUser } from '@/contexts/UserContext';
+import { Sparkles, Download, ZoomIn, Trash2, FolderOpen, Image as ImageIcon, Loader2 } from 'lucide-react';
+import BackToHome from '@/components/site/common/BackToHome';
 
-/* ---------- helpers ---------- */
-const TOOL_LABEL: Record<string, string> = {
-  'product-generator': 'AI 商品图',
-  product: 'AI 商品图',
+/* ---------- 数据类型 ---------- */
+interface Generation {
+  id: number;
+  tool_type: string;
+  style: string;
+  ratio: string;
+  prompt: string;
+  thumbnail: string;
+  output_content: string | Record<string, unknown>;
+  created_at: string;
+  model_name?: string;
+  count?: number;
+}
+
+/* ---------- 工具名映射 ---------- */
+const TOOL_NAMES: Record<string, string> = {
+  'product-generator': 'AI商品图',
   'xiaohongshu-generator': '小红书封面',
-  xiaohongshu: '小红书封面',
-  'ai-photo': 'AI 写真',
-  photo: 'AI 写真',
+  'ai-photo': 'AI写真',
 };
 
-function genImage(gen: Record<string, unknown>): string {
-  if (gen.thumbnail && typeof gen.thumbnail === 'string') return gen.thumbnail;
-  const oc = gen.output_content;
-  if (oc) {
-    try {
-      const parsed = typeof oc === 'string' ? JSON.parse(oc) : oc;
-      if (parsed?.image_urls?.[0]) return parsed.image_urls[0];
-      if (parsed?.imageUrl) return parsed.imageUrl;
-    } catch { /* ignore */ }
+/* ---------- 提取首张图 ---------- */
+function firstImage(gen: Generation): string {
+  if (gen.thumbnail) return gen.thumbnail;
+  try {
+    const oc = typeof gen.output_content === 'string'
+      ? JSON.parse(gen.output_content)
+      : gen.output_content;
+    if (oc?.image_urls && Array.isArray(oc.image_urls) && oc.image_urls.length > 0) {
+      return oc.image_urls[0] as string;
+    }
+    if (oc?.imageUrl) return oc.imageUrl as string;
+    if (oc?.url) return oc.url as string;
+  } catch {
+    /* empty */
   }
   return '';
 }
 
-function genAllImages(gen: Record<string, unknown>): string[] {
-  const oc = gen.output_content;
-  if (oc) {
-    try {
-      const parsed = typeof oc === 'string' ? JSON.parse(oc) : oc;
-      if (Array.isArray(parsed?.image_urls)) return parsed.image_urls;
-      if (parsed?.imageUrl) return [parsed.imageUrl];
-    } catch { /* ignore */ }
+/* ---------- 格式化日期 ---------- */
+function fmtDate(d: string): string {
+  try {
+    const dt = new Date(d);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  } catch {
+    return '';
   }
-  const thumb = genImage(gen);
-  return thumb ? [thumb] : [];
 }
 
-function toolTypeSlug(gen: Record<string, unknown>): string {
-  return (gen.tool_type as string) || '';
-}
-
-function formatDate(d: string) {
-  if (!d) return '';
-  const dt = new Date(d);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
-}
-
-/* Extract generation meta info from output_content */
-function genMeta(gen: Record<string, unknown>) {
-  const oc = gen.output_content;
-  let model = '';
-  let style = '';
-  let ratio = '';
+/* ---------- 提取生成元数据 ---------- */
+function genMeta(gen: Generation) {
+  const tool = TOOL_NAMES[gen.tool_type] || gen.tool_type || 'AI创作';
+  const model = gen.model_name || '';
+  const style = gen.style || '';
+  const ratio = gen.ratio || '';
   let count = 0;
-  if (oc) {
-    try {
-      const parsed = typeof oc === 'string' ? JSON.parse(oc) : oc;
-      model = parsed?.model || '';
-      style = parsed?.style || '';
-      ratio = parsed?.ratio || parsed?.aspect_ratio || '';
-      if (Array.isArray(parsed?.image_urls)) count = parsed.image_urls.length;
-    } catch { /* ignore */ }
+  try {
+    const oc = typeof gen.output_content === 'string'
+      ? JSON.parse(gen.output_content)
+      : gen.output_content;
+    if (oc?.image_urls && Array.isArray(oc.image_urls)) {
+      count = oc.image_urls.length;
+    }
+  } catch {
+    /* empty */
   }
-  return { model, style, ratio, count };
+  return { tool, model, style, ratio, count };
 }
 
-/* ---------- component ---------- */
+/* ==================== 作品页面 ==================== */
 export default function ProjectPage() {
   const router = useRouter();
-  const { authenticated, setShowLoginModal } = useUser();
-  const [items, setItems] = useState<Record<string, unknown>[]>([]);
+  const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterTool, setFilterTool] = useState('all');
-  const [previewIdx, setPreviewIdx] = useState<number | null>(null);
+  const [lightbox, setLightbox] = useState<string | null>(null);
 
+  /* ---- 加载 ---- */
   useEffect(() => {
-    if (!authenticated) { setLoading(false); return; }
-    setLoading(true);
-    fetch('/api/generations', { credentials: 'include' })
-      .then(r => r.json())
-      .then(d => { if (d.success) setItems(d.generations || []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [authenticated]);
-
-  const filtered = filterTool === 'all' ? items : items.filter(g => toolTypeSlug(g) === filterTool);
-
-  const handleDelete = useCallback(async (id: number) => {
-    if (!confirm('确定删除此作品？')) return;
-    await fetch(`/api/generations?id=${id}`, { method: 'DELETE', credentials: 'include' });
-    setItems(prev => prev.filter(g => g.id !== id));
+    (async () => {
+      try {
+        const res = await fetch('/api/generations');
+        const d = await res.json();
+        setGenerations(d.generations || d.data || []);
+      } catch {
+        /* empty */
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const handleDownload = useCallback((url: string, name?: string) => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = name || 'oneclaw-work.png';
-    a.target = '_blank';
-    a.click();
+  /* ---- 下载 ---- */
+  const handleDownload = useCallback(async (e: React.MouseEvent, url: string) => {
+    e.stopPropagation();
+    try {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `oneclaw-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, '_blank');
+    }
   }, []);
 
-  /* ---------- not logged in ---------- */
-  if (!authenticated) {
-    return (
-      <div className="os-page">
-        <div className="os-page-inner">
-          <h1 className="os-page-title">我的作品</h1>
-          <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
-          <div className="os-project-empty-hero" style={{ marginTop: 80 }}>
-            <div className="os-project-empty-icon"><ImagePlus /></div>
-            <h3>登录后查看你的作品</h3>
-            <p>完成创作后，你的作品会自动保存在这里</p>
-            <button className="os-btn-primary" onClick={() => setShowLoginModal(true)} style={{ marginTop: 8 }}>
-              登录查看作品
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  /* ---- 删除 ---- */
+  const handleDelete = useCallback(
+    async (e: React.MouseEvent, id: number) => {
+      e.stopPropagation();
+      if (!confirm('确定删除这个作品吗？')) return;
+      try {
+        await fetch(`/api/generations?id=${id}`, { method: 'DELETE' });
+        setGenerations((prev) => prev.filter((g) => g.id !== id));
+      } catch {
+        /* empty */
+      }
+    },
+    []
+  );
 
-  /* ---------- loading ---------- */
-  if (loading) {
-    return (
-      <div className="os-page">
-        <div className="os-page-inner">
-          <h1 className="os-page-title">我的作品</h1>
-          <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
-            <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#7B61FF' }} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  /* ---- 继续优化 ---- */
+  const handleContinue = useCallback(
+    (e: React.MouseEvent, gen: Generation) => {
+      e.stopPropagation();
+      const slug = gen.tool_type || 'product-generator';
+      router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(gen.prompt || '')}`);
+    },
+    [router]
+  );
 
-  /* ---------- empty ---------- */
-  if (items.length === 0) {
-    return (
-      <div className="os-page">
-        <div className="os-page-inner">
-          <h1 className="os-page-title">我的作品</h1>
-          <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
-          <div className="os-project-empty-hero" style={{ marginTop: 80 }}>
-            <div className="os-project-empty-icon"><ImagePlus /></div>
-            <h3>还没有作品</h3>
-            <p>完成一次创作后，你的作品会自动保存在这里</p>
-            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-              <button className="os-btn-primary" onClick={() => router.push('/tools')}>
-                开始创作
-              </button>
-              <button className="os-btn-secondary" onClick={() => router.push('/inspiration')}>
-                查看灵感案例
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ---------- filter pills ---------- */
-  const toolFilters = [
-    { key: 'all', label: '全部' },
-    { key: 'product-generator', label: 'AI 商品图' },
-    { key: 'product', label: 'AI 商品图' },
-    { key: 'xiaohongshu-generator', label: '小红书' },
-    { key: 'xiaohongshu', label: '小红书' },
-    { key: 'ai-photo', label: 'AI 写真' },
-    { key: 'photo', label: 'AI 写真' },
-  ];
-  const uniqueFilters = toolFilters.reduce<Array<{ key: string; label: string }>>((acc, f) => {
-    if (!acc.find(x => x.label === f.label)) acc.push(f);
-    return acc;
+  /* ---- 查看大图 ---- */
+  const handleView = useCallback((e: React.MouseEvent, url: string) => {
+    e.stopPropagation();
+    setLightbox(url);
   }, []);
 
-  /* ---------- main ---------- */
+  if (loading) return <div className="flex items-center justify-center py-32"><Loader2 className="w-8 h-8 animate-spin text-[#7B61FF]" /></div>;
+
+  /* ==================== 渲染 ==================== */
   return (
     <div className="os-page">
       <div className="os-page-inner">
+        <BackToHome />
         <h1 className="os-page-title">我的作品</h1>
-        <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
+        <p className="os-page-subtitle">管理你的 AI 创作作品</p>
 
-        {/* 筛选胶囊 */}
-        <div className="os-page-pills">
-          {uniqueFilters.map(f => (
-            <button
-              key={f.key}
-              className={`os-btn-capsule ${filterTool === f.key ? 'os-btn-capsule-active' : ''}`}
-              onClick={() => setFilterTool(f.key)}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
+        {generations.length === 0 ? (
+          /* 空状态 */
+          <div className="os-project-empty-hero">
+            <div className="os-project-empty-icon">
+              <FolderOpen />
+            </div>
+            <h3>还没有作品</h3>
+            <p>去创作页面生成你的第一个作品吧</p>
+          </div>
+        ) : (
+          /* 3列网格 */
+          <div className="os-project-grid">
+            {generations.map((gen) => {
+              const img = firstImage(gen);
+              const meta = genMeta(gen);
+              return (
+                <div key={gen.id} className="os-project-card">
+                  {/* 图片区 */}
+                  <div className="os-project-img-wrap">
+                    {img ? (
+                      <img src={img} alt={gen.prompt || '作品'} className="os-project-img" loading="lazy" />
+                    ) : (
+                      <div className="os-project-img-fallback">
+                        <ImageIcon style={{ width: 40, height: 40 }} />
+                      </div>
+                    )}
 
-        {/* 作品网格 */}
-        <div className="os-project-grid">
-          {filtered.map((gen) => {
-            const img = genImage(gen);
-            const slug = toolTypeSlug(gen);
-            const title = (gen.title as string) || TOOL_LABEL[slug] || '未命名作品';
-            const date = formatDate(gen.created_at as string);
-            const meta = genMeta(gen);
-            return (
-              <div key={gen.id as number} className="os-project-card">
-                {/* 图片区 — 3:4 比例 */}
-                <div className="os-project-img-wrap">
-                  {img ? (
-                    <img src={img} alt={title} className="os-project-img" />
-                  ) : (
-                    <div className="os-project-img-fallback">
-                      <ImageIcon style={{ width: 40, height: 40, color: '#C4B5FD' }} />
+                    {/* 删除按钮 */}
+                    <button
+                      className="os-project-del-btn"
+                      onClick={(e) => handleDelete(e, gen.id)}
+                      type="button"
+                      aria-label="删除"
+                    >
+                      <Trash2 />
+                    </button>
+
+                    {/* hover 操作栏 — glass bar */}
+                    <div className="os-project-hover">
+                      <button className="os-project-hover-btn" onClick={(e) => handleContinue(e, gen)} type="button">
+                        <Sparkles style={{ width: 14, height: 14 }} /> 继续优化
+                      </button>
+                      <button className="os-project-hover-btn" onClick={(e) => img && handleDownload(e, img)} type="button">
+                        <Download style={{ width: 14, height: 14 }} /> 下载
+                      </button>
+                      <button className="os-project-hover-btn" onClick={(e) => img && handleView(e, img)} type="button">
+                        <ZoomIn style={{ width: 14, height: 14 }} /> 大图
+                      </button>
                     </div>
-                  )}
-                  {/* hover 底部操作栏 — 绝对定位 + 渐变遮罩 */}
-                  <div className="os-project-hover">
-                    <button onClick={() => router.push(`/create?tool=${slug}`)} className="os-project-hover-btn">
-                      <Sparkles style={{ width: 14, height: 14 }} />
-                      继续优化
-                    </button>
-                    <button onClick={() => handleDownload(img)} className="os-project-hover-btn">
-                      <Download style={{ width: 14, height: 14 }} />
-                      下载
-                    </button>
-                    <button onClick={() => setPreviewIdx(gen.id as number)} className="os-project-hover-btn">
-                      <Eye style={{ width: 14, height: 14 }} />
-                      大图
-                    </button>
                   </div>
-                </div>
-                {/* 底部生成信息栏 */}
-                <div className="os-project-info">
-                  <span className="os-project-info-title">{title}</span>
-                  <div className="os-project-meta-row">
-                    <span className="os-project-meta-tag">{TOOL_LABEL[slug] || slug}</span>
-                    {meta.model && <span className="os-project-meta-tag">{meta.model}</span>}
-                    {meta.style && <span className="os-project-meta-tag-neutral">{meta.style}</span>}
-                    {meta.ratio && <span className="os-project-meta-tag-neutral">{meta.ratio}</span>}
-                    {meta.count > 0 && <span className="os-project-meta-tag-neutral">{meta.count} 张</span>}
-                  </div>
-                  <span className="os-project-time">
-                    {date}
-                    <span className="os-project-del-btn">
-                      <Trash2 style={{ width: 14, height: 14 }} onClick={() => handleDelete(gen.id as number)} />
-                    </span>
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
 
-        {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#A0A8B8' }}>
-            该分类下暂无作品
+                  {/* 信息区 */}
+                  <div className="os-project-info">
+                    <div className="os-project-info-title">
+                      {gen.prompt || meta.tool || 'AI 创作'}
+                    </div>
+                    <div className="os-project-meta-row">
+                      <span className="os-project-meta-tag">{meta.tool}</span>
+                      {meta.model && <span className="os-project-meta-tag">{meta.model}</span>}
+                      {meta.style && <span className="os-project-meta-tag-neutral os-project-meta-tag">{meta.style}</span>}
+                      {meta.ratio && <span className="os-project-meta-tag-neutral os-project-meta-tag">{meta.ratio}</span>}
+                      {meta.count > 1 && <span className="os-project-meta-tag-neutral os-project-meta-tag">{meta.count} 张</span>}
+                    </div>
+                    <div className="os-project-time">{fmtDate(gen.created_at)}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Lightbox */}
+        {lightbox && (
+          <div className="os-lightbox-overlay" onClick={() => setLightbox(null)}>
+            <div className="os-lightbox-content">
+              <button className="os-lightbox-close" onClick={() => setLightbox(null)} type="button">
+                &times;
+              </button>
+              <img src={lightbox} alt="大图" className="os-lightbox-img" />
+            </div>
           </div>
         )}
       </div>
-
-      {/* lightbox */}
-      {previewIdx !== null && (() => {
-        const gen = items.find(g => g.id === previewIdx);
-        if (!gen) return null;
-        const allImgs = genAllImages(gen);
-        return (
-          <div className="os-lightbox-overlay" onClick={() => setPreviewIdx(null)}>
-            <div className="os-lightbox-content" onClick={e => e.stopPropagation()}>
-              <button className="os-lightbox-close" onClick={() => setPreviewIdx(null)}>
-                <X style={{ width: 20, height: 20 }} />
-              </button>
-              {allImgs.length > 0 ? (
-                <img src={allImgs[0]} alt="" className="os-lightbox-img" />
-              ) : (
-                <div style={{ width: 480, height: 480, borderRadius: 12, background: 'var(--oc-grad-placeholder)' }} />
-              )}
-            </div>
-          </div>
-        );
-      })()}
     </div>
   );
 }

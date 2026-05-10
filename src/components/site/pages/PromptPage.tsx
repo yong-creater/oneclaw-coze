@@ -1,230 +1,258 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Sparkles, Heart, Copy, ImageIcon } from 'lucide-react';
+import { Sparkles, Eye, Heart, Bookmark, Copy, Search, Loader2 } from 'lucide-react';
+import BackToHome from '@/components/site/common/BackToHome';
 
-/* ---------- types ---------- */
-interface Inspiration {
+/* ---------- 数据类型 ---------- */
+interface Prompt {
   id: number;
   title: string;
-  description?: string;
-  content?: string;
-  image?: string;
-  category?: string;
-  style?: string;
-  tool_slug?: string;
-  tags?: string[];
-  views?: number;
-  likes?: number;
+  content: string;
+  category: string;
+  tags: string[];
+  author: string;
+  uses: number;
+  likes: number;
+  views: number;
+  image: string;
+  style: string;
+  tool_slug: string;
+  created_at: string;
 }
 
-/* ---------- Pill (outside render — fixes react-hooks/static-components) ---------- */
-function Pill({ label, count, active, onClick }: { label: string; count?: number; active: boolean; onClick: () => void }) {
+/* ---------- 混合比例高度 — 瀑布流节奏 ---------- */
+const RATIO_HEIGHTS = [
+  320,   // ~4:5 短卡
+  380,   // ~3:4 中卡
+  420,   // ~1:1 方卡
+  480,   // ~4:5 高卡
+  360,   // ~16:9 宽卡
+];
+
+/* 确定性伪随机 — 基于 id 分配高度，避免每次渲染闪烁 */
+function cardHeight(id: number): number {
+  const idx = (id * 7 + 3) % RATIO_HEIGHTS.length;
+  return RATIO_HEIGHTS[idx];
+}
+
+/* ---------- Pill 组件 — 渲染外定义 ---------- */
+function Pill({
+  label,
+  active,
+  count,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  count?: number;
+  onClick: () => void;
+}) {
   return (
-    <button onClick={onClick} className={`os-btn-capsule ${active ? 'os-btn-capsule-active' : ''}`}>
+    <button
+      className={`os-pill ${active ? 'os-pill-active' : ''}`}
+      onClick={onClick}
+      type="button"
+    >
       {label}
-      {count !== undefined && <span className="os-btn-capsule-count">{count}</span>}
+      {count !== undefined && <span className="os-pill-count">{count}</span>}
     </button>
   );
 }
 
-/* ---------- TOOL_MAP for button routing ---------- */
-const TOOL_MAP: Record<string, string> = {
-  'AI商品图': 'product-generator',
-  '商品图': 'product-generator',
-  '小红书': 'xiaohongshu-generator',
-  '小红书封面': 'xiaohongshu-generator',
-  'AI写真': 'ai-photo',
-  '写真': 'ai-photo',
-};
-
-/* ---------- Random height generator for Pinterest effect ---------- */
-const HEIGHT_SETS = [
-  { minHeight: 320, maxHeight: 400 },
-  { minHeight: 400, maxHeight: 500 },
-  { minHeight: 480, maxHeight: 580 },
-  { minHeight: 340, maxHeight: 440 },
-  { minHeight: 440, maxHeight: 540 },
-];
-function getCardHeight(id: number): number {
-  const set = HEIGHT_SETS[id % HEIGHT_SETS.length];
-  // Deterministic pseudo-random based on id
-  const seed = ((id * 2654435761) >>> 0) / 4294967296;
-  return Math.round(set.minHeight + seed * (set.maxHeight - set.minHeight));
-}
-
-/* ---------- component ---------- */
+/* ==================== 灵感库页面 ==================== */
 export default function PromptPage() {
   const router = useRouter();
-  const [items, setItems] = useState<Inspiration[]>([]);
+  const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('全部');
-  const [filterStyle, setFilterStyle] = useState('');
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const masonryRef = useRef<HTMLDivElement>(null);
 
-  /* load favorites from localStorage */
+  /* ---- 加载数据 ---- */
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('insp-fav');
-      if (raw) setFavorites(new Set(JSON.parse(raw)));
-    } catch { /* ignore */ }
-  }, []);
-
-  /* save favorites */
-  const toggleFav = useCallback((id: number) => {
-    setFavorites(prev => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      try { localStorage.setItem('insp-fav', JSON.stringify([...next])); } catch { /* ignore */ }
-      return next;
-    });
-  }, []);
-
-  /* fetch data */
-  useEffect(() => {
-    setLoading(true);
-    fetch('/api/prompts')
-      .then(r => r.json())
-      .then(d => { if (d.success) setItems(d.prompts || d.data || []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  /* categories & styles from data */
-  const categories = useMemo(() => {
-    const map = new Map<string, number>();
-    items.forEach(it => {
-      const cat = it.category || '未分类';
-      map.set(cat, (map.get(cat) || 0) + 1);
-    });
-    return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
-  }, [items]);
-
-  const uniqueStyles = useMemo(() => {
-    const s = new Set<string>();
-    items.forEach(it => { if (it.style) s.add(it.style); });
-    return Array.from(s);
-  }, [items]);
-
-  /* filtered */
-  const filtered = useMemo(() => {
-    return items.filter(it => {
-      if (activeCategory !== '全部' && it.category !== activeCategory) return false;
-      if (filterStyle && it.style !== filterStyle) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        return (it.title || '').toLowerCase().includes(q) || (it.description || '').toLowerCase().includes(q);
+    (async () => {
+      try {
+        const res = await fetch('/api/prompts');
+        const d = await res.json();
+        setPrompts(d.prompts || d.data || []);
+      } catch {
+        /* empty */
+      } finally {
+        setLoading(false);
       }
-      return true;
-    });
-  }, [items, activeCategory, filterStyle, search]);
-
-  /* handle generate same */
-  const handleGenSame = useCallback((it: Inspiration) => {
-    const slug = it.tool_slug || TOOL_MAP[it.category || ''] || 'product-generator';
-    router.push(`/create?tool=${slug}`);
-  }, [router]);
-
-  /* copy prompt */
-  const handleCopy = useCallback((text: string) => {
-    navigator.clipboard.writeText(text).catch(() => {});
+    })();
   }, []);
 
-  /* ---------- render ---------- */
+  /* ---- 分类列表 ---- */
+  const categories = useMemo(() => {
+    const cats = new Set(prompts.map((p) => p.category));
+    return ['全部', ...Array.from(cats)];
+  }, [prompts]);
+
+  /* ---- 过滤 ---- */
+  const filtered = useMemo(() => {
+    let list = prompts;
+    if (activeCategory !== '全部') {
+      list = list.filter((p) => p.category === activeCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.tags?.some((t) => t.toLowerCase().includes(q)) ||
+          p.content?.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [prompts, activeCategory, searchQuery]);
+
+  /* ---- 复制 Prompt ---- */
+  const handleCopy = useCallback(
+    async (e: React.MouseEvent, p: Prompt) => {
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(p.content || p.title);
+        setCopiedId(p.id);
+        setTimeout(() => setCopiedId(null), 1500);
+      } catch {
+        /* empty */
+      }
+    },
+    []
+  );
+
+  /* ---- 生成同款 ---- */
+  const handleGen = useCallback(
+    (e: React.MouseEvent, p: Prompt) => {
+      e.stopPropagation();
+      const slug = p.tool_slug || 'product-generator';
+      router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(p.content || p.title)}`);
+    },
+    [router]
+  );
+
+  /* ---- 加载中 ---- */
+  if (loading) return <div className="flex items-center justify-center py-32"><Loader2 className="w-8 h-8 animate-spin text-[#7B61FF]" /></div>;
+
+  /* ==================== 渲染 ==================== */
   return (
     <div className="os-page">
       <div className="os-page-inner">
-        <h1 className="os-page-title">灵感案例库</h1>
-        <p className="os-page-subtitle">从优质案例中获取灵感，一键生成同款内容</p>
+        {/* 顶部 */}
+        <BackToHome />
+        <h1 className="os-page-title">灵感库</h1>
+        <p className="os-page-subtitle">探索 AI 创意灵感，一键生成同款</p>
 
-        {/* 搜索 */}
-        <div className="os-page-search-wrap">
-          <Search className="os-page-search-icon" />
-          <input
-            type="text"
-            placeholder="搜索灵感案例..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="os-page-search"
-          />
-        </div>
-
-        {/* 类型筛选 */}
-        <div className="os-page-pills">
-          <Pill label="全部" count={items.length} active={activeCategory === '全部'} onClick={() => setActiveCategory('全部')} />
-          {categories.map(cat => (
-            <Pill key={cat.label} label={cat.label} count={cat.count} active={activeCategory === cat.label} onClick={() => setActiveCategory(cat.label)} />
-          ))}
-        </div>
-
-        {/* 风格筛选 */}
-        {uniqueStyles.length > 0 && (
-          <div className="os-page-pills" style={{ marginBottom: 32 }}>
-            <Pill label="全部风格" active={!filterStyle} onClick={() => setFilterStyle('')} />
-            {uniqueStyles.map(style => (
-              <Pill key={style} label={style} active={filterStyle === style} onClick={() => setFilterStyle(style)} />
+        {/* 分类 + 搜索 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
+          <div className="os-page-pills" style={{ marginBottom: 0, flex: 1, minWidth: 0 }}>
+            {categories.map((cat) => (
+              <Pill
+                key={cat}
+                label={cat}
+                active={activeCategory === cat}
+                onClick={() => setActiveCategory(cat)}
+              />
             ))}
           </div>
-        )}
+          <div className="os-page-search-wrap" style={{ marginBottom: 0 }}>
+            <Search className="os-page-search-icon" />
+            <input
+              className="os-page-search"
+              placeholder="搜索灵感…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
 
-        {/* Pinterest 瀑布流 — 默认只显示图片，hover 浮出信息 */}
-        <div className="os-insp-masonry">
-          {filtered.map(it => {
-            const cardH = getCardHeight(it.id);
-            return (
-              <div key={it.id} className="os-insp-card">
-                {/* 图片区 — Pinterest 随机高度 */}
-                <div className="os-insp-card-img" style={{ height: cardH }}>
-                  {it.image ? (
-                    <img src={it.image} alt={it.title} />
+        {/* 瀑布流 */}
+        {filtered.length === 0 ? (
+          <div className="os-project-empty-hero">
+            <div className="os-project-empty-icon">
+              <Sparkles />
+            </div>
+            <h3>暂无灵感</h3>
+            <p>换个分类或关键词试试</p>
+          </div>
+        ) : (
+          <div className="os-insp-masonry" ref={masonryRef}>
+            {filtered.map((p) => {
+              const h = cardHeight(p.id);
+              return (
+                <div
+                  key={p.id}
+                  className="os-insp-card"
+                  onClick={() => handleGen({ stopPropagation: () => {} } as React.MouseEvent, p)}
+                >
+                  {/* 图片 */}
+                  {p.image ? (
+                    <img
+                      src={p.image}
+                      alt={p.title}
+                      className="os-insp-card-img"
+                      style={{ height: h }}
+                      loading="lazy"
+                    />
                   ) : (
-                    <div className="os-insp-card-img-fallback" style={{ height: cardH }}>
-                      <ImageIcon style={{ width: 32, height: 32, color: '#C4B5FD', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+                    <div className="os-insp-card-img-fallback" style={{ height: h }}>
+                      <Sparkles style={{ width: 32, height: 32 }} />
                     </div>
                   )}
-                  {/* hover 底部渐变信息层 */}
+
+                  {/* hover 渐变浮层 */}
                   <div className="os-insp-card-overlay">
-                    <span className="os-insp-card-overlay-tag">
-                      {it.category || '灵感'}
-                    </span>
-                    <span className="os-insp-card-overlay-title">{it.title}</span>
+                    {/* 左下信息 */}
+                    {p.category && (
+                      <span className="os-insp-card-overlay-tag">{p.category}</span>
+                    )}
+                    <div className="os-insp-card-overlay-title">{p.title}</div>
                     <div className="os-insp-card-overlay-stats">
-                      {it.style && <span>{it.style}</span>}
-                      {typeof it.views === 'number' && <span>{it.views} 浏览</span>}
-                      {typeof it.likes === 'number' && <span>{it.likes} 喜欢</span>}
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        <Eye /> {p.views || p.uses || 0}
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        <Heart /> {p.likes || 0}
+                      </span>
                     </div>
+
+                    {/* 右下操作 */}
                     <div className="os-insp-card-overlay-actions">
-                      <button className="os-insp-card-gen" onClick={() => handleGenSame(it)}>
+                      <button
+                        className="os-insp-card-gen"
+                        onClick={(e) => handleGen(e, p)}
+                        type="button"
+                      >
                         <Sparkles style={{ width: 14, height: 14 }} />
                         生成同款
                       </button>
-                      {it.content && (
-                        <button className="os-insp-card-action" onClick={() => handleCopy(it.content!)} title="复制 Prompt">
-                          <Copy style={{ width: 14, height: 14 }} />
-                        </button>
-                      )}
-                      <button className="os-insp-card-action" onClick={() => toggleFav(it.id)} title="收藏">
-                        <Heart style={{ width: 14, height: 14 }} fill={favorites.has(it.id) ? '#ff5a7e' : 'none'} stroke={favorites.has(it.id) ? '#ff5a7e' : 'currentColor'} />
+                      <button
+                        className="os-insp-card-action"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        title="收藏"
+                        type="button"
+                      >
+                        <Bookmark />
+                      </button>
+                      <button
+                        className="os-insp-card-action"
+                        onClick={(e) => handleCopy(e, p)}
+                        title={copiedId === p.id ? '已复制' : '复制 Prompt'}
+                        type="button"
+                      >
+                        <Copy />
                       </button>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {filtered.length === 0 && !loading && (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#A0A8B8' }}>
-            {search ? '没有找到匹配的灵感案例' : '暂无灵感案例'}
-          </div>
-        )}
-
-        {loading && (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
-            <div style={{ width: 32, height: 32, border: '3px solid #E6E8F0', borderTopColor: '#7B61FF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+              );
+            })}
           </div>
         )}
       </div>

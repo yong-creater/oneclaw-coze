@@ -1,5 +1,6 @@
 /* ================================================================
-   左侧导航 Dock — 简洁线性风格 · 紫色主调
+   左侧导航 Dock — 线性风格 · 紫蓝渐变高亮 · 88px
+   参考：Framer / Linear / Arc — 极简 / 高级 / AI SaaS
    ================================================================ */
 
 /* ---------- Dock 容器 ---------- */
@@ -7,15 +8,17 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 80px;
+  width: 88px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 20px 0 16px;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.96);
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 /* ---------- Logo ---------- */
@@ -23,7 +26,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   cursor: pointer;
   transition: opacity 0.2s;
 }
@@ -34,7 +37,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   flex: 1;
 }
 
@@ -46,13 +49,13 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: 56px;
-  padding: 8px 0;
-  border-radius: 10px;
+  width: 60px;
+  padding: 10px 0;
+  border-radius: 14px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.22s ease;
   text-decoration: none;
-  color: #666666;
+  color: #9ca3af;
   background: transparent;
   border: none;
   outline: none;
@@ -62,51 +65,54 @@
 .os-dock-item .os-dock-icon {
   width: 24px;
   height: 24px;
-  transition: color 0.15s;
-  color: #666666;
+  transition: all 0.22s ease;
+  color: #9ca3af;
 }
 
-/* 文字 — 12px 居中 */
+/* 文字 — 11px 居中 */
 .os-dock-item .os-dock-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1;
   text-align: center;
-  transition: color 0.15s;
-  color: #666666;
+  transition: all 0.22s ease;
+  color: #9ca3af;
   font-family: -apple-system, "PingFang SC", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 
-/* ---------- hover — 浅紫背景，颜色不变 ---------- */
+/* ---------- hover — 轻微发光 ---------- */
 .os-dock-item:hover {
-  background: #F9F7FF;
+  background: rgba(123, 97, 255, 0.06);
 }
 .os-dock-item:hover .os-dock-icon {
-  color: #666666;
+  color: #7B61FF;
+  filter: drop-shadow(0 0 6px rgba(123, 97, 255, 0.3));
 }
 .os-dock-item:hover .os-dock-label {
-  color: #666666;
+  color: #7B61FF;
 }
 
-/* ---------- 选中态 — 透明浅紫背景 + 深紫图标文字 ---------- */
+/* ---------- 选中态 — 紫蓝渐变高亮 ---------- */
 .os-dock-item-active {
-  background: #F5F0FF !important;
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.12), rgba(94, 169, 255, 0.10)) !important;
+  box-shadow: 0 2px 12px rgba(123, 97, 255, 0.12);
 }
 .os-dock-item-active .os-dock-icon {
-  color: #7C5BFF !important;
+  color: #7B61FF !important;
+  filter: drop-shadow(0 0 8px rgba(123, 97, 255, 0.4));
 }
 .os-dock-item-active .os-dock-label {
-  color: #7C5BFF !important;
+  color: #7B61FF !important;
   font-weight: 600;
 }
 .os-dock-item-active:hover {
-  background: #F5F0FF !important;
+  background: linear-gradient(135deg, rgba(123, 97, 255, 0.16), rgba(94, 169, 255, 0.14)) !important;
 }
 .os-dock-item-active:hover .os-dock-icon {
-  color: #7C5BFF !important;
+  color: #7B61FF !important;
 }
 .os-dock-item-active:hover .os-dock-label {
-  color: #7C5BFF !important;
+  color: #7B61FF !important;
 }
 
 /* ---------- 底部区域 ---------- */
@@ -115,7 +121,7 @@
   flex-direction: column;
   align-items: center;
   padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
   width: 100%;
 }
 
@@ -128,23 +134,24 @@
   outline: none;
   cursor: pointer;
   background: transparent;
-  color: #666666;
+  color: #9ca3af;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all 0.22s ease;
 }
 .os-dock-login-icon {
   width: 20px;
   height: 20px;
-  transition: color 0.15s;
+  transition: all 0.22s;
 }
 .os-dock-login-btn:hover {
-  background: #F9F7FF;
-  color: #7C5BFF;
+  background: rgba(123, 97, 255, 0.06);
+  color: #7B61FF;
 }
 .os-dock-login-btn:hover .os-dock-login-icon {
-  color: #7C5BFF;
+  color: #7B61FF;
+  filter: drop-shadow(0 0 6px rgba(123, 97, 255, 0.3));
 }
 
 /* ---------- 头像按钮 ---------- */
@@ -162,11 +169,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all 0.22s ease;
   padding: 0;
 }
 .os-dock-avatar-btn:hover {
-  background: #F9F7FF;
+  background: rgba(123, 97, 255, 0.06);
 }
 
 .os-dock-avatar-img {
@@ -174,7 +181,7 @@
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(124, 91, 255, 0.2);
+  border: 2px solid rgba(123, 91, 255, 0.2);
 }
 .os-dock-avatar-fallback {
   width: 32px;
@@ -194,19 +201,20 @@
   position: absolute;
   bottom: 0;
   left: calc(100% + 12px);
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(16px);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 6px;
   min-width: 140px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   z-index: 60;
 }
 .os-dock-user-menu-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: 8px;
   font-size: 13px;
   color: #374151;
@@ -220,7 +228,8 @@
   outline: none;
 }
 .os-dock-user-menu-item:hover {
-  background: #F9F7FF;
+  background: rgba(123, 97, 255, 0.06);
+  color: #7B61FF;
 }
 
 /* ================================================================
@@ -229,14 +238,14 @@
 
 /* 根容器：推过 Dock 宽度 + 24px 间距 */
 .os-dock-page {
-  margin-left: 104px; /* 80px Dock + 24px gap */
+  margin-left: 112px; /* 88px Dock + 24px gap */
   min-height: 100vh;
   transition: margin-left 0.2s;
 }
 
 /* 工作台模式：紧贴 Dock，1px 分割线代替间距，无氛围背景 */
 .os-dock-page-workbench {
-  margin-left: 80px !important; /* 80px Dock，无 gap */
+  margin-left: 88px !important; /* 88px Dock，无 gap */
   background: #fff !important;
 }
 
@@ -269,7 +278,7 @@
 /* 平板及以下：减少间距 */
 @media (max-width: 1024px) {
   .os-dock-page {
-    margin-left: 104px;
+    margin-left: 112px;
   }
   .os-content {
     padding: 0 32px;
@@ -291,6 +300,7 @@
     border-top: 1px solid rgba(0, 0, 0, 0.05);
     background: rgba(255, 255, 255, 0.96);
     z-index: 50;
+    backdrop-filter: blur(20px);
   }
   .os-dock-logo {
     display: none;
@@ -305,7 +315,7 @@
     width: auto;
     padding: 6px 12px;
     gap: 2px;
-    border-radius: 8px;
+    border-radius: 10px;
   }
   .os-dock-item .os-dock-icon {
     width: 22px;
@@ -315,13 +325,13 @@
     font-size: 10px;
   }
   .os-dock-item-active {
-    background: transparent !important;
+    background: linear-gradient(135deg, rgba(123, 97, 255, 0.12), rgba(94, 169, 255, 0.10)) !important;
   }
   .os-dock-item-active .os-dock-icon {
-    color: #7C5BFF !important;
+    color: #7B61FF !important;
   }
   .os-dock-item-active .os-dock-label {
-    color: #7C5BFF !important;
+    color: #7B61FF !important;
   }
 
   .os-dock-bottom {

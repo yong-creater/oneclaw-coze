@@ -32,18 +32,12 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SiteSidebar />
-      <main className="os-dock-page">
+      <main className="os-dock-page os-main-canvas">
         {/* 全局 AI 氛围背景层 — fixed 定位覆盖整个右侧内容区 */}
         <div className="os-global-bg" aria-hidden="true">
           <div className="os-global-orb os-global-orb-top" />
-          <div className="os-global-orb os-global-orb-right" />
-          <div className="os-global-orb os-global-orb-mid" />
-          <div className="os-light-band os-light-band-primary os-atmo-band-top" />
-          <div className="os-light-band os-light-band-secondary os-atmo-band-mid" />
-          <div className="os-mote os-mote-purple os-mote-1" />
-          <div className="os-mote os-mote-cyan os-mote-2" />
-          <div className="os-mote os-mote-blue os-mote-3" />
-          <div className="os-mote os-mote-purple os-mote-4" />
+          <div className="os-global-orb os-global-orb-bl" />
+          <div className="os-global-orb os-global-orb-br" />
         </div>
         <div className="os-dock-page-inner">
           <div style={{ flex: 1 }}>

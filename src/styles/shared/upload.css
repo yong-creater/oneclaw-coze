@@ -54,6 +54,13 @@
   color: #94A3B8;
 }
 
+/* 已达上限状态 */
+.os-dropzone-full {
+  border-style: solid;
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.04);
+}
+
 /* 底部工具栏 */
 .os-studio-toolbar {
   display: flex;
