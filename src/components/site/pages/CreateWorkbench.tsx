@@ -212,7 +212,7 @@ export default function CreateWorkbench() {
       let matchedRatio = toolConf.defaultRatio;
       if (recRatio) {
         const r = recRatio.replace(/\s/g, '');
-        const validRatios = ['1:1', '3:4', '4:3', '16:9', '9:16'];
+        const validRatios = ['1:1', '3:4', '4:3', '16:9', '9:16', '4:5', '2:3'];
         if (validRatios.includes(r)) matchedRatio = r;
       }
 

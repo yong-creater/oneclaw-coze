@@ -119,27 +119,44 @@ export default function PromptPage() {
       '商品图': 'product-generator',
       '小红书': 'xiaohongshu-generator',
       'AI写真': 'ai-photo',
-      '海报': 'product-generator',
-      '封面图': 'product-generator',
+      '海报': 'poster-design',
+      '封面图': 'xiaohongshu-generator',
       '详情页': 'product-page',
       '视频封面': 'product-generator',
     };
     const typeSlug = typeSlugMap[type] || 'product-generator';
 
-    // 根据 prompt 的 tags 推测推荐 style
+    // 根据 prompt 的 tags 推测推荐 style（使用 styleOptions 的 value 值）
     const tags = (prompt.tags || []).map(t => t.toLowerCase());
     let recStyle = '';
+    let recRatio = '';
     if (typeSlug === 'ai-photo') {
-      if (tags.some(t => t.includes('韩系') || t.includes('清新') || t.includes('自然'))) recStyle = 'korean';
-      else if (tags.some(t => t.includes('复古') || t.includes('胶片') || t.includes('怀旧'))) recStyle = 'vintage';
-      else if (tags.some(t => t.includes('质感') || t.includes('高级') || t.includes('杂志'))) recStyle = 'premium';
+      if (tags.some(t => t.includes('韩系') || t.includes('清新') || t.includes('自然'))) recStyle = 'korean-fresh';
+      else if (tags.some(t => t.includes('复古') || t.includes('胶片') || t.includes('怀旧'))) recStyle = 'retro-film';
+      else if (tags.some(t => t.includes('质感') || t.includes('高级') || t.includes('杂志'))) recStyle = 'luxury';
+      else recStyle = 'korean-fresh';
+      recRatio = '3:4';
     } else if (typeSlug === 'product-generator') {
-      if (tags.some(t => t.includes('场景') || t.includes('氛围'))) recStyle = 'scene';
-      else if (tags.some(t => t.includes('白底') || t.includes('简洁') || t.includes('干净'))) recStyle = 'white';
-      else if (tags.some(t => t.includes('模特') || t.includes('人物'))) recStyle = 'model';
+      if (tags.some(t => t.includes('场景') || t.includes('氛围') || t.includes('生活'))) recStyle = 'lifestyle';
+      else if (tags.some(t => t.includes('白底') || t.includes('简洁') || t.includes('干净') || t.includes('极简'))) recStyle = 'minimal';
+      else recStyle = 'premium';
+      recRatio = '1:1';
     } else if (typeSlug === 'xiaohongshu-generator') {
-      if (tags.some(t => t.includes('种草') || t.includes('推荐'))) recStyle = 'grass';
-      else if (tags.some(t => t.includes('教程') || t.includes('攻略'))) recStyle = 'tutorial';
+      if (tags.some(t => t.includes('甜美') || t.includes('可爱') || t.includes('少女'))) recStyle = 'cute';
+      else if (tags.some(t => t.includes('高级') || t.includes('质感'))) recStyle = 'premium';
+      else recStyle = 'fresh';
+      recRatio = '3:4';
+    } else if (typeSlug === 'poster-design') {
+      if (tags.some(t => t.includes('节日') || t.includes('圣诞') || t.includes('新年'))) recStyle = 'festive';
+      else if (tags.some(t => t.includes('极简') || t.includes('简约'))) recStyle = 'minimal';
+      else if (tags.some(t => t.includes('生活') || t.includes('场景'))) recStyle = 'lifestyle';
+      else recStyle = 'premium';
+      recRatio = '3:4';
+    } else if (typeSlug === 'product-page') {
+      if (tags.some(t => t.includes('科技') || t.includes('数码'))) recStyle = 'tech';
+      else if (tags.some(t => t.includes('可爱') || t.includes('甜美'))) recStyle = 'cute';
+      else recStyle = 'premium';
+      recRatio = '2:3';
     }
 
     const params = new URLSearchParams({
@@ -147,6 +164,7 @@ export default function PromptPage() {
       type: typeSlug,
     });
     if (recStyle) params.set('style', recStyle);
+    if (recRatio) params.set('ratio', recRatio);
     router.push(`/create?${params.toString()}`);
   };
 

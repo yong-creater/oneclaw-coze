@@ -267,19 +267,28 @@ export default function HomePage() {
   // 推荐风格映射
   interface StyleRecommendation { style: string; ratio: string; count: string; }
   function getStyleRecommendation(tool: ToolMatch | null, input: string): StyleRecommendation {
-    if (!tool) return { style: '自动匹配', ratio: '3:4', count: '4张' };
+    if (!tool) return { style: 'premium', ratio: '3:4', count: '4' };
     const lower = input.toLowerCase();
     const map: Record<string, StyleRecommendation> = {
-      'product-generator': { style: '科技感极简风', ratio: '3:4', count: '4张' },
-      'xiaohongshu-generator': { style: '清新氛围感', ratio: '4:5', count: '3张' },
-      'ai-photo': { style: '高级质感大片', ratio: '3:4', count: '6张' },
-      'background-removal': { style: '干净白底', ratio: '1:1', count: '1张' },
-      'product-page': { style: '品牌调性排版', ratio: '3:4', count: '1份' },
+      'product-generator': { style: 'premium', ratio: '1:1', count: '4' },
+      'xiaohongshu-generator': { style: 'fresh', ratio: '3:4', count: '4' },
+      'ai-photo': { style: 'luxury', ratio: '3:4', count: '6' },
+      'background-removal': { style: '', ratio: '1:1', count: '1' },
+      'poster-design': { style: 'minimal', ratio: '3:4', count: '2' },
+      'product-page': { style: 'premium', ratio: '2:3', count: '1' },
     };
-    const rec = map[tool.slug] || { style: '自动匹配', ratio: '3:4', count: '4张' };
-    if (lower.includes('深色') || lower.includes('暗黑') || lower.includes('科技')) rec.style = '深色科技\u98ce';
-    if (lower.includes('清新') || lower.includes('夏日') || lower.includes('文艺')) rec.style = '清新文艺\u98ce';
-    if (lower.includes('海报') || lower.includes('封面')) { rec.ratio = '3:4'; rec.count = '3张'; }
+    const rec = map[tool.slug] ? { ...map[tool.slug] } : { style: 'premium', ratio: '3:4', count: '4' };
+    // 根据用户输入动态调整 style
+    if (lower.includes('深色') || lower.includes('暗黑') || lower.includes('科技')) rec.style = 'tech';
+    if (lower.includes('清新') || lower.includes('夏日') || lower.includes('文艺') || lower.includes('自然')) rec.style = 'fresh';
+    if (lower.includes('极简') || lower.includes('简约') || lower.includes('干净')) rec.style = 'minimal';
+    if (lower.includes('高级') || lower.includes('质感') || lower.includes('大片')) rec.style = 'premium';
+    if (lower.includes('可爱') || lower.includes('甜美') || lower.includes('少女')) rec.style = 'cute';
+    if (lower.includes('复古') || lower.includes('胶片') || lower.includes('怀旧')) rec.style = 'retro-film';
+    if (lower.includes('韩系') || lower.includes('韩风') || lower.includes('清新写真')) rec.style = 'korean-fresh';
+    if (lower.includes('节日') || lower.includes('圣诞') || lower.includes('新年')) rec.style = 'festive';
+    if (lower.includes('生活') || lower.includes('场景') || lower.includes('日常')) rec.style = 'lifestyle';
+    if (lower.includes('海报') || lower.includes('封面')) { rec.ratio = '3:4'; rec.count = '3'; }
     return rec;
   }
 
@@ -427,20 +436,21 @@ export default function HomePage() {
   }, [router]);
 
   const handleAutoCreate = useCallback(() => {
+    if (!matchedTool) return;
     setIsJumping(true);
-    const firstTool = TOOL_MATCHES[0];
-    const routeType = TOOL_ROUTES[firstTool.slug] || 'auto';
+    const rec = getStyleRecommendation(matchedTool, inputText);
+    const routeType = TOOL_ROUTES[matchedTool.slug] || 'auto';
     navigateToCreate(router, {
       prompt: inputText.trim(),
       uploadedImages,
-      matchedTool: firstTool.slug,
+      matchedTool: matchedTool.slug,
       type: routeType,
       autoGenerate: true,
       analysisResult: {
-        tool: firstTool.slug,
-        style: '自动匹配',
-        ratio: '3:4',
-        count: '4张',
+        tool: matchedTool.slug,
+        style: rec.style,
+        ratio: rec.ratio,
+        count: rec.count,
       },
     });
   }, [inputText, uploadedImages, router]);
