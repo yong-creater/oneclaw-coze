@@ -72,7 +72,7 @@ export default function PromptPage() {
     setLoading(true);
     fetch('/api/prompts')
       .then(r => r.json())
-      .then(d => { if (d.success) setItems(d.data || []); })
+      .then(d => { if (d.success) setItems(d.prompts || d.data || []); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);

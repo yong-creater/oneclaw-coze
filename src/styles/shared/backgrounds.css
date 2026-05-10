@@ -75,6 +75,29 @@
   .os-page { padding: 20px 16px 40px; }
 }
 
+/* ---- 统一页面标题系统 ---- */
+.os-page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1.2;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+@media (max-width: 768px) {
+  .os-page-title { font-size: 24px; }
+}
+
+.os-page-subtitle {
+  font-size: 14px;
+  color: #8A94A6;
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+@media (max-width: 768px) {
+  .os-page-subtitle { font-size: 13px; margin-bottom: 20px; }
+}
+
 /* ---- 首页 Hero ---- */
 .os-hero {
   position: relative;
