@@ -486,7 +486,7 @@ export default function HomePage() {
               {/* AI 创作描述框 */}
               <div className="os-studio-input-area">
                 {/* 顶部 AI 引导文字 — 有输入时完全移除，杜绝重叠 */}
-                {!inputText && <span className="os-studio-ai-hint">AI 正在等待你的创意…</span>}
+                {!inputText && <span className="os-studio-ai-hint">描述你想生成的内容…</span>}
                 {/* 输入区域：placeholder + textarea 叠加 */}
                 <div className="os-studio-textarea-wrap">
                   {/* placeholder 仅在无输入时渲染，彻底避免文字重叠 */}
@@ -550,7 +550,7 @@ export default function HomePage() {
                       {uploadedImages.length > 0 ? '继续添加参考图' : '添加灵感参考（可选）'}
                     </span>
                     <span className="os-dropzone-formats">
-                      支持拖拽上传{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ''}
+                      点击或拖拽上传{uploadedImages.length > 0 ? ` · 已选 ${uploadedImages.length}/${MAX_UPLOAD_IMAGES}` : ' · 支持 JPG / PNG / WebP'}
                     </span>
                   </div>
                 </div>
