@@ -41,14 +41,6 @@ const TOOL_META: Record<string, {
     cover: '/demo-card-lifestyle.jpg',
     valueProp: '爆款小红书内容一键生成',
   },
-  'resume-optimizer': {
-    cover: '/cover-resume.png',
-    valueProp: 'STAR法则优化简历，HR直接约面试',
-  },
-  'novel': {
-    cover: '/cover-novel.png',
-    valueProp: 'AI辅助小说创作，大纲到正文一键生成',
-  },
 };
 
 export default function ToolsPage() {

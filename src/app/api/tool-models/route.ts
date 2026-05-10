@@ -6,16 +6,10 @@ const supabaseKey = process.env.COZE_SUPABASE_SERVICE_ROLE_KEY || process.env.SU
 
 // 工具ID映射到数据库tool_id
 const TOOL_ID_MAP: Record<string, string> = {
-  'novel': 'novel-polish',
-  'novel-polish': 'novel-polish',
-  'novel-script': 'novel-script',
-  'novel-split-panel': 'novel-split-panel',
-  'novel-generate-image': 'novel-generate-image',
   'product-compliance': 'product-compliance',
   'product-enhance': 'product-enhance',
   'background-removal': 'background-removal',
   'xhs-generator': 'xhs-generator',
-  'resume': 'resume',
   'product-generator': 'product-generator',
   'ai-photo': 'ai-photo',
   'product-poster': 'product-enhance',
@@ -25,15 +19,10 @@ const TOOL_ID_MAP: Record<string, string> = {
 
 // 默认免费模型配置（当数据库无配置时使用）
 const DEFAULT_CONFIGS: Record<string, { model: string; source: string; isFree: boolean }> = {
-  'novel-polish': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
-  'novel-script': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
-  'novel-split-panel': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
-  'novel-generate-image': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
   'product-compliance': { model: 'doubao-seed-1-6-vision-250815', source: 'coze', isFree: true },
   'product-enhance': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
   'background-removal': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
   'xhs-generator': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
-  'resume': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },
   'product-generator': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
   'ai-photo': { model: 'doubao-seedream-4-5-251128', source: 'coze', isFree: true },
   'layout-design': { model: 'doubao-seed-1-8-251228', source: 'coze', isFree: true },

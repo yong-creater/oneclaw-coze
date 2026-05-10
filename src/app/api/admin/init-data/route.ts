@@ -48,11 +48,9 @@ const TAGS = [
 // 精选工具数据 - 所有精选工具都在这里定义，新增工具只需添加到这里
 const UTILITY_TOOLS = [
   // 精选工具组 (group_id=1)
-  { name: 'STAR简历优化', slug: 'resume', group_id: 1, sort_order: 1, tool_path: '/resume', color: 'from-blue-500 to-cyan-500', icon: 'FileText' },
-  { name: '小说创作工坊', slug: 'novel', group_id: 1, sort_order: 2, tool_path: '/novel', color: 'from-purple-500 to-pink-500', icon: 'BookOpen' },
-  { name: '商品详情页生成器', slug: 'productpage', group_id: 1, sort_order: 3, tool_path: '/productpage', color: 'from-green-500 to-emerald-500', icon: 'ShoppingCart' },
-  { name: 'AI智能抠图', slug: 'background-removal', group_id: 1, sort_order: 4, tool_path: '/background-removal', color: 'from-amber-500 to-orange-500', icon: 'Scissors' },
-  { name: '小红书笔记生成器', slug: 'xiaohongshu-generator', group_id: 1, sort_order: 5, tool_path: '/xiaohongshu-generator', color: 'from-pink-500 to-rose-500', icon: 'Heart' },
+  { name: '商品详情页生成器', slug: 'productpage', group_id: 1, sort_order: 1, tool_path: '/productpage', color: 'from-green-500 to-emerald-500', icon: 'ShoppingCart' },
+  { name: 'AI智能抠图', slug: 'background-removal', group_id: 1, sort_order: 2, tool_path: '/background-removal', color: 'from-amber-500 to-orange-500', icon: 'Scissors' },
+  { name: '小红书笔记生成器', slug: 'xiaohongshu-generator', group_id: 1, sort_order: 3, tool_path: '/xiaohongshu-generator', color: 'from-pink-500 to-rose-500', icon: 'Heart' },
   // ⚠️ 新增工具只需在这里添加一行即可自动同步到数据库
 ];
 

@@ -4,7 +4,7 @@ import { streamWithModel, invokeWithModel, ChatMessage } from '@/lib/llm-selecto
 /**
  * LLM 通用生成 API
  * 
- * 统一入口，所有 LLM 类工具（小说、简历、文案等）都通过此接口生成
+ * 统一入口，所有 LLM 类工具都通过此接口生成
  * 通过 tool_id 从数据库读取模型配置，按 providerSlug 分发
  * 
  * 支持两种模式：

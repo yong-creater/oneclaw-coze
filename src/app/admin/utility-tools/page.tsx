@@ -1036,7 +1036,7 @@ export default function UtilityToolsPage() {
 	                </div>
 	                <div>
 	                  <label className="text-xs font-medium text-slate-500 mb-1.5 block">Slug标识</label>
-	                  <Input value={toolForm.slug} onChange={(e) => setToolForm({ ...toolForm, slug: e.target.value })} placeholder="例如：resume" className="font-mono" />
+	                  <Input value={toolForm.slug} onChange={(e) => setToolForm({ ...toolForm, slug: e.target.value })} placeholder="例如：product-page" className="font-mono" />
 	                </div>
 	              </div>
 	              <div>

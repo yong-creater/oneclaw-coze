@@ -306,43 +306,6 @@ const TOOL_WORKFLOWS: ToolWorkflowConfig[] = [
       { value: 'cute', label: '清新甜美' },
     ],
   },
-  {
-    slug: 'novel',
-    name: '小说创作',
-    icon: '📖',
-    description: 'AI辅助小说创作，大纲到正文一键生成',
-    greeting: '你想创作什么类型的小说？',
-    steps: [
-      {
-        id: 'genre',
-        type: 'select',
-        label: '选择小说类型',
-        options: [
-          { value: 'romance', label: '言情', icon: '💕' },
-          { value: 'fantasy', label: '玄幻', icon: '🔮' },
-          { value: 'scifi', label: '科幻', icon: '🚀' },
-          { value: 'mystery', label: '悬疑', icon: '🔍' },
-        ],
-      },
-      {
-        id: 'description',
-        type: 'input',
-        label: '描述你的故事构思',
-        placeholder: '例如：现代都市背景下，一个平凡女孩意外获得读心术…',
-      },
-    ],
-    cases: [
-      { image: '/cover-novel.png', title: '言情小说大纲', desc: '甜宠文经典设定' },
-      { image: '/cover-resume.png', title: '玄幻世界设定', desc: '修仙体系与世界观' },
-    ],
-    defaultRatio: 'text',
-    defaultCount: 1,
-    styleOptions: [
-      { value: 'sweet', label: '甜宠风格' },
-      { value: 'dark', label: '暗黑风格' },
-      { value: 'epic', label: '史诗风格' },
-    ],
-  },
 ];
 
 // ===== 查找工具配置 =====
@@ -366,7 +329,6 @@ export function slugToGenType(slug: string): string {
     'product-page': 'detail',
     'productpage': 'detail',
     'product-poster': 'product',
-    'novel': 'novel',
   };
   return map[slug] || slug;
 }
@@ -379,7 +341,6 @@ export function genTypeToSlug(genType: string): string {
     'aiphoto': 'ai-photo',
     'removebg': 'background-removal',
     'detail': 'product-page',
-    'novel': 'novel',
     'poster': 'poster-design',
   };
   return map[genType] || genType;

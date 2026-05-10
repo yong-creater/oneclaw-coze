@@ -38,7 +38,6 @@ const TOOL_ROUTES: Record<string, string> = {
   'background-removal': 'removebg',
   'product-page': 'detail',
   'poster-design': 'poster',
-  'novel': 'novel',
 };
 
 // ===== 跳转上下文存储 key =====
@@ -126,14 +125,6 @@ const TOOL_MATCHES: ToolMatch[] = [
     icon: <Palette className="w-4 h-4" />,
     keywords: ['海报', '海报设计', '宣传图', '活动海报', '品牌海报', '促销海报', '节日海报', '音乐节', '创意海报'],
     description: '一键生成品牌宣传海报和活动海报',
-  },
-  {
-    slug: 'novel',
-    name: '小说创作工坊',
-    type: 'novel',
-    icon: <PenTool className="w-4 h-4" />,
-    keywords: ['小说', '故事', '大纲', '角色', '剧情', '写作', '创作', '短剧', 'IP'],
-    description: 'AI辅助小说创作，从大纲到正文一键生成',
   },
 ];
 
@@ -284,7 +275,6 @@ export default function HomePage() {
       'ai-photo': { style: '高级质感大片', ratio: '3:4', count: '6张' },
       'background-removal': { style: '干净白底', ratio: '1:1', count: '1张' },
       'product-page': { style: '品牌调性排版', ratio: '3:4', count: '1份' },
-      'novel': { style: '文学创作', ratio: '-', count: '1篇' },
     };
     const rec = map[tool.slug] || { style: '自动匹配', ratio: '3:4', count: '4张' };
     if (lower.includes('深色') || lower.includes('暗黑') || lower.includes('科技')) rec.style = '深色科技\u98ce';

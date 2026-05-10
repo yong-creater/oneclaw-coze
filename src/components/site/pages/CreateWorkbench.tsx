@@ -56,11 +56,6 @@ async function callGenerateAPI(
       url = '/api/images/generate';
       body = { prompt, images, style, subtype: subtype || 'full', tool_id: 'product-page' };
       break;
-    case 'novel':
-      // 小说脚本走 LLM
-      url = '/api/novel/generate-script';
-      body = { text: prompt, genre: subtype || style, style };
-      break;
     default:
       // 兜底：走图片生成
       url = '/api/images/generate';

@@ -14,8 +14,6 @@ import {
   Camera,
   Image as ImageIcon,
   FileText,
-  BookOpen,
-  Sparkles,
   Wand2,
   X,
 } from 'lucide-react';
@@ -43,8 +41,6 @@ const TOOL_META: Record<string, { label: string; icon: React.ComponentType<{ cla
   ai_photo: { label: 'AI写真', icon: Camera, gradient: 'from-[#7B61FF] to-[#A78BFA]' },
   product_poster: { label: '商品海报', icon: ImageIcon, gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
   xiaohongshu: { label: '小红书', icon: FileText, gradient: 'from-[#7B61FF] to-[#FFB84D]' },
-  novel: { label: '小说创作', icon: BookOpen, gradient: 'from-[#A78BFA] to-[#7B61FF]' },
-  resume: { label: '简历优化', icon: Sparkles, gradient: 'from-[#7B61FF] to-[#6EE7FF]' },
   productpage: { label: '详情页', icon: FileText, gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
   cover: { label: '封面设计', icon: ImageIcon, gradient: 'from-[#6EE7FF] to-[#5B8CFF]' },
   video: { label: '视频脚本', icon: FileText, gradient: 'from-[#7B61FF] to-[#5B8CFF]' },

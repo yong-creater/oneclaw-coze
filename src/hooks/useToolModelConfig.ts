@@ -24,7 +24,7 @@ interface ModelInfo {
 
 /**
  * 获取工具的模型配置（支持新旧两种配置方式）
- * @param toolSlug 工具slug (如 'novel', 'resume', 'xhs-generator')
+ * @param toolSlug 工具slug (如 'xhs-generator', 'product-page')
  * @returns 模型配置和加载状态
  */
 export function useToolModelConfig(toolSlug: string) {
@@ -117,8 +117,6 @@ export function useToolModelConfig(toolSlug: string) {
 export function getToolName(toolSlug: string): string {
   const names: Record<string, string> = {
     'xhs-generator': '小红书爆款生成器',
-    'resume': '简历优化器',
-    'novel-polish': '小说创作',
     'ai-photo': 'AI写真生成器',
     'product-poster': '商品海报生成器',
     'background-removal': 'AI智能抠图',

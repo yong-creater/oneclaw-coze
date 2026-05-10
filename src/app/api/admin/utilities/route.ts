@@ -100,8 +100,6 @@ export async function GET(request: NextRequest) {
         data: [],
         pagination: { page, limit, total: 0, total_pages: 0 },
         stats: {
-          resume: { total: 0, success: 0, failed: 0 },
-          novel: { total: 0, success: 0, failed: 0 },
           product_page: { total: 0, success: 0, failed: 0 }
         }
       });
@@ -120,7 +118,7 @@ export async function GET(request: NextRequest) {
 
     // 计算各工具的使用统计
     const toolStats: Record<string, { total: number; success: number; failed: number }> = {};
-    const toolTypes = ['resume', 'novel', 'product_page'];
+    const toolTypes = ['product_page'];
 
     for (const type of toolTypes) {
       const typeData = statsData?.filter((d: { tool_type: string; status: string }) => d.tool_type === type) || [];
@@ -149,8 +147,6 @@ export async function GET(request: NextRequest) {
       data: [],
       pagination: { page: 1, limit: 20, total: 0, total_pages: 0 },
       stats: {
-        resume: { total: 0, success: 0, failed: 0 },
-        novel: { total: 0, success: 0, failed: 0 },
         product_page: { total: 0, success: 0, failed: 0 }
       }
     });
