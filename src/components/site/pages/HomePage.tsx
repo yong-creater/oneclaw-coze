@@ -82,7 +82,7 @@ const TOOL_MATCHES: ToolMatch[] = [
 
 
 // ===== AI 需求识别状态 =====
-type IdentifyPhase = 'idle' | 'identifying' | 'matched' | 'no-match';
+type IdentifyPhase = 'idle' | 'identifying' | 'no-match';
 
 // ===== 试试这些创作 =====
 const tryChips = [
@@ -196,8 +196,6 @@ export default function HomePage() {
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const [phase, setPhase] = useState<IdentifyPhase>('idle');
-  const [matchedTool, setMatchedTool] = useState<ToolMatch | null>(null);
-  const [identifyStep, setIdentifyStep] = useState(0);
   const [isJumping, setIsJumping] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
@@ -205,12 +203,7 @@ export default function HomePage() {
   const [showcaseIndex, setShowcaseIndex] = useState(0);
   const [showcaseFading, setShowcaseFading] = useState(false);
 
-  const identifyMessages = [
-    '正在理解你的创意需求…',
-    '正在分析参考图片风格…',
-    '正在匹配最佳创作方式…',
-    'OneClaw 正在为你生成专业方案…',
-  ];
+  const identifyMessage = '正在准备创作环境…';
 
   interface StyleRecommendation { style: string; ratio: string; count: string; }
   function getStyleRecommendation(tool: ToolMatch | null, input: string): StyleRecommendation {
@@ -287,15 +280,8 @@ export default function HomePage() {
 
   const handleStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
-    setPhase('identifying'); setIdentifyStep(0);
-    setTimeout(() => setIdentifyStep(1), 2000);
-    setTimeout(() => setIdentifyStep(2), 4000);
-    setTimeout(() => setIdentifyStep(3), 6000);
-    setTimeout(() => {
-      const tool = matchTool(inputText);
-      if (tool) { setMatchedTool(tool); setPhase('matched'); }
-      else { setPhase('no-match'); }
-    }, 8000);
+    setPhase('identifying');
+    // 轻量过渡：1.2秒后直接跳转工具页
     setTimeout(() => {
       const tool = matchTool(inputText);
       if (tool && TOOL_ROUTE_MAP[tool.slug]) {
@@ -306,37 +292,16 @@ export default function HomePage() {
           autoGenerate: true,
           analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
         });
+      } else {
+        setPhase('no-match');
       }
-    }, 9000);
+    }, 1200);
   }, [inputText, uploadedImages, phase, router]);
-
-  const handleJumpNow = useCallback(() => {
-    if (!matchedTool) return;
-    if (!TOOL_ROUTE_MAP[matchedTool.slug]) return;
-    setIsJumping(true);
-    const rec = getStyleRecommendation(matchedTool, inputText);
-    navigateToCreate(router, {
-      prompt: inputText.trim(), uploadedImages, matchedTool: matchedTool.slug,
-      autoGenerate: true,
-      analysisResult: { tool: matchedTool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
-    });
-  }, [matchedTool, inputText, uploadedImages, router]);
 
   const handleBrowseTools = useCallback(() => { router.push('/tools'); }, [router]);
 
-  const handleAutoCreate = useCallback(() => {
-    if (!matchedTool) return;
-    setIsJumping(true);
-    const rec = getStyleRecommendation(matchedTool, inputText);
-    navigateToCreate(router, {
-      prompt: inputText.trim(), uploadedImages, matchedTool: matchedTool.slug,
-      autoGenerate: true,
-      analysisResult: { tool: matchedTool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
-    });
-  }, [inputText, uploadedImages, router, matchedTool]);
-
   const resetIdentify = useCallback(() => {
-    setPhase('idle'); setMatchedTool(null); setIdentifyStep(0); setIsJumping(false);
+    setPhase('idle'); setIsJumping(false);
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -567,13 +532,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== 全页 AI 分析浮层 ===== */}
+      {/* ===== 轻量过渡浮层 ===== */}
       {phase !== 'idle' && (
         <div className="os-ai-overlay">
           <div className="os-ai-card">
             <div className="os-ai-card-glow" />
             {phase === 'identifying' && (
-              <div className="os-ai-analyzing" key={`msg-${identifyStep}`}>
+              <div className="os-ai-analyzing">
                 {uploadedImages.length > 0 && (
                   <div className="os-ai-scan-area">
                     {uploadedImages.length === 1 ? (
@@ -589,32 +554,18 @@ export default function HomePage() {
                         ))}
                       </div>
                     )}
-                    <div className="os-ai-scan-line" />
                     <div className="os-ai-scan-shimmer" />
                     {uploadedImages.length > 1 && <span className="os-ai-scan-count">已上传 {uploadedImages.length} 张参考图</span>}
                   </div>
                 )}
                 <div className="os-ai-msg-wrap">
-                  <span className="os-ai-msg">{identifyMessages[identifyStep]}</span>
+                  <span className="os-ai-msg">{identifyMessage}</span>
                 </div>
                 <div className="os-ai-pulse-dots">
                   <span className="os-ai-pulse-dot" style={{ animationDelay: '0s' }} />
                   <span className="os-ai-pulse-dot" style={{ animationDelay: '0.4s' }} />
                   <span className="os-ai-pulse-dot" style={{ animationDelay: '0.8s' }} />
                 </div>
-              </div>
-            )}
-            {phase === 'matched' && matchedTool && (
-              <div className="os-ai-matched">
-                <div className="os-ai-matched-check"><Check className="w-6 h-6 text-white" /></div>
-                <span className="os-ai-matched-label">OneClaw 已为你匹配最佳创作工具</span>
-                <span className="os-ai-matched-tool">{matchedTool.icon}<span className="ml-2">{matchedTool.name}</span></span>
-                <div className="os-ai-matched-recs">
-                  <div className="os-ai-matched-rec"><span className="os-ai-matched-rec-label">推荐风格</span><span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).style}</span></div>
-                  <div className="os-ai-matched-rec"><span className="os-ai-matched-rec-label">推荐比例</span><span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).ratio}</span></div>
-                  <div className="os-ai-matched-rec"><span className="os-ai-matched-rec-label">生成数量</span><span className="os-ai-matched-rec-value">{getStyleRecommendation(matchedTool, inputText).count}</span></div>
-                </div>
-                <span className="os-ai-matched-redirect">正在进入创作工作台…</span>
               </div>
             )}
             {phase === 'no-match' && (
@@ -645,7 +596,16 @@ export default function HomePage() {
                   })}
                 </div>
                 <div className="os-ai-nomatch-actions">
-                  <button onClick={handleAutoCreate} className="os-ai-nomatch-primary">选择第一个推荐工具继续</button>
+                  <button onClick={() => {
+                    const tool = TOOL_MATCHES[0];
+                    if (!TOOL_ROUTE_MAP[tool.slug]) return;
+                    const rec = getStyleRecommendation(tool, inputText);
+                    navigateToCreate(router, {
+                      prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
+                      autoGenerate: true,
+                      analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
+                    });
+                  }} className="os-ai-nomatch-primary">选择第一个推荐工具继续</button>
                   <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览全部工具</button>
                   <button onClick={resetIdentify} className="os-ai-nomatch-ghost">返回修改需求</button>
                 </div>
