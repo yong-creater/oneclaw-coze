@@ -1,10 +1,17 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { MenuProvider } from '@/components/site/common/MenuProvider';
 import SiteSidebar from '@/components/site/common/SiteSidebar';
 import SiteFooter from '@/components/site/common/SiteFooter';
 
+// 不显示 Footer 的页面路径
+const FOOTLESS_PATHS = ['/create'];
+
 function PageSwitcher({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const hideFooter = FOOTLESS_PATHS.some(p => pathname.startsWith(p));
+
   return (
     <>
       <SiteSidebar />
@@ -25,7 +32,7 @@ function PageSwitcher({ children }: { children: React.ReactNode }) {
           <div style={{ flex: 1 }}>
             {children}
           </div>
-          <SiteFooter />
+          {!hideFooter && <SiteFooter />}
         </div>
       </main>
     </>
