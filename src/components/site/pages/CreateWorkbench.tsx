@@ -6,7 +6,7 @@ import {
   Sparkles, Upload, X,
   Download, RotateCcw, ZoomIn, Loader2, Check,
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck,
-  History, BookOpen, Wand2,
+  Wand2,
   Package, BookImage, Camera
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
@@ -585,20 +585,7 @@ export default function CreateWorkbench() {
             <span className="os-ws-header-tool-desc">{headerInfo.desc}</span>
           </div>
         </div>
-        <div className="os-ws-header-actions">
-          <button
-            onClick={() => {/* TODO: 历史记录 */}}
-            title="历史记录"
-          >
-            <History size={16} />
-          </button>
-          <button
-            onClick={() => {/* TODO: 使用指南 */}}
-            title="使用指南"
-          >
-            <BookOpen size={16} />
-          </button>
-        </div>
+
       </div>
 
       {/* ===== BODY ===== */}
