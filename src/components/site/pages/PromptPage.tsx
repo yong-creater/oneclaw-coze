@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Search, Star, Eye, Heart, Sparkles, X } from 'lucide-react';
-import { getInspirations, getInspirationCategories } from '@/lib/tool-workflow-config';
+import { getInspirations } from '@/lib/tool-workflow-config';
 import type { InspirationItem } from '@/lib/tool-workflow-config';
 import { useRouter } from 'next/navigation';
 
@@ -81,12 +81,11 @@ export default function InspirationPage() {
     });
   };
 
-  /* ---- Fetch from API ---- */
+  /* ---- Fetch all items from API (no category filter, we filter client-side) ---- */
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
-      if (activeCategory !== '全部') params.set('category', activeCategory);
       if (search) params.set('search', search);
       const res = await fetch(`/api/prompts?${params}`);
       const data = await res.json();
@@ -98,18 +97,37 @@ export default function InspirationPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeCategory, search]);
+  }, [search]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
 
-  /* ---- Derived categories from static config ---- */
-  const categories = getInspirationCategories();
+  /* ---- Derived categories from all items ---- */
+  const categories = useMemo(() => {
+    const map = new Map<string, number>();
+    items.forEach(item => {
+      const c = item.category || '其他';
+      map.set(c, (map.get(c) || 0) + 1);
+    });
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, count]) => ({ label, count }));
+  }, [items]);
 
-  /* ---- Filter items ---- */
-  const filteredItems = items.filter(item => {
-    if (filterStyle && item.style !== filterStyle) return false;
-    return true;
-  });
+  /* ---- Unique styles ---- */
+  const uniqueStyles = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach(item => { if (item.style) set.add(item.style); });
+    return Array.from(set);
+  }, [items]);
+
+  /* ---- Filter items client-side ---- */
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      if (activeCategory !== '全部' && item.category !== activeCategory) return false;
+      if (filterStyle && item.style !== filterStyle) return false;
+      return true;
+    });
+  }, [items, activeCategory, filterStyle]);
 
   /* ---- Generate similar ---- */
   const handleGenerate = (item: PromptItem) => {
@@ -119,9 +137,6 @@ export default function InspirationPage() {
     if (item.style) params.set('style', item.style);
     router.push(`/create?${params.toString()}`);
   };
-
-  /* ---- Extract unique styles ---- */
-  const uniqueStyles = [...new Set(items.map(i => i.style).filter(Boolean) as string[])];
 
   /* ---- Favorite count ---- */
   const favoriteCount = favorites.size;
