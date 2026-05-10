@@ -189,7 +189,7 @@ export default function XiaohongshuGeneratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-[#f7f7fb] via-[#f3f2ff] to-[#f8f8fc] dark:from-slate-900 dark:to-slate-800">
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         {/* 页面标题 */}
@@ -206,7 +206,7 @@ export default function XiaohongshuGeneratorPage() {
           {/* 左侧：输入区 */}
           <div className="space-y-4">
             {/* 输入卡片 */}
-            <Card className="border-pink-100 dark:border-pink-900/30">
+            <Card className="border-[#7B61FF]/20 dark:border-[#7B61FF]/30">
               <CardContent className="p-5">
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                   输入内容主题
@@ -227,7 +227,7 @@ export default function XiaohongshuGeneratorPage() {
                 <Button
                   onClick={generateContent}
                   disabled={loading || !keyword.trim()}
-                  className="w-full mt-3 h-11 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-medium rounded-xl shadow-lg shadow-pink-500/25"
+                  className="w-full mt-3 h-11 bg-gradient-to-r from-[#7B61FF] to-[#5EA2FF] hover:brightness-110 text-white font-medium rounded-xl shadow-lg shadow-[#7B61FF]/25"
                 >
                   {loading ? (
                     <>
@@ -246,13 +246,13 @@ export default function XiaohongshuGeneratorPage() {
 
             {/* 标题选择 */}
             {content && content.titles.length > 0 && (
-              <Card className="border-pink-100 dark:border-pink-900/30">
+              <Card className="border-[#7B61FF]/20 dark:border-[#7B61FF]/30">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                       选择标题
                     </label>
-                    <span className="text-xs text-pink-500">
+                    <span className="text-xs text-[#7B61FF]">
                       {selectedTitle + 1} / {content.titles.length}
                     </span>
                   </div>
@@ -263,13 +263,13 @@ export default function XiaohongshuGeneratorPage() {
                         onClick={() => setSelectedTitle(index)}
                         className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-all text-sm ${
                           selectedTitle === index
-                            ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300'
-                            : 'border-slate-200 dark:border-slate-700 hover:border-pink-300 text-slate-700 dark:text-slate-300'
+                            ? 'border-[#7B61FF] bg-[#7B61FF]/5 dark:bg-[#7B61FF]/10 text-[#7B61FF] dark:text-[#9B8AFF]'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-[#7B61FF]/40 text-slate-700 dark:text-slate-300'
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                            selectedTitle === index ? 'border-pink-500 bg-pink-500' : 'border-slate-300'
+                            selectedTitle === index ? 'border-[#7B61FF] bg-[#7B61FF]' : 'border-slate-300'
                           }`}>
                             {selectedTitle === index && <Check className="w-3 h-3 text-white" />}
                           </span>
@@ -285,7 +285,7 @@ export default function XiaohongshuGeneratorPage() {
                     size="sm"
                     onClick={regenerateCover}
                     disabled={generatingImage}
-                    className="w-full mt-3 border-pink-300 text-pink-600 hover:bg-pink-50"
+                    className="w-full mt-3 border-[#7B61FF]/30 text-[#7B61FF] hover:bg-[#7B61FF]/5"
                   >
                     {generatingImage ? (
                       <>
@@ -305,7 +305,7 @@ export default function XiaohongshuGeneratorPage() {
 
             {/* 标签区 */}
             {content && content.tags.length > 0 && (
-              <Card className="border-pink-100 dark:border-pink-900/30">
+              <Card className="border-[#7B61FF]/20 dark:border-[#7B61FF]/30">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -313,7 +313,7 @@ export default function XiaohongshuGeneratorPage() {
                     </label>
                     <button
                       onClick={() => copyTag(content.tags.join(' #'))}
-                      className="text-xs text-pink-500 hover:text-pink-600 flex items-center gap-1"
+                      className="text-xs text-[#7B61FF] hover:text-[#5EA2FF] flex items-center gap-1"
                     >
                       <Copy className="w-3 h-3" />
                       复制全部
@@ -324,7 +324,7 @@ export default function XiaohongshuGeneratorPage() {
                       <button
                         key={index}
                         onClick={() => copyTag(tag)}
-                        className="px-3 py-1.5 bg-gradient-to-r from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30 text-pink-600 dark:text-pink-400 rounded-full text-xs font-medium hover:from-pink-200 hover:to-rose-200 transition-colors"
+                        className="px-3 py-1.5 bg-[#7B61FF]/8 dark:bg-[#7B61FF]/15 text-[#7B61FF] dark:text-[#9B8AFF] rounded-full text-xs font-medium hover:bg-[#7B61FF]/15 transition-colors"
                       >
                         #{tag.replace(/^#/, '')}
                       </button>
@@ -358,7 +358,7 @@ export default function XiaohongshuGeneratorPage() {
                 {/* 帖子内容 */}
                 <div className="bg-white dark:bg-slate-800 rounded-[24px] overflow-hidden">
                   {/* 封面图 */}
-                  <div className="relative aspect-[3/4] bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30">
+                  <div className="relative aspect-[3/4] bg-gradient-to-br from-[#7B61FF]/5 to-[#5EA2FF]/5 dark:from-[#7B61FF]/10 dark:to-[#5EA2FF]/10">
                     {content?.coverImages[0] ? (
                       <img
                         src={content.coverImages[0]}
@@ -367,10 +367,10 @@ export default function XiaohongshuGeneratorPage() {
                       />
                     ) : generatingImage ? (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Loader2 className="w-8 h-8 text-pink-400 animate-spin" />
+                        <Loader2 className="w-8 h-8 text-[#7B61FF] animate-spin" />
                       </div>
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-pink-300">
+                      <div className="w-full h-full flex flex-col items-center justify-center text-[#7B61FF]/40">
                         <Image className="w-12 h-12 mb-2 opacity-50" />
                         <span className="text-xs">封面图</span>
                       </div>
@@ -392,7 +392,7 @@ export default function XiaohongshuGeneratorPage() {
                     {/* 标签 */}
                     <div className="flex flex-wrap gap-1 mb-3">
                       {content?.tags.slice(0, 3).map((tag, index) => (
-                        <span key={index} className="text-[10px] text-pink-500 bg-pink-50 dark:bg-pink-900/30 px-1.5 py-0.5 rounded">
+                        <span key={index} className="text-[10px] text-[#7B61FF] bg-[#7B61FF]/8 dark:bg-[#7B61FF]/15 px-1.5 py-0.5 rounded">
                           #{tag.replace(/^#/, '')}
                         </span>
                       ))}
@@ -423,11 +423,11 @@ export default function XiaohongshuGeneratorPage() {
         {content && (
           <div className="mt-8 space-y-4">
             {/* 正文卡片 - 可复制 */}
-            <Card className="border-pink-100 dark:border-pink-900/30">
+            <Card className="border-[#7B61FF]/20 dark:border-[#7B61FF]/30">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                    <span className="text-pink-500">📝</span> 正文内容
+                    <span className="text-[#7B61FF]">📝</span> 正文内容
                   </h2>
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -437,7 +437,7 @@ export default function XiaohongshuGeneratorPage() {
             </Card>
 
             {/* 一键复制区域 */}
-            <Card className="border-pink-200 dark:border-pink-800 bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20">
+            <Card className="border-[#7B61FF]/20 dark:border-[#7B61FF]/30 bg-gradient-to-r from-[#7B61FF]/5 to-[#5EA2FF]/5 dark:from-[#7B61FF]/10 dark:to-[#5EA2FF]/10">
               <CardContent className="p-6">
                 <div className="text-center">
                   <h3 className="font-bold text-slate-800 dark:text-white mb-2">
@@ -449,7 +449,7 @@ export default function XiaohongshuGeneratorPage() {
                   <Button
                     onClick={copyAll}
                     size="lg"
-                    className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white px-8"
+                    className="bg-gradient-to-r from-[#7B61FF] to-[#5EA2FF] hover:brightness-110 text-white px-8"
                   >
                     {copied ? (
                       <>
@@ -473,7 +473,7 @@ export default function XiaohongshuGeneratorPage() {
         {!content && (
           <div className="mt-8 text-center">
             <div className="inline-flex items-center gap-2 text-sm text-slate-500 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full">
-              <Sparkles className="w-4 h-4 text-pink-500" />
+              <Sparkles className="w-4 h-4 text-[#7B61FF]" />
               输入主题后点击「一键生成」，AI将自动创作爆款内容
             </div>
           </div>

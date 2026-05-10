@@ -47,11 +47,11 @@ const VALID_RATIOS = RATIO_OPTIONS.map(r => r.value);
 // sessionStorage key
 const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
 
-// ===== 工具主题色 =====
+// ===== 工具主题色（统一 OneClaw 品牌紫蓝渐变） =====
 const TOOL_ACCENT: Record<string, string> = {
-  'product-generator': '#7B6DFF',
-  'xiaohongshu-generator': '#FF2442',
-  'ai-photo': '#F97316',
+  'product-generator': '#7B61FF',
+  'xiaohongshu-generator': '#7B61FF',
+  'ai-photo': '#7B61FF',
 };
 
 // ===== 工具 Lucide 图标映射 =====
@@ -146,7 +146,7 @@ export default function CreateWorkbench() {
     greeting: '', steps: [], cases: [],
     defaultRatio: '1:1', defaultCount: 4, styleOptions: [],
   };
-  const accent = TOOL_ACCENT[toolSlug] || '#7B6DFF';
+  const accent = TOOL_ACCENT[toolSlug] || '#7B61FF';
 
   // ----- 输入 -----
   const [inputText, setInputText] = useState('');

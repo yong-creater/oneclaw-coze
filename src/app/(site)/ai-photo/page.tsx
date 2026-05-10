@@ -255,12 +255,12 @@ export default function AIPhotoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-[#f7f7fb] via-[#f3f2ff] to-[#f8f8fc] dark:from-slate-900 dark:to-slate-800">
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* 标题区 */}
         <div className="text-center py-8">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#7B61FF] to-[#5EA2FF] text-white rounded-full text-sm font-medium mb-4">
             <Camera className="w-4 h-4" />
             AI写真生成器
           </div>
@@ -274,9 +274,9 @@ export default function AIPhotoPage() {
 
         {/* 模型配置错误提示 */}
         {loadingModel ? (
-          <Card className="mb-8 border-violet-100 dark:border-violet-900/30">
+          <Card className="mb-8 border-[#7B61FF]/20 dark:border-[#7B61FF]/30">
             <CardContent className="p-8 flex flex-col items-center">
-              <Loader2 className="w-8 h-8 animate-spin text-violet-500 mb-3" />
+              <Loader2 className="w-8 h-8 animate-spin text-[#7B61FF] mb-3" />
               <p className="text-slate-500">加载中...</p>
             </CardContent>
           </Card>
@@ -297,7 +297,7 @@ export default function AIPhotoPage() {
         ) : null}
 
         {/* 上传区 */}
-        <Card className="mb-8 border-violet-100 dark:border-violet-900/30">
+        <Card className="mb-8 border-[#7B61FF]/20 dark:border-[#7B61FF]/30">
           <CardContent className="p-6">
             <input
               ref={fileInputRef}
@@ -310,10 +310,10 @@ export default function AIPhotoPage() {
             {!previewUrl ? (
               <button
                 onClick={handleUploadClick}
-                className="w-full h-48 border-2 border-dashed border-violet-200 dark:border-violet-800 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-violet-400 dark:hover:border-violet-600 transition-colors cursor-pointer bg-violet-50/50 dark:bg-violet-900/20"
+                className="w-full h-48 border-2 border-dashed border-[#7B61FF]/30 dark:border-[#7B61FF]/40 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-[#7B61FF] dark:hover:border-[#7B61FF] transition-colors cursor-pointer bg-[#7B61FF]/5 dark:bg-[#7B61FF]/10"
               >
-                <div className="w-16 h-16 rounded-full bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center">
-                  <Upload className="w-8 h-8 text-violet-500" />
+                <div className="w-16 h-16 rounded-full bg-[#7B61FF]/10 dark:bg-[#7B61FF]/20 flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-[#7B61FF]" />
                 </div>
                 <div className="text-center">
                   <p className="font-medium text-slate-800 dark:text-white">点击上传照片</p>
@@ -348,8 +348,8 @@ export default function AIPhotoPage() {
                         onClick={() => setSelectedStyle(style.id)}
                         className={`p-3 rounded-xl border-2 transition-all text-center ${
                           selectedStyle === style.id
-                            ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30'
-                            : 'border-slate-200 dark:border-slate-700 hover:border-violet-300'
+                            ? 'border-[#7B61FF] bg-[#7B61FF]/5 dark:bg-[#7B61FF]/10'
+                            : 'border-slate-200 dark:border-slate-700 hover:border-[#7B61FF]/40'
                         }`}
                       >
                         <span className="text-xl mb-1 block">{style.emoji}</span>
@@ -365,7 +365,7 @@ export default function AIPhotoPage() {
                 <Button
                   onClick={generatePhotos}
                   disabled={generating || !modelConfig}
-                  className="w-full h-12 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white font-medium rounded-xl shadow-lg shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-12 bg-gradient-to-r from-[#7B61FF] to-[#5EA2FF] hover:brightness-110 text-white font-medium rounded-xl shadow-lg shadow-[#7B61FF]/25 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {generating ? (
                     <>
@@ -392,7 +392,7 @@ export default function AIPhotoPage() {
                 生成的写真
               </h2>
               {generating && (
-                <span className="text-sm text-violet-600 flex items-center gap-1">
+                <span className="text-sm text-[#7B61FF] flex items-center gap-1">
                   <Loader2 className="w-4 h-4 animate-spin" /> 生成中...
                 </span>
               )}
@@ -402,7 +402,7 @@ export default function AIPhotoPage() {
               {Array(4).fill(0).map((_, i) => {
                 const photo = photos[i];
                 return (
-                  <Card key={i} className="border-violet-100 dark:border-violet-900/30 overflow-hidden">
+                  <Card key={i} className="border-[#7B61FF]/20 dark:border-[#7B61FF]/30 overflow-hidden">
                     <div className="relative aspect-square bg-slate-100 dark:bg-slate-800">
                       {photo ? (
                         <>
@@ -420,7 +420,7 @@ export default function AIPhotoPage() {
                         </>
                       ) : generating ? (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
+                          <Loader2 className="w-8 h-8 animate-spin text-[#7B61FF]/50" />
                         </div>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -432,7 +432,7 @@ export default function AIPhotoPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="w-full border-violet-300 text-violet-600 hover:bg-violet-50"
+                        className="w-full border-[#7B61FF]/30 text-[#7B61FF] hover:bg-[#7B61FF]/5"
                         onClick={() => photo && downloadPhoto(photo, i)}
                         disabled={!photo || downloading === i}
                       >

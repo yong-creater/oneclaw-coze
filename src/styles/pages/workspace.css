@@ -81,7 +81,7 @@
 }
 .os-ws-header-actions button:hover {
   background: rgba(123,109,255,0.06);
-  color: #7B6DFF;
+  color: #7B61FF;
 }
 .os-ws-header-actions button svg {
   width: 16px;
@@ -162,7 +162,7 @@
 }
 .os-ws-textarea:focus {
   outline: none;
-  border-color: var(--ws-accent, #7B6DFF);
+  border-color: var(--ws-accent, #7B61FF);
   background: #fff;
 }
 .os-ws-textarea::placeholder { color: #bbb; text-align: left; }
@@ -231,8 +231,8 @@
   background: #fafafa;
 }
 .os-ws-upload-btn:hover {
-  border-color: var(--ws-accent, #7B6DFF);
-  color: var(--ws-accent, #7B6DFF);
+  border-color: var(--ws-accent, #7B61FF);
+  color: var(--ws-accent, #7B61FF);
   background: rgba(123,109,255,0.03);
 }
 .os-ws-upload-btn svg { width: 20px; height: 20px; }
@@ -256,12 +256,12 @@
   white-space: nowrap;
 }
 .os-ws-pill:hover {
-  border-color: var(--ws-accent, #7B6DFF);
-  color: var(--ws-accent, #7B6DFF);
+  border-color: var(--ws-accent, #7B61FF);
+  color: var(--ws-accent, #7B61FF);
 }
 .os-ws-pill.active {
-  background: var(--ws-accent, #7B6DFF);
-  border-color: var(--ws-accent, #7B6DFF);
+  background: var(--ws-accent, #7B61FF);
+  border-color: var(--ws-accent, #7B61FF);
   color: #fff;
   font-weight: 500;
 }
@@ -339,10 +339,10 @@
   min-width: 48px;
 }
 .os-ws-ratio-card:hover {
-  border-color: var(--ws-accent, #7B6DFF);
+  border-color: var(--ws-accent, #7B61FF);
 }
 .os-ws-ratio-card.active {
-  border-color: var(--ws-accent, #7B6DFF);
+  border-color: var(--ws-accent, #7B61FF);
   background: rgba(123,109,255,0.06);
 }
 .os-ws-ratio-icon {
@@ -351,7 +351,7 @@
   transition: border-color 0.2s;
 }
 .os-ws-ratio-card.active .os-ws-ratio-icon {
-  border-color: var(--ws-accent, #7B6DFF);
+  border-color: var(--ws-accent, #7B61FF);
 }
 .os-ws-ratio-label {
   font-size: 10px;
@@ -359,7 +359,7 @@
   transition: color 0.2s;
 }
 .os-ws-ratio-card.active .os-ws-ratio-label {
-  color: var(--ws-accent, #7B6DFF);
+  color: var(--ws-accent, #7B61FF);
   font-weight: 500;
 }
 
@@ -367,23 +367,23 @@
 .os-ws-generate-btn {
   width: 100%;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 16px;
   border: none;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #fff;
-  background: var(--ws-accent, #7B6DFF);
+  background: linear-gradient(135deg, #7B61FF, #5EA2FF);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(123,109,255,0.25);
+  box-shadow: 0 2px 8px rgba(123,97,255,0.25);
 }
 .os-ws-generate-btn:hover {
-  filter: brightness(1.05);
-  box-shadow: 0 4px 14px rgba(123,109,255,0.35);
+  filter: brightness(1.08);
+  box-shadow: 0 4px 16px rgba(123,97,255,0.4);
 }
 .os-ws-generate-btn:disabled {
   opacity: 0.5;
@@ -404,7 +404,7 @@
   height: 44px;
   border-radius: 50%;
   border: none;
-  background: var(--ws-accent, #7B6DFF);
+  background: var(--ws-accent, #7B61FF);
   color: #fff;
   box-shadow: 0 2px 12px rgba(123,109,255,0.4);
   cursor: pointer;
@@ -521,7 +521,7 @@
 .os-ws-canvas-empty-icon-core svg {
   width: 32px;
   height: 32px;
-  color: var(--ws-accent, #7B6DFF);
+  color: var(--ws-accent, #7B61FF);
   opacity: 0.7;
 }
 /* Pulsing ring */
@@ -679,7 +679,7 @@
   transition: all 0.4s ease;
 }
 .os-ws-canvas-loading-dot.active {
-  background: var(--ws-accent, #7B6DFF);
+  background: var(--ws-accent, #7B61FF);
   box-shadow: 0 0 8px rgba(123,109,255,0.4);
   width: 20px;
   border-radius: 3px;
@@ -832,13 +832,13 @@
 .os-ws-capsule-btn--glass:hover {
   background: rgba(255,255,255,0.85);
   box-shadow: 0 2px 16px rgba(123,109,255,0.12), inset 0 0 0 1px rgba(123,109,255,0.1);
-  color: var(--ws-accent, #7B6DFF);
+  color: var(--ws-accent, #7B61FF);
 }
 
 /* Accent (primary) */
 .os-ws-capsule-btn--accent {
   background: rgba(123,109,255,0.12);
-  color: var(--ws-accent, #7B6DFF);
+  color: var(--ws-accent, #7B61FF);
   box-shadow: 0 1px 8px rgba(123,109,255,0.08), inset 0 0 0 1px rgba(123,109,255,0.1);
 }
 .os-ws-capsule-btn--accent:hover {
@@ -1005,7 +1005,7 @@
   border: 2px solid transparent;
   transition: border-color 0.2s;
 }
-.os-ws-lightbox-thumb.active { border-color: var(--ws-accent, #7B6DFF); }
+.os-ws-lightbox-thumb.active { border-color: var(--ws-accent, #7B61FF); }
 .os-ws-lightbox-thumb:hover { border-color: rgba(123,109,255,0.5); }
 
 /* ====== RESPONSIVE ====== */

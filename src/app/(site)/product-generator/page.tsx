@@ -391,16 +391,16 @@ export default function ProductDetailGeneratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-[#f7f7fb] via-[#f3f2ff] to-[#f8f8fc] dark:from-slate-900 dark:to-slate-800">
 
       <div className="max-w-6xl mx-auto px-4 py-3">
         {/* 核心价值标题 */}
         <div className="text-center mb-7">
           <h1 className="text-lg md:text-xl font-black text-slate-800 dark:text-white mb-0.5 tracking-tight">
-            让商品图帮你<span className="text-orange-500">卖货</span>
+            让商品图帮你<span className="text-[#7B61FF]">卖货</span>
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            普通商品照 <span className="text-orange-400 mx-0.5">→</span> 能上架的电商详情页
+            普通商品照 <span className="text-[#5EA2FF] mx-0.5">→</span> 能上架的电商详情页
           </p>
         </div>
 
@@ -430,7 +430,7 @@ export default function ProductDetailGeneratorPage() {
                     onDragOver={(e) => handleDragOver(e, 0)}
                     onDragEnd={handleDragEnd}
                     onDragLeave={() => setDragOverIndex(null)}
-                    className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === 0 && dragIndex !== 0 ? 'border-orange-500 scale-[1.02]' : 'border-orange-400 shadow-sm'} ${dragIndex === 0 ? 'opacity-40 scale-95' : ''}`}
+                    className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === 0 && dragIndex !== 0 ? 'border-[#7B61FF] scale-[1.02]' : 'border-[#7B61FF]/50 shadow-sm'} ${dragIndex === 0 ? 'opacity-40 scale-95' : ''}`}
                   >
                     <img src={uploadedImages[0]} alt="商品图" className="w-full h-full object-cover" />
                     <button
@@ -454,7 +454,7 @@ export default function ProductDetailGeneratorPage() {
                             onDragOver={(e) => handleDragOver(e, ri)}
                             onDragEnd={handleDragEnd}
                             onDragLeave={() => setDragOverIndex(null)}
-                            className={`relative flex-1 aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === ri && dragIndex !== ri ? 'border-orange-500 scale-105' : 'border-slate-200 dark:border-slate-600'} ${dragIndex === ri ? 'opacity-40 scale-95' : ''}`}
+                            className={`relative flex-1 aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-grab active:cursor-grabbing group ${dragOverIndex === ri && dragIndex !== ri ? 'border-[#7B61FF] scale-105' : 'border-slate-200 dark:border-slate-600'} ${dragIndex === ri ? 'opacity-40 scale-95' : ''}`}
                           >
                             <img src={img} alt={`图片${ri + 1}`} className="w-full h-full object-cover" />
                             <button
@@ -544,9 +544,9 @@ export default function ProductDetailGeneratorPage() {
                     <div className="text-center">
                       <p className="text-sm text-slate-700 font-medium mb-2">{generatingStep || '正在生成…'}</p>
                       <div className="flex items-center justify-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-[bounce_1.4s_ease-in-out_infinite]" />
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7B61FF] animate-[bounce_1.4s_ease-in-out_infinite]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7B61FF] animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#7B61FF] animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
                       </div>
                     </div>
                   </div>
@@ -650,7 +650,7 @@ export default function ProductDetailGeneratorPage() {
                     onClick={handleDownloadAll}
                     disabled={generatedImages.length === 0}
                     className="w-full py-3.5 text-white font-semibold text-sm rounded-xl transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg, #FF6A00, #FF8C00)' }}
+                    style={{ background: 'linear-gradient(135deg, #7B61FF, #5EA2FF)' }}
                   >
                     <Download className="w-4 h-4" />
                     下载整套详情图
@@ -747,12 +747,12 @@ export default function ProductDetailGeneratorPage() {
             </div>
             <div className="text-center py-2">
               <span className="text-sm text-slate-400 line-through mr-2">原价 ¥29</span>
-              <span className="text-2xl font-bold text-orange-600">限时 ¥9.9</span>
+              <span className="text-2xl font-bold text-[#7B61FF]">限时 ¥9.9</span>
               <span className="text-sm text-slate-400 ml-1">/ 10次</span>
             </div>
             <button
               onClick={() => setShowUnlockDialog(false)}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium hover:from-orange-600 hover:to-orange-700 transition-all"
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#7B61FF] to-[#5EA2FF] text-white font-medium hover:brightness-110 transition-all"
             >
               🔥 立即解锁高清图
             </button>
