@@ -6,7 +6,7 @@ import {
   Sparkles, Upload, X,
   Download, RotateCcw, ZoomIn, Loader2, Check,
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck,
-  History, BookOpen
+  History, BookOpen, Wand2
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
 import { useUser } from '@/contexts/UserContext';
@@ -56,14 +56,32 @@ const TOOL_ACCENT: Record<string, string> = {
   'product-page': '#10B981',
 };
 
-// ===== 工具布局 =====
-const TOOL_LAYOUT: Record<string, string> = {
-  'product-generator': 'os-ws-layout-product',
-  'xiaohongshu-generator': 'os-ws-layout-xiaohongshu',
-  'ai-photo': 'os-ws-layout-photo',
-  'poster-design': 'os-ws-layout-poster',
-  'background-removal': 'os-ws-layout-default',
-  'product-page': 'os-ws-layout-default',
+// ===== 工具布局 ===== (CSS class suffix for canvas image sizing)
+const TOOL_SIZE: Record<string, string> = {
+  'product-generator': 'product',
+  'xiaohongshu-generator': 'xiaohongshu',
+  'ai-photo': 'photo',
+  'poster-design': 'poster',
+  'background-removal': 'default',
+  'product-page': 'default',
+};
+
+// ===== 生成中动态文案 =====
+const LOADING_MESSAGES = [
+  '正在理解你的创意',
+  'AI 正在构建视觉细节',
+  '正在优化光影与构图',
+  '正在生成高质量画面',
+];
+
+// ===== Shimmer 尺寸映射（宽 x 高） =====
+const TOOL_SHIMMER: Record<string, { w: number; h: number }> = {
+  'product-generator': { w: 380, h: 300 },
+  'xiaohongshu-generator': { w: 260, h: 380 },
+  'ai-photo': { w: 300, h: 400 },
+  'poster-design': { w: 420, h: 300 },
+  'background-removal': { w: 340, h: 340 },
+  'product-page': { w: 360, h: 320 },
 };
 
 export default function CreateWorkbench() {
@@ -107,6 +125,9 @@ export default function CreateWorkbench() {
   // ----- 移动端侧栏 -----
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // ----- 加载中文案轮播 -----
+  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+
   // ----- Refs -----
   const parsedCtx = useRef<{
     shouldAuto?: boolean;
@@ -118,8 +139,10 @@ export default function CreateWorkbench() {
   const genParamsRef = useRef({ toolSlug, selectedStyle, selectedSubtype, count, ratio, inputText, uploads });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 同步 ref
-  genParamsRef.current = { toolSlug, selectedStyle, selectedSubtype, count, ratio, inputText, uploads };
+  // 同步 ref (useEffect to avoid assigning ref during render)
+  useEffect(() => {
+    genParamsRef.current = { toolSlug, selectedStyle, selectedSubtype, count, ratio, inputText, uploads };
+  }, [toolSlug, selectedStyle, selectedSubtype, count, ratio, inputText, uploads]);
 
   // ===== 读取 context =====
   const getContext = useCallback(() => {
@@ -223,6 +246,19 @@ export default function CreateWorkbench() {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toolSlug]);
+
+  // ===== 加载中文案轮播 =====
+  useEffect(() => {
+    if (!isGenerating) {
+      setLoadingMsgIdx(0);
+      return;
+    }
+    const iv = setInterval(() => {
+      setLoadingMsgIdx(prev => (prev + 1) % LOADING_MESSAGES.length);
+    }, 2800);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
 
   // ===== 切换工具 =====
   const handleToolSwitch = (slug: string) => {
@@ -382,7 +418,9 @@ export default function CreateWorkbench() {
 
   // ===== 渲染 =====
   const isGenerating = !['idle', 'done', 'error'].includes(step);
-  const layoutClass = TOOL_LAYOUT[toolSlug] || 'os-ws-layout-default';
+  const sizeSuffix = TOOL_SIZE[toolSlug] || 'default';
+  const shimmerSize = TOOL_SHIMMER[toolSlug] || { w: 340, h: 340 };
+  const currentStepIdx = STEP_ORDER.indexOf(step);
 
   return (
     <div className="os-ws-page" style={{ '--ws-accent': accent } as React.CSSProperties}>
@@ -552,94 +590,129 @@ export default function CreateWorkbench() {
           </div>
         </div>
 
-        {/* ----- CENTER (Visual Focus) ----- */}
+        {/* ----- CENTER — AI Creation Canvas ----- */}
         <div className="os-ws-center">
 
-          {/* 空状态 */}
+          {/* 空状态 — 画布氛围 */}
           {step === 'idle' && images.length === 0 && (
-            <div className="os-ws-empty">
-              <div className="os-ws-empty-icon">
-                <ImageIcon />
+            <div className="os-ws-canvas-empty">
+              <div className="os-ws-canvas-empty-icon">
+                <div className="os-ws-canvas-empty-icon-core">
+                  <Wand2 />
+                </div>
               </div>
               <h3>{config.name}</h3>
-              <p>{config.description || '在左侧输入描述和上传参考图，或从灵感库选取'}</p>
+              <p>{config.description || '在左侧输入描述和上传参考图，AI 将为你创作'}</p>
             </div>
           )}
 
-          {/* 加载中 */}
+          {/* 加载中 — Shimmer Canvas */}
           {isGenerating && (
-            <div className="os-ws-progress">
-              <div className="os-ws-progress-spinner" />
-              <div className="os-ws-progress-steps">
-                {STEP_ORDER.map((s, i) => {
-                  const curIdx = STEP_ORDER.indexOf(step);
-                  const isDone = i < curIdx;
-                  const isActive = s === step;
-                  return (
-                    <div key={s} className={`os-ws-progress-step ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}>
-                      {isDone ? <Check /> : isActive ? <Loader2 className="animate-spin" /> : null}
-                      {STEP_LABELS[s]}
-                      {i < STEP_ORDER.length - 1 && <div className="os-ws-progress-arrow" />}
-                    </div>
-                  );
-                })}
+            <div className="os-ws-canvas-loading">
+              <div
+                className="os-ws-canvas-shimmer"
+                style={{ width: shimmerSize.w, height: shimmerSize.h }}
+              >
+                <div className="os-ws-canvas-shimmer-icon">
+                  <Sparkles />
+                </div>
               </div>
-              <div className="os-ws-progress-text">AI 正在为你创作，请稍候…</div>
+              <div className="os-ws-canvas-loading-text">
+                <div className="os-ws-canvas-loading-label" key={loadingMsgIdx}>
+                  {LOADING_MESSAGES[loadingMsgIdx]}
+                </div>
+                <div className="os-ws-canvas-loading-sub">
+                  {STEP_LABELS[step]}…
+                </div>
+              </div>
+              <div className="os-ws-canvas-loading-dots">
+                {STEP_ORDER.map((s, i) => (
+                  <div
+                    key={s}
+                    className={`os-ws-canvas-loading-dot ${
+                      i < currentStepIdx ? 'done' : i === currentStepIdx ? 'active' : ''
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
           {/* 错误 */}
           {step === 'error' && (
-            <div className="os-ws-empty">
-              <div className="os-ws-empty-icon" style={{ background: 'rgba(239,68,68,0.1)' }}>
-                <ImageIcon style={{ color: '#ef4444' }} />
+            <div className="os-ws-canvas-error">
+              <div className="os-ws-canvas-error-icon">
+                <ImageIcon />
               </div>
               <h3>生成失败</h3>
               <p>{errorMsg || '请检查输入后重试'}</p>
-              <button className="os-ws-generate-btn" style={{ width: 'auto', padding: '8px 24px' }} onClick={handleGenerate}>
+              <button
+                className="os-ws-capsule-btn os-ws-capsule-btn--accent"
+                onClick={handleGenerate}
+              >
                 <RotateCcw /> 重试
               </button>
             </div>
           )}
 
-          {/* 生成结果 */}
+          {/* 生成结果 — 聚焦展示 */}
           {step === 'done' && images.length > 0 && (
-            <div className="os-ws-results">
-              {/* 图片网格 */}
-              <div className={layoutClass}>
-                {images.map((img, idx) => (
-                  <div key={idx} className="os-ws-img-card" onClick={() => setLightboxIdx(idx)}>
-                    <img src={img.url} alt={`生成结果 ${idx + 1}`} loading="lazy" />
-                    <div className="os-ws-img-overlay">
-                      <button
-                        className="os-ws-img-action os-ws-img-action-primary"
-                        onClick={e => { e.stopPropagation(); handleDownload(img.url, idx); }}
-                      >
-                        <Download /> 下载
-                      </button>
-                      <button
-                        className="os-ws-img-action os-ws-img-action-secondary"
-                        onClick={e => { e.stopPropagation(); setLightboxIdx(idx); }}
-                      >
-                        <ZoomIn /> 查看
-                      </button>
-                    </div>
+            <div className="os-ws-canvas-result">
+              {/* 图片区域 */}
+              <div className="os-ws-canvas-gallery">
+                {images.length === 1 ? (
+                  /* 单图大展示 */
+                  <div
+                    className={`os-ws-canvas-img os-ws-canvas-img--${sizeSuffix}`}
+                    style={{ animationDelay: '0.1s' }}
+                    onClick={() => setLightboxIdx(0)}
+                  >
+                    <img src={images[0].url} alt="生成结果" />
                   </div>
-                ))}
+                ) : (
+                  /* 多图网格 */
+                  <div className="os-ws-canvas-multi-grid">
+                    {images.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className={`os-ws-canvas-img os-ws-canvas-img--${sizeSuffix}`}
+                        style={{ animationDelay: `${idx * 0.1}s` }}
+                        onClick={() => setLightboxIdx(idx)}
+                      >
+                        <img src={img.url} alt={`生成结果 ${idx + 1}`} loading="lazy" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* 操作栏 */}
-              <div className="os-ws-result-actions">
-                <button className="os-ws-result-btn" onClick={handleGenerate}>
+              {/* 胶囊操作栏 */}
+              <div className="os-ws-canvas-actions">
+                <button
+                  className="os-ws-capsule-btn os-ws-capsule-btn--glass"
+                  onClick={handleGenerate}
+                >
                   <RotateCcw /> 重新生成
                 </button>
                 <button
-                  className={`os-ws-result-btn ${saved ? 'os-ws-result-btn-saved' : 'os-ws-result-btn-primary'}`}
+                  className={`os-ws-capsule-btn ${
+                    saved
+                      ? 'os-ws-capsule-btn--saved'
+                      : 'os-ws-capsule-btn--accent'
+                  }`}
                   onClick={handleSave}
                   disabled={saved}
                 >
                   {saved ? <><BookmarkCheck /> 已保存</> : <><BookmarkPlus /> 保存到作品库</>}
                 </button>
+                {images.length === 1 && (
+                  <button
+                    className="os-ws-capsule-btn os-ws-capsule-btn--download"
+                    onClick={() => handleDownload(images[0].url, 0)}
+                  >
+                    <Download /> 下载
+                  </button>
+                )}
               </div>
             </div>
           )}
