@@ -3,8 +3,6 @@ import { generateWithModel } from '@/lib/model-selector';
 import { HeaderUtils } from 'coze-coding-dev-sdk';
 
 // ===== 工具类型 → Prompt 前缀映射 =====
-// 每种工具根据其特色构建专属提示词，确保生成效果符合工具定位
-
 const PRODUCT_FIDELITY_PREFIX = `CRITICAL: You MUST preserve the EXACT product from the reference image. The product's shape, color, material, proportions, and ALL visual details must remain IDENTICAL. ONLY change the background, lighting, and scene environment. NEVER deform, distort, or reimagine the product.
 
 RULES:
@@ -90,56 +88,9 @@ ${styleDesc}
 ${prompt ? `Style notes: ${prompt}` : ''}
 Professional photography, high resolution, stunning portrait quality.`;
   },
-
-  // 海报设计
-  'poster-design': ({ prompt, subtype, style, hasImage }) => {
-    const fidelityPrefix = hasImage ? PRODUCT_FIDELITY_PREFIX : '';
-    const subtypeMap: Record<string, string> = {
-      'minimal-brand': 'minimalist brand poster, clean layout, elegant typography, lots of white space',
-      'event-promo': 'event promotion poster, bold headline, vibrant colors, call-to-action',
-      'social-media': 'social media post design, trendy layout, eye-catching visuals, share-worthy',
-      'product-promo': 'product promotion poster, product-focused, benefit highlights, professional layout',
-    };
-    const styleMap: Record<string, string> = {
-      'minimal': 'minimalist and sophisticated, clean lines, premium feel',
-      'creative': 'creative and playful, bold colors, dynamic composition',
-      'professional': 'professional and corporate, structured layout, trustworthy',
-      'lifestyle': 'lifestyle and warm, inviting atmosphere, human connection',
-    };
-    const subtypeDesc = subtypeMap[subtype || 'minimal-brand'] || '';
-    const styleDesc = styleMap[style || 'minimal'] || '';
-    return `${fidelityPrefix}Create a professional design poster.
-${subtypeDesc}
-${styleDesc}
-${prompt ? `Poster content/purpose: ${prompt}` : ''}
-High quality graphic design, print-ready resolution.`;
-  },
-
-  // 商品详情页 (fallback, also uses product image style)
-  'product-page': ({ prompt, subtype, style, hasImage }) => {
-    const fidelityPrefix = hasImage ? PRODUCT_FIDELITY_PREFIX : '';
-    const subtypeMap: Record<string, string> = {
-      'full': 'complete product detail page, hero image + features + specifications layout',
-      'highlight': 'selling point highlight page, key benefits with visual icons',
-      'compare': 'comparison display page, before/after or feature comparison layout',
-    };
-    const styleMap: Record<string, string> = {
-      'premium': 'premium luxury e-commerce detail page, high-end feel',
-      'tech': 'tech product detail page, clean and modern, data-driven',
-      'cute': 'cute and sweet style, pastel colors, friendly layout',
-    };
-    const subtypeDesc = subtypeMap[subtype || 'full'] || '';
-    const styleDesc = styleMap[style || 'premium'] || '';
-    return `${fidelityPrefix}Create an e-commerce product detail page image.
-${subtypeDesc}
-${styleDesc}
-${prompt ? `Product info: ${prompt}` : ''}
-Professional e-commerce quality, high resolution.`;
-  },
 };
 
 // ===== 比例 → SDK size 参数映射 =====
-// SDK 支持: '2K', '4K', 或 'WIDTHxHEIGHT' 格式（2560~4096 范围）
 const RATIO_TO_SIZE: Record<string, string> = {
   '1:1':  '2560x2560',
   '3:4':  '2560x3414',
@@ -157,36 +108,73 @@ function ratioToSize(ratio: string | undefined, fallback: string = '2K'): string
   return RATIO_TO_SIZE[ratio] || fallback;
 }
 
+// ===== 生成类型中文标签 =====
+export const SUBTYPE_LABELS: Record<string, Record<string, string>> = {
+  'product-generator': {
+    'white-bg': '白底主图',
+    'lifestyle': '场景图',
+    'detail': '细节展示',
+    'group': '组合搭配',
+  },
+  'xiaohongshu-generator': {
+    'beauty': '美妆种草',
+    'fashion': '穿搭分享',
+    'lifestyle': '生活好物',
+    'food': '美食探店',
+  },
+  'ai-photo': {
+    'korean': '韩系写真',
+    'retro': '复古写真',
+    'cyberpunk': '赛博朋克',
+    'japanese': '日系写真',
+  },
+};
+
+// ===== 风格中文标签 =====
+export const STYLE_LABELS: Record<string, Record<string, string>> = {
+  'product-generator': {
+    'premium': '高级质感',
+    'minimal': '极简风格',
+    'lifestyle': '生活场景',
+  },
+  'xiaohongshu-generator': {
+    'fresh': '清新自然',
+    'premium': '精致高级',
+    'ins': 'INS 风格',
+    'viral': '爆款风格',
+  },
+  'ai-photo': {
+    'natural': '自然清新',
+    'cinematic': '电影感',
+    'artistic': '艺术创意',
+    'magazine': '杂志封面',
+  },
+};
+
 /**
  * 通用图片生成 API
- * 
- * 统一入口，所有图片类工具（商品图、小红书、AI写真、海报、详情页）都通过此接口生成
- * 通过 tool_id 从数据库读取模型配置，按 providerSlug 分发到不同的生成方式
+ * 支持多张并行生成（count 参数）
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { 
       prompt, 
-      image,      // 单张参考图（兼容旧调用）
-      images,     // 多张参考图（CreateWorkbench 传入）
+      image,
+      images,
       size, 
-      ratio,      // 图片比例（1:1/3:4/16:9 等），优先级高于 size
+      ratio,
       style, 
-      subtype,    // 子类型（白底/场景/细节 等）
+      subtype,
       model, 
-      tool_id,    // 工具 slug，用于从数据库读取模型配置
-      type,       // 兼容旧调用的 type 字段
-      count,      // 生成数量
+      tool_id,
+      type,
+      count = 1,
     } = body;
     
-    // 确定最终的 size 参数：ratio 优先于 size
     const finalSize = ratioToSize(ratio, size || '2K');
-    
-    // 确定 tool_id：优先使用 tool_id，其次根据 type 推断
     const effectiveToolId = tool_id || type || 'product-generator';
     
-    // 确定参考图片：优先 images 数组，其次 image 单张
     const imageArray = images && Array.isArray(images) && images.length > 0
       ? images
       : image
@@ -206,32 +194,53 @@ export async function POST(request: NextRequest) {
         })
       : (prompt || 'Generate a high-quality image');
 
-    console.log(`[ImagesGenerate] tool=${effectiveToolId}, hasImage=${hasImage}, promptLen=${finalPrompt.length}`);
+    const effectiveCount = Math.max(1, Math.min(count || 1, 6));
+    console.log(`[ImagesGenerate] tool=${effectiveToolId}, count=${effectiveCount}, hasImage=${hasImage}, ratio=${ratio || 'default'}`);
 
-    // 使用统一模型调度
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
-    const result = await generateWithModel(
-      finalPrompt,
-      model || 'coze-image',   // fallback 模型名
-      finalSize,               // 图片尺寸（ratio 优先转换后的 WIDTHxHEIGHT）
-      customHeaders,            // 转发请求头
-      effectiveToolId,          // toolId，走数据库配置
-      referenceImage            // 参考图片
+
+    // 并行生成多张图片
+    const promises = Array.from({ length: effectiveCount }, () =>
+      generateWithModel(
+        finalPrompt,
+        model || 'coze-image',
+        finalSize,
+        customHeaders,
+        effectiveToolId,
+        referenceImage
+      )
     );
-    
-    if (result.success && result.imageUrls && result.imageUrls.length > 0) {
-      // 如果请求了多张，且只生成了1张，可以循环使用（前端展示用）
-      const returnedUrls = result.imageUrls;
-      
+
+    const results = await Promise.allSettled(promises);
+
+    // 收集所有成功生成的图片 URL
+    const allImageUrls: string[] = [];
+    const errors: string[] = [];
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value.success && result.value.imageUrls) {
+        allImageUrls.push(...result.value.imageUrls);
+      } else {
+        const errorMsg = result.status === 'fulfilled'
+          ? (result.value.error || `第 ${index + 1} 张生成失败`)
+          : `第 ${index + 1} 张生成异常`;
+        errors.push(errorMsg);
+      }
+    });
+
+    if (allImageUrls.length > 0) {
       return NextResponse.json({
         success: true,
-        imageUrls: returnedUrls,
+        imageUrls: allImageUrls,
+        requestedCount: effectiveCount,
+        successCount: allImageUrls.length,
+        errors: errors.length > 0 ? errors : undefined,
       });
     }
     
     return NextResponse.json({ 
       success: false, 
-      error: result.error || '图片生成失败',
+      error: errors.join('; ') || '图片生成失败',
     }, { status: 500 });
   } catch (error: any) {
     console.error('[图片生成] 错误:', error);

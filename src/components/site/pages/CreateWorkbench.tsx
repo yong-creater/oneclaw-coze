@@ -69,19 +69,20 @@ const TOOL_HEADER: Record<string, { title: string; desc: string }> = {
 };
 
 // ===== 工具布局 ===== (CSS class suffix for canvas image sizing)
-const TOOL_SIZE: Record<string, string> = {
-  'product-generator': 'product',
-  'xiaohongshu-generator': 'xiaohongshu',
-  'ai-photo': 'photo',
-};
-
-// ===== 生成中动态文案 =====
-const LOADING_MESSAGES = [
-  '正在理解你的创意',
-  'AI 正在构建视觉细节',
-  '正在优化光影与构图',
-  '正在生成高质量画面',
-];
+// ===== 生成中动态文案（会根据参数动态生成） =====
+function buildLoadingMessages(count: number, ratio: string, styleName: string, subtypeName: string): string[] {
+  const countStr = count > 1 ? `${count} 张` : '';
+  const ratioStr = ratio;
+  const styleStr = styleName || '';
+  const typeStr = subtypeName || '';
+  return [
+    `正在生成 ${countStr} ${ratioStr} ${styleStr} ${typeStr}结果`.replace(/\s+/g, ' ').trim(),
+    `正在理解你的创意`,
+    `AI 正在构建视觉细节`,
+    `正在优化${styleStr}光影与构图`.replace(/\s+/g, ' ').trim(),
+    `正在生成高质量画面`,
+  ];
+}
 
 // ===== Shimmer 尺寸映射（宽 x 高） =====
 const TOOL_SHIMMER: Record<string, { w: number; h: number }> = {
@@ -89,6 +90,47 @@ const TOOL_SHIMMER: Record<string, { w: number; h: number }> = {
   'xiaohongshu-generator': { w: 260, h: 380 },
   'ai-photo': { w: 300, h: 400 },
 };
+
+// ===== 子类型结果标题 =====
+const SUBTYPE_RESULT_LABEL: Record<string, Record<string, string>> = {
+  'product-generator': {
+    'white-bg': '白底主图结果',
+    'scene': '场景图结果',
+    'detail': '细节展示结果',
+    'combo': '组合搭配结果',
+  },
+  'xiaohongshu-generator': {
+    'cover': '封面图结果',
+    'carousel': '轮播图结果',
+    'guide': '教程图结果',
+  },
+  'ai-photo': {
+    'portrait': '人像写真结果',
+    'half-body': '半身写真结果',
+    'full-body': '全身写真结果',
+    'creative': '创意写真结果',
+  },
+};
+
+// ===== 风格显示名 =====
+function styleLabel(config: ToolWorkflowConfig, value: string): string {
+  const opt = config.styleOptions?.find(s => s.value === value);
+  return opt?.label || value;
+}
+
+// ===== 比例 → aspect-ratio CSS =====
+function ratioToAspect(ratio: string): string {
+  const map: Record<string, string> = {
+    '1:1': '1 / 1',
+    '3:4': '3 / 4',
+    '4:5': '4 / 5',
+    '4:3': '4 / 3',
+    '2:3': '2 / 3',
+    '16:9': '16 / 9',
+    '9:16': '9 / 16',
+  };
+  return map[ratio] || '1 / 1';
+}
 
 export default function CreateWorkbench() {
   const router = useRouter();
@@ -127,6 +169,9 @@ export default function CreateWorkbench() {
 
   // ----- 大图 -----
   const [lightboxIdx, setLightboxIdx] = useState(-1);
+
+  // ----- 选中图片 -----
+  const [selectedIdx, setSelectedIdx] = useState(0);
 
   // ----- 移动端侧栏 -----
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -254,13 +299,17 @@ export default function CreateWorkbench() {
   }, [toolSlug]);
 
   // ===== 加载中文案轮播 =====
+  const subtypeLabel = config.subtypeOptions?.find(s => s.value === selectedSubtype)?.label || '';
+  const sLabel = styleLabel(config, selectedStyle);
+  const loadingMessages = buildLoadingMessages(count, ratio, sLabel, subtypeLabel);
+
   useEffect(() => {
     if (!isGenerating) {
       setLoadingMsgIdx(0);
       return;
     }
     const iv = setInterval(() => {
-      setLoadingMsgIdx(prev => (prev + 1) % LOADING_MESSAGES.length);
+      setLoadingMsgIdx(prev => (prev + 1) % loadingMessages.length);
     }, 2800);
     return () => clearInterval(iv);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -341,9 +390,11 @@ export default function CreateWorkbench() {
 
       if (data.success && Array.isArray(data.imageUrls) && data.imageUrls.length > 0) {
         setImages(data.imageUrls.map((url: string) => ({ url })));
+        setSelectedIdx(0);
         setStep('done');
       } else if (data.success && Array.isArray(data.images) && data.images.length > 0) {
         setImages(data.images.map((url: string) => ({ url })));
+        setSelectedIdx(0);
         setStep('done');
       } else {
         setStep('error');
@@ -424,7 +475,6 @@ export default function CreateWorkbench() {
 
   // ===== 渲染 =====
   const isGenerating = !['idle', 'done', 'error'].includes(step);
-  const sizeSuffix = TOOL_SIZE[toolSlug] || 'default';
   const shimmerSize = TOOL_SHIMMER[toolSlug] || { w: 340, h: 340 };
   const currentStepIdx = STEP_ORDER.indexOf(step);
   const HeaderIcon = TOOL_LUCIDE_ICON[toolSlug] || Package;
@@ -617,7 +667,7 @@ export default function CreateWorkbench() {
             <div className="os-ws-canvas-loading">
               <div
                 className="os-ws-canvas-shimmer"
-                style={{ width: shimmerSize.w, height: shimmerSize.h }}
+                style={{ width: shimmerSize.w, height: shimmerSize.h, aspectRatio: ratioToAspect(ratio) }}
               >
                 <div className="os-ws-canvas-shimmer-icon">
                   <Sparkles />
@@ -625,7 +675,7 @@ export default function CreateWorkbench() {
               </div>
               <div className="os-ws-canvas-loading-text">
                 <div className="os-ws-canvas-loading-label" key={loadingMsgIdx}>
-                  {LOADING_MESSAGES[loadingMsgIdx]}
+                  {loadingMessages[loadingMsgIdx]}
                 </div>
                 <div className="os-ws-canvas-loading-sub">
                   {STEP_LABELS[step]}…
@@ -661,36 +711,42 @@ export default function CreateWorkbench() {
             </div>
           )}
 
-          {/* 生成结果 — 聚焦展示 */}
+          {/* 生成结果 — 主预览 + 缩略图 */}
           {step === 'done' && images.length > 0 && (
             <div className="os-ws-canvas-result">
-              {/* 图片区域 */}
-              <div className="os-ws-canvas-gallery">
-                {images.length === 1 ? (
-                  /* 单图大展示 */
-                  <div
-                    className={`os-ws-canvas-img os-ws-canvas-img--${sizeSuffix}`}
-                    style={{ animationDelay: '0.1s' }}
-                    onClick={() => setLightboxIdx(0)}
-                  >
-                    <img src={images[0].url} alt="生成结果" />
-                  </div>
-                ) : (
-                  /* 多图网格 */
-                  <div className="os-ws-canvas-multi-grid">
-                    {images.map((img, idx) => (
-                      <div
-                        key={idx}
-                        className={`os-ws-canvas-img os-ws-canvas-img--${sizeSuffix}`}
-                        style={{ animationDelay: `${idx * 0.1}s` }}
-                        onClick={() => setLightboxIdx(idx)}
-                      >
-                        <img src={img.url} alt={`生成结果 ${idx + 1}`} loading="lazy" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* 结果标题栏 */}
+              <div className="os-ws-result-header">
+                <span className="os-ws-result-title">
+                  {SUBTYPE_RESULT_LABEL[toolSlug]?.[selectedSubtype] || `${config.name}结果`}
+                </span>
+                <span className="os-ws-result-count">共 {images.length} 张</span>
               </div>
+
+              {/* 主预览区 */}
+              <div className="os-ws-result-main" style={{ aspectRatio: ratioToAspect(ratio) }}>
+                <img
+                  src={images[selectedIdx].url}
+                  alt={`生成结果 ${selectedIdx + 1}`}
+                  onClick={() => setLightboxIdx(selectedIdx)}
+                  className="os-ws-result-main-img"
+                />
+              </div>
+
+              {/* 缩略图列表（多图时） */}
+              {images.length > 1 && (
+                <div className="os-ws-result-thumbs">
+                  {images.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className={`os-ws-result-thumb ${idx === selectedIdx ? 'active' : ''}`}
+                      style={{ aspectRatio: ratioToAspect(ratio) }}
+                      onClick={() => setSelectedIdx(idx)}
+                    >
+                      <img src={img.url} alt={`缩略图 ${idx + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* 胶囊操作栏 */}
               <div className="os-ws-canvas-actions">
@@ -711,12 +767,18 @@ export default function CreateWorkbench() {
                 >
                   {saved ? <><BookmarkCheck /> 已保存</> : <><BookmarkPlus /> 保存到作品库</>}
                 </button>
-                {images.length === 1 && (
+                <button
+                  className="os-ws-capsule-btn os-ws-capsule-btn--download"
+                  onClick={() => handleDownload(images[selectedIdx].url, selectedIdx)}
+                >
+                  <Download /> 下载当前图
+                </button>
+                {images.length > 1 && (
                   <button
                     className="os-ws-capsule-btn os-ws-capsule-btn--download"
-                    onClick={() => handleDownload(images[0].url, 0)}
+                    onClick={() => images.forEach((img, i) => handleDownload(img.url, i))}
                   >
-                    <Download /> 下载
+                    <Download /> 下载全部
                   </button>
                 )}
               </div>
