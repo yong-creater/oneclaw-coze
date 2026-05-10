@@ -531,8 +531,10 @@ export async function generateWithModel(
     let response;
     try {
       response = await client.generate(requestParams);
+      console.error('[generateWithModel] SDK response:', JSON.stringify(response).substring(0, 500));
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
+      console.error('[generateWithModel] Coze SDK error:', errMsg.substring(0, 300));
       // 403 = Coze 资源配额耗尽
       if (errMsg.includes('403') || errMsg.includes('ErrSourceLimit') || errMsg.includes('Forbidden')) {
         return { success: false, error: '模型服务暂时不可用，请稍后重试' };

@@ -225,9 +225,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: false, 
       error: errors.join('; ') || '图片生成失败',
-    }, { status: 500 });
+    });
   } catch (error: any) {
     console.error('[图片生成] 错误:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, error: error.message || '服务器内部错误' });
   }
 }
