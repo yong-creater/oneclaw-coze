@@ -1,17 +1,23 @@
 import { NextResponse } from 'next/server';
 
-// Favicon - 浏览器标签页图标 (闪电图标+紫蓝渐变)
+// Favicon - 浏览器标签页图标 (与侧边栏Logo一致: 紫蓝渐变+Sparkles星花)
 export async function GET() {
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#7B61FF"/>
-      <stop offset="100%" style="stop-color:#5EA9FF"/>
+      <stop offset="100%" style="stop-color:#5B8CFF"/>
     </linearGradient>
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#grad)"/>
-  <path d="M18.5 4L10 18h5.5L13.5 28 22 14h-5.5L18.5 4z" fill="white"/>
+  <g transform="translate(4,4)" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" fill="white" stroke="none"/>
+    <path d="M20 3v4"/>
+    <path d="M22 5h-4"/>
+    <path d="M4 17v2"/>
+    <path d="M5 18H3"/>
+  </g>
 </svg>`;
 
   return new NextResponse(svgContent, {
