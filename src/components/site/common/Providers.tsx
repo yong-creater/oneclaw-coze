@@ -1,8 +1,8 @@
 'use client';
 
 import { UserProvider, useUser } from '@/contexts/UserContext';
+import { ModalProvider } from '@/contexts/ModalContext';
 import LoginModal from '@/components/site/common/LoginModal';
-import { SWRConfig } from 'swr';
 
 function UserAuthWrapper({ children }: { children: React.ReactNode }) {
   const { showLoginModal, setShowLoginModal, login } = useUser();
@@ -21,17 +21,10 @@ function UserAuthWrapper({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SWRConfig 
-      value={{
-        revalidateOnFocus: false,
-        revalidateOnReconnect: true,
-        errorRetryCount: 3,
-        errorRetryInterval: 5000,
-      }}
-    >
+    <ModalProvider>
       <UserProvider>
         <UserAuthWrapper>{children}</UserAuthWrapper>
       </UserProvider>
-    </SWRConfig>
+    </ModalProvider>
   );
 }

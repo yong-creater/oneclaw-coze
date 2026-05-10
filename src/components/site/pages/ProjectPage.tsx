@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useModal } from '@/contexts/ModalContext';
 import {
   Sparkles, Download, ZoomIn, Trash2, FolderOpen,
   Image as ImageIcon, Loader2, X, ChevronLeft, ChevronRight,
@@ -21,57 +22,6 @@ interface Generation {
   created_at: string;
   model_name?: string;
   count?: number;
-}
-
-/* ---------- 删除确认弹窗 ---------- */
-function DeleteConfirmModal({
-  open,
-  onConfirm,
-  onCancel,
-}: {
-  open: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open, onCancel]);
-
-  if (!open) return null;
-
-  return (
-    <div className="os-delete-overlay" onClick={onCancel}>
-      <div
-        className="os-delete-dialog"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label="确认删除"
-      >
-        <button className="os-delete-close" onClick={onCancel} type="button" aria-label="关闭">
-          <X style={{ width: 18, height: 18 }} />
-        </button>
-        <div className="os-delete-icon-wrap">
-          <Trash2 style={{ width: 24, height: 24 }} />
-        </div>
-        <h3 className="os-delete-title">删除这个作品？</h3>
-        <p className="os-delete-desc">删除后将无法恢复。</p>
-        <div className="os-delete-actions">
-          <button className="os-delete-cancel" onClick={onCancel} type="button">
-            取消
-          </button>
-          <button className="os-delete-confirm" onClick={onConfirm} type="button">
-            删除
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 /* ---------- 工具名映射 ---------- */
@@ -307,9 +257,10 @@ function GalleryModal({
 /* ==================== 作品页面 ==================== */
 export default function ProjectPage() {
   const router = useRouter();
+  const { confirm, alert } = useModal();
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+
 
   /* 多图预览状态 */
   const [gallery, setGallery] = useState<{
@@ -354,31 +305,28 @@ export default function ProjectPage() {
   }, []);
 
   /* ---- 删除 ---- */
-  const handleDeleteClick = useCallback((e: React.MouseEvent, id: number) => {
+  const handleDeleteClick = useCallback(async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
-    setDeleteTarget(id);
-  }, []);
-
-  const handleDeleteConfirm = useCallback(async () => {
-    if (deleteTarget == null) return;
+    const ok = await confirm({
+      title: '确认删除作品？',
+      description: '删除后不可恢复。',
+      confirmText: '删除',
+      cancelText: '取消',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
-      const res = await fetch(`/api/generations?id=${deleteTarget}`, { method: 'DELETE' });
+      const res = await fetch(`/api/generations?id=${id}`, { method: 'DELETE' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        alert(data.error || '删除失败，请重试');
+        alert({ title: '删除失败', description: data.error || '请重试', variant: 'danger' });
         return;
       }
-      setGenerations((prev) => prev.filter((g) => g.id !== deleteTarget));
+      setGenerations((prev) => prev.filter((g) => g.id !== id));
     } catch {
-      alert('网络错误，请重试');
-    } finally {
-      setDeleteTarget(null);
+      alert({ title: '网络错误', description: '请检查网络后重试', variant: 'danger' });
     }
-  }, [deleteTarget]);
-
-  const handleDeleteCancel = useCallback(() => {
-    setDeleteTarget(null);
-  }, []);
+  }, [confirm, alert]);
 
   /* ---- 继续优化 ---- */
   const handleContinue = useCallback(
@@ -504,12 +452,7 @@ export default function ProjectPage() {
           />
         )}
 
-        {/* 删除确认弹窗 */}
-        <DeleteConfirmModal
-          open={deleteTarget !== null}
-          onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
-        />
+
       </div>
     </div>
   );

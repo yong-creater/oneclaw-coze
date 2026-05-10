@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
 import { useUser } from '@/contexts/UserContext';
+import { useModal } from '@/contexts/ModalContext';
 
 // ===== 类型 =====
 interface GeneratedImage { url: string; }
@@ -146,6 +147,7 @@ export default function CreateWorkbench() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, authenticated, setShowLoginModal, requireAuth, dailyQuota, refreshQuota } = useUser();
+  const { showAlert, showConfirm } = useModal();
 
   // ----- 工具 -----
   const allTools = getAllToolWorkflows();
@@ -637,7 +639,7 @@ export default function CreateWorkbench() {
     // 登录拦截：未登录时暂存操作，登录后自动继续
     if (!requireAuth(handleSave)) return;
     if (images.length === 0) {
-      alert('暂无可保存的作品');
+      showAlert('无法保存', '暂无可保存的作品', 'alert');
       return;
     }
     try {
@@ -672,11 +674,11 @@ export default function CreateWorkbench() {
       } else if (res.status === 401) {
         setShowLoginModal(true);
       } else {
-        alert(data.error || '保存失败，请稍后重试');
+        showAlert('保存失败', data.error || '请稍后重试', 'error');
       }
     } catch (err) {
       console.error('保存请求异常:', err);
-      alert('网络异常，请稍后重试');
+      showAlert('网络异常', '请稍后重试', 'alert');
     }
   };
 

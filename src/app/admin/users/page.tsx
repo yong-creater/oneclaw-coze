@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useModal } from '@/contexts/ModalContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +58,7 @@ interface UsersData {
 }
 
 export default function AdminUsersPage() {
+  const { showAlert } = useModal();
   const [data, setData] = useState<UsersData | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -117,11 +119,11 @@ export default function AdminUsersPage() {
         setDeleteDialog(null);
         fetchUsers();
       } else {
-        alert(json.error || '删除失败');
+        showAlert('操作失败', String(json.error || '删除失败'));
       }
     } catch (err) {
       console.error('删除用户失败:', err);
-      alert('删除失败');
+      showAlert('操作失败', '删除失败');
     } finally {
       setDeleting(false);
     }

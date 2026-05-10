@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
+import { useModal } from '@/contexts/ModalContext';
 
 // ===== 布局模式识别（模块级，供 createTaskAndNavigate 和组件内部共用） =====
 const LAYOUT_KEYWORDS = [
@@ -268,6 +269,7 @@ export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
   const router = useRouter();
   const { requireAuth, dailyQuota } = useUser();
+  const { showAlert } = useModal();
   const [inputText, setInputText] = useState('');
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -364,7 +366,8 @@ export default function HomePage() {
     if (!inputText.trim() || phase !== 'idle') return;
     // 每日免费次数检查（-2=无限制跳过，-1=未登录/未知不阻止）
     if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota <= 0) {
-      alert('今日免费生成次数已用完，明天再来吧！');
+      showAlert('今日免费额度已用完', '注册登录后可继续生成作品，并同步保存你的创作记录。', 'quota-exhausted');
+      requireAuth();
       return;
     }
     phaseRef.current = 'identifying'; setPhase('identifying');
@@ -385,7 +388,7 @@ export default function HomePage() {
         // 并发限制等错误，回退到 idle
         phaseRef.current = 'idle'; setPhase('idle');
         setIsJumping(false);
-        alert(err);
+        showAlert('跳转失败', String(err));
       }
     }, 1200);
     // 兜底：4秒后若仍在 identifying 阶段，强制跳转

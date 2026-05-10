@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useModal } from '@/contexts/ModalContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -111,6 +112,7 @@ const DEFAULT_FORM = {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 export default function AdminInspirationPage() {
+  const { showAlert, confirm: modalConfirm } = useModal();
   const [items, setItems] = useState<InspirationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -165,11 +167,11 @@ export default function AdminInspirationPage() {
 
     // Validate
     if (!file.type.startsWith('image/')) {
-      alert('请上传图片文件');
+      showAlert('提示', String('请上传图片文件'));
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('图片大小不能超过 5MB');
+      showAlert('提示', String('图片大小不能超过 5MB'));
       return;
     }
 
@@ -187,11 +189,11 @@ export default function AdminInspirationPage() {
       if (data.success && data.data?.url) {
         setForm(f => ({ ...f, image: data.data.url }));
       } else {
-        alert(data.error || '上传失败');
+        showAlert('上传失败', String(data.error || '上传失败'));
       }
     } catch (err) {
       console.error('Upload failed:', err);
-      alert('上传失败，请重试');
+      showAlert('上传失败', String('上传失败，请重试'));
     } finally {
       setUploading(false);
       // Reset file input
@@ -249,11 +251,11 @@ export default function AdminInspirationPage() {
         setDialogOpen(false);
         fetchItems(editingId ? pagination.page : 1);
       } else {
-        alert(data.error || '保存失败');
+        showAlert('保存失败', String(data.error || '保存失败'));
       }
     } catch (err) {
       console.error('Save failed:', err);
-      alert('保存失败，请重试');
+      showAlert('保存失败', String('保存失败，请重试'));
     } finally {
       setSaving(false);
     }
@@ -269,7 +271,7 @@ export default function AdminInspirationPage() {
         setDeleteId(null);
         fetchItems(pagination.page);
       } else {
-        alert(data.error || '删除失败');
+        showAlert('删除失败', String(data.error || '操作失败，请重试'));
       }
     } catch (err) {
       console.error('Delete failed:', err);

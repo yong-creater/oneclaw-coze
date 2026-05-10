@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useModal } from '@/contexts/ModalContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Pencil, Trash2, Eye, EyeOff, Copy, Check, RefreshCw, Loader2, ExternalLink, DollarSign, Zap, Clock } from 'lucide-react';
 
@@ -57,6 +58,7 @@ const PROVIDER_TYPES = [
 ];
 
 export default function ModelProvidersPage() {
+  const { showAlert, confirm: modalConfirm } = useModal();
   const [providers, setProviders] = useState<ModelProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -164,16 +166,17 @@ export default function ModelProvidersPage() {
         setDialogOpen(false);
         fetchProviders();
       } else {
-        alert(`保存失败: ${data.error || '未知错误'}`);
+        showAlert(`保存失败: ${data.error || '未知错误'}`);
       }
     } catch (error) {
       console.error('保存失败:', error);
-      alert('保存失败，请重试');
+      showAlert('保存失败，请重试');
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('确定要删除吗？')) return;
+    const ok = await modalConfirm('确定要删除吗？', '删除后不可恢复', 'delete');
+    if (!ok) return;
     try {
       const res = await fetch(`/api/admin/model-providers?id=${id}`, {
         method: 'DELETE',
@@ -196,12 +199,12 @@ export default function ModelProvidersPage() {
   const fetchModelsFromAPI = async (provider: ModelProvider) => {
     // 内置提供商不允许通过 API 获取
     if (provider.is_system) {
-      alert('内置模型无法通过 API 获取，请联系系统管理员');
+      showAlert('内置模型无法通过 API 获取，请联系系统管理员');
       return;
     }
     
     if (!provider.api_key) {
-      alert('该提供商未配置 API Key');
+      showAlert('该提供商未配置 API Key');
       return;
     }
 
@@ -224,11 +227,11 @@ export default function ModelProvidersPage() {
         // 保存成功后，刷新模型列表
         await loadProviderModels(provider.id);
       } else {
-        alert(`获取失败: ${data.error}`);
+        showAlert(`获取失败: ${data.error}`);
       }
     } catch (error) {
       console.error('获取模型失败:', error);
-      alert('获取模型失败');
+      showAlert('获取模型失败');
     } finally {
       setFetchingModels(null);
     }
@@ -237,7 +240,7 @@ export default function ModelProvidersPage() {
   // 手动添加模型
   const handleAddModel = async () => {
     if (!selectedProvider || !modelFormData.name) {
-      alert('请填写模型名称');
+      showAlert('请填写模型名称');
       return;
     }
 
@@ -271,17 +274,18 @@ export default function ModelProvidersPage() {
         });
         await loadProviderModels(selectedProvider.id);
       } else {
-        alert(`添加失败: ${data.error}`);
+        showAlert(`添加失败: ${data.error}`);
       }
     } catch (error) {
       console.error('添加模型失败:', error);
-      alert('添加模型失败');
+      showAlert('添加模型失败');
     }
   };
 
   // 删除模型
   const handleDeleteModel = async (modelId: string) => {
-    if (!confirm('确定要删除该模型吗？')) return;
+    const ok = await modalConfirm('确定要删除该模型吗？', '删除后不可恢复', 'delete');
+    if (!ok) return;
 
     try {
       const res = await fetch(`/api/admin/models?id=${modelId}`, {
