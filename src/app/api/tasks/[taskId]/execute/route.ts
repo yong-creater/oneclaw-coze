@@ -1,60 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateWithModel } from '@/lib/model-selector';
+import { buildPrompt, ratioToSize } from '@/lib/prompt-engine';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-// ===== Prompt 前缀 =====
-const PRODUCT_FIDELITY_PREFIX = `CRITICAL: You MUST preserve the EXACT product from the reference image. The product's shape, color, material, proportions, and ALL visual details must remain IDENTICAL. ONLY change the background, lighting, and scene environment. NEVER deform, distort, or reimagine the product.
-
-RULES:
-1. Product MUST look EXACTLY like the reference image — same shape, color, material, proportions.
-2. NEVER deform, distort, reshape, or stylize the product.
-3. ONLY modify: background, lighting, scene, environment, and mood.
-4. Output a photorealistic product photo in the specified style.`;
-
-const XIAOHONGSHU_PREFIX = `Create a Xiaohongshu (Little Red Book) style cover image. Requirements:
-1. Trendy, aesthetic, eye-catching composition
-2. Soft, warm lighting with natural feel
-3. Clean layout with visual focus
-4. Social media optimized vertical format
-5. Fashion/lifestyle aesthetic quality`;
-
-const PHOTO_PREFIX = `Create a professional AI portrait photo. Requirements:
-1. Maintain facial features and identity from reference photo
-2. Apply the specified style naturally
-3. Professional lighting and composition
-4. High-quality magazine/campaign level output`;
-
-// ===== 多角度拼图 Prompt =====
-const MULTI_ANGLE_INSTRUCTION = `Create a SINGLE composite image showing the product from MULTIPLE angles in a clean grid/collage layout. The image should show the product from front, side, back, and detail views arranged in a professional product photography grid. Each angle should be clearly visible and well-lit.`;
-
-function buildPrompt(task: Record<string, unknown>): string {
-  const toolType = task.tool_type as string;
-  const prompt = (task.prompt as string) || '';
-  const style = task.style as string;
-  const ratio = task.ratio as string;
-  const layoutMode = (task.layout_mode as string) || 'single-product';
-
-  let prefix = '';
-  if (toolType === 'product-generator') prefix = PRODUCT_FIDELITY_PREFIX;
-  else if (toolType === 'xiaohongshu-generator') prefix = XIAOHONGSHU_PREFIX;
-  else if (toolType === 'ai-photo') prefix = PHOTO_PREFIX;
-
-  let fullPrompt = prefix ? `${prefix}\n\nUser request: ${prompt}` : prompt;
-  if (style) fullPrompt += `\nStyle: ${style}`;
-  if (ratio) fullPrompt += `\nAspect ratio: ${ratio}`;
-
-  // 布局模式：多角度拼图时追加拼图指令
-  if (layoutMode === 'multi-angle') {
-    fullPrompt += `\n\n${MULTI_ANGLE_INSTRUCTION}`;
-  }
-
-  return fullPrompt;
-}
 
 // POST /api/tasks/[taskId]/execute — 执行任务
 export async function POST(
@@ -98,11 +50,21 @@ export async function POST(
       return NextResponse.json({ error: '任务已被锁定' }, { status: 409 });
     }
 
-    // 3. 构建生成参数
-    const fullPrompt = buildPrompt(task);
+    // 3. 构建生成参数（使用独立 Prompt Engine）
+    const { fullPrompt, toolLabel } = buildPrompt({
+      prompt: (task.prompt as string) || '',
+      toolType: (task.tool_type as string) || '',
+      style: (task.style as string) || undefined,
+      subtype: (task.generation_type as string) || undefined,
+      ratio: (task.ratio as string) || undefined,
+      layoutMode: (task.layout_mode as string) || undefined,
+      hasImage: !!((task.uploaded_images as Array<{ url: string }>)?.length),
+      count: (task.count as number) || 1,
+    });
     const uploadedImages = (task.uploaded_images as Array<{ url: string }>) || [];
     const count = (task.count as number) || 1;
     const ratio = (task.ratio as string) || '1:1';
+    const size = ratioToSize(ratio);
 
     // 4. 更新进度
     await supabase
@@ -118,7 +80,7 @@ export async function POST(
       const generateResult = await generateWithModel(
         fullPrompt,
         'coze-image',
-        '2K',
+        size,
         {},
         task.tool_type as string,
         images.length > 0 ? images : undefined
@@ -181,7 +143,7 @@ export async function POST(
           count,
           task_id: taskId,
         },
-        title: `${task.tool_type === 'product-generator' ? 'AI商品图' : task.tool_type === 'xiaohongshu-generator' ? '小红书封面' : 'AI写真'} #${idx + 1}`,
+        title: `${toolLabel} #${idx + 1}`,
       }));
 
       const { error: genError } = await supabase
