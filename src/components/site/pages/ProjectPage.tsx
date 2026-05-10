@@ -3,12 +3,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, Download, ZoomIn, Trash2, FolderOpen, Image as ImageIcon, Loader2, X } from 'lucide-react';
-import BackToHome from '@/components/site/common/BackToHome';
 
 /* ---------- 数据类型 ---------- */
 interface Generation {
   id: number;
   tool_type: string;
+  tool_name?: string;
+  title?: string;
   style: string;
   ratio: string;
   prompt: string;
@@ -81,8 +82,13 @@ function DeleteConfirmModal({
 /* ---------- 工具名映射 ---------- */
 const TOOL_NAMES: Record<string, string> = {
   'product-generator': 'AI商品图',
+  'product_generator': 'AI商品图',
+  'product': 'AI商品图',
   'xiaohongshu-generator': '小红书封面',
   'ai-photo': 'AI写真',
+  'background_removal': 'AI智能抠图',
+  'poster-design': '海报设计',
+  'detail-page': '商品详情页',
 };
 
 /* ---------- 提取首张图 ---------- */
@@ -115,7 +121,7 @@ function fmtDate(d: string): string {
 
 /* ---------- 提取生成元数据 ---------- */
 function genMeta(gen: Generation) {
-  const tool = TOOL_NAMES[gen.tool_type] || gen.tool_type || 'AI创作';
+  const tool = gen.tool_name || TOOL_NAMES[gen.tool_type] || 'AI创作';
   const model = gen.model_name || '';
   const style = gen.style || '';
   const ratio = gen.ratio || '';
@@ -217,7 +223,6 @@ export default function ProjectPage() {
   return (
     <div className="os-page">
       <div className="os-page-inner">
-        <BackToHome />
         <h1 className="os-page-title">我的作品</h1>
         <p className="os-page-subtitle">管理你的 AI 创作作品</p>
 
@@ -275,7 +280,11 @@ export default function ProjectPage() {
                   {/* 信息区 */}
                   <div className="os-project-info">
                     <div className="os-project-info-title">
-                      {gen.prompt || meta.tool || 'AI 创作'}
+                      {(() => {
+                        const t = gen.title || '';
+                        const isJunk = /^(测试|test|demo|订单|AI.*结果)$/i.test(t) || t.length <= 2;
+                        return (isJunk ? (gen.prompt || meta.tool || 'AI 创作') : t) || 'AI 创作';
+                      })()}
                     </div>
                     <div className="os-project-meta-row">
                       <span className="os-project-meta-tag">{meta.tool}</span>

@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sparkles, Eye, Heart, Bookmark, Copy, Search, Loader2 } from 'lucide-react';
-import BackToHome from '@/components/site/common/BackToHome';
 
 /* ---------- 数据类型 ---------- */
 interface Prompt {
@@ -24,11 +23,16 @@ interface Prompt {
 
 /* ---------- 混合比例高度 — 瀑布流节奏 ---------- */
 const RATIO_HEIGHTS = [
-  320,   // ~4:5 短卡
+  280,   // ~16:9 宽卡
+  340,   // ~4:5 短卡
+  400,   // ~3:4 中卡
+  460,   // ~1:1 方卡
+  540,   // ~4:5 大卡（视觉冲击）
+  360,   // ~4:5 中短卡
+  480,   // ~3:4 高卡
+  320,   // ~16:9 短宽卡
+  520,   // ~4:5 大图（节奏重音）
   380,   // ~3:4 中卡
-  420,   // ~1:1 方卡
-  480,   // ~4:5 高卡
-  360,   // ~16:9 宽卡
 ];
 
 /* 确定性伪随机 — 基于 id 分配高度，避免每次渲染闪烁 */
@@ -143,7 +147,6 @@ export default function PromptPage() {
     <div className="os-page">
       <div className="os-page-inner">
         {/* 顶部 */}
-        <BackToHome />
         <h1 className="os-page-title">灵感库</h1>
         <p className="os-page-subtitle">探索 AI 创意灵感，一键生成同款</p>
 

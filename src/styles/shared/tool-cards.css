@@ -576,6 +576,7 @@
   width: 100%;
   display: block;
   object-fit: cover;
+  object-position: center;
   border-radius: 20px;
   transition: transform 0.3s ease;
 }
@@ -586,7 +587,7 @@
 /* 图片加载失败 */
 .os-insp-card-img-fallback {
   width: 100%;
-  min-height: 260px;
+  min-height: 280px;
   display: flex;
   align-items: center;
   justify-content: center;

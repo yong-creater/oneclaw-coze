@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { ArrowRight, Sparkles, Image as ImageIcon, Camera, Layout } from 'lucide-react';
-import BackToHome from '@/components/site/common/BackToHome';
 
 /* ---------- 工具数据 ---------- */
 interface Tool {
@@ -48,7 +47,6 @@ export default function ToolsPage() {
   return (
     <div className="os-page">
       <div className="os-page-inner">
-        <BackToHome />
         <h1 className="os-page-title">工具库</h1>
         <p className="os-page-subtitle">专业 AI 创作工具，一键生成高质量内容</p>
 
