@@ -360,7 +360,7 @@ export default function HomePage() {
               商品图、小红书、AI写真等内容，简单输入需求即可生成。
             </p>
 
-            {/* 输入框 */}
+            {/* 输入区 */}
             <div className="os-hero-input-area">
               {!inputText && <span className="os-studio-ai-hint">描述你想生成的内容…</span>}
               <div className="os-studio-textarea-wrap">
@@ -377,7 +377,7 @@ export default function HomePage() {
                   onChange={(e) => { setInputText(e.target.value.slice(0, 500)); if (phase !== 'idle') resetIdentify(); }}
                   onKeyDown={handleKeyDown}
                   placeholder=""
-                  className="os-studio-textarea"
+                  className="os-studio-textarea os-hero-textarea"
                 />
               </div>
 
@@ -435,17 +435,19 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* CTA 按钮 */}
-            <button
-              onClick={handleStartCreate}
-              disabled={!inputText.trim() || phase !== 'idle'}
-              className="os-hero-cta"
-            >
-              <Wand2 className="w-5 h-5" />
-              <span>{phase === 'idle' ? '立即开始创作' : '识别中...'}</span>
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </button>
-            <span className="text-[12px] text-slate-300 mt-2 ml-1">{inputText.length} / 500</span>
+            {/* 底部操作栏 */}
+            <div className="os-hero-action-bar">
+              <button
+                onClick={handleStartCreate}
+                disabled={!inputText.trim() || phase !== 'idle'}
+                className="os-hero-cta"
+              >
+                <Wand2 className="w-5 h-5" />
+                <span>{phase === 'idle' ? '立即开始创作' : '识别中...'}</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </button>
+              <span className="os-hero-char-count">{inputText.length} / 500</span>
+            </div>
           </div>
 
           {/* ===== 右侧案例区 ===== */}
