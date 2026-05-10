@@ -515,13 +515,26 @@ export default function CreateWorkbench() {
             </div>
             <div className="os-ws-field">
               <label className="os-ws-label">比例</label>
-              <select value={ratio} onChange={e => setRatio(e.target.value)} className="os-ws-ratio-select">
-                <option value="1:1">1:1</option>
-                <option value="3:4">3:4</option>
-                <option value="4:5">4:5</option>
-                <option value="16:9">16:9</option>
-                <option value="2:3">2:3</option>
-              </select>
+              <div className="os-ws-ratio-grid">
+                {[
+                  { value: '1:1',  w: 28, h: 28, label: '1:1' },
+                  { value: '3:4',  w: 24, h: 32, label: '3:4' },
+                  { value: '4:5',  w: 24, h: 30, label: '4:5' },
+                  { value: '2:3',  w: 22, h: 33, label: '2:3' },
+                  { value: '4:3',  w: 32, h: 24, label: '4:3' },
+                  { value: '16:9', w: 36, h: 20, label: '16:9' },
+                ].map(r => (
+                  <button
+                    key={r.value}
+                    className={`os-ws-ratio-card${ratio === r.value ? ' active' : ''}`}
+                    onClick={() => setRatio(r.value)}
+                    title={r.label}
+                  >
+                    <div className="os-ws-ratio-box" style={{ width: r.w, height: r.h }} />
+                    <span>{r.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

@@ -252,16 +252,37 @@
 }
 
 /* Ratio select */
-.os-ws-ratio-select {
-  padding: 6px 10px;
+/* Ratio card grid */
+.os-ws-ratio-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.os-ws-ratio-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 6px;
   border: 1.5px solid #e5e7eb;
   border-radius: 8px;
-  font-size: 13px;
-  color: #555;
   background: white;
   cursor: pointer;
+  transition: all 0.15s;
+  min-width: 42px;
 }
-.os-ws-ratio-select:hover { border-color: #7B6DFF; }
+.os-ws-ratio-card:hover { border-color: #7B6DFF; background: #f8f7ff; }
+.os-ws-ratio-card.active { border-color: #7B6DFF; background: #ede9ff; }
+.os-ws-ratio-card span { font-size: 10px; color: #888; line-height: 1; }
+.os-ws-ratio-card.active span { color: #7B6DFF; font-weight: 600; }
+.os-ws-ratio-box {
+  border: 1.5px solid #ccc;
+  border-radius: 3px;
+  background: #f3f4f6;
+  transition: all 0.15s;
+}
+.os-ws-ratio-card:hover .os-ws-ratio-box { border-color: #7B6DFF; background: #ede9ff; }
+.os-ws-ratio-card.active .os-ws-ratio-box { border-color: #7B6DFF; background: #7B6DFF; }
 
 /* Generate button */
 .os-ws-gen-btn {

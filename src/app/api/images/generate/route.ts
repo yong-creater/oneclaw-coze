@@ -138,6 +138,25 @@ Professional e-commerce quality, high resolution.`;
   },
 };
 
+// ===== 比例 → SDK size 参数映射 =====
+// SDK 支持: '2K', '4K', 或 'WIDTHxHEIGHT' 格式（2560~4096 范围）
+const RATIO_TO_SIZE: Record<string, string> = {
+  '1:1':  '2560x2560',
+  '3:4':  '2560x3414',
+  '4:3':  '3414x2560',
+  '4:5':  '2560x3200',
+  '5:4':  '3200x2560',
+  '2:3':  '2560x3840',
+  '3:2':  '3840x2560',
+  '16:9': '2560x1440',
+  '9:16': '1440x2560',
+};
+
+function ratioToSize(ratio: string | undefined, fallback: string = '2K'): string {
+  if (!ratio) return fallback;
+  return RATIO_TO_SIZE[ratio] || fallback;
+}
+
 /**
  * 通用图片生成 API
  * 
@@ -152,6 +171,7 @@ export async function POST(request: NextRequest) {
       image,      // 单张参考图（兼容旧调用）
       images,     // 多张参考图（CreateWorkbench 传入）
       size, 
+      ratio,      // 图片比例（1:1/3:4/16:9 等），优先级高于 size
       style, 
       subtype,    // 子类型（白底/场景/细节 等）
       model, 
@@ -159,6 +179,9 @@ export async function POST(request: NextRequest) {
       type,       // 兼容旧调用的 type 字段
       count,      // 生成数量
     } = body;
+    
+    // 确定最终的 size 参数：ratio 优先于 size
+    const finalSize = ratioToSize(ratio, size || '2K');
     
     // 确定 tool_id：优先使用 tool_id，其次根据 type 推断
     const effectiveToolId = tool_id || type || 'product-generator';
@@ -190,7 +213,7 @@ export async function POST(request: NextRequest) {
     const result = await generateWithModel(
       finalPrompt,
       model || 'coze-image',   // fallback 模型名
-      size || '2K',             // 图片尺寸
+      finalSize,               // 图片尺寸（ratio 优先转换后的 WIDTHxHEIGHT）
       customHeaders,            // 转发请求头
       effectiveToolId,          // toolId，走数据库配置
       referenceImage            // 参考图片
