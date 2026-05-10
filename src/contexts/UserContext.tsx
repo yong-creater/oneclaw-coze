@@ -131,6 +131,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   // 检查是否需要登录
+  // callback 仅在未登录时暂存，登录成功后自动执行
+  // 已登录时仅返回 true，不执行 callback（避免递归）
   const requireAuth = (callback?: () => void): boolean => {
     // loading 中暂存回调，等 checkAuth 完成后自动执行
     if (loading) {
@@ -147,7 +149,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setShowLoginModal(true);
       return false;
     }
-    callback?.();
+    // 已登录：不执行 callback，仅返回 true
+    // 调用方应自行处理已登录的逻辑
     return true;
   };
 

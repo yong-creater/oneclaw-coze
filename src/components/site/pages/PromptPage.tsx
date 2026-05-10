@@ -190,7 +190,9 @@ const categoryCounts = useMemo(() => {
       const targetUrl = `/create?${params.toString()}`;
 
       // 登录拦截：未登录时弹出登录弹窗，登录后继续执行跳转
-      if (!requireAuth(() => router.push(targetUrl))) return;
+      if (!requireAuth(() => { router.push(targetUrl); })) return;
+      // 已登录时 requireAuth 返回 true，需要手动执行跳转
+      router.push(targetUrl);
     },
     [router, requireAuth]
   );

@@ -145,7 +145,7 @@ function ratioToAspect(ratio: string): string {
 export default function CreateWorkbench() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { authenticated, setShowLoginModal, requireAuth, dailyQuota, refreshQuota } = useUser();
+  const { user, loading, authenticated, setShowLoginModal, requireAuth, dailyQuota, refreshQuota } = useUser();
 
   // ----- 工具 -----
   const allTools = getAllToolWorkflows();
@@ -313,7 +313,9 @@ export default function CreateWorkbench() {
     // URL 带 prompt 时自动生成
     if (urlPrompt && !ctx?.shouldAuto) {
       parsedCtx.current.shouldAuto = true;
+      console.log('[Init] shouldAuto set to true, urlPrompt:', urlPrompt);
     }
+    console.log('[Init] done, slug:', slug, 'inputText will be:', ctx?.prompt || urlPrompt || '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -327,8 +329,19 @@ export default function CreateWorkbench() {
   }, [searchParams]);
   useEffect(() => {
     if (!parsedCtx.current.shouldAuto || autoGenTriggered.current) return;
+    // loading 中，等 checkAuth 完成后再执行
+    if (loading) return;
+
     const p = genParamsRef.current;
     if (!p.inputText && p.uploads.length === 0) return; // 等 inputText 设置好
+
+    // 未登录：弹登录弹窗，暂存回调，登录后自动继续
+    if (!user) {
+      requireAuth(handleGenerate);
+      return; // 不标记 autoGenTriggered，等 user 变化后重新进入
+    }
+
+    // 已登录：直接触发生成
     autoGenTriggered.current = true;
     parsedCtx.current.shouldAuto = false;
     const timer = setTimeout(() => {
@@ -336,7 +349,7 @@ export default function CreateWorkbench() {
     }, 800);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputText, toolSlug]);
+  }, [inputText, toolSlug, user, loading]);
 
   // ===== 加载中文案轮播 =====
   const subtypeLabel = config.subtypeOptions?.find(s => s.value === selectedSubtype)?.label || '';
@@ -509,14 +522,25 @@ export default function CreateWorkbench() {
   // ===== 任务驱动生成 =====
   const handleGenerate = async () => {
     const p = genParamsRef.current;
+    console.log('[HandleGenerate] called', {
+      inputText: p.inputText,
+      uploads: p.uploads.length,
+      step,
+      user: !!user,
+      loading,
+      dailyQuota,
+    });
     if (!p.inputText && p.uploads.length === 0) {
       setErrorMsg('请先输入描述或上传参考图片');
       return;
     }
     if (step === 'creating' || step === 'generating') return; // 防重复点击
 
-    // 登录拦截：未登录时弹出登录弹窗，登录后继续执行
-    if (!requireAuth(handleGenerate)) return;
+    // 登录拦截：未登录时弹出登录弹窗，登录后通过 pendingAction 自动继续
+    if (!requireAuth(handleGenerate)) {
+      console.log('[HandleGenerate] blocked by requireAuth, pending action saved');
+      return;
+    }
 
     // 每日免费次数检查（dailyQuota=0 表示用完，-1 表示未登录/未知，不阻止）
     if (dailyQuota === 0) {
@@ -594,7 +618,7 @@ export default function CreateWorkbench() {
 
   // ===== 下载 =====
   const handleDownload = async (url: string, idx: number) => {
-    // 登录拦截
+    // 登录拦截：未登录时暂存操作，登录后自动继续
     if (!requireAuth(() => handleDownload(url, idx))) return;
     try {
       const resp = await fetch(url);
@@ -610,7 +634,7 @@ export default function CreateWorkbench() {
 
   // ===== 保存到作品库 =====
   const handleSave = async () => {
-    // 登录拦截
+    // 登录拦截：未登录时暂存操作，登录后自动继续
     if (!requireAuth(handleSave)) return;
     if (images.length === 0) {
       alert('暂无可保存的作品');
