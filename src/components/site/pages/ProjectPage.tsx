@@ -2,157 +2,141 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  FolderOpen,
-  Download,
-  Pencil,
-  Search,
-  Package,
-  Camera,
-  BookImage,
-  Trash2,
-  Eye,
-  Sparkles,
-  X,
-} from 'lucide-react';
+import { ImagePlus, Download, Eye, Trash2, Sparkles, ArrowRight, Loader2, X } from 'lucide-react';
+import { useUser } from '@/contexts/UserContext';
 
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
-interface Generation {
-  id: number;
-  tool_id: number | null;
-  tool_slug: string;
-  prompt: string;
-  result_url: string;
-  created_at: string;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                            */
-/* ------------------------------------------------------------------ */
-const TOOL_LABELS: Record<string, string> = {
-  'product-generator': 'AI商品图',
-  'ai-photo': 'AI写真',
+/* ---------- helpers ---------- */
+const TOOL_LABEL: Record<string, string> = {
+  'product-generator': 'AI 商品图',
+  product: 'AI 商品图',
   'xiaohongshu-generator': '小红书封面',
+  xiaohongshu: '小红书封面',
+  'ai-photo': 'AI 写真',
+  photo: 'AI 写真',
 };
 
-const TOOL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  'product-generator': Package,
-  'ai-photo': Camera,
-  'xiaohongshu-generator': BookImage,
-};
-
-const TOOL_ASPECTS: Record<string, string> = {
-  'product-generator': '4/3',
-  'ai-photo': '3/4',
-  'xiaohongshu-generator': '3/4',
-};
-
-const FILTER_OPTIONS = [
-  { key: '', label: '全部' },
-  { key: 'product-generator', label: '商品图' },
-  { key: 'xiaohongshu-generator', label: '小红书' },
-  { key: 'ai-photo', label: 'AI写真' },
-];
-
-function formatDate(dateStr: string) {
-  try {
-    const d = new Date(dateStr);
-    const now = new Date();
-    const diff = now.getTime() - d.getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return '刚刚';
-    if (mins < 60) return `${mins}分钟前`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}小时前`;
-    const days = Math.floor(hours / 24);
-    if (days < 30) return `${days}天前`;
-    return d.toLocaleDateString('zh-CN');
-  } catch {
-    return '';
+function genImage(gen: Record<string, unknown>): string {
+  // 1. thumbnail
+  if (gen.thumbnail && typeof gen.thumbnail === 'string') return gen.thumbnail;
+  // 2. output_content.image_urls[0]
+  const oc = gen.output_content;
+  if (oc) {
+    try {
+      const parsed = typeof oc === 'string' ? JSON.parse(oc) : oc;
+      if (parsed?.image_urls?.[0]) return parsed.image_urls[0];
+      if (parsed?.imageUrl) return parsed.imageUrl;
+    } catch { /* ignore */ }
   }
+  return '';
 }
 
-/* ------------------------------------------------------------------ */
-/*  Component                                                          */
-/* ------------------------------------------------------------------ */
+function genAllImages(gen: Record<string, unknown>): string[] {
+  const oc = gen.output_content;
+  if (oc) {
+    try {
+      const parsed = typeof oc === 'string' ? JSON.parse(oc) : oc;
+      if (Array.isArray(parsed?.image_urls)) return parsed.image_urls;
+      if (parsed?.imageUrl) return [parsed.imageUrl];
+    } catch { /* ignore */ }
+  }
+  const thumb = genImage(gen);
+  return thumb ? [thumb] : [];
+}
+
+function toolTypeSlug(gen: Record<string, unknown>): string {
+  return (gen.tool_type as string) || '';
+}
+
+function formatDate(d: string) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+}
+
+/* ---------- component ---------- */
 export default function ProjectPage() {
   const router = useRouter();
-  const [generations, setGenerations] = useState<Generation[]>([]);
+  const { authenticated, setShowLoginModal } = useUser();
+  const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [filterTool, setFilterTool] = useState('');
-  const [deleting, setDeleting] = useState<number | null>(null);
+  const [filterTool, setFilterTool] = useState('all');
+  const [previewIdx, setPreviewIdx] = useState<number | null>(null);
 
-  /* ---- Fetch ---- */
-  const fetchGenerations = useCallback(async () => {
+  useEffect(() => {
+    if (!authenticated) { setLoading(false); return; }
     setLoading(true);
-    try {
-      const res = await fetch('/api/generations', { credentials: 'include' });
-      const data = await res.json();
-      if (data.success && Array.isArray(data.generations)) {
-        setGenerations(data.generations);
-      }
-    } catch {}
-    setLoading(false);
-  }, []);
+    fetch('/api/generations', { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => { if (d.success) setItems(d.generations || []); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [authenticated]);
 
-  useEffect(() => { fetchGenerations(); }, [fetchGenerations]);
+  const filtered = filterTool === 'all' ? items : items.filter(g => toolTypeSlug(g) === filterTool);
 
-  /* ---- Delete ---- */
   const handleDelete = useCallback(async (id: number) => {
-    if (!confirm('确定要删除这个作品吗？')) return;
-    setDeleting(id);
-    try {
-      await fetch(`/api/generations?id=${id}`, { method: 'DELETE', credentials: 'include' });
-      setGenerations(prev => prev.filter(g => g.id !== id));
-    } catch {}
-    setDeleting(null);
+    if (!confirm('确定删除此作品？')) return;
+    await fetch(`/api/generations?id=${id}`, { method: 'DELETE', credentials: 'include' });
+    setItems(prev => prev.filter(g => g.id !== id));
   }, []);
 
-  /* ---- Download ---- */
-  const handleDownload = useCallback(async (url: string, name: string) => {
-    try {
-      const resp = await fetch(url);
-      const blob = await resp.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = name || 'oneclaw-creation.png';
-      a.click();
-      window.URL.revokeObjectURL(blobUrl);
-    } catch {}
+  const handleDownload = useCallback((url: string, name?: string) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name || 'oneclaw-work.png';
+    a.target = '_blank';
+    a.click();
   }, []);
 
-  /* ---- Filter ---- */
-  const filtered = generations.filter(g => {
-    if (filterTool && g.tool_slug !== filterTool) return false;
-    if (search) {
-      const q = search.toLowerCase();
-      if (!(g.prompt || '').toLowerCase().includes(q)) return false;
-    }
-    return true;
-  });
-
-  /* ---- Empty state ---- */
-  if (!loading && generations.length === 0) {
+  /* ---------- not logged in ---------- */
+  if (!authenticated) {
     return (
       <div className="os-page">
-        <div className="os-content">
-          <div className="os-page-header">
-            <h1 className="os-page-title">我的作品</h1>
-            <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
+        <div className="os-page-inner">
+          <h1 className="os-page-title">我的作品</h1>
+          <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
+          <div className="os-project-empty-hero" style={{ marginTop: 80 }}>
+            <div className="os-project-empty-icon"><ImagePlus /></div>
+            <h3>登录后查看你的作品</h3>
+            <p>完成创作后，你的作品会自动保存在这里</p>
+            <button className="os-btn-primary" onClick={() => setShowLoginModal(true)}>
+              登录查看作品
+            </button>
           </div>
-          <div className="os-empty-lg">
-            <div className="os-empty-lg-icon">
-              <FolderOpen className="w-10 h-10" />
-            </div>
-            <h2 className="os-empty-lg-title">还没有作品</h2>
-            <p className="os-empty-lg-desc">完成一次创作后，你的作品会自动保存在这里</p>
-            <div className="flex items-center gap-3 mt-6">
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------- loading ---------- */
+  if (loading) {
+    return (
+      <div className="os-page">
+        <div className="os-page-inner">
+          <h1 className="os-page-title">我的作品</h1>
+          <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '120px 0' }}>
+            <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#7B61FF' }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ---------- empty ---------- */
+  if (items.length === 0) {
+    return (
+      <div className="os-page">
+        <div className="os-page-inner">
+          <h1 className="os-page-title">我的作品</h1>
+          <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
+          <div className="os-project-empty-hero" style={{ marginTop: 80 }}>
+            <div className="os-project-empty-icon"><ImagePlus /></div>
+            <h3>还没有作品</h3>
+            <p>完成一次创作后，你的作品会自动保存在这里</p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
               <button className="os-btn-primary" onClick={() => router.push('/tools')}>
-                <Sparkles className="w-4 h-4" />开始创作
+                开始创作
               </button>
               <button className="os-btn-secondary" onClick={() => router.push('/inspiration')}>
                 查看灵感案例
@@ -164,103 +148,111 @@ export default function ProjectPage() {
     );
   }
 
+  /* ---------- main ---------- */
+  const toolFilters = [
+    { key: 'all', label: '全部' },
+    { key: 'product-generator', label: 'AI 商品图' },
+    { key: 'product', label: 'AI 商品图' },
+    { key: 'xiaohongshu-generator', label: '小红书' },
+    { key: 'xiaohongshu', label: '小红书' },
+    { key: 'ai-photo', label: 'AI 写真' },
+    { key: 'photo', label: 'AI 写真' },
+  ];
+  // deduplicate by label
+  const uniqueFilters = toolFilters.reduce<Array<{ key: string; label: string }>>((acc, f) => {
+    if (!acc.find(x => x.label === f.label)) acc.push(f);
+    return acc;
+  }, []);
+
   return (
     <div className="os-page">
-      <div className="os-content">
-        {/* Page Title */}
-        <div className="os-page-header">
-          <h1 className="os-page-title">我的作品</h1>
-          <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
-        </div>
+      <div className="os-page-inner">
+        <h1 className="os-page-title">我的作品</h1>
+        <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
 
-        {/* Search + Filters */}
-        <div className="max-w-lg mb-6 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="搜索作品…"
-            className="os-search-input"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2">
-              <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 mb-8 scrollbar-hide">
-          {FILTER_OPTIONS.map(opt => (
+        {/* filter pills */}
+        <div className="os-page-pills">
+          {uniqueFilters.map(f => (
             <button
-              key={opt.key}
-              onClick={() => setFilterTool(opt.key)}
-              className={`os-btn-capsule ${filterTool === opt.key ? 'os-btn-capsule-active' : ''}`}
+              key={f.key}
+              className={`os-btn-capsule ${filterTool === f.key ? 'os-btn-capsule-active' : ''}`}
+              onClick={() => setFilterTool(f.key)}
             >
-              {opt.label}
+              {f.label}
             </button>
           ))}
         </div>
 
-        {/* Works Grid */}
+        {/* grid */}
         <div className="os-project-grid">
-          {filtered.map(gen => {
-            const Icon = TOOL_ICONS[gen.tool_slug] || Package;
-            const aspect = TOOL_ASPECTS[gen.tool_slug] || '4/3';
-
+          {filtered.map((gen) => {
+            const img = genImage(gen);
+            const slug = toolTypeSlug(gen);
+            const title = (gen.title as string) || TOOL_LABEL[slug] || '未命名作品';
+            const date = formatDate(gen.created_at as string);
             return (
-              <div key={gen.id} className="os-project-card">
-                {/* Image */}
-                <div className="os-project-img-wrap" style={{ aspectRatio: aspect }}>
-                  {gen.result_url ? (
-                    <img src={gen.result_url} alt="作品" loading="lazy" className="os-project-img" />
+              <div key={gen.id as number} className="os-project-card">
+                {/* image */}
+                <div className="os-project-card-img-wrap">
+                  {img ? (
+                    <img src={img} alt={title} className="os-project-card-img" />
                   ) : (
-                    <div className="os-project-img-fallback">
-                      <Icon className="w-6 h-6" />
-                    </div>
+                    <div className="os-project-card-placeholder" />
                   )}
-                  {/* Hover overlay */}
-                  <div className="os-project-hover">
-                    <button className="os-project-hover-btn" onClick={() => router.push(`/create?tool=${gen.tool_slug}`)}>
-                      <Pencil className="w-4 h-4" />继续优化
+                  {/* hover overlay */}
+                  <div className="os-project-card-hover">
+                    <button onClick={() => router.push(`/create?tool=${slug}`)} className="os-project-hover-btn">
+                      <Sparkles style={{ width: 16, height: 16 }} />
+                      继续优化
                     </button>
-                    <button className="os-project-hover-btn" onClick={() => handleDownload(gen.result_url, `oneclaw-${gen.id}.png`)}>
-                      <Download className="w-4 h-4" />下载
+                    <button onClick={() => handleDownload(img)} className="os-project-hover-btn">
+                      <Download style={{ width: 16, height: 16 }} />
+                      下载
                     </button>
-                    <button className="os-project-hover-btn" onClick={() => window.open(gen.result_url, '_blank')}>
-                      <Eye className="w-4 h-4" />查看大图
+                    <button onClick={() => setPreviewIdx(gen.id as number)} className="os-project-hover-btn">
+                      <Eye style={{ width: 16, height: 16 }} />
+                      大图
                     </button>
                   </div>
                 </div>
-
-                {/* Card Info */}
-                <div className="os-project-info">
-                  <span className="os-card-tag">{TOOL_LABELS[gen.tool_slug] || '作品'}</span>
-                  <p className="os-project-time">{formatDate(gen.created_at)}</p>
-                  <div className="os-project-actions">
-                    <button
-                      className="os-project-del-btn"
-                      onClick={() => handleDelete(gen.id)}
-                      disabled={deleting === gen.id}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                {/* info */}
+                <div className="os-project-card-info">
+                  <span className="os-project-card-title">{title}</span>
+                  <span className="os-project-card-meta">
+                    <span className="os-project-card-tag">{TOOL_LABEL[slug] || slug}</span>
+                    <span>{date}</span>
+                  </span>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Empty filter result */}
-        {filtered.length === 0 && generations.length > 0 && (
-          <div className="os-empty">
-            <div className="os-empty-icon"><Search className="w-8 h-8" /></div>
-            <div className="os-empty-title">没有找到匹配的作品</div>
-            <div className="os-empty-desc">换个条件试试？</div>
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '60px 0', color: '#A0A8B8' }}>
+            该分类下暂无作品
           </div>
         )}
       </div>
+
+      {/* lightbox */}
+      {previewIdx !== null && (() => {
+        const gen = items.find(g => g.id === previewIdx);
+        if (!gen) return null;
+        const allImgs = genAllImages(gen);
+        return (
+          <div className="os-lightbox-overlay" onClick={() => setPreviewIdx(null)}>
+            <div className="os-lightbox-content" onClick={e => e.stopPropagation()}>
+              <button className="os-lightbox-close" onClick={() => setPreviewIdx(null)}><X /></button>
+              {allImgs.length > 0 ? (
+                <img src={allImgs[0]} alt="" className="os-lightbox-img" />
+              ) : (
+                <div className="os-project-card-placeholder" style={{ width: 480, height: 480 }} />
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
