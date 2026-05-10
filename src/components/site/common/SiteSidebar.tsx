@@ -30,10 +30,11 @@ export default function SiteSidebar() {
   // 轮询活跃任务数
   useEffect(() => {
     if (!authenticated) { setActiveTaskCount(0); return; }
+    let cancelled = false;
     const poll = async () => {
       try {
         const res = await fetch('/api/tasks?status=generating&limit=10');
-        if (res.ok) {
+        if (res.ok && !cancelled) {
           const data = await res.json();
           setActiveTaskCount(data.tasks?.length ?? 0);
         }
@@ -41,7 +42,7 @@ export default function SiteSidebar() {
     };
     poll();
     const timer = setInterval(poll, 5000);
-    return () => clearInterval(timer);
+    return () => { cancelled = true; clearInterval(timer); };
   }, [authenticated]);
 
   function isActive(href: string): boolean {

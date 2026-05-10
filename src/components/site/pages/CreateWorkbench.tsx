@@ -42,6 +42,18 @@ const VALID_RATIOS = RATIO_OPTIONS.map(r => r.value);
 // sessionStorage key
 const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
 
+// ===== fetch 超时工具 =====
+function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number } = {}, timeout = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const { signal: externalSignal, timeout: _t, ...rest } = options;
+  // 如果外部也传了 signal，需要同时监听
+  if (externalSignal) {
+    externalSignal.addEventListener('abort', () => controller.abort());
+  }
+  const timer = setTimeout(() => controller.abort(), timeout);
+  return fetch(url, { ...rest, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
 // ===== 工具主题色（统一 OneClaw 品牌紫蓝渐变） =====
 const TOOL_ACCENT: Record<string, string> = {
   'product-generator': '#7B61FF',
@@ -180,6 +192,7 @@ export default function CreateWorkbench() {
   // ----- 任务系统 -----
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const pollTimerRef = useRef<number | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // ----- Refs -----
   const parsedCtx = useRef<{
@@ -357,8 +370,14 @@ export default function CreateWorkbench() {
   // ===== 生成 =====
   // ===== 任务轮询 =====
   const pollTask = useCallback(async (taskId: string) => {
+    // 每次 poll 创建新的 AbortController，组件卸载时统一取消
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    const { signal } = ac;
+
     try {
-      const res = await fetch(`/api/tasks/${taskId}`, { credentials: 'include' });
+      const res = await fetchWithTimeout(`/api/tasks/${taskId}`, { credentials: 'include', signal }, 10000);
       const data = await res.json();
       if (!data.success) {
         setStep('error');
@@ -385,7 +404,7 @@ export default function CreateWorkbench() {
           // Auto-save to user_generations
           if (authenticated && urls.length > 0) {
             try {
-              await fetch('/api/generations', {
+              await fetchWithTimeout('/api/generations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -398,7 +417,8 @@ export default function CreateWorkbench() {
                   output_content: { image_urls: urls },
                 }),
                 credentials: 'include',
-              });
+                signal,
+              }, 10000);
               setSaved(true);
             } catch { /* auto-save failure is non-critical */ }
           }
@@ -411,16 +431,19 @@ export default function CreateWorkbench() {
       }
       // Continue polling
       pollTimerRef.current = window.setTimeout(() => pollTask(taskId), 2000);
-    } catch {
+    } catch (err: unknown) {
+      // AbortError means component unmounted — don't update state
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       setStep('error');
       setErrorMsg('网络错误，请重试');
     }
   }, [authenticated, config?.name, inputText, ratio, selectedStyle, selectedSubtype, count, toolSlug]);
 
-  // 清理轮询
+  // 清理轮询和 pending 请求（防止导航卡死）
   useEffect(() => {
     return () => {
       if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+      abortRef.current?.abort();
     };
   }, []);
 
@@ -431,7 +454,9 @@ export default function CreateWorkbench() {
     const tid = urlParams.get('taskId');
     if (tid && !currentTaskId && step === 'idle') {
       setCurrentTaskId(tid);
-      fetch(`/api/tasks/${tid}`)
+      const ac = new AbortController();
+      abortRef.current = ac;
+      fetch(`/api/tasks/${tid}`, { signal: ac.signal })
         .then(r => r.json())
         .then(data => {
           const task = data.task;
@@ -477,6 +502,12 @@ export default function CreateWorkbench() {
     setSaved(false);
     setErrorMsg('');
 
+    // 取消之前的 pending 请求
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    const { signal } = ac;
+
     try {
       // 1. 创建任务
       const layoutMode = parsedCtx.current.analysisResult?.layoutMode || 'single-product';
@@ -491,12 +522,13 @@ export default function CreateWorkbench() {
       };
       if (p.uploads.length > 0) createBody.uploadedImages = p.uploads.map(u => u.url);
 
-      const createRes = await fetch('/api/tasks', {
+      const createRes = await fetchWithTimeout('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(createBody),
         credentials: 'include',
-      });
+        signal,
+      }, 15000);
       const createData = await createRes.json();
 
       if (!createData.success) {
@@ -515,16 +547,19 @@ export default function CreateWorkbench() {
 
       setStep('generating');
 
-      // 2. 执行任务（异步，不等待完成）
-      fetch(`/api/tasks/${taskId}/execute`, {
+      // 2. 执行任务（异步，不等待完成，带超时避免挂起）
+      fetchWithTimeout(`/api/tasks/${taskId}/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-      }).catch(() => { /* execute runs server-side */ });
+        signal,
+      }, 30000).catch(() => { /* execute runs server-side */ });
 
       // 3. 开始轮询
       pollTask(taskId);
-    } catch {
+    } catch (err: unknown) {
+      // AbortError means component unmounted — don't update state
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       setStep('error');
       setErrorMsg('网络错误，请重试');
     }

@@ -320,17 +320,20 @@ export default function ProjectPage() {
 
   /* ---- 加载 ---- */
   useEffect(() => {
+    const ac = new AbortController();
     (async () => {
       try {
-        const res = await fetch('/api/generations');
+        const res = await fetch('/api/generations', { signal: ac.signal });
         const d = await res.json();
         setGenerations(d.generations || d.data || []);
-      } catch {
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
         /* empty */
       } finally {
         setLoading(false);
       }
     })();
+    return () => ac.abort();
   }, []);
 
   /* ---- 下载 ---- */

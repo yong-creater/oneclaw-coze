@@ -35,15 +35,21 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // 存储：登录成功后需要自动执行的回调
   const pendingActionRef = useRef<(() => void) | null>(null);
+  // 组件卸载时取消 pending 请求
+  const abortRef = useRef<AbortController | null>(null);
 
   // 检查登录状态
   useEffect(() => {
     checkAuth();
+    return () => { abortRef.current?.abort(); };
   }, []);
 
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/auth');
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
+      const res = await fetch('/api/auth', { signal: ac.signal });
       const data = await res.json();
 
       if (data.success && data.authenticated) {
@@ -70,12 +76,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const fetchQuota = async () => {
     try {
-      const res = await fetch('/api/quota/daily-generations', { credentials: 'include' });
+      const res = await fetch('/api/quota/daily-generations', { credentials: 'include', signal: abortRef.current?.signal });
       const data = await res.json();
       if (data.remaining !== undefined) {
         setDailyQuota(data.remaining);
       }
-    } catch {
+    } catch (err: unknown) {
+      // AbortError is expected on unmount
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       // 静默失败
     }
   };
