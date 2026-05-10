@@ -139,9 +139,6 @@ function getCategoryByTool(slug: string): string {
     'product-generator': '商品图',
     'xiaohongshu-generator': '小红书',
     'ai-photo': 'AI写真',
-    'poster-design': '海报',
-    'background-removal': '抠图',
-    'product-page': '详情页',
   };
   return map[slug] || '全部';
 }

@@ -8,9 +8,7 @@ import {
   Pencil,
   Search,
   Package,
-  Scissors,
   Camera,
-  Image as ImageIcon,
   FileText,
   Wand2,
   X,
@@ -39,13 +37,8 @@ interface Generation {
 // ========== 工具类型映射 — 统一标签 ==========
 const TOOL_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
   product_generator: { label: '商品图', icon: Package },
-  background_removal: { label: '智能抠图', icon: Scissors },
   ai_photo: { label: 'AI写真', icon: Camera },
-  product_poster: { label: '海报', icon: ImageIcon },
   xiaohongshu: { label: '小红书', icon: FileText },
-  productpage: { label: '详情页', icon: FileText },
-  cover: { label: '封面设计', icon: ImageIcon },
-  video: { label: '视频脚本', icon: FileText },
 };
 
 // 筛选列表
@@ -54,8 +47,6 @@ const TYPE_FILTERS = [
   { key: 'product_generator', label: '商品图' },
   { key: 'xiaohongshu', label: '小红书' },
   { key: 'ai_photo', label: 'AI写真' },
-  { key: 'product_poster', label: '海报' },
-  { key: 'productpage', label: '详情页' },
 ];
 
 // 作品卡片比例映射
@@ -63,11 +54,6 @@ const TOOL_ASPECT: Record<string, string> = {
   product_generator: '4/3',
   xiaohongshu: '3/4',
   ai_photo: '3/4',
-  product_poster: '4/5',
-  productpage: '1/2',
-  background_removal: '1/1',
-  cover: '3/4',
-  video: '16/9',
 };
 
 // ========== Toast 通知 ==========

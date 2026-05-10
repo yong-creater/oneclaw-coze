@@ -7,7 +7,7 @@ import {
   Download, RotateCcw, ZoomIn, Loader2, Check,
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck,
   History, BookOpen, Wand2,
-  Package, BookImage, Camera, Palette, Scissors, FileText
+  Package, BookImage, Camera
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
 import { useUser } from '@/contexts/UserContext';
@@ -52,9 +52,6 @@ const TOOL_ACCENT: Record<string, string> = {
   'product-generator': '#7B6DFF',
   'xiaohongshu-generator': '#FF2442',
   'ai-photo': '#F97316',
-  'poster-design': '#06B6D4',
-  'background-removal': '#8B5CF6',
-  'product-page': '#10B981',
 };
 
 // ===== 工具 Lucide 图标映射 =====
@@ -62,9 +59,6 @@ const TOOL_LUCIDE_ICON: Record<string, React.ComponentType<{ size?: number; stro
   'product-generator': Package,
   'xiaohongshu-generator': BookImage,
   'ai-photo': Camera,
-  'poster-design': Palette,
-  'background-removal': Scissors,
-  'product-page': FileText,
 };
 
 // ===== 工具标题和描述（弱化后台感） =====
@@ -72,9 +66,6 @@ const TOOL_HEADER: Record<string, { title: string; desc: string }> = {
   'product-generator': { title: 'AI 商品图生成器', desc: '生成高质感电商视觉图' },
   'xiaohongshu-generator': { title: '小红书封面生成器', desc: '一键生成爆款封面' },
   'ai-photo': { title: 'AI 写真生成器', desc: '生成氛围感写真大片' },
-  'poster-design': { title: 'AI 海报设计器', desc: '生成营销海报与品牌视觉图' },
-  'background-removal': { title: 'AI 智能抠图', desc: '快速去背景，生成白底图' },
-  'product-page': { title: 'AI 商品详情页生成器', desc: '自动生成电商详情页长图' },
 };
 
 // ===== 工具布局 ===== (CSS class suffix for canvas image sizing)
@@ -82,9 +73,6 @@ const TOOL_SIZE: Record<string, string> = {
   'product-generator': 'product',
   'xiaohongshu-generator': 'xiaohongshu',
   'ai-photo': 'photo',
-  'poster-design': 'poster',
-  'background-removal': 'default',
-  'product-page': 'default',
 };
 
 // ===== 生成中动态文案 =====
@@ -100,9 +88,6 @@ const TOOL_SHIMMER: Record<string, { w: number; h: number }> = {
   'product-generator': { w: 380, h: 300 },
   'xiaohongshu-generator': { w: 260, h: 380 },
   'ai-photo': { w: 300, h: 400 },
-  'poster-design': { w: 420, h: 300 },
-  'background-removal': { w: 340, h: 340 },
-  'product-page': { w: 360, h: 320 },
 };
 
 export default function CreateWorkbench() {
@@ -492,7 +477,6 @@ export default function CreateWorkbench() {
             </div>
 
             {/* 上传参考图 */}
-            {toolSlug !== 'background-removal' && (
               <div>
                 <div className="os-ws-section-label">参考图 {uploads.length > 0 && `(${uploads.length}/5)`}</div>
                 <div className="os-ws-upload-area">
@@ -520,7 +504,6 @@ export default function CreateWorkbench() {
                   onChange={handleFileSelect}
                 />
               </div>
-            )}
 
             {/* 生成类型 (subtype) */}
             {config.subtypeOptions && config.subtypeOptions.length > 0 && (

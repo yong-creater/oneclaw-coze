@@ -13,9 +13,7 @@ import {
   BookOpen,
   Heart,
   X,
-  Scissors,
   PenTool,
-  Palette, FileText,
   ImagePlus,
   LayoutTemplate,
 } from 'lucide-react';
@@ -35,9 +33,6 @@ const TOOL_ROUTES: Record<string, string> = {
   'product-generator': 'product',
   'xiaohongshu-generator': 'xiaohongshu',
   'ai-photo': 'aiphoto',
-  'background-removal': 'removebg',
-  'product-page': 'detail',
-  'poster-design': 'poster',
 };
 
 // ===== 跳转上下文存储 key =====
@@ -101,30 +96,6 @@ const TOOL_MATCHES: ToolMatch[] = [
     icon: <Heart className="w-4 h-4" />,
     keywords: ['写真', '人像', '肖像', '自拍', '头像', '氛围感', '大片', '证件照', '形象照', '个人照'],
     description: '一键生成氛围感写真大片，朋友圈C位担当',
-  },
-  {
-    slug: 'background-removal',
-    name: 'AI智能抠图',
-    type: 'removebg',
-    icon: <Scissors className="w-4 h-4" />,
-    keywords: ['抠图', '去背景', '去底', '透明底', '白底图', '换背景', '抠人', '抠产品', '批量抠图'],
-    description: '一键智能抠图，3秒出电商白底图和证件照',
-  },
-  {
-    slug: 'product-page',
-    name: '商品详情页生成器',
-    type: 'detail',
-    icon: <FileText className="w-4 h-4" />,
-    keywords: ['详情页', '详情', '长图', '卖点', '规格', '参数', '详情页设计', '产品详情', '宝贝详情'],
-    description: '自动生成电商详情长图和卖点排版',
-  },
-  {
-    slug: 'poster-design',
-    name: '海报设计生成器',
-    type: 'poster',
-    icon: <Palette className="w-4 h-4" />,
-    keywords: ['海报', '海报设计', '宣传图', '活动海报', '品牌海报', '促销海报', '节日海报', '音乐节', '创意海报'],
-    description: '一键生成品牌宣传海报和活动海报',
   },
 ];
 
@@ -273,9 +244,6 @@ export default function HomePage() {
       'product-generator': { style: 'premium', ratio: '1:1', count: '4' },
       'xiaohongshu-generator': { style: 'fresh', ratio: '3:4', count: '4' },
       'ai-photo': { style: 'luxury', ratio: '3:4', count: '6' },
-      'background-removal': { style: '', ratio: '1:1', count: '1' },
-      'poster-design': { style: 'minimal', ratio: '3:4', count: '2' },
-      'product-page': { style: 'premium', ratio: '2:3', count: '1' },
     };
     const rec = map[tool.slug] ? { ...map[tool.slug] } : { style: 'premium', ratio: '3:4', count: '4' };
     // 根据用户输入动态调整 style

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Package, Camera, FileText, Scissors, Image as ImageIcon, Sparkles, X } from 'lucide-react';
+import { Search, Package, Camera, FileText, Sparkles, X } from 'lucide-react';
 import { getToolWorkflow } from '@/lib/tool-workflow-config';
 
 interface UtilityTool {
@@ -46,27 +46,6 @@ const TOOL_META: Record<string, {
     icon: FileText,
     sortOrder: 3,
   },
-  'product-poster': {
-    cover: '/case-lipstick-main.png',
-    valueProp: '生成营销海报与品牌视觉图',
-    tags: ['营销', '海报'],
-    icon: ImageIcon,
-    sortOrder: 4,
-  },
-  'product-page': {
-    cover: '/case-lipstick-main.png',
-    valueProp: '自动生成电商详情页长图',
-    tags: ['电商', '详情页'],
-    icon: FileText,
-    sortOrder: 5,
-  },
-  'background-removal': {
-    cover: '/case-ecommerce.jpg',
-    valueProp: '快速去背景，生成白底图',
-    tags: ['抠图', '白底图'],
-    icon: Scissors,
-    sortOrder: 6,
-  },
 };
 
 export default function ToolsPage() {
@@ -101,8 +80,9 @@ export default function ToolsPage() {
       .catch(() => {});
   }, []);
 
-  // 按 sortOrder 排序，核心工具优先
-  const sortedTools = [...tools].sort((a, b) => {
+  // 按 sortOrder 排序，核心工具优先；只保留3个已知工具
+  const ALLOWED_SLUGS = new Set(Object.keys(TOOL_META));
+  const sortedTools = [...tools].filter(t => ALLOWED_SLUGS.has(t.slug)).sort((a, b) => {
     const aOrder = TOOL_META[a.slug]?.sortOrder ?? 99;
     const bOrder = TOOL_META[b.slug]?.sortOrder ?? 99;
     return aOrder - bOrder;
