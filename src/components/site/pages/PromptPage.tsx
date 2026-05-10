@@ -1,269 +1,330 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { Search, Star, Eye, Heart, Sparkles, SlidersHorizontal, X } from 'lucide-react';
+import { getInspirations, getInspirationCategories } from '@/lib/tool-workflow-config';
+import type { InspirationItem } from '@/lib/tool-workflow-config';
 import { useRouter } from 'next/navigation';
-import {
-  Search, Wand2, Star, Eye, Heart,
-  ShoppingBag, BookOpen, Camera, Image as ImageIcon, LayoutTemplate, Layers,
-  Sparkles, SlidersHorizontal, FolderOpen
-} from 'lucide-react';
-import { getInspirations, getInspirationCategories, type InspirationItem } from '@/lib/tool-workflow-config';
 
-// 展示分类配置
-const DISPLAY_CATEGORIES = [
-  { key: 'all', label: '全部', icon: Sparkles, color: '#7C6CFF' },
-  { key: '商品图', label: '商品图', icon: ShoppingBag, color: '#FF6B6B' },
-  { key: '小红书', label: '小红书', icon: BookOpen, color: '#FF6B9D' },
-  { key: 'AI写真', label: 'AI写真', icon: Camera, color: '#7B61FF' },
-  { key: '海报', label: '海报', icon: ImageIcon, color: '#5B8CFF' },
-  { key: '抠图', label: '抠图', icon: Layers, color: '#8B5CF6' },
-  { key: '详情页', label: '详情页', icon: LayoutTemplate, color: '#5B8CFF' },
-];
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+interface PromptItem {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  tags: string[] | null;
+  uses: number;
+  likes: number;
+  views: number;
+  image: string | null;
+  style: string | null;
+  tool_slug: string | null;
+  is_featured: boolean;
+}
 
-export default function PromptPage() {
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
+const CATEGORY_COLORS: Record<string, { bg: string; text: string; badge: string }> = {
+  '商品图': { bg: 'from-orange-400 to-amber-500', text: 'text-orange-600', badge: 'bg-orange-500' },
+  '小红书': { bg: 'from-rose-400 to-pink-500', text: 'text-rose-600', badge: 'bg-rose-500' },
+  'AI写真': { bg: 'from-violet-400 to-purple-500', text: 'text-violet-600', badge: 'bg-violet-500' },
+  '海报设计': { bg: 'from-blue-400 to-indigo-500', text: 'text-blue-600', badge: 'bg-blue-500' },
+  '详情页': { bg: 'from-emerald-400 to-teal-500', text: 'text-emerald-600', badge: 'bg-emerald-500' },
+  '抠图': { bg: 'from-purple-400 to-fuchsia-500', text: 'text-purple-600', badge: 'bg-purple-500' },
+  '视频': { bg: 'from-cyan-400 to-sky-500', text: 'text-cyan-600', badge: 'bg-cyan-500' },
+};
+
+const DEFAULT_VISUAL = { bg: 'from-slate-400 to-slate-500', text: 'text-slate-600', badge: 'bg-slate-500' };
+
+const TOOL_SLUG_MAP: Record<string, string> = {
+  'product-generator': '商品图',
+  'xiaohongshu-generator': '小红书',
+  'ai-photo': 'AI写真',
+  'poster-design': '海报设计',
+  'background-removal': '抠图',
+  'product-page': '详情页',
+};
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+export default function InspirationPage() {
   const router = useRouter();
-  const [allInspirations, setAllInspirations] = useState<InspirationItem[]>([]);
+  const [items, setItems] = useState<PromptItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('all');
   const [search, setSearch] = useState('');
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [activeCategory, setActiveCategory] = useState('全部');
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
   const [showFilter, setShowFilter] = useState(false);
+  const [filterStyle, setFilterStyle] = useState('');
 
-  // 加载收藏
+  // Load favorites from localStorage
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('oneclaw_inspiration_favorites');
-      if (saved) setFavorites(new Set(JSON.parse(saved)));
-    } catch { /* ignore */ }
+      const saved = localStorage.getItem('insp_favorites');
+      if (saved) {
+        setFavorites(new Set(JSON.parse(saved)));
+      }
+    } catch {}
   }, []);
 
-  // 保存收藏
-  useEffect(() => {
-    try {
-      localStorage.setItem('oneclaw_inspiration_favorites', JSON.stringify([...favorites]));
-    } catch { /* ignore */ }
-  }, [favorites]);
-
-  // 加载灵感数据
-  useEffect(() => {
-    const data = getInspirations();
-    setAllInspirations(data);
-    setLoading(false);
-  }, []);
-
-  const getCategoryCount = useCallback((catKey: string): number => {
-    if (catKey === 'all') return allInspirations.length;
-    return allInspirations.filter(item => item.categoryLabel === catKey).length;
-  }, [allInspirations]);
-
-  const filtered = allInspirations.filter(item => {
-    if (activeCategory !== 'all' && item.categoryLabel !== activeCategory) return false;
-    if (search) {
-      const s = search.toLowerCase();
-      return (
-        item.title.toLowerCase().includes(s) ||
-        item.desc.toLowerCase().includes(s) ||
-        item.tags.some(t => t.toLowerCase().includes(s))
-      );
-    }
-    return true;
-  });
-
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Save favorites
+  const toggleFavorite = (id: number) => {
     setFavorites(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
+      localStorage.setItem('insp_favorites', JSON.stringify([...next]));
       return next;
     });
   };
 
-  const handleGenerate = (item: InspirationItem) => {
-    const params = new URLSearchParams({
-      prompt: item.title + ' ' + item.desc,
-      type: item.toolSlug,
-    });
+  /* ---- Fetch from API ---- */
+  const fetchItems = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (activeCategory !== '全部') params.set('category', activeCategory);
+      if (search) params.set('search', search);
+      const res = await fetch(`/api/prompts?${params}`);
+      const data = await res.json();
+      if (data.success) {
+        setItems(data.prompts || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch inspirations:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeCategory, search]);
+
+  useEffect(() => { fetchItems(); }, [fetchItems]);
+
+  /* ---- Derived categories from static config ---- */
+  const categories = getInspirationCategories();
+
+  /* ---- Filter items ---- */
+  const filteredItems = items.filter(item => {
+    if (filterStyle && item.style !== filterStyle) return false;
+    return true;
+  });
+
+  /* ---- Generate similar ---- */
+  const handleGenerate = (item: PromptItem) => {
+    const params = new URLSearchParams();
+    if (item.tool_slug) params.set('toolId', item.tool_slug);
+    if (item.content) params.set('prompt', item.content);
     if (item.style) params.set('style', item.style);
-    if (item.ratio) params.set('ratio', item.ratio);
     router.push(`/create?${params.toString()}`);
   };
 
+  /* ---- Extract unique styles ---- */
+  const uniqueStyles = [...new Set(items.map(i => i.style).filter(Boolean) as string[])];
+
+  /* ---- Favorite count ---- */
   const favoriteCount = favorites.size;
 
-  // 获取分类颜色
-  const getCatColor = (catLabel: string): string => {
-    const cat = DISPLAY_CATEGORIES.find(c => c.key === catLabel);
-    return cat?.color || '#7C6CFF';
-  };
-
+  /* ---- Render ---- */
   return (
-    <div className="os-page">
-      <div className="os-content os-insp-page">
-
-        {/* ===== Header ===== */}
-        <div className="os-insp-header animate-fade-slide-up">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="os-insp-header-icon">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="os-h1 !mb-0">灵感案例库</h1>
-              <p className="os-section-desc !mt-1">从优质案例中获取灵感，一键生成同款内容</p>
+              <h1 className="text-2xl font-bold text-slate-800">灵感案例库</h1>
+              <p className="text-sm text-slate-500">看看别人正在生成什么内容，一键生成同款</p>
             </div>
           </div>
-          <button
-            className="os-insp-fav-btn"
-            onClick={() => {
-              if (favoriteCount > 0) setActiveCategory('all');
-            }}
-          >
-            <FolderOpen className={`w-4 h-4 ${favoriteCount > 0 ? 'text-amber-500' : ''}`} />
-            <span>我的收藏</span>
-            {favoriteCount > 0 && <span className="os-insp-fav-badge">{favoriteCount}</span>}
+          <button className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 hover:border-purple-300 transition-colors shadow-sm">
+            <Star className="w-4 h-4 text-amber-400" />
+            <span className="text-sm font-medium text-slate-700">我的收藏</span>
+            {favoriteCount > 0 && (
+              <span className="text-xs bg-purple-500 text-white rounded-full px-1.5 py-0.5 min-w-[20px] text-center">{favoriteCount}</span>
+            )}
           </button>
         </div>
 
-        {/* ===== Search + Filter ===== */}
-        <div className="os-insp-search-row animate-fade-slide-up" style={{ animationDelay: '0.05s' }}>
-          <div className="os-insp-search-box">
-            <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+        {/* Search Bar */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="搜索你想生成的内容，例如: 小红书封面、节日海报、AI写真..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="os-insp-search-input"
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="搜索你想生成的内容，例如: 商品图、小红书、AI写真..."
+              className="w-full pl-10 pr-4 py-2.5 bg-white border-2 border-slate-200 rounded-xl text-sm hover:border-purple-300 focus:outline-none focus:border-purple-500 transition-colors"
             />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
+                <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
+              </button>
+            )}
           </div>
           <button
-            className={`os-insp-filter-btn ${showFilter ? 'os-insp-filter-btn-active' : ''}`}
             onClick={() => setShowFilter(!showFilter)}
+            className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl border-2 text-sm transition-colors ${showFilter ? 'border-purple-400 bg-purple-50 text-purple-600' : 'border-slate-200 bg-white text-slate-600 hover:border-purple-300'}`}
           >
             <SlidersHorizontal className="w-4 h-4" />
-            <span>筛选</span>
+            筛选
           </button>
         </div>
 
-        {/* ===== Category Tabs ===== */}
-        <div className="os-insp-tabs-row animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
-          <div className="os-insp-tabs-scroll">
-            {DISPLAY_CATEGORIES.map(cat => {
-              const isActive = activeCategory === cat.key;
-              const count = getCategoryCount(cat.key);
-              if (count === 0 && cat.key !== 'all') return null;
-              return (
-                <button
-                  key={cat.key}
-                  onClick={() => setActiveCategory(cat.key)}
-                  className={`os-insp-tab ${isActive ? 'os-insp-tab-active' : ''}`}
-                >
-                  {isActive && <cat.icon className="w-3.5 h-3.5" />}
-                  <span>{cat.label}</span>
-                  <span className="os-insp-tab-count">{count}</span>
-                </button>
-              );
-            })}
-          </div>
+        {/* Category Tags */}
+        <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            onClick={() => setActiveCategory('全部')}
+            className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+              activeCategory === '全部'
+                ? 'bg-gradient-to-r from-[#7C6CFF] to-[#9B87FF] text-white shadow-md shadow-purple-200'
+                : 'bg-white text-slate-600 border border-slate-200 hover:border-purple-300'
+            }`}
+          >
+            全部 {items.length > 0 ? items.length : ''}
+          </button>
+          {categories.map(cat => {
+            const count = cat.count;
+            return (
+              <button
+                key={cat.label}
+                onClick={() => setActiveCategory(cat.label)}
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  activeCategory === cat.label
+                    ? 'bg-gradient-to-r from-[#7C6CFF] to-[#9B87FF] text-white shadow-md shadow-purple-200'
+                    : 'bg-white text-slate-600 border border-slate-200 hover:border-purple-300'
+                }`}
+              >
+                {cat.label} {count}
+              </button>
+            );
+          })}
         </div>
 
-        {/* ===== Loading ===== */}
-        {loading && (
-          <div className="os-insp-loading">
-            <div className="os-insp-spinner" />
-            <p>加载灵感中...</p>
+        {/* Style filter bar */}
+        {showFilter && uniqueStyles.length > 0 && (
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
+            <span className="text-xs text-slate-400 flex-shrink-0">风格:</span>
+            <button
+              onClick={() => setFilterStyle('')}
+              className={`flex-shrink-0 px-3 py-1 rounded-full text-xs transition-all ${
+                !filterStyle ? 'bg-purple-100 text-purple-600' : 'bg-slate-50 text-slate-500 hover:bg-purple-50'
+              }`}
+            >
+              全部
+            </button>
+            {uniqueStyles.map(style => (
+              <button
+                key={style}
+                onClick={() => setFilterStyle(style)}
+                className={`flex-shrink-0 px-3 py-1 rounded-full text-xs transition-all ${
+                  filterStyle === style ? 'bg-purple-100 text-purple-600' : 'bg-slate-50 text-slate-500 hover:bg-purple-50'
+                }`}
+              >
+                {style}
+              </button>
+            ))}
           </div>
         )}
 
-        {/* ===== Empty ===== */}
-        {!loading && filtered.length === 0 && (
-          <div className="os-insp-empty">
-            <div className="os-insp-empty-icon">
-              <Sparkles className="w-8 h-8 text-slate-300" />
-            </div>
-            <p className="text-sm text-slate-400">未找到匹配的灵感案例</p>
+        {/* Card Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[1,2,3,4,5,6,7,8].map(i => (
+              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm animate-pulse">
+                <div className="aspect-[16/10] bg-slate-200" />
+                <div className="p-4 space-y-2">
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-3 bg-slate-100 rounded w-full" />
+                </div>
+              </div>
+            ))}
           </div>
-        )}
-
-        {/* ===== Cards Grid ===== */}
-        {!loading && filtered.length > 0 && (
-          <div className="os-insp-grid">
-            {filtered.map((item, index) => {
-              const catColor = getCatColor(item.categoryLabel);
+        ) : filteredItems.length === 0 ? (
+          <div className="text-center py-20">
+            <Sparkles className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <p className="text-slate-500">暂无灵感内容</p>
+            <p className="text-sm text-slate-400">换个关键词或分类试试？</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredItems.map(item => {
+              const visual = CATEGORY_COLORS[item.category] || DEFAULT_VISUAL;
               const isFav = favorites.has(item.id);
-              const views = item.views || 0;
-              const likes = item.likes || 0;
 
               return (
                 <div
                   key={item.id}
-                  className="os-insp-card-v2 animate-fade-slide-up"
-                  style={{ animationDelay: `${Math.min(index * 0.03, 0.5)}s` }}
+                  className="os-insp-card bg-white rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-200 group"
                 >
                   {/* Cover Image */}
-                  <div className="os-insp-card-cover">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="os-insp-card-img"
-                      loading="lazy"
-                    />
-
-                    {/* Category Badge */}
-                    <span className="os-insp-card-badge" style={{ background: catColor }}>
-                      {item.categoryLabel}
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className={`w-full h-full bg-gradient-to-br ${visual.bg} flex items-center justify-center`}>
+                        <Sparkles className="w-8 h-8 text-white/60" />
+                      </div>
+                    )}
+                    {/* Category badge */}
+                    <span className={`absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-xs font-medium text-white ${visual.badge}`}>
+                      {item.category}
                     </span>
-
-                    {/* Favorite Star */}
+                    {/* Favorite button */}
                     <button
-                      className={`os-insp-card-star ${isFav ? 'os-insp-card-star-active' : ''}`}
-                      onClick={(e) => toggleFavorite(item.id, e)}
+                      onClick={(e) => { e.stopPropagation(); toggleFavorite(item.id); }}
+                      className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center hover:bg-black/50 transition-colors"
                     >
-                      <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-amber-400 text-amber-400' : ''}`} />
+                      <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-amber-400 text-amber-400' : 'text-white'}`} />
                     </button>
-
-                    {/* Hover Overlay */}
-                    <div className="os-insp-card-hover-overlay">
-                      <button className="os-insp-card-cta" onClick={() => handleGenerate(item)}>
-                        <Wand2 className="w-4 h-4" />
-                        <span>生成同款</span>
-                      </button>
-                    </div>
                   </div>
 
-                  {/* Card Body */}
-                  <div className="os-insp-card-body">
-                    <h3 className="os-insp-card-title">{item.title}</h3>
-                    <p className="os-insp-card-desc">{item.desc}</p>
+                  {/* Content */}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-sm text-slate-800 line-clamp-1 mb-1">{item.title}</h3>
+                    <p className="text-xs text-slate-500 line-clamp-2 mb-2 leading-relaxed">{item.content}</p>
 
                     {/* Tags */}
                     {item.tags && item.tags.length > 0 && (
-                      <div className="os-insp-card-tags">
-                        {item.tags.slice(0, 3).map((tag, i) => (
-                          <span key={i} className="os-insp-card-tag">#{tag}</span>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {item.tags.slice(0, 3).map(tag => (
+                          <span key={tag} className="text-xs text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded">
+                            #{tag}
+                          </span>
                         ))}
+                        {item.tags.length > 3 && (
+                          <span className="text-xs text-slate-400">+{item.tags.length - 3}</span>
+                        )}
                       </div>
                     )}
 
                     {/* Stats */}
-                    <div className="os-insp-card-stats">
-                      <span className="os-insp-card-stat">
-                        <Eye className="w-3.5 h-3.5" />
-                        {views}
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="flex items-center gap-1 text-xs text-slate-400">
+                        <Eye className="w-3 h-3" /> {item.views || 0}
                       </span>
-                      <span className="os-insp-card-stat">
-                        <Heart className="w-3.5 h-3.5" />
-                        {likes}
+                      <span className="flex items-center gap-1 text-xs text-slate-400">
+                        <Heart className="w-3 h-3" /> {item.likes || 0}
                       </span>
                     </div>
 
-                    {/* Generate Button */}
+                    {/* Generate button */}
                     <button
                       onClick={() => handleGenerate(item)}
-                      className="os-insp-card-gen-btn"
+                      className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-[#7C6CFF] to-[#9B87FF] text-white text-sm font-medium hover:shadow-md hover:shadow-purple-200 transition-all active:scale-[0.98]"
                     >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      <span>生成同款</span>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      生成同款
                     </button>
                   </div>
                 </div>

@@ -24,6 +24,11 @@ export async function PUT(
     if (body.tags !== undefined) updateData.tags = Array.isArray(body.tags) ? body.tags : [];
     if (body.is_featured !== undefined) updateData.is_featured = !!body.is_featured;
     if (body.status !== undefined) updateData.status = body.status;
+    if (body.tool_slug !== undefined) updateData.tool_slug = body.tool_slug || null;
+    if (body.image !== undefined) updateData.image = body.image || null;
+    if (body.style !== undefined) updateData.style = body.style || null;
+    if (body.views !== undefined) updateData.views = body.views;
+    if (body.likes !== undefined) updateData.likes = body.likes;
     updateData.updated_at = new Date().toISOString();
 
     const { data, error } = await client

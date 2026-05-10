@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
 
     let query = client
       .from('prompts')
-      .select('id, title, content, category, tags, author, uses, likes, is_featured, status, tool_id, created_at, updated_at', { count: 'exact' });
+      .select('id, title, content, category, tags, author, uses, likes, views, is_featured, status, tool_id, tool_slug, image, style, created_at, updated_at', { count: 'exact' });
 
     if (category) query = query.eq('category', category);
     if (status) query = query.eq('status', status);
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const client = getSupabaseClient();
     const body = await request.json();
 
-    const { title, content, category, tags, is_featured, status } = body;
+    const { title, content, category, tags, is_featured, status, tool_slug, image, style } = body;
     if (!title?.trim() || !content?.trim()) {
       return NextResponse.json({ success: false, error: '标题和内容不能为空' }, { status: 400 });
     }
@@ -76,6 +76,10 @@ export async function POST(request: NextRequest) {
       author: 'OneClaw官方',
       uses: 0,
       likes: 0,
+      views: 0,
+      tool_slug: tool_slug || null,
+      image: image || null,
+      style: style || null,
     };
 
     const { data, error } = await client

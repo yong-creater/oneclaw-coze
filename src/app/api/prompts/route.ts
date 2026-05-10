@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     let query = client
       .from('prompts')
-      .select('id, title, content, category, tags, author, uses, created_at, tools(id, name, logo)')
+      .select('id, title, content, category, tags, author, uses, likes, views, image, style, tool_slug, created_at')
       .eq('status', 'published');
 
     if (category) {
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
     }
 
-    query = query.order('uses', { ascending: false }).order('created_at', { ascending: false });
+    query = query.order('is_featured', { ascending: false }).order('uses', { ascending: false }).order('created_at', { ascending: false });
 
     const { data, error } = await query;
 

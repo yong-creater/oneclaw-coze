@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Search, RefreshCw, Star, ChevronLeft, ChevronRight, Eye, EyeOff, Copy } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, RefreshCw, Star, ChevronLeft, ChevronRight, Eye, EyeOff, Copy, ImagePlus, X } from 'lucide-react';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -34,9 +34,12 @@ interface InspirationItem {
   author: string | null;
   uses: number;
   likes: number;
+  views: number;
   is_featured: boolean;
   status: string;
-  tool_id: number | null;
+  tool_slug: string | null;
+  image: string | null;
+  style: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -52,16 +55,25 @@ interface Pagination {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 const CATEGORIES = [
-  { value: '场景描述', label: '场景描述' },
-  { value: '风格迁移', label: '风格迁移' },
-  { value: '角色扮演', label: '角色扮演' },
-  { value: '特效制作', label: '特效制作' },
   { value: '商品图', label: '商品图' },
   { value: '小红书', label: '小红书' },
   { value: 'AI写真', label: 'AI写真' },
   { value: '海报设计', label: '海报设计' },
   { value: '详情页', label: '详情页' },
+  { value: '抠图', label: '抠图' },
+  { value: '场景描述', label: '场景描述' },
+  { value: '风格迁移', label: '风格迁移' },
+  { value: '特效制作', label: '特效制作' },
   { value: '视频', label: '视频' },
+];
+
+const TOOL_SLUGS = [
+  { value: 'product-generator', label: '商品图' },
+  { value: 'xiaohongshu-generator', label: '小红书' },
+  { value: 'ai-photo', label: 'AI写真' },
+  { value: 'poster-design', label: '海报设计' },
+  { value: 'background-removal', label: '抠图' },
+  { value: 'product-page', label: '详情页' },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -70,11 +82,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   'AI写真': 'bg-violet-100 text-violet-700',
   '海报设计': 'bg-blue-100 text-blue-700',
   '详情页': 'bg-emerald-100 text-emerald-700',
+  '抠图': 'bg-purple-100 text-purple-700',
   '视频': 'bg-cyan-100 text-cyan-700',
   '场景描述': 'bg-amber-100 text-amber-700',
   '风格迁移': 'bg-pink-100 text-pink-700',
-  '角色扮演': 'bg-indigo-100 text-indigo-700',
-  '特效制作': 'bg-purple-100 text-purple-700',
+  '特效制作': 'bg-indigo-100 text-indigo-700',
 };
 
 const STATUS_OPTIONS = [
@@ -90,6 +102,9 @@ const DEFAULT_FORM = {
   tags: '',
   is_featured: false,
   status: 'published' as 'published' | 'draft',
+  tool_slug: '',
+  image: '',
+  style: '',
 };
 
 /* ------------------------------------------------------------------ */
@@ -108,6 +123,10 @@ export default function AdminInspirationPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
+
+  // Image upload
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Delete
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -139,6 +158,47 @@ export default function AdminInspirationPage() {
 
   useEffect(() => { fetchItems(1); }, [fetchItems]);
 
+  /* ---- Image upload ---- */
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate
+    if (!file.type.startsWith('image/')) {
+      alert('请上传图片文件');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('图片大小不能超过 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'inspiration');
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        setForm(f => ({ ...f, image: data.data.url }));
+      } else {
+        alert(data.error || '上传失败');
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('上传失败，请重试');
+    } finally {
+      setUploading(false);
+      // Reset file input
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   /* ---- Form handlers ---- */
   const openCreate = () => {
     setEditingId(null);
@@ -155,6 +215,9 @@ export default function AdminInspirationPage() {
       tags: Array.isArray(item.tags) ? item.tags.join(', ') : '',
       is_featured: item.is_featured,
       status: item.status as 'published' | 'draft',
+      tool_slug: item.tool_slug || '',
+      image: item.image || '',
+      style: item.style || '',
     });
     setDialogOpen(true);
   };
@@ -170,6 +233,9 @@ export default function AdminInspirationPage() {
         tags: form.tags.split(/[,，]/).map(t => t.trim()).filter(Boolean),
         is_featured: form.is_featured,
         status: form.status,
+        tool_slug: form.tool_slug || null,
+        image: form.image || null,
+        style: form.style || null,
       };
       const url = editingId ? `/api/admin/prompts/${editingId}` : '/api/admin/prompts';
       const method = editingId ? 'PUT' : 'POST';
@@ -308,63 +374,87 @@ export default function AdminInspirationPage() {
           {items.map(item => (
             <Card key={item.id} className="group relative hover:shadow-md transition-shadow">
               <CardContent className="p-4">
-                {/* Top row: category + status + featured + actions */}
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Badge className={`text-xs ${CATEGORY_COLORS[item.category] || 'bg-slate-100 text-slate-700'}`}>
-                      {item.category}
-                    </Badge>
-                    <button onClick={() => toggleStatus(item)} className="cursor-pointer" title={item.status === 'published' ? '点击下架' : '点击发布'}>
-                      {item.status === 'published' ? (
-                        <Badge className="text-xs cursor-pointer bg-green-100 text-green-700 hover:bg-green-200">
-                          <Eye className="w-3 h-3 mr-0.5" /> 已发布
-                        </Badge>
-                      ) : (
-                        <Badge className="text-xs cursor-pointer bg-slate-100 text-slate-500 hover:bg-slate-200">
-                          <EyeOff className="w-3 h-3 mr-0.5" /> 草稿
-                        </Badge>
-                      )}
-                    </button>
-                    <button onClick={() => toggleFeatured(item)} className="cursor-pointer" title={item.is_featured ? '取消推荐' : '设为推荐'}>
-                      <Star className={`w-4 h-4 ${item.is_featured ? 'fill-amber-400 text-amber-400' : 'text-slate-300 hover:text-amber-300'}`} />
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyContent(item.content)} title="复制内容">
-                      <Copy className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(item)} title="编辑">
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => setDeleteId(item.id)} title="删除">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Title */}
-                <h3 className="font-medium text-sm line-clamp-1 mb-1">{item.title}</h3>
-
-                {/* Content preview */}
-                <p className="text-xs text-muted-foreground line-clamp-2 mb-2 leading-relaxed">
-                  {item.content}
-                </p>
-
-                {/* Bottom row: tags + stats */}
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-wrap gap-1">
-                    {(item.tags || []).slice(0, 3).map((tag: string) => (
-                      <span key={tag} className="text-xs text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded">
-                        {tag}
-                      </span>
-                    ))}
-                    {(item.tags || []).length > 3 && (
-                      <span className="text-xs text-slate-400">+{(item.tags || []).length - 3}</span>
+                <div className="flex gap-3">
+                  {/* Thumbnail */}
+                  <div className="w-20 h-20 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                    {item.image ? (
+                      <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300">
+                        <ImagePlus className="w-6 h-6" />
+                      </div>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                    {item.uses || 0} 次使用 · {item.likes || 0} 赞
-                  </span>
+
+                  <div className="flex-1 min-w-0">
+                    {/* Top row: category + status + featured + actions */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-2">
+                        <Badge className={`text-xs ${CATEGORY_COLORS[item.category] || 'bg-slate-100 text-slate-700'}`}>
+                          {item.category}
+                        </Badge>
+                        <button onClick={() => toggleStatus(item)} className="cursor-pointer" title={item.status === 'published' ? '点击下架' : '点击发布'}>
+                          {item.status === 'published' ? (
+                            <Badge className="text-xs cursor-pointer bg-green-100 text-green-700 hover:bg-green-200">
+                              <Eye className="w-3 h-3 mr-0.5" /> 已发布
+                            </Badge>
+                          ) : (
+                            <Badge className="text-xs cursor-pointer bg-slate-100 text-slate-500 hover:bg-slate-200">
+                              <EyeOff className="w-3 h-3 mr-0.5" /> 草稿
+                            </Badge>
+                          )}
+                        </button>
+                        <button onClick={() => toggleFeatured(item)} className="cursor-pointer" title={item.is_featured ? '取消推荐' : '设为推荐'}>
+                          <Star className={`w-4 h-4 ${item.is_featured ? 'fill-amber-400 text-amber-400' : 'text-slate-300 hover:text-amber-300'}`} />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyContent(item.content)} title="复制内容">
+                          <Copy className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(item)} title="编辑">
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500 hover:text-red-600" onClick={() => setDeleteId(item.id)} title="删除">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="font-medium text-sm line-clamp-1 mb-1">{item.title}</h3>
+
+                    {/* Tool slug + style */}
+                    <div className="flex items-center gap-2 mb-1">
+                      {item.tool_slug && (
+                        <span className="text-xs text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded">
+                          {TOOL_SLUGS.find(t => t.value === item.tool_slug)?.label || item.tool_slug}
+                        </span>
+                      )}
+                      {item.style && (
+                        <span className="text-xs text-violet-500 bg-violet-50 px-1.5 py-0.5 rounded">
+                          {item.style}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Bottom row: tags + stats */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {(item.tags || []).slice(0, 3).map((tag: string) => (
+                          <span key={tag} className="text-xs text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded">
+                            {tag}
+                          </span>
+                        ))}
+                        {(item.tags || []).length > 3 && (
+                          <span className="text-xs text-slate-400">+{(item.tags || []).length - 3}</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                        {item.views || 0} 浏览 · {item.likes || 0} 赞 · {item.uses || 0} 使用
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -420,7 +510,7 @@ export default function AdminInspirationPage() {
               />
             </div>
 
-            {/* 分类 + 状态 */}
+            {/* 分类 + 关联工具 */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium mb-1.5 block">分类</label>
@@ -434,6 +524,33 @@ export default function AdminInspirationPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">关联工具</label>
+                <Select value={form.tool_slug} onValueChange={v => setForm(f => ({ ...f, tool_slug: v }))}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="选择工具" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">无</SelectItem>
+                    {TOOL_SLUGS.map(t => (
+                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* 风格 + 状态 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-1.5 block">风格</label>
+                <Input
+                  value={form.style}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, style: e.target.value }))}
+                  placeholder="例：lifestyle, korean-fresh"
+                  className="w-full"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium mb-1.5 block">状态</label>
@@ -453,6 +570,51 @@ export default function AdminInspirationPage() {
               </div>
             </div>
 
+            {/* 封面图上传 */}
+            <div>
+              <label className="text-sm font-medium mb-1.5 block">封面图</label>
+              <div className="flex items-start gap-3">
+                {form.image ? (
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden group/img">
+                    <img src={form.image} alt="封面" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setForm(f => ({ ...f, image: '' }))}
+                      className="absolute top-1 right-1 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover/img:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="w-24 h-24 rounded-lg border-2 border-dashed border-slate-300 hover:border-orange-400 flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-orange-400 transition-colors"
+                  >
+                    <ImagePlus className="w-6 h-6" />
+                    <span className="text-xs">{uploading ? '上传中' : '上传'}</span>
+                  </button>
+                )}
+                <div className="flex-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <p className="text-xs text-muted-foreground">支持 JPG、PNG、WebP，建议 16:10 比例，不超过 5MB</p>
+                  <Input
+                    value={form.image}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, image: e.target.value }))}
+                    placeholder="或输入图片 URL"
+                    className="mt-2 text-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* 灵感内容 */}
             <div>
               <label className="text-sm font-medium mb-1.5 block">灵感内容 <span className="text-red-400">*</span></label>
@@ -460,7 +622,7 @@ export default function AdminInspirationPage() {
                 value={form.content}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm(f => ({ ...f, content: e.target.value }))}
                 placeholder="输入灵感提示词内容，描述你想要生成的画面效果..."
-                rows={5}
+                rows={4}
                 className="w-full resize-none"
               />
             </div>
