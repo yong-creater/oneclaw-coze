@@ -164,11 +164,15 @@ export default function CreateWorkbench() {
   // --- Init ---
   useEffect(() => {
     const ctx = getContext();
-    const urlSlug = searchParams.get('tool');
+    // URL 参数：优先 tool，其次 type/toolId（灵感页面/首页用 type 或 toolId）
+    const urlSlug = searchParams.get('tool') || searchParams.get('type') || searchParams.get('toolId');
+    const urlPrompt = searchParams.get('prompt');
     const slug = ctx?.matchedTool || urlSlug || 'product-generator';
     setToolSlug(slug);
 
-    if (ctx?.prompt) setInputText(ctx.prompt);
+    // Prompt 来源：context > URL 参数
+    const effectivePrompt = ctx?.prompt || urlPrompt || '';
+    if (effectivePrompt) setInputText(effectivePrompt);
     if (ctx?.images?.length) {
       setUploads(ctx.images.map((url: string, i: number) => ({ id: `ctx-${i}`, url, name: `参考图${i + 1}` })));
     }
@@ -179,6 +183,13 @@ export default function CreateWorkbench() {
       setRatio(toolConf.defaultRatio);
       if (toolConf.styleOptions.length > 0) setSelectedStyle(toolConf.styleOptions[0].value);
       if (toolConf.steps[1]?.options?.length) setSelectedSubtype(toolConf.steps[1].options[0].value);
+    }
+
+    // 当 URL 带 prompt 参数时（来自灵感页面），标记自动生成
+    if (urlPrompt && !parsedCtx.current) {
+      parsedCtx.current = { shouldAuto: true, prompt: urlPrompt };
+    } else if (urlPrompt && parsedCtx.current && !parsedCtx.current.shouldAuto) {
+      parsedCtx.current.shouldAuto = true;
     }
   }, [searchParams, getContext]);
 
