@@ -330,42 +330,54 @@ export default function CreateWorkbench() {
 
   // ===== 保存到作品库 =====
   const handleSave = async () => {
-    if (images.length === 0) return;
     if (!authenticated) {
       setShowLoginModal(true);
       return;
     }
+    if (images.length === 0) {
+      alert('暂无可保存的作品');
+      return;
+    }
     try {
+      const payload = {
+        tool_id: toolSlug,
+        tool_name: config?.name || toolSlug,
+        tool_type: slugToGenType(toolSlug),
+        title: inputText.slice(0, 50) || config?.name || 'AI生成作品',
+        thumbnail: images[0]?.url || '',
+        input_params: {
+          prompt: inputText,
+          style: selectedStyle,
+          subtype: selectedSubtype,
+          ratio,
+          count,
+        },
+        output_content: {
+          image_urls: images.map((i: GeneratedImage) => i.url),
+        },
+      };
+      console.log('[Save] payload:', payload);
       const res = await fetch('/api/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tool_id: toolSlug,
-          tool_name: config.name,
-          tool_type: slugToGenType(toolSlug),
-          title: inputText.slice(0, 50) || config.name,
-          thumbnail: images[0]?.url,
-          input_params: {
-            prompt: inputText,
-            style: selectedStyle,
-            subtype: selectedSubtype,
-            ratio,
-            count,
-          },
-          output_content: {
-            image_urls: images.map(i => i.url),
-          },
-        }),
+        body: JSON.stringify(payload),
+        credentials: 'include',
       });
       const data = await res.json();
+      console.log('[Save] response:', res.status, data);
       if (res.ok && data.success) {
         setSaved(true);
         setShowToast(true);
         setTimeout(() => setShowToast(false), 2500);
       } else if (res.status === 401) {
         setShowLoginModal(true);
+      } else {
+        alert(data.error || '保存失败，请稍后重试');
       }
-    } catch { /* silently fail */ }
+    } catch (err) {
+      console.error('保存请求异常:', err);
+      alert('网络异常，请稍后重试');
+    }
   };
 
   // ===== 渲染 =====
