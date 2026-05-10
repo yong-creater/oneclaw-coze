@@ -104,11 +104,9 @@ export async function sendVerificationEmail(
   const template = getVerificationEmailTemplate(code);
   
   if (hasResendConfig) {
-    console.log(`[Email] 使用 Resend 发送验证码到 ${to}: ${code}`);
     const result = await sendEmailViaResend(to, template.subject, template.html);
     
     if (result.success) {
-      console.log(`[Resend] 验证码已发送至 ${to}, MessageId: ${result.messageId}`);
       return { success: true, configured: true };
     } else {
       console.error(`[Resend] 发送失败:`, result.error);
@@ -117,7 +115,6 @@ export async function sendVerificationEmail(
   }
   
   // 未配置邮件服务：模拟发送
-  console.log(`[Email] 未配置 Resend，模拟发送验证码到 ${to}: ${code}`);
   return { success: true, configured: false };
 }
 

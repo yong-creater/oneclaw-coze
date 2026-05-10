@@ -63,7 +63,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, data });
+  // 脱敏处理：POST 创建后返回的数据也需要隐藏 API Key
+  const sanitized = data ? {
+    ...data,
+    api_key: data.api_key ? `${data.api_key.slice(0, 8)}...${data.api_key.slice(-4)}` : null,
+    has_api_key: !!data.api_key,
+  } : data;
+
+  return NextResponse.json({ success: true, data: sanitized });
 }
 
 export async function PUT(request: NextRequest) {
@@ -101,7 +108,14 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true, data });
+  // 脱敏处理：PUT 更新后返回的数据也需要隐藏 API Key
+  const sanitized = data ? {
+    ...data,
+    api_key: data.api_key ? `${data.api_key.slice(0, 8)}...${data.api_key.slice(-4)}` : null,
+    has_api_key: !!data.api_key,
+  } : data;
+
+  return NextResponse.json({ success: true, data: sanitized });
 }
 
 export async function DELETE(request: NextRequest) {

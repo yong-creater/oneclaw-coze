@@ -190,7 +190,6 @@ export async function streamWithModel(
       const config = await getProviderConfig(providerSlug);
       if (config) {
         const useModelName = modelName || fallbackModel;
-        console.log(`[LLMSelector] 使用提供商: ${providerSlug} / ${useModelName}`);
         const isCoze = providerSlug.includes('coze');
 
         if (isCoze) {
@@ -229,7 +228,6 @@ export async function streamWithModel(
     try {
       const config = await getToolModelConfig(toolId);
       if (config) {
-        console.log(`[LLMSelector] 工具 ${toolId} 使用模型: ${config.providerSlug} / ${config.modelName}`);
         const isCoze = config.providerSlug.includes('coze');
 
         if (isCoze) {
@@ -270,7 +268,6 @@ export async function streamWithModel(
   }
 
   // 无 toolId 时的 fallback：根据模型名推断 provider
-  console.log(`[LLMSelector] 无 toolId，使用默认模型: ${fallbackModel}`);
   const client = createCozeLLMClient(customHeaders);
   const llmConfig = {
     model: fallbackModel,
@@ -324,7 +321,6 @@ export async function invokeWithModel(
       const config = await getProviderConfig(providerSlug);
       if (config) {
         const useModelName = modelName || fallbackModel;
-        console.log(`[LLMSelector] 使用提供商: ${providerSlug} / ${useModelName}`);
         const isCoze = providerSlug.includes('coze');
 
         if (isCoze) {
@@ -356,7 +352,6 @@ export async function invokeWithModel(
     try {
       const config = await getToolModelConfig(toolId);
       if (config) {
-        console.log(`[LLMSelector] 工具 ${toolId} 使用模型: ${config.providerSlug} / ${config.modelName}`);
         const isCoze = config.providerSlug.includes('coze');
 
         if (isCoze) {
@@ -386,7 +381,6 @@ export async function invokeWithModel(
   }
 
   // 无 toolId 时的 fallback
-  console.log(`[LLMSelector] 无 toolId，使用默认模型: ${fallbackModel}`);
   const client = createCozeLLMClient(customHeaders);
   const response = await client.invoke(messages as Message[], {
     model: fallbackModel,

@@ -118,15 +118,11 @@ export async function authenticateAdmin(username: string, password: string): Pro
   }
   
   if (!user.is_active) {
-    console.log('[Auth] User is not active:', username);
     return null;
   }
   
-  console.log('[Auth] Verifying password for:', username, 'hash:', user.password_hash.substring(0, 20) + '...');
   const isValid = await verifyPassword(password, user.password_hash);
-  console.log('[Auth] Password verification result:', isValid);
   if (!isValid) {
-    console.log('[Auth] Password invalid for user:', username);
     return null;
   }
   
@@ -161,14 +157,12 @@ export async function authenticateAdmin(username: string, password: string): Pro
 export async function validateSession(token: string): Promise<AdminUser | null> {
   const decoded = await verifyToken(token);
   if (!decoded) {
-    console.log('[Auth] Token verification failed');
     return null;
   }
   
   // 检查环境标识是否匹配（防止跨环境token滥用）
   const currentEnv = process.env.COZE_PROJECT_ENV || process.env.NODE_ENV || 'development';
   if (decoded.env && decoded.env !== currentEnv) {
-    console.log(`[Auth] Environment mismatch: token=${decoded.env}, current=${currentEnv}`);
     return null;
   }
   
@@ -182,13 +176,11 @@ export async function validateSession(token: string): Promise<AdminUser | null> 
     .single();
   
   if (error || !session) {
-    console.log('[Auth] Session not found in DB:', error?.message);
     return null;
   }
   
   // 检查是否过期
   if (new Date(session.expires_at) < new Date()) {
-    console.log('[Auth] Session expired');
     // 删除过期会话
     await client.from('admin_sessions').delete().eq('token', token);
     return null;
@@ -202,11 +194,8 @@ export async function validateSession(token: string): Promise<AdminUser | null> 
     .single();
   
   if (userError || !user || !user.is_active) {
-    console.log('[Auth] User not found or inactive:', userError?.message);
     return null;
   }
-  
-  console.log('[Auth] Session validated for user:', user.username);
   
   return {
     id: user.id,

@@ -201,7 +201,6 @@ async function generateWithOpenAICompatible(
 
     // 文生图通用函数
     const textToImage = async (): Promise<{ success: boolean; imageUrls?: string[]; error?: string }> => {
-      console.log('[ModelSelector] 文生图模式，使用 /images/generations 端点');
       const requestBody: Record<string, any> = {
         model: model,
         prompt: prompt,
@@ -243,7 +242,6 @@ async function generateWithOpenAICompatible(
 
     if (imageInput) {
       // ===== 图生图：使用 /images/edits + multipart/form-data =====
-      console.log(`[ModelSelector] 图生图模式，模型: ${model}，使用 /images/edits 端点`);
 
       // 处理图片来源：URL → 下载 → Buffer；base64 → 直接解码
       let imageBuffer: Buffer;
@@ -251,7 +249,6 @@ async function generateWithOpenAICompatible(
 
       if (imageInput.startsWith('http://') || imageInput.startsWith('https://')) {
         // URL 图片：先下载再转 Buffer
-        console.log('[ModelSelector] 检测到URL图片，先下载:', imageInput.substring(0, 80));
         const imgResp = await fetch(imageInput, { redirect: 'follow' });
         if (!imgResp.ok) {
           console.error('[ModelSelector] 参考图片下载失败，状态:', imgResp.status);
@@ -352,7 +349,6 @@ async function uploadBase64ToStorage(base64Data: string, filename: string): Prom
     if (uploadResp.ok) {
       const result = await uploadResp.json();
       if (result.success && result.data?.url) {
-        console.log('[ModelSelector] base64图片已上传到存储:', result.data.url.substring(0, 80));
         return result.data.url;
       }
     }
@@ -403,7 +399,6 @@ export async function generateWithModel(
     try {
       const config = await getToolModelConfig(toolId);
       if (config) {
-        console.log(`[ModelSelector] 工具 ${toolId} 使用模型: ${config.providerSlug} / ${config.modelName}`);
         
         const isCoze = config.providerSlug.includes('coze');
         
@@ -436,7 +431,6 @@ export async function generateWithModel(
               
               if (imageInput.startsWith('data:') || (!imageInput.startsWith('http://') && !imageInput.startsWith('https://'))) {
                 // base64 图片需要先上传到存储获取 URL
-                console.log('[ModelSelector] Coze图生图: 检测到base64图片，先上传到存储...');
                 const base64Data = imageInput.startsWith('data:') 
                   ? imageInput.split(',')[1] || imageInput 
                   : imageInput;
@@ -450,7 +444,6 @@ export async function generateWithModel(
               }
               
               if (imageUrl) {
-                console.log('[ModelSelector] Coze图生图: 传入参考图片URL，模型将保持商品形态');
                 requestParams.image = imageUrl;
               }
             }
@@ -481,7 +474,6 @@ export async function generateWithModel(
   }
 
   // 无 toolId 时的 fallback 逻辑
-  console.log(`[ModelSelector] 无 toolId，使用默认模型: ${model}`);
   
   // 根据模型名推断 provider
   const isCozeModel = model.includes('coze') || model.includes('doubao') || model.includes('seedream');

@@ -261,17 +261,10 @@ export default function UtilityToolsPage() {
         credentials: 'include', // 包含 cookie
       });
       const data = await res.json();
-      console.log('[fetchProviders] API 返回数据:', data);
       
       // 直接使用 API 返回的 providers（所有已配置的模型提供商）
       // API 已经按类型分组：image, llm, video, audio
       if (data.success && data.providers) {
-        console.log('[fetchProviders] 使用 API 返回的 providers:', {
-          image: data.providers.image?.length || 0,
-          llm: data.providers.llm?.length || 0,
-          video: data.providers.video?.length || 0,
-          audio: data.providers.audio?.length || 0,
-        });
         setProviders(data.providers);
       } else if (data.error) {
         console.error('获取模型提供商失败:', data.error);
@@ -486,7 +479,6 @@ export default function UtilityToolsPage() {
         body: formData,
       });
       const data = await res.json();
-      console.log('[封面上传] 返回数据:', data);
       
       // 后端返回 { success: true, data: { url, path, ... } }
       if (data.success && data.data?.url) {

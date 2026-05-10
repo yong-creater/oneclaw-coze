@@ -315,9 +315,7 @@ export default function CreateWorkbench() {
     // URL 带 prompt 时自动生成
     if (urlPrompt && !ctx?.shouldAuto) {
       parsedCtx.current.shouldAuto = true;
-      console.log('[Init] shouldAuto set to true, urlPrompt:', urlPrompt);
     }
-    console.log('[Init] done, slug:', slug, 'inputText will be:', ctx?.prompt || urlPrompt || '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
@@ -534,14 +532,6 @@ export default function CreateWorkbench() {
   // ===== 任务驱动生成 =====
   const handleGenerate = async () => {
     const p = genParamsRef.current;
-    console.log('[HandleGenerate] called', {
-      inputText: p.inputText,
-      uploads: p.uploads.length,
-      step,
-      user: !!user,
-      loading,
-      dailyQuota,
-    });
     if (!p.inputText && p.uploads.length === 0) {
       setErrorMsg('请先输入描述或上传参考图片');
       return;
@@ -550,7 +540,6 @@ export default function CreateWorkbench() {
 
     // 登录拦截：未登录时弹出登录弹窗，登录后通过 pendingAction 自动继续
     if (!requireAuth(handleGenerate)) {
-      console.log('[HandleGenerate] blocked by requireAuth, pending action saved');
       return;
     }
 

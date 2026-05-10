@@ -56,8 +56,6 @@ export async function POST(request: NextRequest) {
 
     for (const endpoint of endpoints) {
       try {
-        console.log(`[fetch-models] 尝试端点: ${endpoint.url}`);
-        
         const response = await fetch(endpoint.url, {
           headers: {
             'Authorization': `Bearer ${realApiKey}`,
@@ -67,11 +65,8 @@ export async function POST(request: NextRequest) {
           signal: AbortSignal.timeout(10000),
         });
 
-        console.log(`[fetch-models] ${endpoint.url} 返回: ${response.status}`);
-
         if (response.ok) {
           const data = await response.json();
-          console.log(`[fetch-models] 数据格式:`, JSON.stringify(data).substring(0, 500));
 
           // 解析不同格式的响应
           // 格式1: OpenAI 格式 { "data": [...] }
@@ -85,7 +80,6 @@ export async function POST(request: NextRequest) {
               pricing: model.pricing || {},
               is_available: model.ready ?? model.status !== 'deprecated',
             }));
-            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (OpenAI格式)`);
             break;
           }
 
@@ -99,7 +93,6 @@ export async function POST(request: NextRequest) {
               pricing: { image: model.price || 0 },
               is_available: model.available !== false,
             }));
-            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (4SAPI格式)`);
             break;
           }
 
@@ -113,7 +106,6 @@ export async function POST(request: NextRequest) {
               pricing: model.pricing || {},
               is_available: model.available !== false,
             }));
-            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (数组格式)`);
             break;
           }
 
@@ -127,39 +119,32 @@ export async function POST(request: NextRequest) {
               pricing: {},
               is_available: true,
             }));
-            console.log(`[fetch-models] 解析到 ${models.length} 个模型 (list格式)`);
             break;
           }
         } else {
           lastError = `API 返回 ${response.status}`;
-          // 读取错误信息
           try {
             const errorText = await response.text();
-            console.log(`[fetch-models] 错误响应: ${errorText.substring(0, 200)}`);
             lastError += `: ${errorText.substring(0, 100)}`;
-          } catch (e) {
+          } catch {
             // 忽略
           }
         }
       } catch (e: any) {
         lastError = e.message || '请求失败';
-        console.log(`[fetch-models] 端点 ${endpoint.url} 请求失败:`, e.message);
       }
     }
 
     // 对于图片模型提供商，如果获取到了模型列表，尝试筛选图片相关模型
     if (models.length > 0 && provider_type === 'image') {
       const imageKeywords = ['image', 'dall', 'flux', 'stable', 'diffusion', 'sd', 'midjourney', 'gpt-image', 'imagen'];
-      const imageModels = models.filter((m: any) => 
+      const imageModels = models.filter((m: any) =>
         imageKeywords.some(kw => m.id.toLowerCase().includes(kw) || (m.display_name || '').toLowerCase().includes(kw))
       );
-      
+
       // 如果筛选出了图片模型，使用筛选结果；否则保留全部（可能 API 只返回了图片模型）
       if (imageModels.length > 0) {
-        console.log(`[fetch-models] 从 ${models.length} 个模型中筛选出 ${imageModels.length} 个图片模型`);
         models = imageModels;
-      } else {
-        console.log(`[fetch-models] 未筛选出图片模型，保留全部 ${models.length} 个模型`);
       }
     }
 
@@ -167,16 +152,16 @@ export async function POST(request: NextRequest) {
     if (models.length === 0) {
       // 对于图片模型提供商，提供已知模型建议
       if (provider_type === 'image') {
-        return NextResponse.json({ 
-          success: false, 
+        return NextResponse.json({
+          success: false,
           error: `无法自动获取图片模型列表（该 API 不支持模型列举）。${lastError ? '最后错误: ' + lastError + '。' : ''}请手动添加模型，常见图片模型: ${KNOWN_IMAGE_MODELS.map(m => m.id).join(', ')}`,
           suggested_models: KNOWN_IMAGE_MODELS,
         }, { status: 400 });
       }
-      
-      return NextResponse.json({ 
-        success: false, 
-        error: `无法获取模型列表。${lastError}。请检查 API URL 和 Key 是否正确，或手动添加模型。` 
+
+      return NextResponse.json({
+        success: false,
+        error: `无法获取模型列表。${lastError}。请检查 API URL 和 Key 是否正确，或手动添加模型。`
       }, { status: 400 });
     }
 
@@ -224,9 +209,9 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('[fetch-models] 保存模型失败:', insertError);
-      return NextResponse.json({ 
-        success: false, 
-        error: '保存模型失败: ' + insertError.message 
+      return NextResponse.json({
+        success: false,
+        error: '保存模型失败: ' + insertError.message
       }, { status: 500 });
     }
 

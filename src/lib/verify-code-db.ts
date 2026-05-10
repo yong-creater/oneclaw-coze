@@ -32,7 +32,7 @@ export async function storeCode(email: string, code: string, type: 'register' | 
   if (error) {
     console.error('[storeCode] 存储验证码失败:', error);
   } else {
-    console.log(`[storeCode] 验证码已存储: key=${key}, code=${code}`);
+    console.log(`[storeCode] 验证码已存储: key=${key}`);
   }
 }
 
@@ -46,7 +46,7 @@ export async function verifyCode(
   const normalizedEmail = email.toLowerCase().trim();
   const key = `${type}:${normalizedEmail}`;
 
-  console.log(`[verifyCode] 查询验证码: key=${key}, code=${code}`);
+  console.log(`[verifyCode] 查询验证码: key=${key}`);
 
   // 查询验证码
   const { data, error } = await supabase

@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     const showDevCode = isDev && !emailResult.configured;
     
     if (showDevCode) {
-      console.log(`[验证码] 邮件服务未配置，返回模拟验证码用于测试: ${code}`);
+      // Dev mode: return code for testing (no log in production)
     }
 
     return NextResponse.json({
