@@ -2,7 +2,10 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Download, ZoomIn, Trash2, FolderOpen, Image as ImageIcon, Loader2, X } from 'lucide-react';
+import {
+  Sparkles, Download, ZoomIn, Trash2, FolderOpen,
+  Image as ImageIcon, Loader2, X, ChevronLeft, ChevronRight,
+} from 'lucide-react';
 
 /* ---------- 数据类型 ---------- */
 interface Generation {
@@ -30,7 +33,6 @@ function DeleteConfirmModal({
   onConfirm: () => void;
   onCancel: () => void;
 }) {
-  /* ESC 关闭 */
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -51,21 +53,14 @@ function DeleteConfirmModal({
         aria-modal="true"
         aria-label="确认删除"
       >
-        {/* 关闭按钮 */}
         <button className="os-delete-close" onClick={onCancel} type="button" aria-label="关闭">
           <X style={{ width: 18, height: 18 }} />
         </button>
-
-        {/* 图标 */}
         <div className="os-delete-icon-wrap">
           <Trash2 style={{ width: 24, height: 24 }} />
         </div>
-
-        {/* 文案 */}
         <h3 className="os-delete-title">删除这个作品？</h3>
         <p className="os-delete-desc">删除后将无法恢复。</p>
-
-        {/* 按钮 */}
         <div className="os-delete-actions">
           <button className="os-delete-cancel" onClick={onCancel} type="button">
             取消
@@ -109,6 +104,30 @@ function firstImage(gen: Generation): string {
   return '';
 }
 
+/* ---------- 提取所有图片 ---------- */
+function allImages(gen: Generation): string[] {
+  const imgs: string[] = [];
+  try {
+    const oc = typeof gen.output_content === 'string'
+      ? JSON.parse(gen.output_content)
+      : gen.output_content;
+    if (oc?.image_urls && Array.isArray(oc.image_urls)) {
+      imgs.push(...(oc.image_urls as string[]));
+    }
+  } catch {
+    /* empty */
+  }
+  /* 兜底：thumbnail 不在 image_urls 里时补上 */
+  if (imgs.length === 0 && gen.thumbnail) {
+    imgs.push(gen.thumbnail);
+  }
+  /* 如果 image_urls 为空但 thumbnail 不在首位，用 thumbnail 作首图 */
+  if (gen.thumbnail && imgs.length > 0 && imgs[0] !== gen.thumbnail) {
+    imgs.unshift(gen.thumbnail);
+  }
+  return imgs;
+}
+
 /* ---------- 格式化日期 ---------- */
 function fmtDate(d: string): string {
   try {
@@ -139,13 +158,165 @@ function genMeta(gen: Generation) {
   return { tool, model, style, ratio, count };
 }
 
+/* ==================== 多图预览弹窗 ==================== */
+function GalleryModal({
+  images,
+  initialIndex,
+  onContinue,
+  onClose,
+}: {
+  images: string[];
+  initialIndex: number;
+  onContinue: () => void;
+  onClose: () => void;
+}) {
+  const [current, setCurrent] = useState(initialIndex);
+  const isMulti = images.length > 1;
+
+  /* ESC / 左右键 */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowLeft' && isMulti) setCurrent((c) => Math.max(0, c - 1));
+      if (e.key === 'ArrowRight' && isMulti) setCurrent((c) => Math.min(images.length - 1, c + 1));
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose, isMulti, images.length]);
+
+  /* 下载当前图 */
+  const downloadCurrent = useCallback(async () => {
+    const url = images[current];
+    try {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `oneclaw-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, '_blank');
+    }
+  }, [images, current]);
+
+  /* 下载全部 */
+  const downloadAll = useCallback(async () => {
+    for (let i = 0; i < images.length; i++) {
+      const url = images[i];
+      try {
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = `oneclaw-${i + 1}-${Date.now()}.png`;
+        a.click();
+        URL.revokeObjectURL(blobUrl);
+        /* 间隔避免浏览器拦截 */
+        await new Promise((r) => setTimeout(r, 300));
+      } catch {
+        window.open(url, '_blank');
+      }
+    }
+  }, [images]);
+
+  return (
+    <div className="os-gallery-overlay" onClick={onClose}>
+      <div className="os-gallery-modal" onClick={(e) => e.stopPropagation()}>
+        {/* 关闭按钮 */}
+        <button className="os-gallery-close" onClick={onClose} type="button" aria-label="关闭">
+          <X style={{ width: 20, height: 20 }} />
+        </button>
+
+        {/* 主图区 */}
+        <div className="os-gallery-main">
+          {/* 上一张 */}
+          {isMulti && current > 0 && (
+            <button
+              className="os-gallery-nav os-gallery-prev"
+              onClick={() => setCurrent((c) => c - 1)}
+              type="button"
+              aria-label="上一张"
+            >
+              <ChevronLeft style={{ width: 24, height: 24 }} />
+            </button>
+          )}
+
+          <img src={images[current]} alt={`第 ${current + 1} 张`} className="os-gallery-img" />
+
+          {/* 下一张 */}
+          {isMulti && current < images.length - 1 && (
+            <button
+              className="os-gallery-nav os-gallery-next"
+              onClick={() => setCurrent((c) => c + 1)}
+              type="button"
+              aria-label="下一张"
+            >
+              <ChevronRight style={{ width: 24, height: 24 }} />
+            </button>
+          )}
+        </div>
+
+        {/* 底部工具栏 */}
+        <div className="os-gallery-toolbar">
+          {/* 左侧：页码 */}
+          <div className="os-gallery-info">
+            {isMulti && <span className="os-gallery-page">{current + 1} / {images.length}</span>}
+          </div>
+
+          {/* 右侧：操作按钮 */}
+          <div className="os-gallery-actions">
+            <button className="os-gallery-action-btn" onClick={downloadCurrent} type="button">
+              <Download style={{ width: 16, height: 16 }} /> 下载当前
+            </button>
+            {isMulti && (
+              <button className="os-gallery-action-btn" onClick={downloadAll} type="button">
+                <Download style={{ width: 16, height: 16 }} /> 下载全部
+              </button>
+            )}
+            <button className="os-gallery-action-btn os-gallery-action-primary" onClick={onContinue} type="button">
+              <Sparkles style={{ width: 16, height: 16 }} /> 继续优化
+            </button>
+          </div>
+        </div>
+
+        {/* 缩略图列表（多图才显示） */}
+        {isMulti && (
+          <div className="os-gallery-thumbs">
+            <div className="os-gallery-thumbs-inner">
+              {images.map((url, idx) => (
+                <button
+                  key={idx}
+                  className={`os-gallery-thumb ${idx === current ? 'os-gallery-thumb-active' : ''}`}
+                  onClick={() => setCurrent(idx)}
+                  type="button"
+                >
+                  <img src={url} alt={`缩略图 ${idx + 1}`} />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ==================== 作品页面 ==================== */
 export default function ProjectPage() {
   const router = useRouter();
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [lightbox, setLightbox] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+
+  /* 多图预览状态 */
+  const [gallery, setGallery] = useState<{
+    images: string[];
+    index: number;
+    gen: Generation;
+  } | null>(null);
 
   /* ---- 加载 ---- */
   useEffect(() => {
@@ -208,13 +379,16 @@ export default function ProjectPage() {
       const slug = gen.tool_type || 'product-generator';
       router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(gen.prompt || '')}`);
     },
-    [router]
+    [router],
   );
 
-  /* ---- 查看大图 ---- */
-  const handleView = useCallback((e: React.MouseEvent, url: string) => {
+  /* ---- 查看大图（打开多图预览） ---- */
+  const handleView = useCallback((e: React.MouseEvent, gen: Generation) => {
     e.stopPropagation();
-    setLightbox(url);
+    const imgs = allImages(gen);
+    if (imgs.length > 0) {
+      setGallery({ images: imgs, index: 0, gen });
+    }
   }, []);
 
   if (loading) return <div className="flex items-center justify-center py-32"><Loader2 className="w-8 h-8 animate-spin text-[#7B61FF]" /></div>;
@@ -227,7 +401,6 @@ export default function ProjectPage() {
         <p className="os-page-subtitle">管理你的 AI 创作作品</p>
 
         {generations.length === 0 ? (
-          /* 空状态 */
           <div className="os-project-empty-hero">
             <div className="os-project-empty-icon">
               <FolderOpen />
@@ -236,11 +409,13 @@ export default function ProjectPage() {
             <p>去创作页面生成你的第一个作品吧</p>
           </div>
         ) : (
-          /* 3列网格 */
           <div className="os-project-grid">
             {generations.map((gen) => {
               const img = firstImage(gen);
               const meta = genMeta(gen);
+              const imgs = allImages(gen);
+              const imgCount = imgs.length;
+
               return (
                 <div key={gen.id} className="os-project-card">
                   {/* 图片区 */}
@@ -253,6 +428,11 @@ export default function ProjectPage() {
                       </div>
                     )}
 
+                    {/* 多图数量标识 */}
+                    {imgCount > 1 && (
+                      <span className="os-project-count-badge">{imgCount} 张</span>
+                    )}
+
                     {/* 删除按钮 */}
                     <button
                       className="os-project-del-btn"
@@ -263,7 +443,7 @@ export default function ProjectPage() {
                       <Trash2 />
                     </button>
 
-                    {/* hover 操作栏 — glass bar */}
+                    {/* hover 操作栏 */}
                     <div className="os-project-hover">
                       <button className="os-project-hover-btn" onClick={(e) => handleContinue(e, gen)} type="button">
                         <Sparkles style={{ width: 14, height: 14 }} /> 继续优化
@@ -271,7 +451,7 @@ export default function ProjectPage() {
                       <button className="os-project-hover-btn" onClick={(e) => img && handleDownload(e, img)} type="button">
                         <Download style={{ width: 14, height: 14 }} /> 下载
                       </button>
-                      <button className="os-project-hover-btn" onClick={(e) => img && handleView(e, img)} type="button">
+                      <button className="os-project-hover-btn" onClick={(e) => handleView(e, gen)} type="button">
                         <ZoomIn style={{ width: 14, height: 14 }} /> 大图
                       </button>
                     </div>
@@ -301,16 +481,19 @@ export default function ProjectPage() {
           </div>
         )}
 
-        {/* Lightbox */}
-        {lightbox && (
-          <div className="os-lightbox-overlay" onClick={() => setLightbox(null)}>
-            <div className="os-lightbox-content">
-              <button className="os-lightbox-close" onClick={() => setLightbox(null)} type="button">
-                &times;
-              </button>
-              <img src={lightbox} alt="大图" className="os-lightbox-img" />
-            </div>
-          </div>
+        {/* 多图预览弹窗 */}
+        {gallery && (
+          <GalleryModal
+            images={gallery.images}
+            initialIndex={gallery.index}
+            onContinue={() => {
+              const gen = gallery.gen;
+              const slug = gen.tool_type || 'product-generator';
+              setGallery(null);
+              router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(gen.prompt || '')}`);
+            }}
+            onClose={() => setGallery(null)}
+          />
         )}
 
         {/* 删除确认弹窗 */}
