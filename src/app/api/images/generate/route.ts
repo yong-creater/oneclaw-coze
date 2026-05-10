@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       } else {
         const errorMsg = result.status === 'fulfilled'
           ? (result.value.error || `第 ${index + 1} 张生成失败`)
-          : `第 ${index + 1} 张生成异常`;
+          : (result.reason?.message || `第 ${index + 1} 张生成异常: ${String(result.reason).substring(0, 80)}`);
         errors.push(errorMsg);
       }
     });

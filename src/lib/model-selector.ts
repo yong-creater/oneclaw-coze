@@ -449,7 +449,16 @@ export async function generateWithModel(
             }
           }
           
-          const response = await client.generate(requestParams);
+          let response;
+          try {
+            response = await client.generate(requestParams);
+          } catch (err: unknown) {
+            const errMsg = err instanceof Error ? err.message : String(err);
+            if (errMsg.includes('403') || errMsg.includes('ErrSourceLimit') || errMsg.includes('Forbidden')) {
+              return { success: false, error: '模型服务暂时不可用，请稍后重试' };
+            }
+            return { success: false, error: `图片生成失败: ${errMsg.substring(0, 100)}` };
+          }
           const helper = new ImageGenerationResponseHelper(response);
           if (helper.success && helper.imageUrls && helper.imageUrls.length > 0) {
             return { success: true, imageUrls: helper.imageUrls };
@@ -519,7 +528,21 @@ export async function generateWithModel(
       }
     }
     
-    const response = await client.generate(requestParams);
+    let response;
+    try {
+      response = await client.generate(requestParams);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      // 403 = Coze 资源配额耗尽
+      if (errMsg.includes('403') || errMsg.includes('ErrSourceLimit') || errMsg.includes('Forbidden')) {
+        return { success: false, error: '模型服务暂时不可用，请稍后重试' };
+      }
+      // 429 = 请求过于频繁
+      if (errMsg.includes('429') || errMsg.includes('rate limit') || errMsg.includes('Too Many')) {
+        return { success: false, error: '生成请求过于频繁，请稍后重试' };
+      }
+      return { success: false, error: `生成失败：${errMsg.substring(0, 100)}` };
+    }
     const helper = new ImageGenerationResponseHelper(response);
     if (helper.success && helper.imageUrls && helper.imageUrls.length > 0) {
       return { success: true, imageUrls: helper.imageUrls };
