@@ -143,13 +143,21 @@
   background: #fafafa;
   transition: border-color 0.2s;
   font-family: inherit;
+  text-align: left;
 }
 .os-ws-textarea:focus {
   outline: none;
   border-color: var(--ws-accent, #7B6DFF);
   background: #fff;
 }
-.os-ws-textarea::placeholder { color: #bbb; }
+.os-ws-textarea::placeholder { color: #bbb; text-align: left; }
+
+/* Force left alignment for all inputs in workspace */
+.os-ws-left textarea,
+.os-ws-left input[type="text"],
+.os-ws-left input[type="search"] {
+  text-align: left;
+}
 
 /* Image upload */
 .os-ws-upload-area {
