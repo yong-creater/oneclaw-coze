@@ -71,15 +71,13 @@ export default function SiteSidebar() {
           <img src="/api/wechat/qrcode-image" alt="公众号" />
         </div>
 
-        {/* 二维码弹窗 */}
+        {/* 二维码弹窗 — 作为 os-dock-bottom 的子元素，CSS 绝对定位到右侧 */}
         {showQrPopup && (
           <div className="os-dock-qr-popup">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/api/wechat/qrcode-image" alt="微信公众号" />
             <div className="os-dock-qr-popup-label">
-              扫码关注公众号
-              <br />
-              获取 AI 创作灵感
+              扫码关注公众号获取 AI 创作灵感
             </div>
           </div>
         )}

@@ -18,14 +18,12 @@
   border-right: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-/* ---------- Logo ---------- */
+/* ---------- Logo — 居中在 64px 宽度内 ---------- */
 .os-dock-logo {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 28px;
-  margin-left: 32px;
-  margin-right: auto;
   cursor: pointer;
   transition: opacity 0.2s;
 }
@@ -113,8 +111,9 @@
   color: #FFFFFF !important;
 }
 
-/* ---------- 底部固定区域 ---------- */
+/* ---------- 底部固定区域 — 弹窗定位锚点 ---------- */
 .os-dock-bottom {
+  position: relative; /* 弹窗定位基准 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,9 +122,8 @@
   flex-shrink: 0;
 }
 
-/* ---------- 公众号二维码（左下角固定） ---------- */
+/* ---------- 公众号二维码缩略图（左下角固定） ---------- */
 .os-dock-qr {
-  position: relative;
   width: 44px;
   height: 44px;
   border-radius: 10px;
@@ -274,19 +272,19 @@
 }
 
 /* ================================================================
-   二维码弹窗
+   二维码弹窗 — 相对于 .os-dock-bottom 定位
    ================================================================ */
 .os-dock-qr-popup {
   position: absolute;
-  bottom: 0;
-  left: calc(100% + 12px);
+  bottom: 16px;       /* 从 dock-bottom 底部对齐（含 padding） */
+  left: calc(100% + 12px); /* 弹出在 dock 右侧 */
   background: #fff;
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   z-index: 60;
   text-align: center;
-  pointer-events: none;
+  white-space: nowrap;
 }
 .os-dock-qr-popup img {
   width: 120px;
@@ -300,6 +298,8 @@
   font-size: 12px;
   line-height: 1.5;
   color: #666;
+  white-space: normal;
+  width: 120px;
 }
 
 /* ================================================================
@@ -396,6 +396,10 @@
     display: none;
   }
   .os-dock-auth {
+    display: none;
+  }
+
+  .os-dock-qr-popup {
     display: none;
   }
 
