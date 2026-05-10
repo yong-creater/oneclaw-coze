@@ -239,21 +239,34 @@ export default function CreateWorkbench() {
     const urlCount = searchParams.get('count');
 
     const ctx = parsedCtx.current;
-    const slug = urlSlug || ctx?.toolSlug || 'product-generator';
+    const rawSlug = urlSlug || ctx?.toolSlug || '';
 
-    // 无论是哪个工具，只要 URL 指定了 slug，都应用配置
-    if (slug) {
-      const tc = getToolWorkflow(slug);
-      if (tc) {
-        // 只有 slug 变化时才 setToolSlug（避免同值触发重渲染）
-        if (slug !== toolSlug) {
-          setToolSlug(slug);
-          // 切换工具时重置为工具默认值
-          setSelectedSubtype(tc.subtypeOptions?.[0]?.value || '');
-          setSelectedStyle(tc.styleOptions?.[0]?.value || '');
-          setCount(tc.defaultCount || 4);
-          setRatio(tc.defaultRatio || '1:1');
-        }
+    // 将无效 slug 映射到有效 slug（灵感库数据可能有 product-page 等旧值）
+    const SLUG_ALIASES: Record<string, string> = {
+      'product-page': 'product-generator',
+      'product': 'product-generator',
+      'portrait': 'ai-photo',
+      'ai-portrait': 'ai-photo',
+      'xiaohongshu': 'xiaohongshu-generator',
+      'xiaohongshu-cover': 'xiaohongshu-generator',
+      'xhs': 'xiaohongshu-generator',
+    };
+    const slug = SLUG_ALIASES[rawSlug] || rawSlug || 'product-generator';
+
+    // 应用工具配置
+    const tc = getToolWorkflow(slug);
+    if (tc) {
+      if (slug !== toolSlug) {
+        setToolSlug(slug);
+        setSelectedSubtype(tc.subtypeOptions?.[0]?.value || '');
+        setSelectedStyle(tc.styleOptions?.[0]?.value || '');
+        setCount(tc.defaultCount || 4);
+        setRatio(tc.defaultRatio || '1:1');
+      }
+    } else {
+      // slug 无法识别，回退到 product-generator
+      if (toolSlug !== 'product-generator') {
+        setToolSlug('product-generator');
       }
     }
 
@@ -266,8 +279,7 @@ export default function CreateWorkbench() {
     const recRatio = urlRatio || analysis?.ratio;
     const recCount = urlCount || analysis?.count;
 
-    if (slug) {
-      const tc = getToolWorkflow(slug);
+    if (slug && tc) {
       // 匹配 style
       if (recStyle && tc?.styleOptions?.length) {
         const found = tc.styleOptions.find(s =>
@@ -497,7 +509,10 @@ export default function CreateWorkbench() {
   // ===== 任务驱动生成 =====
   const handleGenerate = async () => {
     const p = genParamsRef.current;
-    if (!p.inputText && p.uploads.length === 0) return;
+    if (!p.inputText && p.uploads.length === 0) {
+      setErrorMsg('请先输入描述或上传参考图片');
+      return;
+    }
     if (step === 'creating' || step === 'generating') return; // 防重复点击
 
     // 登录拦截：未登录时弹出登录弹窗，登录后继续执行

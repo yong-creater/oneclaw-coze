@@ -171,7 +171,11 @@ const categoryCounts = useMemo(() => {
   const handleGen = useCallback(
     (e: React.MouseEvent, p: Prompt) => {
       e.stopPropagation();
-      const slug = p.tool_slug || CATEGORY_TOOL_MAP[p.category] || 'product-generator';
+      // 优先使用 category 映射到有效 slug，忽略数据库中无效的 tool_slug
+      const VALID_SLUGS = ['product-generator', 'xiaohongshu-generator', 'ai-photo'];
+      const slug = CATEGORY_TOOL_MAP[p.category]
+        || (p.tool_slug && VALID_SLUGS.includes(p.tool_slug) ? p.tool_slug : null)
+        || 'product-generator';
       const defaults = CATEGORY_DEFAULTS[p.category] || CATEGORY_DEFAULTS['AI商品图'];
 
       // 构建跳转参数：prompt + style + ratio + count
@@ -185,9 +189,8 @@ const categoryCounts = useMemo(() => {
 
       const targetUrl = `/create?${params.toString()}`;
 
-      // 登录拦截：未登录时弹出登录弹窗，登录后继续执行
+      // 登录拦截：未登录时弹出登录弹窗，登录后继续执行跳转
       if (!requireAuth(() => router.push(targetUrl))) return;
-      router.push(targetUrl);
     },
     [router, requireAuth]
   );
