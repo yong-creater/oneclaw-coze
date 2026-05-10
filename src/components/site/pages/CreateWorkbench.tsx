@@ -16,20 +16,15 @@ import { useUser } from '@/contexts/UserContext';
 interface GeneratedImage { url: string; }
 interface UploadItem { id: string; url: string; name: string; }
 
-type GenStep = 'idle' | 'understanding' | 'analyzing' | 'matching' | 'generating' | 'optimizing' | 'done' | 'error';
+type GenStep = 'idle' | 'creating' | 'generating' | 'done' | 'error';
 
 const STEP_LABELS: Record<GenStep, string> = {
   idle: '等待开始',
-  understanding: '理解需求',
-  analyzing: '分析图片',
-  matching: '匹配生成方式',
-  generating: '生成结果',
-  optimizing: '优化细节',
+  creating: '创建任务',
+  generating: '生成中',
   done: '完成',
   error: '生成失败',
 };
-
-const STEP_ORDER: GenStep[] = ['understanding', 'analyzing', 'matching', 'generating', 'optimizing', 'done'];
 
 // 比例 → SDK size 映射（由 API 端处理，前端只传 ratio）
 const RATIO_OPTIONS = [
@@ -90,6 +85,9 @@ const TOOL_SHIMMER: Record<string, { w: number; h: number }> = {
   'xiaohongshu-generator': { w: 260, h: 380 },
   'ai-photo': { w: 300, h: 400 },
 };
+
+// ===== 生成步骤顺序 =====
+const STEP_ORDER: GenStep[] = ['idle', 'creating', 'generating', 'done', 'error'];
 
 // ===== 子类型结果标题 =====
 const SUBTYPE_RESULT_LABEL: Record<string, Record<string, string>> = {
@@ -178,6 +176,10 @@ export default function CreateWorkbench() {
 
   // ----- 加载中文案轮播 -----
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+
+  // ----- 任务系统 -----
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const pollTimerRef = useRef<number | null>(null);
 
   // ----- Refs -----
   const parsedCtx = useRef<{
@@ -352,56 +354,163 @@ export default function CreateWorkbench() {
   const removeUpload = (id: string) => setUploads(prev => prev.filter(u => u.id !== id));
 
   // ===== 生成 =====
+  // ===== 任务轮询 =====
+  const pollTask = useCallback(async (taskId: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, { credentials: 'include' });
+      const data = await res.json();
+      if (!data.success) {
+        setStep('error');
+        setErrorMsg(data.error || '任务查询失败');
+        return;
+      }
+      const task = data.task;
+      switch (task.status) {
+        case 'pending':
+          setStep('creating');
+          break;
+        case 'generating':
+          setStep('generating');
+          break;
+        case 'completed': {
+          const urls = (task.result_images || []).map((img: { url: string }) => img.url);
+          if (urls.length > 0) {
+            setImages(urls.map((url: string) => ({ url })));
+            setSelectedIdx(0);
+          }
+          setStep('done');
+          // Auto-save to user_generations
+          if (authenticated && urls.length > 0) {
+            try {
+              await fetch('/api/generations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  tool_id: toolSlug,
+                  tool_name: config?.name || toolSlug,
+                  tool_type: slugToGenType(toolSlug),
+                  title: inputText.slice(0, 50) || config?.name || 'AI生成作品',
+                  thumbnail: urls[0],
+                  input_params: { prompt: inputText, style: selectedStyle, subtype: selectedSubtype, ratio, count },
+                  output_content: { image_urls: urls },
+                }),
+                credentials: 'include',
+              });
+              setSaved(true);
+            } catch { /* auto-save failure is non-critical */ }
+          }
+          return; // Stop polling
+        }
+        case 'failed':
+          setStep('error');
+          setErrorMsg(task.error_message || '生成失败，请重试');
+          return; // Stop polling
+      }
+      // Continue polling
+      pollTimerRef.current = window.setTimeout(() => pollTask(taskId), 2000);
+    } catch {
+      setStep('error');
+      setErrorMsg('网络错误，请重试');
+    }
+  }, [authenticated, config?.name, inputText, ratio, selectedStyle, selectedSubtype, count, toolSlug]);
+
+  // 清理轮询
+  useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    };
+  }, []);
+
+  // URL中有taskId时恢复任务状态
+  // ===== 刷新恢复 =====
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tid = urlParams.get('taskId');
+    if (tid && !currentTaskId && step === 'idle') {
+      setCurrentTaskId(tid);
+      fetch(`/api/tasks/${tid}`)
+        .then(r => r.json())
+        .then(data => {
+          const task = data.task;
+          if (!task) return;
+          if (task.status === 'generating') {
+            setStep('generating');
+            pollTask(tid);
+          } else if (task.status === 'completed') {
+            setStep('done');
+            setImages((task.result_images || []).map((url: string, i: number) => ({ id: `${i}`, url })));
+          } else if (task.status === 'failed') {
+            setStep('error');
+            setErrorMsg(task.error_message || '生成失败');
+          } else if (task.status === 'pending') {
+            setStep('creating');
+            pollTask(tid);
+          }
+        })
+        .catch(() => {});
+    }
+    return () => {
+      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    };
+  }, [searchParams, currentTaskId, step, setImages, setStep, setErrorMsg]);
+
+  // ===== 任务驱动生成 =====
   const handleGenerate = async () => {
     const p = genParamsRef.current;
     if (!p.inputText && p.uploads.length === 0) return;
+    if (step === 'creating' || step === 'generating') return; // 防重复点击
 
-    setStep('understanding');
+    setStep('creating');
     setImages([]);
     setSaved(false);
     setErrorMsg('');
 
-    const steps: GenStep[] = ['understanding', 'analyzing', 'matching', 'generating', 'optimizing'];
-    let stepIdx = 0;
-    const iv = setInterval(() => {
-      stepIdx++;
-      if (stepIdx < steps.length) setStep(steps[stepIdx]);
-    }, 1200);
-
     try {
-      const body: Record<string, unknown> = {
+      // 1. 创建任务
+      const createBody: Record<string, unknown> = {
         prompt: p.inputText,
-        tool_id: p.toolSlug,
+        toolType: p.toolSlug,
         style: p.selectedStyle,
         ratio: p.ratio,
         count: p.count,
-        subtype: p.selectedSubtype,
+        generationType: p.selectedSubtype,
       };
-      if (p.uploads.length > 0) body.images = p.uploads.map(u => u.url);
+      if (p.uploads.length > 0) createBody.uploadedImages = p.uploads.map(u => u.url);
 
-      const res = await fetch('/api/images/generate', {
+      const createRes = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify(createBody),
+        credentials: 'include',
       });
+      const createData = await createRes.json();
 
-      clearInterval(iv);
-      const data = await res.json();
-
-      if (data.success && Array.isArray(data.imageUrls) && data.imageUrls.length > 0) {
-        setImages(data.imageUrls.map((url: string) => ({ url })));
-        setSelectedIdx(0);
-        setStep('done');
-      } else if (data.success && Array.isArray(data.images) && data.images.length > 0) {
-        setImages(data.images.map((url: string) => ({ url })));
-        setSelectedIdx(0);
-        setStep('done');
-      } else {
+      if (!createData.success) {
         setStep('error');
-        setErrorMsg(data.error || '生成失败，请重试');
+        setErrorMsg(createData.error || '任务创建失败');
+        return;
       }
-    } catch (err) {
-      clearInterval(iv);
+
+      const taskId = createData.task.taskId;
+      setCurrentTaskId(taskId);
+
+      // Update URL with taskId (no page reload)
+      const url = new URL(window.location.href);
+      url.searchParams.set('taskId', taskId);
+      window.history.replaceState({}, '', url.toString());
+
+      setStep('generating');
+
+      // 2. 执行任务（异步，不等待完成）
+      fetch(`/api/tasks/${taskId}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      }).catch(() => { /* execute runs server-side */ });
+
+      // 3. 开始轮询
+      pollTask(taskId);
+    } catch {
       setStep('error');
       setErrorMsg('网络错误，请重试');
     }

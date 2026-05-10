@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Flame, FolderOpen, Wrench, LogIn, LogOut, User } from 'lucide-react';
+import { Sparkles, Flame, FolderOpen, Wrench, LogIn, LogOut, User, Loader2 } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -25,6 +25,24 @@ export default function SiteSidebar() {
   const pathname = usePathname();
   const { user, authenticated, logout, setShowLoginModal } = useUser();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [activeTaskCount, setActiveTaskCount] = useState(0);
+
+  // 轮询活跃任务数
+  useEffect(() => {
+    if (!authenticated) { setActiveTaskCount(0); return; }
+    const poll = async () => {
+      try {
+        const res = await fetch('/api/tasks?status=generating&limit=10');
+        if (res.ok) {
+          const data = await res.json();
+          setActiveTaskCount(data.tasks?.length ?? 0);
+        }
+      } catch { /* ignore */ }
+    };
+    poll();
+    const timer = setInterval(poll, 5000);
+    return () => clearInterval(timer);
+  }, [authenticated]);
 
   function isActive(href: string): boolean {
     if (href === '/') return pathname === '/';
@@ -59,6 +77,18 @@ export default function SiteSidebar() {
           );
         })}
       </nav>
+
+      {/* ===== 生成任务指示器 ===== */}
+      {activeTaskCount > 0 && (
+        <Link
+          href="/projects?tab=tasks"
+          className="os-dock-task-indicator"
+          title={`${activeTaskCount} 个任务生成中`}
+        >
+          <div className="os-dock-task-dot" />
+          <span className="os-dock-task-text">{activeTaskCount} 生成中</span>
+        </Link>
+      )}
 
       {/* ===== 底部：登录 / 我的 ===== */}
       <div className="os-dock-bottom">

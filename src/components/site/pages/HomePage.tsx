@@ -25,7 +25,7 @@ const TOOL_ROUTE_MAP: Record<string, string> = {
   'ai-photo': '/create',
 };
 
-function navigateToCreate(
+async function createTaskAndNavigate(
   router: ReturnType<typeof useRouter>,
   opts: {
     prompt?: string;
@@ -35,8 +35,8 @@ function navigateToCreate(
     autoGenerate?: boolean;
     analysisResult?: { tool: string; style: string; ratio: string; count: string };
   }
-) {
-  // 写入 sessionStorage，确保图片等大数据不丢失
+): Promise<string | null> {
+  // 1. 写入 sessionStorage 作为备用（图片等大数据）
   const context: Record<string, unknown> = {};
   if (opts.prompt) context.prompt = opts.prompt;
   if (opts.uploadedImages && opts.uploadedImages.length > 0) {
@@ -52,22 +52,63 @@ function navigateToCreate(
   try {
     sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
   } catch (e) {
-    // sessionStorage 配额不足时忽略，不影响跳转
     console.warn('sessionStorage write failed:', e);
   }
 
-  // 路由到对应工具详情页（而非 /create）
-  const targetRoute = (opts.matchedTool && TOOL_ROUTE_MAP[opts.matchedTool]) || '/create';
-  const params = new URLSearchParams();
-  if (opts.prompt) params.set('prompt', opts.prompt);
-  if (opts.matchedTool) params.set('tool', opts.matchedTool);
-  if (opts.autoGenerate) params.set('auto', '1');
-  if (opts.analysisResult) {
-    params.set('style', opts.analysisResult.style);
-    params.set('ratio', opts.analysisResult.ratio);
-    params.set('count', opts.analysisResult.count);
+  // 2. 调用 createTask API 创建任务
+  try {
+    const taskRes = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: opts.prompt || '',
+        uploadedImages: opts.uploadedImages || [],
+        toolType: opts.matchedTool || 'product-generator',
+        generationType: opts.type || opts.matchedTool || 'product-generator',
+        style: opts.analysisResult?.style || '',
+        ratio: opts.analysisResult?.ratio || '1:1',
+        count: parseInt(opts.analysisResult?.count || '4', 10),
+      }),
+    });
+
+    if (!taskRes.ok) {
+      const errData = await taskRes.json().catch(() => ({}));
+      // 如果是并发限制错误，返回错误信息
+      if (taskRes.status === 429 && errData.error?.includes('正在生成')) {
+        return errData.error;
+      }
+      throw new Error(errData.error || '创建任务失败');
+    }
+
+    const taskData = await taskRes.json();
+    const taskId = taskData.taskId;
+
+    if (!taskId) throw new Error('未获取到任务ID');
+
+    // 3. 跳转到工具页，携带 taskId
+    const targetRoute = (opts.matchedTool && TOOL_ROUTE_MAP[opts.matchedTool]) || '/create';
+    const params = new URLSearchParams();
+    params.set('taskId', taskId);
+    if (opts.matchedTool) params.set('tool', opts.matchedTool);
+    router.push(`${targetRoute}?${params.toString()}`);
+
+    return null; // 成功
+  } catch (err) {
+    // createTask 失败时降级为旧模式（不带 taskId）
+    console.warn('createTask failed, falling back to legacy mode:', err);
+    const targetRoute = (opts.matchedTool && TOOL_ROUTE_MAP[opts.matchedTool]) || '/create';
+    const params = new URLSearchParams();
+    if (opts.prompt) params.set('prompt', opts.prompt);
+    if (opts.matchedTool) params.set('tool', opts.matchedTool);
+    if (opts.autoGenerate) params.set('auto', '1');
+    if (opts.analysisResult) {
+      params.set('style', opts.analysisResult.style);
+      params.set('ratio', opts.analysisResult.ratio);
+      params.set('count', opts.analysisResult.count);
+    }
+    router.push(`${targetRoute}?${params.toString()}`);
+    return null;
   }
-  router.push(`${targetRoute}?${params.toString()}`);
 }
 
 // ===== 工具匹配 =====
@@ -201,6 +242,7 @@ export default function HomePage() {
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const [phase, setPhase] = useState<IdentifyPhase>('idle');
+  const phaseRef = useRef<IdentifyPhase>('idle');
   const [isJumping, setIsJumping] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [placeholderVisible, setPlaceholderVisible] = useState(true);
@@ -285,30 +327,38 @@ export default function HomePage() {
 
   const handleStartCreate = useCallback(() => {
     if (!inputText.trim() || phase !== 'idle') return;
-    setPhase('identifying');
-    // 轻量过渡：1.2秒后直接跳转工具页
-    const navTimer = setTimeout(() => {
+    phaseRef.current = 'identifying'; setPhase('identifying');
+    // 轻量过渡：1.2秒后创建任务并跳转工具页
+    const navTimer = setTimeout(async () => {
       let tool = matchTool(inputText);
       // 未匹配到工具时，默认使用 AI 商品图生成器
       if (!tool) tool = TOOL_MATCHES[0];
       setIsJumping(true);
       const rec = getStyleRecommendation(tool, inputText);
-      navigateToCreate(router, {
+      const err = await createTaskAndNavigate(router, {
         prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
         autoGenerate: true,
         analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
       });
+      if (err) {
+        // 并发限制等错误，回退到 idle
+        phaseRef.current = 'idle'; setPhase('idle');
+        setIsJumping(false);
+        alert(err);
+      }
     }, 1200);
-    // 兜底：2.5秒后若仍在 identifying 阶段，强制跳转
+    // 兜底：4秒后若仍在 identifying 阶段，强制跳转
     setTimeout(() => {
-      router.push('/create?tool=product-generator');
-    }, 2500);
+      if (phaseRef.current === 'identifying') {
+        router.push('/create?tool=product-generator');
+      }
+    }, 4000);
   }, [inputText, uploadedImages, phase, router]);
 
   const handleBrowseTools = useCallback(() => { router.push('/tools'); }, [router]);
 
   const resetIdentify = useCallback(() => {
-    setPhase('idle'); setIsJumping(false);
+    phaseRef.current = 'idle'; setPhase('idle'); setIsJumping(false);
   }, []);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -589,10 +639,11 @@ export default function HomePage() {
                         onClick={() => {
                           if (!TOOL_ROUTE_MAP[tool.slug]) return;
                           const rec = getStyleRecommendation(tool, inputText);
-                          navigateToCreate(router, {
-                            prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
-                            autoGenerate: true,
-                            analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
+                          createTaskAndNavigate(router, {
+                            prompt: inputText.trim(),
+                            uploadedImages,
+                            matchedTool: tool.slug,
+                            analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: String(rec.count) },
                           });
                         }}
                       >
@@ -607,10 +658,11 @@ export default function HomePage() {
                     const tool = TOOL_MATCHES[0];
                     if (!TOOL_ROUTE_MAP[tool.slug]) return;
                     const rec = getStyleRecommendation(tool, inputText);
-                    navigateToCreate(router, {
-                      prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
-                      autoGenerate: true,
-                      analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
+                    createTaskAndNavigate(router, {
+                      prompt: inputText.trim(),
+                      uploadedImages,
+                      matchedTool: tool.slug,
+                      analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: String(rec.count) },
                     });
                   }} className="os-ai-nomatch-primary">选择第一个推荐工具继续</button>
                   <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览全部工具</button>
