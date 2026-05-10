@@ -40,12 +40,13 @@ export default function ToolsPage() {
         <h1 className="os-page-title">AI 创作工具</h1>
         <p className="os-page-subtitle">选择你想生成的内容，快速获得商业级结果</p>
 
+        {/* 3 列卡片网格 */}
         <div className="os-tool-grid">
           {TOOLS.map(tool => {
             const Icon = tool.icon;
             return (
               <div key={tool.slug} className="os-tool-card">
-                {/* cover image */}
+                {/* 封面图区 */}
                 <div className="os-tool-card-img">
                   <img
                     src={tool.cover}
@@ -54,13 +55,13 @@ export default function ToolsPage() {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
-                  {/* fallback: icon + gradient when img fails */}
+                  {/* fallback: icon + 渐变底色 */}
                   <div className="os-tool-card-img-fallback">
-                    <Icon style={{ width: 56, height: 56, color: 'rgba(255,255,255,0.85)' }} strokeWidth={1.2} />
+                    <Icon style={{ width: 56, height: 56, color: 'rgba(123,97,255,0.35)' }} strokeWidth={1.2} />
                   </div>
                 </div>
 
-                {/* info */}
+                {/* 信息区 */}
                 <div className="os-tool-card-body">
                   <h3 className="os-tool-card-title">{tool.name}</h3>
                   <p className="os-tool-card-desc">{tool.desc}</p>
@@ -71,7 +72,7 @@ export default function ToolsPage() {
                   </div>
                 </div>
 
-                {/* CTA */}
+                {/* CTA 渐变按钮 */}
                 <button
                   className="os-tool-card-cta"
                   onClick={() => router.push(`/create?tool=${tool.slug}`)}

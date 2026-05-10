@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImagePlus, Download, Eye, Trash2, Sparkles, ArrowRight, Loader2, X } from 'lucide-react';
+import { ImagePlus, Download, Eye, Sparkles, Trash2, Loader2, X, ImageIcon } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 
 /* ---------- helpers ---------- */
@@ -16,9 +16,7 @@ const TOOL_LABEL: Record<string, string> = {
 };
 
 function genImage(gen: Record<string, unknown>): string {
-  // 1. thumbnail
   if (gen.thumbnail && typeof gen.thumbnail === 'string') return gen.thumbnail;
-  // 2. output_content.image_urls[0]
   const oc = gen.output_content;
   if (oc) {
     try {
@@ -99,7 +97,7 @@ export default function ProjectPage() {
             <div className="os-project-empty-icon"><ImagePlus /></div>
             <h3>登录后查看你的作品</h3>
             <p>完成创作后，你的作品会自动保存在这里</p>
-            <button className="os-btn-primary" onClick={() => setShowLoginModal(true)}>
+            <button className="os-btn-primary" onClick={() => setShowLoginModal(true)} style={{ marginTop: 8 }}>
               登录查看作品
             </button>
           </div>
@@ -148,7 +146,7 @@ export default function ProjectPage() {
     );
   }
 
-  /* ---------- main ---------- */
+  /* ---------- filter pills ---------- */
   const toolFilters = [
     { key: 'all', label: '全部' },
     { key: 'product-generator', label: 'AI 商品图' },
@@ -158,19 +156,19 @@ export default function ProjectPage() {
     { key: 'ai-photo', label: 'AI 写真' },
     { key: 'photo', label: 'AI 写真' },
   ];
-  // deduplicate by label
   const uniqueFilters = toolFilters.reduce<Array<{ key: string; label: string }>>((acc, f) => {
     if (!acc.find(x => x.label === f.label)) acc.push(f);
     return acc;
   }, []);
 
+  /* ---------- main ---------- */
   return (
     <div className="os-page">
       <div className="os-page-inner">
         <h1 className="os-page-title">我的作品</h1>
         <p className="os-page-subtitle">管理你生成过的内容，继续优化与下载</p>
 
-        {/* filter pills */}
+        {/* 筛选胶囊 */}
         <div className="os-page-pills">
           {uniqueFilters.map(f => (
             <button
@@ -183,7 +181,7 @@ export default function ProjectPage() {
           ))}
         </div>
 
-        {/* grid */}
+        {/* 作品网格 */}
         <div className="os-project-grid">
           {filtered.map((gen) => {
             const img = genImage(gen);
@@ -192,35 +190,40 @@ export default function ProjectPage() {
             const date = formatDate(gen.created_at as string);
             return (
               <div key={gen.id as number} className="os-project-card">
-                {/* image */}
+                {/* 图片区 — 1:1 */}
                 <div className="os-project-img-wrap">
                   {img ? (
                     <img src={img} alt={title} className="os-project-img" />
                   ) : (
-                    <div className="os-project-img-fallback" />
+                    <div className="os-project-img-fallback">
+                      <ImageIcon style={{ width: 40, height: 40, color: '#C4B5FD' }} />
+                    </div>
                   )}
-                  {/* hover overlay */}
+                  {/* hover 底部操作栏 */}
                   <div className="os-project-hover">
                     <button onClick={() => router.push(`/create?tool=${slug}`)} className="os-project-hover-btn">
-                      <Sparkles style={{ width: 16, height: 16 }} />
+                      <Sparkles style={{ width: 14, height: 14 }} />
                       继续优化
                     </button>
                     <button onClick={() => handleDownload(img)} className="os-project-hover-btn">
-                      <Download style={{ width: 16, height: 16 }} />
+                      <Download style={{ width: 14, height: 14 }} />
                       下载
                     </button>
                     <button onClick={() => setPreviewIdx(gen.id as number)} className="os-project-hover-btn">
-                      <Eye style={{ width: 16, height: 16 }} />
+                      <Eye style={{ width: 14, height: 14 }} />
                       大图
                     </button>
                   </div>
                 </div>
-                {/* info */}
+                {/* 底部信息 */}
                 <div className="os-project-info">
-                  <span className="os-project-card-title" style={{ fontWeight: 600, fontSize: 15, color: '#1F2937', display: 'block' }}>{title}</span>
+                  <span style={{ fontWeight: 600, fontSize: 14, color: '#1F2937', display: 'block' }}>{title}</span>
                   <span className="os-project-time">
                     <span className="os-card-tag">{TOOL_LABEL[slug] || slug}</span>
                     <span>{date}</span>
+                    <span className="os-project-del-btn" style={{ marginLeft: 'auto' }}>
+                      <Trash2 style={{ width: 14, height: 14 }} onClick={() => handleDelete(gen.id as number)} />
+                    </span>
                   </span>
                 </div>
               </div>
@@ -243,11 +246,13 @@ export default function ProjectPage() {
         return (
           <div className="os-lightbox-overlay" onClick={() => setPreviewIdx(null)}>
             <div className="os-lightbox-content" onClick={e => e.stopPropagation()}>
-              <button className="os-lightbox-close" onClick={() => setPreviewIdx(null)}><X /></button>
+              <button className="os-lightbox-close" onClick={() => setPreviewIdx(null)}>
+                <X style={{ width: 20, height: 20 }} />
+              </button>
               {allImgs.length > 0 ? (
                 <img src={allImgs[0]} alt="" className="os-lightbox-img" />
               ) : (
-                <div className="os-project-card-placeholder" style={{ width: 480, height: 480 }} />
+                <div style={{ width: 480, height: 480, borderRadius: 12, background: 'var(--oc-grad-placeholder)' }} />
               )}
             </div>
           </div>

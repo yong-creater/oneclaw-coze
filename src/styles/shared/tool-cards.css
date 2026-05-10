@@ -1,118 +1,206 @@
-/* ==================== Creator OS 卡片系统 ==================== */
+/* ==================================================================
+   OneClaw Card Design System — 统一卡片系统
+   规范：340px 宽 / 420px 最小高 / 28px 圆角 / 毛玻璃 / 统一 hover
+   ================================================================== */
 
-/* ---------- 通用卡片基础 ---------- */
+/* ==================== CSS 变量 ==================== */
+:root {
+  --oc-card-radius: 28px;
+  --oc-card-bg: rgba(255,255,255,0.78);
+  --oc-card-border: 1px solid rgba(255,255,255,0.7);
+  --oc-card-blur: blur(24px);
+  --oc-card-shadow: 0 12px 32px rgba(80,80,120,0.08);
+  --oc-card-hover-y: -6px;
+  --oc-card-hover-shadow: 0 20px 60px rgba(92,92,255,0.14);
+  --oc-card-transition: all 0.28s ease;
+  --oc-tag-bg: rgba(123,97,255,0.08);
+  --oc-tag-color: #7B61FF;
+  --oc-grad-primary: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
+  --oc-grad-placeholder: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+}
+
+/* ==================== 页面布局工具类 ==================== */
+
+/* 页面内层容器 — 居中 + 限宽 */
+.os-page-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 筛选胶囊行 */
+.os-page-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+/* 搜索框容器 */
+.os-page-search-wrap {
+  position: relative;
+  max-width: 480px;
+  margin-bottom: 20px;
+}
+.os-page-search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #A0A8B8;
+  pointer-events: none;
+}
+.os-page-search {
+  width: 100%;
+  height: 48px;
+  padding: 0 20px 0 46px;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(238,240,245,0.80);
+  border-radius: 16px;
+  font-size: 14px;
+  color: #1E293B;
+  outline: none;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.os-page-search::placeholder { color: #A0A8B8; }
+.os-page-search:hover {
+  border-color: rgba(123,97,255,0.25);
+}
+.os-page-search:focus {
+  border-color: #7B61FF;
+  box-shadow: 0 0 0 3px rgba(123,97,255,0.08);
+}
+
+/* ==================== 通用卡片基础 ==================== */
 .os-card {
-  background: rgba(255,255,255,0.72);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 28px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 12px 32px rgba(80,80,120,0.08);
-  transition: all 0.28s ease;
+  background: var(--oc-card-bg);
+  border: var(--oc-card-border);
+  border-radius: var(--oc-card-radius);
+  backdrop-filter: var(--oc-card-blur);
+  -webkit-backdrop-filter: var(--oc-card-blur);
+  box-shadow: var(--oc-card-shadow);
+  transition: var(--oc-card-transition);
   overflow: hidden;
   position: relative;
 }
 .os-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(92,92,255,0.12);
+  transform: translateY(var(--oc-card-hover-y));
+  box-shadow: var(--oc-card-hover-shadow);
 }
 
-/* ---------- 通用占位图渐变 ---------- */
-.os-card-img-placeholder {
-  background: linear-gradient(135deg, #F4F0FF, #EEF7FF);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #C4B5FD;
-}
-
-/* ---------- 通用标签 ---------- */
+/* 通用标签 */
 .os-card-tag {
   display: inline-flex;
   align-items: center;
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: rgba(123,97,255,0.08);
-  color: #7B61FF;
+  background: var(--oc-tag-bg);
+  color: var(--oc-tag-color);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
 }
 
+/* 通用占位图 */
+.os-card-img-placeholder {
+  background: var(--oc-grad-placeholder);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #C4B5FD;
+}
+
 /* ==================== 工具库卡片 ==================== */
+
+/* 3 列网格 */
+.os-tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+@media (max-width: 1024px) {
+  .os-tool-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .os-tool-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+}
+
+/* 工具卡片 */
 .os-tool-card {
-  background: rgba(255,255,255,0.72);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 28px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 12px 32px rgba(80,80,120,0.08);
-  transition: all 0.28s ease;
+  background: var(--oc-card-bg);
+  border: var(--oc-card-border);
+  border-radius: var(--oc-card-radius);
+  backdrop-filter: var(--oc-card-blur);
+  -webkit-backdrop-filter: var(--oc-card-blur);
+  box-shadow: var(--oc-card-shadow);
+  transition: var(--oc-card-transition);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 420px;
   cursor: pointer;
 }
 .os-tool-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(92,92,255,0.12);
+  transform: translateY(var(--oc-card-hover-y));
+  box-shadow: var(--oc-card-hover-shadow);
 }
 
-/* 工具卡片 - 图片区 */
+/* 工具卡片 - 封面图区 (70% 高度) */
 .os-tool-card-img {
   position: relative;
   width: 100%;
-  height: 180px;
+  flex: 7;
+  min-height: 220px;
   overflow: hidden;
+  background: var(--oc-grad-placeholder);
 }
 .os-tool-card-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.35s ease;
+  position: relative;
+  z-index: 2;
 }
 .os-tool-card:hover .os-tool-card-img img {
   transform: scale(1.03);
 }
-/* 图片顶部渐变遮罩 (hover) */
+/* 底部渐变 */
 .os-tool-card-img::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 40%;
-  background: linear-gradient(to top, rgba(0,0,0,0.08), transparent);
+  background: linear-gradient(to top, rgba(0,0,0,0.06), transparent);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
+  z-index: 3;
 }
 .os-tool-card:hover .os-tool-card-img::after {
   opacity: 1;
 }
-/* 图片加载失败时的渐变 fallback */
+/* 图片 fallback — 大图标 + 渐变底 */
 .os-tool-card-img-fallback {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #F4F0FF, #EEF7FF);
-  z-index: 0;
-}
-.os-tool-card-img img {
-  position: relative;
+  background: var(--oc-grad-placeholder);
   z-index: 1;
 }
-.os-tool-card-img img[src] {
-  z-index: 2;
-}
 
-/* 工具卡片 - 内容区 */
+/* 工具卡片 - 信息区 (30%) */
 .os-tool-card-body {
+  flex: 3;
   padding: 16px 20px 8px;
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -145,11 +233,10 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  width: calc(100% - 32px);
-  height: 52px;
-  margin: 12px 16px 16px;
+  height: 48px;
+  margin: auto 16px 16px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
+  background: var(--oc-grad-primary);
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -168,130 +255,13 @@
   transform: translateY(0) scale(0.98);
 }
 
-/* ==================== 灵感库卡片 ==================== */
-.os-insp-card {
-  position: relative;
-  border-radius: 28px;
-  overflow: hidden;
-  background: rgba(255,255,255,0.72);
-  border: 1px solid rgba(255,255,255,0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 12px 32px rgba(80,80,120,0.08);
-  transition: all 0.28s ease;
-  break-inside: avoid;
-  margin-bottom: 24px;
-  cursor: pointer;
-}
-.os-insp-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(92,92,255,0.12);
-}
-
-/* 灵感卡片 - 图片区 */
-.os-insp-card-img {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4/5;
-  overflow: hidden;
-}
-.os-insp-card-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.35s ease;
-}
-.os-insp-card:hover .os-insp-card-img img {
-  transform: scale(1.04);
-}
-
-/* 灵感卡片 - hover 底部渐变信息层 */
-.os-insp-card-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 60px 20px 20px;
-  background: linear-gradient(to top, rgba(0,0,0,0.68), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  pointer-events: none;
-}
-.os-insp-card:hover .os-insp-card-overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
-.os-insp-card-overlay-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-  line-height: 1.3;
-}
-.os-insp-card-overlay-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.85);
-  font-size: 11px;
-  font-weight: 500;
-  align-self: flex-start;
-}
-.os-insp-card-overlay-stats {
-  font-size: 12px;
-  color: rgba(255,255,255,0.55);
-}
-
-/* 灵感卡片 - 一键生成同款 (hover 浮现) */
-.os-insp-card-gen {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.88);
-  color: #1C1C28;
-  font-size: 13px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  align-self: flex-start;
-  margin-top: 2px;
-}
-.os-insp-card-gen:hover {
-  background: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-}
-.os-insp-card-img-fallback {
-  position: absolute; inset: 0;
-  background: linear-gradient(135deg, #F4F0FF, #EEF7FF);
-}
-.os-insp-card-overlay-actions {
-  display: flex; align-items: center; gap: 8px; margin-top: 6px;
-}
-.os-insp-card-action {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 999px;
-  background: rgba(255,255,255,0.6); border: none; cursor: pointer;
-  color: #fff; transition: all 0.2s ease;
-}
-.os-insp-card-action:hover {
-  background: rgba(255,255,255,0.9); color: #1C1C28;
-}
-
 /* ==================== 作品卡片 ==================== */
+
+/* 作品网格 — 4 列 */
 .os-project-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 28px;
+  gap: 24px;
 }
 @media (max-width: 1280px) {
   .os-project-grid { grid-template-columns: repeat(3, 1fr); }
@@ -300,29 +270,33 @@
   .os-project-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 560px) {
-  .os-project-grid { grid-template-columns: 1fr; }
+  .os-project-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
 }
 
+/* 作品卡片 */
 .os-project-card {
-  background: rgba(255,255,255,0.72);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: 28px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 12px 32px rgba(80,80,120,0.08);
-  transition: all 0.28s ease;
+  background: var(--oc-card-bg);
+  border: var(--oc-card-border);
+  border-radius: var(--oc-card-radius);
+  backdrop-filter: var(--oc-card-blur);
+  -webkit-backdrop-filter: var(--oc-card-blur);
+  box-shadow: var(--oc-card-shadow);
+  transition: var(--oc-card-transition);
   overflow: hidden;
+  position: relative;
 }
 .os-project-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(92,92,255,0.12);
+  transform: translateY(var(--oc-card-hover-y));
+  box-shadow: var(--oc-card-hover-shadow);
 }
 
 /* 作品卡片 - 图片区 */
 .os-project-img-wrap {
   position: relative;
   width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
+  background: var(--oc-grad-placeholder);
 }
 .os-project-img {
   width: 100%;
@@ -336,51 +310,55 @@
 .os-project-img-fallback {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+  background: var(--oc-grad-placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #C4B5FD;
 }
 
-/* 作品卡片 - hover 浮层 */
+/* 作品卡片 - hover 浮层 (底部操作栏) */
 .os-project-hover {
   position: absolute;
-  inset: 0;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  bottom: 0; left: 0; right: 0;
+  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   opacity: 0;
   transition: opacity 0.25s ease;
+  z-index: 5;
 }
 .os-project-card:hover .os-project-hover {
   opacity: 1;
 }
 
-/* 作品 hover 按钮 */
+/* hover 操作按钮 */
 .os-project-hover-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  width: 92px;
-  height: 44px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.88);
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.92);
   color: #1C1C28;
   font-size: 12px;
   font-weight: 500;
   border: none;
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .os-project-hover-btn:hover {
   background: #FFFFFF;
   box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
 }
 
 /* 作品卡片 - 底部信息 */
@@ -396,9 +374,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.os-project-actions {
-  margin-left: auto;
 }
 .os-project-del-btn {
   display: inline-flex;
@@ -418,7 +393,44 @@
   color: #EF4444;
 }
 
-/* ==================== 灵感 Masonry 布局 ==================== */
+/* 作品空状态 */
+.os-project-empty-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.os-project-empty-hero h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1C1C28;
+  margin: 0;
+}
+.os-project-empty-hero p {
+  font-size: 14px;
+  color: #8A94A6;
+  margin: 0;
+}
+.os-project-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  background: var(--oc-grad-placeholder);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--oc-tag-color);
+  margin-bottom: 8px;
+}
+.os-project-empty-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* ==================== 灵感库卡片 ==================== */
+
+/* Pinterest 瀑布流 — 4 列 */
 .os-insp-masonry {
   columns: 4;
   column-gap: 24px;
@@ -433,7 +445,190 @@
   .os-insp-masonry { columns: 1; }
 }
 
-/* ==================== 高级空状态 ==================== */
+/* 灵感卡片 */
+.os-insp-card {
+  position: relative;
+  border-radius: var(--oc-card-radius);
+  overflow: hidden;
+  background: var(--oc-card-bg);
+  border: var(--oc-card-border);
+  backdrop-filter: var(--oc-card-blur);
+  -webkit-backdrop-filter: var(--oc-card-blur);
+  box-shadow: var(--oc-card-shadow);
+  transition: var(--oc-card-transition);
+  break-inside: avoid;
+  margin-bottom: 24px;
+  cursor: pointer;
+}
+.os-insp-card:hover {
+  transform: translateY(var(--oc-card-hover-y));
+  box-shadow: var(--oc-card-hover-shadow);
+}
+
+/* 灵感卡片 - 图片区 */
+.os-insp-card-img {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--oc-grad-placeholder);
+}
+.os-insp-card-img img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+.os-insp-card:hover .os-insp-card-img img {
+  transform: scale(1.04);
+}
+.os-insp-card-img-fallback {
+  width: 100%;
+  aspect-ratio: 4/5;
+  background: var(--oc-grad-placeholder);
+}
+
+/* 灵感卡片 - hover 底部渐变信息层 */
+.os-insp-card-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 60px 20px 20px;
+  background: linear-gradient(to top, rgba(0,0,0,0.68), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 5;
+}
+.os-insp-card:hover .os-insp-card-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+.os-insp-card-overlay-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  line-height: 1.3;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.os-insp-card-overlay-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.85);
+  font-size: 11px;
+  font-weight: 500;
+  align-self: flex-start;
+}
+.os-insp-card-overlay-stats {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  gap: 10px;
+}
+.os-insp-card-overlay-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ✨ 生成同款按钮 */
+.os-insp-card-gen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+  color: #1C1C28;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-self: flex-start;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.os-insp-card-gen:hover {
+  background: #FFFFFF;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+
+/* 小圆形操作按钮 (复制/收藏) */
+.os-insp-card-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.6);
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+.os-insp-card-action:hover {
+  background: rgba(255,255,255,0.9);
+  color: #1C1C28;
+}
+
+/* ==================== Lightbox 弹窗 ==================== */
+.os-lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: os-lightbox-fade 0.2s ease;
+}
+@keyframes os-lightbox-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.os-lightbox-content {
+  position: relative;
+  max-width: 85vw;
+  max-height: 85vh;
+}
+.os-lightbox-close {
+  position: absolute;
+  top: -44px;
+  right: -8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.os-lightbox-close:hover {
+  background: rgba(255,255,255,0.3);
+}
+.os-lightbox-img {
+  max-width: 85vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* ==================== 空状态 ==================== */
 .os-empty-lg {
   display: flex;
   flex-direction: column;
@@ -446,11 +641,11 @@
   width: 72px;
   height: 72px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+  background: var(--oc-grad-placeholder);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #7B61FF;
+  color: var(--oc-tag-color);
   margin-bottom: 20px;
 }
 .os-empty-lg-title {
@@ -463,27 +658,4 @@
   font-size: 14px;
   color: #8A94A6;
   max-width: 320px;
-}
-
-/* 普通空状态 */
-.os-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 60px 24px;
-  text-align: center;
-}
-.os-empty-icon {
-  color: #C0C4CC;
-  margin-bottom: 12px;
-}
-.os-empty-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1C1C28;
-  margin-bottom: 6px;
-}
-.os-empty-desc {
-  font-size: 13px;
-  color: #8A94A6;
 }

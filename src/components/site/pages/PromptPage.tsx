@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Sparkles, Eye, Heart, Copy } from 'lucide-react';
+import { Search, Sparkles, Heart, Copy, ImageIcon } from 'lucide-react';
 
 /* ---------- types ---------- */
 interface Inspiration {
@@ -19,7 +19,7 @@ interface Inspiration {
   likes?: number;
 }
 
-/* ---------- Pill (outside render) ---------- */
+/* ---------- Pill (outside render — fixes react-hooks/static-components) ---------- */
 function Pill({ label, count, active, onClick }: { label: string; count?: number; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick} className={`os-btn-capsule ${active ? 'os-btn-capsule-active' : ''}`}>
@@ -124,7 +124,7 @@ export default function PromptPage() {
         <h1 className="os-page-title">灵感案例库</h1>
         <p className="os-page-subtitle">从优质案例中获取灵感，一键生成同款内容</p>
 
-        {/* search */}
+        {/* 搜索 */}
         <div className="os-page-search-wrap">
           <Search className="os-page-search-icon" />
           <input
@@ -136,7 +136,7 @@ export default function PromptPage() {
           />
         </div>
 
-        {/* type pills */}
+        {/* 类型筛选 */}
         <div className="os-page-pills">
           <Pill label="全部" count={items.length} active={activeCategory === '全部'} onClick={() => setActiveCategory('全部')} />
           {categories.map(cat => (
@@ -144,7 +144,7 @@ export default function PromptPage() {
           ))}
         </div>
 
-        {/* style pills */}
+        {/* 风格筛选 */}
         {uniqueStyles.length > 0 && (
           <div className="os-page-pills" style={{ marginBottom: 32 }}>
             <Pill label="全部风格" active={!filterStyle} onClick={() => setFilterStyle('')} />
@@ -154,18 +154,20 @@ export default function PromptPage() {
           </div>
         )}
 
-        {/* masonry grid */}
+        {/* Pinterest 瀑布流 — 4 列 */}
         <div className="os-insp-masonry">
           {filtered.map(it => (
             <div key={it.id} className="os-insp-card">
-              {/* image */}
+              {/* 图片区 */}
               <div className="os-insp-card-img">
                 {it.image ? (
                   <img src={it.image} alt={it.title} />
                 ) : (
-                  <div className="os-insp-card-img-fallback" />
+                  <div className="os-insp-card-img-fallback">
+                    <ImageIcon style={{ width: 32, height: 32, color: '#C4B5FD', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+                  </div>
                 )}
-                {/* hover overlay: bottom gradient */}
+                {/* hover 底部渐变信息层 */}
                 <div className="os-insp-card-overlay">
                   <span className="os-insp-card-overlay-tag">
                     {it.category || '灵感'}
@@ -178,14 +180,14 @@ export default function PromptPage() {
                   <div className="os-insp-card-overlay-actions">
                     <button className="os-insp-card-gen" onClick={() => handleGenSame(it)}>
                       <Sparkles style={{ width: 14, height: 14 }} />
-                      一键生成同款
+                      生成同款
                     </button>
                     {it.content && (
-                      <button className="os-insp-card-action" onClick={() => handleCopy(it.content!)}>
+                      <button className="os-insp-card-action" onClick={() => handleCopy(it.content!)} title="复制提示词">
                         <Copy style={{ width: 14, height: 14 }} />
                       </button>
                     )}
-                    <button className="os-insp-card-action" onClick={() => toggleFav(it.id)}>
+                    <button className="os-insp-card-action" onClick={() => toggleFav(it.id)} title="收藏">
                       <Heart style={{ width: 14, height: 14 }} fill={favorites.has(it.id) ? '#ff5a7e' : 'none'} stroke={favorites.has(it.id) ? '#ff5a7e' : 'currentColor'} />
                     </button>
                   </div>

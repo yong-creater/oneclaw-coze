@@ -1,33 +1,35 @@
-/* ==================== Creator OS 卡片基础变量 ==================== */
+/* ==================== OneClaw 结果卡片 & 变量 ==================== */
+
+/* ---------- CSS 变量（与 tool-cards.css 共享） ---------- */
 :root {
-  --os-card-radius: 28px;
-  --os-card-bg: rgba(255,255,255,0.72);
-  --os-card-border: 1px solid rgba(255,255,255,0.7);
-  --os-card-shadow: 0 12px 32px rgba(80,80,120,0.08);
-  --os-card-hover-shadow: 0 20px 60px rgba(92,92,255,0.12);
-  --os-card-hover-y: -6px;
-  --os-card-transition: all 0.28s ease;
-  --os-card-blur: blur(24px);
-  --os-tag-bg: rgba(123,97,255,0.08);
-  --os-tag-color: #7B61FF;
-  --os-grad-primary: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
-  --os-grad-placeholder: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+  --oc-card-radius: 28px;
+  --oc-card-bg: rgba(255,255,255,0.78);
+  --oc-card-border: 1px solid rgba(255,255,255,0.7);
+  --oc-card-blur: blur(24px);
+  --oc-card-shadow: 0 12px 32px rgba(80,80,120,0.08);
+  --oc-card-hover-y: -6px;
+  --oc-card-hover-shadow: 0 20px 60px rgba(92,92,255,0.14);
+  --oc-card-transition: all 0.28s ease;
+  --oc-tag-bg: rgba(123,97,255,0.08);
+  --oc-tag-color: #7B61FF;
+  --oc-grad-primary: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
+  --oc-grad-placeholder: linear-gradient(135deg, #F4F0FF, #EEF7FF);
 }
 
 /* ---------- 结果卡片 (作品详情/生成结果) ---------- */
 .os-result-card {
-  background: rgba(255,255,255,0.72);
-  border: 1px solid rgba(255,255,255,0.7);
-  border-radius: var(--os-card-radius);
-  backdrop-filter: var(--os-card-blur);
-  -webkit-backdrop-filter: var(--os-card-blur);
-  box-shadow: var(--os-card-shadow);
-  transition: var(--os-card-transition);
+  background: var(--oc-card-bg);
+  border: var(--oc-card-border);
+  border-radius: var(--oc-card-radius);
+  backdrop-filter: var(--oc-card-blur);
+  -webkit-backdrop-filter: var(--oc-card-blur);
+  box-shadow: var(--oc-card-shadow);
+  transition: var(--oc-card-transition);
   overflow: hidden;
 }
 .os-result-card:hover {
-  transform: translateY(var(--os-card-hover-y));
-  box-shadow: var(--os-card-hover-shadow);
+  transform: translateY(var(--oc-card-hover-y));
+  box-shadow: var(--oc-card-hover-shadow);
 }
 .os-result-card-img {
   width: 100%;
@@ -40,8 +42,8 @@
   height: 24px;
   padding: 0 10px;
   border-radius: 999px;
-  background: var(--os-tag-bg);
-  color: var(--os-tag-color);
+  background: var(--oc-tag-bg);
+  color: var(--oc-tag-color);
   font-size: 12px;
   font-weight: 500;
 }
