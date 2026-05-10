@@ -223,6 +223,7 @@ export default function CreateWorkbench() {
     const urlPrompt = searchParams.get('prompt');
     const urlStyle = searchParams.get('style');
     const urlRatio = searchParams.get('ratio');
+    const urlCount = searchParams.get('count');
 
     const ctx = parsedCtx.current;
     const slug = urlSlug || ctx?.toolSlug || 'product-generator';
@@ -245,7 +246,7 @@ export default function CreateWorkbench() {
     const analysis = ctx?.analysisResult;
     const recStyle = urlStyle || analysis?.style;
     const recRatio = urlRatio || analysis?.ratio;
-    const recCount = analysis?.count;
+    const recCount = urlCount || analysis?.count;
 
     if (slug) {
       const tc = getToolWorkflow(slug);

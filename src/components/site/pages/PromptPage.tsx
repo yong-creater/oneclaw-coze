@@ -22,6 +22,23 @@ interface Prompt {
   created_at: string;
 }
 
+/* ---------- 固定分类标签（用户需求：只保留3+全部） ---------- */
+const FIXED_CATEGORIES = ['全部', 'AI商品图', 'AI写真', '小红书封面'] as const;
+
+/* 分类对应的 tool_slug 映射 */
+const CATEGORY_TOOL_MAP: Record<string, string> = {
+  'AI商品图': 'product-generator',
+  'AI写真': 'ai-photo',
+  '小红书封面': 'xiaohongshu-generator',
+};
+
+/* 分类对应的默认生成参数 */
+const CATEGORY_DEFAULTS: Record<string, { style: string; ratio: string; count: number }> = {
+  'AI商品图': { style: 'premium', ratio: '1:1', count: 4 },
+  'AI写真': { style: 'korean', ratio: '3:4', count: 4 },
+  '小红书封面': { style: 'fresh', ratio: '3:4', count: 4 },
+};
+
 /* ---------- 混合比例高度 — 瀑布流节奏 ---------- */
 const RATIO_HEIGHTS = [
   280,   // ~16:9 宽卡
@@ -61,7 +78,7 @@ function Pill({
       type="button"
     >
       {label}
-      {count !== undefined && <span className="os-pill-count">{count}</span>}
+      {count !== undefined && count > 0 && <span className="os-pill-count">{count}</span>}
     </button>
   );
 }
@@ -72,7 +89,7 @@ export default function PromptPage() {
   const { requireAuth } = useUser();
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('全部');
+  const [activeCategory, setActiveCategory] = useState<string>('全部');
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const masonryRef = useRef<HTMLDivElement>(null);
@@ -83,7 +100,12 @@ export default function PromptPage() {
       try {
         const res = await fetch('/api/prompts');
         const d = await res.json();
-        setPrompts(d.prompts || d.data || []);
+        const allPrompts = d.prompts || d.data || [];
+        // 只保留3个核心工具的灵感数据
+        const filtered = allPrompts.filter(
+          (p: Prompt) => p.category === 'AI商品图' || p.category === 'AI写真' || p.category === '小红书封面'
+        );
+        setPrompts(filtered);
       } catch {
         /* empty */
       } finally {
@@ -92,13 +114,20 @@ export default function PromptPage() {
     })();
   }, []);
 
-  /* ---- 分类列表 ---- */
-  const categories = useMemo(() => {
-    const cats = new Set(prompts.map((p) => p.category));
-    return ['全部', ...Array.from(cats)];
+  /* ---- 分类计数 ---- */
+const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    FIXED_CATEGORIES.forEach((cat) => {
+      if (cat === '全部') {
+        counts[cat] = prompts.length;
+      } else {
+        counts[cat] = prompts.filter((p) => p.category === cat).length;
+      }
+    });
+    return counts;
   }, [prompts]);
 
-  /* ---- 过滤 ---- */
+  /* ---- 过滤 + 排序 ---- */
   const filtered = useMemo(() => {
     let list = prompts;
     if (activeCategory !== '全部') {
@@ -113,7 +142,14 @@ export default function PromptPage() {
           p.content?.toLowerCase().includes(q)
       );
     }
-    return list;
+    // 排序：AI商品图 > AI写真 > 小红书封面，同分类内按 is_featured > uses > likes
+    const categoryOrder = { 'AI商品图': 0, 'AI写真': 1, '小红书封面': 2 };
+    return [...list].sort((a, b) => {
+      const ca = categoryOrder[a.category as keyof typeof categoryOrder] ?? 9;
+      const cb = categoryOrder[b.category as keyof typeof categoryOrder] ?? 9;
+      if (ca !== cb) return ca - cb;
+      return (b.uses + b.likes) - (a.uses + a.likes);
+    });
   }, [prompts, activeCategory, searchQuery]);
 
   /* ---- 复制 Prompt ---- */
@@ -131,14 +167,27 @@ export default function PromptPage() {
     []
   );
 
-  /* ---- 生成同款 ---- */
+  /* ---- 生成同款（跳转工具页 + 自动填充参数） ---- */
   const handleGen = useCallback(
     (e: React.MouseEvent, p: Prompt) => {
       e.stopPropagation();
-      const slug = p.tool_slug || 'product-generator';
+      const slug = p.tool_slug || CATEGORY_TOOL_MAP[p.category] || 'product-generator';
+      const defaults = CATEGORY_DEFAULTS[p.category] || CATEGORY_DEFAULTS['AI商品图'];
+
+      // 构建跳转参数：prompt + style + ratio + count
+      const params = new URLSearchParams({
+        tool: slug,
+        prompt: p.content || p.title,
+        style: p.style || defaults.style,
+        ratio: defaults.ratio,
+        count: String(defaults.count),
+      });
+
+      const targetUrl = `/create?${params.toString()}`;
+
       // 登录拦截：未登录时弹出登录弹窗，登录后继续执行
-      if (!requireAuth(() => router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(p.content || p.title)}`))) return;
-      router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(p.content || p.title)}`);
+      if (!requireAuth(() => router.push(targetUrl))) return;
+      router.push(targetUrl);
     },
     [router, requireAuth]
   );
@@ -157,11 +206,12 @@ export default function PromptPage() {
         {/* 分类 + 搜索 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>
           <div className="os-page-pills" style={{ marginBottom: 0, flex: 1, minWidth: 0 }}>
-            {categories.map((cat) => (
+            {FIXED_CATEGORIES.map((cat) => (
               <Pill
                 key={cat}
                 label={cat}
                 active={activeCategory === cat}
+                count={categoryCounts[cat]}
                 onClick={() => setActiveCategory(cat)}
               />
             ))}
