@@ -46,21 +46,18 @@ export default function ToolsPage() {
             return (
               <div key={tool.slug} className="os-tool-card">
                 {/* cover image */}
-                <div className="os-tool-card-cover">
+                <div className="os-tool-card-img">
                   <img
                     src={tool.cover}
                     alt={tool.name}
-                    className="os-tool-card-cover-img"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
-                  {/* fallback: icon + gradient */}
-                  <div className="os-tool-card-cover-fallback">
+                  {/* fallback: icon + gradient when img fails */}
+                  <div className="os-tool-card-img-fallback">
                     <Icon style={{ width: 56, height: 56, color: 'rgba(255,255,255,0.85)' }} strokeWidth={1.2} />
                   </div>
-                  {/* hover gradient */}
-                  <div className="os-tool-card-cover-hover" />
                 </div>
 
                 {/* info */}
@@ -69,14 +66,14 @@ export default function ToolsPage() {
                   <p className="os-tool-card-desc">{tool.desc}</p>
                   <div className="os-tool-card-tags">
                     {tool.tags.map(tag => (
-                      <span key={tag} className="os-tool-card-tag">{tag}</span>
+                      <span key={tag} className="os-card-tag">{tag}</span>
                     ))}
                   </div>
                 </div>
 
                 {/* CTA */}
                 <button
-                  className="os-tool-cta"
+                  className="os-tool-card-cta"
                   onClick={() => router.push(`/create?tool=${tool.slug}`)}
                 >
                   ✨ 开始创作

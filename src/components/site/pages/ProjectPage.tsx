@@ -193,14 +193,14 @@ export default function ProjectPage() {
             return (
               <div key={gen.id as number} className="os-project-card">
                 {/* image */}
-                <div className="os-project-card-img-wrap">
+                <div className="os-project-img-wrap">
                   {img ? (
-                    <img src={img} alt={title} className="os-project-card-img" />
+                    <img src={img} alt={title} className="os-project-img" />
                   ) : (
-                    <div className="os-project-card-placeholder" />
+                    <div className="os-project-img-fallback" />
                   )}
                   {/* hover overlay */}
-                  <div className="os-project-card-hover">
+                  <div className="os-project-hover">
                     <button onClick={() => router.push(`/create?tool=${slug}`)} className="os-project-hover-btn">
                       <Sparkles style={{ width: 16, height: 16 }} />
                       继续优化
@@ -216,10 +216,10 @@ export default function ProjectPage() {
                   </div>
                 </div>
                 {/* info */}
-                <div className="os-project-card-info">
-                  <span className="os-project-card-title">{title}</span>
-                  <span className="os-project-card-meta">
-                    <span className="os-project-card-tag">{TOOL_LABEL[slug] || slug}</span>
+                <div className="os-project-info">
+                  <span className="os-project-card-title" style={{ fontWeight: 600, fontSize: 15, color: '#1F2937', display: 'block' }}>{title}</span>
+                  <span className="os-project-time">
+                    <span className="os-card-tag">{TOOL_LABEL[slug] || slug}</span>
                     <span>{date}</span>
                   </span>
                 </div>

@@ -159,37 +159,35 @@ export default function PromptPage() {
           {filtered.map(it => (
             <div key={it.id} className="os-insp-card">
               {/* image */}
-              <div className="os-insp-card-img-wrap">
+              <div className="os-insp-card-img">
                 {it.image ? (
-                  <img src={it.image} alt={it.title} className="os-insp-card-img" />
+                  <img src={it.image} alt={it.title} />
                 ) : (
-                  <div className="os-insp-card-placeholder" />
+                  <div className="os-insp-card-img-fallback" />
                 )}
                 {/* hover overlay: bottom gradient */}
                 <div className="os-insp-card-overlay">
-                  <div className="os-insp-card-overlay-inner">
-                    <span className="os-insp-card-overlay-tag">
-                      {it.category || '灵感'}
-                    </span>
-                    <span className="os-insp-card-overlay-title">{it.title}</span>
-                    <div className="os-insp-card-overlay-stats">
-                      {typeof it.views === 'number' && <span>{it.views} 浏览</span>}
-                      {typeof it.likes === 'number' && <span>{it.likes} 喜欢</span>}
-                    </div>
-                    <div className="os-insp-card-overlay-actions">
-                      <button className="os-insp-gen-btn" onClick={() => handleGenSame(it)}>
-                        <Sparkles style={{ width: 14, height: 14 }} />
-                        一键生成同款
+                  <span className="os-insp-card-overlay-tag">
+                    {it.category || '灵感'}
+                  </span>
+                  <span className="os-insp-card-overlay-title">{it.title}</span>
+                  <div className="os-insp-card-overlay-stats">
+                    {typeof it.views === 'number' && <span>{it.views} 浏览</span>}
+                    {typeof it.likes === 'number' && <span>{it.likes} 喜欢</span>}
+                  </div>
+                  <div className="os-insp-card-overlay-actions">
+                    <button className="os-insp-card-gen" onClick={() => handleGenSame(it)}>
+                      <Sparkles style={{ width: 14, height: 14 }} />
+                      一键生成同款
+                    </button>
+                    {it.content && (
+                      <button className="os-insp-card-action" onClick={() => handleCopy(it.content!)}>
+                        <Copy style={{ width: 14, height: 14 }} />
                       </button>
-                      {it.content && (
-                        <button className="os-insp-action-btn" onClick={() => handleCopy(it.content!)}>
-                          <Copy style={{ width: 14, height: 14 }} />
-                        </button>
-                      )}
-                      <button className="os-insp-action-btn" onClick={() => toggleFav(it.id)}>
-                        <Heart style={{ width: 14, height: 14 }} fill={favorites.has(it.id) ? '#ff5a7e' : 'none'} stroke={favorites.has(it.id) ? '#ff5a7e' : 'currentColor'} />
-                      </button>
-                    </div>
+                    )}
+                    <button className="os-insp-card-action" onClick={() => toggleFav(it.id)}>
+                      <Heart style={{ width: 14, height: 14 }} fill={favorites.has(it.id) ? '#ff5a7e' : 'none'} stroke={favorites.has(it.id) ? '#ff5a7e' : 'currentColor'} />
+                    </button>
                   </div>
                 </div>
               </div>

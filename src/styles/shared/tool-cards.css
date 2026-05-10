@@ -91,6 +91,23 @@
 .os-tool-card:hover .os-tool-card-img::after {
   opacity: 1;
 }
+/* 图片加载失败时的渐变 fallback */
+.os-tool-card-img-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+  z-index: 0;
+}
+.os-tool-card-img img {
+  position: relative;
+  z-index: 1;
+}
+.os-tool-card-img img[src] {
+  z-index: 2;
+}
 
 /* 工具卡片 - 内容区 */
 .os-tool-card-body {
@@ -253,6 +270,22 @@
   background: #FFFFFF;
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
 }
+.os-insp-card-img-fallback {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+}
+.os-insp-card-overlay-actions {
+  display: flex; align-items: center; gap: 8px; margin-top: 6px;
+}
+.os-insp-card-action {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 999px;
+  background: rgba(255,255,255,0.6); border: none; cursor: pointer;
+  color: #fff; transition: all 0.2s ease;
+}
+.os-insp-card-action:hover {
+  background: rgba(255,255,255,0.9); color: #1C1C28;
+}
 
 /* ==================== 作品卡片 ==================== */
 .os-project-grid {
@@ -354,13 +387,15 @@
 .os-project-info {
   padding: 14px 18px;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 .os-project-time {
   font-size: 12px;
   color: #A0A8B8;
-  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .os-project-actions {
   margin-left: auto;
