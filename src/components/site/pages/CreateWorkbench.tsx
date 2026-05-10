@@ -449,7 +449,6 @@ export default function CreateWorkbench() {
           image_urls: images.map((i: GeneratedImage) => i.url),
         },
       };
-      console.log('[Save] payload:', payload);
       const res = await fetch('/api/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -457,7 +456,6 @@ export default function CreateWorkbench() {
         credentials: 'include',
       });
       const data = await res.json();
-      console.log('[Save] response:', res.status, data);
       if (res.ok && data.success) {
         setSaved(true);
         setShowToast(true);
