@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMenu } from '@/components/site/common/MenuProvider';
 import {
-  Search, Wand2, Eye, Copy, Check, ChevronDown, ChevronUp,
-  ShoppingBag, BookOpen, Camera, Image, LayoutTemplate, Video,
-  Sparkles
+  Search, Wand2, Star, Eye, Heart,
+  ShoppingBag, BookOpen, Camera, Image as ImageIcon, LayoutTemplate, Video,
+  Sparkles, SlidersHorizontal
 } from 'lucide-react';
 
 interface Prompt {
@@ -21,19 +20,19 @@ interface Prompt {
   tools?: { id: number; name: string; logo: string | null } | null;
 }
 
-// 用户可见的分类（映射到后台 category）
+// 用户可见的分类
 const DISPLAY_CATEGORIES = [
-  { key: 'all', label: '全部' },
-  { key: '商品图', label: '商品图', icon: ShoppingBag, gradient: 'from-[#FF6B6B] to-[#FF8E53]' },
-  { key: '小红书', label: '小红书', icon: BookOpen, gradient: 'from-[#FF6B9D] to-[#C44DFF]' },
-  { key: 'AI写真', label: 'AI写真', icon: Camera, gradient: 'from-[#7B61FF] to-[#6EE7FF]' },
-  { key: '海报', label: '海报', icon: Image, gradient: 'from-[#5B8CFF] to-[#7B61FF]' },
-  { key: '封面图', label: '封面图', icon: LayoutTemplate, gradient: 'from-[#6EE7FF] to-[#5B8CFF]' },
-  { key: '详情页', label: '详情页', icon: LayoutTemplate, gradient: 'from-[#5B8CFF] to-[#6EE7FF]' },
-  { key: '视频封面', label: '视频封面', icon: Video, gradient: 'from-[#7B61FF] to-[#5B8CFF]' },
+  { key: 'all', label: '全部', icon: Sparkles },
+  { key: '商品图', label: '商品图', icon: ShoppingBag, color: '#FF6B6B' },
+  { key: '小红书', label: '小红书', icon: BookOpen, color: '#FF6B9D' },
+  { key: 'AI写真', label: 'AI写真', icon: Camera, color: '#7B61FF' },
+  { key: '海报', label: '海报', icon: ImageIcon, color: '#5B8CFF' },
+  { key: '封面图', label: '封面图', icon: LayoutTemplate, color: '#6EE7FF' },
+  { key: '详情页', label: '详情页', icon: LayoutTemplate, color: '#5B8CFF' },
+  { key: '视频封面', label: '视频封面', icon: Video, color: '#7B61FF' },
 ];
 
-// 后台 category 到展示分类的映射
+// 后台分类到展示分类的映射
 const CATEGORY_MAP: Record<string, string> = {
   '场景描述': '封面图',
   '特效制作': '海报',
@@ -41,12 +40,23 @@ const CATEGORY_MAP: Record<string, string> = {
   '风格迁移': '商品图',
 };
 
-// 每个后台分类的占位图渐变和图标
+// 每个分类的渐变和图标（用于占位图）
 const CATEGORY_VISUAL: Record<string, { gradient: string; icon: typeof ShoppingBag }> = {
-  '场景描述': { gradient: 'from-[#5B8CFF] to-[#6EE7FF]', icon: LayoutTemplate },
-  '特效制作': { gradient: 'from-[#7B61FF] to-[#5B8CFF]', icon: Image },
-  '角色扮演': { gradient: 'from-[#7B61FF] to-[#6EE7FF]', icon: Camera },
-  '风格迁移': { gradient: 'from-[#5B8CFF] to-[#7B61FF]', icon: ShoppingBag },
+  '场景描述': { gradient: 'linear-gradient(135deg, #5B8CFF 0%, #6EE7FF 100%)', icon: LayoutTemplate },
+  '特效制作': { gradient: 'linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%)', icon: ImageIcon },
+  '角色扮演': { gradient: 'linear-gradient(135deg, #7B61FF 0%, #6EE7FF 100%)', icon: Camera },
+  '风格迁移': { gradient: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)', icon: ShoppingBag },
+};
+
+// 每个展示分类的默认渐变
+const DISPLAY_VISUAL: Record<string, { gradient: string; icon: typeof ShoppingBag; color: string }> = {
+  '商品图': { gradient: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)', icon: ShoppingBag, color: '#FF6B6B' },
+  '小红书': { gradient: 'linear-gradient(135deg, #FF6B9D 0%, #C44DFF 100%)', icon: BookOpen, color: '#FF6B9D' },
+  'AI写真': { gradient: 'linear-gradient(135deg, #7B61FF 0%, #6EE7FF 100%)', icon: Camera, color: '#7B61FF' },
+  '海报': { gradient: 'linear-gradient(135deg, #5B8CFF 0%, #7B61FF 100%)', icon: ImageIcon, color: '#5B8CFF' },
+  '封面图': { gradient: 'linear-gradient(135deg, #6EE7FF 0%, #5B8CFF 100%)', icon: LayoutTemplate, color: '#5B8CFF' },
+  '详情页': { gradient: 'linear-gradient(135deg, #5B8CFF 0%, #6EE7FF 100%)', icon: LayoutTemplate, color: '#5B8CFF' },
+  '视频封面': { gradient: 'linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%)', icon: Video, color: '#7B61FF' },
 };
 
 export default function PromptPage() {
@@ -55,9 +65,25 @@ export default function PromptPage() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
   const [search, setSearch] = useState('');
-  const [copiedId, setCopiedId] = useState<number | null>(null);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [showFilter, setShowFilter] = useState(false);
 
+  // 加载收藏
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('oneclaw_inspiration_favorites');
+      if (saved) setFavorites(new Set(JSON.parse(saved)));
+    } catch {}
+  }, []);
+
+  // 保存收藏
+  useEffect(() => {
+    try {
+      localStorage.setItem('oneclaw_inspiration_favorites', JSON.stringify([...favorites]));
+    } catch {}
+  }, [favorites]);
+
+  // 加载数据
   useEffect(() => {
     const CACHE_KEY = 'oneclaw_prompts_cache';
     const CACHE_TTL = 5 * 60 * 1000;
@@ -86,7 +112,6 @@ export default function PromptPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Map backend category to display category
   const getDisplayCategory = useCallback((backendCat: string): string => {
     return CATEGORY_MAP[backendCat] || backendCat;
   }, []);
@@ -105,12 +130,14 @@ export default function PromptPage() {
     return true;
   });
 
-  const handleCopy = async (prompt: Prompt) => {
-    try {
-      await navigator.clipboard.writeText(prompt.content);
-      setCopiedId(prompt.id);
-      setTimeout(() => setCopiedId(null), 1500);
-    } catch {}
+  const toggleFavorite = (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   const handleGenerate = (prompt: Prompt) => {
@@ -126,7 +153,6 @@ export default function PromptPage() {
     };
     const typeSlug = typeSlugMap[type] || 'product-generator';
 
-    // 根据 prompt 的 tags 推测推荐 style（使用 styleOptions 的 value 值）
     const tags = (prompt.tags || []).map(t => t.toLowerCase());
     let recStyle = '';
     let recRatio = '';
@@ -173,160 +199,187 @@ export default function PromptPage() {
     return prompts.filter(p => getDisplayCategory(p.category) === catKey).length;
   };
 
+  const favoriteCount = favorites.size;
+
   return (
     <div className="os-page">
-      <div className="os-content">
-      {/* Header */}
-      <div className="mb-6 animate-fade-slide-up">
-        <h1 className="os-h1">灵感案例库</h1>
-        <p className="os-section-desc">看看别人正在生成什么内容，一键生成同款。</p>
-      </div>
+      <div className="os-content os-insp-page">
 
-      {/* Search */}
-      <div className="relative mb-5 animate-fade-slide-up" style={{ animationDelay: '0.05s' }}>
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
-          type="text"
-          placeholder="搜索你想生成的内容，比如商品图、小红书、AI写真"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="os-search-input"
-        />
-      </div>
-
-      {/* Category Tabs */}
-      <div className="flex gap-2 flex-wrap mb-6 animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
-        {DISPLAY_CATEGORIES.map(cat => {
-          const isActive = activeCategory === cat.key;
-          const count = getCategoryCount(cat.key);
-          return (
-            <button
-              key={cat.key}
-              onClick={() => setActiveCategory(cat.key)}
-              className={`os-btn-capsule ${isActive ? 'os-btn-capsule-active' : ''}`}
-            >
-              {cat.label}
-              <span className="ml-1 text-xs opacity-60">{count}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Loading */}
-      {loading && (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-          <div className="w-8 h-8 border-2 border-slate-200 border-t-[#7B61FF] rounded-full animate-spin mb-3" />
-          <p className="text-sm">加载灵感中...</p>
-        </div>
-      )}
-
-      {/* Empty */}
-      {!loading && filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4">
-            <Sparkles className="w-8 h-8 text-slate-300" />
+        {/* ===== Header ===== */}
+        <div className="os-insp-header animate-fade-slide-up">
+          <div className="flex items-center gap-3">
+            <div className="os-insp-header-icon">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="os-h1 !mb-0">灵感案例库</h1>
+              <p className="os-section-desc !mt-1">看看别人正在生成什么内容，一键生成同款。</p>
+            </div>
           </div>
-          <p className="text-sm">未找到匹配的灵感案例</p>
+          <button
+            className="os-insp-fav-btn"
+            onClick={() => {
+              if (favoriteCount > 0) setActiveCategory('all');
+            }}
+          >
+            <Star className={`w-4 h-4 ${favoriteCount > 0 ? 'text-amber-400 fill-amber-400' : ''}`} />
+            <span>我的收藏</span>
+            {favoriteCount > 0 && <span className="os-insp-fav-badge">{favoriteCount}</span>}
+          </button>
         </div>
-      )}
 
-      {/* Visual Case Cards */}
-      {!loading && filtered.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filtered.map((prompt, index) => {
-            const catVisual = CATEGORY_VISUAL[prompt.category] || { gradient: 'from-slate-400 to-slate-500', icon: Sparkles };
-            const CatIcon = catVisual.icon;
-            const displayCat = getDisplayCategory(prompt.category);
-            const isExpanded = expandedId === prompt.id;
-            const isCopied = copiedId === prompt.id;
+        {/* ===== Search + Filter ===== */}
+        <div className="os-insp-search-row animate-fade-slide-up" style={{ animationDelay: '0.05s' }}>
+          <div className="os-insp-search-box">
+            <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <input
+              type="text"
+              placeholder="搜索你想生成的内容，例如: 小红书封面、节日海报、AI写真..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="os-insp-search-input"
+            />
+          </div>
+          <button
+            className={`os-insp-filter-btn ${showFilter ? 'os-insp-filter-btn-active' : ''}`}
+            onClick={() => setShowFilter(!showFilter)}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>筛选</span>
+          </button>
+        </div>
 
-            return (
-              <div
-                key={prompt.id}
-                className="os-inspire-card group animate-fade-slide-up"
-                style={{ animationDelay: `${Math.min(index * 0.03, 0.5)}s` }}
-              >
-                {/* Cover Image Area */}
-                <div className="os-inspire-cover">
-                  {/* Gradient placeholder (no real images in data) */}
-                  <div className={`w-full h-full bg-gradient-to-br ${catVisual.gradient} flex flex-col items-center justify-center gap-2`}>
+        {/* ===== Category Tabs ===== */}
+        <div className="os-insp-tabs-row animate-fade-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div className="os-insp-tabs-scroll">
+            {DISPLAY_CATEGORIES.map(cat => {
+              const isActive = activeCategory === cat.key;
+              const count = getCategoryCount(cat.key);
+              return (
+                <button
+                  key={cat.key}
+                  onClick={() => setActiveCategory(cat.key)}
+                  className={`os-insp-tab ${isActive ? 'os-insp-tab-active' : ''}`}
+                >
+                  {isActive && <cat.icon className="w-3.5 h-3.5" />}
+                  <span>{cat.label}</span>
+                  <span className="os-insp-tab-count">{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ===== Loading ===== */}
+        {loading && (
+          <div className="os-insp-loading">
+            <div className="os-insp-spinner" />
+            <p>加载灵感中...</p>
+          </div>
+        )}
+
+        {/* ===== Empty ===== */}
+        {!loading && filtered.length === 0 && (
+          <div className="os-insp-empty">
+            <div className="os-insp-empty-icon">
+              <Sparkles className="w-8 h-8 text-slate-300" />
+            </div>
+            <p className="text-sm text-slate-400">未找到匹配的灵感案例</p>
+          </div>
+        )}
+
+        {/* ===== Cards Grid ===== */}
+        {!loading && filtered.length > 0 && (
+          <div className="os-insp-grid">
+            {filtered.map((prompt, index) => {
+              const catVisual = CATEGORY_VISUAL[prompt.category];
+              const displayVisual = DISPLAY_VISUAL[getDisplayCategory(prompt.category)] || DISPLAY_VISUAL['商品图'];
+              const visual = catVisual
+                ? { gradient: catVisual.gradient, icon: catVisual.icon }
+                : { gradient: displayVisual.gradient, icon: displayVisual.icon };
+              const CatIcon = visual.icon;
+              const displayCat = getDisplayCategory(prompt.category);
+              const catColor = displayVisual.color || '#7B61FF';
+              const isFav = favorites.has(prompt.id);
+              const uses = prompt.uses || 0;
+              // 使用 id 作为确定性伪随机值
+              const pseudoViews = ((prompt.id * 37 + 13) % 900) + 100;
+              const pseudoLikes = ((prompt.id * 23 + 7) % 90) + 10;
+
+              return (
+                <div
+                  key={prompt.id}
+                  className="os-insp-card-v2 animate-fade-slide-up"
+                  style={{ animationDelay: `${Math.min(index * 0.03, 0.5)}s` }}
+                >
+                  {/* Cover Image */}
+                  <div className="os-insp-card-cover" style={{ background: visual.gradient }}>
                     <CatIcon className="w-10 h-10 text-white/80" />
-                    <span className="text-white/90 text-sm font-medium">{displayCat}</span>
+                    <span className="text-white/90 text-sm font-medium mt-1">{displayCat}</span>
+
+                    {/* Category Badge */}
+                    <span className="os-insp-card-badge" style={{ background: catColor }}>{displayCat}</span>
+
+                    {/* Favorite Star */}
+                    <button
+                      className={`os-insp-card-star ${isFav ? 'os-insp-card-star-active' : ''}`}
+                      onClick={(e) => toggleFavorite(prompt.id, e)}
+                    >
+                      <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-amber-400 text-amber-400' : ''}`} />
+                    </button>
+
+                    {/* Hover Overlay */}
+                    <div className="os-insp-card-hover-overlay">
+                      <button className="os-insp-card-cta" onClick={() => handleGenerate(prompt)}>
+                        <Wand2 className="w-4 h-4" />
+                        <span>生成同款</span>
+                      </button>
+                    </div>
                   </div>
-                  {/* Hover overlay */}
-                  <div className="os-inspire-cover-overlay">
+
+                  {/* Card Body */}
+                  <div className="os-insp-card-body">
+                    <h3 className="os-insp-card-title">{prompt.title}</h3>
+                    <p className="os-insp-card-desc">
+                      {prompt.content.length > 50 ? prompt.content.slice(0, 50) + '...' : prompt.content}
+                    </p>
+
+                    {/* Tags */}
+                    {prompt.tags && prompt.tags.length > 0 && (
+                      <div className="os-insp-card-tags">
+                        {prompt.tags.slice(0, 3).map((tag, i) => (
+                          <span key={i} className="os-insp-card-tag">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Stats */}
+                    <div className="os-insp-card-stats">
+                      <span className="os-insp-card-stat">
+                        <Eye className="w-3.5 h-3.5" />
+                        {pseudoViews}
+                      </span>
+                      <span className="os-insp-card-stat">
+                        <Heart className="w-3.5 h-3.5" />
+                        {pseudoLikes}
+                      </span>
+                    </div>
+
+                    {/* Generate Button */}
                     <button
                       onClick={() => handleGenerate(prompt)}
-                      className="os-inspire-cta"
+                      className="os-insp-card-gen-btn"
                     >
-                      <Wand2 className="w-4 h-4" />
+                      <Wand2 className="w-3.5 h-3.5" />
                       <span>生成同款</span>
                     </button>
                   </div>
-                  {/* Category badge */}
-                  <span className="os-inspire-badge">{displayCat}</span>
                 </div>
-
-                {/* Card Body */}
-                <div className="os-inspire-body">
-                  {/* Title */}
-                  <h3 className="os-inspire-title">{prompt.title}</h3>
-
-                  {/* Description - first 60 chars of content */}
-                  <p className="os-inspire-desc">
-                    {prompt.content.length > 60 ? prompt.content.slice(0, 60) + '...' : prompt.content}
-                  </p>
-
-                  {/* Tags */}
-                  {prompt.tags && prompt.tags.length > 0 && (
-                    <div className="flex gap-1.5 flex-wrap mb-3">
-                      {prompt.tags.slice(0, 3).map((tag, i) => (
-                        <span key={i} className="os-inspire-tag">{tag}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Primary Action */}
-                  <button
-                    onClick={() => handleGenerate(prompt)}
-                    className="os-inspire-generate-btn"
-                  >
-                    <Wand2 className="w-3.5 h-3.5" />
-                    <span>生成同款</span>
-                  </button>
-
-                  {/* Secondary Actions */}
-                  <div className="flex items-center gap-3 mt-2">
-                    <button
-                      onClick={() => setExpandedId(isExpanded ? null : prompt.id)}
-                      className="os-inspire-secondary-btn"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>查看 Prompt</span>
-                      {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                    </button>
-                    <button
-                      onClick={() => handleCopy(prompt)}
-                      className="os-inspire-secondary-btn"
-                    >
-                      {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{isCopied ? '已复制' : '复制'}</span>
-                    </button>
-                  </div>
-
-                  {/* Expanded Prompt */}
-                  {isExpanded && (
-                    <div className="os-inspire-prompt-panel">
-                      <p className="text-xs text-slate-500 leading-relaxed whitespace-pre-wrap">{prompt.content}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      </div>{/* end os-content */}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -7,9 +7,8 @@ import {
   Download, RotateCcw, ZoomIn, Loader2, Check,
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck
 } from 'lucide-react';
-import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig, type InspirationItem } from '@/lib/tool-workflow-config';
+import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
-import InspirationLibrary from '@/components/site/common/InspirationLibrary';
 
 // ===== 类型 =====
 interface GeneratedImage { url: string; }
@@ -358,22 +357,6 @@ export default function CreateWorkbench() {
     } catch { /* silently fail */ }
   };
 
-  // ===== 使用灵感 =====
-  const handleUseInspiration = useCallback((item: InspirationItem) => {
-    // 切换到对应工具
-    if (item.toolSlug !== toolSlug) {
-      handleToolSwitch(item.toolSlug);
-    }
-    // 填充参数
-    setInputText(item.desc);
-    if (item.style) setSelectedStyle(item.style);
-    if (item.subtype) setSelectedSubtype(item.subtype);
-    if (item.ratio && VALID_RATIOS.includes(item.ratio)) setRatio(item.ratio);
-    if (item.count >= 1 && item.count <= 8) setCount(item.count);
-    // 自动触发生成
-    setTimeout(() => handleGenerate(), 300);
-  }, [toolSlug]);
-
   // ===== 渲染 =====
   const isGenerating = !['idle', 'done', 'error'].includes(step);
   const layoutClass = TOOL_LAYOUT[toolSlug] || 'os-ws-layout-default';
@@ -531,11 +514,6 @@ export default function CreateWorkbench() {
                 <><Sparkles /> 开始生成</>
               )}
             </button>
-
-            {/* 灵感参考 */}
-            <div className="os-ws-inspiration-section">
-              <InspirationLibrary currentTool={toolSlug} onUseInspiration={handleUseInspiration} />
-            </div>
           </div>
         </div>
 
