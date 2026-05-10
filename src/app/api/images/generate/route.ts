@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateWithModel } from '@/lib/model-selector';
 import { HeaderUtils } from 'coze-coding-dev-sdk';
 import { buildPrompt, ratioToSize } from '@/lib/prompt-engine';
+import { getSupabaseClient } from '@/storage/database/supabase-client';
 
 // ===== 生成类型中文标签 =====
 export const SUBTYPE_LABELS: Record<string, Record<string, string>> = {
@@ -52,7 +53,27 @@ export const STYLE_LABELS: Record<string, Record<string, string>> = {
  */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // ===== 认证检查 =====
+    const supabase = getSupabaseClient();
+    const token = request.cookies.get('user_token')?.value;
+    if (!token) {
+      return NextResponse.json({ success: false, error: '请先登录' }, { status: 401 });
+    }
+    const { data: session } = await supabase
+      .from('user_sessions')
+      .select('user_id, expires_at')
+      .eq('token', token)
+      .single();
+    if (!session || new Date(session.expires_at) < new Date()) {
+      return NextResponse.json({ success: false, error: '登录已过期，请重新登录' }, { status: 401 });
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ success: false, error: '请求体格式错误' }, { status: 400 });
+    }
     const { 
       prompt, 
       image,
@@ -65,32 +86,66 @@ export async function POST(request: NextRequest) {
       tool_id,
       type,
       count = 1,
-    } = body;
+    } = body as Record<string, unknown>;
     
-    const finalSize = ratioToSize(ratio, size || '2K');
-    const effectiveToolId = tool_id || type || 'product-generator';
+    // Type assertions
+    const promptStr = typeof prompt === 'string' ? prompt : '';
+    const imagesArr = Array.isArray(images) ? images as string[] : [];
+    const sizeStr = typeof size === 'string' ? size : undefined;
+    const ratioStr = typeof ratio === 'string' ? ratio : undefined;
+    const styleStr = typeof style === 'string' ? style : undefined;
+    const subtypeStr = typeof subtype === 'string' ? subtype : undefined;
+    const modelStr = typeof model === 'string' ? model : undefined;
+    const toolIdStr = typeof tool_id === 'string' ? tool_id : undefined;
+    const typeStr = typeof type === 'string' ? type : undefined;
+    const countNum = typeof count === 'number' ? count : 1;
     
-    const imageArray = images && Array.isArray(images) && images.length > 0
-      ? images
-      : image
-        ? [image]
+    if (!promptStr || promptStr.trim().length === 0) {
+      return NextResponse.json({ success: false, error: '请提供生成需求描述' }, { status: 400 });
+    }
+
+    // ===== 配额检查 =====
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const { count: todayCount } = await supabase
+      .from('generation_tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', session.user_id)
+      .gte('created_at', today.toISOString());
+    const DAILY_FREE_LIMIT = 3;
+    if ((todayCount || 0) >= DAILY_FREE_LIMIT) {
+      return NextResponse.json({ 
+        success: false, 
+        error: `今日免费生成次数已用完（${DAILY_FREE_LIMIT}次/天），请明天再试或升级会员` 
+      }, { status: 429 });
+    }
+    
+    const finalSize = ratioToSize(ratioStr, sizeStr || '2K');
+    const imageStr = typeof image === 'string' ? image : undefined;
+
+    const effectiveToolId = toolIdStr || typeStr || 'product-generator';
+    
+    const imageArray = imagesArr.length > 0
+      ? imagesArr
+      : imageStr
+        ? [imageStr]
         : [];
     const hasImage = imageArray.length > 0;
     const referenceImage = hasImage ? imageArray[0] : undefined;
 
     // 构建工具专属增强提示词（含guardrail负面词）
     const promptResult = buildPrompt({
-      prompt: prompt || '',
+      prompt: promptStr,
       toolType: effectiveToolId,
-      style,
-      subtype,
-      ratio,
+      style: styleStr,
+      subtype: subtypeStr,
+      ratio: ratioStr,
       hasImage,
       layoutMode: undefined,
     });
 
-    const effectiveCount = Math.max(1, Math.min(count || 1, 6));
-    console.log(`[ImagesGenerate] tool=${effectiveToolId}, count=${effectiveCount}, hasImage=${hasImage}, ratio=${ratio || 'default'}`);
+    const effectiveCount = Math.max(1, Math.min(countNum, 6));
+    console.log(`[ImagesGenerate] tool=${effectiveToolId}, count=${effectiveCount}, hasImage=${hasImage}, ratio=${ratioStr || 'default'}`);
 
     const customHeaders = HeaderUtils.extractForwardHeaders(request.headers);
 
@@ -98,7 +153,7 @@ export async function POST(request: NextRequest) {
     const promises = Array.from({ length: effectiveCount }, () =>
       generateWithModel(
         promptResult.fullPrompt,
-        model || 'coze-image',
+        modelStr || 'coze-image',
         finalSize,
         customHeaders,
         effectiveToolId,
