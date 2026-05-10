@@ -283,8 +283,10 @@ export default function HomePage() {
     setPhase('identifying');
     // 轻量过渡：1.2秒后直接跳转工具页
     setTimeout(() => {
-      const tool = matchTool(inputText);
-      if (tool && TOOL_ROUTE_MAP[tool.slug]) {
+      let tool = matchTool(inputText);
+      // 未匹配到工具时，默认使用 AI 商品图生成器
+      if (!tool) tool = TOOL_MATCHES[0];
+      if (TOOL_ROUTE_MAP[tool.slug]) {
         setIsJumping(true);
         const rec = getStyleRecommendation(tool, inputText);
         navigateToCreate(router, {
@@ -293,7 +295,8 @@ export default function HomePage() {
           analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
         });
       } else {
-        setPhase('no-match');
+        // 兜底：跳转通用创作页
+        router.push('/create');
       }
     }, 1200);
   }, [inputText, uploadedImages, phase, router]);
