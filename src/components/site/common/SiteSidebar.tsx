@@ -35,7 +35,10 @@ export default function SiteSidebar() {
     <aside className="os-dock">
       {/* ===== Logo ===== */}
       <Link href="/" className="os-dock-logo" aria-label="OneClaw 首页">
-        <SiteLogo size={36} />
+        <div className="relative rounded-xl flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-[#7B61FF] to-[#5B8CFF] shadow-sm" style={{ width: 36, height: 36 }}>
+          <Sparkles className="text-white" style={{ width: 18, height: 18 }} strokeWidth={2.5} />
+        </div>
+        <span className="os-dock-brand">OneClaw</span>
       </Link>
 
       {/* ===== 主导航 ===== */}

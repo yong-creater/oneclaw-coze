@@ -1,5 +1,11 @@
 import { Suspense } from 'react';
+import { Metadata } from 'next';
 import CreateWorkbench from '@/components/site/pages/CreateWorkbench';
+
+export const metadata: Metadata = {
+  title: 'AI 创作工作台',
+  description: 'OneClaw AI 创作工作台，快速生成商品图、小红书封面、AI 写真等高质量内容。',
+};
 
 function CreateLoading() {
   return (

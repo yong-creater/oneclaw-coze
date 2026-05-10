@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
-// Favicon - 浏览器标签页图标 (闪电图标+橙红渐变)
+// Favicon - 浏览器标签页图标 (闪电图标+紫蓝渐变)
 export async function GET() {
   const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#f97316"/>
-      <stop offset="100%" style="stop-color:#ea580c"/>
+      <stop offset="0%" style="stop-color:#7B61FF"/>
+      <stop offset="100%" style="stop-color:#5EA9FF"/>
     </linearGradient>
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#grad)"/>
