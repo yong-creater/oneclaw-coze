@@ -21,7 +21,7 @@ type GenStep = 'idle' | 'creating' | 'generating' | 'done' | 'error';
 
 const STEP_LABELS: Record<GenStep, string> = {
   idle: '等待开始',
-  creating: '创建任务',
+  creating: '准备生成',
   generating: '生成中',
   done: '完成',
   error: '生成失败',
@@ -191,12 +191,8 @@ export default function CreateWorkbench() {
   // ----- 加载中文案轮播 -----
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
 
-  // ----- 任务系统 -----
-  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
-  const pollTimerRef = useRef<number | null>(null);
+  // ----- 生成控制 -----
   const abortRef = useRef<AbortController | null>(null);
-  const executeAbortRef = useRef<AbortController | null>(null); // execute 请求独立 AbortController，避免被 poll 取消
-  const pollStartRef = useRef<number | null>(null); // 轮询开始时间，用于超时检测
 
   // ----- Refs -----
   const parsedCtx = useRef<{
@@ -416,163 +412,19 @@ export default function CreateWorkbench() {
 
   const removeUpload = (id: string) => setUploads(prev => prev.filter(u => u.id !== id));
 
-  // ===== 生成 =====
-  // ===== 任务轮询 =====
-  const pollTask = useCallback(async (taskId: string) => {
-    // 记录轮询开始时间
-    if (!pollStartRef.current) pollStartRef.current = Date.now();
-    // 总超时保护：3 分钟仍未完成则终止
-    if (Date.now() - pollStartRef.current > 180000) {
-      setStep('error');
-      setErrorMsg('生成超时，请重试');
-      pollStartRef.current = null;
-      return;
-    }
-    // 每次 poll 创建新的 AbortController，组件卸载时统一取消
-    abortRef.current?.abort();
-    const ac = new AbortController();
-    abortRef.current = ac;
-    const { signal } = ac;
-
-    try {
-      const res = await fetchWithTimeout(`/api/tasks/${taskId}`, { credentials: 'include', signal }, 10000);
-      const data = await res.json();
-      if (!data.success) {
-        setStep('error');
-        setErrorMsg(data.error || '任务查询失败');
-        return;
-      }
-      const task = data.task;
-      switch (task.status) {
-        case 'pending': {
-          setStep('creating');
-          // 如果任务 pending 超过 15 秒，说明 execute 可能未触发，重新执行
-          const createdTime = new Date(task.created_at).getTime();
-          const elapsed = Date.now() - createdTime;
-          if (elapsed > 15000) {
-            console.warn('[Poll] 任务 pending 超过 15 秒，重新触发 execute');
-            const execAc = new AbortController();
-            executeAbortRef.current = execAc;
-            fetchWithTimeout(`/api/tasks/${taskId}/execute`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              signal: execAc.signal,
-            }, 60000).catch(() => {});
-          }
-          break;
-        }
-        case 'generating':
-          setStep('generating');
-          break;
-        case 'completed': {
-          const urls = (task.result_images || []).map((img: { url: string }) => img.url);
-          if (urls.length > 0) {
-            setImages(urls.map((url: string) => ({ url })));
-            setSelectedIdx(0);
-          }
-          setStep('done');
-          // 刷新每日配额
-          refreshQuota();
-          // Auto-save to user_generations
-          if (authenticated && urls.length > 0) {
-            try {
-              await fetchWithTimeout('/api/generations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  tool_id: toolSlug,
-                  tool_name: config?.name || toolSlug,
-                  tool_type: slugToGenType(toolSlug),
-                  title: inputText.slice(0, 50) || config?.name || 'AI生成作品',
-                  thumbnail: urls[0],
-                  input_params: { prompt: inputText, style: selectedStyle, subtype: selectedSubtype, ratio, count },
-                  output_content: { image_urls: urls },
-                }),
-                credentials: 'include',
-                signal,
-              }, 10000);
-              setSaved(true);
-            } catch { /* auto-save failure is non-critical */ }
-          }
-          pollStartRef.current = null;
-          return; // Stop polling
-        }
-        case 'failed':
-          setStep('error');
-          setErrorMsg(task.error_message || '生成失败，请重试');
-          pollStartRef.current = null;
-          return; // Stop polling
-      }
-      // Continue polling
-      pollTimerRef.current = window.setTimeout(() => pollTask(taskId), 2000);
-    } catch (err: unknown) {
-      // AbortError means component unmounted — don't update state
-      if (err instanceof DOMException && err.name === 'AbortError') return;
-      setStep('error');
-      setErrorMsg('网络错误，请重试');
-    }
-  }, [authenticated, config?.name, inputText, ratio, selectedStyle, selectedSubtype, count, toolSlug]);
-
-  // 清理轮询和 pending 请求（防止导航卡死）
-  useEffect(() => {
-    return () => {
-      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
-      abortRef.current?.abort();
-      executeAbortRef.current?.abort();
-    };
-  }, []);
-
-  // URL中有taskId时恢复任务状态
-  // ===== 刷新恢复 =====
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tid = urlParams.get('taskId');
-    if (tid && !currentTaskId && step === 'idle') {
-      setCurrentTaskId(tid);
-      const ac = new AbortController();
-      abortRef.current = ac;
-      fetch(`/api/tasks/${tid}`, { signal: ac.signal })
-        .then(r => r.json())
-        .then(data => {
-          const task = data.task;
-          if (!task) return;
-          if (task.status === 'generating') {
-            setStep('generating');
-            pollTask(tid);
-          } else if (task.status === 'completed') {
-            setStep('done');
-            setImages((task.result_images || []).map((img: { url: string }, i: number) => ({ id: `${i}`, url: img.url })));
-          } else if (task.status === 'failed') {
-            setStep('error');
-            setErrorMsg(task.error_message || '生成失败');
-          } else if (task.status === 'pending') {
-            setStep('creating');
-            pollTask(tid);
-          }
-        })
-        .catch(() => {});
-    }
-    return () => {
-      if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
-    };
-  }, [searchParams, currentTaskId, step, setImages, setStep, setErrorMsg]);
-
-  // ===== 任务驱动生成 =====
+  // ===== 生成（直接调用 /api/images/generate） =====
   const handleGenerate = async () => {
     const p = genParamsRef.current;
     if (!p.inputText && p.uploads.length === 0) {
-      setErrorMsg('请先输入描述或上传参考图片');
+      showAlert('请先输入内容', '请输入描述文字或上传参考图片后再生成。', 'alert');
       return;
     }
     if (step === 'creating' || step === 'generating') return; // 防重复点击
 
-    // 登录拦截：未登录时弹出登录弹窗，登录后通过 pendingAction 自动继续
-    if (!requireAuth(handleGenerate)) {
-      return;
-    }
+    // 登录拦截
+    if (!requireAuth(handleGenerate)) return;
 
-    // 每日免费次数检查（-2=无限制跳过，-1=未登录/未知不阻止，0=用完，null=加载中不阻止）
+    // 每日免费次数检查（-2=无限制跳过，-1=未登录不阻止，0=用完，null=加载中不阻止）
     if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
       showAlert('今日免费额度已用完', '今日免费生成次数已达上限，明天再来吧！升级会员可获取更多额度。', 'quota-exhausted');
       return;
@@ -582,73 +434,72 @@ export default function CreateWorkbench() {
     setImages([]);
     setSaved(false);
     setErrorMsg('');
-    pollStartRef.current = null; // 重置轮询计时
 
-    // 取消之前的 pending 请求（包括 execute 和 poll）
+    // 取消之前的请求
     abortRef.current?.abort();
-    executeAbortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
     const { signal } = ac;
 
     try {
-      // 1. 创建任务
+      setStep('generating');
+
+      // 直接调用生成 API
       const layoutMode = parsedCtx.current.analysisResult?.layoutMode || 'single-product';
-      const createBody: Record<string, unknown> = {
+      const genBody: Record<string, unknown> = {
         prompt: p.inputText,
-        toolType: p.toolSlug,
+        toolSlug: p.toolSlug,
         style: p.selectedStyle,
         ratio: p.ratio,
         count: p.count,
         generationType: p.selectedSubtype,
         layoutMode,
       };
-      if (p.uploads.length > 0) createBody.uploadedImages = p.uploads.map(u => u.url);
+      if (p.uploads.length > 0) genBody.referenceImages = p.uploads.map(u => u.url);
 
-      const createRes = await fetchWithTimeout('/api/tasks', {
+      const genRes = await fetchWithTimeout('/api/images/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(createBody),
+        body: JSON.stringify(genBody),
         credentials: 'include',
         signal,
-      }, 15000);
-      const createData = await createRes.json();
+      }, 120000); // 图片生成最多等 120 秒
 
-      if (!createData.success) {
+      const genData = await genRes.json();
+
+      if (!genData.success) {
         setStep('error');
-        setErrorMsg(createData.error || '任务创建失败');
+        const errMsg = genData.error || '生成失败，请重试';
+        setErrorMsg(errMsg);
+        showAlert('生成失败', errMsg, 'error');
         return;
       }
 
-      const taskId = createData.task.task_id || createData.task.taskId;
-      setCurrentTaskId(taskId);
+      // 提取图片 URL（API 返回 imageUrls 字段）
+      const urls: string[] = genData.imageUrls || genData.images || genData.data?.images || [];
+      if (urls.length === 0) {
+        setStep('error');
+        setErrorMsg('未获取到生成结果');
+        return;
+      }
 
-      // Update URL with taskId (no page reload)
-      const url = new URL(window.location.href);
-      url.searchParams.set('taskId', taskId);
-      window.history.replaceState({}, '', url.toString());
-
-      setStep('generating');
-
-      // 2. 执行任务（独立 AbortController，不受 poll 取消影响）
-      const execAc = new AbortController();
-      executeAbortRef.current = execAc;
-      fetchWithTimeout(`/api/tasks/${taskId}/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        signal: execAc.signal,
-      }, 60000).catch(() => { /* execute runs server-side */ });
-
-      // 3. 开始轮询
-      pollTask(taskId);
+      setImages(urls.map((url: string) => ({ url })));
+      setSelectedIdx(0);
+      setStep('done');
+      setSaved(true); // 后端已自动保存到 user_generations
+      refreshQuota();
     } catch (err: unknown) {
-      // AbortError means component unmounted — don't update state
       if (err instanceof DOMException && err.name === 'AbortError') return;
       setStep('error');
-      setErrorMsg('网络错误，请重试');
+      const msg = err instanceof Error && err.message.includes('timeout') ? '生成超时，请重试' : '网络错误，请重试';
+      setErrorMsg(msg);
     }
   };
+
+  // 清理 pending 请求
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
 
   // ===== 下载 =====
   const handleDownload = async (url: string, idx: number) => {

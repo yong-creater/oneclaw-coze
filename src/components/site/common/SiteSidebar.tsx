@@ -25,25 +25,9 @@ export default function SiteSidebar() {
   const pathname = usePathname();
   const { user, authenticated, logout, setShowLoginModal, requireAuth } = useUser();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [activeTaskCount, setActiveTaskCount] = useState(0);
 
-  // 轮询活跃任务数
-  useEffect(() => {
-    if (!authenticated) { setActiveTaskCount(0); return; }
-    let cancelled = false;
-    const poll = async () => {
-      try {
-        const res = await fetch('/api/tasks?status=generating&limit=10');
-        if (res.ok && !cancelled) {
-          const data = await res.json();
-          setActiveTaskCount(data.tasks?.length ?? 0);
-        }
-      } catch { /* ignore */ }
-    };
-    poll();
-    const timer = setInterval(poll, 5000);
-    return () => { cancelled = true; clearInterval(timer); };
-  }, [authenticated]);
+  // 生成中的任务数（直接生成模式下无轮询，始终为0）
+  const activeTaskCount = 0;
 
   function isActive(href: string): boolean {
     if (href === '/') return pathname === '/';
