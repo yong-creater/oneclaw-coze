@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Download, ZoomIn, Trash2, FolderOpen, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Sparkles, Download, ZoomIn, Trash2, FolderOpen, Image as ImageIcon, Loader2, X } from 'lucide-react';
 import BackToHome from '@/components/site/common/BackToHome';
 
 /* ---------- 数据类型 ---------- */
@@ -17,6 +17,65 @@ interface Generation {
   created_at: string;
   model_name?: string;
   count?: number;
+}
+
+/* ---------- 删除确认弹窗 ---------- */
+function DeleteConfirmModal({
+  open,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  /* ESC 关闭 */
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open, onCancel]);
+
+  if (!open) return null;
+
+  return (
+    <div className="os-delete-overlay" onClick={onCancel}>
+      <div
+        className="os-delete-dialog"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="确认删除"
+      >
+        {/* 关闭按钮 */}
+        <button className="os-delete-close" onClick={onCancel} type="button" aria-label="关闭">
+          <X style={{ width: 18, height: 18 }} />
+        </button>
+
+        {/* 图标 */}
+        <div className="os-delete-icon-wrap">
+          <Trash2 style={{ width: 24, height: 24 }} />
+        </div>
+
+        {/* 文案 */}
+        <h3 className="os-delete-title">删除这个作品？</h3>
+        <p className="os-delete-desc">删除后将无法恢复。</p>
+
+        {/* 按钮 */}
+        <div className="os-delete-actions">
+          <button className="os-delete-cancel" onClick={onCancel} type="button">
+            取消
+          </button>
+          <button className="os-delete-confirm" onClick={onConfirm} type="button">
+            删除
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ---------- 工具名映射 ---------- */
@@ -80,6 +139,7 @@ export default function ProjectPage() {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   /* ---- 加载 ---- */
   useEffect(() => {
@@ -114,19 +174,26 @@ export default function ProjectPage() {
   }, []);
 
   /* ---- 删除 ---- */
-  const handleDelete = useCallback(
-    async (e: React.MouseEvent, id: number) => {
-      e.stopPropagation();
-      if (!confirm('确定删除这个作品吗？')) return;
-      try {
-        await fetch(`/api/generations?id=${id}`, { method: 'DELETE' });
-        setGenerations((prev) => prev.filter((g) => g.id !== id));
-      } catch {
-        /* empty */
-      }
-    },
-    []
-  );
+  const handleDeleteClick = useCallback((e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
+    setDeleteTarget(id);
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (deleteTarget == null) return;
+    try {
+      await fetch(`/api/generations?id=${deleteTarget}`, { method: 'DELETE' });
+      setGenerations((prev) => prev.filter((g) => g.id !== deleteTarget));
+    } catch {
+      /* empty */
+    } finally {
+      setDeleteTarget(null);
+    }
+  }, [deleteTarget]);
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteTarget(null);
+  }, []);
 
   /* ---- 继续优化 ---- */
   const handleContinue = useCallback(
@@ -184,7 +251,7 @@ export default function ProjectPage() {
                     {/* 删除按钮 */}
                     <button
                       className="os-project-del-btn"
-                      onClick={(e) => handleDelete(e, gen.id)}
+                      onClick={(e) => handleDeleteClick(e, gen.id)}
                       type="button"
                       aria-label="删除"
                     >
@@ -236,6 +303,13 @@ export default function ProjectPage() {
             </div>
           </div>
         )}
+
+        {/* 删除确认弹窗 */}
+        <DeleteConfirmModal
+          open={deleteTarget !== null}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
       </div>
     </div>
   );

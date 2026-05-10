@@ -801,3 +801,143 @@
   font-size: 10px;
   font-weight: 600;
 }
+
+/* ================================================================
+   删除确认弹窗 — AI SaaS 风格
+   glassmorphism + fade/scale 动画
+   ================================================================ */
+
+/* 遮罩层 */
+.os-delete-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 20, 0.45);
+  backdrop-filter: blur(6px);
+  animation: os-delete-fade-in 0.2s ease;
+}
+
+/* 弹窗主体 */
+.os-delete-dialog {
+  position: relative;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  padding: 32px 28px 24px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  text-align: center;
+  animation: os-delete-scale-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 关闭按钮 */
+.os-delete-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #a0a3b1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.os-delete-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #5a5d6e;
+}
+
+/* 图标 */
+.os-delete-icon-wrap {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.12), rgba(255, 77, 79, 0.08));
+  color: #ff4d4f;
+}
+
+/* 标题 */
+.os-delete-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1d2e;
+  line-height: 1.3;
+}
+
+/* 描述 */
+.os-delete-desc {
+  margin: 0 0 28px;
+  font-size: 14px;
+  color: #8b90a7;
+  line-height: 1.5;
+}
+
+/* 按钮行 */
+.os-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 取消按钮 */
+.os-delete-cancel {
+  height: 44px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+  color: #5a5d6e;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.os-delete-cancel:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1a1d2e;
+}
+
+/* 删除按钮 */
+.os-delete-confirm {
+  height: 44px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ff6b6b, #ff4d4f);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(255, 77, 79, 0.25);
+}
+.os-delete-confirm:hover {
+  box-shadow: 0 6px 24px rgba(255, 77, 79, 0.4);
+  filter: brightness(1.06);
+}
+
+/* 动画 */
+@keyframes os-delete-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes os-delete-scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
