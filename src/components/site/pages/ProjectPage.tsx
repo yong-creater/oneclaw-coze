@@ -51,6 +51,25 @@ function formatDate(d: string) {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
 }
 
+/* Extract generation meta info from output_content */
+function genMeta(gen: Record<string, unknown>) {
+  const oc = gen.output_content;
+  let model = '';
+  let style = '';
+  let ratio = '';
+  let count = 0;
+  if (oc) {
+    try {
+      const parsed = typeof oc === 'string' ? JSON.parse(oc) : oc;
+      model = parsed?.model || '';
+      style = parsed?.style || '';
+      ratio = parsed?.ratio || parsed?.aspect_ratio || '';
+      if (Array.isArray(parsed?.image_urls)) count = parsed.image_urls.length;
+    } catch { /* ignore */ }
+  }
+  return { model, style, ratio, count };
+}
+
 /* ---------- component ---------- */
 export default function ProjectPage() {
   const router = useRouter();
@@ -188,9 +207,10 @@ export default function ProjectPage() {
             const slug = toolTypeSlug(gen);
             const title = (gen.title as string) || TOOL_LABEL[slug] || '未命名作品';
             const date = formatDate(gen.created_at as string);
+            const meta = genMeta(gen);
             return (
               <div key={gen.id as number} className="os-project-card">
-                {/* 图片区 — 1:1 */}
+                {/* 图片区 — 3:4 比例 */}
                 <div className="os-project-img-wrap">
                   {img ? (
                     <img src={img} alt={title} className="os-project-img" />
@@ -199,7 +219,7 @@ export default function ProjectPage() {
                       <ImageIcon style={{ width: 40, height: 40, color: '#C4B5FD' }} />
                     </div>
                   )}
-                  {/* hover 底部操作栏 */}
+                  {/* hover 底部操作栏 — 绝对定位 + 渐变遮罩 */}
                   <div className="os-project-hover">
                     <button onClick={() => router.push(`/create?tool=${slug}`)} className="os-project-hover-btn">
                       <Sparkles style={{ width: 14, height: 14 }} />
@@ -215,13 +235,19 @@ export default function ProjectPage() {
                     </button>
                   </div>
                 </div>
-                {/* 底部信息 */}
+                {/* 底部生成信息栏 */}
                 <div className="os-project-info">
-                  <span style={{ fontWeight: 600, fontSize: 14, color: '#1F2937', display: 'block' }}>{title}</span>
+                  <span className="os-project-info-title">{title}</span>
+                  <div className="os-project-meta-row">
+                    <span className="os-project-meta-tag">{TOOL_LABEL[slug] || slug}</span>
+                    {meta.model && <span className="os-project-meta-tag">{meta.model}</span>}
+                    {meta.style && <span className="os-project-meta-tag-neutral">{meta.style}</span>}
+                    {meta.ratio && <span className="os-project-meta-tag-neutral">{meta.ratio}</span>}
+                    {meta.count > 0 && <span className="os-project-meta-tag-neutral">{meta.count} 张</span>}
+                  </div>
                   <span className="os-project-time">
-                    <span className="os-card-tag">{TOOL_LABEL[slug] || slug}</span>
-                    <span>{date}</span>
-                    <span className="os-project-del-btn" style={{ marginLeft: 'auto' }}>
+                    {date}
+                    <span className="os-project-del-btn">
                       <Trash2 style={{ width: 14, height: 14 }} onClick={() => handleDelete(gen.id as number)} />
                     </span>
                   </span>

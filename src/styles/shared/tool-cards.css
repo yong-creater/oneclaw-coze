@@ -1,34 +1,38 @@
 /* ==================================================================
-   OneClaw Card Design System — 统一卡片系统
-   规范：340px 宽 / 420px 最小高 / 28px 圆角 / 毛玻璃 / 统一 hover
+   OneClaw Card Design System v2 — AI 创作平台高级感
+   视觉参考：Midjourney Explore / Pinterest / Runway / 即梦
    ================================================================== */
 
 /* ==================== CSS 变量 ==================== */
 :root {
   --oc-card-radius: 28px;
   --oc-card-bg: rgba(255,255,255,0.78);
-  --oc-card-border: 1px solid rgba(255,255,255,0.7);
+  --oc-card-border: 1px solid rgba(255,255,255,0.65);
   --oc-card-blur: blur(24px);
-  --oc-card-shadow: 0 12px 32px rgba(80,80,120,0.08);
+  --oc-card-shadow: 0 8px 32px rgba(80,80,120,0.07);
   --oc-card-hover-y: -6px;
-  --oc-card-hover-shadow: 0 20px 60px rgba(92,92,255,0.14);
+  --oc-card-hover-shadow: 0 20px 50px rgba(120,120,255,0.12);
   --oc-card-transition: all 0.28s ease;
   --oc-tag-bg: rgba(123,97,255,0.08);
   --oc-tag-color: #7B61FF;
   --oc-grad-primary: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
   --oc-grad-placeholder: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+  /* 深色渐变遮罩 */
+  --oc-grad-mask-light: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.18) 100%);
+  --oc-grad-mask-heavy: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.58) 100%);
+  /* glow 阴影 */
+  --oc-glow-btn: 0 8px 30px -6px rgba(91,140,255,0.35);
+  --oc-glow-btn-hover: 0 12px 40px rgba(123,97,255,0.32);
 }
 
 /* ==================== 页面布局工具类 ==================== */
 
-/* 页面内层容器 — 居中 + 限宽 */
 .os-page-inner {
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
 }
 
-/* 筛选胶囊行 */
 .os-page-pills {
   display: flex;
   align-items: center;
@@ -37,7 +41,6 @@
   margin-bottom: 28px;
 }
 
-/* 搜索框容器 */
 .os-page-search-wrap {
   position: relative;
   max-width: 480px;
@@ -68,13 +71,8 @@
   -webkit-backdrop-filter: blur(12px);
 }
 .os-page-search::placeholder { color: #A0A8B8; }
-.os-page-search:hover {
-  border-color: rgba(123,97,255,0.25);
-}
-.os-page-search:focus {
-  border-color: #7B61FF;
-  box-shadow: 0 0 0 3px rgba(123,97,255,0.08);
-}
+.os-page-search:hover { border-color: rgba(123,97,255,0.25); }
+.os-page-search:focus { border-color: #7B61FF; box-shadow: 0 0 0 3px rgba(123,97,255,0.08); }
 
 /* ==================== 通用卡片基础 ==================== */
 .os-card {
@@ -107,13 +105,20 @@
   white-space: nowrap;
 }
 
-/* 通用占位图 */
-.os-card-img-placeholder {
-  background: var(--oc-grad-placeholder);
-  display: flex;
+/* 深色背景标签 (hover 浮层用) */
+.os-card-tag-dark {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: #C4B5FD;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.88);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 /* ==================== 工具库卡片 ==================== */
@@ -143,7 +148,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 420px;
+  min-height: 480px;
   cursor: pointer;
 }
 .os-tool-card:hover {
@@ -151,12 +156,12 @@
   box-shadow: var(--oc-card-hover-shadow);
 }
 
-/* 工具卡片 - 封面图区 (70% 高度) */
+/* 工具卡片 - 封面图区 (占 70%) */
 .os-tool-card-img {
   position: relative;
   width: 100%;
   flex: 7;
-  min-height: 220px;
+  min-height: 280px;
   overflow: hidden;
   background: var(--oc-grad-placeholder);
 }
@@ -164,27 +169,27 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s ease;
+  transition: transform 0.4s ease;
   position: relative;
   z-index: 2;
 }
 .os-tool-card:hover .os-tool-card-img img {
-  transform: scale(1.03);
+  transform: scale(1.05);
 }
-/* 底部渐变 */
+/* 底部渐变遮罩 — 增强视觉层次 */
 .os-tool-card-img::after {
   content: '';
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  height: 40%;
-  background: linear-gradient(to top, rgba(0,0,0,0.06), transparent);
-  opacity: 0;
+  height: 50%;
+  background: var(--oc-grad-mask-light);
+  opacity: 1;
   transition: opacity 0.3s ease;
   pointer-events: none;
   z-index: 3;
 }
 .os-tool-card:hover .os-tool-card-img::after {
-  opacity: 1;
+  background: var(--oc-grad-mask-heavy);
 }
 /* 图片 fallback — 大图标 + 渐变底 */
 .os-tool-card-img-fallback {
@@ -200,21 +205,21 @@
 /* 工具卡片 - 信息区 (30%) */
 .os-tool-card-body {
   flex: 3;
-  padding: 16px 20px 8px;
+  padding: 18px 22px 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 .os-tool-card-title {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 19px;
+  font-weight: 700;
   color: #1C1C28;
   line-height: 1.3;
 }
 .os-tool-card-desc {
   font-size: 13px;
   color: rgba(28,28,40,0.50);
-  line-height: 1.4;
+  line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
@@ -227,29 +232,31 @@
   margin-top: 2px;
 }
 
-/* 工具卡片 - CTA 按钮 */
+/* 工具卡片 - CTA 按钮 (56px / glow) */
 .os-tool-card-cta {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
-  margin: auto 16px 16px;
+  height: 56px;
+  margin: auto 18px 18px;
   border-radius: 16px;
   background: var(--oc-grad-primary);
   color: white;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 18px -4px rgba(91,140,255,0.30);
+  transition: all 0.28s ease;
+  box-shadow: var(--oc-glow-btn);
   flex-shrink: 0;
+  letter-spacing: 0.02em;
 }
 .os-tool-card-cta:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(91,140,255,0.28);
+  box-shadow: var(--oc-glow-btn-hover);
   background: linear-gradient(135deg, #8B71FF 0%, #6B9CFF 100%);
+  filter: brightness(1.08);
 }
 .os-tool-card-cta:active {
   transform: translateY(0) scale(0.98);
@@ -290,11 +297,11 @@
   box-shadow: var(--oc-card-hover-shadow);
 }
 
-/* 作品卡片 - 图片区 */
+/* 作品卡片 - 图片区 (3:4 比例) */
 .os-project-img-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   background: var(--oc-grad-placeholder);
 }
@@ -302,10 +309,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s ease;
+  transition: transform 0.35s ease, filter 0.35s ease;
 }
 .os-project-card:hover .os-project-img {
   transform: scale(1.03);
+  filter: blur(1px) brightness(0.85);
 }
 .os-project-img-fallback {
   width: 100%;
@@ -317,59 +325,97 @@
   color: #C4B5FD;
 }
 
-/* 作品卡片 - hover 浮层 (底部操作栏) */
+/* 作品卡片 - hover 浮层 (底部操作栏 + 渐变遮罩) */
 .os-project-hover {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  padding: 12px 16px;
-  background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+  padding: 20px 16px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 60%, transparent 100%);
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.3s ease;
   z-index: 5;
 }
 .os-project-card:hover .os-project-hover {
   opacity: 1;
 }
 
-/* hover 操作按钮 */
+/* hover 操作按钮 — 白色胶囊 */
 .os-project-hover-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 5px;
-  height: 38px;
+  height: 40px;
   padding: 0 16px;
   border-radius: 12px;
   background: rgba(255,255,255,0.92);
   color: #1C1C28;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
   white-space: nowrap;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .os-project-hover-btn:hover {
   background: #FFFFFF;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   transform: translateY(-1px);
 }
 
-/* 作品卡片 - 底部信息 */
+/* 作品卡片 - 底部生成信息栏 */
 .os-project-info {
-  padding: 14px 18px;
+  padding: 14px 18px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+}
+.os-project-info-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1F2937;
+  display: block;
+  line-height: 1.3;
+}
+/* 生成信息小标签行 */
+.os-project-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.os-project-meta-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: rgba(123,97,255,0.06);
+  color: #7B61FF;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.os-project-meta-tag-neutral {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: rgba(120,130,150,0.06);
+  color: #8A94A6;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 .os-project-time {
-  font-size: 12px;
+  font-size: 11px;
   color: #A0A8B8;
   display: flex;
   align-items: center;
@@ -387,6 +433,7 @@
   color: #C0C4CC;
   cursor: pointer;
   transition: all 0.15s ease;
+  margin-left: auto;
 }
 .os-project-del-btn:hover {
   background: rgba(239,68,68,0.08);
@@ -428,12 +475,12 @@
   height: 32px;
 }
 
-/* ==================== 灵感库卡片 ==================== */
+/* ==================== 灵感库卡片 — Pinterest 风格 ==================== */
 
 /* Pinterest 瀑布流 — 4 列 */
 .os-insp-masonry {
   columns: 4;
-  column-gap: 24px;
+  column-gap: 20px;
 }
 @media (max-width: 1280px) {
   .os-insp-masonry { columns: 3; }
@@ -445,54 +492,55 @@
   .os-insp-masonry { columns: 1; }
 }
 
-/* 灵感卡片 */
+/* 灵感卡片 — 默认只显示图片，hover 浮出信息层 */
 .os-insp-card {
   position: relative;
   border-radius: var(--oc-card-radius);
   overflow: hidden;
-  background: var(--oc-card-bg);
-  border: var(--oc-card-border);
-  backdrop-filter: var(--oc-card-blur);
-  -webkit-backdrop-filter: var(--oc-card-blur);
   box-shadow: var(--oc-card-shadow);
   transition: var(--oc-card-transition);
   break-inside: avoid;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   cursor: pointer;
+  /* 无白色背景、无边框 — 纯图片展示 */
+  background: transparent;
+  border: none;
 }
 .os-insp-card:hover {
   transform: translateY(var(--oc-card-hover-y));
   box-shadow: var(--oc-card-hover-shadow);
 }
 
-/* 灵感卡片 - 图片区 */
+/* 灵感卡片 - 图片区 (全卡 = 图片) */
 .os-insp-card-img {
   position: relative;
   width: 100%;
   overflow: hidden;
   background: var(--oc-grad-placeholder);
+  border-radius: var(--oc-card-radius);
 }
 .os-insp-card-img img {
   width: 100%;
   display: block;
   object-fit: cover;
-  transition: transform 0.35s ease;
+  transition: transform 0.4s ease;
 }
 .os-insp-card:hover .os-insp-card-img img {
   transform: scale(1.04);
 }
 .os-insp-card-img-fallback {
   width: 100%;
-  aspect-ratio: 4/5;
   background: var(--oc-grad-placeholder);
+  border-radius: var(--oc-card-radius);
 }
 
-/* 灵感卡片 - hover 底部渐变信息层 */
+/* 灵感卡片 - hover 渐变信息层 */
 .os-insp-card-overlay {
   position: absolute;
   bottom: 0; left: 0; right: 0;
-  padding: 60px 20px 20px;
-  background: linear-gradient(to top, rgba(0,0,0,0.68), transparent);
+  padding: 80px 20px 20px;
+  background: var(--oc-grad-mask-heavy);
+  border-radius: 0 0 var(--oc-card-radius) var(--oc-card-radius);
   opacity: 0;
   transition: opacity 0.3s ease;
   display: flex;
@@ -510,7 +558,7 @@
   font-weight: 600;
   color: white;
   line-height: 1.3;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
 }
 .os-insp-card-overlay-tag {
   display: inline-flex;
@@ -523,10 +571,12 @@
   font-size: 11px;
   font-weight: 500;
   align-self: flex-start;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .os-insp-card-overlay-stats {
   font-size: 12px;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.60);
   display: flex;
   gap: 10px;
 }
@@ -537,29 +587,28 @@
   margin-top: 4px;
 }
 
-/* ✨ 生成同款按钮 */
+/* ✨ 生成同款按钮 — 渐变胶囊 */
 .os-insp-card-gen {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 38px;
-  padding: 0 18px;
+  height: 40px;
+  padding: 0 20px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.92);
-  color: #1C1C28;
-  font-size: 13px;
-  font-weight: 600;
+  background: var(--oc-grad-primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s ease;
   align-self: flex-start;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(123,97,255,0.35);
 }
 .os-insp-card-gen:hover {
-  background: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 24px rgba(123,97,255,0.45);
+  filter: brightness(1.08);
   transform: translateY(-1px);
 }
 
@@ -568,18 +617,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.18);
   border: none;
   cursor: pointer;
-  color: #fff;
+  color: rgba(255,255,255,0.85);
   transition: all 0.2s ease;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 .os-insp-card-action:hover {
-  background: rgba(255,255,255,0.9);
-  color: #1C1C28;
+  background: rgba(255,255,255,0.35);
+  color: white;
 }
 
 /* ==================== Lightbox 弹窗 ==================== */
@@ -587,11 +638,13 @@
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.88);
   display: flex;
   align-items: center;
   justify-content: center;
   animation: os-lightbox-fade 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 @keyframes os-lightbox-fade {
   from { opacity: 0; }

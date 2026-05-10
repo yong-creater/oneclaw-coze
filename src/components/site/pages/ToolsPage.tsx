@@ -3,30 +3,30 @@
 import { useRouter } from 'next/navigation';
 import { Package, Camera, BookImage } from 'lucide-react';
 
-/* ---------- tool data ---------- */
+/* ---------- tool data — with real case images ---------- */
 const TOOLS = [
   {
     slug: 'product-generator',
     name: 'AI 商品图生成器',
-    desc: '上传商品图，生成高质感电商主图',
+    desc: '上传商品图，一键生成高质感电商主图、场景图、白底图',
     tags: ['电商', '商品图', '白底图'],
-    cover: '/tool-covers/product.jpg',
+    cover: '/case-lipstick-main.png',
     icon: Package,
   },
   {
     slug: 'xiaohongshu-generator',
     name: '小红书封面生成器',
-    desc: '一键生成爆款小红书封面',
+    desc: '一键生成爆款小红书封面，吸引更多点击与关注',
     tags: ['小红书', '封面', '社交'],
-    cover: '/tool-covers/xiaohongshu.jpg',
+    cover: '/demo-card-lifestyle.jpg',
     icon: BookImage,
   },
   {
     slug: 'ai-photo',
     name: 'AI 写真生成器',
-    desc: '生成氛围感写真大片',
+    desc: '生成氛围感人像写真，多种风格随心选择',
     tags: ['写真', '人像', '氛围感'],
-    cover: '/tool-covers/photo.jpg',
+    cover: '/demo-scene.jpg',
     icon: Camera,
   },
 ];
@@ -46,7 +46,7 @@ export default function ToolsPage() {
             const Icon = tool.icon;
             return (
               <div key={tool.slug} className="os-tool-card">
-                {/* 封面图区 */}
+                {/* 封面图区 — 真实 AI 案例图 */}
                 <div className="os-tool-card-img">
                   <img
                     src={tool.cover}
@@ -72,7 +72,7 @@ export default function ToolsPage() {
                   </div>
                 </div>
 
-                {/* CTA 渐变按钮 */}
+                {/* CTA 渐变 glow 按钮 */}
                 <button
                   className="os-tool-card-cta"
                   onClick={() => router.push(`/create?tool=${tool.slug}`)}

@@ -39,6 +39,21 @@ const TOOL_MAP: Record<string, string> = {
   '写真': 'ai-photo',
 };
 
+/* ---------- Random height generator for Pinterest effect ---------- */
+const HEIGHT_SETS = [
+  { minHeight: 320, maxHeight: 400 },
+  { minHeight: 400, maxHeight: 500 },
+  { minHeight: 480, maxHeight: 580 },
+  { minHeight: 340, maxHeight: 440 },
+  { minHeight: 440, maxHeight: 540 },
+];
+function getCardHeight(id: number): number {
+  const set = HEIGHT_SETS[id % HEIGHT_SETS.length];
+  // Deterministic pseudo-random based on id
+  const seed = ((id * 2654435761) >>> 0) / 4294967296;
+  return Math.round(set.minHeight + seed * (set.maxHeight - set.minHeight));
+}
+
 /* ---------- component ---------- */
 export default function PromptPage() {
   const router = useRouter();
@@ -154,47 +169,51 @@ export default function PromptPage() {
           </div>
         )}
 
-        {/* Pinterest 瀑布流 — 4 列 */}
+        {/* Pinterest 瀑布流 — 默认只显示图片，hover 浮出信息 */}
         <div className="os-insp-masonry">
-          {filtered.map(it => (
-            <div key={it.id} className="os-insp-card">
-              {/* 图片区 */}
-              <div className="os-insp-card-img">
-                {it.image ? (
-                  <img src={it.image} alt={it.title} />
-                ) : (
-                  <div className="os-insp-card-img-fallback">
-                    <ImageIcon style={{ width: 32, height: 32, color: '#C4B5FD', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
-                  </div>
-                )}
-                {/* hover 底部渐变信息层 */}
-                <div className="os-insp-card-overlay">
-                  <span className="os-insp-card-overlay-tag">
-                    {it.category || '灵感'}
-                  </span>
-                  <span className="os-insp-card-overlay-title">{it.title}</span>
-                  <div className="os-insp-card-overlay-stats">
-                    {typeof it.views === 'number' && <span>{it.views} 浏览</span>}
-                    {typeof it.likes === 'number' && <span>{it.likes} 喜欢</span>}
-                  </div>
-                  <div className="os-insp-card-overlay-actions">
-                    <button className="os-insp-card-gen" onClick={() => handleGenSame(it)}>
-                      <Sparkles style={{ width: 14, height: 14 }} />
-                      生成同款
-                    </button>
-                    {it.content && (
-                      <button className="os-insp-card-action" onClick={() => handleCopy(it.content!)} title="复制提示词">
-                        <Copy style={{ width: 14, height: 14 }} />
+          {filtered.map(it => {
+            const cardH = getCardHeight(it.id);
+            return (
+              <div key={it.id} className="os-insp-card">
+                {/* 图片区 — Pinterest 随机高度 */}
+                <div className="os-insp-card-img" style={{ height: cardH }}>
+                  {it.image ? (
+                    <img src={it.image} alt={it.title} />
+                  ) : (
+                    <div className="os-insp-card-img-fallback" style={{ height: cardH }}>
+                      <ImageIcon style={{ width: 32, height: 32, color: '#C4B5FD', position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+                    </div>
+                  )}
+                  {/* hover 底部渐变信息层 */}
+                  <div className="os-insp-card-overlay">
+                    <span className="os-insp-card-overlay-tag">
+                      {it.category || '灵感'}
+                    </span>
+                    <span className="os-insp-card-overlay-title">{it.title}</span>
+                    <div className="os-insp-card-overlay-stats">
+                      {it.style && <span>{it.style}</span>}
+                      {typeof it.views === 'number' && <span>{it.views} 浏览</span>}
+                      {typeof it.likes === 'number' && <span>{it.likes} 喜欢</span>}
+                    </div>
+                    <div className="os-insp-card-overlay-actions">
+                      <button className="os-insp-card-gen" onClick={() => handleGenSame(it)}>
+                        <Sparkles style={{ width: 14, height: 14 }} />
+                        生成同款
                       </button>
-                    )}
-                    <button className="os-insp-card-action" onClick={() => toggleFav(it.id)} title="收藏">
-                      <Heart style={{ width: 14, height: 14 }} fill={favorites.has(it.id) ? '#ff5a7e' : 'none'} stroke={favorites.has(it.id) ? '#ff5a7e' : 'currentColor'} />
-                    </button>
+                      {it.content && (
+                        <button className="os-insp-card-action" onClick={() => handleCopy(it.content!)} title="复制 Prompt">
+                          <Copy style={{ width: 14, height: 14 }} />
+                        </button>
+                      )}
+                      <button className="os-insp-card-action" onClick={() => toggleFav(it.id)} title="收藏">
+                        <Heart style={{ width: 14, height: 14 }} fill={favorites.has(it.id) ? '#ff5a7e' : 'none'} stroke={favorites.has(it.id) ? '#ff5a7e' : 'currentColor'} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {filtered.length === 0 && !loading && (
