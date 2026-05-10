@@ -108,6 +108,9 @@
 
 /* Hero 内层 — 左右 flex 布局 */
 .os-hero-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 32px;
   display: flex;
   gap: 48px;
   align-items: flex-start;

@@ -26,10 +26,11 @@
 
 /* ==================== 页面通用工具类 ==================== */
 
-/* 页面内层容器 */
+/* 页面内层容器（与 os-content 统一 padding） */
 .os-page-inner {
   max-width: 1440px;
   margin: 0 auto;
+  padding: 0 32px;
 }
 
 /* 页面标题 + 副标题 */
