@@ -8,6 +8,7 @@ import {
   ArrowRight, ImageIcon, Menu, BookmarkPlus, BookmarkCheck
 } from 'lucide-react';
 import { getToolWorkflow, getAllToolWorkflows, slugToGenType, type ToolWorkflowConfig } from '@/lib/tool-workflow-config';
+import { useUser } from '@/contexts/UserContext';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 
 // ===== 类型 =====
@@ -68,6 +69,7 @@ const TOOL_LAYOUT: Record<string, string> = {
 export default function CreateWorkbench() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { authenticated, setShowLoginModal } = useUser();
 
   // ----- 工具 -----
   const allTools = getAllToolWorkflows();
@@ -329,8 +331,12 @@ export default function CreateWorkbench() {
   // ===== 保存到作品库 =====
   const handleSave = async () => {
     if (images.length === 0) return;
+    if (!authenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     try {
-      await fetch('/api/generations', {
+      const res = await fetch('/api/generations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -351,9 +357,14 @@ export default function CreateWorkbench() {
           },
         }),
       });
-      setSaved(true);
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 2500);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSaved(true);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2500);
+      } else if (res.status === 401) {
+        setShowLoginModal(true);
+      }
     } catch { /* silently fail */ }
   };
 
