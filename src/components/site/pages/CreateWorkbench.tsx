@@ -187,7 +187,7 @@ export default function CreateWorkbench() {
     prompt?: string;
     toolSlug?: string;
     images?: UploadItem[];
-    analysisResult?: { tool?: string; style?: string; ratio?: string; count?: string; industry?: string; output_type?: string };
+    analysisResult?: { tool?: string; style?: string; ratio?: string; count?: string; industry?: string; output_type?: string; layoutMode?: 'single-product' | 'multi-angle' };
   }>({});
   const genParamsRef = useRef({ toolSlug, selectedStyle, selectedSubtype, count, ratio, inputText, uploads });
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -467,6 +467,7 @@ export default function CreateWorkbench() {
 
     try {
       // 1. 创建任务
+      const layoutMode = parsedCtx.current.analysisResult?.layoutMode || 'single-product';
       const createBody: Record<string, unknown> = {
         prompt: p.inputText,
         toolType: p.toolSlug,
@@ -474,6 +475,7 @@ export default function CreateWorkbench() {
         ratio: p.ratio,
         count: p.count,
         generationType: p.selectedSubtype,
+        layoutMode,
       };
       if (p.uploads.length > 0) createBody.uploadedImages = p.uploads.map(u => u.url);
 

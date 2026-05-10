@@ -15,6 +15,30 @@ import {
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 
+// ===== 布局模式识别（模块级，供 createTaskAndNavigate 和组件内部共用） =====
+const LAYOUT_KEYWORDS = [
+  '多角度', '多视角', '展示多个角度', '四宫格', '拼图',
+  '组合展示', '多面展示', '全方位展示', '360度展示',
+  '多角度展示', '多视角展示', '组合图', '九宫格',
+];
+
+function parseLayoutMode(input: string): 'single-product' | 'multi-angle' {
+  const lower = input.toLowerCase();
+  for (const kw of LAYOUT_KEYWORDS) {
+    if (lower.includes(kw)) return 'multi-angle';
+  }
+  return 'single-product';
+}
+
+function stripLayoutKeywords(input: string): string {
+  let cleaned = input;
+  for (const kw of LAYOUT_KEYWORDS) {
+    cleaned = cleaned.replace(new RegExp(`[，,]?\\s*${kw}\\s*[，,]?`, 'g'), '');
+  }
+  cleaned = cleaned.replace(/\s{2,}/g, ' ').replace(/[，,]\s*[，,]/g, ',').replace(/^\s*[，,]\s*/, '').replace(/\s*[，,]\s*$/, '').trim();
+  return cleaned;
+}
+
 // ===== 导航到创作页 =====
 const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
 
@@ -33,12 +57,16 @@ async function createTaskAndNavigate(
     matchedTool?: string;
     type?: string;
     autoGenerate?: boolean;
-    analysisResult?: { tool: string; style: string; ratio: string; count: string };
+    analysisResult?: { tool: string; style: string; ratio: string; count: string; layoutMode?: 'single-product' | 'multi-angle' };
   }
 ): Promise<string | null> {
+  // 布局模式识别：从 prompt 中剥离布局关键词
+  const layoutMode = opts.analysisResult?.layoutMode || 'single-product';
+  const cleanedPrompt = stripLayoutKeywords(opts.prompt || '');
+
   // 1. 写入 sessionStorage 作为备用（图片等大数据）
   const context: Record<string, unknown> = {};
-  if (opts.prompt) context.prompt = opts.prompt;
+  if (cleanedPrompt) context.prompt = cleanedPrompt;
   if (opts.uploadedImages && opts.uploadedImages.length > 0) {
     context.images = opts.uploadedImages.map((url, i) => ({
       id: `upload-${Date.now()}-${i}`,
@@ -48,7 +76,9 @@ async function createTaskAndNavigate(
   }
   if (opts.matchedTool) context.toolSlug = opts.matchedTool;
   if (opts.autoGenerate) context.autoGenerate = true;
-  if (opts.analysisResult) context.analysisResult = opts.analysisResult;
+  if (opts.analysisResult) {
+    context.analysisResult = { ...opts.analysisResult, layoutMode };
+  }
   try {
     sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
   } catch (e) {
@@ -61,13 +91,14 @@ async function createTaskAndNavigate(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        prompt: opts.prompt || '',
+        prompt: cleanedPrompt || '',
         uploadedImages: opts.uploadedImages || [],
         toolType: opts.matchedTool || 'product-generator',
         generationType: opts.type || opts.matchedTool || 'product-generator',
         style: opts.analysisResult?.style || '',
         ratio: opts.analysisResult?.ratio || '1:1',
         count: parseInt(opts.analysisResult?.count || '4', 10),
+        layoutMode,
       }),
     });
 
@@ -81,7 +112,7 @@ async function createTaskAndNavigate(
     }
 
     const taskData = await taskRes.json();
-    const taskId = taskData.taskId;
+    const taskId = taskData.task?.task_id || taskData.taskId;
 
     if (!taskId) throw new Error('未获取到任务ID');
 
@@ -252,16 +283,17 @@ export default function HomePage() {
 
   const identifyMessage = '正在准备创作环境…';
 
-  interface StyleRecommendation { style: string; ratio: string; count: string; }
+  interface StyleRecommendation { style: string; ratio: string; count: string; layoutMode: 'single-product' | 'multi-angle'; }
   function getStyleRecommendation(tool: ToolMatch | null, input: string): StyleRecommendation {
-    if (!tool) return { style: 'premium', ratio: '3:4', count: '4' };
+    if (!tool) return { style: 'premium', ratio: '3:4', count: '4', layoutMode: 'single-product' };
     const lower = input.toLowerCase();
+    const layoutMode = parseLayoutMode(input);
     const map: Record<string, StyleRecommendation> = {
-      'product-generator': { style: 'premium', ratio: '1:1', count: '4' },
-      'xiaohongshu-generator': { style: 'fresh', ratio: '3:4', count: '4' },
-      'ai-photo': { style: 'luxury', ratio: '3:4', count: '6' },
+      'product-generator': { style: 'premium', ratio: '1:1', count: layoutMode === 'multi-angle' ? '1' : '4', layoutMode },
+      'xiaohongshu-generator': { style: 'fresh', ratio: '3:4', count: layoutMode === 'multi-angle' ? '1' : '4', layoutMode },
+      'ai-photo': { style: 'luxury', ratio: '3:4', count: layoutMode === 'multi-angle' ? '1' : '6', layoutMode },
     };
-    const rec = map[tool.slug] ? { ...map[tool.slug] } : { style: 'premium', ratio: '3:4', count: '4' };
+    const rec = map[tool.slug] ? { ...map[tool.slug] } : { style: 'premium', ratio: '3:4', count: '4', layoutMode };
     if (lower.includes('深色') || lower.includes('暗黑') || lower.includes('科技')) rec.style = 'tech';
     if (lower.includes('清新') || lower.includes('夏日') || lower.includes('文艺')) rec.style = 'fresh';
     if (lower.includes('极简') || lower.includes('简约')) rec.style = 'minimal';
@@ -338,7 +370,7 @@ export default function HomePage() {
       const err = await createTaskAndNavigate(router, {
         prompt: inputText.trim(), uploadedImages, matchedTool: tool.slug,
         autoGenerate: true,
-        analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count },
+        analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: rec.count, layoutMode: rec.layoutMode },
       });
       if (err) {
         // 并发限制等错误，回退到 idle
@@ -643,7 +675,7 @@ export default function HomePage() {
                             prompt: inputText.trim(),
                             uploadedImages,
                             matchedTool: tool.slug,
-                            analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: String(rec.count) },
+                            analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: String(rec.count), layoutMode: rec.layoutMode },
                           });
                         }}
                       >
@@ -662,7 +694,7 @@ export default function HomePage() {
                       prompt: inputText.trim(),
                       uploadedImages,
                       matchedTool: tool.slug,
-                      analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: String(rec.count) },
+                      analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: String(rec.count), layoutMode: rec.layoutMode },
                     });
                   }} className="os-ai-nomatch-primary">选择第一个推荐工具继续</button>
                   <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览全部工具</button>

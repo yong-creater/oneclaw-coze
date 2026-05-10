@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { prompt, uploadedImages, toolType, generationType, style, ratio, count } = body;
+    const { prompt, uploadedImages, toolType, generationType, style, ratio, count, layoutMode } = body;
 
     if (!toolType) {
       return NextResponse.json({ error: '缺少工具类型' }, { status: 400 });
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         style: style || null,
         ratio: ratio || null,
         count: count || 1,
+        layout_mode: layoutMode || 'single-product',
         status: 'pending',
         progress: 0,
       })

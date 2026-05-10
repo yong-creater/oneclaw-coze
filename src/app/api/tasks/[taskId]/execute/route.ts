@@ -29,11 +29,15 @@ const PHOTO_PREFIX = `Create a professional AI portrait photo. Requirements:
 3. Professional lighting and composition
 4. High-quality magazine/campaign level output`;
 
+// ===== 多角度拼图 Prompt =====
+const MULTI_ANGLE_INSTRUCTION = `Create a SINGLE composite image showing the product from MULTIPLE angles in a clean grid/collage layout. The image should show the product from front, side, back, and detail views arranged in a professional product photography grid. Each angle should be clearly visible and well-lit.`;
+
 function buildPrompt(task: Record<string, unknown>): string {
   const toolType = task.tool_type as string;
   const prompt = (task.prompt as string) || '';
   const style = task.style as string;
   const ratio = task.ratio as string;
+  const layoutMode = (task.layout_mode as string) || 'single-product';
 
   let prefix = '';
   if (toolType === 'product-generator') prefix = PRODUCT_FIDELITY_PREFIX;
@@ -43,6 +47,11 @@ function buildPrompt(task: Record<string, unknown>): string {
   let fullPrompt = prefix ? `${prefix}\n\nUser request: ${prompt}` : prompt;
   if (style) fullPrompt += `\nStyle: ${style}`;
   if (ratio) fullPrompt += `\nAspect ratio: ${ratio}`;
+
+  // 布局模式：多角度拼图时追加拼图指令
+  if (layoutMode === 'multi-angle') {
+    fullPrompt += `\n\n${MULTI_ANGLE_INSTRUCTION}`;
+  }
 
   return fullPrompt;
 }
