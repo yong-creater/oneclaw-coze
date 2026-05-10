@@ -75,6 +75,51 @@
   .os-page { padding: 20px 16px 40px; }
 }
 
+/* ---- 首页 Hero ---- */
+.os-hero {
+  position: relative;
+  text-align: center;
+  padding: 72px 0 48px;
+  overflow: hidden;
+}
+@media (max-width: 768px) {
+  .os-hero { padding: 40px 0 32px; }
+}
+
+.os-hero-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+.os-hero-title {
+  position: relative;
+  font-size: 44px;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+@media (max-width: 768px) {
+  .os-hero-title { font-size: 28px; }
+}
+
+.os-hero-subtitle {
+  position: relative;
+  font-size: 17px;
+  color: #8A94A6;
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto;
+}
+@media (max-width: 768px) {
+  .os-hero-subtitle { font-size: 15px; }
+}
+
 /* ---- 光斑漂浮动画 ---- */
 @keyframes orbDrift {
   0%   { transform: translate(0, 0); }
