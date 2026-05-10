@@ -104,10 +104,9 @@ type IdentifyPhase = 'idle' | 'identifying' | 'matched' | 'no-match';
 
 // ===== 试试这些创作 — pills 标签（精简到4个） =====
 const tryChips = [
-  { label: '🔥 商品主图', prompt: '帮我生成高级感耳机商品图，白底高级感，多角度展示' },
-  { label: '🔥 小红书封面', prompt: '生成小红书护肤封面，夏日清新风格' },
-  { label: '🔥 AI写真', prompt: '生成高级感AI写真头像，氛围感大片' },
-  { label: '🔥 海报设计', prompt: '做一张夏日饮品海报，清新文艺风格' },
+  { label: '商品主图', prompt: '帮我生成高级感耳机商品图，白底高级感，多角度展示' },
+  { label: '小红书封面', prompt: '生成小红书护肤封面，夏日清新风格' },
+  { label: 'AI写真', prompt: '生成高级感AI写真头像，氛围感大片' },
 ];
 
 // ===== Placeholder 轮播文案 =====
@@ -115,10 +114,8 @@ const placeholderTexts = [
   '生成高级感耳机商品图',
   '生成小红书护肤封面',
   '生成 AI 写真头像',
-  '生成高级咖啡海报',
-  '生成电商详情页长图',
+  '生成白底商品主图',
   '生成高级时尚大片',
-  '做一张夏日饮品海报',
   '生成穿搭种草封面图',
 ];
 
@@ -137,16 +134,16 @@ const showcaseExamples = [
     generating: '高级感耳机主图',
   },
   {
-    title: '详情页片段',
-    category: '详情页',
-    image: '/case-ecommerce.jpg',
-    generating: '小红书穿搭大片',
-  },
-  {
     title: 'AI写真',
     category: 'AI写真',
     image: '/demo-scene.jpg',
-    generating: '高级咖啡海报',
+    generating: '小红书穿搭大片',
+  },
+  {
+    title: '商品场景图',
+    category: '商品图',
+    image: '/case-ecommerce.jpg',
+    generating: '高级氛围感写真',
   },
 ];
 
@@ -166,9 +163,9 @@ const hotResults = [
   },
   {
     image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop&auto=format&q=80',
-    type: '详情页',
-    title: '家居好物卖点长图',
-    examplePrompt: '生成家居好物详情长图，极简风格',
+    type: 'AI写真',
+    title: '氛围感写真大片',
+    examplePrompt: '生成高级氛围感写真，柔和光影',
   },
   {
     image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=450&fit=crop&auto=format&q=80',
@@ -479,7 +476,7 @@ export default function HomePage() {
 
           {/* 副标题 */}
           <p className="os-hero-subtitle">
-            商品图、小红书、详情页、AI写真、封面海报等内容，简单输入需求即可生成。
+            商品图、小红书、AI写真等内容，简单输入需求即可生成。
           </p>
 
           {/* ===== AI 创作输入区 — 左右分栏 ===== */}
