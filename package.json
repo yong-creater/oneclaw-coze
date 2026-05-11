@@ -1,7 +1,8 @@
 {
-  "name": "projects",
+  "name": "oneclaw",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@9.0.0",
   "scripts": {
     "build": "bash ./scripts/build.sh",
     "dev": "bash ./scripts/dev.sh -- --no-turbopack",
