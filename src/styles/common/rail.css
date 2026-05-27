@@ -1,6 +1,6 @@
 /* ================================================================
-   左侧导航 Dock — 线性风格 · 紫蓝渐变高亮 · 88px
-   参考：Framer / Linear / Arc — 极简 / 高级 / AI SaaS
+   左侧导航 Dock — 线性风格 · 浅紫半透明高亮 · 88px
+   参考：Figma / Notion / Arc — 极简 / 优雅 / AI 创作产品
    ================================================================ */
 
 /* ---------- Dock 容器 ---------- */
@@ -61,7 +61,7 @@
   padding: 10px 0;
   border-radius: 14px;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: all 0.2s ease;
   text-decoration: none;
   color: #9ca3af;
   background: transparent;
@@ -69,11 +69,11 @@
   outline: none;
 }
 
-/* 图标 — 24px 简洁线性 */
+/* 图标 — 22px 简洁线性 */
 .os-dock-item .os-dock-icon {
-  width: 24px;
-  height: 24px;
-  transition: all 0.22s ease;
+  width: 22px;
+  height: 22px;
+  transition: color 0.2s ease;
   color: #9ca3af;
 }
 
@@ -83,38 +83,35 @@
   font-weight: 500;
   line-height: 1;
   text-align: center;
-  transition: all 0.22s ease;
+  transition: color 0.2s ease;
   color: #9ca3af;
   font-family: -apple-system, "PingFang SC", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 
-/* ---------- hover — 轻微发光 ---------- */
+/* ---------- hover — 轻微紫色背景 ---------- */
 .os-dock-item:hover {
   background: rgba(123, 97, 255, 0.06);
 }
 .os-dock-item:hover .os-dock-icon {
   color: #7B61FF;
-  filter: drop-shadow(0 0 6px rgba(123, 97, 255, 0.3));
 }
 .os-dock-item:hover .os-dock-label {
   color: #7B61FF;
 }
 
-/* ---------- 选中态 — 紫蓝渐变高亮 ---------- */
+/* ---------- 选中态 — 浅紫色半透明背景，无竖线，无厚重边框 ---------- */
 .os-dock-item-active {
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.12), rgba(94, 169, 255, 0.10)) !important;
-  box-shadow: 0 2px 12px rgba(123, 97, 255, 0.12);
+  background: rgba(123, 97, 255, 0.10) !important;
 }
 .os-dock-item-active .os-dock-icon {
   color: #7B61FF !important;
-  filter: drop-shadow(0 0 8px rgba(123, 97, 255, 0.4));
 }
 .os-dock-item-active .os-dock-label {
   color: #7B61FF !important;
   font-weight: 600;
 }
 .os-dock-item-active:hover {
-  background: linear-gradient(135deg, rgba(123, 97, 255, 0.16), rgba(94, 169, 255, 0.14)) !important;
+  background: rgba(123, 97, 255, 0.14) !important;
 }
 .os-dock-item-active:hover .os-dock-icon {
   color: #7B61FF !important;
@@ -128,9 +125,39 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 4px;
   padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.04);
   width: 100%;
+}
+
+/* ---------- 会员按钮 ---------- */
+.os-dock-member-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  background: transparent;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.os-dock-member-icon {
+  width: 20px;
+  height: 20px;
+  transition: all 0.2s;
+}
+.os-dock-member-btn:hover {
+  background: rgba(123, 97, 255, 0.06);
+  color: #7B61FF;
+}
+.os-dock-member-btn:hover .os-dock-member-icon {
+  color: #7B61FF;
 }
 
 /* ---------- 登录按钮 — 圆形 36px ---------- */
@@ -146,12 +173,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.22s ease;
+  transition: all 0.2s ease;
 }
 .os-dock-login-icon {
   width: 20px;
   height: 20px;
-  transition: all 0.22s;
+  transition: all 0.2s;
 }
 .os-dock-login-btn:hover {
   background: rgba(123, 97, 255, 0.06);
@@ -159,7 +186,6 @@
 }
 .os-dock-login-btn:hover .os-dock-login-icon {
   color: #7B61FF;
-  filter: drop-shadow(0 0 6px rgba(123, 97, 255, 0.3));
 }
 
 /* ---------- 头像按钮 ---------- */
@@ -177,7 +203,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.22s ease;
+  transition: all 0.2s ease;
   padding: 0;
 }
 .os-dock-avatar-btn:hover {
@@ -326,14 +352,14 @@
     border-radius: 10px;
   }
   .os-dock-item .os-dock-icon {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
   .os-dock-item .os-dock-label {
     font-size: 10px;
   }
   .os-dock-item-active {
-    background: linear-gradient(135deg, rgba(123, 97, 255, 0.12), rgba(94, 169, 255, 0.10)) !important;
+    background: rgba(123, 97, 255, 0.10) !important;
   }
   .os-dock-item-active .os-dock-icon {
     color: #7B61FF !important;

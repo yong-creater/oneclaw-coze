@@ -6,7 +6,7 @@ import SiteSidebar from '@/components/site/common/SiteSidebar';
 import SiteFooter from '@/components/site/common/SiteFooter';
 
 // 不显示 Footer 的页面路径
-const FOOTLESS_PATHS = ['/create', '/projects', '/tools', '/inspiration'];
+const FOOTLESS_PATHS = ['/create', '/projects', '/inspiration'];
 
 // 全屏工作台页面（紧贴侧边栏，无间距）
 const WORKBENCH_PATHS = ['/create'];

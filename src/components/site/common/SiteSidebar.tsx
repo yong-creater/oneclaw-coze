@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, Flame, FolderOpen, Wrench, LogIn, LogOut, User, Loader2 } from 'lucide-react';
+import { Wand2, Lightbulb, Image, LogIn, LogOut, User, Crown } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -13,21 +13,17 @@ interface NavItem {
   href: string;
 }
 
-/* 创作 → 灵感 → 作品 → 工具库 */
+/* 创作 → 灵感 → 作品 */
 const NAV_ITEMS: NavItem[] = [
-  { icon: Sparkles,  label: '创作',   href: '/' },
-  { icon: Flame,     label: '灵感',   href: '/inspiration' },
-  { icon: FolderOpen,label: '作品',   href: '/projects' },
-  { icon: Wrench,    label: '工具库', href: '/tools' },
+  { icon: Wand2,     label: '创作',   href: '/' },
+  { icon: Lightbulb, label: '灵感',   href: '/inspiration' },
+  { icon: Image,     label: '作品',   href: '/projects' },
 ];
 
 export default function SiteSidebar() {
   const pathname = usePathname();
   const { user, authenticated, logout, setShowLoginModal, requireAuth } = useUser();
   const [showDropdown, setShowDropdown] = useState(false);
-
-  // 生成中的任务数（直接生成模式下无轮询，始终为0）
-  const activeTaskCount = 0;
 
   function isActive(href: string): boolean {
     if (href === '/') return pathname === '/';
@@ -39,7 +35,7 @@ export default function SiteSidebar() {
       {/* ===== Logo ===== */}
       <Link href="/" className="os-dock-logo" aria-label="OneClaw 首页">
         <div className="relative rounded-xl flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-[#7B61FF] to-[#5B8CFF] shadow-sm" style={{ width: 36, height: 36 }}>
-          <Sparkles className="text-white" style={{ width: 18, height: 18 }} strokeWidth={2.5} />
+          <Wand2 className="text-white" style={{ width: 18, height: 18 }} strokeWidth={2.5} />
         </div>
         <span className="os-dock-brand">OneClaw</span>
       </Link>
@@ -67,23 +63,18 @@ export default function SiteSidebar() {
         })}
       </nav>
 
-      {/* ===== 生成任务指示器 ===== */}
-      {activeTaskCount > 0 && (
-        <Link
-          href="/projects?tab=tasks"
-          className="os-dock-task-indicator"
-          title={`${activeTaskCount} 个任务生成中`}
-          onClick={(e) => {
-            if (!requireAuth(undefined)) { e.preventDefault(); }
-          }}
-        >
-          <div className="os-dock-task-dot" />
-          <span className="os-dock-task-text">{activeTaskCount} 生成中</span>
-        </Link>
-      )}
-
-      {/* ===== 底部：登录 / 我的 ===== */}
+      {/* ===== 底部区域 ===== */}
       <div className="os-dock-bottom">
+        {/* 会员入口 */}
+        <Link
+          href="/membership"
+          className="os-dock-member-btn"
+          title="会员中心"
+        >
+          <Crown className="os-dock-member-icon" strokeWidth={1.5} />
+        </Link>
+
+        {/* 登录 / 头像 */}
         {!authenticated ? (
           <button
             className="os-dock-login-btn"
@@ -119,8 +110,16 @@ export default function SiteSidebar() {
                     onClick={() => setShowDropdown(false)}
                     className="os-dock-user-menu-item"
                   >
-                    <FolderOpen className="w-4 h-4" />
+                    <Image className="w-4 h-4" />
                     <span>我的作品</span>
+                  </Link>
+                  <Link
+                    href="/membership"
+                    onClick={() => setShowDropdown(false)}
+                    className="os-dock-user-menu-item"
+                  >
+                    <Crown className="w-4 h-4" />
+                    <span>会员中心</span>
                   </Link>
                   <hr className="my-1 border-slate-100" />
                   <button

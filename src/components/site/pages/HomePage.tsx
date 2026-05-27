@@ -406,7 +406,7 @@ export default function HomePage() {
     doStartCreate();
   }, [doStartCreate, inputText, phase, requireAuth]);
 
-  const handleBrowseTools = useCallback(() => { router.push('/tools'); }, [router]);
+  const handleBrowseInspiration = useCallback(() => { router.push('/inspiration'); }, [router]);
 
   const resetIdentify = useCallback(() => {
     phaseRef.current = 'idle'; setPhase('idle'); setIsJumping(false);
@@ -598,7 +598,7 @@ export default function HomePage() {
             <div className="os-hot-nav">
               <button onClick={() => scrollCarousel('left')} className="os-hot-nav-btn"><ChevronLeft className="w-5 h-5" /></button>
               <button onClick={() => scrollCarousel('right')} className="os-hot-nav-btn"><ChevronRight className="w-5 h-5" /></button>
-              <button onClick={() => router.push('/tools')} className="os-hot-more">
+              <button onClick={() => router.push('/inspiration')} className="os-hot-more">
                 查看更多 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -716,7 +716,7 @@ export default function HomePage() {
                       analysisResult: { tool: tool.slug, style: rec.style, ratio: rec.ratio, count: String(rec.count), layoutMode: rec.layoutMode },
                     });
                   }} className="os-ai-nomatch-primary">选择第一个推荐工具继续</button>
-                  <button onClick={handleBrowseTools} className="os-ai-nomatch-secondary">浏览全部工具</button>
+                  <button onClick={handleBrowseInspiration} className="os-ai-nomatch-secondary">浏览灵感库</button>
                   <button onClick={resetIdentify} className="os-ai-nomatch-ghost">返回修改需求</button>
                 </div>
               </div>
