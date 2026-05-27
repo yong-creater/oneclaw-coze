@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Wand2,
-  ArrowRight,
   ImagePlus,
   X,
   Check,
@@ -12,6 +11,12 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
+  Upload,
+  Zap,
+  ChevronDown,
+  Palette,
+  SlidersHorizontal,
+  Crown,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -88,7 +93,6 @@ async function navigateToCreate(
     // ignore
   }
 
-  // 直接跳转到创作页（不再创建任务，创作页自己处理生成）
   const params = new URLSearchParams();
   if (cleanedPrompt) params.set('prompt', cleanedPrompt);
   if (opts.autoGenerate) params.set('auto', '1');
@@ -98,20 +102,6 @@ async function navigateToCreate(
 
   router.push(`/create?${params.toString()}`);
 }
-
-// ===== 动态示例轮播 =====
-const examplePrompts = [
-  '生成一个未来感新能源发布会海报',
-  '做一个赛博朋克人物',
-  '设计一个咖啡品牌包装',
-  '生成行业分析图',
-  '设计高级感网站 Banner',
-  '创作一幅赛博朋克城市夜景',
-  '设计一个极简主义香水品牌视觉',
-  '生成一张复古胶片风旅行照片',
-  '制作一张音乐节主视觉海报',
-  '设计一个潮牌 T 恤印花图案',
-];
 
 // ===== 热门创作灵感 =====
 const hotInspirations = [
@@ -165,6 +155,28 @@ const hotInspirations = [
   },
 ];
 
+// ===== 面板参数选项 =====
+const RATIO_OPTIONS = [
+  { value: '1:1', label: '1:1', w: 16, h: 16 },
+  { value: '3:4', label: '3:4', w: 12, h: 16 },
+  { value: '9:16', label: '9:16', w: 9, h: 16 },
+  { value: '16:9', label: '16:9', w: 16, h: 9 },
+];
+
+const QUALITY_OPTIONS = [
+  { value: 'standard', label: '标准' },
+  { value: 'hd', label: '高清' },
+];
+
+const STYLE_OPTIONS = [
+  { value: 'auto', label: '自动' },
+  { value: 'cinematic', label: '电影感' },
+  { value: 'commercial', label: '商业设计' },
+  { value: 'trendy', label: '潮流艺术' },
+  { value: 'futuristic', label: '未来科技' },
+  { value: 'minimal', label: '极简高级' },
+];
+
 const MAX_UPLOAD_IMAGES = 5;
 
 export default function HomePage() {
@@ -172,33 +184,25 @@ export default function HomePage() {
   const router = useRouter();
   const { requireAuth, dailyQuota } = useUser();
   const { showAlert } = useModal();
+
+  // ===== 面板状态 =====
   const [inputText, setInputText] = useState('');
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [selectedRatio, setSelectedRatio] = useState('3:4');
+  const [selectedQuality, setSelectedQuality] = useState('standard');
+  const [selectedStyle, setSelectedStyle] = useState('auto');
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [exampleIndex, setExampleIndex] = useState(0);
-  const [exampleVisible, setExampleVisible] = useState(true);
-  const [isDragOver, setIsDragOver] = useState(false);
-
-  // 动态示例轮播
-  useEffect(() => {
-    if (inputText.trim()) return;
-    const interval = setInterval(() => {
-      setExampleVisible(false);
-      setTimeout(() => {
-        setExampleIndex((prev) => (prev + 1) % examplePrompts.length);
-        setExampleVisible(true);
-      }, 350);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [inputText]);
 
   useEffect(() => {
     if (pendingInput) { setInputText(pendingInput); consumePendingInput(); }
   }, [pendingInput, consumePendingInput]);
 
+  // ===== 上传逻辑 =====
   const addImageFiles = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
     const remaining = MAX_UPLOAD_IMAGES - uploadedImages.length;
@@ -222,7 +226,16 @@ export default function HomePage() {
     if (e.dataTransfer.files?.length) addImageFiles(e.dataTransfer.files);
   }, [addImageFiles]);
 
-  // 创作入口
+  const handleUploadClick = useCallback(() => { fileInputRef.current?.click(); }, []);
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) addImageFiles(e.target.files);
+    e.target.value = '';
+  }, [addImageFiles]);
+  const removeImage = useCallback((index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // ===== 生成入口 =====
   const handleStartCreate = useCallback(() => {
     if (!inputText.trim() || isTransitioning) return;
     if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
@@ -242,211 +255,234 @@ export default function HomePage() {
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); handleStartCreate(); }
-    if (e.key === 'Enter' && !e.shiftKey) {
-      // 移动端单行输入体验
-    }
   }, [handleStartCreate]);
 
-  const handleExampleClick = useCallback((prompt: string) => {
-    setInputText(prompt);
-  }, []);
-
-  const handleUploadClick = useCallback(() => { fileInputRef.current?.click(); }, []);
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) addImageFiles(e.target.files);
-    e.target.value = '';
-  }, [addImageFiles]);
-  const removeImage = useCallback((index: number) => {
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
-  }, []);
-  const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
-
-  // Carousel scroll
+  // ===== Carousel =====
   const scrollCarousel = useCallback((dir: 'left' | 'right') => {
     if (!carouselRef.current) return;
-    const scrollAmount = 280;
+    const scrollAmount = 260;
     carouselRef.current.scrollBy({ left: dir === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
   }, []);
 
+  const handleInspirationClick = useCallback((prompt: string) => {
+    setInputText(prompt);
+  }, []);
+
+  const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
+
   return (
-    <div className="os-page os-page-hero">
-      {/* ==================== Hero 居中创作区 ==================== */}
-      <div className="os-hero-center">
-        <div className="os-hero-noise" />
+    <div className="os-page os-page-studio">
+      {/* ==================== 两栏布局：面板 + 灵感流 ==================== */}
+      <div className="os-studio-layout">
 
-        {/* 标题 */}
-        <div className="os-hero-center-header">
-          <h1 className="os-hero-center-title">
-            你想创造什么<span className="gradient-text">？</span>
-          </h1>
-          <p className="os-hero-center-subtitle">
-            输入一句话，生成任何视觉内容。
-          </p>
-        </div>
-
-        {/* 输入区 */}
-        <div className={`os-hero-center-input ${isDragOver ? 'os-hero-center-input-dragover' : ''}`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          {/* 参考图预览 */}
-          {uploadedImages.length > 0 && (
-            <div className="os-center-upload-previews">
-              {uploadedImages.map((img, idx) => (
-                <div key={idx} className="os-center-upload-item">
-                  <img src={img} alt={`参考图${idx + 1}`} className="os-center-upload-img" />
-                  <button onClick={() => removeImage(idx)} className="os-center-upload-remove"><X className="w-3 h-3" /></button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="os-center-input-row">
-            {/* 上传按钮 */}
-            <button onClick={handleUploadClick} className="os-center-upload-btn" title="添加参考图">
-              <ImagePlus className="w-5 h-5" />
-            </button>
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleFileChange} />
-
-            {/* 文本输入 */}
-            <textarea
-              value={inputText}
-              onChange={(e) => { setInputText(e.target.value.slice(0, 500)); }}
-              onKeyDown={handleKeyDown}
-              placeholder=""
-              className="os-center-textarea"
-              rows={2}
-            />
-
-            {/* 生成按钮 */}
-            <button
-              onClick={handleStartCreate}
-              disabled={!inputText.trim() || isTransitioning}
-              className="os-center-cta"
-            >
-              <Wand2 className="w-4.5 h-4.5" />
-              <span>生成</span>
-            </button>
-          </div>
-
-          {/* 底部信息行 */}
-          <div className="os-center-input-footer">
-            <div className="os-center-example-row">
-              <Sparkles className="w-3.5 h-3.5 text-[#7B61FF]/50 flex-shrink-0" />
-              <span
-                className={`os-center-example-text ${exampleVisible ? 'os-center-example-visible' : 'os-center-example-hidden'}`}
-                onClick={() => {
-                  if (!inputText.trim()) handleExampleClick(examplePrompts[exampleIndex]);
-                }}
-              >
-                {examplePrompts[exampleIndex]}
-              </span>
-            </div>
-            <span className="os-center-char-count">{inputText.length} / 500</span>
-          </div>
-        </div>
-
-        {/* 快捷标签 */}
-        {!inputText.trim() && (
-          <div className="os-center-chips">
-            {['海报设计', '人物形象', '品牌包装', '数据图表', '网站 Banner', '插画风格'].map((label) => (
-              <button
-                key={label}
-                className="os-center-chip"
-                onClick={() => {
-                  const prompts: Record<string, string> = {
-                    '海报设计': '设计一张科技发布会海报，未来感十足',
-                    '人物形象': '生成一个赛博朋克风格人物形象',
-                    '品牌包装': '设计一个高端咖啡品牌包装',
-                    '数据图表': '生成一张行业分析数据可视化图表',
-                    '网站 Banner': '设计一个高级感网站首页 Banner',
-                    '插画风格': '创作一幅日系清新风格插画',
-                  };
-                  handleExampleClick(prompts[label] || label);
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* 参考图上传区（当没有上传时显示小入口） */}
-        {uploadedImages.length === 0 && (
-          <div
-            className="os-center-upload-hint"
-            onClick={handleUploadClick}
-          >
-            <ImagePlus className="w-3.5 h-3.5" />
-            <span>添加参考图（可选）</span>
-          </div>
-        )}
-        {uploadedImages.length > 0 && canUploadMore && (
-          <div className="os-center-upload-hint" onClick={handleUploadClick}>
-            <ImagePlus className="w-3.5 h-3.5" />
-            <span>继续添加 · 已选 {uploadedImages.length}/{MAX_UPLOAD_IMAGES}</span>
-          </div>
-        )}
-        {uploadedImages.length >= MAX_UPLOAD_IMAGES && (
-          <div className="os-center-upload-hint os-center-upload-full">
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
-            <span>已选 {MAX_UPLOAD_IMAGES} 张参考图</span>
-          </div>
-        )}
-      </div>
-
-      {/* ==================== 创作灵感 — 横向轮播 ==================== */}
-      <section className="os-hot-section">
-        <div className="os-content">
-          <div className="os-hot-header">
-            <div>
-              <div className="os-hot-title-row">
-                <TrendingUp className="w-5 h-5 text-[#7B61FF]/60" />
-                <h2 className="os-hot-title">创作灵感</h2>
+        {/* ===== 左侧：创作面板 ===== */}
+        <aside className="os-studio-panel">
+          {/* --- 模型区域 --- */}
+          <div className="os-panel-model">
+            <div className="os-panel-model-header">
+              <div className="os-panel-model-icon">
+                <Zap className="w-3.5 h-3.5" />
               </div>
-              <p className="os-hot-subtitle">看看 OneClaw 能为你创造什么</p>
-            </div>
-            <div className="os-hot-nav">
-              <button onClick={() => scrollCarousel('left')} className="os-hot-nav-btn"><ChevronLeft className="w-5 h-5" /></button>
-              <button onClick={() => scrollCarousel('right')} className="os-hot-nav-btn"><ChevronRight className="w-5 h-5" /></button>
-              <button onClick={() => router.push('/inspiration')} className="os-hot-more">
-                查看更多 <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="os-panel-model-info">
+                <div className="os-panel-model-name">GPT Image 2</div>
+                <div className="os-panel-model-desc">高质量 AI 视觉生成</div>
+              </div>
             </div>
           </div>
 
-          <div className="os-hot-carousel" ref={carouselRef}>
+          {/* --- 分隔线 --- */}
+          <div className="os-panel-divider" />
+
+          {/* --- 图片上传区域 --- */}
+          <div className="os-panel-section">
+            <div className="os-panel-section-label">
+              <Upload className="w-3.5 h-3.5" />
+              <span>参考图</span>
+            </div>
+
+            {uploadedImages.length > 0 ? (
+              <div className="os-panel-upload-grid">
+                {uploadedImages.map((img, idx) => (
+                  <div key={idx} className="os-panel-upload-thumb">
+                    <img src={img} alt={`参考图${idx + 1}`} />
+                    <button onClick={() => removeImage(idx)} className="os-panel-upload-remove">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                {canUploadMore && (
+                  <button className="os-panel-upload-add" onClick={handleUploadClick}>
+                    <ImagePlus className="w-4 h-4" />
+                    <span>添加</span>
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div
+                className={`os-panel-upload-area ${isDragOver ? 'os-panel-upload-area-active' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={handleUploadClick}
+              >
+                <ImagePlus className="w-6 h-6 os-panel-upload-icon" />
+                <span className="os-panel-upload-text">上传图片</span>
+                <span className="os-panel-upload-subtext">或拖拽图片到这里</span>
+              </div>
+            )}
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleFileChange} />
+          </div>
+
+          {/* --- Prompt 输入框 --- */}
+          <div className="os-panel-section os-panel-section-grow">
+            <div className="os-panel-section-label">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>描述</span>
+            </div>
+            <div className={`os-panel-prompt-wrap ${isFocused ? 'os-panel-prompt-focused' : ''}`}>
+              <textarea
+                value={inputText}
+                onChange={(e) => { setInputText(e.target.value.slice(0, 500)); }}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+                placeholder="描述你想生成的内容..."
+                className="os-panel-prompt-input"
+                rows={4}
+              />
+              <div className="os-panel-prompt-footer">
+                <span className="os-panel-prompt-count">{inputText.length} / 500</span>
+              </div>
+            </div>
+          </div>
+
+          {/* --- 参数区域 --- */}
+          <div className="os-panel-section">
+            {/* 比例 */}
+            <div className="os-panel-params-row">
+              <div className="os-panel-params-label">
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>比例</span>
+              </div>
+              <div className="os-panel-params-options">
+                {RATIO_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    className={`os-panel-ratio-btn ${selectedRatio === opt.value ? 'os-panel-ratio-active' : ''}`}
+                    onClick={() => setSelectedRatio(opt.value)}
+                    title={opt.label}
+                  >
+                    <div className="os-panel-ratio-icon" style={{ width: opt.w, height: opt.h }} />
+                    <span>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 质量 */}
+            <div className="os-panel-params-row">
+              <div className="os-panel-params-label">
+                <Crown className="w-3.5 h-3.5" />
+                <span>质量</span>
+              </div>
+              <div className="os-panel-params-options">
+                {QUALITY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    className={`os-panel-quality-btn ${selectedQuality === opt.value ? 'os-panel-quality-active' : ''}`}
+                    onClick={() => setSelectedQuality(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 风格 */}
+            <div className="os-panel-params-row">
+              <div className="os-panel-params-label">
+                <Palette className="w-3.5 h-3.5" />
+                <span>风格</span>
+              </div>
+              <div className="os-panel-params-options os-panel-style-options">
+                {STYLE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    className={`os-panel-style-btn ${selectedStyle === opt.value ? 'os-panel-style-active' : ''}`}
+                    onClick={() => setSelectedStyle(opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* --- 生成按钮 --- */}
+          <button
+            onClick={handleStartCreate}
+            disabled={!inputText.trim() || isTransitioning}
+            className="os-panel-generate-btn"
+          >
+            {isTransitioning ? (
+              <>
+                <span className="os-panel-generate-spinner" />
+                <span>准备中...</span>
+              </>
+            ) : (
+              <>
+                <Wand2 className="w-4.5 h-4.5" />
+                <span>开始生成</span>
+              </>
+            )}
+          </button>
+        </aside>
+
+        {/* ===== 右侧：灵感流 ===== */}
+        <main className="os-studio-feed">
+          <div className="os-feed-header">
+            <div className="os-feed-header-left">
+              <TrendingUp className="w-4.5 h-4.5 text-[#7B61FF]/60" />
+              <h2 className="os-feed-title">创作灵感</h2>
+              <span className="os-feed-count">{hotInspirations.length} 个创意</span>
+            </div>
+            <div className="os-feed-header-right">
+              <button onClick={() => scrollCarousel('left')} className="os-feed-nav-btn"><ChevronLeft className="w-4 h-4" /></button>
+              <button onClick={() => scrollCarousel('right')} className="os-feed-nav-btn"><ChevronRight className="w-4 h-4" /></button>
+            </div>
+          </div>
+
+          <div className="os-feed-grid" ref={carouselRef}>
             {hotInspirations.map((item, idx) => (
               <div
                 key={idx}
-                className="os-hot-card"
-                onClick={() => handleExampleClick(item.examplePrompt)}
+                className="os-feed-card"
+                onClick={() => handleInspirationClick(item.examplePrompt)}
               >
-                <div className="os-hot-card-img-wrap">
-                  <img src={item.image} alt={item.title} className="os-hot-card-img" loading="lazy" />
-                  <div className="os-hot-card-hover">
+                <div className="os-feed-card-img-wrap">
+                  <img src={item.image} alt={item.title} className="os-feed-card-img" loading="lazy" />
+                  <div className="os-feed-card-hover">
                     <button
-                      className="os-hot-card-cta"
+                      className="os-feed-card-cta"
                       onClick={(e) => {
                         e.stopPropagation();
                         setInputText(item.examplePrompt);
                       }}
                     >
-                      <Wand2 className="w-4 h-4" />
+                      <Wand2 className="w-3.5 h-3.5" />
                       <span>试试这个</span>
                     </button>
                   </div>
                 </div>
-                <div className="os-hot-card-info">
-                  <span className="os-hot-card-type">{item.type}</span>
-                  <p className="os-hot-card-title">{item.title}</p>
+                <div className="os-feed-card-info">
+                  <span className="os-feed-card-type">{item.type}</span>
+                  <p className="os-feed-card-title">{item.title}</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </main>
+      </div>
 
       {/* ===== 过渡浮层 ===== */}
       {isTransitioning && (
