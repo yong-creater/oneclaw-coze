@@ -163,7 +163,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
+      <div className="bg-[#171717] border border-white/[0.06] rounded-2xl shadow-2xl w-[420px] max-w-[90vw] overflow-hidden animate-fade-slide-up">
         {/* 头部 - 紫蓝渐变 */}
         <div className="relative p-6 pb-4" style={{ background: 'linear-gradient(135deg, #7B61FF, #5B8CFF)' }}>
           <CloseButton onClose={() => onOpenChange(false)} />
@@ -182,7 +182,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
         <div className="p-6 space-y-4">
           {/* 邮箱输入 */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-white/70 mb-2">
               邮箱地址
             </label>
             <EmailInput
@@ -194,7 +194,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
           {/* 验证码输入 */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-white/70 mb-2">
               验证码
             </label>
             <div className="flex gap-2">
@@ -216,14 +216,14 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
           </div>
 
           {/* 提示信息 */}
-          <div className="text-xs text-slate-500 space-y-1">
+          <div className="text-xs text-white/30 space-y-1">
             <p>• 如果邮箱未注册，系统会自动创建新账号</p>
             <p>• 验证码10分钟内有效</p>
           </div>
 
           {/* 错误提示 */}
           {error && (
-            <div className="p-3 bg-red-50 rounded-xl text-red-600 text-sm flex items-center gap-2">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               {error}
             </div>
@@ -231,7 +231,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
           {/* 成功提示 */}
           {success && (
-            <div className="p-3 bg-green-50 rounded-xl text-green-600 text-sm flex items-center gap-2">
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400 text-sm flex items-center gap-2">
               <CheckCircle className="w-4 h-4 flex-shrink-0" />
               {success}
             </div>
@@ -248,10 +248,10 @@ export default function LoginModal({ open, onOpenChange, onSuccess }: LoginModal
 
           {/* 开发环境模拟登录 */}
           {devMode && (
-            <div className="pt-4 border-t border-slate-100">
+            <div className="pt-4 border-t border-white/[0.06]">
               <button
                 onClick={handleMockLogin}
-                className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors text-sm text-slate-500 flex items-center justify-center gap-2"
+                className="w-full p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] transition-colors text-sm text-white/40 flex items-center justify-center gap-2"
               >
                 <AlertCircle className="w-4 h-4" />
                 模拟登录（开发环境）

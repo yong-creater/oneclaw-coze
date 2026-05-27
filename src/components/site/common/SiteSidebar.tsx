@@ -121,7 +121,7 @@ export default function SiteSidebar() {
                     <Crown className="w-4 h-4" />
                     <span>会员中心</span>
                   </Link>
-                  <hr className="my-1 border-slate-100" />
+                  <hr className="my-1 border-white/10" />
                   <button
                     onClick={() => { setShowDropdown(false); logout(); }}
                     className="os-dock-user-menu-item text-red-500"

@@ -1,19 +1,19 @@
-/* ==================== OneClaw 结果卡片 & 变量 ==================== */
+/* ==================== OneClaw 结果卡片 & 变量 — 深色版 ==================== */
 
 /* ---------- CSS 变量（与 tool-cards.css 共享） ---------- */
 :root {
-  --oc-card-radius: 28px;
-  --oc-card-bg: rgba(255,255,255,0.78);
-  --oc-card-border: 1px solid rgba(255,255,255,0.7);
+  --oc-card-radius: 20px;
+  --oc-card-bg: #171717;
+  --oc-card-border: 1px solid rgba(255,255,255,0.06);
   --oc-card-blur: blur(24px);
-  --oc-card-shadow: 0 12px 32px rgba(80,80,120,0.08);
-  --oc-card-hover-y: -6px;
-  --oc-card-hover-shadow: 0 20px 60px rgba(92,92,255,0.14);
+  --oc-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --oc-card-hover-y: -4px;
+  --oc-card-hover-shadow: 0 16px 40px rgba(124, 58, 237, 0.12);
   --oc-card-transition: all 0.28s ease;
-  --oc-tag-bg: rgba(123,97,255,0.08);
-  --oc-tag-color: #7B61FF;
-  --oc-grad-primary: linear-gradient(135deg, #7B61FF 0%, #5B8CFF 100%);
-  --oc-grad-placeholder: linear-gradient(135deg, #F4F0FF, #EEF7FF);
+  --oc-tag-bg: rgba(124, 58, 237, 0.1);
+  --oc-tag-color: #a78bfa;
+  --oc-grad-primary: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  --oc-grad-placeholder: linear-gradient(135deg, #1c1c2e, #1a1a2e);
 }
 
 /* ---------- 结果卡片 (作品详情/生成结果) ---------- */

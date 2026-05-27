@@ -175,23 +175,23 @@ export default function EmailInput({
 
       {/* 域名建议列表 */}
       {showSuggestions && filteredDomains.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg overflow-hidden">
+        <div className="absolute z-50 w-full mt-1 bg-[#1a1a1a] border border-white/[0.08] rounded-lg shadow-lg overflow-hidden">
           {filteredDomains.map((domain, index) => (
             <div
               key={domain}
               className={`
                 px-4 py-2 cursor-pointer transition-colors
                 ${index === selectedIndex 
-                  ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-600' 
-                  : 'hover:bg-slate-50 dark:hover:bg-slate-700'}
+                  ? 'bg-[#7B61FF]/10 text-[#a78bfa]' 
+                  : 'hover:bg-white/[0.06]'}
               `}
               onClick={() => selectSuggestion(domain)}
               onMouseEnter={() => setSelectedIndex(index)}
             >
-              <span className="text-slate-600 dark:text-slate-300">
+              <span className="text-white/50">
                 {getParts().prefix}
               </span>
-              <span className="text-orange-500 font-medium">
+              <span className="text-[#a78bfa] font-medium">
                 {domain}
               </span>
             </div>

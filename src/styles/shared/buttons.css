@@ -1,6 +1,6 @@
-/* ==================== Creator OS 按钮系统 ==================== */
+/* ==================== Creator OS 按钮系统 — 深色版 ==================== */
 
-/* 主按钮 - 蓝紫渐变 */
+/* 主按钮 - 紫色渐变 */
 .os-btn-primary {
   display: inline-flex;
   align-items: center;
@@ -12,8 +12,8 @@
   font-size: 15px;
   font-weight: 600;
   border-radius: 14px;
-  background: linear-gradient(135deg, #7B61FF 0%, #5EA9FF 100%);
-  box-shadow: 0 2px 16px -2px rgba(123, 97, 255, 0.30);
+  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.25);
   transition: all 0.25s ease;
   cursor: pointer;
   border: none;
@@ -22,13 +22,13 @@
   overflow: hidden;
 }
 .os-btn-primary:hover {
-  background: linear-gradient(135deg, #8B71FF 0%, #6B9CFF 100%);
+  background: linear-gradient(135deg, #8b5cf6 0%, #818cf8 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px -4px rgba(123, 97, 255, 0.40);
+  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4);
 }
 .os-btn-primary:active {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 8px -2px rgba(123, 97, 255, 0.30);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
 }
 .os-btn-primary:disabled {
   opacity: 0.5;
@@ -37,7 +37,7 @@
   box-shadow: none;
 }
 
-/* 次要按钮 - 白底轻边框 */
+/* 次要按钮 - 深色底轻边框 */
 .os-btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -45,21 +45,21 @@
   gap: 8px;
   height: 44px;
   padding: 0 28px;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.5);
   font-size: 15px;
   font-weight: 500;
   border-radius: 14px;
-  background: white;
-  border: 1px solid #E6E8F0;
-  box-shadow: 0 2px 8px rgba(80,80,120,0.04);
+  background: rgba(139, 92, 246, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: none;
   transition: all 0.25s ease;
   cursor: pointer;
   outline: none;
 }
 .os-btn-secondary:hover {
-  border-color: rgba(123,97,255,0.25);
-  color: #7B61FF;
-  box-shadow: 0 4px 14px rgba(123,97,255,0.08);
+  border-color: rgba(139, 92, 246, 0.25);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.08);
 }
 .os-btn-secondary:active {
   transform: scale(0.98);
@@ -73,7 +73,7 @@
   gap: 6px;
   height: 36px;
   padding: 0 14px;
-  color: #64748B;
+  color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
   font-weight: 500;
   border-radius: 10px;
@@ -84,11 +84,11 @@
   outline: none;
 }
 .os-btn-ghost:hover {
-  background: rgba(123,97,255,0.06);
-  color: #7B61FF;
+  background: rgba(139, 92, 246, 0.06);
+  color: #a78bfa;
 }
 
-/* 胶囊筛选按钮 */
+/* 胶囊筛选按钮 — 深色 */
 .os-btn-capsule {
   display: inline-flex;
   align-items: center;
@@ -96,9 +96,9 @@
   height: 34px;
   padding: 0 16px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.80);
-  border: 1px solid rgba(238,240,245,0.80);
-  color: #64748B;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -108,21 +108,22 @@
   -webkit-backdrop-filter: blur(8px);
 }
 .os-btn-capsule:hover {
-  border-color: rgba(123,97,255,0.20);
-  color: #7B61FF;
-  background: rgba(255,255,255,0.95);
+  border-color: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.06);
 }
 .os-btn-capsule-active {
-  background: rgba(123,97,255,0.10);
-  border-color: rgba(123,97,255,0.25);
-  color: #7B61FF;
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  border-color: transparent;
+  color: #fff;
   font-weight: 600;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
 }
 .os-btn-capsule-count {
   font-size: 11px;
-  color: #A0A8B8;
+  color: rgba(255, 255, 255, 0.3);
   margin-left: 2px;
 }
 .os-btn-capsule-active .os-btn-capsule-count {
-  color: rgba(123,97,255,0.60);
+  color: rgba(255, 255, 255, 0.7);
 }

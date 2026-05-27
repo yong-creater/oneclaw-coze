@@ -20,14 +20,14 @@ export default function BackToHome({ label = 'AI 工具详情', className = '', 
         </Link>
       ) : (
         <Link href="/">
-          <Button variant="ghost" size="sm" className="text-slate-600 dark:text-slate-300 hover:text-orange-500">
+          <Button variant="ghost" size="sm" className="text-white/40 hover:text-[#a78bfa]">
             <Home className="w-4 h-4 mr-2" />
             返回首页
           </Button>
         </Link>
       )}
-      <span className="text-slate-300 dark:text-slate-600 mx-2">/</span>
-      <span className="text-sm text-slate-500 dark:text-slate-400">{label}</span>
+      <span className="text-white/20 mx-2">/</span>
+      <span className="text-sm text-white/30">{label}</span>
     </div>
   );
 }

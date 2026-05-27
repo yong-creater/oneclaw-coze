@@ -223,7 +223,7 @@ function GlobalModalRenderer({
       />
       {/* Modal */}
       <div
-        className="relative w-[90vw] max-w-[420px] rounded-3xl bg-white/95 backdrop-blur-xl shadow-2xl p-6 animate-in zoom-in-95 fade-in duration-200"
+        className="relative w-[90vw] max-w-[420px] rounded-3xl bg-[#1a1a1a]/95 backdrop-blur-xl border border-white/[0.06] shadow-2xl p-6 animate-in zoom-in-95 fade-in duration-200"
       >
         {/* Icon */}
         <div className="flex justify-center">
@@ -231,13 +231,13 @@ function GlobalModalRenderer({
         </div>
 
         {/* Title */}
-        <h3 className="text-lg font-semibold text-slate-900 text-center mt-1">
+        <h3 className="text-lg font-semibold text-white/90 text-center mt-1">
           {state.title}
         </h3>
 
         {/* Description */}
         {state.description && (
-          <p className="text-sm text-slate-500 text-center mt-2 leading-relaxed">
+          <p className="text-sm text-white/40 text-center mt-2 leading-relaxed">
             {state.description}
           </p>
         )}
@@ -250,10 +250,10 @@ function GlobalModalRenderer({
               onClick={() => onAction(action)}
               className={`h-11 rounded-xl text-sm font-medium transition-all duration-200 active:scale-[0.97] ${
                 action.variant === 'primary'
-                  ? 'flex-1 bg-gradient-to-r from-orange-500 to-rose-500 text-white hover:shadow-lg hover:shadow-orange-500/25'
+                  ? 'flex-1 bg-gradient-to-r from-[#7B61FF] to-[#5B8CFF] text-white hover:shadow-lg hover:shadow-[#7B61FF]/25'
                   : action.variant === 'danger'
                   ? 'flex-1 bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/25'
-                  : 'flex-1 bg-white border-2 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                  : 'flex-1 bg-white/[0.04] border border-white/[0.08] text-white/60 hover:bg-white/[0.08] hover:border-white/[0.12]'
               }`}
             >
               {action.label}

@@ -27,15 +27,15 @@ export function UtilityCard({
   gradient = 'from-[#7B61FF] to-[#5B8CFF]'
 }: UtilityCardProps) {
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-      <div className={`px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r ${gradient} bg-opacity-5`}>
+    <div className="bg-[#171717] rounded-2xl shadow-sm border border-white/[0.06] overflow-hidden">
+      <div className={`px-6 py-4 border-b border-white/[0.06] bg-gradient-to-r ${gradient} bg-opacity-5`}>
         <div className="flex items-center gap-2">
           {icon && (
-            <span className="[&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-[#7B61FF]">
+            <span className="[&>svg]:w-5 [&>svg]:h-5 [&>svg]:text-[#a78bfa]">
               {icon}
             </span>
           )}
-          <h2 className="font-semibold text-slate-800 dark:text-white">
+          <h2 className="font-semibold text-white/90">
             {title}
           </h2>
         </div>
@@ -74,13 +74,13 @@ interface FormFieldProps {
 export function FormField({ label, required, hint, children }: FormFieldProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+      <label className="block text-sm font-medium text-white/60 mb-1">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-red-400 ml-1">*</span>}
       </label>
       {children}
       {hint && (
-        <p className="mt-1 text-xs text-slate-500">{hint}</p>
+        <p className="mt-1 text-xs text-white/30">{hint}</p>
       )}
     </div>
   );
@@ -188,14 +188,14 @@ export function SelectField({ label, value, onChange, options, placeholder, icon
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-          {icon && <span className="inline-flex items-center mr-1 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:text-[#7B61FF]">{icon}</span>}
+        <label className="block text-sm font-medium text-white/60 mb-1.5">
+          {icon && <span className="inline-flex items-center mr-1 [&>svg]:w-4 [&>svg]:h-4 [&>svg]:text-[#a78bfa]">{icon}</span>}
           {label}
         </label>
       )}
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className={`w-full bg-white dark:bg-slate-800 rounded-xl focus:outline-none focus:border-[#7B61FF] transition-colors hover:border-slate-300 dark:hover:border-slate-600 ${
-          showBorder ? 'border-2 border-slate-200 dark:border-slate-700' : 'border-2 border-transparent'
+        <SelectTrigger className={`w-full bg-[#1a1a1a] rounded-xl focus:outline-none focus:border-[#7B61FF] transition-colors hover:border-white/20 ${
+          showBorder ? 'border-2 border-white/[0.08]' : 'border-2 border-transparent'
         }`}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -227,9 +227,9 @@ export function TextareaField({ value, onChange, placeholder, rows = 6, classNam
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className={`w-full p-4 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors resize-none hover:border-slate-300 dark:hover:border-slate-600 ${className} ${
+      className={`w-full p-4 rounded-xl bg-[#1a1a1a] text-white/90 placeholder:text-white/25 transition-colors resize-none hover:border-white/20 ${className} ${
         showBorder 
-          ? 'border-2 border-slate-200 dark:border-slate-700 focus:outline-none focus:border-[#7B61FF]' 
+          ? 'border-2 border-white/[0.08] focus:outline-none focus:border-[#7B61FF]' 
           : 'border-2 border-transparent focus:outline-none focus:border-[#7B61FF]'
       }`}
     />

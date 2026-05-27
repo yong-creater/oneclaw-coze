@@ -36,7 +36,7 @@ export default function LoginButton() {
           </div>
         )}
         <div className="min-w-0 flex-1 text-left">
-          <div className="text-xs font-medium text-slate-700 truncate">{user?.nickname || '用户'}</div>
+          <div className="text-xs font-medium text-white/60 truncate">{user?.nickname || '用户'}</div>
         </div>
       </button>
 
@@ -47,11 +47,11 @@ export default function LoginButton() {
             className="fixed inset-0 z-40"
             onClick={() => setShowDropdown(false)}
           />
-          <div className="absolute left-0 bottom-full mb-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 z-50">
+          <div className="absolute left-0 bottom-full mb-2 w-48 bg-[#1a1a1a] rounded-xl shadow-lg border border-white/[0.06] py-1 z-50">
             <Link
               href="/projects"
               onClick={() => setShowDropdown(false)}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.06]"
             >
               <FolderOpen className="w-4 h-4" />
               我的作品
@@ -59,18 +59,18 @@ export default function LoginButton() {
             <Link
               href="/workspace"
               onClick={() => setShowDropdown(false)}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/60 hover:bg-white/[0.06]"
             >
               <User className="w-4 h-4" />
               个人中心
             </Link>
-            <hr className="my-1 border-slate-100" />
+            <hr className="my-1 border-white/[0.06]" />
             <button
               onClick={() => {
                 setShowDropdown(false);
                 logout();
               }}
-              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500 hover:bg-slate-50"
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/[0.06]"
             >
               <LogOut className="w-4 h-4" />
               退出登录

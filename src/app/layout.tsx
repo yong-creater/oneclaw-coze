@@ -13,7 +13,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#ef4444',
+  themeColor: '#0f0f10',
 };
 
 const domain = getDomain();
@@ -160,7 +160,7 @@ export default function RootLayout({
   const googleAdSenseId = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_ID || '';
 
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="zh-CN" className="dark" suppressHydrationWarning>
       <head suppressHydrationWarning>
         {/* 百度站长验证 - 硬编码确保生效 */}
         <meta name="baidu-site-verification" content="codeva-Guh6a5UTE1" />

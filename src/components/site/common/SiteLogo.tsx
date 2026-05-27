@@ -38,7 +38,7 @@ export function SiteLogo({
       
       {/* 文字 Logo */}
       {showText && (
-        <span className="font-semibold tracking-tight text-slate-800 dark:text-white" style={{ fontSize: size * 0.55 }}>
+        <span className="font-semibold tracking-tight text-white/90" style={{ fontSize: size * 0.55 }}>
           OneClaw
         </span>
       )}

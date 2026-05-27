@@ -1,151 +1,82 @@
-/* ===== 灵感参考上传区 ===== */
-.os-dropzone {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
-  height: 72px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1.5px dashed rgba(180, 190, 210, 0.5);
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-sizing: border-box;
-  margin-top: 12px;
-  flex-shrink: 0;
-}
-.os-dropzone:hover {
-  background: rgba(120, 120, 255, 0.03);
-  border-color: rgba(120, 120, 255, 0.30);
-  box-shadow: 0 0 24px rgba(120, 120, 255, 0.06);
-}
-.os-dropzone-active {
-  background: rgba(120, 120, 255, 0.06) !important;
-  border-color: rgba(120, 120, 255, 0.5) !important;
-  box-shadow: 0 0 30px rgba(120, 120, 255, 0.10) !important;
-}
-.os-dropzone-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(120, 120, 255, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #94A3B8;
-  transition: color 0.2s;
-}
-.os-dropzone:hover .os-dropzone-icon {
-  color: #7B61FF;
-}
-.os-dropzone-text {
+/* ==================== Creator OS 上传系统 — 深色版 ==================== */
+
+/* 通用拖拽上传区 */
+.os-upload {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-.os-dropzone-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #64748B;
-}
-.os-dropzone-formats {
-  font-size: 12px;
-  color: #94A3B8;
-}
-
-/* 已达上限状态 */
-.os-dropzone-full {
-  border-style: solid;
-  border-color: rgba(16, 185, 129, 0.3);
-  background: rgba(16, 185, 129, 0.04);
-}
-
-/* 底部工具栏 */
-.os-studio-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 0 0;
-  gap: 12px;
-}
-.os-studio-tool-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 16px;
-  border-radius: 999px;
-  color: #64748B;
-  background: rgba(241, 245, 249, 0.8);
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  outline: none;
-  white-space: nowrap;
-}
-.os-studio-tool-btn:hover {
-  color: #6D5EF6;
-  background: rgba(109, 94, 246, 0.08);
-}
-
-/* 开始创作 CTA — 56px 高 / 渐变紫色 + 发光效果 + 渐变流动 */
-.os-studio-cta {
-  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-width: 220px;
-  height: 56px;
-  padding: 0 36px;
-  border: none;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #8f7cff 0%, #7aa8ff 100%);
-  background-size: 200% 200%;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
+  min-height: 220px;
+  padding: 32px;
+  background: #1c1c1e;
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(120, 120, 255, 0.18);
-  letter-spacing: 0.02em;
-  animation: ctaGradientFlow 4s ease infinite;
+  transition: all 0.22s ease;
 }
-@keyframes ctaGradientFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.os-upload:hover {
+  background: rgba(139, 92, 246, 0.03);
+  border-color: #7c3aed;
 }
-.os-studio-cta::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, #9f8cff 0%, #8ab8ff 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+.os-upload-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(99, 102, 241, 0.06));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a78bfa;
+  margin-bottom: 12px;
 }
-.os-studio-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 40px rgba(120, 120, 255, 0.32), 0 0 80px rgba(120, 120, 255, 0.12);
+.os-upload-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  line-height: 1.5;
 }
-.os-studio-cta:hover::before {
-  opacity: 1;
+.os-upload-text strong {
+  color: #a78bfa;
+  font-weight: 600;
 }
-.os-studio-cta:active {
-  transform: translateY(-1px) scale(0.98);
-}
-.os-studio-cta:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: 0 4px 16px rgba(124, 92, 255, 0.12) !important;
-}
-.os-studio-cta > * {
-  position: relative;
-  z-index: 1;
+.os-upload-hint {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.2);
+  margin-top: 6px;
 }
 
+/* 上传预览 */
+.os-upload-preview {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #1c1c1e;
+}
+.os-upload-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.os-upload-preview-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 2;
+}
+.os-upload-preview-remove:hover {
+  background: rgba(239, 68, 68, 0.7);
+}
