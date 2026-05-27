@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: emailResult.error || '邮件发送失败，请稍后重试'
-      }, { status: 500 });
+      }, { status: 200 });  // 返回200而不是500，前端能正确展示错误
     }
 
     const isDev = process.env.NODE_ENV !== 'production';

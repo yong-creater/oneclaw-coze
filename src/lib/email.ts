@@ -27,14 +27,27 @@ export async function sendEmailViaResend(
 
     if (error) {
       console.error('[Resend] 发送失败:', error);
-      return { success: false, error: error.message };
+      // 将英文错误翻译为用户友好的中文提示
+      const msg = error.message || '';
+      if (msg.includes('API key is invalid') || msg.includes('API key')) {
+        return { success: false, error: '邮件服务配置异常，请联系管理员' };
+      }
+      if (msg.includes('rate limit') || msg.includes('Too many')) {
+        return { success: false, error: '发送过于频繁，请稍后再试' };
+      }
+      return { success: false, error: '邮件发送失败，请稍后重试' };
     }
 
     console.log('[Resend] 邮件已发送, ID:', data?.id);
     return { success: true, messageId: data?.id };
   } catch (error: any) {
     console.error('[Resend] 发送异常:', error.message);
-    return { success: false, error: error.message };
+    // 将英文错误翻译为用户友好的中文提示
+    const msg = error.message || '';
+    if (msg.includes('API key is invalid') || msg.includes('API key')) {
+      return { success: false, error: '邮件服务配置异常，请联系管理员' };
+    }
+    return { success: false, error: '邮件发送失败，请稍后重试' };
   }
 }
 
