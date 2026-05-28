@@ -526,14 +526,13 @@ export default function HomePage() {
 
         {/* ===== 左侧：创作面板 ===== */}
         <aside className="os-studio-panel">
-          {/* --- 品牌区域 --- */}
+          {/* --- 模型能力说明 --- */}
           <div className="os-panel-model">
             <div className="os-panel-model-header">
               <div className="os-panel-model-icon">
                 <Sparkles className="w-3.5 h-3.5" />
               </div>
               <div className="os-panel-model-info">
-                <div className="os-panel-model-name">OneClaw Vision</div>
                 <div className="os-panel-model-desc">Powered by GPT Image 2</div>
               </div>
             </div>
