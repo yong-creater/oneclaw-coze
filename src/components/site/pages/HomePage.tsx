@@ -2,14 +2,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import {
   Wand2,
   ImagePlus,
   X,
   Check,
   Sparkles,
-  ChevronRight,
   Upload,
   Download,
   RotateCcw,
@@ -18,7 +16,6 @@ import {
   BookmarkPlus,
   BookmarkCheck,
   ZoomIn,
-  Lightbulb,
   SlidersHorizontal,
   Pencil,
   Copy,
@@ -115,26 +112,6 @@ export default function HomePage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [cases, setCases] = useState<Array<{ id: number; image: string; type: string; title: string; prompt: string }>>([]);
-
-  // 获取推荐案例（从灵感页数据源）
-  useEffect(() => {
-    fetch('/api/prompts?limit=6')
-      .then(r => r.json())
-      .then(data => {
-        const prompts = data.prompts || data.data || [];
-        const mapped = prompts.slice(0, 6).map((p: Record<string, unknown>) => ({
-          id: p.id as number,
-          image: (p.image as string) || '/og-image.png',
-          type: (p.category_slug as string) || '灵感',
-          title: ((p.title as string) || '').slice(0, 20),
-          prompt: (p.content as string) || (p.title as string) || '',
-        }));
-        setCases(mapped);
-      })
-      .catch(() => {});
-  }, []);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -290,11 +267,6 @@ export default function HomePage() {
     return () => clearInterval(iv);
   }, [genStep, loadingMessages.length]);
 
-  // ===== Carousel =====
-  const handleInspirationClick = useCallback((prompt: string) => {
-    setInputText(prompt);
-  }, []);
-
   // ===== 保存到作品集 =====
   const handleSave = useCallback(async () => {
     if (!requireAuth()) return;
@@ -365,37 +337,15 @@ export default function HomePage() {
 
   // ===== 右侧面板内容 =====
   const renderRightPanel = () => {
-    // 空状态：推荐案例
+    // 空状态：极简等待创作
     if (genStep === 'idle' && generatedImages.length === 0) {
       return (
-        <>
-          <div className="os-cases-header">
-            <div className="os-cases-header-left">
-              <Lightbulb className="w-4 h-4 text-[#7B61FF]/60" />
-              <h2 className="os-cases-title">推荐案例</h2>
-            </div>
-            <Link href="/inspiration" className="os-cases-more">
-              探索更多 <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="os-cases-grid">
-            {cases.map((c) => (
-              <div
-                key={c.id}
-                className="os-case-card"
-                onClick={() => handleInspirationClick(c.prompt)}
-              >
-                <div className="os-case-card-img-wrap">
-                  <img src={c.image} alt={c.title} className="os-case-card-img" loading="lazy" />
-                  <div className="os-case-card-hover" />
-                </div>
-                <div className="os-case-card-info">
-                  <p className="os-case-card-title">{c.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
+        <div className="os-idle-empty">
+          <div className="os-idle-empty-glow" />
+          <Sparkles className="os-idle-empty-icon" />
+          <h2 className="os-idle-empty-title">开始你的创作</h2>
+          <p className="os-idle-empty-sub">上传图片或输入描述词<br />即可生成高质量 AI 图片</p>
+        </div>
       );
     }
 

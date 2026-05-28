@@ -1032,95 +1032,72 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* ---- 推荐案例 ---- */
-/* ── 推荐案例区域 ── */
-/* ── 推荐案例 ── */
-.os-cases-header {
+/* ── 空状态（未生成） ── */
+.os-empty-state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.os-cases-header-left {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.os-cases-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--oc-text-secondary, rgba(255, 255, 255, 0.65));
-}
-.os-cases-more {
-  font-size: 13px;
-  color: var(--oc-text-tertiary, rgba(255, 255, 255, 0.45));
-  text-decoration: none;
-  transition: color var(--oc-transition-fast);
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-.os-cases-more:hover {
-  color: var(--oc-text-secondary, rgba(255, 255, 255, 0.6));
-}
-.os-cases-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-.os-case-card {
-  position: relative;
-  border-radius: 18px;
-  overflow: hidden;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: all 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.os-case-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(139, 92, 246, 0.15);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 0 20px rgba(139, 92, 246, 0.06);
-}
-.os-case-card-img-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.02);
-}
-.os-case-card-img {
-  width: 100%;
+  justify-content: center;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  position: relative;
+  user-select: none;
 }
-.os-case-card:hover .os-case-card-img {
-  transform: scale(1.04);
-}
-.os-case-card-hover {
+.os-empty-state-glow {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 92, 255, 0.08) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
   pointer-events: none;
+  animation: emptyGlow 4s ease-in-out infinite;
 }
-.os-case-card:hover .os-case-card-hover {
-  opacity: 1;
+.os-empty-state-icon {
+  position: relative;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.os-case-card-info {
-  padding: 12px 14px 14px;
+.os-empty-state-icon svg {
+  width: 26px;
+  height: 26px;
+  color: rgba(255, 255, 255, 0.45);
+  animation: emptyPulse 3s ease-in-out infinite;
 }
-.os-case-card-title {
+.os-empty-state-title {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.os-empty-state-subtitle {
+  position: relative;
+  z-index: 1;
   font-size: 14px;
-  font-weight: 500;
-  color: var(--oc-text-secondary, rgba(255, 255, 255, 0.65));
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.45);
+  max-width: 260px;
+}
+@keyframes emptyGlow {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -60%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%, -60%) scale(1.12); }
+}
+@keyframes emptyPulse {
+  0%, 100% { opacity: 0.45; }
+  50%      { opacity: 0.75; }
 }
 
 /* ---- 光斑漂浮动画 ---- */
