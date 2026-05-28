@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Wand2,
   ImagePlus,
@@ -13,14 +12,24 @@ import {
   TrendingUp,
   Upload,
   Zap,
-  ChevronDown,
   Palette,
   SlidersHorizontal,
   Crown,
+  Download,
+  RotateCcw,
+  ImageIcon,
+  Loader2,
+  BookmarkPlus,
+  BookmarkCheck,
+  ZoomIn,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
 import { useModal } from '@/contexts/ModalContext';
+
+// ===== 类型 =====
+interface GeneratedImage { url: string; }
+type GenStep = 'idle' | 'generating' | 'done' | 'error';
 
 // ===== 布局模式识别 =====
 const LAYOUT_KEYWORDS = [
@@ -37,70 +46,15 @@ function parseLayoutMode(input: string): 'single-product' | 'multi-angle' {
   return 'single-product';
 }
 
-function stripLayoutKeywords(input: string): string {
-  let cleaned = input;
-  for (const kw of LAYOUT_KEYWORDS) {
-    cleaned = cleaned.replace(new RegExp(`[，,]?\\s*${kw}\\s*[，,]?`, 'g'), '');
+// ===== fetch 超时工具 =====
+function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number } = {}, timeout = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const { signal: externalSignal, timeout: _t, ...rest } = options;
+  if (externalSignal) {
+    externalSignal.addEventListener('abort', () => controller.abort());
   }
-  cleaned = cleaned.replace(/\s{2,}/g, ' ').replace(/[，,]\s*[，,]/g, ',').replace(/^\s*[，,]\s*/, '').replace(/\s*[，,]\s*$/, '').trim();
-  return cleaned;
-}
-
-// ===== 导航到创作页 =====
-const CREATE_CONTEXT_KEY = 'oneclaw_create_context';
-
-async function navigateToCreate(
-  router: ReturnType<typeof useRouter>,
-  opts: {
-    prompt?: string;
-    uploadedImages?: string[];
-    autoGenerate?: boolean;
-  }
-): Promise<void> {
-  const cleanedPrompt = stripLayoutKeywords(opts.prompt || '');
-
-  const context: Record<string, unknown> = {};
-  if (cleanedPrompt) context.prompt = cleanedPrompt;
-  if (opts.uploadedImages && opts.uploadedImages.length > 0) {
-    context.images = opts.uploadedImages.map((url, i) => ({
-      id: `upload-${Date.now()}-${i}`,
-      url,
-      name: `参考图${i + 1}`,
-    }));
-  }
-  if (opts.autoGenerate) context.autoGenerate = true;
-
-  // 简单风格推荐
-  const lower = (cleanedPrompt || '').toLowerCase();
-  let style = 'premium';
-  let ratio = '3:4';
-  let count = '4';
-  if (lower.includes('海报') || lower.includes('banner') || lower.includes('封面')) { style = 'premium'; ratio = '3:4'; count = '3'; }
-  if (lower.includes('人物') || lower.includes('写真') || lower.includes('人像')) { style = 'luxury'; ratio = '3:4'; count = '4'; }
-  if (lower.includes('包装') || lower.includes('品牌')) { style = 'minimal'; ratio = '1:1'; count = '4'; }
-  if (lower.includes('深色') || lower.includes('暗黑') || lower.includes('科技') || lower.includes('赛博')) { style = 'tech'; }
-  if (lower.includes('清新') || lower.includes('文艺') || lower.includes('日系')) { style = 'fresh'; }
-  if (lower.includes('极简') || lower.includes('简约')) { style = 'minimal'; }
-  if (lower.includes('可爱') || lower.includes('甜美')) { style = 'cute'; }
-  if (lower.includes('复古') || lower.includes('胶片')) { style = 'retro-film'; }
-
-  const layoutMode = parseLayoutMode(cleanedPrompt);
-  context.analysisResult = { tool: 'product-generator', style, ratio, count, layoutMode };
-
-  try {
-    sessionStorage.setItem(CREATE_CONTEXT_KEY, JSON.stringify(context));
-  } catch {
-    // ignore
-  }
-
-  const params = new URLSearchParams();
-  if (cleanedPrompt) params.set('prompt', cleanedPrompt);
-  if (opts.autoGenerate) params.set('auto', '1');
-  params.set('style', style);
-  params.set('ratio', ratio);
-  params.set('count', count);
-
-  router.push(`/create?${params.toString()}`);
+  const timer = setTimeout(() => controller.abort(), timeout);
+  return fetch(url, { ...rest, signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
 // ===== 热门创作灵感 =====
@@ -179,10 +133,33 @@ const STYLE_OPTIONS = [
 
 const MAX_UPLOAD_IMAGES = 5;
 
+// ===== 比例 → aspect-ratio CSS =====
+function ratioToAspect(ratio: string): string {
+  const map: Record<string, string> = {
+    '1:1': '1 / 1',
+    '3:4': '3 / 4',
+    '9:16': '9 / 16',
+    '16:9': '16 / 9',
+  };
+  return map[ratio] || '1 / 1';
+}
+
+// ===== 生成中动态文案 =====
+function buildLoadingMessages(ratio: string, styleName: string): string[] {
+  const ratioStr = ratio;
+  const styleStr = styleName || '';
+  return [
+    `正在生成 ${ratioStr} ${styleStr} 视觉内容`.replace(/\s+/g, ' ').trim(),
+    '正在理解你的创意',
+    'AI 正在构建视觉细节',
+    `正在优化${styleStr}光影与构图`.replace(/\s+/g, ' ').trim(),
+    '正在生成高质量画面',
+  ];
+}
+
 export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
-  const router = useRouter();
-  const { requireAuth, dailyQuota } = useUser();
+  const { requireAuth, dailyQuota, refreshQuota, user, loading } = useUser();
   const { showAlert } = useModal();
 
   // ===== 面板状态 =====
@@ -191,13 +168,24 @@ export default function HomePage() {
   const [selectedRatio, setSelectedRatio] = useState('3:4');
   const [selectedQuality, setSelectedQuality] = useState('standard');
   const [selectedStyle, setSelectedStyle] = useState('auto');
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
+  // ===== 生成状态 =====
+  const [genStep, setGenStep] = useState<GenStep>('idle');
+  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
+  const [errorMsg, setErrorMsg] = useState('');
+  const [selectedImgIdx, setSelectedImgIdx] = useState(0);
+  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
+  const [lightboxIdx, setLightboxIdx] = useState(-1);
+  const [saved, setSaved] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
+  // ===== 初始化 =====
   useEffect(() => {
     if (pendingInput) { setInputText(pendingInput); consumePendingInput(); }
   }, [pendingInput, consumePendingInput]);
@@ -235,27 +223,107 @@ export default function HomePage() {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  // ===== 生成入口 =====
-  const handleStartCreate = useCallback(() => {
-    if (!inputText.trim() || isTransitioning) return;
-    if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
-      showAlert('今日免费额度已用完', '注册登录后可继续生成作品，并同步保存你的创作记录。', 'quota-exhausted');
-      requireAuth();
+  // ===== 生成逻辑（直接调用 /api/images/generate，不跳转） =====
+  const handleGenerate = useCallback(async () => {
+    if (!inputText.trim() && uploadedImages.length === 0) {
+      showAlert('请先输入内容', '请输入描述文字或上传参考图片后再生成。', 'alert');
       return;
     }
+    if (genStep === 'generating') return;
+
+    // 登录拦截
     if (!requireAuth()) return;
 
-    setIsTransitioning(true);
-    navigateToCreate(router, {
-      prompt: inputText.trim(),
-      uploadedImages,
-      autoGenerate: true,
-    });
-  }, [inputText, uploadedImages, isTransitioning, router, dailyQuota, requireAuth, showAlert]);
+    // 额度检查
+    if (dailyQuota !== null && dailyQuota !== -2 && dailyQuota !== -1 && dailyQuota <= 0) {
+      showAlert('今日免费额度已用完', '注册登录后可继续生成作品，并同步保存你的创作记录。', 'quota-exhausted');
+      return;
+    }
 
+    // 开始生成
+    setGenStep('generating');
+    setGeneratedImages([]);
+    setSaved(false);
+    setErrorMsg('');
+
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+
+    try {
+      const layoutMode = parseLayoutMode(inputText);
+      const genBody: Record<string, unknown> = {
+        prompt: inputText.trim(),
+        toolSlug: 'product-generator',
+        style: selectedStyle,
+        ratio: selectedRatio,
+        count: selectedQuality === 'hd' ? 2 : 4,
+        generationType: 'general',
+        layoutMode,
+      };
+      if (uploadedImages.length > 0) genBody.referenceImages = uploadedImages;
+
+      const genRes = await fetchWithTimeout('/api/images/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(genBody),
+        credentials: 'include',
+        signal: ac.signal,
+      }, 120000);
+
+      const genData = await genRes.json();
+
+      if (!genData.success) {
+        setGenStep('error');
+        const errMsg = genData.error || '生成失败，请重试';
+        setErrorMsg(errMsg);
+        return;
+      }
+
+      const urls: string[] = genData.imageUrls || genData.images || genData.data?.images || [];
+      if (urls.length === 0) {
+        setGenStep('error');
+        setErrorMsg('未获取到生成结果');
+        return;
+      }
+
+      setGeneratedImages(urls.map((url: string) => ({ url })));
+      setSelectedImgIdx(0);
+      setGenStep('done');
+      setSaved(true);
+      refreshQuota();
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      setGenStep('error');
+      const msg = err instanceof Error && err.message.includes('timeout') ? '生成超时，请重试' : '网络错误，请重试';
+      setErrorMsg(msg);
+    }
+  }, [inputText, uploadedImages, selectedRatio, selectedQuality, selectedStyle, genStep, dailyQuota, requireAuth, showAlert, refreshQuota]);
+
+  // 键盘快捷键
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); handleStartCreate(); }
-  }, [handleStartCreate]);
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); handleGenerate(); }
+  }, [handleGenerate]);
+
+  // 清理请求
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
+
+  // ===== 加载中文案轮播 =====
+  const styleLabel = STYLE_OPTIONS.find(s => s.value === selectedStyle)?.label || '';
+  const loadingMessages = buildLoadingMessages(selectedRatio, styleLabel);
+
+  useEffect(() => {
+    if (genStep !== 'generating') {
+      setLoadingMsgIdx(0);
+      return;
+    }
+    const iv = setInterval(() => {
+      setLoadingMsgIdx(prev => (prev + 1) % loadingMessages.length);
+    }, 2800);
+    return () => clearInterval(iv);
+  }, [genStep, loadingMessages.length]);
 
   // ===== Carousel =====
   const scrollCarousel = useCallback((dir: 'left' | 'right') => {
@@ -268,11 +336,183 @@ export default function HomePage() {
     setInputText(prompt);
   }, []);
 
+  // ===== 下载 =====
+  const handleDownload = useCallback(async (url: string, idx: number) => {
+    if (!requireAuth()) return;
+    try {
+      const resp = await fetch(url);
+      const blob = await resp.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `oneclaw-${idx + 1}.png`;
+      a.click();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, '_blank');
+    }
+  }, [requireAuth]);
+
   const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
+  const isGenerating = genStep === 'generating';
+
+  // ===== 右侧面板内容 =====
+  const renderRightPanel = () => {
+    // 空状态：灵感流
+    if (genStep === 'idle' && generatedImages.length === 0) {
+      return (
+        <>
+          <div className="os-feed-header">
+            <div className="os-feed-header-left">
+              <TrendingUp className="w-4.5 h-4.5 text-[#7B61FF]/60" />
+              <h2 className="os-feed-title">创作灵感</h2>
+              <span className="os-feed-count">{hotInspirations.length} 个创意</span>
+            </div>
+            <div className="os-feed-header-right">
+              <button onClick={() => scrollCarousel('left')} className="os-feed-nav-btn"><ChevronLeft className="w-4 h-4" /></button>
+              <button onClick={() => scrollCarousel('right')} className="os-feed-nav-btn"><ChevronRight className="w-4 h-4" /></button>
+            </div>
+          </div>
+          <div className="os-feed-grid" ref={carouselRef}>
+            {hotInspirations.map((item, idx) => (
+              <div
+                key={idx}
+                className="os-feed-card"
+                onClick={() => handleInspirationClick(item.examplePrompt)}
+              >
+                <div className="os-feed-card-img-wrap">
+                  <img src={item.image} alt={item.title} className="os-feed-card-img" loading="lazy" />
+                  <div className="os-feed-card-hover">
+                    <button
+                      className="os-feed-card-cta"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setInputText(item.examplePrompt);
+                      }}
+                    >
+                      <Wand2 className="w-3.5 h-3.5" />
+                      <span>试试这个</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="os-feed-card-info">
+                  <span className="os-feed-card-type">{item.type}</span>
+                  <p className="os-feed-card-title">{item.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      );
+    }
+
+    // 生成中
+    if (isGenerating) {
+      return (
+        <div className="os-gen-loading">
+          <div className="os-gen-shimmer" style={{ aspectRatio: ratioToAspect(selectedRatio) }}>
+            <div className="os-gen-shimmer-icon">
+              <Sparkles className="w-8 h-8" />
+            </div>
+          </div>
+          <div className="os-gen-loading-text">
+            <div className="os-gen-loading-label" key={loadingMsgIdx}>
+              {loadingMessages[loadingMsgIdx]}
+            </div>
+            <div className="os-gen-loading-sub">AI 正在创作中…</div>
+          </div>
+          <div className="os-gen-loading-bar">
+            <div className="os-gen-loading-bar-inner" />
+          </div>
+        </div>
+      );
+    }
+
+    // 错误状态
+    if (genStep === 'error') {
+      return (
+        <div className="os-gen-error">
+          <div className="os-gen-error-icon">
+            <ImageIcon className="w-10 h-10" />
+          </div>
+          <h3>生成失败</h3>
+          <p>{errorMsg || '请检查输入后重试'}</p>
+          <button className="os-gen-error-retry" onClick={handleGenerate}>
+            <RotateCcw className="w-4 h-4" /> 重试
+          </button>
+        </div>
+      );
+    }
+
+    // 生成结果
+    if (genStep === 'done' && generatedImages.length > 0) {
+      return (
+        <div className="os-gen-result">
+          {/* 结果标题 */}
+          <div className="os-gen-result-header">
+            <span className="os-gen-result-title">生成结果</span>
+            <span className="os-gen-result-count">共 {generatedImages.length} 张</span>
+          </div>
+
+          {/* 主预览 */}
+          <div
+            className="os-gen-result-main"
+            style={{ aspectRatio: ratioToAspect(selectedRatio) }}
+            onClick={() => setLightboxIdx(selectedImgIdx)}
+          >
+            <img
+              src={generatedImages[selectedImgIdx].url}
+              alt={`生成结果 ${selectedImgIdx + 1}`}
+              className="os-gen-result-main-img"
+            />
+            <div className="os-gen-result-zoom">
+              <ZoomIn className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* 缩略图 */}
+          {generatedImages.length > 1 && (
+            <div className="os-gen-result-thumbs">
+              {generatedImages.map((img, idx) => (
+                <div
+                  key={idx}
+                  className={`os-gen-result-thumb ${idx === selectedImgIdx ? 'active' : ''}`}
+                  style={{ aspectRatio: ratioToAspect(selectedRatio) }}
+                  onClick={() => setSelectedImgIdx(idx)}
+                >
+                  <img src={img.url} alt={`缩略图 ${idx + 1}`} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 操作栏 */}
+          <div className="os-gen-result-actions">
+            <button className="os-gen-action-btn os-gen-action-glass" onClick={handleGenerate}>
+              <RotateCcw className="w-4 h-4" /> 重新生成
+            </button>
+            <button
+              className={`os-gen-action-btn ${saved ? 'os-gen-action-saved' : 'os-gen-action-accent'}`}
+              disabled={saved}
+            >
+              {saved ? <><BookmarkCheck className="w-4 h-4" /> 已保存</> : <><BookmarkPlus className="w-4 h-4" /> 保存</>}
+            </button>
+            <button
+              className="os-gen-action-btn os-gen-action-download"
+              onClick={() => handleDownload(generatedImages[selectedImgIdx].url, selectedImgIdx)}
+            >
+              <Download className="w-4 h-4" /> 下载
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <div className="os-page os-page-studio">
-      {/* ==================== 两栏布局：面板 + 灵感流 ==================== */}
       <div className="os-studio-layout">
 
         {/* ===== 左侧：创作面板 ===== */}
@@ -290,7 +530,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* --- 分隔线 --- */}
           <div className="os-panel-divider" />
 
           {/* --- 图片上传区域 --- */}
@@ -349,6 +588,7 @@ export default function HomePage() {
                 placeholder="描述你想生成的内容..."
                 className="os-panel-prompt-input"
                 rows={4}
+                disabled={isGenerating}
               />
               <div className="os-panel-prompt-footer">
                 <span className="os-panel-prompt-count">{inputText.length} / 500</span>
@@ -420,14 +660,19 @@ export default function HomePage() {
 
           {/* --- 生成按钮 --- */}
           <button
-            onClick={handleStartCreate}
-            disabled={!inputText.trim() || isTransitioning}
+            onClick={handleGenerate}
+            disabled={(!inputText.trim() && uploadedImages.length === 0) || isGenerating}
             className="os-panel-generate-btn"
           >
-            {isTransitioning ? (
+            {isGenerating ? (
               <>
-                <span className="os-panel-generate-spinner" />
-                <span>准备中...</span>
+                <Loader2 className="w-4.5 h-4.5 animate-spin" />
+                <span>生成中…</span>
+              </>
+            ) : genStep === 'done' ? (
+              <>
+                <RotateCcw className="w-4.5 h-4.5" />
+                <span>重新生成</span>
               </>
             ) : (
               <>
@@ -438,70 +683,39 @@ export default function HomePage() {
           </button>
         </aside>
 
-        {/* ===== 右侧：灵感流 ===== */}
+        {/* ===== 右侧：灵感流 / 生成结果 ===== */}
         <main className="os-studio-feed">
-          <div className="os-feed-header">
-            <div className="os-feed-header-left">
-              <TrendingUp className="w-4.5 h-4.5 text-[#7B61FF]/60" />
-              <h2 className="os-feed-title">创作灵感</h2>
-              <span className="os-feed-count">{hotInspirations.length} 个创意</span>
-            </div>
-            <div className="os-feed-header-right">
-              <button onClick={() => scrollCarousel('left')} className="os-feed-nav-btn"><ChevronLeft className="w-4 h-4" /></button>
-              <button onClick={() => scrollCarousel('right')} className="os-feed-nav-btn"><ChevronRight className="w-4 h-4" /></button>
-            </div>
-          </div>
-
-          <div className="os-feed-grid" ref={carouselRef}>
-            {hotInspirations.map((item, idx) => (
-              <div
-                key={idx}
-                className="os-feed-card"
-                onClick={() => handleInspirationClick(item.examplePrompt)}
-              >
-                <div className="os-feed-card-img-wrap">
-                  <img src={item.image} alt={item.title} className="os-feed-card-img" loading="lazy" />
-                  <div className="os-feed-card-hover">
-                    <button
-                      className="os-feed-card-cta"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setInputText(item.examplePrompt);
-                      }}
-                    >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      <span>试试这个</span>
-                    </button>
-                  </div>
-                </div>
-                <div className="os-feed-card-info">
-                  <span className="os-feed-card-type">{item.type}</span>
-                  <p className="os-feed-card-title">{item.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          {renderRightPanel()}
         </main>
       </div>
 
-      {/* ===== 过渡浮层 ===== */}
-      {isTransitioning && (
-        <div className="os-ai-overlay">
-          <div className="os-ai-card">
-            <div className="os-ai-card-glow" />
-            <div className="os-ai-analyzing">
-              <div className="os-ai-msg-wrap">
-                <span className="os-ai-msg">正在准备创作环境…</span>
-              </div>
-              <div className="os-ai-pulse-dots">
-                <span className="os-ai-pulse-dot" style={{ animationDelay: '0s' }} />
-                <span className="os-ai-pulse-dot" style={{ animationDelay: '0.4s' }} />
-                <span className="os-ai-pulse-dot" style={{ animationDelay: '0.8s' }} />
-              </div>
+      {/* ===== Lightbox ===== */}
+      {lightboxIdx >= 0 && generatedImages[lightboxIdx] && (
+        <div className="os-gen-lightbox" onClick={() => setLightboxIdx(-1)}>
+          <button className="os-gen-lightbox-close" onClick={() => setLightboxIdx(-1)}>
+            <X className="w-6 h-6" />
+          </button>
+          <img src={generatedImages[lightboxIdx].url} alt="大图预览" />
+          {generatedImages.length > 1 && (
+            <div className="os-gen-lightbox-thumbs">
+              {generatedImages.map((img, i) => (
+                <img
+                  key={i}
+                  src={img.url}
+                  alt={`缩略图 ${i + 1}`}
+                  className={`os-gen-lightbox-thumb ${i === lightboxIdx ? 'active' : ''}`}
+                  onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
+                />
+              ))}
             </div>
-          </div>
+          )}
         </div>
       )}
+
+      {/* ===== Toast ===== */}
+      <div className={`os-gen-toast ${showToast ? 'show' : ''}`}>
+        <Check className="w-4 h-4" /> 已保存到作品库
+      </div>
     </div>
   );
 }

@@ -591,6 +591,369 @@
   line-height: 1.4;
 }
 
+/* ==================== 生成状态：加载 / 结果 / 错误 / Lightbox ==================== */
+
+/* --- 生成中 loading --- */
+.os-gen-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 400px;
+  padding: 40px 20px;
+}
+.os-gen-shimmer {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #1a1a1a 30%, #222 50%, #1a1a1a 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+.os-gen-shimmer-icon {
+  color: rgba(139, 92, 246, 0.2);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
+.os-gen-loading-text {
+  text-align: center;
+}
+.os-gen-loading-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  animation: fadeSlideIn 0.35s ease;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.os-gen-loading-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 6px;
+}
+
+/* 进度条 */
+.os-gen-loading-bar {
+  width: 180px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.os-gen-loading-bar-inner {
+  height: 100%;
+  width: 40%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #7c3aed, #6366f1);
+  animation: loadingSlide 1.6s ease-in-out infinite;
+}
+@keyframes loadingSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* --- 生成结果 --- */
+.os-gen-result {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.os-gen-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.os-gen-result-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e0e0e8;
+}
+.os-gen-result-count {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+/* 主预览 */
+.os-gen-result-main {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.os-gen-result-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.os-gen-result-zoom {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.os-gen-result-main:hover .os-gen-result-zoom {
+  opacity: 1;
+}
+
+/* 缩略图 */
+.os-gen-result-thumbs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.os-gen-result-thumb {
+  width: 72px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+  background: #1a1a1a;
+}
+.os-gen-result-thumb.active {
+  border-color: rgba(139, 92, 246, 0.6);
+}
+.os-gen-result-thumb:hover:not(.active) {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.os-gen-result-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 操作栏 */
+.os-gen-result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.os-gen-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.os-gen-action-glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.6);
+}
+.os-gen-action-glass:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+.os-gen-action-accent {
+  background: rgba(139, 92, 246, 0.12);
+  color: #a78bfa;
+}
+.os-gen-action-accent:hover {
+  background: rgba(139, 92, 246, 0.2);
+}
+.os-gen-action-saved {
+  background: rgba(52, 211, 153, 0.08);
+  color: rgba(52, 211, 153, 0.6);
+  cursor: default;
+}
+.os-gen-action-download {
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+}
+.os-gen-action-download:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+}
+
+/* --- 错误状态 --- */
+.os-gen-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 400px;
+  padding: 40px 20px;
+  text-align: center;
+}
+.os-gen-error-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(239, 68, 68, 0.08);
+  color: rgba(239, 68, 68, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.os-gen-error h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+.os-gen-error p {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 360px;
+  line-height: 1.6;
+}
+.os-gen-error-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.os-gen-error-retry:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.06);
+  color: #a78bfa;
+}
+
+/* --- Lightbox 大图 --- */
+.os-gen-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.os-gen-lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.os-gen-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.os-gen-lightbox > img {
+  max-width: 85vw;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: 12px;
+  cursor: default;
+}
+.os-gen-lightbox-thumbs {
+  position: absolute;
+  bottom: 24px;
+  display: flex;
+  gap: 8px;
+}
+.os-gen-lightbox-thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, opacity 0.2s;
+  opacity: 0.5;
+}
+.os-gen-lightbox-thumb.active {
+  border-color: #a78bfa;
+  opacity: 1;
+}
+.os-gen-lightbox-thumb:hover:not(.active) {
+  opacity: 0.8;
+}
+
+/* --- Toast --- */
+.os-gen-toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 12px;
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  color: #34d399;
+  font-size: 14px;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9999;
+}
+.os-gen-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* ---- 光斑漂浮动画 ---- */
 @keyframes orbDrift {
   0%   { transform: translate(0, 0); }
