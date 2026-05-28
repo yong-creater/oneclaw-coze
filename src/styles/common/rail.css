@@ -1,6 +1,6 @@
 /* ================================================================
    左侧导航 Dock — 深色极简 · AI 创作产品风格
-   参考：create.qianwen.com / Midjourney / Krea AI
+   参考：create.qianwen.com / Midjourney / Linear / Krea AI
    背景 #0f0f10 · 面板 #171717 · 紫色主色
    ================================================================ */
 
@@ -9,15 +9,15 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 72px;
+  width: 80px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px 0 12px;
+  padding: 28px 0 20px;
   z-index: 50;
   background: #0a0a0b;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 /* ---------- Logo ---------- */
@@ -25,18 +25,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 24px;
+  gap: 6px;
+  margin-bottom: 36px;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s ease;
 }
-.os-dock-logo:hover { opacity: 0.8; }
+.os-dock-logo:hover { opacity: 0.85; }
 .os-dock-brand {
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.25);
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 /* ---------- 导航区 ---------- */
@@ -44,7 +45,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   flex: 1;
 }
 
@@ -55,14 +56,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  width: 52px;
-  padding: 10px 0;
-  border-radius: 12px;
+  gap: 7px;
+  width: 56px;
+  padding: 12px 0;
+  border-radius: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.3);
   background: transparent;
   border: none;
   outline: none;
@@ -72,8 +73,8 @@
 .os-dock-item .os-dock-icon {
   width: 20px;
   height: 20px;
-  transition: color 0.2s ease;
-  color: rgba(255, 255, 255, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 /* 文字 — 10px 居中 */
@@ -82,41 +83,47 @@
   font-weight: 500;
   line-height: 1;
   text-align: center;
-  transition: color 0.2s ease;
-  color: rgba(255, 255, 255, 0.35);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.3);
   font-family: -apple-system, "PingFang SC", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 
-/* ---------- hover — 轻微紫色背景 ---------- */
+/* ---------- hover — 柔和紫色光晕 + 轻微浮起 ---------- */
 .os-dock-item:hover {
-  background: rgba(139, 92, 246, 0.08);
+  background: rgba(139, 92, 246, 0.06);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.08);
 }
 .os-dock-item:hover .os-dock-icon {
-  color: rgba(167, 139, 250, 0.9);
+  color: rgba(167, 139, 250, 0.85);
 }
 .os-dock-item:hover .os-dock-label {
-  color: rgba(167, 139, 250, 0.9);
+  color: rgba(167, 139, 250, 0.85);
 }
 
-/* ---------- 选中态 — 浅紫色半透明背景，无竖线，无厚重边框 ---------- */
+/* ---------- 选中态 — 浮动紫色胶囊，柔和无框 ---------- */
 .os-dock-item-active {
-  background: rgba(139, 92, 246, 0.12) !important;
+  background: rgba(139, 92, 246, 0.1) !important;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.1), 0 2px 8px rgba(139, 92, 246, 0.06) !important;
+  transform: translateY(0) !important;
 }
 .os-dock-item-active .os-dock-icon {
   color: #a78bfa !important;
+  filter: drop-shadow(0 0 6px rgba(167, 139, 250, 0.3));
 }
 .os-dock-item-active .os-dock-label {
-  color: #a78bfa !important;
+  color: #c4b5fd !important;
   font-weight: 600;
 }
 .os-dock-item-active:hover {
-  background: rgba(139, 92, 246, 0.18) !important;
+  background: rgba(139, 92, 246, 0.15) !important;
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.14), 0 4px 12px rgba(139, 92, 246, 0.08) !important;
 }
 .os-dock-item-active:hover .os-dock-icon {
   color: #c4b5fd !important;
 }
 .os-dock-item-active:hover .os-dock-label {
-  color: #c4b5fd !important;
+  color: #ddd6fe !important;
 }
 
 /* ---------- 底部区域 ---------- */
@@ -124,64 +131,68 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  width: 100%;
+  gap: 8px;
+  padding: 16px 0 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  width: calc(100% - 16px);
 }
 
 /* ---------- 会员按钮 ---------- */
 .os-dock-member-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   outline: none;
   cursor: pointer;
   background: transparent;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
 }
 .os-dock-member-icon {
   width: 18px;
   height: 18px;
-  transition: all 0.2s;
+  transition: all 0.25s;
 }
 .os-dock-member-btn:hover {
   background: rgba(139, 92, 246, 0.08);
   color: #a78bfa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.1);
 }
 .os-dock-member-btn:hover .os-dock-member-icon {
   color: #a78bfa;
 }
 
-/* ---------- 登录按钮 — 圆形 32px ---------- */
+/* ---------- 登录按钮 — 圆形 36px ---------- */
 .os-dock-login-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   outline: none;
   cursor: pointer;
   background: transparent;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .os-dock-login-icon {
   width: 18px;
   height: 18px;
-  transition: all 0.2s;
+  transition: all 0.25s;
 }
 .os-dock-login-btn:hover {
   background: rgba(139, 92, 246, 0.08);
   color: #a78bfa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.1);
 }
 .os-dock-login-btn:hover .os-dock-login-icon {
   color: #a78bfa;
@@ -192,8 +203,8 @@
   position: relative;
 }
 .os-dock-avatar-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   cursor: pointer;
   background: transparent;
@@ -202,23 +213,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
 }
 .os-dock-avatar-btn:hover {
   background: rgba(139, 92, 246, 0.08);
+  transform: translateY(-1px);
 }
 
 .os-dock-avatar-img {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(139, 92, 246, 0.3);
+  border: 2px solid rgba(139, 92, 246, 0.25);
+  transition: border-color 0.25s;
+}
+.os-dock-avatar-btn:hover .os-dock-avatar-img {
+  border-color: rgba(139, 92, 246, 0.5);
 }
 .os-dock-avatar-fallback {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: linear-gradient(135deg, #7c3aed, #6366f1);
   color: #fff;
@@ -233,25 +249,26 @@
 .os-dock-user-menu {
   position: absolute;
   bottom: 0;
-  left: calc(100% + 12px);
-  background: #1c1c1e;
-  border-radius: 12px;
-  padding: 6px;
-  min-width: 140px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  left: calc(100% + 16px);
+  background: rgba(28, 28, 30, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 14px;
+  padding: 8px;
+  min-width: 152px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
   z-index: 60;
 }
 .os-dock-user-menu-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.2s ease;
   text-decoration: none;
   background: transparent;
   border: none;
@@ -260,7 +277,7 @@
   outline: none;
 }
 .os-dock-user-menu-item:hover {
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(139, 92, 246, 0.08);
   color: #c4b5fd;
 }
 
@@ -270,14 +287,14 @@
 
 /* 根容器：推过 Dock 宽度 + 16px 间距 */
 .os-dock-page {
-  margin-left: 88px; /* 72px Dock + 16px gap */
+  margin-left: 96px; /* 80px Dock + 16px gap */
   min-height: 100vh;
   transition: margin-left 0.2s;
 }
 
 /* 工作台模式：紧贴 Dock，1px 分割线代替间距，无氛围背景 */
 .os-dock-page-workbench {
-  margin-left: 72px !important; /* 72px Dock，无 gap */
+  margin-left: 80px !important; /* 80px Dock，无 gap */
   background: #0f0f10 !important;
 }
 
@@ -310,10 +327,10 @@
 /* 平板及以下：减少间距 */
 @media (max-width: 1024px) {
   .os-dock-page {
-    margin-left: 88px;
+    margin-left: 96px;
   }
   .os-content {
-    padding: 0 32px;
+    padding: 0 24px;
   }
 }
 
@@ -325,11 +342,11 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60px;
+    height: 64px;
     flex-direction: row;
-    padding: 0 8px;
+    padding: 0 12px;
     border-right: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
     background: #0a0a0b;
     z-index: 50;
   }
@@ -344,21 +361,27 @@
   }
   .os-dock-item {
     width: auto;
-    padding: 6px 12px;
-    gap: 2px;
-    border-radius: 10px;
+    padding: 8px 16px;
+    gap: 3px;
+    border-radius: 12px;
   }
   .os-dock-item .os-dock-icon {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
   }
   .os-dock-item .os-dock-label {
     font-size: 9px;
   }
+  .os-dock-item:hover {
+    transform: none;
+    box-shadow: none;
+  }
   .os-dock-item-active {
-    background: rgba(139, 92, 246, 0.12) !important;
+    background: rgba(139, 92, 246, 0.1) !important;
+    box-shadow: none !important;
   }
   .os-dock-item-active .os-dock-icon {
+    filter: none;
     color: #a78bfa !important;
   }
   .os-dock-item-active .os-dock-label {
@@ -371,7 +394,7 @@
 
   .os-dock-page {
     margin-left: 0;
-    padding-bottom: 60px;
+    padding-bottom: 64px;
   }
 
   .os-content {
