@@ -1231,13 +1231,25 @@
 }
 
 /* 模型区域 — 极简标识 */
-.os-panel-powered {
-  text-align: center;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.2);
-  letter-spacing: 0.5px;
-  padding: 6px 0;
+/* AI 能力说明 — 左对齐，轻量克制 */
+.os-panel-capability {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+}
+.os-panel-capability-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+.os-panel-capability-sub {
+  font-size: 10px;
   font-weight: 400;
+  color: rgba(255, 255, 255, 0.16);
+  line-height: 1.4;
 }
 
 /* 分隔线 — 轻柔渐隐 */

@@ -529,9 +529,10 @@ export default function HomePage() {
         {/* ===== 左侧：创作面板 ===== */}
         <aside className="os-studio-panel">
           {/* --- AI 能力说明 --- */}
-          <div className="os-panel-powered">Powered by GPT Image 2</div>
-
-          <div className="os-panel-divider" />
+          <div className="os-panel-capability">
+            <div className="os-panel-capability-label">GPT Image 2 AI 生图</div>
+            <div className="os-panel-capability-sub">OpenAI 新一代视觉生成模型</div>
+          </div>
 
           {/* --- 图片上传区域 --- */}
           <div className="os-panel-section">
