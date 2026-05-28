@@ -20,6 +20,8 @@ import {
   ZoomIn,
   Lightbulb,
   SlidersHorizontal,
+  Pencil,
+  Copy,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -344,6 +346,22 @@ export default function HomePage() {
     }
   }, [requireAuth]);
 
+  // 编辑 Prompt：滚动到输入框并聚焦
+  const handleEditPrompt = useCallback(() => {
+    const textarea = document.querySelector('.os-panel-prompt-input') as HTMLTextAreaElement | null;
+    if (textarea) {
+      textarea.focus();
+      textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
+  // 使用同款风格：复制 prompt 到剪贴板并重置到编辑状态
+  const handleUseStyle = useCallback(() => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(inputText).catch(() => {});
+    }
+  }, [inputText]);
+
   const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
   const isGenerating = genStep === 'generating';
 
@@ -477,20 +495,24 @@ export default function HomePage() {
 
           {/* 操作栏 */}
           <div className="os-gen-result-actions">
-            <button className="os-gen-action-btn os-gen-action-glass" onClick={handleGenerate}>
-              <RotateCcw className="w-4 h-4" /> 重新生成
+            <button className="os-gen-action-btn os-gen-action-download" onClick={() => handleDownload(generatedImages[selectedImgIdx].url, selectedImgIdx)}>
+              <Download className="w-4 h-4" /> 下载
             </button>
             <button
               className={`os-gen-action-btn ${saved ? 'os-gen-action-saved' : 'os-gen-action-accent'}`}
-              disabled={saved}
+              disabled={saved || saving}
+              onClick={saved ? undefined : handleSave}
             >
-              {saved ? <><BookmarkCheck className="w-4 h-4" /> 已保存</> : <><BookmarkPlus className="w-4 h-4" /> 保存</>}
+              {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> 保存中</> : saved ? <><BookmarkCheck className="w-4 h-4" /> 已保存</> : <><BookmarkPlus className="w-4 h-4" /> 保存</>}
             </button>
-            <button
-              className="os-gen-action-btn os-gen-action-download"
-              onClick={() => handleDownload(generatedImages[selectedImgIdx].url, selectedImgIdx)}
-            >
-              <Download className="w-4 h-4" /> 下载
+            <button className="os-gen-action-btn os-gen-action-edit" onClick={handleEditPrompt}>
+              <Pencil className="w-4 h-4" /> 编辑
+            </button>
+            <button className="os-gen-action-btn os-gen-action-glass" onClick={handleGenerate}>
+              <RotateCcw className="w-4 h-4" /> 重新生成
+            </button>
+            <button className="os-gen-action-btn os-gen-action-glass" onClick={handleUseStyle}>
+              <Copy className="w-4 h-4" /> 复制提示词
             </button>
           </div>
         </div>
