@@ -1,22 +1,22 @@
-/* ==================== Creator OS 输入系统 — 深色版 ==================== */
+/* ==================== Creator OS 输入系统 — 柔和版 ==================== */
 
 .os-input {
   width: 100%;
   height: 44px;
   padding: 0 16px;
-  background: #1c1c1e;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 16px;
-  font-size: 14px;
-  color: #e0e0e8;
+  font-size: 15px;
+  color: #e8e8f0;
   outline: none;
   transition: var(--oc-transition-base);
 }
 .os-input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.38);
 }
 .os-input:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 .os-input:focus {
   border-color: rgba(139, 92, 246, 0.5);
@@ -28,16 +28,16 @@
   width: 100%;
   height: 52px;
   padding: 0 20px 0 48px;
-  background: #1c1c1e;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: var(--oc-radius-lg);
-  font-size: 14px;
-  color: #e0e0e8;
+  font-size: 15px;
+  color: #e8e8f0;
   outline: none;
   transition: var(--oc-transition-base);
 }
 .os-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.38);
 }
 .os-search-input:hover {
   border-color: rgba(139, 92, 246, 0.25);
@@ -51,28 +51,28 @@
 .os-textarea {
   width: 100%;
   padding: 14px 16px;
-  background: #1c1c1e;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 16px;
   font-size: var(--typo-body-size);
-  line-height: 1.6;
-  color: #e0e0e8;
+  line-height: 1.7;
+  color: #e8e8f0;
   resize: none;
   outline: none;
   transition: var(--oc-transition-base);
 }
 .os-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.38);
 }
 .os-textarea:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 .os-textarea:focus {
   border-color: rgba(139, 92, 246, 0.5);
   box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
-/* 上传区域 — 深色风格 */
+/* 上传区域 — 柔和风格 */
 .os-upload {
   display: flex;
   flex-direction: column;
@@ -80,8 +80,8 @@
   justify-content: center;
   min-height: 220px;
   padding: 32px;
-  background: #1c1c1e;
-  border: 2px dashed rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed rgba(255, 255, 255, 0.12);
   border-radius: var(--oc-radius-xl);
   cursor: pointer;
   transition: var(--oc-transition-base);
@@ -100,9 +100,9 @@
   width: 100%;
 }
 .os-chips-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.5);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -115,13 +115,13 @@
 .os-chip {
   display: inline-flex;
   align-items: center;
-  height: 28px;
+  height: 30px;
   padding: 0 14px;
   border-radius: 999px;
   background: rgba(139, 92, 246, 0.06);
   border: 1px solid rgba(139, 92, 246, 0.1);
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: var(--oc-transition-smooth);
@@ -145,9 +145,9 @@
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 .os-try-chips-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.45);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -160,13 +160,13 @@
 .os-try-chip {
   display: inline-flex;
   align-items: center;
-  height: 30px;
+  height: 32px;
   padding: 0 14px;
   border-radius: 999px;
   background: rgba(139, 92, 246, 0.04);
   border: 1px solid rgba(139, 92, 246, 0.08);
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: var(--oc-transition-smooth);
@@ -186,7 +186,7 @@
   display: grid;
   grid-template-columns: 68% 32%;
   gap: 28px;
-  background: #171717;
+  background: #151821;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: var(--oc-radius-xl);
@@ -203,7 +203,7 @@
   position: relative;
 }
 .os-studio-input-area {
-  background: #1c1c1e;
+  background: rgba(255, 255, 255, 0.04);
   border-radius: var(--oc-radius-lg);
   padding: 24px;
   min-height: 240px;

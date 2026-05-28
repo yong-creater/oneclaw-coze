@@ -1,7 +1,7 @@
 /* ================================================================
-   左侧导航 Dock — 深色极简 · AI 创作产品风格
+   左侧导航 Dock — 柔和灰黑 · AI 创作产品风格
    参考：create.qianwen.com / Midjourney / Linear / Krea AI
-   背景 #0f0f10 · 面板 #171717 · 紫色主色
+   背景 #0E1018 · 面板 #151821 · 紫色主色
    ================================================================ */
 
 /* ---------- Dock 容器 ---------- */
@@ -16,8 +16,8 @@
   align-items: center;
   padding: 28px 0 20px;
   z-index: 50;
-  background: #0a0a0b;
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  background: #0E1018;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* ---------- Logo ---------- */
@@ -32,7 +32,7 @@
 }
 .os-dock-logo:hover { opacity: 0.85; }
 .os-dock-brand {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.8px;
   color: rgba(255, 255, 255, 0.4);
@@ -77,14 +77,14 @@
   color: rgba(255, 255, 255, 0.3);
 }
 
-/* 文字 — 10px 居中 */
+/* 文字 — 11px 居中 */
 .os-dock-item .os-dock-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1;
   text-align: center;
   transition: var(--oc-transition-smooth);
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.38);
   font-family: -apple-system, "PingFang SC", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
 
@@ -401,8 +401,8 @@
 }
 
 .os-dock-qr-text {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
@@ -443,7 +443,7 @@
     height: 20px;
   }
   .os-dock-item .os-dock-label {
-    font-size: 9px;
+    font-size: 10px;
   }
   .os-dock-item:hover {
     transform: none;

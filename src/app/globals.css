@@ -60,74 +60,74 @@ html {
   scroll-behavior: smooth;
 }
 
-/* ==================== 深色主题 — 全局变量 ==================== */
+/* ==================== 深色主题 — 全局变量（柔和灰黑版） ==================== */
 :root {
   --radius: 0.75rem;
-  /* shadcn 语义色 — 深色 */
-  --background: #0f0f10;
+  /* shadcn 语义色 — 柔和灰黑 */
+  --background: #0F1115;
   --foreground: #e0e0e8;
-  --card: #171717;
+  --card: #181B22;
   --card-foreground: #e0e0e8;
-  --popover: #1c1c1e;
+  --popover: #1C1F28;
   --popover-foreground: #e0e0e8;
   --primary: #7c3aed;
   --primary-foreground: #ffffff;
-  --secondary: #1c1c1e;
+  --secondary: #1C1F28;
   --secondary-foreground: #a1a1aa;
-  --muted: #1c1c1e;
-  --muted-foreground: #71717a;
-  --accent: #1c1c1e;
+  --muted: #1C1F28;
+  --muted-foreground: #8b8b96;
+  --accent: #1C1F28;
   --accent-foreground: #e0e0e8;
   --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.09);
   --ring: #7c3aed;
   --chart-1: #7c3aed;
   --chart-2: #6366f1;
   --chart-3: #818cf8;
   --chart-4: #34d399;
   --chart-5: #fbbf24;
-  --sidebar: #0a0a0b;
+  --sidebar: #0E1018;
   --sidebar-foreground: #a1a1aa;
   --sidebar-primary: #7c3aed;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(123, 97, 255, 0.08);
+  --sidebar-accent: rgba(123, 97, 255, 0.10);
   --sidebar-accent-foreground: #a78bfa;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-border: rgba(255, 255, 255, 0.07);
   --sidebar-ring: #7c3aed;
 }
 
 .dark {
-  --background: #0f0f10;
+  --background: #0F1115;
   --foreground: #e0e0e8;
-  --card: #171717;
+  --card: #181B22;
   --card-foreground: #e0e0e8;
-  --popover: #1c1c1e;
+  --popover: #1C1F28;
   --popover-foreground: #e0e0e8;
   --primary: #7c3aed;
   --primary-foreground: #ffffff;
-  --secondary: #1c1c1e;
+  --secondary: #1C1F28;
   --secondary-foreground: #a1a1aa;
-  --muted: #1c1c1e;
-  --muted-foreground: #71717a;
-  --accent: #1c1c1e;
+  --muted: #1C1F28;
+  --muted-foreground: #8b8b96;
+  --accent: #1C1F28;
   --accent-foreground: #e0e0e8;
   --destructive: #ef4444;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.09);
   --ring: #7c3aed;
   --chart-1: #7c3aed;
   --chart-2: #6366f1;
   --chart-3: #818cf8;
   --chart-4: #34d399;
   --chart-5: #fbbf24;
-  --sidebar: #0a0a0b;
+  --sidebar: #0E1018;
   --sidebar-foreground: #a1a1aa;
   --sidebar-primary: #7c3aed;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(123, 97, 255, 0.08);
+  --sidebar-accent: rgba(123, 97, 255, 0.10);
   --sidebar-accent-foreground: #a78bfa;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-border: rgba(255, 255, 255, 0.07);
   --sidebar-ring: #7c3aed;
 }
 
@@ -142,16 +142,16 @@ html {
 
 body {
   @apply font-sans;
-  background: #0f0f10;
+  background: #0F1115;
   color: #e0e0e8;
 }
 
-/* ==================== OneClaw 全局色彩系统 — 深色版 ==================== */
+/* ==================== OneClaw 全局色彩系统 — 柔和灰黑版 ==================== */
 :root {
   /* Primary - 紫色渐变 */
   --brand: #7c3aed;
   --brand-secondary: #6366f1;
-  --brand-light: rgba(124, 58, 237, 0.08);
+  --brand-light: rgba(124, 58, 237, 0.10);
   --brand-dark: #6d28d9;
   --brand-cyan: #818cf8;
   --brand-gradient: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
@@ -164,86 +164,89 @@ body {
   --brand-glow: 0 0 20px rgba(124, 58, 237, 0.2);
   --brand-glow-strong: 0 0 40px rgba(124, 58, 237, 0.3), 0 0 80px rgba(99, 102, 241, 0.1);
 
-  /* Page */
-  --bg-primary: #0f0f10;
-  --bg-card: #171717;
+  /* Page — 柔和灰黑 */
+  --bg-primary: #0F1115;
+  --bg-panel: #151821;
+  --bg-card: #181B22;
+  --bg-input: rgba(255, 255, 255, 0.04);
+  --bg-hover: #1B1F2A;
 
-  /* Text 层级 — 4 级 + placeholder */
-  --text-primary: #e0e0e8;
-  --text-2: rgba(255, 255, 255, 0.88);   /* 一级：主标题 */
-  --text-3: rgba(255, 255, 255, 0.6);    /* 二级：正文/描述 */
-  --text-4: rgba(255, 255, 255, 0.45);   /* 三级：标签/弱提示 */
-  --text-5: rgba(255, 255, 255, 0.3);    /* 四级：时间戳/元信息 */
-  --text-placeholder: rgba(255, 255, 255, 0.35); /* 仅 placeholder */
+  /* Text 层级 — 提亮 + 更易读 */
+  --text-primary: #e8e8f0;
+  --text-2: rgba(255, 255, 255, 0.90);   /* 一级：主标题 */
+  --text-3: rgba(255, 255, 255, 0.65);   /* 二级：正文/描述 */
+  --text-4: rgba(255, 255, 255, 0.48);   /* 三级：标签/弱提示 */
+  --text-5: rgba(255, 255, 255, 0.34);   /* 四级：时间戳/元信息 */
+  --text-placeholder: rgba(255, 255, 255, 0.38); /* 仅 placeholder */
 
   /* Border */
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.04);
+  --border-default: rgba(255, 255, 255, 0.09);
+  --border-light: rgba(255, 255, 255, 0.05);
 }
 
-/* ==================== OneClaw 字体系统 (Typography) — 深色版 ==================== */
+/* ==================== OneClaw 字体系统 (Typography) — 柔和版 ==================== */
 :root {
   --typo-h1-size: 48px;
   --typo-h1-weight: 700;
-  --typo-h1-color: #e0e0e8;
+  --typo-h1-color: #e8e8f0;
   --typo-h1-line-height: 1.2;
 
   --typo-h2-size: 32px;
   --typo-h2-weight: 700;
-  --typo-h2-color: #e0e0e8;
+  --typo-h2-color: #e8e8f0;
 
   --typo-h3-size: 20px;
   --typo-h3-weight: 600;
-  --typo-h3-color: #e0e0e8;
+  --typo-h3-color: #e8e8f0;
 
-  --typo-body-size: 15px;
+  --typo-body-size: 16px;
   --typo-body-weight: 400;
-  --typo-body-color: rgba(255, 255, 255, 0.6);
+  --typo-body-color: rgba(255, 255, 255, 0.65);
   --typo-body-line-height: 1.7;
 
-  --typo-caption-size: 13px;
+  --typo-caption-size: 14px;
   --typo-caption-weight: 400;
-  --typo-caption-color: rgba(255, 255, 255, 0.45);
+  --typo-caption-color: rgba(255, 255, 255, 0.48);
 
   --typo-btn-size: 15px;
   --typo-btn-weight: 600;
-  --typo-tag-size: 12px;
+  --typo-tag-size: 13px;
   --typo-tag-weight: 500;
-  --typo-micro-size: 11px;
+  --typo-micro-size: 12px;
 }
 
 /* ==================== OneClaw 间距系统 (Spacing) ==================== */
 :root {
   --spacing-page-x: 56px;
   --spacing-section-y: 80px;
-  --spacing-card-gap: 24px;
+  --spacing-card-gap: 20px;
   --spacing-card-padding: 24px;
   --spacing-input-padding: 20px;
   --spacing-btn-px: 20px;
   --spacing-btn-py: 12px;
 }
 
-/* ==================== OneClaw Design Token v2 — 统一设计系统 ==================== */
+/* ==================== OneClaw Design Token v2 — 统一设计系统（柔和灰黑版） ==================== */
 :root {
-  /* Radius — 卡片16 / 按钮12 / 输入框16 */
+  /* Radius — 卡片18 / 按钮12 / 输入框16 */
   --oc-radius-sm: 8px;
   --oc-radius-md: 12px;
   --oc-radius-lg: 16px;
   --oc-radius-xl: 20px;
   --oc-radius-pill: 999px;
 
-  /* Shadow — 3 级 */
-  --oc-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.2);
-  --oc-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --oc-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
-  --oc-shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --oc-shadow-card-hover: 0 16px 40px rgba(124, 58, 237, 0.12);
+  /* Shadow — 更柔和 */
+  --oc-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.18);
+  --oc-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.22);
+  --oc-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.30);
+  --oc-shadow-card: 0 4px 20px rgba(0, 0, 0, 0.22);
+  --oc-shadow-card-hover: 0 16px 40px rgba(124, 58, 237, 0.10);
 
   /* Glow — 统一紫色光晕 */
   --oc-glow-sm: 0 0 16px rgba(124, 58, 237, 0.08);
-  --oc-glow-md: 0 4px 20px rgba(124, 58, 237, 0.2);
-  --oc-glow-lg: 0 8px 28px rgba(124, 58, 237, 0.3);
-  --oc-glow-xl: 0 8px 28px rgba(124, 58, 237, 0.45);
+  --oc-glow-md: 0 4px 20px rgba(124, 58, 237, 0.15);
+  --oc-glow-lg: 0 8px 28px rgba(124, 58, 237, 0.22);
+  --oc-glow-xl: 0 8px 28px rgba(124, 58, 237, 0.35);
 
   /* Transition — 3 级 */
   --oc-transition-fast: all 0.15s ease;
@@ -255,16 +258,16 @@ body {
   --oc-hover-lift-sm: translateY(-1px);
 
   /* Card 统一 */
-  --oc-card-radius: 16px;
-  --oc-card-bg: #171717;
-  --oc-card-border: rgba(255, 255, 255, 0.06);
+  --oc-card-radius: 18px;
+  --oc-card-bg: #181B22;
+  --oc-card-border: rgba(255, 255, 255, 0.07);
   --oc-card-transition: all 0.28s ease;
 
   /* Accent 紫色渐变 */
   --oc-grad-cta: linear-gradient(135deg, #7c3aed, #6366f1);
   --oc-grad-cta-hover: linear-gradient(135deg, #8b5cf6, #818cf8);
-  --oc-grad-mask-light: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 100%);
-  --oc-grad-mask-heavy: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 100%);
+  --oc-grad-mask-light: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.18) 100%);
+  --oc-grad-mask-heavy: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.55) 100%);
 }
 
 /* ==================== 模块化样式引入 ==================== */

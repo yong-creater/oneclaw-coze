@@ -765,10 +765,10 @@
 
 /* hover 信息 - 标题 */
 .os-insp-card-overlay-title {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #fff;
-  line-height: 1.3;
+  line-height: 1.4;
   margin-bottom: 10px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
