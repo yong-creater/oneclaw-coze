@@ -168,10 +168,13 @@ body {
   --bg-primary: #0f0f10;
   --bg-card: #171717;
 
-  /* Text */
+  /* Text 层级 — 4 级 + placeholder */
   --text-primary: #e0e0e8;
-  --text-secondary: rgba(255, 255, 255, 0.4);
-  --text-tertiary: rgba(255, 255, 255, 0.25);
+  --text-2: rgba(255, 255, 255, 0.88);   /* 一级：主标题 */
+  --text-3: rgba(255, 255, 255, 0.6);    /* 二级：正文/描述 */
+  --text-4: rgba(255, 255, 255, 0.45);   /* 三级：标签/弱提示 */
+  --text-5: rgba(255, 255, 255, 0.3);    /* 四级：时间戳/元信息 */
+  --text-placeholder: rgba(255, 255, 255, 0.35); /* 仅 placeholder */
 
   /* Border */
   --border-default: rgba(255, 255, 255, 0.08);
@@ -193,17 +196,20 @@ body {
   --typo-h3-weight: 600;
   --typo-h3-color: #e0e0e8;
 
-  --typo-body-size: 16px;
+  --typo-body-size: 15px;
   --typo-body-weight: 400;
   --typo-body-color: rgba(255, 255, 255, 0.6);
-  --typo-body-line-height: 1.6;
+  --typo-body-line-height: 1.7;
 
-  --typo-caption-size: 14px;
+  --typo-caption-size: 13px;
   --typo-caption-weight: 400;
-  --typo-caption-color: rgba(255, 255, 255, 0.3);
+  --typo-caption-color: rgba(255, 255, 255, 0.45);
 
   --typo-btn-size: 15px;
   --typo-btn-weight: 600;
+  --typo-tag-size: 12px;
+  --typo-tag-weight: 500;
+  --typo-micro-size: 11px;
 }
 
 /* ==================== OneClaw 间距系统 (Spacing) ==================== */
@@ -215,6 +221,50 @@ body {
   --spacing-input-padding: 20px;
   --spacing-btn-px: 20px;
   --spacing-btn-py: 12px;
+}
+
+/* ==================== OneClaw Design Token v2 — 统一设计系统 ==================== */
+:root {
+  /* Radius — 卡片16 / 按钮12 / 输入框16 */
+  --oc-radius-sm: 8px;
+  --oc-radius-md: 12px;
+  --oc-radius-lg: 16px;
+  --oc-radius-xl: 20px;
+  --oc-radius-pill: 999px;
+
+  /* Shadow — 3 级 */
+  --oc-shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.2);
+  --oc-shadow-md: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --oc-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+  --oc-shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --oc-shadow-card-hover: 0 16px 40px rgba(124, 58, 237, 0.12);
+
+  /* Glow — 统一紫色光晕 */
+  --oc-glow-sm: 0 0 16px rgba(124, 58, 237, 0.08);
+  --oc-glow-md: 0 4px 20px rgba(124, 58, 237, 0.2);
+  --oc-glow-lg: 0 8px 28px rgba(124, 58, 237, 0.3);
+  --oc-glow-xl: 0 8px 28px rgba(124, 58, 237, 0.45);
+
+  /* Transition — 3 级 */
+  --oc-transition-fast: all 0.15s ease;
+  --oc-transition-base: all 0.25s ease;
+  --oc-transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Hover lift — 统一浮起 */
+  --oc-hover-lift: translateY(-3px);
+  --oc-hover-lift-sm: translateY(-1px);
+
+  /* Card 统一 */
+  --oc-card-radius: 16px;
+  --oc-card-bg: #171717;
+  --oc-card-border: rgba(255, 255, 255, 0.06);
+  --oc-card-transition: all 0.28s ease;
+
+  /* Accent 紫色渐变 */
+  --oc-grad-cta: linear-gradient(135deg, #7c3aed, #6366f1);
+  --oc-grad-cta-hover: linear-gradient(135deg, #8b5cf6, #818cf8);
+  --oc-grad-mask-light: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 100%);
+  --oc-grad-mask-heavy: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 100%);
 }
 
 /* ==================== 模块化样式引入 ==================== */

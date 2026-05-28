@@ -10,13 +10,13 @@
   font-size: 14px;
   color: #e0e0e8;
   outline: none;
-  transition: all 0.2s ease;
+  transition: var(--oc-transition-base);
 }
 .os-input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.35);
 }
 .os-input:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 .os-input:focus {
   border-color: rgba(139, 92, 246, 0.5);
@@ -30,14 +30,14 @@
   padding: 0 20px 0 48px;
   background: #1c1c1e;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
+  border-radius: var(--oc-radius-lg);
   font-size: 14px;
   color: #e0e0e8;
   outline: none;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
 }
 .os-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.35);
 }
 .os-search-input:hover {
   border-color: rgba(139, 92, 246, 0.25);
@@ -59,13 +59,13 @@
   color: #e0e0e8;
   resize: none;
   outline: none;
-  transition: all 0.2s ease;
+  transition: var(--oc-transition-base);
 }
 .os-textarea::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.35);
 }
 .os-textarea:hover {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 .os-textarea:focus {
   border-color: rgba(139, 92, 246, 0.5);
@@ -81,10 +81,10 @@
   min-height: 220px;
   padding: 32px;
   background: #1c1c1e;
-  border: 2px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
+  border: 2px dashed rgba(255, 255, 255, 0.14);
+  border-radius: var(--oc-radius-xl);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--oc-transition-base);
 }
 .os-upload:hover {
   background: rgba(139, 92, 246, 0.04);
@@ -102,7 +102,7 @@
 .os-chips-label {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -124,7 +124,7 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: var(--oc-transition-smooth);
   white-space: nowrap;
 }
 .os-chip:hover {
@@ -147,7 +147,7 @@
 .os-try-chips-label {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.35);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -169,7 +169,7 @@
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: var(--oc-transition-smooth);
   white-space: nowrap;
 }
 .os-try-chip:hover {
@@ -189,7 +189,7 @@
   background: #171717;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
+  border-radius: var(--oc-radius-xl);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   padding: 28px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -204,7 +204,7 @@
 }
 .os-studio-input-area {
   background: #1c1c1e;
-  border-radius: 18px;
+  border-radius: var(--oc-radius-lg);
   padding: 24px;
   min-height: 240px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -247,7 +247,7 @@
 .os-studio-ai-hint {
   font-size: 14px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   margin-bottom: 8px;
   display: block;
   flex-shrink: 0;
@@ -277,7 +277,7 @@
 .os-studio-placeholder-example {
   font-size: 16px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.35);
   margin: 0;
   line-height: 1.75;
 }

@@ -11,10 +11,10 @@
   color: white;
   font-size: 15px;
   font-weight: 600;
-  border-radius: 14px;
+  border-radius: var(--oc-radius-md);
   background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
   box-shadow: 0 4px 20px rgba(124, 58, 237, 0.25);
-  transition: all 0.25s ease;
+  transition: var(--oc-transition-base);
   cursor: pointer;
   border: none;
   outline: none;
@@ -23,8 +23,8 @@
 }
 .os-btn-primary:hover {
   background: linear-gradient(135deg, #8b5cf6 0%, #818cf8 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4);
+  transform: var(--oc-hover-lift-sm);
+  box-shadow: var(--oc-glow-md);
 }
 .os-btn-primary:active {
   transform: translateY(0) scale(0.98);
@@ -48,11 +48,11 @@
   color: rgba(255, 255, 255, 0.5);
   font-size: 15px;
   font-weight: 500;
-  border-radius: 14px;
+  border-radius: var(--oc-radius-md);
   background: rgba(139, 92, 246, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: none;
-  transition: all 0.25s ease;
+  transition: var(--oc-transition-base);
   cursor: pointer;
   outline: none;
 }
@@ -76,11 +76,11 @@
   color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
   font-weight: 500;
-  border-radius: 10px;
+  border-radius: var(--oc-radius-sm);
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: var(--oc-transition-fast);
   outline: none;
 }
 .os-btn-ghost:hover {
@@ -95,14 +95,14 @@
   gap: 6px;
   height: 34px;
   padding: 0 16px;
-  border-radius: 999px;
+  border-radius: var(--oc-radius-pill);
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
   color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--oc-transition-base);
   white-space: nowrap;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -121,7 +121,7 @@
 }
 .os-btn-capsule-count {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.35);
   margin-left: 2px;
 }
 .os-btn-capsule-active .os-btn-capsule-count {

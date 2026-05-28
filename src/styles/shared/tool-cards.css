@@ -4,23 +4,15 @@
    统一：深色面板 · 紫色渐变 · 氛围感
    ================================================================ */
 
-/* ---- CSS 变量 ---- */
+/* ---- CSS 变量（tool-cards 扩展，基础变量在 globals.css） ---- */
 :root {
-  --oc-card-radius: 14px;
-  --oc-card-bg: #171717;
-  --oc-card-border: rgba(255, 255, 255, 0.06);
-  --oc-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --oc-card-hover-shadow: 0 16px 40px rgba(124, 58, 237, 0.12);
-  --oc-card-hover-lift: translateY(-4px);
-  --oc-card-transition: all 0.28s ease;
-  --oc-grad-cta: linear-gradient(135deg, #7c3aed, #6366f1);
-  --oc-grad-cta-hover: linear-gradient(135deg, #8b5cf6, #818cf8);
   --oc-grad-mask-light: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.2) 100%);
   --oc-grad-mask-heavy: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.6) 100%);
-  --oc-glow-btn: 0 4px 20px rgba(124, 58, 237, 0.3);
-  --oc-glow-btn-hover: 0 8px 28px rgba(124, 58, 237, 0.45);
+  --oc-glow-btn: 0 4px 20px rgba(124, 58, 237, 0.2);
+  --oc-glow-btn-hover: 0 8px 28px rgba(124, 58, 237, 0.3);
   --oc-text-primary: #e0e0e8;
-  --oc-text-secondary: rgba(255, 255, 255, 0.4);
+  --oc-text-secondary: rgba(255, 255, 255, 0.6);
+  --oc-text-tertiary: rgba(255, 255, 255, 0.45);
   --oc-text-light: #ffffff;
 }
 
@@ -64,7 +56,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -96,7 +88,7 @@
   transform: translateY(-50%);
   width: 18px;
   height: 18px;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   pointer-events: none;
 }
 .os-page-search {
@@ -104,14 +96,14 @@
   height: 44px;
   padding: 0 16px 0 44px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  border-radius: var(--oc-radius-md);
   background: #171717;
   font-size: 14px;
   color: var(--oc-text-primary);
   outline: none;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
 }
-.os-page-search::placeholder { color: rgba(255, 255, 255, 0.25); }
+.os-page-search::placeholder { color: rgba(255, 255, 255, 0.35); }
 .os-page-search:hover {
   border-color: rgba(139, 92, 246, 0.2);
 }
@@ -249,7 +241,7 @@
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.28s ease;
+  transition: var(--oc-card-transition);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -313,7 +305,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: all 0.3s ease;
+  transition: var(--oc-transition-smooth);
 }
 .os-project-card:hover .os-project-img {
   filter: blur(2px);
@@ -341,7 +333,7 @@
   justify-content: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: var(--oc-card-radius);
   background: rgba(23, 23, 23, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -371,7 +363,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
   white-space: nowrap;
 }
 .os-project-hover-btn:hover {
@@ -428,7 +420,7 @@
 /* 时间 */
 .os-project-time {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   margin-top: 2px;
 }
 
@@ -717,14 +709,14 @@
   position: relative;
   break-inside: avoid;
   margin-bottom: 20px;
-  border-radius: var(--oc-card-radius, 14px);
+  border-radius: var(--oc-card-radius);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.28s ease;
+  transition: var(--oc-card-transition);
 }
 .os-insp-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(124, 58, 237, 0.12);
+  transform: var(--oc-hover-lift);
+  box-shadow: var(--oc-shadow-card-hover);
 }
 
 /* 图片 — cover */
@@ -733,7 +725,7 @@
   display: block;
   object-fit: cover;
   object-position: center;
-  border-radius: var(--oc-card-radius, 14px);
+  border-radius: var(--oc-card-radius);
   transition: transform 0.3s ease;
 }
 .os-insp-card:hover .os-insp-card-img {
@@ -748,7 +740,7 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #1c1c2e 0%, #1a1a2e 50%, #18182e 100%);
-  border-radius: var(--oc-card-radius, 14px);
+  border-radius: var(--oc-card-radius);
   color: #6d5ef6;
 }
 
@@ -763,7 +755,7 @@
   opacity: 0;
   transition: opacity 0.28s ease;
   background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
-  border-radius: var(--oc-card-radius, 14px);
+  border-radius: var(--oc-card-radius);
   pointer-events: none;
 }
 .os-insp-card:hover .os-insp-card-overlay {
@@ -833,7 +825,7 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
   box-shadow: 0 2px 12px rgba(124, 58, 237, 0.3);
   white-space: nowrap;
 }
@@ -856,7 +848,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
 }
 .os-insp-card-action:hover {
   background: rgba(255, 255, 255, 0.25);
@@ -874,14 +866,14 @@
   gap: 8px;
   height: 48px;
   padding: 0 28px;
-  border-radius: 14px;
+  border-radius: var(--oc-radius-md);
   border: none;
   background: var(--oc-grad-cta);
   color: #fff;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.28s ease;
+  transition: var(--oc-card-transition);
   box-shadow: var(--oc-glow-btn);
   white-space: nowrap;
 }
@@ -898,14 +890,14 @@
   gap: 8px;
   height: 48px;
   padding: 0 28px;
-  border-radius: 14px;
+  border-radius: var(--oc-radius-md);
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(139, 92, 246, 0.04);
   color: var(--oc-text-primary);
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
   white-space: nowrap;
 }
 .os-btn-secondary:hover {
@@ -929,7 +921,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.22s ease;
+  transition: var(--oc-transition-base);
   white-space: nowrap;
 }
 .os-btn-capsule:hover {
@@ -982,8 +974,8 @@
   padding: 32px 28px 24px;
   background: #1c1c1e;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border-radius: var(--oc-radius-xl);
+  box-shadow: var(--oc-shadow-lg);
   text-align: center;
   animation: os-delete-scale-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -1003,7 +995,7 @@
   background: transparent;
   color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: var(--oc-transition-fast);
 }
 .os-delete-close:hover {
   background: rgba(255, 255, 255, 0.08);
@@ -1056,7 +1048,7 @@
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--oc-transition-base);
 }
 .os-delete-cancel:hover {
   border-color: rgba(255, 255, 255, 0.2);
@@ -1072,7 +1064,7 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--oc-transition-base);
   box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25);
 }
 .os-delete-confirm:hover {

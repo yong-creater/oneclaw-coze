@@ -35,7 +35,7 @@
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.8px;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   white-space: nowrap;
   text-transform: uppercase;
 }
@@ -61,7 +61,7 @@
   padding: 12px 0;
   border-radius: 14px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--oc-transition-smooth);
   text-decoration: none;
   color: rgba(255, 255, 255, 0.3);
   background: transparent;
@@ -73,7 +73,7 @@
 .os-dock-item .os-dock-icon {
   width: 20px;
   height: 20px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--oc-transition-smooth);
   color: rgba(255, 255, 255, 0.3);
 }
 
@@ -83,7 +83,7 @@
   font-weight: 500;
   line-height: 1;
   text-align: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--oc-transition-smooth);
   color: rgba(255, 255, 255, 0.3);
   font-family: -apple-system, "PingFang SC", "Source Han Sans SC", "Noto Sans SC", sans-serif;
 }
@@ -146,17 +146,17 @@
   outline: none;
   cursor: pointer;
   background: transparent;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--oc-transition-smooth);
   text-decoration: none;
 }
 .os-dock-member-icon {
   width: 18px;
   height: 18px;
-  transition: all 0.25s;
+  transition: var(--oc-transition-base);
 }
 .os-dock-member-btn:hover {
   background: rgba(139, 92, 246, 0.08);
@@ -177,16 +177,16 @@
   outline: none;
   cursor: pointer;
   background: transparent;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--oc-transition-smooth);
 }
 .os-dock-login-icon {
   width: 18px;
   height: 18px;
-  transition: all 0.25s;
+  transition: var(--oc-transition-base);
 }
 .os-dock-login-btn:hover {
   background: rgba(139, 92, 246, 0.08);
@@ -213,7 +213,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--oc-transition-smooth);
   padding: 0;
 }
 .os-dock-avatar-btn:hover {
@@ -268,7 +268,7 @@
   font-size: 13px;
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--oc-transition-base);
   text-decoration: none;
   background: transparent;
   border: none;
@@ -345,7 +345,7 @@
   height: 40px;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--oc-transition-smooth);
 }
 .os-dock-wechat-btn:hover {
   background: rgba(139, 92, 246, 0.08);
@@ -356,7 +356,7 @@
   width: 18px;
   height: 18px;
   color: rgba(255, 255, 255, 0.3);
-  transition: color 0.2s ease;
+  transition: color var(--oc-transition-base);
 }
 .os-dock-wechat-btn:hover .os-dock-wechat-icon {
   color: rgba(167, 139, 250, 0.7);

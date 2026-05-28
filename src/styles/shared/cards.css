@@ -1,35 +1,19 @@
 /* ==================== OneClaw 结果卡片 & 变量 — 深色版 ==================== */
 
-/* ---------- CSS 变量（与 tool-cards.css 共享） ---------- */
-:root {
-  --oc-card-radius: 14px;
-  --oc-card-bg: #171717;
-  --oc-card-border: 1px solid rgba(255,255,255,0.06);
-  --oc-card-blur: blur(24px);
-  --oc-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --oc-card-hover-y: -4px;
-  --oc-card-hover-shadow: 0 16px 40px rgba(124, 58, 237, 0.12);
-  --oc-card-transition: all 0.28s ease;
-  --oc-tag-bg: rgba(124, 58, 237, 0.1);
-  --oc-tag-color: #a78bfa;
-  --oc-grad-primary: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-  --oc-grad-placeholder: linear-gradient(135deg, #1c1c2e, #1a1a2e);
-}
-
 /* ---------- 结果卡片 (作品详情/生成结果) ---------- */
 .os-result-card {
   background: var(--oc-card-bg);
-  border: var(--oc-card-border);
+  border: 1px solid var(--oc-card-border);
   border-radius: var(--oc-card-radius);
-  backdrop-filter: var(--oc-card-blur);
-  -webkit-backdrop-filter: var(--oc-card-blur);
-  box-shadow: var(--oc-card-shadow);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--oc-shadow-card);
   transition: var(--oc-card-transition);
   overflow: hidden;
 }
 .os-result-card:hover {
-  transform: translateY(var(--oc-card-hover-y));
-  box-shadow: var(--oc-card-hover-shadow);
+  transform: var(--oc-hover-lift);
+  box-shadow: var(--oc-shadow-card-hover);
 }
 .os-result-card-img {
   width: 100%;
@@ -41,9 +25,9 @@
   align-items: center;
   height: 24px;
   padding: 0 10px;
-  border-radius: 999px;
-  background: var(--oc-tag-bg);
-  color: var(--oc-tag-color);
+  border-radius: var(--oc-radius-pill);
+  background: var(--oc-tag-bg, rgba(124, 58, 237, 0.1));
+  color: var(--oc-tag-color, #a78bfa);
   font-size: 12px;
   font-weight: 500;
 }
