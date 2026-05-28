@@ -1034,11 +1034,12 @@
 
 /* ---- 推荐案例 ---- */
 /* ── 推荐案例区域 ── */
+/* ── 推荐案例 ── */
 .os-cases-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 .os-cases-header-left {
   display: flex;
@@ -1046,40 +1047,40 @@
   gap: 6px;
 }
 .os-cases-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--oc-text-secondary, rgba(255, 255, 255, 0.6));
 }
 .os-cases-more {
   font-size: 12px;
-  color: rgba(139, 92, 246, 0.5);
+  color: var(--oc-text-tertiary, rgba(255, 255, 255, 0.35));
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--oc-transition-fast);
   display: flex;
   align-items: center;
   gap: 3px;
 }
 .os-cases-more:hover {
-  color: rgba(139, 92, 246, 0.9);
+  color: var(--oc-text-secondary, rgba(255, 255, 255, 0.6));
 }
 .os-cases-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 16px;
 }
 .os-case-card {
   position: relative;
-  border-radius: var(--oc-card-radius, 14px);
+  border-radius: 18px;
   overflow: hidden;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.32s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .os-case-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(139, 92, 246, 0.2);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 12px rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.15);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25), 0 0 20px rgba(139, 92, 246, 0.06);
 }
 .os-case-card-img-wrap {
   position: relative;
@@ -1092,56 +1093,29 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .os-case-card:hover .os-case-card-img {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 .os-case-card-hover {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 55%);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 60%);
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 .os-case-card:hover .os-case-card-hover {
   opacity: 1;
 }
-.os-case-card-cta {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: rgba(139, 92, 246, 0.9);
-  font-weight: 500;
-  background: rgba(139, 92, 246, 0.12);
-  padding: 4px 10px;
-  border-radius: var(--oc-radius-xl);
-  backdrop-filter: blur(8px);
-}
-.os-case-card-cta svg {
-  width: 11px;
-  height: 11px;
-}
 .os-case-card-info {
-  padding: 8px 10px;
-}
-.os-case-card-type {
-  font-size: 10px;
-  font-weight: 500;
-  color: rgba(139, 92, 246, 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 3px;
+  padding: 12px 14px 14px;
 }
 .os-case-card-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--oc-text-secondary, rgba(255, 255, 255, 0.6));
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;

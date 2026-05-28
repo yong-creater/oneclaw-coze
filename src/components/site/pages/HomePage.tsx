@@ -387,21 +387,9 @@ export default function HomePage() {
               >
                 <div className="os-case-card-img-wrap">
                   <img src={c.image} alt={c.title} className="os-case-card-img" loading="lazy" />
-                  <div className="os-case-card-hover">
-                    <button
-                      className="os-case-card-cta"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setInputText(c.prompt);
-                      }}
-                    >
-                      <Wand2 className="w-3.5 h-3.5" />
-                      <span>试试</span>
-                    </button>
-                  </div>
+                  <div className="os-case-card-hover" />
                 </div>
                 <div className="os-case-card-info">
-                  <span className="os-case-card-type">{c.type}</span>
                   <p className="os-case-card-title">{c.title}</p>
                 </div>
               </div>

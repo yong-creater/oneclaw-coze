@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Eye, Heart, Bookmark, Copy, Search, Loader2 } from 'lucide-react';
+import { Sparkles, Bookmark, Search, Loader2 } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { useModal } from '@/contexts/ModalContext';
 
@@ -86,7 +86,6 @@ export default function PromptPage() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('全部');
   const [searchQuery, setSearchQuery] = useState('');
-  const [copiedId, setCopiedId] = useState<number | null>(null);
   const masonryRef = useRef<HTMLDivElement>(null);
 
   /* ---- 加载数据 ---- */
@@ -146,21 +145,6 @@ const categoryCounts = useMemo(() => {
       return (b.uses + b.likes) - (a.uses + a.likes);
     });
   }, [prompts, activeCategory, searchQuery]);
-
-  /* ---- 复制 Prompt ---- */
-  const handleCopy = useCallback(
-    async (e: React.MouseEvent, p: Prompt) => {
-      e.stopPropagation();
-      try {
-        await navigator.clipboard.writeText(p.content || p.title);
-        setCopiedId(p.id);
-        setTimeout(() => setCopiedId(null), 1500);
-      } catch {
-        /* empty */
-      }
-    },
-    []
-  );
 
   /* ---- 生成同款（跳转新创作工作台 + 自动填充参数） ---- */
   const handleGen = useCallback(
@@ -265,29 +249,15 @@ const categoryCounts = useMemo(() => {
 
                   {/* hover 渐变浮层 */}
                   <div className="os-insp-card-overlay">
-                    {/* 左下信息 */}
-                    {p.category && (
-                      <span className="os-insp-card-overlay-tag">{p.category}</span>
-                    )}
                     <div className="os-insp-card-overlay-title">{p.title}</div>
-                    <div className="os-insp-card-overlay-stats">
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                        <Eye /> {p.views || p.uses || 0}
-                      </span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                        <Heart /> {p.likes || 0}
-                      </span>
-                    </div>
-
-                    {/* 右下操作 */}
                     <div className="os-insp-card-overlay-actions">
                       <button
                         className="os-insp-card-gen"
                         onClick={(e) => handleGen(e, p)}
                         type="button"
                       >
-                        <Sparkles style={{ width: 14, height: 14 }} />
-                        生成同款
+                        <Sparkles style={{ width: 13, height: 13 }} />
+                        应用灵感
                       </button>
                       <button
                         className="os-insp-card-action"
@@ -298,14 +268,6 @@ const categoryCounts = useMemo(() => {
                         type="button"
                       >
                         <Bookmark />
-                      </button>
-                      <button
-                        className="os-insp-card-action"
-                        onClick={(e) => handleCopy(e, p)}
-                        title={copiedId === p.id ? '已复制' : '复制 Prompt'}
-                        type="button"
-                      >
-                        <Copy />
                       </button>
                     </div>
                   </div>
