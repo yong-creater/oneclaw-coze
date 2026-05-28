@@ -150,6 +150,7 @@ export default function HomePage() {
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [lightboxIdx, setLightboxIdx] = useState(-1);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -227,6 +228,7 @@ export default function HomePage() {
     setGenStep('generating');
     setGeneratedImages([]);
     setSaved(false);
+    setSaved(false);
     setErrorMsg('');
 
     abortRef.current?.abort();
@@ -272,7 +274,7 @@ export default function HomePage() {
       setGeneratedImages(urls.map((url: string) => ({ url })));
       setSelectedImgIdx(0);
       setGenStep('done');
-      setSaved(true);
+      setSaved(false); // 不自动保存，由用户决定
       refreshQuota();
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
@@ -310,6 +312,40 @@ export default function HomePage() {
   const handleInspirationClick = useCallback((prompt: string) => {
     setInputText(prompt);
   }, []);
+
+  // ===== 保存到作品集 =====
+  const handleSave = useCallback(async () => {
+    if (!requireAuth()) return;
+    if (saved || generatedImages.length === 0) return;
+    setSaving(true);
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find(r => r.startsWith('user_token='))
+        ?.split('=')[1];
+      const res = await fetch('/api/generations/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          images: generatedImages.map((img: { url: string }) => img.url),
+          prompt: inputText,
+          ratio: selectedRatio,
+          referenceImageUrl: uploadedImages.length > 0 ? uploadedImages[0] : undefined,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaved(true);
+        showAlert('已保存到我的作品', 'success');
+      } else {
+        showAlert(data.error || '保存失败', 'error');
+      }
+    } catch {
+      showAlert('保存失败，请稍后重试', 'error');
+    } finally {
+      setSaving(false);
+    }
+  }, [requireAuth, saved, generatedImages, inputText, selectedRatio, uploadedImages, showAlert]);
 
   // ===== 下载 =====
   const handleDownload = useCallback(async (url: string, idx: number) => {

@@ -190,29 +190,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (allImageUrls.length > 0) {
-      // 自动保存生成记录到 user_generations 表
-      try {
-        await supabase.from('user_generations').insert({
-          user_id: session.user_id,
-          tool_id: effectiveToolId,
-          tool_name: effectiveToolId,
-          tool_type: effectiveToolId,
-          title: promptStr.slice(0, 50) || 'AI生成作品',
-          thumbnail: allImageUrls[0] || '',
-          input_params: {
-            prompt: promptStr,
-            style: styleStr,
-            subtype: subtypeStr,
-            ratio: ratioStr,
-            count: effectiveCount,
-          },
-          output_content: { image_urls: allImageUrls },
-        });
-      } catch (saveErr) {
-        console.error('[图片生成] 保存记录失败:', saveErr);
-        // 不影响生成结果返回
-      }
-
+      // 不再自动保存，由用户主动保存
       return NextResponse.json({
         success: true,
         imageUrls: allImageUrls,
