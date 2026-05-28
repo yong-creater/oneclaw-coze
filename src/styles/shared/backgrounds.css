@@ -684,142 +684,91 @@
 
 /* --- 生成结果 --- */
 /* ── 生成结果 — 沉浸式画布 ── */
+/* ── 生成结果（创作流内嵌） ── */
 .os-gen-result {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  gap: 16px;
   animation: resultFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 8px;
 }
 @keyframes resultFadeIn {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 画布容器 — 图片为主体 */
-.os-gen-result-canvas {
-  position: relative;
-  flex: 1;
+/* 结果标题行 */
+.os-gen-result-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border-radius: var(--oc-radius-xl);
-  background: #0c0c0e;
-  cursor: zoom-in;
-  min-height: 0;
-}
-.os-gen-result-canvas-img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.os-gen-result-canvas:hover .os-gen-result-canvas-img {
-  transform: scale(1.005);
-}
-
-/* 放大提示 */
-.os-gen-result-zoom {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--oc-radius-sm);
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
-  color: rgba(255, 255, 255, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: all 0.25s;
-  z-index: 5;
-}
-.os-gen-result-canvas:hover .os-gen-result-zoom { opacity: 1; }
-.os-gen-result-zoom:hover {
-  background: rgba(0, 0, 0, 0.7);
-  color: #fff;
-}
-
-/* 底部悬浮控制栏 */
-.os-gen-result-float-bar {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
-  display: flex;
-  align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: var(--oc-radius-lg);
-  background: rgba(15, 15, 18, 0.72);
-  backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  pointer-events: none;
 }
-.os-gen-result-canvas:hover .os-gen-result-float-bar {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+.os-gen-result-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* 缩略图 — 紧凑横排 */
-.os-gen-result-float-thumbs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex-shrink: 1;
-  min-width: 0;
+/* 图片网格 */
+.os-gen-grid {
+  display: grid;
+  gap: 10px;
 }
-.os-gen-result-float-thumbs::-webkit-scrollbar { display: none; }
-.os-gen-result-float-thumb {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border-radius: var(--oc-radius-sm);
+/* 单图 */
+.os-gen-grid.cols-1 {
+  grid-template-columns: 1fr;
+}
+/* 双图 */
+.os-gen-grid.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+/* 三图 */
+.os-gen-grid.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+/* 四图 */
+.os-gen-grid.cols-4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* 单张图片卡片 */
+.os-gen-img-card {
+  position: relative;
+  border-radius: var(--oc-card-radius);
   overflow: hidden;
-  cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0.5;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all var(--oc-transition-smooth);
 }
-.os-gen-result-float-thumb:hover:not(.active) {
-  opacity: 0.8;
-  border-color: rgba(255, 255, 255, 0.15);
+.os-gen-img-card:hover {
+  border-color: rgba(139, 92, 246, 0.2);
+  box-shadow: 0 4px 24px rgba(139, 92, 246, 0.06);
 }
-.os-gen-result-float-thumb.active {
-  border-color: rgba(139, 92, 246, 0.6);
-  opacity: 1;
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
-}
-.os-gen-result-float-thumb img {
+.os-gen-img-card img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
+  transition: transform var(--oc-transition-smooth);
+}
+.os-gen-img-card:hover img {
+  transform: scale(1.01);
+}
+/* 单图模式图片高度 */
+.os-gen-grid.cols-1 .os-gen-img-card {
+  max-height: 520px;
+}
+.os-gen-grid.cols-1 .os-gen-img-card img {
+  max-height: 520px;
 }
 
-/* 操作按钮组 */
-.os-gen-result-float-actions {
+/* 底部操作栏 — 始终可见 */
+.os-gen-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-.os-gen-float-divider {
-  width: 1px;
-  height: 20px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 0 4px;
+  gap: 6px;
+  padding: 8px 0;
 }
 
 /* 按钮 — 轻量 ghost 风格 */
@@ -828,10 +777,10 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  height: 32px;
-  padding: 0 10px;
-  border-radius: var(--oc-radius-sm);
-  font-size: 12px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: var(--oc-radius-md);
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -839,12 +788,12 @@
   white-space: nowrap;
 }
 .os-gen-action-ghost {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
 }
 .os-gen-action-ghost:hover {
   background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.8);
   transform: translateY(-1px);
 }
 /* 唯一主按钮：重新生成 */
@@ -852,11 +801,11 @@
   background: linear-gradient(135deg, #7c3aed, #6366f1);
   color: #fff;
   padding: 0 14px;
-  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.15);
 }
 .os-gen-action-primary:hover {
   filter: brightness(1.1);
-  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.25);
   transform: translateY(-1px);
 }
 /* 已保存状态 */
@@ -921,87 +870,6 @@
   color: #a78bfa;
   transform: translateY(-1px);
   box-shadow: 0 0 16px rgba(139, 92, 246, 0.1);
-}
-
-/* --- Lightbox 大图 — 沉浸式 --- */
-.os-gen-lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(24px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  animation: lbFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-@keyframes lbFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.os-gen-lightbox-close {
-  position: absolute;
-  top: 20px;
-  right: 24px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s;
-}
-.os-gen-lightbox-close:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-.os-gen-lightbox > img {
-  max-width: 85vw;
-  max-height: 80vh;
-  object-fit: contain;
-  border-radius: var(--oc-radius-md);
-  cursor: default;
-  box-shadow: var(--oc-shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  animation: lbImgIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-@keyframes lbImgIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-.os-gen-lightbox-thumbs {
-  position: absolute;
-  bottom: 28px;
-  display: flex;
-  gap: 8px;
-}
-.os-gen-lightbox-thumb {
-  width: 52px;
-  height: 52px;
-  object-fit: cover;
-  border-radius: var(--oc-radius-sm);
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: all 0.25s;
-  opacity: 0.4;
-}
-.os-gen-lightbox-thumb.active {
-  border-color: rgba(139, 92, 246, 0.5);
-  opacity: 1;
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.12);
-}
-.os-gen-lightbox-thumb:hover:not(.active) {
-  opacity: 0.7;
-  transform: translateY(-2px);
 }
 
 /* --- Toast — 轻量通知 --- */

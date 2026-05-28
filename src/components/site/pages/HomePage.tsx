@@ -15,7 +15,6 @@ import {
   Loader2,
   BookmarkPlus,
   BookmarkCheck,
-  ZoomIn,
   SlidersHorizontal,
   Pencil,
   Copy,
@@ -106,9 +105,7 @@ export default function HomePage() {
   const [genStep, setGenStep] = useState<GenStep>('idle');
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
-  const [selectedImgIdx, setSelectedImgIdx] = useState(0);
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
-  const [lightboxIdx, setLightboxIdx] = useState(-1);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -231,7 +228,6 @@ export default function HomePage() {
       }
 
       setGeneratedImages(urls.map((url: string) => ({ url })));
-      setSelectedImgIdx(0);
       setGenStep('done');
       setSaved(false); // 不自动保存，由用户决定
       refreshQuota();
@@ -391,60 +387,41 @@ export default function HomePage() {
     if (genStep === 'done' && generatedImages.length > 0) {
       return (
         <div className="os-gen-result">
-          {/* 主图 — 沉浸画布 */}
-          <div
-            className="os-gen-result-canvas"
-            onClick={() => setLightboxIdx(selectedImgIdx)}
-          >
-            <img
-              src={generatedImages[selectedImgIdx].url}
-              alt={`生成结果 ${selectedImgIdx + 1}`}
-              className="os-gen-result-canvas-img"
-            />
-            <div className="os-gen-result-zoom">
-              <ZoomIn className="w-4 h-4" />
-            </div>
-
-            {/* 底部悬浮控制栏 */}
-            <div className="os-gen-result-float-bar" onClick={e => e.stopPropagation()}>
-              {/* 左：缩略图 */}
-              {generatedImages.length > 1 && (
-                <div className="os-gen-result-float-thumbs">
-                  {generatedImages.map((img, idx) => (
-                    <div
-                      key={idx}
-                      className={`os-gen-result-float-thumb ${idx === selectedImgIdx ? 'active' : ''}`}
-                      onClick={() => setSelectedImgIdx(idx)}
-                    >
-                      <img src={img.url} alt={`缩略图 ${idx + 1}`} />
-                    </div>
-                  ))}
-                </div>
-              )}
-              {/* 右：操作按钮 */}
-              <div className="os-gen-result-float-actions">
-                <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleDownload(generatedImages[selectedImgIdx].url, selectedImgIdx)}>
-                  <Download className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  className={`os-gen-action-btn ${saved ? 'os-gen-action-saved' : 'os-gen-action-ghost'}`}
-                  disabled={saved || saving}
-                  onClick={saved ? undefined : handleSave}
-                >
-                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : saved ? <BookmarkCheck className="w-3.5 h-3.5" /> : <BookmarkPlus className="w-3.5 h-3.5" />}
-                </button>
-                <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
-                  <Pencil className="w-3.5 h-3.5" />
-                </button>
-                <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleUseStyle}>
-                  <Copy className="w-3.5 h-3.5" />
-                </button>
-                <span className="os-gen-float-divider" />
-                <button className="os-gen-action-btn os-gen-action-primary" onClick={handleGenerate}>
-                  <RotateCcw className="w-3.5 h-3.5" /> 重新生成
-                </button>
+          {/* 图片网格 */}
+          <div className="os-gen-result-grid">
+            {generatedImages.map((img, idx) => (
+              <div
+                key={idx}
+                className={`os-gen-result-card ${generatedImages.length === 1 ? 'single' : ''}`}
+              >
+                <img src={img.url} alt={`生成结果 ${idx + 1}`} className="os-gen-result-card-img" />
               </div>
-            </div>
+            ))}
+          </div>
+
+          {/* 操作栏 */}
+          <div className="os-gen-result-actions">
+            <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleDownload(generatedImages[0].url, 0)}>
+              <Download className="w-4 h-4" /> <span>下载</span>
+            </button>
+            <button
+              className={`os-gen-action-btn ${saved ? 'os-gen-action-saved' : 'os-gen-action-ghost'}`}
+              disabled={saved || saving}
+              onClick={saved ? undefined : handleSave}
+            >
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
+              <span>{saved ? '已保存' : saving ? '保存中' : '保存'}</span>
+            </button>
+            <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
+              <Pencil className="w-4 h-4" /> <span>编辑</span>
+            </button>
+            <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleUseStyle}>
+              <Copy className="w-4 h-4" /> <span>复用</span>
+            </button>
+            <span className="os-gen-actions-divider" />
+            <button className="os-gen-action-btn os-gen-action-primary" onClick={handleGenerate}>
+              <RotateCcw className="w-4 h-4" /> <span>重新生成</span>
+            </button>
           </div>
         </div>
       );
@@ -583,29 +560,6 @@ export default function HomePage() {
           {renderRightPanel()}
         </main>
       </div>
-
-      {/* ===== Lightbox ===== */}
-      {lightboxIdx >= 0 && generatedImages[lightboxIdx] && (
-        <div className="os-gen-lightbox" onClick={() => setLightboxIdx(-1)}>
-          <button className="os-gen-lightbox-close" onClick={() => setLightboxIdx(-1)}>
-            <X className="w-6 h-6" />
-          </button>
-          <img src={generatedImages[lightboxIdx].url} alt="大图预览" />
-          {generatedImages.length > 1 && (
-            <div className="os-gen-lightbox-thumbs">
-              {generatedImages.map((img, i) => (
-                <img
-                  key={i}
-                  src={img.url}
-                  alt={`缩略图 ${i + 1}`}
-                  className={`os-gen-lightbox-thumb ${i === lightboxIdx ? 'active' : ''}`}
-                  onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ===== Toast ===== */}
       <div className={`os-gen-toast ${showToast ? 'show' : ''}`}>
