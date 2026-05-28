@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Wand2, Lightbulb, Image, LogIn, LogOut, User, Crown, MessageCircle } from 'lucide-react';
+import { Wand2, Lightbulb, Image, LogIn, LogOut, User, Crown } from 'lucide-react';
+
+/** 微信图标 — 简约 SVG */
+function WechatIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" strokeWidth={0}>
+      <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05a6.42 6.42 0 0 1-.246-1.79c0-3.552 3.395-6.443 7.585-6.443.232 0 .459.022.684.042C16.387 4.834 12.879 2.188 8.691 2.188zm-2.85 4.56a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2zm5.7 0a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2zm4.3 4.378c-3.652 0-6.615 2.472-6.615 5.517s2.963 5.517 6.615 5.517a7.8 7.8 0 0 0 2.222-.323.617.617 0 0 1 .51.07l1.36.796a.233.233 0 0 0 .119.039.21.21 0 0 0 .207-.211c0-.051-.021-.102-.035-.152l-.278-1.054a.42.42 0 0 1 .152-.474c1.34-.988 2.198-2.452 2.198-4.108 0-3.045-2.963-5.517-6.655-5.517zM14.5 15a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8zm3.6 0a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8z" />
+    </svg>
+  );
+}
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -69,12 +78,11 @@ export default function SiteSidebar() {
         {/* 公众号入口 */}
         <div
           className="os-dock-wechat-btn"
-          title="公众号"
+          title="关注公众号"
           onMouseEnter={() => setShowQr(true)}
           onMouseLeave={() => setShowQr(false)}
         >
-          <MessageCircle className="os-dock-wechat-icon" strokeWidth={1.5} />
-          <span className="os-dock-label">公众号</span>
+          <WechatIcon className="os-dock-wechat-icon" />
 
           {/* 二维码浮层 */}
           {showQr && (

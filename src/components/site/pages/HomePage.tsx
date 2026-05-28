@@ -12,10 +12,7 @@ import {
   ChevronRight,
   TrendingUp,
   Upload,
-  Zap,
-  Palette,
   SlidersHorizontal,
-  Crown,
   Download,
   RotateCcw,
   ImageIcon,
@@ -118,20 +115,6 @@ const RATIO_OPTIONS = [
   { value: '16:9', label: '16:9', w: 16, h: 9 },
 ];
 
-const QUALITY_OPTIONS = [
-  { value: 'standard', label: '标准' },
-  { value: 'hd', label: '高清' },
-];
-
-const STYLE_OPTIONS = [
-  { value: 'auto', label: '自动' },
-  { value: 'cinematic', label: '电影感' },
-  { value: 'commercial', label: '商业设计' },
-  { value: 'trendy', label: '潮流艺术' },
-  { value: 'futuristic', label: '未来科技' },
-  { value: 'minimal', label: '极简高级' },
-];
-
 const MAX_UPLOAD_IMAGES = 5;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -168,8 +151,6 @@ export default function HomePage() {
   const [inputText, setInputText] = useState('');
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [selectedRatio, setSelectedRatio] = useState('3:4');
-  const [selectedQuality, setSelectedQuality] = useState('standard');
-  const [selectedStyle, setSelectedStyle] = useState('auto');
   const [isDragOver, setIsDragOver] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -197,9 +178,6 @@ export default function HomePage() {
 
     if (prompt) setInputText(prompt);
     if (ratio && ['1:1', '3:4', '9:16', '16:9'].includes(ratio)) setSelectedRatio(ratio);
-    if (style && ['auto', 'cinematic', 'commercial', 'trendy', 'futuristic', 'minimal'].includes(style)) {
-      setSelectedStyle(style);
-    }
     if (imageUrl) setUploadedImages([imageUrl]);
   }, [searchParams]);
 
@@ -273,9 +251,8 @@ export default function HomePage() {
       const genBody: Record<string, unknown> = {
         prompt: inputText.trim(),
         toolSlug: 'product-generator',
-        style: selectedStyle,
         ratio: selectedRatio,
-        count: selectedQuality === 'hd' ? 2 : 4,
+        count: 4,
         generationType: 'general',
         layoutMode,
       };
@@ -316,7 +293,7 @@ export default function HomePage() {
       const msg = err instanceof Error && err.message.includes('timeout') ? '生成超时，请重试' : '网络错误，请重试';
       setErrorMsg(msg);
     }
-  }, [inputText, uploadedImages, selectedRatio, selectedQuality, selectedStyle, genStep, dailyQuota, requireAuth, showAlert, refreshQuota]);
+  }, [inputText, uploadedImages, selectedRatio, genStep, dailyQuota, requireAuth, showAlert, refreshQuota]);
 
   // 键盘快捷键
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -329,8 +306,7 @@ export default function HomePage() {
   }, []);
 
   // ===== 加载中文案轮播 =====
-  const styleLabel = STYLE_OPTIONS.find(s => s.value === selectedStyle)?.label || '';
-  const loadingMessages = buildLoadingMessages(selectedRatio, styleLabel);
+  const loadingMessages = buildLoadingMessages(selectedRatio, '');
 
   useEffect(() => {
     if (genStep !== 'generating') {
@@ -535,15 +511,15 @@ export default function HomePage() {
 
         {/* ===== 左侧：创作面板 ===== */}
         <aside className="os-studio-panel">
-          {/* --- 模型区域 --- */}
+          {/* --- 品牌区域 --- */}
           <div className="os-panel-model">
             <div className="os-panel-model-header">
               <div className="os-panel-model-icon">
-                <Zap className="w-3.5 h-3.5" />
+                <Sparkles className="w-3.5 h-3.5" />
               </div>
               <div className="os-panel-model-info">
-                <div className="os-panel-model-name">GPT Image 2</div>
-                <div className="os-panel-model-desc">高质量 AI 视觉生成</div>
+                <div className="os-panel-model-name">OneClaw Vision</div>
+                <div className="os-panel-model-desc">Powered by GPT Image 2</div>
               </div>
             </div>
           </div>
@@ -632,44 +608,6 @@ export default function HomePage() {
                   >
                     <div className="os-panel-ratio-icon" style={{ width: opt.w, height: opt.h }} />
                     <span>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 质量 */}
-            <div className="os-panel-params-row">
-              <div className="os-panel-params-label">
-                <Crown className="w-3.5 h-3.5" />
-                <span>质量</span>
-              </div>
-              <div className="os-panel-params-options">
-                {QUALITY_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    className={`os-panel-quality-btn ${selectedQuality === opt.value ? 'os-panel-quality-active' : ''}`}
-                    onClick={() => setSelectedQuality(opt.value)}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* 风格 */}
-            <div className="os-panel-params-row">
-              <div className="os-panel-params-label">
-                <Palette className="w-3.5 h-3.5" />
-                <span>风格</span>
-              </div>
-              <div className="os-panel-params-options os-panel-style-options">
-                {STYLE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    className={`os-panel-style-btn ${selectedStyle === opt.value ? 'os-panel-style-active' : ''}`}
-                    onClick={() => setSelectedStyle(opt.value)}
-                  >
-                    {opt.label}
                   </button>
                 ))}
               </div>

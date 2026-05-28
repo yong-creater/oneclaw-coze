@@ -1299,56 +1299,6 @@
   opacity: 0.8;
 }
 
-/* 质量按钮 — chip 风格 */
-.os-panel-quality-btn {
-  padding: 6px 16px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.os-panel-quality-btn:hover {
-  background: rgba(139, 92, 246, 0.04);
-  color: rgba(255, 255, 255, 0.5);
-}
-.os-panel-quality-active {
-  background: rgba(139, 92, 246, 0.1) !important;
-  color: #a78bfa !important;
-  border-color: rgba(139, 92, 246, 0.2) !important;
-  box-shadow: 0 0 16px rgba(124, 58, 237, 0.08);
-}
-
-/* 风格按钮 — pill chip 风格 */
-.os-panel-style-options {
-  gap: 6px !important;
-}
-.os-panel-style-btn {
-  padding: 5px 12px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.025);
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  white-space: nowrap;
-}
-.os-panel-style-btn:hover {
-  background: rgba(139, 92, 246, 0.04);
-  color: rgba(255, 255, 255, 0.5);
-}
-.os-panel-style-active {
-  background: rgba(139, 92, 246, 0.1) !important;
-  color: #a78bfa !important;
-  border-color: rgba(139, 92, 246, 0.2) !important;
-  box-shadow: 0 0 16px rgba(124, 58, 237, 0.08);
-}
-
 /* 生成按钮 — 高级发光渐变 */
 .os-panel-generate-btn {
   width: 100%;
