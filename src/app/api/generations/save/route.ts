@@ -4,13 +4,18 @@ import { getSupabaseClient } from '@/storage/database/supabase-client';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userToken, imageUrls, prompt, ratio, style } = body;
+    const { images, prompt, ratio, referenceImageUrl } = body;
+
+    // 从 httpOnly cookie 中获取用户 token（前端无法通过 JS 读取 httpOnly cookie）
+    const userToken = request.cookies.get('user_token')?.value;
 
     if (!userToken) {
       return NextResponse.json({ success: false, error: '请先登录' });
     }
 
-    if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) {
+    const imageUrls: string[] = images || [];
+
+    if (imageUrls.length === 0) {
       return NextResponse.json({ success: false, error: '没有可保存的作品' });
     }
 
@@ -38,8 +43,8 @@ export async function POST(request: NextRequest) {
       thumbnail: imageUrls[0] || '',
       input_params: {
         prompt: prompt || '',
-        style: style || '',
         ratio: ratio || '',
+        referenceImageUrl: referenceImageUrl || '',
         count: imageUrls.length,
       },
       output_content: { image_urls: imageUrls },

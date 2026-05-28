@@ -301,13 +301,11 @@ export default function HomePage() {
     if (saved || generatedImages.length === 0) return;
     setSaving(true);
     try {
-      const token = document.cookie
-        .split('; ')
-        .find(r => r.startsWith('user_token='))
-        ?.split('=')[1];
+      // httpOnly cookie 会通过 credentials: 'include' 自动发送，无需手动读取
       const res = await fetch('/api/generations/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           images: generatedImages.map((img: { url: string }) => img.url),
           prompt: inputText,
