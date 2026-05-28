@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Wand2, Lightbulb, Image, LogIn, LogOut, User, Crown } from 'lucide-react';
+import { Wand2, Lightbulb, Image, LogIn, LogOut, User, Crown, MessageCircle } from 'lucide-react';
 import { SiteLogo } from '@/components/site/common/SiteLogo';
 import { useUser } from '@/contexts/UserContext';
 
@@ -24,6 +24,7 @@ export default function SiteSidebar() {
   const pathname = usePathname();
   const { user, authenticated, logout, setShowLoginModal, requireAuth } = useUser();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   function isActive(href: string): boolean {
     if (href === '/') return pathname === '/';
@@ -65,6 +66,32 @@ export default function SiteSidebar() {
 
       {/* ===== 底部区域 ===== */}
       <div className="os-dock-bottom">
+        {/* 公众号入口 */}
+        <div
+          className="os-dock-wechat-btn"
+          title="公众号"
+          onMouseEnter={() => setShowQr(true)}
+          onMouseLeave={() => setShowQr(false)}
+        >
+          <MessageCircle className="os-dock-wechat-icon" strokeWidth={1.5} />
+          <span className="os-dock-label">公众号</span>
+
+          {/* 二维码浮层 */}
+          {showQr && (
+            <div className="os-dock-qr-popup">
+              <div className="os-dock-qr-popup-inner">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/api/wechat/qrcode-image"
+                  alt="微信公众号"
+                  className="os-dock-qr-img"
+                />
+                <span className="os-dock-qr-text">扫码关注公众号</span>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 会员入口 */}
         <Link
           href="/membership"

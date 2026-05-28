@@ -334,7 +334,80 @@
   }
 }
 
-/* 移动端：Dock 变底栏 */
+/* ===== 公众号二维码浮层 ===== */
+.os-dock-wechat-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 56px;
+  padding: 10px 0;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.os-dock-wechat-btn:hover {
+  background: rgba(139, 92, 246, 0.06);
+  transform: translateY(-1px);
+}
+
+.os-dock-wechat-icon {
+  width: 22px;
+  height: 22px;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.2s ease, filter 0.2s ease;
+}
+.os-dock-wechat-btn:hover .os-dock-wechat-icon {
+  color: rgba(167, 139, 250, 0.8);
+}
+
+.os-dock-qr-popup {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  animation: os-qr-pop 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes os-qr-pop {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+.os-dock-qr-popup-inner {
+  background: rgba(22, 22, 24, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(139, 92, 246, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.os-dock-qr-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.os-dock-qr-text {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ===== 移动端：Dock 变底栏 ===== */
 @media (max-width: 768px) {
   .os-dock {
     position: fixed;
@@ -389,6 +462,10 @@
   }
 
   .os-dock-bottom {
+    display: none;
+  }
+
+  .os-dock-wechat-btn {
     display: none;
   }
 

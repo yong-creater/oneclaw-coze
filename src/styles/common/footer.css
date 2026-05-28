@@ -1,135 +1,42 @@
-/* ===== Site Footer — 深色 AI SaaS 风格 ===== */
+/* ===== Site Footer — 极简 AI 产品底部栏 ===== */
 .os-footer {
   margin-top: auto;
-  padding: 36px 0 0;
-  background: rgba(15, 15, 16, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.os-footer-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 48px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 48px;
-}
-
-/* 左侧：品牌 + 关于我们 */
-.os-footer-left {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 340px;
-}
-
-.os-footer-logo {
-  font-size: 15px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
-  letter-spacing: -0.02em;
-}
-
-.os-footer-desc {
-  font-size: 12px;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.3);
-  margin: 0;
-}
-
-.os-footer-about-link {
-  display: inline-block;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.35);
-  text-decoration: none;
-  margin-top: 4px;
-  transition: color 0.2s ease;
-}
-.os-footer-about-link:hover {
-  color: #a78bfa;
-}
-
-/* 右侧：公众号二维码 */
-.os-footer-qr {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.os-footer-qr-card {
-  width: 160px;
-  height: 160px;
-  border-radius: 16px;
-  background: #1c1c1e;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  overflow: hidden;
+  padding: 16px 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  background: transparent;
+  letter-spacing: 0.01em;
+  line-height: 1;
 }
 
-.os-footer-qr-card img {
-  width: 140px;
-  height: 140px;
-  border-radius: 8px;
-  object-fit: cover;
-}
-
-.os-footer-qr-label {
-  font-size: 12px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.35);
-  text-align: center;
-}
-
-/* 底部：版权备案（独立一行） */
-.os-footer-bottom {
-  max-width: 1280px;
-  margin: 32px auto 0;
-  padding: 14px 48px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  text-align: center;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.2);
-}
-
-.os-footer-bottom a {
-  color: rgba(255, 255, 255, 0.2);
+.os-footer a {
+  color: rgba(255, 255, 255, 0.18);
   text-decoration: none;
   transition: color 0.2s ease;
 }
-.os-footer-bottom a:hover {
-  color: rgba(255, 255, 255, 0.4);
+.os-footer a:hover {
+  color: rgba(167, 139, 250, 0.6);
 }
 
-/* 响应式 */
+.os-footer-sep {
+  margin: 0 8px;
+  color: rgba(255, 255, 255, 0.08);
+  user-select: none;
+}
+
 @media (max-width: 768px) {
-  .os-footer-inner {
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-    padding: 0 20px;
+  .os-footer {
+    padding: 14px 20px;
+    font-size: 10px;
   }
-  .os-footer-left {
-    max-width: 100%;
-    text-align: center;
-    align-items: center;
-  }
-  .os-footer-qr-card {
-    width: 140px;
-    height: 140px;
-  }
-  .os-footer-qr-card img {
-    width: 120px;
-    height: 120px;
-  }
-  .os-footer-bottom {
-    padding: 14px 20px 16px;
+  .os-footer-sep {
+    margin: 0 6px;
   }
 }
 
