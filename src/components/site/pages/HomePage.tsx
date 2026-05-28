@@ -453,65 +453,60 @@ export default function HomePage() {
     if (genStep === 'done' && generatedImages.length > 0) {
       return (
         <div className="os-gen-result">
-          {/* 结果标题 */}
-          <div className="os-gen-result-header">
-            <span className="os-gen-result-title">生成结果</span>
-            <span className="os-gen-result-count">共 {generatedImages.length} 张</span>
-          </div>
-
-          {/* 主预览 */}
+          {/* 主图 — 沉浸画布 */}
           <div
-            className="os-gen-result-main"
-            style={{ aspectRatio: ratioToAspect(selectedRatio) }}
+            className="os-gen-result-canvas"
             onClick={() => setLightboxIdx(selectedImgIdx)}
           >
             <img
               src={generatedImages[selectedImgIdx].url}
               alt={`生成结果 ${selectedImgIdx + 1}`}
-              className="os-gen-result-main-img"
+              className="os-gen-result-canvas-img"
             />
             <div className="os-gen-result-zoom">
-              <ZoomIn className="w-5 h-5" />
+              <ZoomIn className="w-4 h-4" />
             </div>
-          </div>
 
-          {/* 缩略图 */}
-          {generatedImages.length > 1 && (
-            <div className="os-gen-result-thumbs">
-              {generatedImages.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={`os-gen-result-thumb ${idx === selectedImgIdx ? 'active' : ''}`}
-                  style={{ aspectRatio: ratioToAspect(selectedRatio) }}
-                  onClick={() => setSelectedImgIdx(idx)}
-                >
-                  <img src={img.url} alt={`缩略图 ${idx + 1}`} />
+            {/* 底部悬浮控制栏 */}
+            <div className="os-gen-result-float-bar" onClick={e => e.stopPropagation()}>
+              {/* 左：缩略图 */}
+              {generatedImages.length > 1 && (
+                <div className="os-gen-result-float-thumbs">
+                  {generatedImages.map((img, idx) => (
+                    <div
+                      key={idx}
+                      className={`os-gen-result-float-thumb ${idx === selectedImgIdx ? 'active' : ''}`}
+                      onClick={() => setSelectedImgIdx(idx)}
+                    >
+                      <img src={img.url} alt={`缩略图 ${idx + 1}`} />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+              {/* 右：操作按钮 */}
+              <div className="os-gen-result-float-actions">
+                <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleDownload(generatedImages[selectedImgIdx].url, selectedImgIdx)}>
+                  <Download className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  className={`os-gen-action-btn ${saved ? 'os-gen-action-saved' : 'os-gen-action-ghost'}`}
+                  disabled={saved || saving}
+                  onClick={saved ? undefined : handleSave}
+                >
+                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : saved ? <BookmarkCheck className="w-3.5 h-3.5" /> : <BookmarkPlus className="w-3.5 h-3.5" />}
+                </button>
+                <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+                <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleUseStyle}>
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
+                <span className="os-gen-float-divider" />
+                <button className="os-gen-action-btn os-gen-action-primary" onClick={handleGenerate}>
+                  <RotateCcw className="w-3.5 h-3.5" /> 重新生成
+                </button>
+              </div>
             </div>
-          )}
-
-          {/* 操作栏 */}
-          <div className="os-gen-result-actions">
-            <button className="os-gen-action-btn os-gen-action-download" onClick={() => handleDownload(generatedImages[selectedImgIdx].url, selectedImgIdx)}>
-              <Download className="w-4 h-4" /> 下载
-            </button>
-            <button
-              className={`os-gen-action-btn ${saved ? 'os-gen-action-saved' : 'os-gen-action-accent'}`}
-              disabled={saved || saving}
-              onClick={saved ? undefined : handleSave}
-            >
-              {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> 保存中</> : saved ? <><BookmarkCheck className="w-4 h-4" /> 已保存</> : <><BookmarkPlus className="w-4 h-4" /> 保存</>}
-            </button>
-            <button className="os-gen-action-btn os-gen-action-edit" onClick={handleEditPrompt}>
-              <Pencil className="w-4 h-4" /> 编辑
-            </button>
-            <button className="os-gen-action-btn os-gen-action-glass" onClick={handleGenerate}>
-              <RotateCcw className="w-4 h-4" /> 重新生成
-            </button>
-            <button className="os-gen-action-btn os-gen-action-glass" onClick={handleUseStyle}>
-              <Copy className="w-4 h-4" /> 复制提示词
-            </button>
           </div>
         </div>
       );
