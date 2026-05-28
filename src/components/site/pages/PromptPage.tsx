@@ -202,8 +202,8 @@ const categoryCounts = useMemo(() => {
     <div className="os-page">
       <div className="os-page-inner">
         {/* 顶部 */}
-        <h1 className="os-page-title">灵感库</h1>
-        <p className="os-page-subtitle">探索 AI 创意灵感，一键生成同款</p>
+        <h1 className="os-page-title">创作灵感</h1>
+        <p className="os-page-subtitle">探索灵感，生成你的创意</p>
 
         {/* 分类 + 搜索 */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28, flexWrap: 'wrap' }}>

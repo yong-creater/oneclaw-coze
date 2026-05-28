@@ -2,7 +2,7 @@
 
 /* ---------- CSS 变量（与 tool-cards.css 共享） ---------- */
 :root {
-  --oc-card-radius: 20px;
+  --oc-card-radius: 14px;
   --oc-card-bg: #171717;
   --oc-card-border: 1px solid rgba(255,255,255,0.06);
   --oc-card-blur: blur(24px);

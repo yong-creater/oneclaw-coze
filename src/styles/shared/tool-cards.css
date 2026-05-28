@@ -6,7 +6,7 @@
 
 /* ---- CSS 变量 ---- */
 :root {
-  --oc-card-radius: 20px;
+  --oc-card-radius: 14px;
   --oc-card-bg: #171717;
   --oc-card-border: rgba(255, 255, 255, 0.06);
   --oc-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -717,7 +717,7 @@
   position: relative;
   break-inside: avoid;
   margin-bottom: 20px;
-  border-radius: 16px;
+  border-radius: var(--oc-card-radius, 14px);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.28s ease;
@@ -733,7 +733,7 @@
   display: block;
   object-fit: cover;
   object-position: center;
-  border-radius: 16px;
+  border-radius: var(--oc-card-radius, 14px);
   transition: transform 0.3s ease;
 }
 .os-insp-card:hover .os-insp-card-img {
@@ -748,7 +748,7 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #1c1c2e 0%, #1a1a2e 50%, #18182e 100%);
-  border-radius: 16px;
+  border-radius: var(--oc-card-radius, 14px);
   color: #6d5ef6;
 }
 
@@ -763,7 +763,7 @@
   opacity: 0;
   transition: opacity 0.28s ease;
   background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
-  border-radius: 16px;
+  border-radius: var(--oc-card-radius, 14px);
   pointer-events: none;
 }
 .os-insp-card:hover .os-insp-card-overlay {

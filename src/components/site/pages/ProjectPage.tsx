@@ -362,7 +362,7 @@ export default function ProjectPage() {
     <div className="os-page">
       <div className="os-page-inner">
         <h1 className="os-page-title">我的作品</h1>
-        <p className="os-page-subtitle">管理你的 AI 创作作品</p>
+        <p className="os-page-subtitle">查看和管理你的 AI 创作作品</p>
 
         {generations.length === 0 ? (
           <div className="os-project-empty-hero">

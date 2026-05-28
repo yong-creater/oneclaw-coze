@@ -65,10 +65,10 @@
   position: relative;
   z-index: 1;
   min-height: calc(100vh - 64px);
-  padding: 32px 48px 60px;
+  padding: 24px 40px 48px;
 }
 @media (max-width: 768px) {
-  .os-page { padding: 20px 16px 40px; }
+  .os-page { padding: 16px 16px 32px; }
 }
 
 /* 首页特化 — 居中布局，垂直居中 hero */
@@ -84,26 +84,26 @@
 
 /* ---- 统一页面标题系统 ---- */
 .os-page-title {
-  font-size: 56px;
-  font-weight: 700;
-  color: #f0f0f5;
-  line-height: 1.1;
-  margin-bottom: 10px;
-  letter-spacing: -0.03em;
+  font-size: 22px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.3;
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
 }
 @media (max-width: 768px) {
-  .os-page-title { font-size: 32px; }
+  .os-page-title { font-size: 18px; }
 }
 
 .os-page-subtitle {
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.4);
-  line-height: 1.5;
-  margin-bottom: 36px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.4;
+  margin-bottom: 20px;
   font-weight: 400;
 }
 @media (max-width: 768px) {
-  .os-page-subtitle { font-size: 15px; margin-bottom: 24px; }
+  .os-page-subtitle { font-size: 12px; margin-bottom: 16px; }
 }
 
 /* ==================== 居中 Hero 创作区 ==================== */
