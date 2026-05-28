@@ -58,11 +58,11 @@ export default function ToolsPage() {
               <div
                 key={tool.slug}
                 className="os-tool-card"
-                onClick={() => router.push(`/create?tool=${tool.slug}`)}
+                onClick={() => router.push(`/?sourceType=tool&tool=${tool.slug}`)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') router.push(`/create?tool=${tool.slug}`);
+                  if (e.key === 'Enter') router.push(`/?sourceType=tool&tool=${tool.slug}`);
                 }}
               >
                 {/* 封面图 — 260px */}

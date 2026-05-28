@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   Wand2,
   ImagePlus,
@@ -161,6 +162,7 @@ export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
   const { requireAuth, dailyQuota, refreshQuota, user, loading } = useUser();
   const { showAlert } = useModal();
+  const searchParams = useSearchParams();
 
   // ===== 面板状态 =====
   const [inputText, setInputText] = useState('');
@@ -184,6 +186,22 @@ export default function HomePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // ===== URL 参数自动填充 =====
+  useEffect(() => {
+    const prompt = searchParams.get('prompt');
+    const ratio = searchParams.get('ratio');
+    const style = searchParams.get('style');
+    const imageUrl = searchParams.get('imageUrl');
+    // const sourceType = searchParams.get('sourceType'); // reserved for analytics
+
+    if (prompt) setInputText(prompt);
+    if (ratio && ['1:1', '3:4', '9:16', '16:9'].includes(ratio)) setSelectedRatio(ratio);
+    if (style && ['auto', 'cinematic', 'commercial', 'trendy', 'futuristic', 'minimal'].includes(style)) {
+      setSelectedStyle(style);
+    }
+    if (imageUrl) setUploadedImages([imageUrl]);
+  }, [searchParams]);
 
   // ===== 初始化 =====
   useEffect(() => {

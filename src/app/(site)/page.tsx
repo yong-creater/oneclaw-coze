@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import HomePage from '@/components/site/pages/HomePage';
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function HomeRoute() {
-  return <HomePage />;
+  return (
+    <Suspense>
+      <HomePage />
+    </Suspense>
+  );
 }

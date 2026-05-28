@@ -26,13 +26,6 @@ interface Prompt {
 /* ---------- 固定分类标签（用户需求：只保留3+全部） ---------- */
 const FIXED_CATEGORIES = ['全部', 'AI商品图', 'AI写真', '小红书封面'] as const;
 
-/* 分类对应的 tool_slug 映射 */
-const CATEGORY_TOOL_MAP: Record<string, string> = {
-  'AI商品图': 'product-generator',
-  'AI写真': 'ai-photo',
-  '小红书封面': 'xiaohongshu-generator',
-};
-
 /* 分类对应的默认生成参数 */
 const CATEGORY_DEFAULTS: Record<string, { style: string; ratio: string; count: number }> = {
   'AI商品图': { style: 'premium', ratio: '1:1', count: 4 },
@@ -169,7 +162,7 @@ const categoryCounts = useMemo(() => {
     []
   );
 
-  /* ---- 生成同款（跳转工具页 + 自动填充参数） ---- */
+  /* ---- 生成同款（跳转新创作工作台 + 自动填充参数） ---- */
   const handleGen = useCallback(
     (e: React.MouseEvent, p: Prompt) => {
       e.stopPropagation();
@@ -180,23 +173,18 @@ const categoryCounts = useMemo(() => {
         return;
       }
 
-      // 优先使用 category 映射到有效 slug，忽略数据库中无效的 tool_slug
-      const VALID_SLUGS = ['product-generator', 'xiaohongshu-generator', 'ai-photo'];
-      const slug = CATEGORY_TOOL_MAP[p.category]
-        || (p.tool_slug && VALID_SLUGS.includes(p.tool_slug) ? p.tool_slug : null)
-        || 'product-generator';
       const defaults = CATEGORY_DEFAULTS[p.category] || CATEGORY_DEFAULTS['AI商品图'];
 
-      // 构建跳转参数：prompt + style + ratio + count
+      // 构建跳转参数：跳转新创作工作台（首页），带入 prompt + 参数
       const params = new URLSearchParams({
-        tool: slug,
         prompt: p.content || p.title,
         style: p.style || defaults.style,
         ratio: defaults.ratio,
-        count: String(defaults.count),
+        sourceType: 'inspiration',
       });
+      if (p.image) params.set('imageUrl', p.image);
 
-      const targetUrl = `/create?${params.toString()}`;
+      const targetUrl = `/?${params.toString()}`;
 
       // 登录拦截：未登录时弹出登录弹窗，登录后继续执行跳转
       if (!requireAuth(() => { router.push(targetUrl); })) return;

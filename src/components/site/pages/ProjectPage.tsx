@@ -328,12 +328,20 @@ export default function ProjectPage() {
     }
   }, [confirm, alert]);
 
-  /* ---- 继续优化 ---- */
+  /* ---- 继续优化（跳转新创作工作台） ---- */
   const handleContinue = useCallback(
     (e: React.MouseEvent, gen: Generation) => {
       e.stopPropagation();
-      const slug = gen.tool_type || 'product-generator';
-      router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(gen.prompt || '')}`);
+      const params = new URLSearchParams({
+        prompt: gen.prompt || '',
+        sourceType: 'work',
+      });
+      if (gen.style) params.set('style', gen.style);
+      if (gen.ratio) params.set('ratio', gen.ratio);
+      // 带入参考图
+      const refImg = firstImage(gen);
+      if (refImg) params.set('imageUrl', refImg);
+      router.push(`/?${params.toString()}`);
     },
     [router],
   );
@@ -444,9 +452,16 @@ export default function ProjectPage() {
             initialIndex={gallery.index}
             onContinue={() => {
               const gen = gallery.gen;
-              const slug = gen.tool_type || 'product-generator';
+              const params = new URLSearchParams({
+                prompt: gen.prompt || '',
+                sourceType: 'work',
+              });
+              if (gen.style) params.set('style', gen.style);
+              if (gen.ratio) params.set('ratio', gen.ratio);
+              const refImg = firstImage(gen);
+              if (refImg) params.set('imageUrl', refImg);
               setGallery(null);
-              router.push(`/create?tool=${slug}&prompt=${encodeURIComponent(gen.prompt || '')}`);
+              router.push(`/?${params.toString()}`);
             }}
             onClose={() => setGallery(null)}
           />
