@@ -2,17 +2,15 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import {
   Wand2,
   ImagePlus,
   X,
   Check,
   Sparkles,
-  ChevronLeft,
   ChevronRight,
-  TrendingUp,
   Upload,
-  SlidersHorizontal,
   Download,
   RotateCcw,
   ImageIcon,
@@ -20,6 +18,8 @@ import {
   BookmarkPlus,
   BookmarkCheck,
   ZoomIn,
+  Lightbulb,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -55,55 +55,43 @@ function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number
   return fetch(url, { ...rest, signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
-// ===== 热门创作灵感 =====
-const hotInspirations = [
+// ===== 推荐案例数据 =====
+const recommendedCases = [
   {
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=750&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=500&fit=crop&auto=format&q=80',
     type: '海报',
     title: '未来感发布会海报',
-    examplePrompt: '生成一个未来感新能源发布会海报',
+    prompt: '生成一个未来感新能源发布会海报',
   },
   {
-    image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=600&h=750&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&h=500&fit=crop&auto=format&q=80',
     type: '人物',
     title: '赛博朋克风格人物',
-    examplePrompt: '做一个赛博朋克人物',
+    prompt: '做一个赛博朋克人物',
   },
   {
-    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefda?w=600&h=750&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefda?w=400&h=500&fit=crop&auto=format&q=80',
     type: '包装',
     title: '咖啡品牌包装设计',
-    examplePrompt: '设计一个咖啡品牌包装',
+    prompt: '设计一个咖啡品牌包装',
   },
   {
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=750&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=500&fit=crop&auto=format&q=80',
     type: '数据',
     title: '行业分析图',
-    examplePrompt: '生成行业分析图',
+    prompt: '生成行业分析图',
   },
   {
-    image: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=600&h=750&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&h=500&fit=crop&auto=format&q=80',
     type: 'Banner',
     title: '高级感网站 Banner',
-    examplePrompt: '设计高级感网站 Banner',
+    prompt: '设计高级感网站 Banner',
   },
   {
-    image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600&h=750&fit=crop&auto=format&q=80',
+    image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=500&fit=crop&auto=format&q=80',
     type: '风景',
     title: '赛博朋克城市夜景',
-    examplePrompt: '创作一幅赛博朋克城市夜景',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=600&h=750&fit=crop&auto=format&q=80',
-    type: '品牌',
-    title: '极简香水品牌视觉',
-    examplePrompt: '设计一个极简主义香水品牌视觉',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=750&fit=crop&auto=format&q=80',
-    type: '摄影',
-    title: '复古胶片风旅行照',
-    examplePrompt: '生成一张复古胶片风旅行照片',
+    prompt: '创作一幅赛博朋克城市夜景',
   },
 ];
 
@@ -165,7 +153,6 @@ export default function HomePage() {
   const [showToast, setShowToast] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   // ===== URL 参数自动填充 =====
@@ -320,12 +307,6 @@ export default function HomePage() {
   }, [genStep, loadingMessages.length]);
 
   // ===== Carousel =====
-  const scrollCarousel = useCallback((dir: 'left' | 'right') => {
-    if (!carouselRef.current) return;
-    const scrollAmount = 260;
-    carouselRef.current.scrollBy({ left: dir === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
-  }, []);
-
   const handleInspirationClick = useCallback((prompt: string) => {
     setInputText(prompt);
   }, []);
@@ -352,46 +333,44 @@ export default function HomePage() {
 
   // ===== 右侧面板内容 =====
   const renderRightPanel = () => {
-    // 空状态：灵感流
+    // 空状态：推荐案例
     if (genStep === 'idle' && generatedImages.length === 0) {
       return (
         <>
-          <div className="os-feed-header">
-            <div className="os-feed-header-left">
-              <TrendingUp className="w-4.5 h-4.5 text-[#7B61FF]/60" />
-              <h2 className="os-feed-title">创作灵感</h2>
-              <span className="os-feed-count">{hotInspirations.length} 个创意</span>
+          <div className="os-cases-header">
+            <div className="os-cases-header-left">
+              <Lightbulb className="w-4 h-4 text-[#7B61FF]/60" />
+              <h2 className="os-cases-title">推荐案例</h2>
             </div>
-            <div className="os-feed-header-right">
-              <button onClick={() => scrollCarousel('left')} className="os-feed-nav-btn"><ChevronLeft className="w-4 h-4" /></button>
-              <button onClick={() => scrollCarousel('right')} className="os-feed-nav-btn"><ChevronRight className="w-4 h-4" /></button>
-            </div>
+            <Link href="/inspiration" className="os-cases-more">
+              探索更多 <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-          <div className="os-feed-grid" ref={carouselRef}>
-            {hotInspirations.map((item, idx) => (
+          <div className="os-cases-grid">
+            {recommendedCases.map((c, idx) => (
               <div
                 key={idx}
-                className="os-feed-card"
-                onClick={() => handleInspirationClick(item.examplePrompt)}
+                className="os-case-card"
+                onClick={() => handleInspirationClick(c.prompt)}
               >
-                <div className="os-feed-card-img-wrap">
-                  <img src={item.image} alt={item.title} className="os-feed-card-img" loading="lazy" />
-                  <div className="os-feed-card-hover">
+                <div className="os-case-card-img-wrap">
+                  <img src={c.image} alt={c.title} className="os-case-card-img" loading="lazy" />
+                  <div className="os-case-card-hover">
                     <button
-                      className="os-feed-card-cta"
+                      className="os-case-card-cta"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setInputText(item.examplePrompt);
+                        setInputText(c.prompt);
                       }}
                     >
                       <Wand2 className="w-3.5 h-3.5" />
-                      <span>试试这个</span>
+                      <span>试试</span>
                     </button>
                   </div>
                 </div>
-                <div className="os-feed-card-info">
-                  <span className="os-feed-card-type">{item.type}</span>
-                  <p className="os-feed-card-title">{item.title}</p>
+                <div className="os-case-card-info">
+                  <span className="os-case-card-type">{c.type}</span>
+                  <p className="os-case-card-title">{c.title}</p>
                 </div>
               </div>
             ))}
