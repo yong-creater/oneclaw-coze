@@ -56,45 +56,6 @@ function fetchWithTimeout(url: string, options: RequestInit & { timeout?: number
 }
 
 // ===== 推荐案例数据 =====
-const recommendedCases = [
-  {
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=500&fit=crop&auto=format&q=80',
-    type: '海报',
-    title: '未来感发布会海报',
-    prompt: '生成一个未来感新能源发布会海报',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&h=500&fit=crop&auto=format&q=80',
-    type: '人物',
-    title: '赛博朋克风格人物',
-    prompt: '做一个赛博朋克人物',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefda?w=400&h=500&fit=crop&auto=format&q=80',
-    type: '包装',
-    title: '咖啡品牌包装设计',
-    prompt: '设计一个咖啡品牌包装',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=500&fit=crop&auto=format&q=80',
-    type: '数据',
-    title: '行业分析图',
-    prompt: '生成行业分析图',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=400&h=500&fit=crop&auto=format&q=80',
-    type: 'Banner',
-    title: '高级感网站 Banner',
-    prompt: '设计高级感网站 Banner',
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=500&fit=crop&auto=format&q=80',
-    type: '风景',
-    title: '赛博朋克城市夜景',
-    prompt: '创作一幅赛博朋克城市夜景',
-  },
-];
-
 // ===== 面板参数选项 =====
 const RATIO_OPTIONS = [
   { value: '1:1', label: '1:1', w: 16, h: 16 },
@@ -152,6 +113,25 @@ export default function HomePage() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [cases, setCases] = useState<Array<{ id: number; image: string; type: string; title: string; prompt: string }>>([]);
+
+  // 获取推荐案例（从灵感页数据源）
+  useEffect(() => {
+    fetch('/api/prompts?limit=6')
+      .then(r => r.json())
+      .then(data => {
+        const prompts = data.prompts || data.data || [];
+        const mapped = prompts.slice(0, 6).map((p: Record<string, unknown>) => ({
+          id: p.id as number,
+          image: (p.image as string) || '/og-image.png',
+          type: (p.category_slug as string) || '灵感',
+          title: ((p.title as string) || '').slice(0, 20),
+          prompt: (p.content as string) || (p.title as string) || '',
+        }));
+        setCases(mapped);
+      })
+      .catch(() => {});
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -383,9 +363,9 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="os-cases-grid">
-            {recommendedCases.map((c, idx) => (
+            {cases.map((c) => (
               <div
-                key={idx}
+                key={c.id}
                 className="os-case-card"
                 onClick={() => handleInspirationClick(c.prompt)}
               >
@@ -526,17 +506,8 @@ export default function HomePage() {
 
         {/* ===== 左侧：创作面板 ===== */}
         <aside className="os-studio-panel">
-          {/* --- 模型能力说明 --- */}
-          <div className="os-panel-model">
-            <div className="os-panel-model-header">
-              <div className="os-panel-model-icon">
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-              <div className="os-panel-model-info">
-                <div className="os-panel-model-desc">Powered by GPT Image 2</div>
-              </div>
-            </div>
-          </div>
+          {/* --- AI 能力说明 --- */}
+          <div className="os-panel-powered">Powered by GPT Image 2</div>
 
           <div className="os-panel-divider" />
 
