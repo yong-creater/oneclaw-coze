@@ -907,65 +907,67 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  width: 100%;
   text-align: center;
   position: relative;
   user-select: none;
 }
 .os-empty-state-glow {
   position: absolute;
-  width: 280px;
-  height: 280px;
+  width: 400px;
+  height: 400px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(124, 92, 255, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(124, 92, 255, 0.12) 0%, rgba(124, 92, 255, 0.04) 40%, transparent 70%);
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -60%);
+  transform: translate(-50%, -55%);
   pointer-events: none;
   animation: emptyGlow 4s ease-in-out infinite;
 }
 .os-empty-state-icon {
   position: relative;
   z-index: 1;
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 28px;
+  border-radius: 18px;
+  background: rgba(124, 92, 255, 0.08);
+  border: 1px solid rgba(124, 92, 255, 0.15);
 }
 .os-empty-state-icon svg {
-  width: 26px;
-  height: 26px;
-  color: rgba(255, 255, 255, 0.45);
+  width: 32px;
+  height: 32px;
+  color: rgba(168, 143, 255, 0.85);
   animation: emptyPulse 3s ease-in-out infinite;
 }
 .os-empty-state-title {
   position: relative;
   z-index: 1;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   color: #FFFFFF;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   line-height: 1.4;
+  letter-spacing: -0.01em;
 }
 .os-empty-state-subtitle {
   position: relative;
   z-index: 1;
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.45);
-  max-width: 260px;
+  color: rgba(255, 255, 255, 0.65);
+  max-width: 300px;
 }
 @keyframes emptyGlow {
-  0%, 100% { opacity: 0.6; transform: translate(-50%, -60%) scale(1); }
-  50%      { opacity: 1;   transform: translate(-50%, -60%) scale(1.12); }
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -55%) scale(1); }
+  50%      { opacity: 1;   transform: translate(-50%, -55%) scale(1.1); }
 }
 @keyframes emptyPulse {
-  0%, 100% { opacity: 0.45; }
-  50%      { opacity: 0.75; }
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1; }
 }
 
 /* ---- 光斑漂浮动画 ---- */
@@ -1376,7 +1378,8 @@
 .os-studio-feed::-webkit-scrollbar { width: 4px; }
 .os-studio-feed::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
 /* 结果展示时去掉 padding，让画布撑满 */
-.os-studio-feed:has(.os-gen-result) {
+.os-studio-feed:has(.os-gen-result),
+.os-studio-feed:has(.os-empty-state) {
   padding: 0;
   overflow: hidden;
 }

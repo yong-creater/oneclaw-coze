@@ -336,11 +336,11 @@ export default function HomePage() {
     // 空状态：极简等待创作
     if (genStep === 'idle' && generatedImages.length === 0) {
       return (
-        <div className="os-idle-empty">
-          <div className="os-idle-empty-glow" />
-          <Sparkles className="os-idle-empty-icon" />
-          <h2 className="os-idle-empty-title">开始你的创作</h2>
-          <p className="os-idle-empty-sub">上传图片或输入描述词<br />即可生成高质量 AI 图片</p>
+        <div className="os-empty-state">
+          <div className="os-empty-state-glow" />
+          <Sparkles className="os-empty-state-icon" />
+          <h2 className="os-empty-state-title">开始你的创作</h2>
+          <p className="os-empty-state-sub">上传图片或输入描述词<br />即可生成高质量 AI 图片</p>
         </div>
       );
     }
