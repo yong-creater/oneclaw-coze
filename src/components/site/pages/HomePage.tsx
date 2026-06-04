@@ -18,6 +18,14 @@ import {
   SlidersHorizontal,
   Pencil,
   AlertCircle,
+  ShoppingBag,
+  FileText,
+  Camera,
+  BookOpen,
+  Palette,
+  Eye,
+  BadgeCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -74,6 +82,25 @@ const RATIO_OPTIONS = [
 ];
 
 const MAX_UPLOAD_IMAGES = 5;
+
+// ===== GPT Image 2 核心优势 =====
+const GPT_VALUES = [
+  '中文文字生成更准确',
+  '商品图细节更真实',
+  '构图更高级',
+  '广告设计能力更强',
+  'ChatGPT Plus 同款模型',
+] as const;
+
+// ===== GPT Image 2 适用场景 =====
+const CAPABILITY_ITEMS = [
+  { icon: ShoppingBag, label: '商品主图' },
+  { icon: FileText, label: '商品详情页' },
+  { icon: Camera, label: 'AI写真' },
+  { icon: BookOpen, label: '小红书封面' },
+  { icon: Palette, label: '海报设计' },
+  { icon: Eye, label: '品牌视觉' },
+] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
 function ratioToAspect(ratio: string): string {
@@ -325,7 +352,7 @@ export default function HomePage() {
       const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = blobUrl;
-      a.download = `oneclaw-${idx + 1}.png`;
+      a.download = `oneclaw-gpt-image2-${idx + 1}.png`;
       a.click();
       window.URL.revokeObjectURL(blobUrl);
     } catch {
@@ -345,7 +372,6 @@ export default function HomePage() {
   const canUploadMore = uploadedImages.length < MAX_UPLOAD_IMAGES;
 
   // ===== 右侧面板内容 =====
-  // 创作流模式：只要有历史记录就显示创作流，loading/error 状态内嵌在卡片中
   const renderRightPanel = () => {
     // 空状态：从未生成过
     if (generationHistory.length === 0) {
@@ -353,8 +379,19 @@ export default function HomePage() {
         <div className="os-empty-state">
           <div className="os-empty-state-glow" />
           <Sparkles className="os-empty-state-icon" />
-          <h2 className="os-empty-state-title">开始你的创作</h2>
-          <p className="os-empty-state-subtitle">上传图片或输入描述词<br />即可生成高质量 AI 图片</p>
+          <h2 className="os-empty-state-title">ChatGPT 同款图片生成</h2>
+          <p className="os-empty-state-subtitle">
+            上传图片或输入描述词<br />使用 GPT Image 2 创作商业级图片
+          </p>
+          <p className="os-empty-state-scenarios-label">适用于</p>
+          <div className="os-empty-state-capabilities">
+            {CAPABILITY_ITEMS.map(item => (
+              <div key={item.label} className="os-empty-state-cap-item">
+                <item.icon className="w-4 h-4" />
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
@@ -383,8 +420,11 @@ export default function HomePage() {
     <div key={record.id} className="os-gen-card os-gen-card--loading">
       {/* 卡片头部 */}
       <div className="os-gen-card-header">
-        <div className="os-gen-card-prompt" title={record.prompt}>
-          {record.prompt}
+        <div className="os-gen-card-prompt-wrap">
+          <span className="os-gen-card-brand-tag">GPT Image 2</span>
+          <div className="os-gen-card-prompt" title={record.prompt}>
+            {record.prompt}
+          </div>
         </div>
         <div className="os-gen-card-meta">
           {record.ratio} · {new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
@@ -414,8 +454,11 @@ export default function HomePage() {
     <div key={record.id} className="os-gen-card os-gen-card--error">
       {/* 卡片头部 */}
       <div className="os-gen-card-header">
-        <div className="os-gen-card-prompt" title={record.prompt}>
-          {record.prompt}
+        <div className="os-gen-card-prompt-wrap">
+          <span className="os-gen-card-brand-tag">GPT Image 2</span>
+          <div className="os-gen-card-prompt" title={record.prompt}>
+            {record.prompt}
+          </div>
         </div>
         <div className="os-gen-card-meta">
           {record.ratio} · {new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
@@ -441,8 +484,11 @@ export default function HomePage() {
     <div key={record.id} className="os-gen-card">
       {/* 卡片头部 */}
       <div className="os-gen-card-header">
-        <div className="os-gen-card-prompt" title={record.prompt}>
-          {record.prompt}
+        <div className="os-gen-card-prompt-wrap">
+          <span className="os-gen-card-brand-tag">GPT Image 2</span>
+          <div className="os-gen-card-prompt" title={record.prompt}>
+            {record.prompt}
+          </div>
         </div>
         <div className="os-gen-card-meta">
           {record.ratio} · {new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
@@ -463,6 +509,12 @@ export default function HomePage() {
           ))}
         </div>
       )}
+
+      {/* 由 GPT Image 2 生成 */}
+      <div className="os-gen-card-brand-line">
+        <BadgeCheck className="w-3.5 h-3.5" />
+        <span>由 OpenAI GPT Image 2 生成</span>
+      </div>
 
       {/* 操作按钮区 */}
       <div className="os-gen-actions">
@@ -493,10 +545,26 @@ export default function HomePage() {
 
         {/* ===== 左侧：创作面板 ===== */}
         <aside className="os-studio-panel">
-          {/* --- AI 能力说明 --- */}
+          {/* --- 模型品牌卡 --- */}
           <div className="os-panel-capability">
-            <div className="os-panel-capability-label">GPT Image 2 AI 生图</div>
-            <div className="os-panel-capability-sub">OpenAI 新一代视觉生成模型</div>
+            <div className="os-panel-capability-top">
+              <div className="os-panel-capability-label">ChatGPT 同款图片生成</div>
+              <span className="os-panel-capability-tag">GPT官方模型</span>
+            </div>
+            <div className="os-panel-capability-sub">基于 OpenAI GPT Image 2</div>
+          </div>
+
+          {/* --- 核心价值区 --- */}
+          <div className="os-panel-values">
+            <div className="os-panel-values-title">为什么选择 GPT Image 2</div>
+            <div className="os-panel-values-list">
+              {GPT_VALUES.map(text => (
+                <div key={text} className="os-panel-values-item">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{text}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* --- 图片上传区域 --- */}
