@@ -101,10 +101,14 @@ const MAX_UPLOAD_IMAGES = 5;
 
 // ===== 精选案例数据 =====
 const FEATURED_CASES = [
-  { name: '商品主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
-  { name: '商品详情页', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
-  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
-  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
+  { name: '电商主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
+  { name: '详情页设计', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
+  { name: '人像写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
+  { name: '小红书爆款', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
+  { name: '品牌海报', prompt: '品牌视觉海报设计，简约高端，科技蓝调', ratio: '1:1', image: '/cases/brand-poster.png' },
+  { name: '商业广告', prompt: '商业广告设计图，手表产品展示，黑色背景，金色光影', ratio: '16:9', image: '/cases/commercial-ad.png' },
+  { name: '产品包装', prompt: '产品包装设计图，化妆品礼盒，精美包装盒，高级质感', ratio: '1:1', image: '/cases/product-packaging.png' },
+  { name: '社交媒体封面', prompt: '社交媒体封面图，时尚潮流，渐变色彩，创意排版', ratio: '16:9', image: '/cases/social-cover.png' },
 ] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -383,7 +387,7 @@ export default function HomePage() {
           {/* 品牌区 */}
           <div className="os-showcase-brand">
             <h2 className="os-showcase-brand-title">GPT Image 2</h2>
-            <p className="os-showcase-brand-sub">ChatGPT 同款生图模型</p>
+            <span className="os-showcase-brand-tag">ChatGPT Plus 同款</span>
           </div>
 
           {/* 2×2 案例网格 */}
@@ -578,11 +582,6 @@ export default function HomePage() {
               <div className="os-panel-capability-label">GPT Image 2</div>
               <span className="os-panel-capability-tag">ChatGPT Plus 同款</span>
             </div>
-            <div className="os-panel-capability-points">
-              <span>✓ 中文文字更准确</span>
-              <span>✓ 商品细节更真实</span>
-              <span>✓ 海报设计更高级</span>
-            </div>
           </div>
 
           {/* --- 图片上传区域 --- */}
@@ -619,7 +618,7 @@ export default function HomePage() {
               >
                 <ImagePlus className="w-6 h-6 os-panel-upload-icon" />
                 <span className="os-panel-upload-text">上传图片</span>
-                <span className="os-panel-upload-subtext">或拖拽图片到这里</span>
+                <span className="os-panel-upload-subtext">或拖拽到此处</span>
               </div>
             )}
             <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleFileChange} />
