@@ -852,6 +852,44 @@
   animation: genCardIn 0.3s ease;
 }
 
+/* ── 历史记录折叠区 ── */
+.os-gen-history {
+  margin-top: 4px;
+}
+.os-gen-history-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.2s ease;
+}
+.os-gen-history-toggle:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+.os-gen-history-arrow {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+.os-gen-history-arrow--open {
+  transform: rotate(180deg);
+}
+.os-gen-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 12px;
+}
+.os-gen-history--collapsed .os-gen-history-list {
+  display: none;
+}
+
 /* ── 卡片 meta 信息（比例 · 时间） ── */
 .os-gen-card-meta {
   font-size: 12px;
@@ -865,19 +903,19 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  max-height: 320px;
+  max-height: 260px;
   overflow: hidden;
 }
 .os-gen-card-grid-item {
   border-radius: 12px;
   overflow: hidden;
   background: #0a0a0a;
-  max-height: 156px;
+  max-height: 120px;
 }
 .os-gen-card-grid-item img {
   width: 100%;
   height: 100%;
-  max-height: 156px;
+  max-height: 120px;
   object-fit: cover;
   display: block;
   border-radius: 12px;
@@ -898,11 +936,11 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  max-height: 320px;
+  max-height: 260px;
   overflow: hidden;
 }
 .os-gen-card-skeleton-cell {
-  height: 156px;
+  height: 120px;
   border-radius: 16px;
   background: #141414;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -921,7 +959,7 @@
     transparent 75%
   );
   background-size: 300% 100%;
-  animation: skeletonFlow 1.5s ease-in-out infinite;
+  animation: skeletonFlow 2s ease-in-out infinite;
   border-radius: 16px;
 }
 
@@ -947,20 +985,14 @@
   50% { opacity: 0.4; transform: scale(0.7); }
 }
 
-/* ── Loading 动态阶段文案 ── */
+/* ── Loading 动态阶段文案（单行轮播） ── */
 .os-gen-card-phase {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  font-size: 18px;
-  font-weight: 600;
-  color: #FFFFFF;
-}
-.os-gen-card-phase-text {
+  margin-bottom: 12px;
   font-size: 13px;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.45);
+}
+.os-gen-card-phase-text {
   animation: os-phase-fade 0.4s ease;
 }
 @keyframes os-phase-fade {

@@ -20,16 +20,12 @@ import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
 import { useModal } from '@/contexts/ModalContext';
 
-// ===== 生成阶段文案池 =====
+// ===== 生成阶段文案池（精简 4 条） =====
 const GENERATION_PHASES = [
-  '正在分析构图...',
-  '正在优化光影效果...',
-  '正在增强商品细节...',
-  '正在提升画面真实感...',
-  '正在生成第1张图片...',
-  '正在生成第2张图片...',
-  '正在生成第3张图片...',
-  '正在生成第4张图片...',
+  '分析构图...',
+  '优化光影...',
+  '增强细节...',
+  '生成图片...',
 ];
 
 // ===== 类型 =====
@@ -143,8 +139,20 @@ export default function HomePage() {
   // 创作流历史：每次生成自动追加（含 loading 状态）
   const [generationHistory, setGenerationHistory] = useState<GenerationRecord[]>([]);
 
+  // 生成中时自动折叠历史记录
+  const [historyCollapsed, setHistoryCollapsed] = useState(false);
+
   // 是否正在生成中（从 history 中判断）
   const isGenerating = generationHistory.some(r => r.status === 'loading');
+
+  // 生成开始时自动折叠历史，结束时自动展开
+  useEffect(() => {
+    if (isGenerating) {
+      setHistoryCollapsed(true);
+    } else {
+      setHistoryCollapsed(false);
+    }
+  }, [isGenerating]);
 
   // 生成阶段文案轮播（每2秒切换）
   const [loadingPhaseIdx, setLoadingPhaseIdx] = useState(0);
@@ -413,9 +421,32 @@ export default function HomePage() {
     }
 
     // 创作流：所有记录（含 loading/error/done）
+    const currentRecord = generationHistory[0]; // 最新的（可能是 loading）
+    const historyRecords = generationHistory.slice(1); // 历史记录
+    const hasHistory = historyRecords.length > 0;
+
     return (
       <div className="os-gen-flow">
-        {generationHistory.map(record => renderFlowCard(record))}
+        {/* 当前生成任务 */}
+        {renderFlowCard(currentRecord)}
+
+        {/* 历史记录：生成中时自动折叠，完成后展开 */}
+        {hasHistory && (
+          <div className={`os-gen-history ${historyCollapsed ? 'os-gen-history--collapsed' : ''}`}>
+            <button
+              className="os-gen-history-toggle"
+              onClick={() => setHistoryCollapsed(prev => !prev)}
+            >
+              最近作品（{historyRecords.length}）
+              <span className={`os-gen-history-arrow ${historyCollapsed ? '' : 'os-gen-history-arrow--open'}`}>▼</span>
+            </button>
+            {!historyCollapsed && (
+              <div className="os-gen-history-list">
+                {historyRecords.map(record => renderFlowCard(record))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
@@ -449,13 +480,12 @@ export default function HomePage() {
           {/* 右上角创作状态 */}
           <div className="os-gen-card-loading-status">
             <span className="os-gen-card-loading-dot" />
-            <span>GPT Image 2 创作中</span>
+            <span>GPT Image 2 生成中</span>
           </div>
         </div>
 
-        {/* 动态阶段文案 */}
+        {/* 动态阶段文案（单行轮播） */}
         <div className="os-gen-card-phase">
-          GPT Image 2 正在创作
           <span className="os-gen-card-phase-text">{GENERATION_PHASES[loadingPhaseIdx]}</span>
         </div>
 
