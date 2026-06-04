@@ -11,7 +11,6 @@ import {
   Upload,
   Download,
   RotateCcw,
-  ImageIcon,
   Loader2,
   BookmarkPlus,
   BookmarkCheck,
@@ -82,16 +81,18 @@ const CAPABILITY_TAGS = [
   '商品广告设计',
   '电商详情页',
   '品牌视觉设计',
+  'AI写真',
+  '海报设计',
 ] as const;
 
 // ===== 精选案例数据 =====
 const FEATURED_CASES = [
-  { name: '高端口红主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1' },
-  { name: '商品详情页长图', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16' },
-  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4' },
-  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4' },
-  { name: '品牌海报', prompt: '品牌视觉海报，简约大气，高级质感', ratio: '16:9' },
-  { name: '商业广告图', prompt: '商业广告设计图，产品展示，精美排版', ratio: '16:9' },
+  { name: '高端口红主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
+  { name: '商品详情页长图', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
+  { name: '小红书爆款封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
+  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
+  { name: '品牌海报', prompt: '品牌视觉海报，简约大气，高级质感', ratio: '16:9', image: '/cases/poster.png' },
+  { name: '商业广告图', prompt: '商业广告设计图，产品展示，精美排版', ratio: '16:9', image: '/cases/commercial.png' },
 ] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -371,10 +372,10 @@ export default function HomePage() {
         <div className="os-empty-state">
           <div className="os-empty-state-glow" />
           <Sparkles className="os-empty-state-icon" />
-          <h2 className="os-empty-state-title">ChatGPT 同款图片生成</h2>
-          <p className="os-empty-state-subtitle">GPT Image 2 官方模型</p>
+          <h2 className="os-empty-state-title">GPT Image 2 创作平台</h2>
+          <p className="os-empty-state-subtitle">ChatGPT Plus 同款模型</p>
 
-          {/* 能力标签 */}
+          {/* GPT Image 2 擅长 */}
           <div className="os-empty-state-tags">
             {CAPABILITY_TAGS.map(tag => (
               <span key={tag} className="os-empty-state-tag">{tag}</span>
@@ -383,7 +384,10 @@ export default function HomePage() {
 
           {/* 精选案例 */}
           <div className="os-empty-cases">
-            <div className="os-empty-cases-title">精选案例</div>
+            <div className="os-empty-cases-header">
+              <div className="os-empty-cases-title">GPT Image 2 精选案例</div>
+              <div className="os-empty-cases-subtitle">全部使用 GPT Image 2 生成</div>
+            </div>
             <div className="os-empty-cases-grid">
               {FEATURED_CASES.map(item => (
                 <div
@@ -395,12 +399,20 @@ export default function HomePage() {
                   }}
                 >
                   <div className="os-empty-case-thumb" style={{ aspectRatio: ratioToAspect(item.ratio) }}>
-                    <ImageIcon className="w-5 h-5" />
+                    <img src={item.image} alt={item.name} loading="lazy" />
                   </div>
                   <div className="os-empty-case-name">{item.name}</div>
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* 为什么选择 GPT Image 2 */}
+          <div className="os-empty-why">
+            <span className="os-empty-why-item">✓ 中文文字更准确</span>
+            <span className="os-empty-why-item">✓ 商品细节更真实</span>
+            <span className="os-empty-why-item">✓ 广告设计效果更好</span>
+            <span className="os-empty-why-item">✓ 商业视觉更高级</span>
           </div>
         </div>
       );
@@ -562,6 +574,7 @@ export default function HomePage() {
               <span className="os-panel-capability-tag">ChatGPT Plus 同款</span>
             </div>
             <div className="os-panel-capability-sub">OpenAI 官方图像模型</div>
+            <div className="os-panel-capability-focus">专注 GPT Image 2 创作</div>
           </div>
 
           {/* --- 图片上传区域 --- */}
@@ -671,7 +684,7 @@ export default function HomePage() {
             ) : (
               <>
                 <Wand2 className="w-4.5 h-4.5" />
-                <span>开始生成</span>
+                <span>使用 GPT Image 2 生成</span>
               </>
             )}
           </button>

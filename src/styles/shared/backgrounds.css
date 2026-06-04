@@ -5,7 +5,7 @@
 /* ---- main 画布 — 深色底色 ---- */
 .os-main-canvas {
   position: relative;
-  background: #0F1115;
+  background: #0F1117;
 }
 
 /* ---- 全局背景层 — fixed 定位覆盖右侧内容区 ---- */
@@ -1179,7 +1179,7 @@
 .os-empty-state-title {
   position: relative;
   z-index: 1;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: #FFFFFF;
   margin-bottom: 8px;
@@ -1192,10 +1192,10 @@
   font-size: 16px;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
-/* 空状态 — 能力胶囊标签 */
+/* 空状态 — 能力胶囊标签（2行3列） */
 .os-empty-state-tags {
   position: relative;
   z-index: 1;
@@ -1204,6 +1204,7 @@
   justify-content: center;
   gap: 10px;
   margin-bottom: 48px;
+  max-width: 480px;
 }
 .os-empty-state-tag {
   display: inline-flex;
@@ -1228,31 +1229,42 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 560px;
+  max-width: 720px;
+}
+.os-empty-cases-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
 }
 .os-empty-cases-title {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 16px;
-  letter-spacing: 0.02em;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+.os-empty-cases-subtitle {
+  font-size: 13px;
+  color: #A1A1AA;
+  margin-top: 4px;
 }
 .os-empty-cases-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 16px;
 }
 .os-empty-case-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
-  padding: 16px 8px 12px;
-  border-radius: 14px;
+  padding: 16px 10px 14px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
   cursor: pointer;
   transition: var(--oc-transition-base);
+  overflow: hidden;
 }
 .os-empty-case-card:hover {
   background: rgba(255, 255, 255, 0.06);
@@ -1264,18 +1276,50 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
-  min-height: 60px;
+  overflow: hidden;
+  min-height: 80px;
+}
+.os-empty-case-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 .os-empty-case-thumb svg {
   color: rgba(255, 255, 255, 0.15);
 }
 .os-empty-case-name {
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(255, 255, 255, 0.6);
   text-align: center;
   line-height: 1.4;
+}
+
+/* 空状态 — 为什么选择 GPT Image 2 */
+.os-empty-why {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 36px;
+  max-width: 720px;
+}
+.os-empty-why-item {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
 }
 
 @keyframes emptyGlow {
@@ -1376,6 +1420,12 @@
   font-size: 13px;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}
+.os-panel-capability-focus {
+  font-size: 13px;
+  font-weight: 400;
+  color: #A1A1AA;
   line-height: 1.5;
 }
 
