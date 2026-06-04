@@ -570,11 +570,14 @@ export default function HomePage() {
           {/* --- 模型品牌卡 --- */}
           <div className="os-panel-capability">
             <div className="os-panel-capability-top">
-              <div className="os-panel-capability-label">GPT Image 2 官方模型</div>
+              <div className="os-panel-capability-label">GPT Image 2</div>
               <span className="os-panel-capability-tag">ChatGPT Plus 同款</span>
             </div>
-            <div className="os-panel-capability-sub">OpenAI 官方图像模型</div>
-            <div className="os-panel-capability-focus">专注 GPT Image 2 创作</div>
+            <div className="os-panel-capability-points">
+              <span>✓ 中文文字更准确</span>
+              <span>✓ 商品细节更真实</span>
+              <span>✓ 海报设计更高级</span>
+            </div>
           </div>
 
           {/* --- 图片上传区域 --- */}

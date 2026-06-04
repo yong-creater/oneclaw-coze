@@ -1383,11 +1383,11 @@
   .os-studio-panel { width: 100%; height: auto; max-height: 55vh; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.06); }
 }
 
-/* 模型品牌卡 — ChatGPT 同款 */
+/* 模型品牌卡 — GPT Image 2 专家定位 */
 .os-panel-capability {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   padding: 0;
 }
 .os-panel-capability-top {
@@ -1396,17 +1396,17 @@
   gap: 8px;
 }
 .os-panel-capability-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.88);
-  letter-spacing: -0.01em;
-  line-height: 1.4;
+  font-size: 24px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 .os-panel-capability-tag {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 24px;
+  height: 22px;
   padding: 0 10px;
   border-radius: 999px;
   background: rgba(124, 58, 237, 0.15);
@@ -1416,17 +1416,13 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.os-panel-capability-sub {
-  font-size: 13px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.5;
-}
-.os-panel-capability-focus {
-  font-size: 13px;
-  font-weight: 400;
+.os-panel-capability-points {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
   color: #A1A1AA;
   line-height: 1.5;
+  flex-wrap: wrap;
 }
 
 /* 分隔线 — 轻柔渐隐 */
