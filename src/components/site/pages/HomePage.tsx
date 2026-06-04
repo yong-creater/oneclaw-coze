@@ -75,20 +75,12 @@ const RATIO_OPTIONS = [
 
 const MAX_UPLOAD_IMAGES = 5;
 
-// ===== 瀑布流案例数据 =====
-const MASONRY_CASES = [
-  { name: '高端口红主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png', span: 'md' },
-  { name: '商品详情页', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png', span: 'lg' },
-  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png', span: 'md' },
-  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png', span: 'md' },
-  { name: '品牌海报', prompt: '品牌视觉海报，简约大气，高级质感', ratio: '16:9', image: '/cases/poster.png', span: 'sm' },
-  { name: '奢侈品广告', prompt: '奢侈品香水广告，金色光影，高端商业摄影', ratio: '1:1', image: '/cases/luxury-perfume.png', span: 'md' },
-  { name: '美妆海报', prompt: '美妆护肤品牌海报，清新粉色调，少女感', ratio: '3:4', image: '/cases/beauty-poster.png', span: 'md' },
-  { name: '科技产品', prompt: '科技电子产品广告，手机产品展示，极简白色背景', ratio: '1:1', image: '/cases/tech-product.png', span: 'md' },
-  { name: '餐饮封面', prompt: '精致甜品美食摄影，咖啡馆风格，温馨暖色调', ratio: '1:1', image: '/cases/food-cover.png', span: 'sm' },
-  { name: '时尚写真', prompt: '高级女装时尚写真，优雅站姿，杂志大片风格', ratio: '3:4', image: '/cases/fashion-portrait.png', span: 'lg' },
-  { name: '汽车海报', prompt: '汽车品牌海报，豪华轿车，城市夜景灯光', ratio: '16:9', image: '/cases/car-poster.png', span: 'sm' },
-  { name: '商业广告图', prompt: '商业广告设计图，产品展示，精美排版', ratio: '16:9', image: '/cases/commercial.png', span: 'sm' },
+// ===== 精选案例数据 =====
+const FEATURED_CASES = [
+  { name: '商品主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
+  { name: '商品详情页', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
+  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
+  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
 ] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -339,35 +331,31 @@ export default function HomePage() {
 
   // ===== 右侧面板内容 =====
   const renderRightPanel = () => {
-    // 空状态：从未生成过 → 瀑布流作品展示
+    // 空状态：从未生成过 → 2x2 精选案例
     if (generationHistory.length === 0) {
       return (
-        <div className="os-masonry-page">
+        <div className="os-showcase-page">
           {/* 品牌区 */}
-          <div className="os-masonry-brand">
-            <Sparkles className="w-6 h-6" style={{ color: '#A78BFA' }} />
-            <h2 className="os-masonry-brand-title">GPT Image 2 创作平台</h2>
-            <p className="os-masonry-brand-sub">ChatGPT Plus 同款模型 · 商业级图片生成</p>
+          <div className="os-showcase-brand">
+            <h2 className="os-showcase-brand-title">GPT Image 2</h2>
+            <p className="os-showcase-brand-sub">ChatGPT 同款生图模型</p>
           </div>
 
-          {/* 瀑布流作品 */}
-          <div className="os-masonry-grid">
-            {MASONRY_CASES.map((item, idx) => (
+          {/* 2×2 案例网格 */}
+          <div className="os-showcase-grid">
+            {FEATURED_CASES.map((item, idx) => (
               <div
                 key={idx}
-                className={`os-masonry-card os-masonry-card--${item.span}`}
+                className="os-showcase-card"
                 onClick={() => {
                   setInputText(item.prompt);
                   if (item.ratio !== selectedRatio) setSelectedRatio(item.ratio);
                 }}
               >
-                <div className="os-masonry-card-img" style={{ aspectRatio: ratioToAspect(item.ratio) }}>
+                <div className="os-showcase-card-img">
                   <img src={item.image} alt={item.name} loading="lazy" />
                 </div>
-                <div className="os-masonry-card-overlay">
-                  <span className="os-masonry-card-view">查看案例</span>
-                </div>
-                <div className="os-masonry-card-title">{item.name}</div>
+                <div className="os-showcase-card-name">{item.name}</div>
               </div>
             ))}
           </div>

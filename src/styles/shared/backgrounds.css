@@ -1081,51 +1081,51 @@
 
 /* ── 空状态（未生成） ── */
 /* ===== 瀑布流作品展示 ===== */
-.os-masonry-page {
+.os-showcase-page {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   height: 100%;
   width: 100%;
-  position: relative;
   user-select: none;
-  padding: 48px 40px 40px;
+  padding: 60px 32px 40px;
   overflow-y: auto;
 }
 
 /* 品牌区 */
-.os-masonry-brand {
+.os-showcase-brand {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  margin-bottom: 36px;
+  margin-bottom: 48px;
 }
-.os-masonry-brand-title {
+.os-showcase-brand-title {
   font-size: 32px;
   font-weight: 700;
   color: #FFFFFF;
-  letter-spacing: -0.01em;
-  line-height: 1.3;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
-.os-masonry-brand-sub {
+.os-showcase-brand-sub {
   font-size: 15px;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.55);
   line-height: 1.5;
 }
 
-/* Masonry Grid — CSS columns 瀑布流 */
-.os-masonry-grid {
-  column-count: 3;
-  column-gap: 24px;
+/* 2×2 案例网格 */
+.os-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
   width: 100%;
-  max-width: 900px;
+  max-width: 760px;
 }
 
-/* 卡片基础 */
-.os-masonry-card {
-  break-inside: avoid;
-  margin-bottom: 24px;
+/* 案例卡片 */
+.os-showcase-card {
   border-radius: 20px;
   background: #111111;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -1134,74 +1134,44 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   position: relative;
 }
-.os-masonry-card:hover {
+.os-showcase-card:hover {
   transform: scale(1.03);
-  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.15);
-  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.35);
 }
 
-/* 卡片尺寸变体 */
-.os-masonry-card--sm  { /* 16:9 横图 — 自然小高度 */ }
-.os-masonry-card--md  { /* 1:1, 3:4 — 中等高度 */ }
-.os-masonry-card--lg  { /* 9:16 竖图 — 高卡 */ }
-
-/* 卡片图片 */
-.os-masonry-card-img {
+/* 卡片图片 — 占卡片90% */
+.os-showcase-card-img {
   width: 100%;
+  height: 360px;
   overflow: hidden;
 }
-.os-masonry-card-img img {
+.os-showcase-card-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 16px;
+  border-radius: 20px 20px 0 0;
 }
 
-/* Hover 遮罩 */
-.os-masonry-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
-.os-masonry-card:hover .os-masonry-card-overlay {
-  opacity: 1;
-}
-.os-masonry-card-view {
-  font-size: 14px;
-  font-weight: 500;
-  color: #FFFFFF;
-  padding: 8px 20px;
-  border-radius: 999px;
-  background: rgba(124, 58, 237, 0.7);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(168, 143, 255, 0.3);
-  pointer-events: none;
-}
-
-/* 卡片标题 */
-.os-masonry-card-title {
+/* 卡片名称 */
+.os-showcase-card-name {
   font-size: 15px;
   font-weight: 500;
   color: #E5E7EB;
-  padding: 14px 16px 16px;
+  padding: 14px 18px 16px;
   line-height: 1.4;
 }
 
 /* 响应式 */
-@media (max-width: 900px) {
-  .os-masonry-grid { column-count: 2; max-width: 600px; }
+@media (max-width: 768px) {
+  .os-showcase-grid { max-width: 100%; gap: 14px; }
+  .os-showcase-card-img { height: 260px; }
+  .os-showcase-brand-title { font-size: 26px; }
 }
-@media (max-width: 600px) {
-  .os-masonry-grid { column-count: 2; column-gap: 16px; }
-  .os-masonry-page { padding: 32px 20px 24px; }
-  .os-masonry-brand-title { font-size: 26px; }
+@media (max-width: 480px) {
+  .os-showcase-page { padding: 32px 16px 24px; }
+  .os-showcase-card-img { height: 200px; }
 }
 
 /* ---- 光斑漂浮动画 ---- */
@@ -1632,7 +1602,7 @@
 .os-studio-feed::-webkit-scrollbar { width: 4px; }
 .os-studio-feed::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
 /* 结果展示时去掉 padding，让画布撑满 */
-.os-studio-feed:has(.os-masonry-page) {
+.os-studio-feed:has(.os-showcase-page) {
   padding: 0;
   overflow: hidden;
 }
