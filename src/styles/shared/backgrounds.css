@@ -856,7 +856,7 @@
 .os-gen-card-skeleton-cell {
   height: 256px;
   border-radius: 16px;
-  background: #111111;
+  background: #141414;
   border: 1px solid rgba(255, 255, 255, 0.06);
   position: relative;
   overflow: hidden;
@@ -867,14 +867,69 @@
   background: linear-gradient(
     110deg,
     transparent 25%,
-    rgba(139, 92, 246, 0.06) 37%,
-    rgba(139, 92, 246, 0.12) 50%,
-    rgba(139, 92, 246, 0.06) 63%,
+    rgba(255, 255, 255, 0.04) 37%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.04) 63%,
     transparent 75%
   );
   background-size: 300% 100%;
-  animation: skeletonFlow 2s ease-in-out infinite;
+  animation: skeletonFlow 1.5s ease-in-out infinite;
   border-radius: 16px;
+}
+
+/* ── Loading 状态指示器 ── */
+.os-gen-card-loading-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+.os-gen-card-loading-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8B5CF6;
+  animation: os-pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes os-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* ── Loading 动态阶段文案 ── */
+.os-gen-card-phase {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+.os-gen-card-phase-text {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.45);
+  animation: os-phase-fade 0.4s ease;
+}
+@keyframes os-phase-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 渐进出图：已揭示的图片 ── */
+.os-gen-card-grid-item--revealed {
+  animation: os-reveal-img 0.4s ease;
+}
+.os-gen-card-grid-item--revealed img {
+  animation: os-reveal-img 0.4s ease;
+}
+@keyframes os-reveal-img {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* ── Error 状态卡片 ── */

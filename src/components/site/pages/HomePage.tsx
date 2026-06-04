@@ -23,6 +23,18 @@ import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
 import { useModal } from '@/contexts/ModalContext';
 
+// ===== 生成阶段文案池 =====
+const GENERATION_PHASES = [
+  '正在分析构图...',
+  '正在优化光影效果...',
+  '正在增强商品细节...',
+  '正在提升画面真实感...',
+  '正在生成第1张图片...',
+  '正在生成第2张图片...',
+  '正在生成第3张图片...',
+  '正在生成第4张图片...',
+];
+
 // ===== 类型 =====
 type GenRecordStatus = 'loading' | 'done' | 'error';
 
@@ -37,6 +49,8 @@ interface GenerationRecord {
   timestamp: number;
   status: GenRecordStatus;
   errorMsg?: string;
+  /** 渐进出图：已返回的图片数量（1~4） */
+  revealedCount?: number;
 }
 
 // ===== 布局模式识别 =====
@@ -117,6 +131,16 @@ export default function HomePage() {
 
   // 是否正在生成中（从 history 中判断）
   const isGenerating = generationHistory.some(r => r.status === 'loading');
+
+  // 生成阶段文案轮播（每2秒切换）
+  const [loadingPhaseIdx, setLoadingPhaseIdx] = useState(0);
+  useEffect(() => {
+    if (!isGenerating) { setLoadingPhaseIdx(0); return; }
+    const timer = setInterval(() => {
+      setLoadingPhaseIdx(prev => (prev + 1) % GENERATION_PHASES.length);
+    }, 2000);
+    return () => clearInterval(timer);
+  }, [isGenerating]);
 
   // ===== URL 参数自动填充 =====
   useEffect(() => {
@@ -242,9 +266,20 @@ export default function HomePage() {
       }
 
       const images = urls.map((url: string) => ({ url }));
-      // 更新记录：loading → done，填入图片
+      // 渐进出图：先填入图片数据，但 revealedCount=0，然后逐步揭示
       setGenerationHistory(prev => prev.map(r =>
-        r.id === recordId ? { ...r, status: 'done' as GenRecordStatus, images } : r
+        r.id === recordId ? { ...r, status: 'loading' as GenRecordStatus, images, revealedCount: 0 } : r
+      ));
+      // 每600ms揭示一张图，模拟渐进出图
+      for (let i = 1; i <= images.length; i++) {
+        await new Promise<void>(resolve => setTimeout(resolve, 600));
+        setGenerationHistory(prev => prev.map(r =>
+          r.id === recordId ? { ...r, revealedCount: i } : r
+        ));
+      }
+      // 全部揭示后标记为 done
+      setGenerationHistory(prev => prev.map(r =>
+        r.id === recordId ? { ...r, status: 'done' as GenRecordStatus } : r
       ));
       refreshQuota();
     } catch (err: unknown) {
@@ -382,32 +417,51 @@ export default function HomePage() {
     return renderDoneCard(record);
   };
 
-  // Loading 卡片：4 格骨架网格（匹配最终 4 图布局）
-  const renderLoadingCard = (record: GenerationRecord) => (
-    <div key={record.id} className="os-gen-card os-gen-card--loading">
-      {/* 卡片头部 */}
-      <div className="os-gen-card-header">
-        <div className="os-gen-card-prompt-wrap">
-          <span className="os-gen-card-brand-tag">GPT Image 2</span>
-          <div className="os-gen-card-prompt" title={record.prompt}>
-            {record.prompt}
+  // Loading 卡片：4 格骨架网格 + 动态文案 + 渐进出图
+  const renderLoadingCard = (record: GenerationRecord) => {
+    const revealed = record.revealedCount ?? 0;
+    const totalSlots = 4;
+    // 已渐进显示的图片用真实图，其余用骨架
+    return (
+      <div key={record.id} className="os-gen-card os-gen-card--loading">
+        {/* 卡片头部 */}
+        <div className="os-gen-card-header">
+          <div className="os-gen-card-prompt-wrap">
+            <span className="os-gen-card-brand-tag">GPT Image 2</span>
+            <div className="os-gen-card-prompt" title={record.prompt}>
+              {record.prompt}
+            </div>
+          </div>
+          {/* 右上角创作状态 */}
+          <div className="os-gen-card-loading-status">
+            <span className="os-gen-card-loading-dot" />
+            <span>GPT Image 2 创作中</span>
           </div>
         </div>
-        <div className="os-gen-card-meta">
-          生成中...
-        </div>
-      </div>
 
-      {/* 4 格骨架占位 */}
-      <div className="os-gen-card-skeleton-grid">
-        {[0, 1, 2, 3].map(i => (
-          <div key={i} className="os-gen-card-skeleton-cell">
-            <div className="os-gen-card-skeleton-cell-shimmer" />
-          </div>
-        ))}
+        {/* 动态阶段文案 */}
+        <div className="os-gen-card-phase">
+          GPT Image 2 正在创作
+          <span className="os-gen-card-phase-text">{GENERATION_PHASES[loadingPhaseIdx]}</span>
+        </div>
+
+        {/* 4 格：已出图用真实图，未出图用骨架 */}
+        <div className="os-gen-card-skeleton-grid">
+          {Array.from({ length: totalSlots }, (_, i) => (
+            i < revealed && record.images[i] ? (
+              <div key={i} className="os-gen-card-grid-item os-gen-card-grid-item--revealed">
+                <img src={record.images[i].url} alt={`${record.prompt} ${i + 1}`} />
+              </div>
+            ) : (
+              <div key={i} className="os-gen-card-skeleton-cell">
+                <div className="os-gen-card-skeleton-cell-shimmer" />
+              </div>
+            )
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Error 卡片：错误信息 + 重试
   const renderErrorCard = (record: GenerationRecord) => (
