@@ -12,12 +12,9 @@ import {
   Download,
   RotateCcw,
   Loader2,
-  BookmarkPlus,
-  BookmarkCheck,
   SlidersHorizontal,
   Pencil,
   AlertCircle,
-  BadgeCheck,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -51,6 +48,19 @@ interface GenerationRecord {
   errorMsg?: string;
   /** 渐进出图：已返回的图片数量（1~4） */
   revealedCount?: number;
+}
+
+// ===== 继续创作模板 =====
+const CONTINUE_STYLES = [
+  { name: '商品详情页', suffix: '，制作成电商商品详情页，展示产品卖点和规格参数' },
+  { name: '品牌海报', suffix: '，制作成品牌宣传海报，高端大气' },
+  { name: '模特场景图', suffix: '，制作成模特场景展示图，生活化场景' },
+  { name: '小红书封面', suffix: '，制作成小红书封面图，清新吸引眼球' },
+] as const;
+
+// ===== Prompt 截断 =====
+function truncatePrompt(text: string, max = 30): string {
+  return text.length > max ? text.slice(0, max) + '...' : text;
 }
 
 // ===== 布局模式识别 =====
@@ -429,7 +439,7 @@ export default function HomePage() {
           <div className="os-gen-card-prompt-wrap">
             <span className="os-gen-card-brand-tag">GPT Image 2</span>
             <div className="os-gen-card-prompt" title={record.prompt}>
-              {record.prompt}
+              {truncatePrompt(record.prompt)}
             </div>
           </div>
           {/* 右上角创作状态 */}
@@ -465,17 +475,14 @@ export default function HomePage() {
 
   // Error 卡片：错误信息 + 重试
   const renderErrorCard = (record: GenerationRecord) => (
-    <div key={record.id} className="os-gen-card os-gen-card--error">
+      <div key={record.id} className="os-gen-card os-gen-card--error">
       {/* 卡片头部 */}
       <div className="os-gen-card-header">
         <div className="os-gen-card-prompt-wrap">
           <span className="os-gen-card-brand-tag">GPT Image 2</span>
           <div className="os-gen-card-prompt" title={record.prompt}>
-            {record.prompt}
+            {truncatePrompt(record.prompt)}
           </div>
-        </div>
-        <div className="os-gen-card-meta">
-          {record.ratio} · {new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>
 
@@ -496,17 +503,15 @@ export default function HomePage() {
   // Done 卡片：图片 + 操作
   const renderDoneCard = (record: GenerationRecord) => (
     <div key={record.id} className="os-gen-card">
-      {/* 卡片头部 */}
-      <div className="os-gen-card-header">
-        <div className="os-gen-card-prompt-wrap">
-          <span className="os-gen-card-brand-tag">GPT Image 2</span>
-          <div className="os-gen-card-prompt" title={record.prompt}>
-            {record.prompt}
-          </div>
-        </div>
-        <div className="os-gen-card-meta">
-          {record.ratio} · {new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-        </div>
+      {/* 模型标签行 */}
+      <div className="os-gen-card-model-tags">
+        <span className="os-gen-card-model-tag">GPT Image 2</span>
+        <span className="os-gen-card-model-tag os-gen-card-model-tag--outline">ChatGPT Plus 同款</span>
+      </div>
+
+      {/* Prompt（截断30字） */}
+      <div className="os-gen-card-prompt-line" title={record.prompt}>
+        {truncatePrompt(record.prompt)}
       </div>
 
       {/* 图片展示区 */}
@@ -524,31 +529,39 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 由 GPT Image 2 生成 */}
-      <div className="os-gen-card-brand-line">
-        <BadgeCheck className="w-3.5 h-3.5" />
-        <span>由 OpenAI GPT Image 2 生成</span>
-      </div>
-
       {/* 操作按钮区 */}
       <div className="os-gen-actions">
-        <button className="os-gen-action-btn os-gen-action-primary" onClick={() => handleDownload(record.images[0].url, 0)}>
-          <Download className="w-4 h-4" /> 下载
-        </button>
-        <button
-          className={`os-gen-action-btn ${record.saved ? 'os-gen-action-saved' : 'os-gen-action-ghost'}`}
-          disabled={record.saved || record.saving}
-          onClick={record.saved ? undefined : () => handleSaveRecord(record)}
-        >
-          {record.saving ? <Loader2 className="w-4 h-4 animate-spin" /> : record.saved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-          {record.saved ? '已保存' : record.saving ? '保存中' : '保存'}
+        <button className="os-gen-action-btn os-gen-action-primary" onClick={() => {
+          record.images.forEach((img, idx) => handleDownload(img.url, idx));
+        }}>
+          <Download className="w-4 h-4" /> 下载全部
         </button>
         <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
-          <Pencil className="w-4 h-4" /> 编辑
+          <Pencil className="w-4 h-4" /> 编辑提示词
         </button>
         <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleGenerate}>
           <RotateCcw className="w-4 h-4" /> 重新生成
         </button>
+      </div>
+
+      {/* 继续创作 */}
+      <div className="os-gen-continue">
+        <div className="os-gen-continue-label">继续创作</div>
+        <div className="os-gen-continue-options">
+          {CONTINUE_STYLES.map((style, idx) => (
+            <button
+              key={idx}
+              className="os-gen-continue-btn"
+              onClick={() => {
+                const newPrompt = record.prompt + style.suffix;
+                setInputText(newPrompt);
+                handleEditPrompt();
+              }}
+            >
+              {style.name}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

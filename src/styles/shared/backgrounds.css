@@ -606,11 +606,11 @@
 /* ── 单条生成记录卡片 ── */
 .os-gen-card {
   background: #111111;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   border: 1px solid rgba(255, 255, 255, 0.04);
   animation: genCardIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -619,7 +619,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 卡片头部：品牌标签 + prompt + meta */
+/* 卡片头部：品牌标签 + prompt */
 .os-gen-card-header {
   display: flex;
   align-items: flex-start;
@@ -628,7 +628,7 @@
 }
 .os-gen-card-prompt-wrap {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   flex: 1;
   min-width: 0;
@@ -646,47 +646,58 @@
   font-weight: 500;
   white-space: nowrap;
   flex-shrink: 0;
-  margin-top: 1px;
-}
-.os-gen-card-time {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 .os-gen-card-prompt {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.5;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-.os-gen-card-meta {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
+  text-overflow: ellipsis;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 
-/* 生成结果品牌认证行 */
-.os-gen-card-brand-line {
+/* ── 模型标签行（Done 卡片顶部） ── */
+.os-gen-card-model-tags {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: rgba(167, 139, 250, 0.5);
-  margin-top: 4px;
+  gap: 8px;
 }
-.os-gen-card-brand-line svg {
-  flex-shrink: 0;
+.os-gen-card-model-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.15);
+  color: #A78BFA;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.os-gen-card-model-tag--outline {
+  background: transparent;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  color: rgba(167, 139, 250, 0.7);
+}
+
+/* ── Prompt 单行（Done 卡片） ── */
+.os-gen-card-prompt-line {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
 }
 
 /* ── 主图展示区 ── */
 .os-gen-main-img {
   width: 100%;
-  max-height: 520px;
+  max-height: 320px;
   border-radius: 16px;
   overflow: hidden;
   background: #0a0a0a;
@@ -696,7 +707,7 @@
 }
 .os-gen-main-img img {
   width: 100%;
-  max-height: 520px;
+  max-height: 320px;
   object-fit: contain;
   display: block;
   border-radius: 16px;
@@ -793,13 +804,50 @@
   cursor: default;
 }
 
+/* ── 继续创作区域 ── */
+.os-gen-continue {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+}
+.os-gen-continue-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+}
+.os-gen-continue-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.os-gen-continue-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.os-gen-continue-btn:hover {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #A78BFA;
+}
+
 /* ── 创作流容器 ── */
 .os-gen-flow {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   padding: 24px 32px;
-  max-width: 1280px;
+  max-width: 1100px;
   margin: 0 auto;
   animation: genCardIn 0.3s ease;
 }
@@ -817,19 +865,19 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  max-height: 520px;
+  max-height: 320px;
   overflow: hidden;
 }
 .os-gen-card-grid-item {
   border-radius: 12px;
   overflow: hidden;
   background: #0a0a0a;
-  max-height: 256px;
+  max-height: 156px;
 }
 .os-gen-card-grid-item img {
   width: 100%;
   height: 100%;
-  max-height: 256px;
+  max-height: 156px;
   object-fit: cover;
   display: block;
   border-radius: 12px;
@@ -850,11 +898,11 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  max-height: 520px;
+  max-height: 320px;
   overflow: hidden;
 }
 .os-gen-card-skeleton-cell {
-  height: 256px;
+  height: 156px;
   border-radius: 16px;
   background: #141414;
   border: 1px solid rgba(255, 255, 255, 0.06);
