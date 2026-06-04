@@ -1377,11 +1377,16 @@
   gap: 10px;
 }
 .os-panel-capability-label {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #FFFFFF;
   letter-spacing: -0.02em;
   line-height: 1.2;
+}
+.os-panel-capability-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 2px;
 }
 .os-panel-capability-tag {
   display: inline-flex;
@@ -1397,6 +1402,16 @@
   font-weight: 500;
   white-space: nowrap;
   flex-shrink: 0;
+}
+.os-panel-capability-desc {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+}
+.os-panel-capability-desc span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* 分隔线 — 轻柔渐隐 */
