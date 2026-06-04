@@ -1136,12 +1136,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   height: 100%;
   width: 100%;
   text-align: center;
   position: relative;
   user-select: none;
+  padding: 80px 32px 32px;
+  overflow-y: auto;
 }
 .os-empty-state-glow {
   position: absolute;
@@ -1149,9 +1151,9 @@
   height: 400px;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(124, 92, 255, 0.12) 0%, rgba(124, 92, 255, 0.04) 40%, transparent 70%);
-  top: 50%;
+  top: 80px;
   left: 50%;
-  transform: translate(-50%, -55%);
+  transform: translateX(-50%);
   pointer-events: none;
   animation: emptyGlow 4s ease-in-out infinite;
 }
@@ -1163,7 +1165,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   border-radius: 18px;
   background: rgba(124, 92, 255, 0.08);
   border: 1px solid rgba(124, 92, 255, 0.15);
@@ -1177,63 +1179,108 @@
 .os-empty-state-title {
   position: relative;
   z-index: 1;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: #FFFFFF;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   line-height: 1.4;
   letter-spacing: -0.01em;
 }
 .os-empty-state-subtitle {
   position: relative;
   z-index: 1;
-  font-size: 15px;
+  font-size: 16px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.65);
-  margin-bottom: 32px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 24px;
 }
 
-/* 空状态 — 适用场景标签 */
-.os-empty-state-scenarios-label {
+/* 空状态 — 能力胶囊标签 */
+.os-empty-state-tags {
   position: relative;
   z-index: 1;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
-  margin-bottom: 12px;
-  letter-spacing: 0.02em;
-}
-.os-empty-state-capabilities {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  max-width: 360px;
-}
-.os-empty-state-cap-item {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 48px;
+}
+.os-empty-state-tag {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.12);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  font-size: 13px;
+  font-weight: 500;
+  color: #A78BFA;
   transition: var(--oc-transition-base);
 }
-.os-empty-state-cap-item svg {
-  color: rgba(167, 139, 250, 0.6);
-  flex-shrink: 0;
+.os-empty-state-tag:hover {
+  background: rgba(124, 58, 237, 0.18);
+  border-color: rgba(124, 58, 237, 0.3);
 }
-.os-empty-state-cap-item:hover {
+
+/* 空状态 — 精选案例区 */
+.os-empty-cases {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 560px;
+}
+.os-empty-cases-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
+}
+.os-empty-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.os-empty-case-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 8px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: var(--oc-transition-base);
+}
+.os-empty-case-card:hover {
+  background: rgba(255, 255, 255, 0.06);
   border-color: rgba(124, 58, 237, 0.2);
-  background: rgba(124, 58, 237, 0.05);
-  color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
 }
+.os-empty-case-thumb {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  min-height: 60px;
+}
+.os-empty-case-thumb svg {
+  color: rgba(255, 255, 255, 0.15);
+}
+.os-empty-case-name {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+  line-height: 1.4;
+}
+
 @keyframes emptyGlow {
-  0%, 100% { opacity: 0.6; transform: translate(-50%, -55%) scale(1); }
-  50%      { opacity: 1;   transform: translate(-50%, -55%) scale(1.1); }
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50%      { opacity: 1;   transform: translateX(-50%) scale(1.1); }
 }
 @keyframes emptyPulse {
   0%, 100% { opacity: 0.7; }
@@ -1328,40 +1375,8 @@
 .os-panel-capability-sub {
   font-size: 13px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.5);
   line-height: 1.5;
-}
-
-/* 核心价值区 */
-.os-panel-values {
-  margin-top: 4px;
-  padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-}
-.os-panel-values-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 12px;
-}
-.os-panel-values-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.os-panel-values-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.4;
-}
-.os-panel-values-item svg {
-  color: #A78BFA;
-  flex-shrink: 0;
 }
 
 /* 分隔线 — 轻柔渐隐 */

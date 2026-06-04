@@ -18,14 +18,7 @@ import {
   SlidersHorizontal,
   Pencil,
   AlertCircle,
-  ShoppingBag,
-  FileText,
-  Camera,
-  BookOpen,
-  Palette,
-  Eye,
   BadgeCheck,
-  CheckCircle2,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -83,23 +76,22 @@ const RATIO_OPTIONS = [
 
 const MAX_UPLOAD_IMAGES = 5;
 
-// ===== GPT Image 2 核心优势 =====
-const GPT_VALUES = [
-  '中文文字生成更准确',
-  '商品图细节更真实',
-  '构图更高级',
-  '广告设计能力更强',
-  'ChatGPT Plus 同款模型',
+// ===== GPT Image 2 能力标签（空状态展示） =====
+const CAPABILITY_TAGS = [
+  '中文文字生成',
+  '商品广告设计',
+  '电商详情页',
+  '品牌视觉设计',
 ] as const;
 
-// ===== GPT Image 2 适用场景 =====
-const CAPABILITY_ITEMS = [
-  { icon: ShoppingBag, label: '商品主图' },
-  { icon: FileText, label: '商品详情页' },
-  { icon: Camera, label: 'AI写真' },
-  { icon: BookOpen, label: '小红书封面' },
-  { icon: Palette, label: '海报设计' },
-  { icon: Eye, label: '品牌视觉' },
+// ===== 精选案例数据 =====
+const FEATURED_CASES = [
+  { name: '高端口红主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1' },
+  { name: '商品详情页长图', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16' },
+  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4' },
+  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4' },
+  { name: '品牌海报', prompt: '品牌视觉海报，简约大气，高级质感', ratio: '16:9' },
+  { name: '商业广告图', prompt: '商业广告设计图，产品展示，精美排版', ratio: '16:9' },
 ] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -380,17 +372,35 @@ export default function HomePage() {
           <div className="os-empty-state-glow" />
           <Sparkles className="os-empty-state-icon" />
           <h2 className="os-empty-state-title">ChatGPT 同款图片生成</h2>
-          <p className="os-empty-state-subtitle">
-            上传图片或输入描述词<br />使用 GPT Image 2 创作商业级图片
-          </p>
-          <p className="os-empty-state-scenarios-label">适用于</p>
-          <div className="os-empty-state-capabilities">
-            {CAPABILITY_ITEMS.map(item => (
-              <div key={item.label} className="os-empty-state-cap-item">
-                <item.icon className="w-4 h-4" />
-                <span>{item.label}</span>
-              </div>
+          <p className="os-empty-state-subtitle">GPT Image 2 官方模型</p>
+
+          {/* 能力标签 */}
+          <div className="os-empty-state-tags">
+            {CAPABILITY_TAGS.map(tag => (
+              <span key={tag} className="os-empty-state-tag">{tag}</span>
             ))}
+          </div>
+
+          {/* 精选案例 */}
+          <div className="os-empty-cases">
+            <div className="os-empty-cases-title">精选案例</div>
+            <div className="os-empty-cases-grid">
+              {FEATURED_CASES.map(item => (
+                <div
+                  key={item.name}
+                  className="os-empty-case-card"
+                  onClick={() => {
+                    setInputText(item.prompt);
+                    if (item.ratio !== selectedRatio) setSelectedRatio(item.ratio);
+                  }}
+                >
+                  <div className="os-empty-case-thumb" style={{ aspectRatio: ratioToAspect(item.ratio) }}>
+                    <ImageIcon className="w-5 h-5" />
+                  </div>
+                  <div className="os-empty-case-name">{item.name}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       );
@@ -548,23 +558,10 @@ export default function HomePage() {
           {/* --- 模型品牌卡 --- */}
           <div className="os-panel-capability">
             <div className="os-panel-capability-top">
-              <div className="os-panel-capability-label">ChatGPT 同款图片生成</div>
-              <span className="os-panel-capability-tag">GPT官方模型</span>
+              <div className="os-panel-capability-label">GPT Image 2 官方模型</div>
+              <span className="os-panel-capability-tag">ChatGPT Plus 同款</span>
             </div>
-            <div className="os-panel-capability-sub">基于 OpenAI GPT Image 2</div>
-          </div>
-
-          {/* --- 核心价值区 --- */}
-          <div className="os-panel-values">
-            <div className="os-panel-values-title">为什么选择 GPT Image 2</div>
-            <div className="os-panel-values-list">
-              {GPT_VALUES.map(text => (
-                <div key={text} className="os-panel-values-item">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{text}</span>
-                </div>
-              ))}
-            </div>
+            <div className="os-panel-capability-sub">OpenAI 官方图像模型</div>
           </div>
 
           {/* --- 图片上传区域 --- */}
