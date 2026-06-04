@@ -890,6 +890,58 @@
   display: none;
 }
 
+/* ── 折叠历史卡片 ── */
+.os-gen-history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.os-gen-history-item:hover {
+  border-color: rgba(139, 92, 246, 0.35);
+  background: #141414;
+}
+.os-gen-history-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.os-gen-history-info {
+  flex: 1;
+  min-width: 0;
+}
+.os-gen-history-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.os-gen-history-time {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+}
+.os-gen-history-expand-icon {
+  color: rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+.os-gen-history-item:hover .os-gen-history-expand-icon {
+  color: rgba(255, 255, 255, 0.6);
+}
+.os-gen-history-expanded {
+  margin-top: 12px;
+}
+
 /* ── 卡片 meta 信息（比例 · 时间） ── */
 .os-gen-card-meta {
   font-size: 12px;

@@ -16,8 +16,7 @@ import {
   Pencil,
   AlertCircle,
   Trash2,
-  BookmarkPlus,
-  BookmarkCheck,
+
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -44,6 +43,7 @@ interface GenerationRecord {
   saved: boolean;
   saving: boolean;
   timestamp: number;
+  createdAt?: string;  // ISO date string from DB
   status: GenRecordStatus;
   errorMsg?: string;
   /** 渐进出图：已返回的图片数量（1~4） */
@@ -145,6 +145,7 @@ export default function HomePage() {
 
   // 生成中时自动折叠历史记录
   const [historyCollapsed, setHistoryCollapsed] = useState(false);
+  const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
 
   // 是否正在生成中（从 history 中判断）
   const isGenerating = generationHistory.some(r => r.status === 'loading');
@@ -203,6 +204,7 @@ export default function HomePage() {
         saved: false,
         saving: false,
         timestamp: new Date(r.created_at as string).getTime(),
+        createdAt: (r.created_at as string) || new Date().toISOString(),
         status: 'done' as GenRecordStatus,
       }));
 
@@ -282,6 +284,7 @@ export default function HomePage() {
       saving: false,
       timestamp: Date.now(),
       status: 'loading',
+      createdAt: new Date().toISOString(),
     };
     setGenerationHistory(prev => [loadingRecord, ...prev]);
 
@@ -406,7 +409,7 @@ export default function HomePage() {
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          generationId: record.dbId,
+          generation_id: record.dbId,
           images: record.images.map((img: { url: string }) => img.url),
           prompt: record.prompt,
           ratio: record.ratio,
@@ -435,7 +438,7 @@ export default function HomePage() {
     // 如果有 dbId，同步删除数据库记录
     if (record.dbId) {
       try {
-        await fetch(`/api/generation-records?id=${record.dbId}`, {
+        await fetch(`/api/generation-records/${record.dbId}`, {
           method: 'DELETE',
           credentials: 'include',
         });
@@ -509,29 +512,22 @@ export default function HomePage() {
 
     // 创作流：所有记录（含 loading/error/done）
     const currentRecord = generationHistory[0]; // 最新的（可能是 loading）
-    const historyRecords = generationHistory.slice(1); // 历史记录
-    const hasHistory = historyRecords.length > 0;
+    const historyRecords = generationHistory.slice(1); // 历史记录（不含当前）
 
     return (
       <div className="os-gen-flow">
-        {/* 当前生成任务 */}
-        {renderFlowCard(currentRecord)}
+        {/* 当前生成任务（始终展开） */}
+        {currentRecord.status === 'loading' ? renderLoadingCard(currentRecord) :
+         currentRecord.status === 'error' ? renderErrorCard(currentRecord) :
+         renderDoneCard(currentRecord)}
 
-        {/* 历史记录：生成中时自动折叠，完成后展开 */}
-        {hasHistory && (
-          <div className={`os-gen-history ${historyCollapsed ? 'os-gen-history--collapsed' : ''}`}>
-            <button
-              className="os-gen-history-toggle"
-              onClick={() => setHistoryCollapsed(prev => !prev)}
-            >
-              最近作品（{historyRecords.length}）
-              <span className={`os-gen-history-arrow ${historyCollapsed ? '' : 'os-gen-history-arrow--open'}`}>▼</span>
-            </button>
-            {!historyCollapsed && (
-              <div className="os-gen-history-list">
-                {historyRecords.map(record => renderFlowCard(record))}
-              </div>
-            )}
+        {/* 历史记录：每条默认折叠，点击展开 */}
+        {historyRecords.length > 0 && (
+          <div className="os-gen-history">
+            <div className="os-gen-history-label">历史作品</div>
+            <div className="os-gen-history-list">
+              {historyRecords.map(record => renderDoneCard(record, true))}
+            </div>
           </div>
         )}
       </div>
@@ -539,15 +535,6 @@ export default function HomePage() {
   };
 
   // 渲染单条创作流卡片（统一入口：loading/done/error 三态）
-  const renderFlowCard = (record: GenerationRecord) => {
-    if (record.status === 'loading') {
-      return renderLoadingCard(record);
-    }
-    if (record.status === 'error') {
-      return renderErrorCard(record);
-    }
-    return renderDoneCard(record);
-  };
 
   // Loading 卡片：4 格骨架网格 + 动态文案 + 渐进出图
   const renderLoadingCard = (record: GenerationRecord) => {
@@ -619,72 +606,88 @@ export default function HomePage() {
     </div>
   );
 
-  // Done 卡片：图片 + 操作
-  const renderDoneCard = (record: GenerationRecord) => (
-    <div key={record.id} className="os-gen-card">
-      {/* Prompt（截断30字） */}
-      <div className="os-gen-card-prompt-line" title={record.prompt}>
-        {truncatePrompt(record.prompt)}
-      </div>
+  // Done 卡片：支持展开/收起
+  const renderDoneCard = (record: GenerationRecord, isHistoryItem = false) => {
+    const isCurrentRecord = generationHistory[0]?.id === record.id && record.status === 'done';
+    const isExpanded = isCurrentRecord || expandedRecordId === record.id;
+    const timeStr = record.createdAt
+      ? new Date(record.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : '';
 
-      {/* 图片展示区 */}
-      {record.images.length === 1 ? (
-        <div className="os-gen-main-img">
-          <img src={record.images[0].url} alt={record.prompt} />
+    return (
+      <div key={record.id} className={`os-gen-card ${isHistoryItem ? 'os-gen-card--history' : ''} ${isExpanded ? 'os-gen-card--expanded' : 'os-gen-card--collapsed'}`}>
+        {/* 收起态：缩略图 + 标题 + 时间 */}
+        <div className="os-gen-card-summary" onClick={() => setExpandedRecordId(isExpanded ? null : record.id)}>
+          <div className="os-gen-card-summary-thumb">
+            {record.images[0] ? <img src={record.images[0].url} alt="" /> : <span style={{color:'rgba(255,255,255,0.3)',fontSize:'10px'}}>IMG</span>}
+          </div>
+          <div className="os-gen-card-summary-info">
+            <div className="os-gen-card-summary-title" title={record.prompt}>{truncatePrompt(record.prompt)}</div>
+            <div className="os-gen-card-summary-time">{timeStr}</div>
+          </div>
+          <span className={`os-gen-card-summary-arrow ${isExpanded ? 'os-gen-card-summary-arrow--open' : ''}`}>▼</span>
         </div>
-      ) : (
-        <div className="os-gen-card-grid">
-          {record.images.map((img, idx) => (
-            <div key={idx} className="os-gen-card-grid-item">
-              <img src={img.url} alt={`${record.prompt} ${idx + 1}`} />
+
+        {/* 展开态：完整内容 */}
+        {isExpanded && (
+          <>
+            {/* 图片展示区 */}
+            {record.images.length === 1 ? (
+              <div className="os-gen-main-img">
+                <img src={record.images[0].url} alt={record.prompt} />
+              </div>
+            ) : (
+              <div className="os-gen-card-grid">
+                {record.images.map((img, idx) => (
+                  <div key={idx} className="os-gen-card-grid-item">
+                    <img src={img.url} alt={`${record.prompt} ${idx + 1}`} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 操作按钮区 */}
+            <div className="os-gen-actions">
+              <button className="os-gen-action-btn os-gen-action-primary" onClick={() => {
+                record.images.forEach((img, idx) => handleDownload(img.url, idx));
+              }}>
+                <Download className="w-4 h-4" /> 下载全部
+              </button>
+              <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
+                <Pencil className="w-4 h-4" /> 编辑提示词
+              </button>
+              <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleGenerate}>
+                <RotateCcw className="w-4 h-4" /> 重新生成
+              </button>
+              <button className="os-gen-action-btn os-gen-action-ghost os-gen-action-danger" onClick={() => handleDeleteRecord(record)}>
+                <Trash2 className="w-4 h-4" /> 删除
+              </button>
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* 操作按钮区 */}
-      <div className="os-gen-actions">
-        <button className="os-gen-action-btn os-gen-action-primary" onClick={() => {
-          record.images.forEach((img, idx) => handleDownload(img.url, idx));
-        }}>
-          <Download className="w-4 h-4" /> 下载全部
-        </button>
-        <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
-          <Pencil className="w-4 h-4" /> 编辑提示词
-        </button>
-        <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleSaveRecord(record)} disabled={record.saving || record.saved}>
-          {record.saving ? <Loader2 className="w-4 h-4 animate-spin" /> : record.saved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-          {record.saving ? '保存中...' : record.saved ? '已保存' : '保存'}
-        </button>
-        <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleGenerate}>
-          <RotateCcw className="w-4 h-4" /> 重新生成
-        </button>
-        <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleDeleteRecord(record)}>
-          <Trash2 className="w-4 h-4" /> 删除
-        </button>
+            {/* 推荐衍生创作 */}
+            <div className="os-gen-continue">
+              <div className="os-gen-continue-label">推荐衍生创作</div>
+              <div className="os-gen-continue-options">
+                {CONTINUE_STYLES.map((style, idx) => (
+                  <button
+                    key={idx}
+                    className="os-gen-continue-btn"
+                    onClick={() => {
+                      const newPrompt = record.prompt + style.suffix;
+                      setInputText(newPrompt);
+                      handleEditPrompt();
+                    }}
+                  >
+                    {style.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
-
-      {/* 继续创作 */}
-      <div className="os-gen-continue">
-        <div className="os-gen-continue-label">继续创作</div>
-        <div className="os-gen-continue-options">
-          {CONTINUE_STYLES.map((style, idx) => (
-            <button
-              key={idx}
-              className="os-gen-continue-btn"
-              onClick={() => {
-                const newPrompt = record.prompt + style.suffix;
-                setInputText(newPrompt);
-                handleEditPrompt();
-              }}
-            >
-              {style.name}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="os-page os-page-studio">
