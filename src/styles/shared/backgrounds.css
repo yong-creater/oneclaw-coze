@@ -1132,203 +1132,128 @@
 }
 
 /* ── 空状态（未生成） ── */
-.os-empty-state {
+/* ===== 瀑布流作品展示 ===== */
+.os-masonry-page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
   height: 100%;
   width: 100%;
-  text-align: center;
   position: relative;
   user-select: none;
-  padding: 80px 32px 32px;
+  padding: 48px 40px 40px;
   overflow-y: auto;
 }
-.os-empty-state-glow {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(124, 92, 255, 0.12) 0%, rgba(124, 92, 255, 0.04) 40%, transparent 70%);
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  pointer-events: none;
-  animation: emptyGlow 4s ease-in-out infinite;
-}
-.os-empty-state-icon {
-  position: relative;
-  z-index: 1;
-  width: 64px;
-  height: 64px;
+
+/* 品牌区 */
+.os-masonry-brand {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  border-radius: 18px;
-  background: rgba(124, 92, 255, 0.08);
-  border: 1px solid rgba(124, 92, 255, 0.15);
+  gap: 8px;
+  margin-bottom: 36px;
 }
-.os-empty-state-icon svg {
-  width: 32px;
-  height: 32px;
-  color: rgba(168, 143, 255, 0.85);
-  animation: emptyPulse 3s ease-in-out infinite;
-}
-.os-empty-state-title {
-  position: relative;
-  z-index: 1;
+.os-masonry-brand-title {
   font-size: 32px;
   font-weight: 700;
   color: #FFFFFF;
-  margin-bottom: 8px;
-  line-height: 1.4;
   letter-spacing: -0.01em;
+  line-height: 1.3;
 }
-.os-empty-state-subtitle {
-  position: relative;
-  z-index: 1;
-  font-size: 16px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 28px;
+.os-masonry-brand-sub {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.5;
 }
 
-/* 空状态 — 能力胶囊标签（2行3列） */
-.os-empty-state-tags {
+/* Masonry Grid — CSS columns 瀑布流 */
+.os-masonry-grid {
+  column-count: 3;
+  column-gap: 24px;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* 卡片基础 */
+.os-masonry-card {
+  break-inside: avoid;
+  margin-bottom: 24px;
+  border-radius: 20px;
+  background: #111111;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 48px;
-  max-width: 480px;
 }
-.os-empty-state-tag {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: rgba(124, 58, 237, 0.12);
-  border: 1px solid rgba(124, 58, 237, 0.2);
-  font-size: 13px;
-  font-weight: 500;
-  color: #A78BFA;
-  transition: var(--oc-transition-base);
-}
-.os-empty-state-tag:hover {
-  background: rgba(124, 58, 237, 0.18);
+.os-masonry-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.15);
   border-color: rgba(124, 58, 237, 0.3);
 }
 
-/* 空状态 — 精选案例区 */
-.os-empty-cases {
-  position: relative;
-  z-index: 1;
+/* 卡片尺寸变体 */
+.os-masonry-card--sm  { /* 16:9 横图 — 自然小高度 */ }
+.os-masonry-card--md  { /* 1:1, 3:4 — 中等高度 */ }
+.os-masonry-card--lg  { /* 9:16 竖图 — 高卡 */ }
+
+/* 卡片图片 */
+.os-masonry-card-img {
   width: 100%;
-  max-width: 720px;
-}
-.os-empty-cases-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
-}
-.os-empty-cases-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #FFFFFF;
-  letter-spacing: -0.01em;
-}
-.os-empty-cases-subtitle {
-  font-size: 13px;
-  color: #A1A1AA;
-  margin-top: 4px;
-}
-.os-empty-cases-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.os-empty-case-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 10px 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  transition: var(--oc-transition-base);
   overflow: hidden;
 }
-.os-empty-case-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(124, 58, 237, 0.2);
-  transform: translateY(-2px);
-}
-.os-empty-case-thumb {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  overflow: hidden;
-  min-height: 80px;
-}
-.os-empty-case-thumb img {
+.os-masonry-card-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 16px;
 }
-.os-empty-case-thumb svg {
-  color: rgba(255, 255, 255, 0.15);
+
+/* Hover 遮罩 */
+.os-masonry-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
 }
-.os-empty-case-name {
+.os-masonry-card:hover .os-masonry-card-overlay {
+  opacity: 1;
+}
+.os-masonry-card-view {
+  font-size: 14px;
+  font-weight: 500;
+  color: #FFFFFF;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(168, 143, 255, 0.3);
+  pointer-events: none;
+}
+
+/* 卡片标题 */
+.os-masonry-card-title {
   font-size: 15px;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
+  font-weight: 500;
+  color: #E5E7EB;
+  padding: 14px 16px 16px;
   line-height: 1.4;
 }
 
-/* 空状态 — 为什么选择 GPT Image 2 */
-.os-empty-why {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 36px;
-  max-width: 720px;
+/* 响应式 */
+@media (max-width: 900px) {
+  .os-masonry-grid { column-count: 2; max-width: 600px; }
 }
-.os-empty-why-item {
-  display: inline-flex;
-  align-items: center;
-  height: 30px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 13px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.6);
-  white-space: nowrap;
-}
-
-@keyframes emptyGlow {
-  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-  50%      { opacity: 1;   transform: translateX(-50%) scale(1.1); }
-}
-@keyframes emptyPulse {
-  0%, 100% { opacity: 0.7; }
-  50%      { opacity: 1; }
+@media (max-width: 600px) {
+  .os-masonry-grid { column-count: 2; column-gap: 16px; }
+  .os-masonry-page { padding: 32px 20px 24px; }
+  .os-masonry-brand-title { font-size: 26px; }
 }
 
 /* ---- 光斑漂浮动画 ---- */
@@ -1759,7 +1684,7 @@
 .os-studio-feed::-webkit-scrollbar { width: 4px; }
 .os-studio-feed::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.06); border-radius: 4px; }
 /* 结果展示时去掉 padding，让画布撑满 */
-.os-studio-feed:has(.os-empty-state) {
+.os-studio-feed:has(.os-masonry-page) {
   padding: 0;
   overflow: hidden;
 }

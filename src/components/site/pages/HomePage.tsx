@@ -75,24 +75,20 @@ const RATIO_OPTIONS = [
 
 const MAX_UPLOAD_IMAGES = 5;
 
-// ===== GPT Image 2 能力标签（空状态展示） =====
-const CAPABILITY_TAGS = [
-  '中文文字生成',
-  '商品广告设计',
-  '电商详情页',
-  '品牌视觉设计',
-  'AI写真',
-  '海报设计',
-] as const;
-
-// ===== 精选案例数据 =====
-const FEATURED_CASES = [
-  { name: '高端口红主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
-  { name: '商品详情页长图', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
-  { name: '小红书爆款封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
-  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
-  { name: '品牌海报', prompt: '品牌视觉海报，简约大气，高级质感', ratio: '16:9', image: '/cases/poster.png' },
-  { name: '商业广告图', prompt: '商业广告设计图，产品展示，精美排版', ratio: '16:9', image: '/cases/commercial.png' },
+// ===== 瀑布流案例数据 =====
+const MASONRY_CASES = [
+  { name: '高端口红主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png', span: 'md' },
+  { name: '商品详情页', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png', span: 'lg' },
+  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png', span: 'md' },
+  { name: 'AI写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png', span: 'md' },
+  { name: '品牌海报', prompt: '品牌视觉海报，简约大气，高级质感', ratio: '16:9', image: '/cases/poster.png', span: 'sm' },
+  { name: '奢侈品广告', prompt: '奢侈品香水广告，金色光影，高端商业摄影', ratio: '1:1', image: '/cases/luxury-perfume.png', span: 'md' },
+  { name: '美妆海报', prompt: '美妆护肤品牌海报，清新粉色调，少女感', ratio: '3:4', image: '/cases/beauty-poster.png', span: 'md' },
+  { name: '科技产品', prompt: '科技电子产品广告，手机产品展示，极简白色背景', ratio: '1:1', image: '/cases/tech-product.png', span: 'md' },
+  { name: '餐饮封面', prompt: '精致甜品美食摄影，咖啡馆风格，温馨暖色调', ratio: '1:1', image: '/cases/food-cover.png', span: 'sm' },
+  { name: '时尚写真', prompt: '高级女装时尚写真，优雅站姿，杂志大片风格', ratio: '3:4', image: '/cases/fashion-portrait.png', span: 'lg' },
+  { name: '汽车海报', prompt: '汽车品牌海报，豪华轿车，城市夜景灯光', ratio: '16:9', image: '/cases/car-poster.png', span: 'sm' },
+  { name: '商业广告图', prompt: '商业广告设计图，产品展示，精美排版', ratio: '16:9', image: '/cases/commercial.png', span: 'sm' },
 ] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -366,53 +362,37 @@ export default function HomePage() {
 
   // ===== 右侧面板内容 =====
   const renderRightPanel = () => {
-    // 空状态：从未生成过
+    // 空状态：从未生成过 → 瀑布流作品展示
     if (generationHistory.length === 0) {
       return (
-        <div className="os-empty-state">
-          <div className="os-empty-state-glow" />
-          <Sparkles className="os-empty-state-icon" />
-          <h2 className="os-empty-state-title">GPT Image 2 创作平台</h2>
-          <p className="os-empty-state-subtitle">ChatGPT Plus 同款模型</p>
-
-          {/* GPT Image 2 擅长 */}
-          <div className="os-empty-state-tags">
-            {CAPABILITY_TAGS.map(tag => (
-              <span key={tag} className="os-empty-state-tag">{tag}</span>
-            ))}
+        <div className="os-masonry-page">
+          {/* 品牌区 */}
+          <div className="os-masonry-brand">
+            <Sparkles className="w-6 h-6" style={{ color: '#A78BFA' }} />
+            <h2 className="os-masonry-brand-title">GPT Image 2 创作平台</h2>
+            <p className="os-masonry-brand-sub">ChatGPT Plus 同款模型 · 商业级图片生成</p>
           </div>
 
-          {/* 精选案例 */}
-          <div className="os-empty-cases">
-            <div className="os-empty-cases-header">
-              <div className="os-empty-cases-title">GPT Image 2 精选案例</div>
-              <div className="os-empty-cases-subtitle">全部使用 GPT Image 2 生成</div>
-            </div>
-            <div className="os-empty-cases-grid">
-              {FEATURED_CASES.map(item => (
-                <div
-                  key={item.name}
-                  className="os-empty-case-card"
-                  onClick={() => {
-                    setInputText(item.prompt);
-                    if (item.ratio !== selectedRatio) setSelectedRatio(item.ratio);
-                  }}
-                >
-                  <div className="os-empty-case-thumb" style={{ aspectRatio: ratioToAspect(item.ratio) }}>
-                    <img src={item.image} alt={item.name} loading="lazy" />
-                  </div>
-                  <div className="os-empty-case-name">{item.name}</div>
+          {/* 瀑布流作品 */}
+          <div className="os-masonry-grid">
+            {MASONRY_CASES.map((item, idx) => (
+              <div
+                key={idx}
+                className={`os-masonry-card os-masonry-card--${item.span}`}
+                onClick={() => {
+                  setInputText(item.prompt);
+                  if (item.ratio !== selectedRatio) setSelectedRatio(item.ratio);
+                }}
+              >
+                <div className="os-masonry-card-img" style={{ aspectRatio: ratioToAspect(item.ratio) }}>
+                  <img src={item.image} alt={item.name} loading="lazy" />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 为什么选择 GPT Image 2 */}
-          <div className="os-empty-why">
-            <span className="os-empty-why-item">✓ 中文文字更准确</span>
-            <span className="os-empty-why-item">✓ 商品细节更真实</span>
-            <span className="os-empty-why-item">✓ 广告设计效果更好</span>
-            <span className="os-empty-why-item">✓ 商业视觉更高级</span>
+                <div className="os-masonry-card-overlay">
+                  <span className="os-masonry-card-view">查看案例</span>
+                </div>
+                <div className="os-masonry-card-title">{item.name}</div>
+              </div>
+            ))}
           </div>
         </div>
       );
