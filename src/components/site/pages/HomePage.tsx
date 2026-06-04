@@ -103,14 +103,23 @@ export default function HomePage() {
 
   // ===== 生成状态 =====
   const [genStep, setGenStep] = useState<GenStep>('idle');
-  const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);
   const [errorMsg, setErrorMsg] = useState('');
   const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
-  const [saved, setSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  type GenerationRecord = {
+    id: string;
+    images: { url: string }[];
+    prompt: string;
+    ratio: string;
+    referenceImageUrl?: string;
+    saved: boolean;
+    saving: boolean;
+    timestamp: number;
+  };
+  // 创作流历史：每次生成自动追加
+  const [generationHistory, setGenerationHistory] = useState<GenerationRecord[]>([]);
 
   // ===== URL 参数自动填充 =====
   useEffect(() => {
@@ -182,9 +191,6 @@ export default function HomePage() {
 
     // 开始生成
     setGenStep('generating');
-    setGeneratedImages([]);
-    setSaved(false);
-    setSaved(false);
     setErrorMsg('');
 
     abortRef.current?.abort();
@@ -227,9 +233,18 @@ export default function HomePage() {
         return;
       }
 
-      setGeneratedImages(urls.map((url: string) => ({ url })));
+      const images = urls.map((url: string) => ({ url }));
       setGenStep('done');
-      setSaved(false); // 不自动保存，由用户决定
+      // 追加到创作流历史
+      setGenerationHistory(prev => [{
+        id: `gen-${Date.now()}`,
+        images,
+        prompt: inputText.trim(),
+        ratio: selectedRatio,
+        saved: false,
+        saving: false,
+        timestamp: Date.now(),
+      }, ...prev]);
       refreshQuota();
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') return;
@@ -264,36 +279,35 @@ export default function HomePage() {
   }, [genStep, loadingMessages.length]);
 
   // ===== 保存到作品集 =====
-  const handleSave = useCallback(async () => {
+  const handleSaveRecord = useCallback(async (record: GenerationRecord) => {
     if (!requireAuth()) return;
-    if (saved || generatedImages.length === 0) return;
-    setSaving(true);
+    if (record.saved || record.images.length === 0) return;
+    setGenerationHistory(prev => prev.map(r => r.id === record.id ? { ...r, saving: true } : r));
     try {
-      // httpOnly cookie 会通过 credentials: 'include' 自动发送，无需手动读取
       const res = await fetch('/api/generations/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          images: generatedImages.map((img: { url: string }) => img.url),
-          prompt: inputText,
-          ratio: selectedRatio,
-          referenceImageUrl: uploadedImages.length > 0 ? uploadedImages[0] : undefined,
+          images: record.images.map((img: { url: string }) => img.url),
+          prompt: record.prompt,
+          ratio: record.ratio,
+          referenceImageUrl: record.referenceImageUrl,
         }),
       });
       const data = await res.json();
       if (data.success) {
-        setSaved(true);
+        setGenerationHistory(prev => prev.map(r => r.id === record.id ? { ...r, saved: true, saving: false } : r));
         showAlert('已保存到我的作品', 'success');
       } else {
+        setGenerationHistory(prev => prev.map(r => r.id === record.id ? { ...r, saving: false } : r));
         showAlert(data.error || '保存失败', 'error');
       }
     } catch {
+      setGenerationHistory(prev => prev.map(r => r.id === record.id ? { ...r, saving: false } : r));
       showAlert('保存失败，请稍后重试', 'error');
-    } finally {
-      setSaving(false);
     }
-  }, [requireAuth, saved, generatedImages, inputText, selectedRatio, uploadedImages, showAlert]);
+  }, [requireAuth, showAlert]);
 
   // ===== 下载 =====
   const handleDownload = useCallback(async (url: string, idx: number) => {
@@ -333,35 +347,31 @@ export default function HomePage() {
 
   // ===== 右侧面板内容 =====
   const renderRightPanel = () => {
-    // 空状态：极简等待创作
-    if (genStep === 'idle' && generatedImages.length === 0) {
-      return (
-        <div className="os-empty-state">
-          <div className="os-empty-state-glow" />
-          <Sparkles className="os-empty-state-icon" />
-          <h2 className="os-empty-state-title">开始你的创作</h2>
-          <p className="os-empty-state-sub">上传图片或输入描述词<br />即可生成高质量 AI 图片</p>
-        </div>
-      );
-    }
-
-    // 生成中
+    // 生成中（覆盖在创作流之上）
     if (isGenerating) {
       return (
-        <div className="os-gen-loading">
-          <div className="os-gen-shimmer" style={{ aspectRatio: ratioToAspect(selectedRatio) }}>
-            <div className="os-gen-shimmer-icon">
-              <Sparkles className="w-8 h-8" />
+        <div className="os-gen-flow">
+          {/* 已有历史时，显示历史 + skeleton */}
+          {generationHistory.length > 0 && (
+            <div className="os-gen-flow-history">
+              {generationHistory.map(renderHistoryCard)}
             </div>
-          </div>
-          <div className="os-gen-loading-text">
-            <div className="os-gen-loading-label" key={loadingMsgIdx}>
-              {loadingMessages[loadingMsgIdx]}
+          )}
+          <div className="os-gen-flow-card os-gen-flow-card--loading">
+            <div className="os-gen-flow-skeleton" style={{ aspectRatio: ratioToAspect(selectedRatio) }}>
+              <div className="os-gen-flow-skeleton-icon">
+                <Sparkles className="w-6 h-6" />
+              </div>
             </div>
-            <div className="os-gen-loading-sub">AI 正在创作中…</div>
-          </div>
-          <div className="os-gen-loading-bar">
-            <div className="os-gen-loading-bar-inner" />
+            <div className="os-gen-flow-card-body">
+              <div className="os-gen-flow-loading-label" key={loadingMsgIdx}>
+                {loadingMessages[loadingMsgIdx]}
+              </div>
+              <div className="os-gen-flow-loading-sub">AI 正在创作中…</div>
+              <div className="os-gen-flow-loading-bar">
+                <div className="os-gen-flow-loading-bar-inner" />
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -370,64 +380,100 @@ export default function HomePage() {
     // 错误状态
     if (genStep === 'error') {
       return (
-        <div className="os-gen-error">
-          <div className="os-gen-error-icon">
-            <ImageIcon className="w-10 h-10" />
+        <div className="os-gen-flow">
+          {generationHistory.length > 0 && (
+            <div className="os-gen-flow-history">
+              {generationHistory.map(renderHistoryCard)}
+            </div>
+          )}
+          <div className="os-gen-flow-card os-gen-flow-card--error">
+            <div className="os-gen-flow-card-body">
+              <div className="os-gen-flow-error-icon">
+                <ImageIcon className="w-8 h-8" />
+              </div>
+              <div className="os-gen-flow-error-title">生成失败</div>
+              <div className="os-gen-flow-error-msg">{errorMsg || '请检查输入后重试'}</div>
+              <button className="os-gen-flow-error-retry" onClick={handleGenerate}>
+                <RotateCcw className="w-4 h-4" /> 重试
+              </button>
+            </div>
           </div>
-          <h3>生成失败</h3>
-          <p>{errorMsg || '请检查输入后重试'}</p>
-          <button className="os-gen-error-retry" onClick={handleGenerate}>
-            <RotateCcw className="w-4 h-4" /> 重试
-          </button>
         </div>
       );
     }
 
-    // 生成结果
-    if (genStep === 'done' && generatedImages.length > 0) {
+    // 创作流：当前结果 + 历史记录
+    if (generationHistory.length > 0) {
       return (
-        <div className="os-gen-result">
-          {/* 图片网格 */}
-          <div className="os-gen-result-grid">
-            {generatedImages.map((img, idx) => (
-              <div
-                key={idx}
-                className={`os-gen-result-card ${generatedImages.length === 1 ? 'single' : ''}`}
-              >
-                <img src={img.url} alt={`生成结果 ${idx + 1}`} className="os-gen-result-card-img" />
+        <div className="os-gen-flow">
+          {generationHistory.map(renderHistoryCard)}
+        </div>
+      );
+    }
+
+    // 空状态
+    return (
+      <div className="os-empty-state">
+        <div className="os-empty-state-glow" />
+        <Sparkles className="os-empty-state-icon" />
+        <h2 className="os-empty-state-title">开始你的创作</h2>
+        <p className="os-empty-state-sub">上传图片或输入描述词<br />即可生成高质量 AI 图片</p>
+      </div>
+    );
+  };
+
+  // 渲染单条创作流卡片
+  const renderHistoryCard = (record: GenerationRecord) => {
+    const isCurrent = record.id === generationHistory[0]?.id && genStep === 'done';
+    return (
+      <div key={record.id} className={`os-gen-card ${isCurrent ? 'current' : ''}`}>
+        {/* 卡片头部 */}
+        <div className="os-gen-card-header">
+          <div className="os-gen-card-prompt" title={record.prompt}>
+            {record.prompt}
+          </div>
+          <div className="os-gen-card-meta">
+            {record.ratio} · {new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        </div>
+
+        {/* 图片展示区 */}
+        {record.images.length === 1 ? (
+          <div className="os-gen-card-main">
+            <img src={record.images[0].url} alt={record.prompt} className="os-gen-card-img" />
+          </div>
+        ) : (
+          <div className="os-gen-card-grid">
+            {record.images.map((img, idx) => (
+              <div key={idx} className="os-gen-card-grid-item">
+                <img src={img.url} alt={`${record.prompt} ${idx + 1}`} className="os-gen-card-img" />
               </div>
             ))}
           </div>
+        )}
 
-          {/* 操作栏 */}
-          <div className="os-gen-result-actions">
-            <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleDownload(generatedImages[0].url, 0)}>
-              <Download className="w-4 h-4" /> <span>下载</span>
-            </button>
-            <button
-              className={`os-gen-action-btn ${saved ? 'os-gen-action-saved' : 'os-gen-action-ghost'}`}
-              disabled={saved || saving}
-              onClick={saved ? undefined : handleSave}
-            >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-              <span>{saved ? '已保存' : saving ? '保存中' : '保存'}</span>
-            </button>
-            <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
-              <Pencil className="w-4 h-4" /> <span>编辑</span>
-            </button>
-            <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleUseStyle}>
-              <Copy className="w-4 h-4" /> <span>复用</span>
-            </button>
-            <span className="os-gen-actions-divider" />
-            <button className="os-gen-action-btn os-gen-action-primary" onClick={handleGenerate}>
-              <RotateCcw className="w-4 h-4" /> <span>重新生成</span>
-            </button>
-          </div>
+        {/* 操作按钮区 */}
+        <div className="os-gen-card-actions">
+          <button className="os-gen-action-primary" onClick={() => handleDownload(record.images[0].url, 0)}>
+            <Download className="w-4 h-4" /> 下载
+          </button>
+          <button
+            className={`os-gen-action-secondary ${record.saved ? 'saved' : ''}`}
+            disabled={record.saved || record.saving}
+            onClick={record.saved ? undefined : () => handleSaveRecord(record)}
+          >
+            {record.saving ? <Loader2 className="w-4 h-4 animate-spin" /> : record.saved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
+            {record.saved ? '已保存' : record.saving ? '保存中' : '保存'}
+          </button>
+          <button className="os-gen-action-secondary" onClick={handleEditPrompt}>
+            <Pencil className="w-4 h-4" /> 编辑
+          </button>
+          <button className="os-gen-action-secondary" onClick={() => { setGenStep('idle'); handleGenerate(); }}>
+            <RotateCcw className="w-4 h-4" /> 重新生成
+          </button>
         </div>
-      );
-    }
-
-    return null;
+      </div>
+    );
   };
 
   return (
