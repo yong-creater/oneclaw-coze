@@ -559,7 +559,6 @@ export default function HomePage() {
         {/* 卡片头部 */}
         <div className="os-gen-card-header">
           <div className="os-gen-card-prompt-wrap">
-            <span className="os-gen-card-brand-tag">GPT Image 2</span>
             <div className="os-gen-card-prompt" title={record.prompt}>
               {truncatePrompt(record.prompt)}
             </div>
@@ -567,7 +566,7 @@ export default function HomePage() {
           {/* 右上角创作状态 */}
           <div className="os-gen-card-loading-status">
             <span className="os-gen-card-loading-dot" />
-            <span>GPT Image 2 生成中</span>
+            <span>正在生成</span>
           </div>
         </div>
 
@@ -600,7 +599,6 @@ export default function HomePage() {
       {/* 卡片头部 */}
       <div className="os-gen-card-header">
         <div className="os-gen-card-prompt-wrap">
-          <span className="os-gen-card-brand-tag">GPT Image 2</span>
           <div className="os-gen-card-prompt" title={record.prompt}>
             {truncatePrompt(record.prompt)}
           </div>
@@ -624,12 +622,6 @@ export default function HomePage() {
   // Done 卡片：图片 + 操作
   const renderDoneCard = (record: GenerationRecord) => (
     <div key={record.id} className="os-gen-card">
-      {/* 模型标签行 */}
-      <div className="os-gen-card-model-tags">
-        <span className="os-gen-card-model-tag">GPT Image 2</span>
-        <span className="os-gen-card-model-tag os-gen-card-model-tag--outline">ChatGPT Plus 同款</span>
-      </div>
-
       {/* Prompt（截断30字） */}
       <div className="os-gen-card-prompt-line" title={record.prompt}>
         {truncatePrompt(record.prompt)}
@@ -815,7 +807,7 @@ export default function HomePage() {
             ) : (
               <>
                 <Wand2 className="w-4.5 h-4.5" />
-                <span>使用 GPT Image 2 生成</span>
+                <span>开始生成</span>
               </>
             )}
           </button>
