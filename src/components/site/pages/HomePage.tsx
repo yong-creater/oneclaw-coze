@@ -15,6 +15,9 @@ import {
   SlidersHorizontal,
   Pencil,
   AlertCircle,
+  Trash2,
+  BookmarkPlus,
+  BookmarkCheck,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -33,6 +36,7 @@ type GenRecordStatus = 'loading' | 'done' | 'error';
 
 interface GenerationRecord {
   id: string;
+  dbId?: string;        // 数据库记录 ID（持久化后回填）
   images: { url: string }[];
   prompt: string;
   ratio: string;
@@ -181,6 +185,42 @@ export default function HomePage() {
     if (pendingInput) { setInputText(pendingInput); consumePendingInput(); }
   }, [pendingInput, consumePendingInput]);
 
+  // ===== 加载历史生成记录 =====
+  const loadHistory = useCallback(async () => {
+    try {
+      const res = await fetch('/api/generation-records?limit=50', { credentials: 'include' });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !data.records?.length) return;
+
+      const records: GenerationRecord[] = data.records.map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        dbId: r.id as string,
+        images: Array.isArray(r.images) ? r.images : [],
+        prompt: (r.prompt as string) || '',
+        ratio: (r.ratio as string) || '1:1',
+        referenceImageUrl: (r.reference_image_url as string) || undefined,
+        saved: false,
+        saving: false,
+        timestamp: new Date(r.created_at as string).getTime(),
+        status: 'done' as GenRecordStatus,
+      }));
+
+      setGenerationHistory(prev => {
+        // 保留正在 loading 的记录，合并已有的 DB 记录
+        const loadingRecords = prev.filter(r => r.status === 'loading');
+        return [...loadingRecords, ...records];
+      });
+    } catch {
+      // 静默失败，不影响页面
+    }
+  }, []);
+
+  // 页面加载时获取历史记录
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
+
   // ===== 上传逻辑 =====
   const addImageFiles = useCallback((files: FileList | File[]) => {
     const fileArray = Array.from(files).filter(f => f.type.startsWith('image/'));
@@ -303,6 +343,33 @@ export default function HomePage() {
       setGenerationHistory(prev => prev.map(r =>
         r.id === recordId ? { ...r, status: 'done' as GenRecordStatus } : r
       ));
+      // 持久化生成记录到数据库
+      try {
+        const finalRecord = generationHistory.find(r => r.id === recordId);
+        const saveRes = await fetch('/api/generation-records', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            prompt: inputText.trim(),
+            images: images.map((img: { url: string }) => img.url),
+            ratio: selectedRatio,
+            model: 'GPT Image 2',
+            source: 'create_page',
+            status: 'completed',
+            referenceImageUrl: uploadedImages.length > 0 ? uploadedImages[0] : undefined,
+          }),
+        });
+        const saveData = await saveRes.json();
+        if (saveData.success && saveData.record?.id) {
+          // 更新记录的 dbId
+          setGenerationHistory(prev => prev.map(r =>
+            r.id === recordId ? { ...r, dbId: saveData.record.id } : r
+          ));
+        }
+      } catch {
+        // 持久化失败不影响前端展示
+      }
       refreshQuota();
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
@@ -333,15 +400,18 @@ export default function HomePage() {
     if (record.saved || record.images.length === 0) return;
     setGenerationHistory(prev => prev.map(r => r.id === record.id ? { ...r, saving: true } : r));
     try {
-      const res = await fetch('/api/generations/save', {
+      // 保存到作品库
+      const res = await fetch('/api/user-works', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
+          generationId: record.dbId,
           images: record.images.map((img: { url: string }) => img.url),
           prompt: record.prompt,
           ratio: record.ratio,
-          referenceImageUrl: record.referenceImageUrl,
+          model: 'GPT Image 2',
+          source: 'create_page',
         }),
       });
       const data = await res.json();
@@ -357,6 +427,23 @@ export default function HomePage() {
       showAlert('保存失败，请稍后重试', 'error');
     }
   }, [requireAuth, showAlert]);
+
+  // ===== 删除生成记录 =====
+  const handleDeleteRecord = useCallback(async (record: GenerationRecord) => {
+    // 先从前端移除
+    setGenerationHistory(prev => prev.filter(r => r.id !== record.id));
+    // 如果有 dbId，同步删除数据库记录
+    if (record.dbId) {
+      try {
+        await fetch(`/api/generation-records?id=${record.dbId}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+      } catch {
+        // 静默失败
+      }
+    }
+  }, []);
 
   // ===== 下载 =====
   const handleDownload = useCallback(async (url: string, idx: number) => {
@@ -573,8 +660,15 @@ export default function HomePage() {
         <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
           <Pencil className="w-4 h-4" /> 编辑提示词
         </button>
+        <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleSaveRecord(record)} disabled={record.saving || record.saved}>
+          {record.saving ? <Loader2 className="w-4 h-4 animate-spin" /> : record.saved ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
+          {record.saving ? '保存中...' : record.saved ? '已保存' : '保存'}
+        </button>
         <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleGenerate}>
           <RotateCcw className="w-4 h-4" /> 重新生成
+        </button>
+        <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleDeleteRecord(record)}>
+          <Trash2 className="w-4 h-4" /> 删除
         </button>
       </div>
 
