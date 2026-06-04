@@ -102,16 +102,6 @@ function ratioToAspect(ratio: string): string {
   return map[ratio] || '1 / 1';
 }
 
-// ===== 生成中动态文案（6阶段，每3秒轮播） =====
-const GENERATION_PHASES = [
-  '正在理解提示词...',
-  '正在设计构图...',
-  '正在生成主体...',
-  '正在补充细节...',
-  '正在提升画质...',
-  '正在完成渲染...',
-] as const;
-
 export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
   const { requireAuth, dailyQuota, refreshQuota, user, loading } = useUser();
@@ -126,7 +116,6 @@ export default function HomePage() {
   const [isFocused, setIsFocused] = useState(false);
 
   // ===== 生成状态 =====
-  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0);
   const [showToast, setShowToast] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -289,18 +278,6 @@ export default function HomePage() {
     return () => { abortRef.current?.abort(); };
   }, []);
 
-  // ===== 加载中文案轮播（全局计时器） =====
-  useEffect(() => {
-    if (!isGenerating) {
-      setLoadingMsgIdx(0);
-      return;
-    }
-    const iv = setInterval(() => {
-      setLoadingMsgIdx(prev => (prev + 1) % GENERATION_PHASES.length);
-    }, 3000);
-    return () => clearInterval(iv);
-  }, [isGenerating]);
-
   // ===== 保存到作品集 =====
   const handleSaveRecord = useCallback(async (record: GenerationRecord) => {
     if (!requireAuth()) return;
@@ -417,7 +394,7 @@ export default function HomePage() {
     return renderDoneCard(record);
   };
 
-  // Loading 卡片：skeleton + 阶段文案
+  // Loading 卡片：4 格骨架网格（匹配最终 4 图布局）
   const renderLoadingCard = (record: GenerationRecord) => (
     <div key={record.id} className="os-gen-card os-gen-card--loading">
       {/* 卡片头部 */}
@@ -429,24 +406,17 @@ export default function HomePage() {
           </div>
         </div>
         <div className="os-gen-card-meta">
-          {record.ratio} · {new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+          生成中...
         </div>
       </div>
 
-      {/* Skeleton 图片区域 */}
-      <div className="os-gen-card-skeleton" style={{ aspectRatio: ratioToAspect(record.ratio) }}>
-        <div className="os-gen-card-skeleton-shimmer" />
-        <div className="os-gen-card-skeleton-content">
-          <Loader2 className="w-6 h-6 os-gen-card-skeleton-icon" />
-          <div className="os-gen-card-skeleton-title">GPT Image 2 正在生成</div>
-          <div className="os-gen-card-skeleton-phase" key={loadingMsgIdx}>
-            {GENERATION_PHASES[loadingMsgIdx]}
+      {/* 4 格骨架占位 */}
+      <div className="os-gen-card-skeleton-grid">
+        {[0, 1, 2, 3].map(i => (
+          <div key={i} className="os-gen-card-skeleton-cell">
+            <div className="os-gen-card-skeleton-cell-shimmer" />
           </div>
-          <div className="os-gen-card-skeleton-est">预计需要 10-30 秒</div>
-          <div className="os-gen-card-skeleton-bar">
-            <div className="os-gen-card-skeleton-bar-inner" />
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
