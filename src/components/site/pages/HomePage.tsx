@@ -101,14 +101,14 @@ const MAX_UPLOAD_IMAGES = 5;
 
 // ===== 精选案例数据 =====
 const FEATURED_CASES = [
-  { name: '电商主图', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
-  { name: '详情页设计', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
-  { name: '人像写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
-  { name: '小红书爆款', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
-  { name: '品牌海报', prompt: '品牌视觉海报设计，简约高端，科技蓝调', ratio: '1:1', image: '/cases/brand-poster.png' },
-  { name: '商业广告', prompt: '商业广告设计图，手表产品展示，黑色背景，金色光影', ratio: '16:9', image: '/cases/commercial-ad.png' },
-  { name: '产品包装', prompt: '产品包装设计图，化妆品礼盒，精美包装盒，高级质感', ratio: '1:1', image: '/cases/product-packaging.png' },
-  { name: '社交媒体封面', prompt: '社交媒体封面图，时尚潮流，渐变色彩，创意排版', ratio: '16:9', image: '/cases/social-cover.png' },
+  { name: '高端商品摄影', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
+  { name: '电商详情长图', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
+  { name: '氛围感写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
+  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
+  { name: '品牌视觉海报', prompt: '品牌视觉海报设计，简约高端，科技蓝调', ratio: '1:1', image: '/cases/brand-poster.png' },
+  { name: '商业广告创意', prompt: '商业广告设计图，手表产品展示，黑色背景，金色光影', ratio: '16:9', image: '/cases/commercial-ad.png' },
+  { name: '产品包装设计', prompt: '产品包装设计图，化妆品礼盒，精美包装盒，高级质感', ratio: '1:1', image: '/cases/product-packaging.png' },
+  { name: '社媒视觉设计', prompt: '社交媒体封面图，时尚潮流，渐变色彩，创意排版', ratio: '16:9', image: '/cases/social-cover.png' },
 ] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -480,9 +480,9 @@ export default function HomePage() {
       return (
         <div className="os-showcase-page">
           {/* 品牌区 */}
-          <div className="os-showcase-brand">
-            <h2 className="os-showcase-brand-title">GPT Image 2</h2>
-            <span className="os-showcase-brand-tag">ChatGPT Plus 同款</span>
+          <div className="os-showcase-header">
+            <h2 className="os-showcase-header-title">创作灵感</h2>
+            <p className="os-showcase-header-sub">探索专业级视觉创作效果</p>
           </div>
 
           {/* 2×2 案例网格 */}
