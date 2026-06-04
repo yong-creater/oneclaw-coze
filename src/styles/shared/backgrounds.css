@@ -1422,48 +1422,37 @@
   flex-direction: column;
   gap: 0;
   padding: 0;
-}
-.os-panel-capability-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  margin-bottom: 24px;
 }
 .os-panel-capability-label {
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 700;
   color: #FFFFFF;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  letter-spacing: -1px;
+  line-height: 1.1;
 }
-.os-panel-capability-sub {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.55);
-  margin-top: 2px;
+.os-panel-capability-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-top: 4px;
+  font-weight: 400;
+  line-height: 1.3;
 }
-.os-panel-capability-tag {
+.os-panel-capability-tech-tag {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   height: 24px;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: 999px;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(124, 92, 255, 0.12);
+  border: 1px solid rgba(124, 92, 255, 0.25);
   color: #A78BFA;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
-  flex-shrink: 0;
-}
-.os-panel-capability-desc {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 6px;
-}
-.os-panel-capability-desc span {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  margin-top: 10px;
+  align-self: flex-start;
 }
 
 /* 分隔线 — 轻柔渐隐 */

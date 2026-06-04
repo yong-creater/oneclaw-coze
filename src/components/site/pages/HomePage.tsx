@@ -697,16 +697,9 @@ export default function HomePage() {
         <aside className="os-studio-panel">
           {/* --- 模型品牌卡 --- */}
           <div className="os-panel-capability">
-            <div className="os-panel-capability-top">
-              <div className="os-panel-capability-label">OneClaw Image</div>
-              <span className="os-panel-capability-tag">GPT Image 2 官方模型</span>
-            </div>
-            <div className="os-panel-capability-powered">Powered by GPT Image 2</div>
-            <div className="os-panel-capability-features">
-              <span>由 GPT Image 2 驱动</span>
-              <span>支持中文文字生成</span>
-              <span>商业级视觉创作</span>
-            </div>
+            <div className="os-panel-capability-label">OneClaw</div>
+            <div className="os-panel-capability-subtitle">专业级 AI 视觉创作</div>
+            <span className="os-panel-capability-tech-tag">GPT Image 2</span>
           </div>
 
           {/* --- 图片上传区域 --- */}
