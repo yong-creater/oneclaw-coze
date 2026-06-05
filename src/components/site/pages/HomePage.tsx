@@ -100,13 +100,20 @@ const RATIO_OPTIONS = [
 const MAX_UPLOAD_IMAGES = 5;
 
 // ===== 精选案例数据 =====
+const HOT_TAGS = [
+  { emoji: '🔥', label: '商品主图', prompt: '高端商品主图摄影，奢侈品质感，商业级打光，8K超清', ratio: '4:5' },
+  { emoji: '🔥', label: 'AI写真', prompt: 'AI杂志写真，高级时尚人像，电影感打光，VOGUE封面质感', ratio: '4:5' },
+  { emoji: '🔥', label: '小红书封面', prompt: '小红书爆款封面，美妆博主风格，清新自然光，氛围感', ratio: '3:4' },
+  { emoji: '🔥', label: '品牌海报', prompt: '品牌视觉海报，极简几何构成，高端渐变色彩，现代设计', ratio: '3:4' },
+] as const;
+
 const FEATURED_CASES = [
   { name: '商品摄影', sub: '专业级产品拍摄', prompt: '高端商品摄影，奢侈品护肤品瓶身，水滴飞溅，商业级打光，8K超清', ratio: '4:5', image: '/cases/product-photography.png' },
   { name: '电商详情页', sub: '高转化详情页设计', prompt: '电商详情页设计，高端护肤品展示，白色极简背景，产品特写，商业级排版', ratio: '4:5', image: '/cases/ecommerce-detail.png' },
   { name: 'AI写真', sub: '高质量人像写真', prompt: 'AI杂志写真，高级时尚人像，电影感打光，VOGUE封面质感', ratio: '4:5', image: '/cases/ai-portrait.png' },
+  { name: '品牌海报', sub: '品牌视觉系统设计', prompt: '品牌视觉设计KV，极简几何，高端质感，渐变色彩，视觉识别', ratio: '4:5', image: '/cases/brand-visual-new.png' },
+  { name: '珠宝广告', sub: '高端广告视觉创意', prompt: '商业广告创意，珠宝首饰特写，钻石闪耀，深色背景，奢华质感', ratio: '4:5', image: '/cases/commercial-ad.png' },
   { name: '小红书封面', sub: '爆款封面一键生成', prompt: '小红书爆款封面，美妆博主风格，清新自然光，精致妆容', ratio: '4:5', image: '/cases/xiaohongshu-cover.png' },
-  { name: '商业广告', sub: '高端广告视觉创意', prompt: '商业广告创意，珠宝首饰特写，钻石闪耀，深色背景，奢华质感', ratio: '4:5', image: '/cases/commercial-ad.png' },
-  { name: '品牌视觉', sub: '品牌视觉系统设计', prompt: '品牌视觉设计KV，极简几何，高端质感，渐变色彩，视觉识别', ratio: '4:5', image: '/cases/brand-visual-new.png' },
 ] as const;
 
 export default function HomePage() {
@@ -471,8 +478,25 @@ export default function HomePage() {
         <div className="os-showcase-page">
           {/* 标题区 - 左对齐 */}
           <div className="os-showcase-header">
-            <h2 className="os-showcase-header-title">创作灵感</h2>
-            <p className="os-showcase-header-sub">探索专业商业视觉效果</p>
+            <h2 className="os-showcase-header-title">热门创作案例</h2>
+            <p className="os-showcase-header-sub">点击案例快速开始</p>
+            {/* 热门标签 */}
+            <div className="os-showcase-tags">
+              {HOT_TAGS.map((tag, idx) => (
+                <button
+                  key={idx}
+                  className="os-showcase-tag"
+                  onClick={() => {
+                    setInputText(tag.prompt);
+                    if (tag.ratio !== selectedRatio) setSelectedRatio(tag.ratio);
+                    const textarea = document.querySelector<HTMLTextAreaElement>('.os-panel-textarea');
+                    textarea?.focus();
+                  }}
+                >
+                  {tag.emoji} {tag.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* 3×2 案例网格 */}
@@ -695,8 +719,8 @@ export default function HomePage() {
           {/* --- 模型品牌卡 --- */}
           <div className="os-panel-capability">
             <div className="os-panel-capability-label">OneClaw</div>
-            <div className="os-panel-capability-subtitle">商业视觉创作平台</div>
-            <span className="os-panel-capability-tech-tag">GPT Image 2 驱动</span>
+            <div className="os-panel-capability-subtitle">商业视觉创作</div>
+            <span className="os-panel-capability-tech-tag">GPT Image 2</span>
           </div>
 
           {/* --- 图片上传区域 --- */}
