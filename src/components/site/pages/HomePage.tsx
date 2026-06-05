@@ -101,28 +101,13 @@ const MAX_UPLOAD_IMAGES = 5;
 
 // ===== 精选案例数据 =====
 const FEATURED_CASES = [
-  { name: '电影级海报', prompt: '电影级科幻海报，赛博朋克城市，霓虹灯光，超写实电影感', ratio: '9:16', image: '/cases/cinematic-poster.png', height: 'tall' },
-  { name: '奢感美妆摄影', prompt: '奢侈品香水广告大片，金色瓶身，黑色背景，华丽光影', ratio: '3:4', image: '/cases/luxury-ad.png', height: 'tall' },
-  { name: '超写实产品', prompt: '超写实护肤品产品摄影，水滴飞溅，8K细节，商业级打光', ratio: '1:1', image: '/cases/hyper-realistic-product.png', height: 'short' },
-  { name: 'AI杂志写真', prompt: 'AI杂志写真，高级时尚人像，电影感打光，VOGUE封面', ratio: '3:4', image: '/cases/ai-magazine.png', height: 'medium' },
-  { name: '品牌视觉设计', prompt: '品牌视觉设计KV，极简几何，高端质感，渐变色彩', ratio: '1:1', image: '/cases/brand-visual.png', height: 'short' },
-  { name: '建筑空间设计', prompt: '现代极简建筑室内，光影交错，大师级建筑摄影，超广角', ratio: '16:9', image: '/cases/architecture.png', height: 'short' },
-  { name: '爆款种草封面', prompt: '小红书爆款封面，美妆博主风格，清新自然光，精致妆容', ratio: '3:4', image: '/cases/xiaohongshu-viral.png', height: 'medium' },
-  { name: '商业广告创意', prompt: '商业广告创意，珠宝首饰特写，钻石闪耀，深色背景', ratio: '1:1', image: '/cases/commercial-creative.png', height: 'short' },
-  { name: 'IP形象设计', prompt: 'IP形象设计，可爱3D卡通角色，高级渲染质感，潮玩风格', ratio: '1:1', image: '/cases/ip-character.png', height: 'short' },
+  { name: '商品摄影', prompt: '高端商品摄影，奢侈品护肤品瓶身，水滴飞溅，商业级打光，8K超清', ratio: '4:5', image: '/cases/product-photography.png' },
+  { name: '电商详情页', prompt: '电商详情页设计，高端护肤品展示，白色极简背景，产品特写，商业级排版', ratio: '4:5', image: '/cases/ecommerce-detail.png' },
+  { name: 'AI写真', prompt: 'AI杂志写真，高级时尚人像，电影感打光，VOGUE封面质感', ratio: '4:5', image: '/cases/ai-portrait.png' },
+  { name: '小红书封面', prompt: '小红书爆款封面，美妆博主风格，清新自然光，精致妆容', ratio: '4:5', image: '/cases/xiaohongshu-cover.png' },
+  { name: '商业广告', prompt: '商业广告创意，珠宝首饰特写，钻石闪耀，深色背景，奢华质感', ratio: '4:5', image: '/cases/commercial-ad.png' },
+  { name: '品牌视觉', prompt: '品牌视觉设计KV，极简几何，高端质感，渐变色彩，视觉识别', ratio: '4:5', image: '/cases/brand-visual-new.png' },
 ] as const;
-
-// ===== 比例 → aspect-ratio CSS =====
-function ratioToAspect(ratio: string): string {
-  const map: Record<string, string> = {
-    '1:1': '1 / 1',
-    '3:4': '3 / 4',
-    '4:5': '4 / 5',
-    '9:16': '9 / 16',
-    '16:9': '16 / 9',
-  };
-  return map[ratio] || '1 / 1';
-}
 
 export default function HomePage() {
   const { pendingInput, consumePendingInput } = useMenu();
@@ -490,7 +475,7 @@ export default function HomePage() {
             <p className="os-showcase-header-sub">真实生成效果展示</p>
           </div>
 
-          {/* 瀑布流案例 */}
+          {/* 2×3 案例网格 */}
           <div className="os-showcase-masonry">
             {FEATURED_CASES.map((item, idx) => (
               <div
@@ -501,11 +486,10 @@ export default function HomePage() {
                   if (item.ratio !== selectedRatio) setSelectedRatio(item.ratio);
                 }}
               >
-                <div className="os-showcase-masonry-img" style={{ aspectRatio: ratioToAspect(item.ratio) }}>
+                <div className="os-showcase-masonry-img">
                   <img src={item.image} alt={item.name} loading="lazy" />
                   <div className="os-showcase-masonry-hover">
                     <span className="os-showcase-masonry-btn">查看案例</span>
-                    <span className="os-showcase-masonry-model">GPT Image 2</span>
                   </div>
                 </div>
                 <div className="os-showcase-masonry-name">{item.name}</div>
