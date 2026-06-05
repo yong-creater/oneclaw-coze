@@ -17,6 +17,9 @@ import {
   AlertCircle,
   Trash2,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -137,21 +140,15 @@ export default function HomePage() {
   // 创作流历史：每次生成自动追加（含 loading 状态）
   const [generationHistory, setGenerationHistory] = useState<GenerationRecord[]>([]);
 
-  // 生成中时自动折叠历史记录
-  const [historyCollapsed, setHistoryCollapsed] = useState(false);
-  const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
+  // 当前查看的主图索引（每条记录独立）
+  const [selectedImageIdx, setSelectedImageIdx] = useState<Record<string, number>>({});
+
+  // 全屏预览
+  const [fullscreenRecord, setFullscreenRecord] = useState<GenerationRecord | null>(null);
+  const [fullscreenIdx, setFullscreenIdx] = useState(0);
 
   // 是否正在生成中（从 history 中判断）
   const isGenerating = generationHistory.some(r => r.status === 'loading');
-
-  // 生成开始时自动折叠历史，结束时自动展开
-  useEffect(() => {
-    if (isGenerating) {
-      setHistoryCollapsed(true);
-    } else {
-      setHistoryCollapsed(false);
-    }
-  }, [isGenerating]);
 
   // 生成阶段文案轮播（每2秒切换）
   const [loadingPhaseIdx, setLoadingPhaseIdx] = useState(0);
@@ -537,17 +534,17 @@ export default function HomePage() {
 
     return (
       <div className="os-gen-flow">
-        {/* 当前生成任务（始终展开） */}
+        {/* 当前生成任务 */}
         {currentRecord.status === 'loading' ? renderLoadingCard(currentRecord) :
          currentRecord.status === 'error' ? renderErrorCard(currentRecord) :
          renderDoneCard(currentRecord)}
 
-        {/* 历史记录：每条默认折叠，点击展开 */}
+        {/* 历史作品 - 独立模块 */}
         {historyRecords.length > 0 && (
-          <div className="os-gen-history">
-            <div className="os-gen-history-label">历史作品</div>
-            <div className="os-gen-history-list">
-              {historyRecords.map(record => renderDoneCard(record, true))}
+          <div className="os-gen-history-section">
+            <div className="os-gen-history-section-header">历史作品</div>
+            <div className="os-gen-history-section-grid">
+              {historyRecords.map(record => renderHistoryItem(record))}
             </div>
           </div>
         )}
@@ -627,85 +624,183 @@ export default function HomePage() {
     </div>
   );
 
-  // Done 卡片：支持展开/收起
-  const renderDoneCard = (record: GenerationRecord, isHistoryItem = false) => {
-    const isCurrentRecord = generationHistory[0]?.id === record.id && record.status === 'done';
-    const isExpanded = isCurrentRecord || expandedRecordId === record.id;
+  // Done 卡片：主图 + 缩略图 + 操作按钮
+  const renderDoneCard = (record: GenerationRecord) => {
+    const activeIdx = selectedImageIdx[record.id] ?? 0;
+    const activeImg = record.images[activeIdx];
     const timeStr = record.createdAt
       ? new Date(record.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
       : '';
 
     return (
-      <div key={record.id} className={`os-gen-card ${isHistoryItem ? 'os-gen-card--history' : ''} ${isExpanded ? 'os-gen-card--expanded' : 'os-gen-card--collapsed'}`}>
-        {/* 收起态：缩略图 + 标题 + 时间 */}
-        <div className="os-gen-card-summary" onClick={() => setExpandedRecordId(isExpanded ? null : record.id)}>
-          <div className="os-gen-card-summary-thumb">
-            {record.images[0] ? <img src={record.images[0].url} alt="" /> : <span style={{color:'rgba(255,255,255,0.3)',fontSize:'10px'}}>IMG</span>}
+      <div key={record.id} className="os-gen-card">
+        {/* 顶部信息 */}
+        <div className="os-gen-card-header">
+          <div className="os-gen-card-header-left">
+            <div className="os-gen-card-prompt-line" title={record.prompt}>{truncatePrompt(record.prompt, 40)}</div>
+            <div className="os-gen-card-time">{timeStr}</div>
           </div>
-          <div className="os-gen-card-summary-info">
-            <div className="os-gen-card-summary-title" title={record.prompt}>{truncatePrompt(record.prompt)}</div>
-            <div className="os-gen-card-summary-time">{timeStr}</div>
-          </div>
-          <span className={`os-gen-card-summary-arrow ${isExpanded ? 'os-gen-card-summary-arrow--open' : ''}`}>▼</span>
         </div>
 
-        {/* 展开态：完整内容 */}
-        {isExpanded && (
-          <>
-            {/* 图片展示区 */}
-            {record.images.length === 1 ? (
-              <div className="os-gen-main-img">
-                <img src={record.images[0].url} alt={record.prompt} />
-              </div>
-            ) : (
-              <div className="os-gen-card-grid">
-                {record.images.map((img, idx) => (
-                  <div key={idx} className="os-gen-card-grid-item">
-                    <img src={img.url} alt={`${record.prompt} ${idx + 1}`} />
-                  </div>
-                ))}
-              </div>
-            )}
+        {/* 主图展示 */}
+        <div className="os-gen-main-img" onClick={() => {
+          if (activeImg) {
+            setFullscreenRecord(record);
+            setFullscreenIdx(activeIdx);
+          }
+        }}>
+          {activeImg ? (
+            <img src={activeImg.url} alt={record.prompt} />
+          ) : (
+            <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: '14px' }}>暂无图片</div>
+          )}
+        </div>
 
-            {/* 操作按钮区 */}
-            <div className="os-gen-actions">
-              <button className="os-gen-action-btn os-gen-action-primary" onClick={() => {
-                record.images.forEach((img, idx) => handleDownload(img.url, idx));
-              }}>
-                <Download className="w-4 h-4" /> 下载全部
-              </button>
-              <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
-                <Pencil className="w-4 h-4" /> 编辑提示词
-              </button>
-              <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleGenerate}>
-                <RotateCcw className="w-4 h-4" /> 重新生成
-              </button>
-              <button className="os-gen-action-btn os-gen-action-ghost os-gen-action-danger" onClick={() => handleDeleteRecord(record)}>
-                <Trash2 className="w-4 h-4" /> 删除
-              </button>
-            </div>
-
-            {/* 推荐衍生创作 */}
-            <div className="os-gen-continue">
-              <div className="os-gen-continue-label">推荐衍生创作</div>
-              <div className="os-gen-continue-options">
-                {CONTINUE_STYLES.map((style, idx) => (
-                  <button
-                    key={idx}
-                    className="os-gen-continue-btn"
-                    onClick={() => {
-                      const newPrompt = record.prompt + style.suffix;
-                      setInputText(newPrompt);
-                      handleEditPrompt();
-                    }}
-                  >
-                    {style.name}
-                  </button>
-                ))}
+        {/* 缩略图行 */}
+        {record.images.length > 1 && (
+          <div className="os-gen-thumbs">
+            {record.images.map((img, idx) => (
+              <div
+                key={idx}
+                className={`os-gen-thumb ${idx === activeIdx ? 'active' : ''}`}
+                onClick={() => setSelectedImageIdx(prev => ({ ...prev, [record.id]: idx }))}
+              >
+                <img src={img.url} alt={`${record.prompt} ${idx + 1}`} />
               </div>
-            </div>
-          </>
+            ))}
+          </div>
         )}
+
+        {/* 操作按钮区 */}
+        <div className="os-gen-actions">
+          <button className="os-gen-action-btn os-gen-action-primary" onClick={() => {
+            record.images.forEach((img, idx) => handleDownload(img.url, idx));
+          }}>
+            <Download className="w-4 h-4" /> 下载全部
+          </button>
+          <button className="os-gen-action-btn os-gen-action-ghost" onClick={() => handleDownload(activeImg?.url ?? '', activeIdx)}>
+            <Download className="w-4 h-4" /> 下载当前
+          </button>
+          <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleEditPrompt}>
+            <Pencil className="w-4 h-4" /> 编辑提示词
+          </button>
+          <button className="os-gen-action-btn os-gen-action-ghost" onClick={handleGenerate}>
+            <RotateCcw className="w-4 h-4" /> 重新生成
+          </button>
+          {/* 继续创作 - 默认隐藏，点击展开 */}
+          <div className="os-gen-continue-group">
+            <button className="os-gen-action-btn os-gen-action-ghost" onClick={(e) => {
+              const el = (e.currentTarget as HTMLElement).nextElementSibling as HTMLElement;
+              if (el) el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+            }}>
+              <Sparkles className="w-4 h-4" /> 继续创作
+            </button>
+            <div className="os-gen-continue-options" style={{ display: 'none' }}>
+              {CONTINUE_STYLES.map((style, idx) => (
+                <button
+                  key={idx}
+                  className="os-gen-continue-btn"
+                  onClick={() => {
+                    const newPrompt = record.prompt + style.suffix;
+                    setInputText(newPrompt);
+                    handleEditPrompt();
+                  }}
+                >
+                  {style.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // 历史作品项 - 简约缩略图卡片
+  const renderHistoryItem = (record: GenerationRecord) => {
+    const timeStr = record.createdAt
+      ? new Date(record.createdAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : '';
+    const thumb = record.images[0];
+
+    return (
+      <div
+        key={record.id}
+        className="os-gen-history-card"
+        onClick={() => {
+          // 点击历史作品 → 将其提升为当前查看
+          setSelectedImageIdx(prev => ({ ...prev, [record.id]: 0 }));
+          setFullscreenRecord(record);
+          setFullscreenIdx(0);
+        }}
+      >
+        <div className="os-gen-history-card-img">
+          {thumb ? <img src={thumb.url} alt={record.prompt} /> : null}
+        </div>
+        <div className="os-gen-history-card-info">
+          <div className="os-gen-history-card-title" title={record.prompt}>{truncatePrompt(record.prompt, 20)}</div>
+          <div className="os-gen-history-card-time">{timeStr}</div>
+        </div>
+      </div>
+    );
+  };
+
+  // 全屏预览
+  const renderFullscreen = () => {
+    if (!fullscreenRecord) return null;
+    const imgs = fullscreenRecord.images;
+    const current = imgs[fullscreenIdx];
+    if (!current) return null;
+
+    return (
+      <div className="os-fullscreen" onClick={() => setFullscreenRecord(null)}>
+        <div className="os-fullscreen-content" onClick={e => e.stopPropagation()}>
+          {/* 关闭按钮 */}
+          <button className="os-fullscreen-close" onClick={() => setFullscreenRecord(null)}>
+            <X className="w-5 h-5" />
+          </button>
+
+          {/* 主图 */}
+          <div className="os-fullscreen-img-wrap">
+            <img src={current.url} alt={fullscreenRecord.prompt} />
+          </div>
+
+          {/* 左右切换 */}
+          {imgs.length > 1 && (
+            <>
+              <button
+                className="os-fullscreen-nav os-fullscreen-prev"
+                onClick={() => setFullscreenIdx(prev => (prev - 1 + imgs.length) % imgs.length)}
+                disabled={imgs.length <= 1}
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                className="os-fullscreen-nav os-fullscreen-next"
+                onClick={() => setFullscreenIdx(prev => (prev + 1) % imgs.length)}
+                disabled={imgs.length <= 1}
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+
+          {/* 底部操作栏 */}
+          <div className="os-fullscreen-toolbar">
+            <span className="os-fullscreen-counter">{fullscreenIdx + 1} / {imgs.length}</span>
+            <button className="os-fullscreen-action" onClick={() => handleDownload(current.url, fullscreenIdx)}>
+              <Download className="w-4 h-4" /> 下载当前
+            </button>
+            <a
+              className="os-fullscreen-action"
+              href={current.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="w-4 h-4" /> 查看原图
+            </a>
+          </div>
+        </div>
       </div>
     );
   };
@@ -846,6 +941,9 @@ export default function HomePage() {
       <div className={`os-gen-toast ${showToast ? 'show' : ''}`}>
         <Check className="w-4 h-4" /> 已保存到作品库
       </div>
+
+      {/* ===== 全屏预览 ===== */}
+      {renderFullscreen()}
     </div>
   );
 }
