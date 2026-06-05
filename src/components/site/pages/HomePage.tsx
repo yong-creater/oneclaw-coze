@@ -101,14 +101,15 @@ const MAX_UPLOAD_IMAGES = 5;
 
 // ===== 精选案例数据 =====
 const FEATURED_CASES = [
-  { name: '高端商品摄影', prompt: '高端口红商品主图，白色背景，专业摄影打光', ratio: '1:1', image: '/cases/lipstick.png' },
-  { name: '电商详情长图', prompt: '护肤品商品详情页，优雅排版，品牌调性', ratio: '9:16', image: '/cases/detail-page.png' },
-  { name: '氛围感写真', prompt: 'AI写真风格人像，柔和光线，杂志质感', ratio: '3:4', image: '/cases/portrait.png' },
-  { name: '小红书封面', prompt: '小红书风格封面图，清新配色，生活场景', ratio: '3:4', image: '/cases/xiaohongshu.png' },
-  { name: '品牌视觉海报', prompt: '品牌视觉海报设计，简约高端，科技蓝调', ratio: '1:1', image: '/cases/brand-poster.png' },
-  { name: '商业广告创意', prompt: '商业广告设计图，手表产品展示，黑色背景，金色光影', ratio: '16:9', image: '/cases/commercial-ad.png' },
-  { name: '产品包装设计', prompt: '产品包装设计图，化妆品礼盒，精美包装盒，高级质感', ratio: '1:1', image: '/cases/product-packaging.png' },
-  { name: '社媒视觉设计', prompt: '社交媒体封面图，时尚潮流，渐变色彩，创意排版', ratio: '16:9', image: '/cases/social-cover.png' },
+  { name: '电影级海报', prompt: '电影级科幻海报，赛博朋克城市，霓虹灯光，超写实电影感', ratio: '9:16', image: '/cases/cinematic-poster.png', height: 'tall' },
+  { name: '奢感美妆摄影', prompt: '奢侈品香水广告大片，金色瓶身，黑色背景，华丽光影', ratio: '3:4', image: '/cases/luxury-ad.png', height: 'tall' },
+  { name: '超写实产品', prompt: '超写实护肤品产品摄影，水滴飞溅，8K细节，商业级打光', ratio: '1:1', image: '/cases/hyper-realistic-product.png', height: 'short' },
+  { name: 'AI杂志写真', prompt: 'AI杂志写真，高级时尚人像，电影感打光，VOGUE封面', ratio: '3:4', image: '/cases/ai-magazine.png', height: 'medium' },
+  { name: '品牌视觉设计', prompt: '品牌视觉设计KV，极简几何，高端质感，渐变色彩', ratio: '1:1', image: '/cases/brand-visual.png', height: 'short' },
+  { name: '建筑空间设计', prompt: '现代极简建筑室内，光影交错，大师级建筑摄影，超广角', ratio: '16:9', image: '/cases/architecture.png', height: 'short' },
+  { name: '爆款种草封面', prompt: '小红书爆款封面，美妆博主风格，清新自然光，精致妆容', ratio: '3:4', image: '/cases/xiaohongshu-viral.png', height: 'medium' },
+  { name: '商业广告创意', prompt: '商业广告创意，珠宝首饰特写，钻石闪耀，深色背景', ratio: '1:1', image: '/cases/commercial-creative.png', height: 'short' },
+  { name: 'IP形象设计', prompt: 'IP形象设计，可爱3D卡通角色，高级渲染质感，潮玩风格', ratio: '1:1', image: '/cases/ip-character.png', height: 'short' },
 ] as const;
 
 // ===== 比例 → aspect-ratio CSS =====
@@ -116,6 +117,7 @@ function ratioToAspect(ratio: string): string {
   const map: Record<string, string> = {
     '1:1': '1 / 1',
     '3:4': '3 / 4',
+    '4:5': '4 / 5',
     '9:16': '9 / 16',
     '16:9': '16 / 9',
   };
@@ -482,27 +484,31 @@ export default function HomePage() {
     if (generationHistory.length === 0) {
       return (
         <div className="os-showcase-page">
-          {/* 品牌区 */}
+          {/* 标题区 - 左对齐 */}
           <div className="os-showcase-header">
-            <h2 className="os-showcase-header-title">创作灵感</h2>
-            <p className="os-showcase-header-sub">探索专业级视觉创作效果</p>
+            <h2 className="os-showcase-header-title">灵感案例</h2>
+            <p className="os-showcase-header-sub">真实生成效果展示</p>
           </div>
 
-          {/* 2×2 案例网格 */}
-          <div className="os-showcase-grid">
+          {/* 瀑布流案例 */}
+          <div className="os-showcase-masonry">
             {FEATURED_CASES.map((item, idx) => (
               <div
                 key={idx}
-                className="os-showcase-card"
+                className="os-showcase-masonry-item"
                 onClick={() => {
                   setInputText(item.prompt);
                   if (item.ratio !== selectedRatio) setSelectedRatio(item.ratio);
                 }}
               >
-                <div className="os-showcase-card-img">
+                <div className="os-showcase-masonry-img" style={{ aspectRatio: ratioToAspect(item.ratio) }}>
                   <img src={item.image} alt={item.name} loading="lazy" />
+                  <div className="os-showcase-masonry-hover">
+                    <span className="os-showcase-masonry-btn">查看案例</span>
+                    <span className="os-showcase-masonry-model">GPT Image 2</span>
+                  </div>
                 </div>
-                <div className="os-showcase-card-name">{item.name}</div>
+                <div className="os-showcase-masonry-name">{item.name}</div>
               </div>
             ))}
           </div>
