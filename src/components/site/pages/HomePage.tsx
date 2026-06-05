@@ -16,7 +16,7 @@ import {
   Pencil,
   AlertCircle,
   Trash2,
-
+  ArrowRight,
 } from 'lucide-react';
 import { useMenu } from '@/components/site/common/MenuProvider';
 import { useUser } from '@/contexts/UserContext';
@@ -101,12 +101,12 @@ const MAX_UPLOAD_IMAGES = 5;
 
 // ===== 精选案例数据 =====
 const FEATURED_CASES = [
-  { name: '商品摄影', prompt: '高端商品摄影，奢侈品护肤品瓶身，水滴飞溅，商业级打光，8K超清', ratio: '4:5', image: '/cases/product-photography.png' },
-  { name: '电商详情页', prompt: '电商详情页设计，高端护肤品展示，白色极简背景，产品特写，商业级排版', ratio: '4:5', image: '/cases/ecommerce-detail.png' },
-  { name: 'AI写真', prompt: 'AI杂志写真，高级时尚人像，电影感打光，VOGUE封面质感', ratio: '4:5', image: '/cases/ai-portrait.png' },
-  { name: '小红书封面', prompt: '小红书爆款封面，美妆博主风格，清新自然光，精致妆容', ratio: '4:5', image: '/cases/xiaohongshu-cover.png' },
-  { name: '商业广告', prompt: '商业广告创意，珠宝首饰特写，钻石闪耀，深色背景，奢华质感', ratio: '4:5', image: '/cases/commercial-ad.png' },
-  { name: '品牌视觉', prompt: '品牌视觉设计KV，极简几何，高端质感，渐变色彩，视觉识别', ratio: '4:5', image: '/cases/brand-visual-new.png' },
+  { name: '商品摄影', sub: '专业级产品拍摄', prompt: '高端商品摄影，奢侈品护肤品瓶身，水滴飞溅，商业级打光，8K超清', ratio: '4:5', image: '/cases/product-photography.png' },
+  { name: '电商详情页', sub: '高转化详情页设计', prompt: '电商详情页设计，高端护肤品展示，白色极简背景，产品特写，商业级排版', ratio: '4:5', image: '/cases/ecommerce-detail.png' },
+  { name: 'AI写真', sub: '高质量人像写真', prompt: 'AI杂志写真，高级时尚人像，电影感打光，VOGUE封面质感', ratio: '4:5', image: '/cases/ai-portrait.png' },
+  { name: '小红书封面', sub: '爆款封面一键生成', prompt: '小红书爆款封面，美妆博主风格，清新自然光，精致妆容', ratio: '4:5', image: '/cases/xiaohongshu-cover.png' },
+  { name: '商业广告', sub: '高端广告视觉创意', prompt: '商业广告创意，珠宝首饰特写，钻石闪耀，深色背景，奢华质感', ratio: '4:5', image: '/cases/commercial-ad.png' },
+  { name: '品牌视觉', sub: '品牌视觉系统设计', prompt: '品牌视觉设计KV，极简几何，高端质感，渐变色彩，视觉识别', ratio: '4:5', image: '/cases/brand-visual-new.png' },
 ] as const;
 
 export default function HomePage() {
@@ -465,17 +465,17 @@ export default function HomePage() {
 
   // ===== 右侧面板内容 =====
   const renderRightPanel = () => {
-    // 空状态：从未生成过 → 2x2 精选案例
+    // 空状态：从未生成过 → 3×2 精选案例
     if (generationHistory.length === 0) {
       return (
         <div className="os-showcase-page">
           {/* 标题区 - 左对齐 */}
           <div className="os-showcase-header">
-            <h2 className="os-showcase-header-title">灵感案例</h2>
-            <p className="os-showcase-header-sub">真实生成效果展示</p>
+            <h2 className="os-showcase-header-title">创作灵感</h2>
+            <p className="os-showcase-header-sub">探索专业商业视觉效果</p>
           </div>
 
-          {/* 2×3 案例网格 */}
+          {/* 3×2 案例网格 */}
           <div className="os-showcase-masonry">
             {FEATURED_CASES.map((item, idx) => (
               <div
@@ -488,11 +488,18 @@ export default function HomePage() {
               >
                 <div className="os-showcase-masonry-img">
                   <img src={item.image} alt={item.name} loading="lazy" />
+                  {/* 底部渐变信息区 */}
+                  <div className="os-showcase-masonry-info">
+                    <div className="os-showcase-masonry-info-title">{item.name}</div>
+                    <div className="os-showcase-masonry-info-sub">{item.sub}</div>
+                  </div>
+                  {/* hover 遮罩 + 箭头按钮 */}
                   <div className="os-showcase-masonry-hover">
-                    <span className="os-showcase-masonry-btn">查看案例</span>
+                    <div className="os-showcase-masonry-arrow">
+                      <ArrowRight className="w-4.5 h-4.5" />
+                    </div>
                   </div>
                 </div>
-                <div className="os-showcase-masonry-name">{item.name}</div>
               </div>
             ))}
           </div>
@@ -688,8 +695,8 @@ export default function HomePage() {
           {/* --- 模型品牌卡 --- */}
           <div className="os-panel-capability">
             <div className="os-panel-capability-label">OneClaw</div>
-            <div className="os-panel-capability-subtitle">专业级 AI 视觉创作</div>
-            <span className="os-panel-capability-tech-tag">GPT Image 2</span>
+            <div className="os-panel-capability-subtitle">商业视觉创作平台</div>
+            <span className="os-panel-capability-tech-tag">GPT Image 2 驱动</span>
           </div>
 
           {/* --- 图片上传区域 --- */}
@@ -724,7 +731,7 @@ export default function HomePage() {
                 onDrop={handleDrop}
                 onClick={handleUploadClick}
               >
-                <ImagePlus className="w-6 h-6 os-panel-upload-icon" />
+                <ImagePlus className="os-panel-upload-icon" />
                 <span className="os-panel-upload-text">上传图片</span>
                 <span className="os-panel-upload-subtext">或拖拽到此处</span>
               </div>
@@ -745,7 +752,7 @@ export default function HomePage() {
                 onKeyDown={handleKeyDown}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                placeholder="描述你想生成的内容..."
+                placeholder="输入你的想法，越详细越好..."
                 className="os-panel-prompt-input"
                 rows={4}
                 disabled={isGenerating}
@@ -794,12 +801,12 @@ export default function HomePage() {
             ) : generationHistory.length > 0 ? (
               <>
                 <RotateCcw className="w-4.5 h-4.5" />
-                <span>重新生成</span>
+                <span>重新创作</span>
               </>
             ) : (
               <>
                 <Wand2 className="w-4.5 h-4.5" />
-                <span>开始生成</span>
+                <span>开始创作</span>
               </>
             )}
           </button>
